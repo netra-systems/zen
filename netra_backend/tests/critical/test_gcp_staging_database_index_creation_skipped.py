@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for Database Index Creation Skipped Issues
 Critical staging issue: Async engine not available, skipping index creation
@@ -7,11 +9,11 @@ found in GCP staging logs. The tests are intentionally designed to fail to expos
 the specific startup timing and race condition problems that need fixing.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability - ensure proper database initialization in staging
 - Value Impact: Ensures database indexes are created for optimal performance
 - Strategic Impact: Critical for staging environment performance and data integrity
-"""
+""""
 
 import pytest
 import asyncio
@@ -34,11 +36,11 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Demonstrates async engine not available during startup index creation.
         
         This test reproduces the exact error from GCP staging logs:
-        "Async engine not available, skipping index creation"
+            "Async engine not available, skipping index creation"
         
         Expected behavior: Should ensure async engine is available before attempting index creation
         Current behavior: May not properly wait for async engine initialization
-        """
+        """"
         # Mock scenario where async engine is None during startup
         with patch('netra_backend.app.db.postgres_core.async_engine', None):
             initializer = DatabaseInitializer()
@@ -56,7 +58,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Startup timing race condition affecting index creation.
         
         Tests scenario where index creation is attempted before database engine is ready.
-        """
+        """"
         startup_events = []
         
         # Mock startup sequence with timing issues
@@ -81,7 +83,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Database engine initialization incomplete when index creation starts.
         
         Tests scenario where async engine exists but is not fully initialized.
-        """
+        """"
         # Mock partially initialized async engine
         mock_engine = AsyncMock(spec=AsyncEngine)
         mock_engine.connect.side_effect = OperationalError(
@@ -105,7 +107,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Missing retry mechanism for index creation when engine temporarily unavailable.
         
         Tests whether index creation has proper retry logic when async engine is temporarily unavailable.
-        """
+        """"
         call_count = 0
         
         def mock_get_engine():
@@ -135,7 +137,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Concurrent startup processes causing race condition in index creation.
         
         Tests scenario where multiple startup processes interfere with index creation.
-        """
+        """"
         # Simulate concurrent startup processes
         startup_lock_acquired = False
         
@@ -171,7 +173,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Broken dependency chain for index creation prerequisites.
         
         Tests scenario where index creation dependencies are not met in proper order.
-        """
+        """"
         dependencies_met = {
             'database_connection': False,
             'schema_migration': False,
@@ -196,7 +198,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Incorrect startup phase ordering causing index creation to be skipped.
         
         Tests scenario where startup phases are not properly ordered.
-        """
+        """"
         startup_phases_completed = []
         
         async def execute_startup_phase(phase_name):
@@ -229,10 +231,10 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Environment-specific index creation configuration missing.
         
         Tests scenario where staging environment specific configuration for index creation is missing.
-        """
+        """"
         # Mock staging environment configuration
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            mock_config.return_value = MagicNone  # TODO: Use real service instance
+            mock_config.return_value = MagicMock()  # TODO: Use real service instance
             mock_config.return_value.environment = "staging"
             # Missing staging-specific index configuration
             mock_config.return_value.staging_index_creation_enabled = None
@@ -254,7 +256,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Missing async engine state validation before index creation.
         
         Tests whether proper state validation exists for async engine before attempting index creation.
-        """
+        """"
         # Mock async engine in invalid state
         mock_engine = MagicMock(spec=AsyncEngine)
         mock_engine.disposed = True  # Engine is disposed
@@ -279,7 +281,7 @@ class TestDatabaseIndexCreationSkipped:
         FAILING TEST: Missing timeout handling for index creation process.
         
         Tests whether index creation has proper timeout handling to prevent indefinite waits.
-        """
+        """"
         async def slow_index_creation():
             # Simulate very slow index creation (optimized for testing)
             await asyncio.sleep(0.1)  # Reduced from 300s for test performance

@@ -1,12 +1,14 @@
+import asyncio
+
 """
 First-time user signup and authentication integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Free → Early (New user acquisition)
+    1. Segment: Free → Early (New user acquisition)
 2. Business Goal: Protect $30K MRR by ensuring seamless signup flow
 3. Value Impact: Validates email verification and authentication reliability
 4. Strategic Impact: Prevents signup funnel failures that block revenue
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -53,7 +55,7 @@ async def test_user_registration_with_email_verification(
     assert user.email_verified is False
     
     # Verify email verification token in Redis
-    token_key = f"email_verify:{reg_data['verification_token']}"
+    token_key = f"email_verify:{reg_data['verification_token']]"
     stored_user_id = await redis_client.get(token_key)
     assert stored_user_id == str(reg_data["user_id"])
 
@@ -73,7 +75,7 @@ async def test_email_verification_activation(
     
     # Complete email verification
     response = await async_client.post(
-        f"/auth/verify-email/{reg_data['verification_token']}"
+        f"/auth/verify-email/{reg_data['verification_token']]"
     )
     assert response.status_code == status.HTTP_200_OK
     
@@ -97,12 +99,12 @@ async def test_user_authentication_after_verification(
     response = await async_client.post("/auth/register", json=test_user_data)
     reg_data = await assert_user_registration_success(response)
     
-    await async_client.post(f"/auth/verify-email/{reg_data['verification_token']}")
+    await async_client.post(f"/auth/verify-email/{reg_data['verification_token']]")
     
     # Test authentication
     response = await async_client.post(
         "/auth/login",
-        json={"email": test_user_data["email"], "password": test_user_data["password"]}
+        json={"email": test_user_data["email"], "password": test_user_data["password"]]
     )
     assert response.status_code == status.HTTP_200_OK
     auth_data = response.json()
@@ -152,7 +154,7 @@ async def test_google_oauth_signup_flow(
     with oauth_mock["mock"]:
         response = await async_client.get(
             "/auth/oauth/google/callback",
-            params={"code": oauth_mock["code"], "state": oauth_mock["state"]}
+            params={"code": oauth_mock["code"], "state": oauth_mock["state"]]
         )
         assert response.status_code == status.HTTP_200_OK
         auth_result = response.json()
@@ -188,7 +190,7 @@ async def test_github_oauth_signup_flow(
     with oauth_mock["mock"]:
         response = await async_client.get(
             "/auth/oauth/github/callback",
-            params={"code": oauth_mock["code"], "state": oauth_mock["state"]}
+            params={"code": oauth_mock["code"], "state": oauth_mock["state"]]
         )
         assert response.status_code == status.HTTP_200_OK
         assert "access_token" in response.json()
@@ -209,7 +211,7 @@ async def test_oauth_account_linking(
     with oauth_mock["mock"]:
         response = await async_client.get(
             "/auth/oauth/github/callback",
-            params={"code": oauth_mock["code"], "state": oauth_mock["state"]}
+            params={"code": oauth_mock["code"], "state": oauth_mock["state"]]
         )
         assert response.status_code == status.HTTP_200_OK
     
@@ -220,7 +222,7 @@ async def test_oauth_account_linking(
     with oauth_mock["mock"]:
         response = await async_client.get(
             "/auth/oauth/google/callback",
-            params={"code": oauth_mock["code"], "state": oauth_mock["state"]}
+            params={"code": oauth_mock["code"], "state": oauth_mock["state"]]
         )
         assert response.status_code == status.HTTP_200_OK
         

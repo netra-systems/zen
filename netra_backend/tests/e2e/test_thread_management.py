@@ -1,6 +1,8 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Thread Management E2E Testing
 Tests comprehensive thread lifecycle, persistence, and isolation.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -308,8 +310,8 @@ class TestThreadIsolation:
             assert msg.thread_id == thread2.id
         
         # Verify content isolation
-        thread1_content = {msg.content[0]["text"]["value"] for msg in msgs1}
-        thread2_content = {msg.content[0]["text"]["value"] for msg in msgs2}
+        thread1_content = {msg.content[0]["text"]["value"] for msg in msgs1]
+        thread2_content = {msg.content[0]["text"]["value"] for msg in msgs2]
         assert thread1_content.isdisjoint(thread2_content)
 
 @pytest.fixture
@@ -318,9 +320,9 @@ async def db_session():
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncNone  # TODO: Use real service instance
+    session.begin = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncNone  # TODO: Use real service instance
+    session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncMock()  # TODO: Use real service instance
     yield session

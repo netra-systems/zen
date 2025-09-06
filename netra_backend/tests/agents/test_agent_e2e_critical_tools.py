@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical end-to-end tests for tool integration, state persistence, and error handling.
 Tests 4-6: Tool dispatcher integration, state persistence/recovery, error handling.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -31,8 +33,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         - Test tool execution through dispatcher
         - Verify tool results are properly integrated
         - Test multiple tool calls in sequence
-        """
-    pass
+        """"
         infra = setup_agent_infrastructure
         tool_dispatcher = infra["tool_dispatcher"]
         llm_manager = infra["llm_manager"]
@@ -43,7 +44,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
             "content": "Let me analyze your data",
             "tool_calls": [
                 {"name": "get_workload_data", "arguments": {"time_range": "1h"}},
-                {"name": "analyze_metrics", "arguments": {"metrics": ["gpu", "memory"]}}
+                {"name": "analyze_metrics", "arguments": {"metrics": ["gpu", "memory"}]]
             ]
         })
         
@@ -62,7 +63,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         
         # Mock the data agent's execute to simulate tool usage
         async def mock_execute_with_tools(state, rid, stream):
-    pass
             # Simulate making tool calls
             for tool_result in tool_results:
                 await tool_dispatcher.dispatch_tool("mock_tool", {})
@@ -88,8 +88,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         - Test state saving during execution
         - Test state recovery after interruption
         - Test thread context preservation
-        """
-    pass
+        """"
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         db_session = infra["db_session"]
@@ -105,7 +104,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         saved_states = {}
         
         async def mock_save_state(*args, **kwargs):
-    pass
             # Handle both positional and keyword arguments
             # The actual service can be called with StatePersistenceRequest or individual parameters
             run_id = None
@@ -144,7 +142,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
     return True, "mock_snapshot_id"
             
         async def mock_load_state(run_id, db_session):
-    pass
             if run_id in saved_states:
                 await asyncio.sleep(0)
     return DeepAgentState(**saved_states[run_id]["state"])
@@ -169,7 +166,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                                 # Mock: Async component isolation for testing without real async operations
                                 AsyncMock(return_value={"current_run_id": run_id})):
                     
-                    # Second run should load previous state
+                                    # Second run should load previous state
                     state2 = await supervisor.run("Follow-up request", thread_id, user_id, run_id + "_2")
                     
                     # Verify state continuity
@@ -186,7 +183,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
 
     def _setup_error_agent(self, supervisor):
         """Setup sub-agent to simulate error"""
-    pass
         sub_agents = self._get_sub_agents(supervisor)
         # Mock: Agent service isolation for testing without LLM agent execution
         sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
@@ -204,7 +200,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
 
     async def _execute_with_error(self, supervisor, run_id):
         """Execute supervisor with expected error"""
-    pass
         try:
             await supervisor.run("Test with error", supervisor.thread_id, supervisor.user_id, run_id)
         except Exception:
@@ -216,11 +211,9 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
 
     def _setup_retry_mechanism(self, supervisor):
         """Setup retry mechanism for testing"""
-    pass
         supervisor._retry_count = 0
         max_retries = 3
         async def retry_execute(state, rid, stream):
-    pass
             supervisor._retry_count += 1
             if supervisor._retry_count < max_retries:
                 raise Exception("Temporary failure")
@@ -233,7 +226,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
     async def _test_retry_execution(self, supervisor, run_id, max_retries):
         """Test retry execution mechanism"""
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations
@@ -248,18 +241,17 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
     @pytest.mark.asyncio
     async def test_6_error_handling_and_recovery(self, setup_agent_infrastructure):
         """
-    pass
         Test Case 6: Error Handling and Recovery
         - Test graceful error handling in sub-agents
         - Test supervisor error recovery strategies
         - Test error propagation to user
-        """
+        """"
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
         run_id = str(uuid.uuid4())
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations

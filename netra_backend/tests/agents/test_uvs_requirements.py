@@ -1,10 +1,13 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Test UVS Requirements - Only 2 Required Agents.
 
 This test validates that the system correctly implements the UVS simplified architecture:
-- Only Triage and Reporting (with UVS) are required agents
+    - Only Triage and Reporting (with UVS) are required agents
 - Default flow is Triage → Data Helper → Reporting
 - Reporting handles all failure scenarios gracefully
-"""
+""""
 
 import pytest
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -23,8 +26,8 @@ def create_supervisor():
     registry = AgentClassRegistry()
     registry._ensure_initialized()
     
-    mock_llm = MagicNone  # TODO: Use real service instance
-    mock_websocket = MagicNone  # TODO: Use real service instance
+    mock_llm = MagicMock()  # TODO: Use real service instance
+    mock_websocket = MagicMock()  # TODO: Use real service instance
     
     # Mock the agent instance factory configuration
     with patch.object(SupervisorAgent, '_initialize_agent_instances'):
@@ -139,9 +142,9 @@ class TestUVSRequirements:
     async def test_workflow_orchestrator_adaptive_flow(self):
         """Test that WorkflowOrchestrator implements adaptive workflow."""
         # Create mocks
-        mock_registry = MagicNone  # TODO: Use real service instance
-        mock_engine = AsyncNone  # TODO: Use real service instance
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_registry = MagicMock()  # TODO: Use real service instance
+        mock_engine = AsyncMock()  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         orchestrator = WorkflowOrchestrator(
             agent_registry=mock_registry,

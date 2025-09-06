@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Advanced tests for SupervisorAgent - statistics, edge cases, and concurrent execution."""
 
 import sys
@@ -39,17 +41,17 @@ class TestSupervisorAgentStats:
         
         # Mock registry and engine data
         # Mock: Agent service isolation for testing without LLM agent execution
-        supervisor.registry.agents = {"agent1": None  # TODO: Use real service instance, "agent2": None  # TODO: Use real service instance, "agent3": None  # TODO: Use real service instance}
+        supervisor.registry.agents = {"agent1": Mock()  # TODO: Use real service instance, "agent2": Mock()  # TODO: Use real service instance, "agent3": Mock()  # TODO: Use real service instance}
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.engine.active_runs = {"run1": None  # TODO: Use real service instance, "run2": None  # TODO: Use real service instance}
+        supervisor.engine.active_runs = {"run1": Mock()  # TODO: Use real service instance, "run2": Mock()  # TODO: Use real service instance}
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.engine.run_history = [None  # TODO: Use real service instance, None  # TODO: Use real service instance, None  # TODO: Use real service instance, None  # TODO: Use real service instance]
+        supervisor.engine.run_history = [Mock()  # TODO: Use real service instance, Mock()  # TODO: Use real service instance, Mock()  # TODO: Use real service instance, Mock()  # TODO: Use real service instance]
         
         # Add some hooks
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.hooks["before_agent"] = [None  # TODO: Use real service instance, None  # TODO: Use real service instance]
+        supervisor.hooks["before_agent"] = [Mock()  # TODO: Use real service instance, Mock()  # TODO: Use real service instance]
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.hooks["after_agent"] = [None  # TODO: Use real service instance]
+        supervisor.hooks["after_agent"] = [Mock()  # TODO: Use real service instance]
         
         # Get stats
         stats = supervisor.get_stats()

@@ -1,14 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Database Transaction Rollback Cascade Test ($1M impact)
 
 L3 realism level - tests multi-table transaction rollback scenarios
 using real PostgreSQL container for comprehensive transaction testing.
 
 Business Value Justification:
-- Segment: Platform/Internal ($1M revenue protection)
+    - Segment: Platform/Internal ($1M revenue protection)
 - Business Goal: Data Integrity - Transaction consistency
 - Value Impact: Prevents data corruption that causes customer churn
 - Strategic Impact: Foundation reliability for all customer operations
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -53,28 +55,27 @@ async def db_session(l3_database):
     """Database session with transaction support"""
     postgres_container, postgres_url = l3_database
     async with postgres_container.transaction() as conn:
-        yield conn
+    yield conn
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_data():
     """Test data for transaction scenarios"""
     return {
-        "user": User(
-            id="test_user_001", email="test@rollback.com", 
-            plan_tier="pro", is_active=True
-        ),
-        "thread": Thread(
-            id="test_thread_001", object="thread",
-            created_at=int(time.time())
-        ),
-        "messages": [
-            Message(
-                id=f"msg_{i}", thread_id="test_thread_001",
-                role="user", content=[{"text": f"Message {i}"}],
-                created_at=int(time.time())
-            ) for i in range(3)
-        ]
+    "user": User(
+    id="test_user_001", email="test@rollback.com", 
+    plan_tier="pro", is_active=True
+    ),
+    "thread": Thread(
+    id="test_thread_001", object="thread",
+    created_at=int(time.time())
+    ),
+    "messages": [
+    Message(
+    id=f"msg_{i}", thread_id="test_thread_001",
+    role="user", content=[{"text": f"Message {i]"]],
+    created_at=int(time.time())
+    ) for i in range(3)
+    ]
     }
 
 class TestDatabaseTransactionRollback:
@@ -305,7 +306,7 @@ class TestDatabaseTransactionRollback:
                 for i in range(100):
                     await db_session.execute(
                         "INSERT INTO tool_usage_logs (id, user_id, tool_name, status, created_at) VALUES ($1, $2, $3, $4, NOW())",
-                        f"log_{i}", test_data["user"].id, f"tool_{i}", "success"
+                        f"log_{i]", test_data["user"].id, f"tool_{i]", "success"
                     )
                 
                 raise DatabaseTransactionError("Large rollback test")

@@ -1,12 +1,14 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """End-to-End Tests for Unified Configuration System
 
 These tests validate the complete configuration flow from environment
 variables through to actual service usage, testing real scenarios.
-"""
+""""
 
 import pytest
 import asyncio
@@ -117,7 +119,7 @@ class TestDatabaseE2E:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_engine:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_engine.return_value = AsyncNone  # TODO: Use real service instance
+                mock_engine.return_value = AsyncMock()  # TODO: Use real service instance
                 
                 db = AsyncDatabase('postgresql+asyncpg://localhost/test')
                 
@@ -206,7 +208,7 @@ class TestRedisE2E:
             
             with patch.object(manager, '_create_redis_client') as mock_create:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_client = AsyncNone  # TODO: Use real service instance
+                mock_client = AsyncMock()  # TODO: Use real service instance
                 mock_client.ping.side_effect = [
                     Exception("Connection failed"),  # First attempt fails
                     None  # Second attempt (local) succeeds
@@ -285,7 +287,7 @@ class TestCacheE2E:
             # Cache should not store when disabled
             result = await cache.cache_result(
                 'SELECT * FROM test',
-                [{'id': 1}],
+                [{'id': 1]],
                 None,
                 1.0,
                 None

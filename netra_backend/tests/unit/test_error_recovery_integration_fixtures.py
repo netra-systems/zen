@@ -21,16 +21,16 @@ class EnhancedErrorRecoverySystem:
     def __init__(self):
         self.active = True
 
-@pytest.fixture
- def real_error():
-    """Use real service instance."""
+        @pytest.fixture
+        def real_error():
+            """Use real service instance."""
     # TODO: Initialize real service
-    """Create mock error for testing."""
-    return ConnectionError("Test connection error")
+            """Create mock error for testing."""
+            return ConnectionError("Test connection error")
 
-@pytest.fixture
-def recovery_system():
-    """Use real service instance."""
+        @pytest.fixture
+        def recovery_system():
+            """Use real service instance."""
     # TODO: Initialize real service
-    """Create recovery system instance for testing."""
-    return EnhancedErrorRecoverySystem()
+            """Create recovery system instance for testing."""
+            return EnhancedErrorRecoverySystem()

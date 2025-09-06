@@ -1,7 +1,7 @@
 """Critical test to ensure WebSocket message field alignment between frontend and backend.
 
 This test prevents the regression where frontend sends 'content' but backend expects 'text'.
-"""
+""""
 
 import sys
 from pathlib import Path

@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Simplified Golden Pattern Test Suite for DataSubAgent
 
 This test suite validates the DataSubAgent's compliance with the Golden Pattern
@@ -7,23 +9,23 @@ Creates REAL, DIFFICULT tests that could actually fail to ensure robust validati
 Tests both success and failure paths with comprehensive edge case coverage.
 
 Business Value: Ensures reliable data analysis with 15-30% cost savings identification.
-"""
+""""
 
 # Mock all problematic dependencies at the module level before ANY imports
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Mock clickhouse modules with proper package structure
-mock_clickhouse_driver_client = MagicNone  # TODO: Use real service instance
-mock_clickhouse_driver = MagicNone  # TODO: Use real service instance
+mock_clickhouse_driver_client = MagicMock()  # TODO: Use real service instance
+mock_clickhouse_driver = MagicMock()  # TODO: Use real service instance
 mock_clickhouse_driver.client = mock_clickhouse_driver_client
 
-mock_clickhouse_connect = MagicNone  # TODO: Use real service instance
+mock_clickhouse_connect = MagicMock()  # TODO: Use real service instance
 mock_clickhouse_connect.driver = mock_clickhouse_driver
 
 sys.modules['clickhouse_connect'] = mock_clickhouse_connect
@@ -31,8 +33,8 @@ sys.modules['clickhouse_connect.driver'] = mock_clickhouse_driver
 sys.modules['clickhouse_connect.driver.client'] = mock_clickhouse_driver_client
 
 # Mock other problematic modules
-sys.modules['netra_backend.app.db.clickhouse'] = MagicNone  # TODO: Use real service instance
-sys.modules['netra_backend.app.db.clickhouse_base'] = MagicNone  # TODO: Use real service instance
+sys.modules['netra_backend.app.db.clickhouse'] = MagicMock()  # TODO: Use real service instance
+sys.modules['netra_backend.app.db.clickhouse_base'] = MagicMock()  # TODO: Use real service instance
 
 import asyncio
 import json
@@ -47,7 +49,6 @@ class MockDataSubAgent:
     """Mock DataSubAgent that simulates the real agent's interface."""
     
     def __init__(self, llm_manager=None, tool_dispatcher=None):
-    pass
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.name = "DataSubAgent"
@@ -85,25 +86,24 @@ class MockDataSubAgent:
         # Helper mocks
         self.helpers.execute_legacy_analysis = AsyncMock(return_value=Mock(status="success", data={}))
         self.helpers.fetch_clickhouse_data = AsyncMock(return_value=[])
-        self.helpers.send_websocket_update = AsyncNone  # TODO: Use real service instance
+        self.helpers.send_websocket_update = AsyncMock()  # TODO: Use real service instance
         self.helpers.clear_cache = TestRedisManager().get_client()
-        self.helpers.cleanup_resources = AsyncNone  # TODO: Use real service instance
+        self.helpers.cleanup_resources = AsyncMock()  # TODO: Use real service instance
         
         # ClickHouse operations
-        self.clickhouse_ops.get_table_schema = AsyncMock(return_value={"columns": ["id", "name"]})
+        self.clickhouse_ops.get_table_schema = AsyncMock(return_value={"columns": ["id", "name"]])
         
         # Extended operations
         self.extended_ops.process_batch_safe = AsyncMock(return_value=[])
         self.extended_ops.process_and_persist = AsyncMock(return_value={"status": "processed"})
         
         # Execution engine
-        self.execution_engine.execute = AsyncNone  # TODO: Use real service instance
+        self.execution_engine.execute = AsyncMock()  # TODO: Use real service instance
         self.execution_engine.get_health_status = Mock(return_value={"status": "healthy"})
     
     # Golden Pattern Methods
     def set_websocket_bridge(self, bridge, run_id):
         """Set WebSocket bridge for event emission."""
-    pass
         self._websocket_bridge = bridge
         self._run_id = run_id
         self._websocket_adapter.set_bridge(bridge)
@@ -118,7 +118,6 @@ class MockDataSubAgent:
     
     async def execute_core_logic(self, context):
         """Execute core business logic with WebSocket notifications."""
-    pass
         await self.emit_thinking("Initializing data analysis...")
         await asyncio.sleep(0)
     return await self.core.execute_data_analysis(context)
@@ -130,7 +129,6 @@ class MockDataSubAgent:
     
     async def emit_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None):
         """Emit tool executing event."""
-    pass
         await self._websocket_adapter.emit_tool_executing(tool_name, parameters)
     
     async def emit_tool_completed(self, tool_name: str, result: Optional[Dict] = None):
@@ -139,7 +137,6 @@ class MockDataSubAgent:
     
     async def emit_agent_completed(self, result: Optional[Dict] = None):
         """Emit agent completed event."""
-    pass
         await self._websocket_adapter.emit_agent_completed(result)
     
     async def emit_error(self, error_message: str, error_type: Optional[str] = None, error_details: Optional[Dict] = None):
@@ -148,7 +145,6 @@ class MockDataSubAgent:
     
     async def emit_agent_started(self, message: Optional[str] = None):
         """Emit agent started event."""
-    pass
         await self._websocket_adapter.emit_agent_started(message)
     
     def has_websocket_context(self) -> bool:
@@ -172,7 +168,6 @@ class MockDataSubAgent:
     
     async def _analyze_performance_metrics(self, user_id: int, workload_id: str, time_range):
         """Analyze performance metrics with realistic behavior."""
-    pass
         await self.emit_thinking("Retrieving performance metrics...")
         
         data = await self._fetch_clickhouse_data(
@@ -220,7 +215,6 @@ class MockDataSubAgent:
     # Health and State Management
     def get_health_status(self):
         """Get comprehensive health status."""
-    pass
         return {
             "core": self.core.get_health_status(),
             "execution": self.execution_engine.get_health_status()
@@ -243,7 +237,6 @@ class MockDataSubAgent:
     # Cache and Processing Methods
     async def process_data(self, data: Dict[str, Any]):
         """Process data with validation."""
-    pass
         if data.get("valid") is False:
             await asyncio.sleep(0)
     return {"status": "error", "message": "Invalid data"}
@@ -265,7 +258,6 @@ class MockDataSubAgent:
     
     async def process_batch_safe(self, batch: list):
         """Process batch with error handling."""
-    pass
         await asyncio.sleep(0)
     return await self.extended_ops.process_batch_safe(batch)
     
@@ -277,7 +269,6 @@ class MockDataSubAgent:
     
     async def cleanup(self, state, run_id):
         """Clean up resources."""
-    pass
         await self.helpers.cleanup_resources(time.time())
 
 
@@ -294,46 +285,38 @@ class MockWebSocketAdapter:
     """Mock WebSocket adapter for testing."""
     
     def __init__(self):
-    pass
         self.bridge = None
         self.events = []
     
     def set_bridge(self, bridge):
-    pass
         self.bridge = bridge
     
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None):
-    pass
         self.events.append({"type": "thinking", "thought": thought, "step_number": step_number})
         if self.bridge:
             await self.bridge.notify_agent_thinking("test_run", "DataSubAgent", thought, step_number)
     
     async def emit_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None):
-    pass
         self.events.append({"type": "tool_executing", "tool_name": tool_name, "parameters": parameters})
         if self.bridge:
             await self.bridge.notify_tool_executing("test_run", "DataSubAgent", tool_name, parameters)
     
     async def emit_tool_completed(self, tool_name: str, result: Optional[Dict] = None):
-    pass
         self.events.append({"type": "tool_completed", "tool_name": tool_name, "result": result})
         if self.bridge:
             await self.bridge.notify_tool_completed("test_run", "DataSubAgent", tool_name, result)
     
     async def emit_agent_completed(self, result: Optional[Dict] = None):
-    pass
         self.events.append({"type": "agent_completed", "result": result})
         if self.bridge:
             await self.bridge.notify_agent_completed("test_run", "DataSubAgent", result)
     
     async def emit_error(self, error_message: str, error_type: Optional[str] = None, error_details: Optional[Dict] = None):
-    pass
         self.events.append({"type": "error", "error_message": error_message, "error_type": error_type})
         if self.bridge:
             await self.bridge.notify_error("test_run", "DataSubAgent", error_message, error_type, error_details)
     
     async def emit_agent_started(self, message: Optional[str] = None):
-    pass
         self.events.append({"type": "agent_started", "message": message})
         if self.bridge:
             await self.bridge.notify_agent_started("test_run", "DataSubAgent", message)
@@ -343,63 +326,52 @@ class MockWebSocketBridge:
     """Mock WebSocket bridge for testing."""
     
     def __init__(self):
-    pass
         self.events = []
         self.connected = True
         self.should_fail = False
     
     async def notify_agent_started(self, run_id: str, agent_name: str, message: Optional[str] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "agent_started", "run_id": run_id, "agent_name": agent_name, "message": message})
     
     async def notify_agent_thinking(self, run_id: str, agent_name: str, thought: str, step_number: Optional[int] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "agent_thinking", "run_id": run_id, "agent_name": agent_name, "thought": thought})
     
     async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Optional[Dict] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "tool_executing", "run_id": run_id, "tool_name": tool_name, "parameters": parameters})
     
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Optional[Dict] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "tool_completed", "run_id": run_id, "tool_name": tool_name, "result": result})
     
     async def notify_agent_completed(self, run_id: str, agent_name: str, result: Optional[Dict] = None, execution_time_ms: Optional[float] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "agent_completed", "run_id": run_id, "result": result})
     
     async def notify_error(self, run_id: str, agent_name: str, error_message: str, error_type: Optional[str] = None, error_details: Optional[Dict] = None):
-    pass
         if self.should_fail:
             raise ConnectionError("WebSocket connection lost")
         self.events.append({"type": "error", "run_id": run_id, "error_message": error_message})
     
     def get_events_by_type(self, event_type: str):
-    pass
         await asyncio.sleep(0)
     return [event for event in self.events if event["type"] == event_type]
     
     def clear_events(self):
-    pass
         self.events.clear()
     
     def simulate_connection_failure(self):
-    pass
         self.should_fail = True
         self.connected = False
     
     def restore_connection(self):
-    pass
         self.should_fail = False
         self.connected = True
 
@@ -408,10 +380,9 @@ class MockExecutionContext:
     """Mock execution context."""
     
     def __init__(self, run_id="test_run", agent_name="DataSubAgent", state=None, stream_updates=False):
-    pass
         self.run_id = run_id
         self.agent_name = agent_name
-        self.state = state or None  # TODO: Use real service instance
+        self.state = state or Mock()  # TODO: Use real service instance
         self.stream_updates = stream_updates
         self.start_time = datetime.now(timezone.utc)
 
@@ -420,55 +391,50 @@ class TestDataSubAgentGoldenPatternSimplified:
     """Comprehensive but simplified test suite for DataSubAgent Golden Pattern compliance."""
     
     @pytest.fixture
- def real_llm_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_llm_manager():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock LLM manager."""
-    pass
         manager = manager_instance  # Initialize appropriate service
         manager.generate_response = AsyncMock(return_value={"content": "AI insights generated"})
         manager.is_healthy = Mock(return_value=True)
         return manager
     
-    @pytest.fixture
- def real_tool_dispatcher():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_tool_dispatcher():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock tool dispatcher."""
-    pass
         dispatcher = dispatcher_instance  # Initialize appropriate service
         dispatcher.execute_tool = AsyncMock(return_value={"status": "success"})
         return dispatcher
     
-    @pytest.fixture
- def real_websocket_bridge():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_websocket_bridge():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock WebSocket bridge."""
-    pass
         return MockWebSocketBridge()
     
-    @pytest.fixture
-    def execution_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def execution_context(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create sample execution context."""
-    pass
         return MockExecutionContext()
     
-    @pytest.fixture
-    def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_bridge):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_bridge):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock DataSubAgent."""
-    pass
         agent = MockDataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.set_websocket_bridge(mock_websocket_bridge, "test_run_789")
         return agent
     
-    # === Golden Pattern Compliance Tests ===
+        # === Golden Pattern Compliance Tests ===
     
-    def test_agent_identity_and_properties(self, data_sub_agent):
+        def test_agent_identity_and_properties(self, data_sub_agent):
         """Test agent identity and core properties."""
         assert data_sub_agent.name == "DataSubAgent"
         assert "data gathering and analysis" in data_sub_agent.description.lower()
@@ -476,9 +442,8 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert hasattr(data_sub_agent, 'agent_id')
         assert data_sub_agent.state == MockSubAgentLifecycle.PENDING
     
-    def test_has_required_golden_pattern_methods(self, data_sub_agent):
+        def test_has_required_golden_pattern_methods(self, data_sub_agent):
         """Test that agent has all required Golden Pattern methods."""
-    pass
         assert hasattr(data_sub_agent, 'validate_preconditions')
         assert hasattr(data_sub_agent, 'execute_core_logic')
         assert hasattr(data_sub_agent, 'emit_thinking')
@@ -488,24 +453,23 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert hasattr(data_sub_agent, 'set_websocket_bridge')
         assert hasattr(data_sub_agent, 'has_websocket_context')
     
-    @pytest.mark.asyncio
-    async def test_validate_preconditions_success(self, data_sub_agent, execution_context):
+        @pytest.mark.asyncio
+        async def test_validate_preconditions_success(self, data_sub_agent, execution_context):
         """Test successful precondition validation."""
         result = await data_sub_agent.validate_preconditions(execution_context)
         assert result is True
         data_sub_agent.core.validate_data_analysis_preconditions.assert_called_once_with(execution_context)
     
-    @pytest.mark.asyncio
-    async def test_validate_preconditions_failure(self, data_sub_agent, execution_context):
+        @pytest.mark.asyncio
+        async def test_validate_preconditions_failure(self, data_sub_agent, execution_context):
         """Test precondition validation failure handling."""
-    pass
         data_sub_agent.core.validate_data_analysis_preconditions.side_effect = Exception("Connection failed")
         
         result = await data_sub_agent.validate_preconditions(execution_context)
         assert result is False
     
-    @pytest.mark.asyncio
-    async def test_execute_core_logic_with_websocket_events(self, data_sub_agent, execution_context, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_execute_core_logic_with_websocket_events(self, data_sub_agent, execution_context, mock_websocket_bridge):
         """Test core logic execution emits WebSocket events."""
         mock_websocket_bridge.clear_events()
         
@@ -519,9 +483,8 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert len(thinking_events) >= 1
         assert "data analysis" in thinking_events[0]["thought"].lower()
     
-    def test_websocket_bridge_integration(self, data_sub_agent, mock_websocket_bridge):
+        def test_websocket_bridge_integration(self, data_sub_agent, mock_websocket_bridge):
         """Test WebSocket bridge integration."""
-    pass
         assert data_sub_agent.has_websocket_context() is True
         
         # Test without bridge
@@ -532,10 +495,10 @@ class TestDataSubAgentGoldenPatternSimplified:
         agent.set_websocket_bridge(mock_websocket_bridge, "new_run")
         assert agent.has_websocket_context() is True
     
-    # === WebSocket Event Emission Tests ===
+        # === WebSocket Event Emission Tests ===
     
-    @pytest.mark.asyncio
-    async def test_websocket_event_emission_complete_flow(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_websocket_event_emission_complete_flow(self, data_sub_agent, mock_websocket_bridge):
         """Test complete WebSocket event emission flow."""
         mock_websocket_bridge.clear_events()
         
@@ -553,10 +516,9 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert len(mock_websocket_bridge.get_events_by_type("tool_completed")) == 1
         assert len(mock_websocket_bridge.get_events_by_type("agent_completed")) == 1
     
-    @pytest.mark.asyncio
-    async def test_websocket_error_event_emission(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_websocket_error_event_emission(self, data_sub_agent, mock_websocket_bridge):
         """Test error event emission."""
-    pass
         mock_websocket_bridge.clear_events()
         
         await data_sub_agent.emit_error("Test error", "TestError", {"code": "E001"})
@@ -565,18 +527,17 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert len(error_events) == 1
         assert error_events[0]["error_message"] == "Test error"
     
-    @pytest.mark.asyncio
-    async def test_websocket_connection_failure_handling(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_websocket_connection_failure_handling(self, data_sub_agent, mock_websocket_bridge):
         """Test handling of WebSocket connection failures."""
         mock_websocket_bridge.simulate_connection_failure()
         
         # Should not raise exception even if WebSocket fails
         try:
-            await data_sub_agent.emit_thinking("Test during failure")
-            await data_sub_agent.emit_tool_executing("test_tool")
+        await data_sub_agent.emit_thinking("Test during failure")
+        await data_sub_agent.emit_tool_executing("test_tool")
         except ConnectionError:
-            # This is expected, but the agent should handle it gracefully
-            pass
+        # This is expected, but the agent should handle it gracefully
         
         # Restore connection
         mock_websocket_bridge.restore_connection()
@@ -586,19 +547,18 @@ class TestDataSubAgentGoldenPatternSimplified:
         thinking_events = mock_websocket_bridge.get_events_by_type("agent_thinking")
         assert len(thinking_events) >= 1
     
-    @pytest.mark.asyncio
-    async def test_websocket_stress_test(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_websocket_stress_test(self, data_sub_agent, mock_websocket_bridge):
         """Stress test WebSocket event emission."""
-    pass
         mock_websocket_bridge.clear_events()
         
         # Emit many events rapidly
         tasks = []
         for i in range(50):
-            tasks.append(data_sub_agent.emit_thinking(f"Processing item {i}"))
-            if i % 10 == 0:
-                tasks.append(data_sub_agent.emit_tool_executing(f"tool_{i}"))
-                tasks.append(data_sub_agent.emit_tool_completed(f"tool_{i}", {"result": i}))
+        tasks.append(data_sub_agent.emit_thinking(f"Processing item {i}"))
+        if i % 10 == 0:
+        tasks.append(data_sub_agent.emit_tool_executing(f"tool_{i}"))
+        tasks.append(data_sub_agent.emit_tool_completed(f"tool_{i}", {"result": i}))
         
         await asyncio.gather(*tasks)
         
@@ -610,15 +570,15 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert len(tool_executing_events) == 5
         assert len(tool_completed_events) == 5
     
-    # === Business Logic Tests ===
+        # === Business Logic Tests ===
     
-    @pytest.mark.asyncio
-    async def test_performance_metrics_analysis(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_performance_metrics_analysis(self, data_sub_agent):
         """Test performance metrics analysis business logic."""
         # Setup mock data
         mock_data = [
-            {"event_count": 100, "latency_p50": 150},
-            {"event_count": 120, "latency_p50": 180}
+        {"event_count": 100, "latency_p50": 150},
+        {"event_count": 120, "latency_p50": 180}
         ]
         data_sub_agent.helpers.fetch_clickhouse_data.return_value = mock_data
         
@@ -631,10 +591,9 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert "latency" in result
         assert result["latency"]["avg_p50"] == 165.0  # (150 + 180) / 2
     
-    @pytest.mark.asyncio
-    async def test_performance_metrics_no_data(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_performance_metrics_no_data(self, data_sub_agent):
         """Test performance analysis with no data."""
-    pass
         data_sub_agent.helpers.fetch_clickhouse_data.return_value = []
         
         result = await data_sub_agent._analyze_performance_metrics(123, "test", [])
@@ -642,15 +601,15 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert result["status"] == "no_data"
         assert "No performance data found" in result["message"]
     
-    @pytest.mark.asyncio
-    async def test_anomaly_detection(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_anomaly_detection(self, data_sub_agent):
         """Test anomaly detection functionality."""
         # Setup mock data with anomalies
         mock_data = [
-            {"value": 100, "z_score": 1.0},
-            {"value": 110, "z_score": 1.5},
-            {"value": 500, "z_score": 4.2},  # Anomaly
-            {"value": 105, "z_score": 1.2}
+        {"value": 100, "z_score": 1.0},
+        {"value": 110, "z_score": 1.5},
+        {"value": 500, "z_score": 4.2},  # Anomaly
+        {"value": 105, "z_score": 1.2}
         ]
         data_sub_agent.helpers.fetch_clickhouse_data.return_value = mock_data
         
@@ -662,11 +621,10 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert result["anomalies"][0]["value"] == 500
         assert result["threshold"] == 3.0
     
-    @pytest.mark.asyncio
-    async def test_clickhouse_data_fetching_with_websocket_notifications(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_clickhouse_data_fetching_with_websocket_notifications(self, data_sub_agent, mock_websocket_bridge):
         """Test ClickHouse data fetching with WebSocket notifications."""
-    pass
-        mock_data = [{"id": 1, "value": 100}]
+        mock_data = [{"id": 1, "value": 100]]
         data_sub_agent.helpers.fetch_clickhouse_data.return_value = mock_data
         mock_websocket_bridge.clear_events()
         
@@ -683,25 +641,24 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert tool_executing_events[0]["tool_name"] == "database_query"
         assert tool_completed_events[0]["result"]["status"] == "success"
     
-    @pytest.mark.asyncio
-    async def test_clickhouse_query_error_handling(self, data_sub_agent, mock_websocket_bridge):
+        @pytest.mark.asyncio
+        async def test_clickhouse_query_error_handling(self, data_sub_agent, mock_websocket_bridge):
         """Test ClickHouse query error handling."""
         data_sub_agent.helpers.fetch_clickhouse_data.side_effect = Exception("SQL error")
         mock_websocket_bridge.clear_events()
         
         with pytest.raises(Exception, match="SQL error"):
-            await data_sub_agent._fetch_clickhouse_data("INVALID SQL")
+        await data_sub_agent._fetch_clickhouse_data("INVALID SQL")
         
         # Verify error WebSocket notification
         tool_completed_events = mock_websocket_bridge.get_events_by_type("tool_completed")
         assert len(tool_completed_events) == 1
         assert tool_completed_events[0]["result"]["status"] == "error"
     
-    # === Reliability and Infrastructure Tests ===
+        # === Reliability and Infrastructure Tests ===
     
-    def test_health_status_monitoring(self, data_sub_agent):
+        def test_health_status_monitoring(self, data_sub_agent):
         """Test comprehensive health status monitoring."""
-    pass
         health = data_sub_agent.get_health_status()
         
         assert "core" in health
@@ -709,44 +666,41 @@ class TestDataSubAgentGoldenPatternSimplified:
         data_sub_agent.core.get_health_status.assert_called_once()
         data_sub_agent.execution_engine.get_health_status.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_reliability_execution_success(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_reliability_execution_success(self, data_sub_agent):
         """Test successful execution with reliability patterns."""
         async def test_operation():
-            await asyncio.sleep(0)
-    return {"result": "success"}
+        await asyncio.sleep(0)
+        return {"result": "success"}
         
         result = await data_sub_agent.execute_with_reliability(test_operation, "test_op")
         assert result == {"result": "success"}
     
-    @pytest.mark.asyncio
-    async def test_reliability_execution_with_fallback(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_reliability_execution_with_fallback(self, data_sub_agent):
         """Test reliability execution with fallback."""
-    pass
         call_count = 0
         
         async def failing_operation():
-    pass
-            nonlocal call_count
-            call_count += 1
-            raise Exception("Primary failed")
+        nonlocal call_count
+        call_count += 1
+        raise Exception("Primary failed")
         
         async def fallback_operation():
-    pass
-            await asyncio.sleep(0)
-    return {"result": "fallback_success"}
+        await asyncio.sleep(0)
+        return {"result": "fallback_success"}
         
         result = await data_sub_agent.execute_with_reliability(
-            failing_operation, "test_op", fallback=fallback_operation
+        failing_operation, "test_op", fallback=fallback_operation
         )
         
         assert result == {"result": "fallback_success"}
         assert call_count == 1  # Primary operation was attempted
     
-    # === Data Processing Tests ===
+        # === Data Processing Tests ===
     
-    @pytest.mark.asyncio
-    async def test_data_processing_success(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_data_processing_success(self, data_sub_agent):
         """Test successful data processing."""
         test_data = {"id": 1, "content": "test", "valid": True}
         result = await data_sub_agent.process_data(test_data)
@@ -754,18 +708,17 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert result["status"] == "success"
         assert result["data"] == test_data
     
-    @pytest.mark.asyncio
-    async def test_data_processing_validation_failure(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_data_processing_validation_failure(self, data_sub_agent):
         """Test data processing with validation failure."""
-    pass
         invalid_data = {"id": 1, "valid": False}
         result = await data_sub_agent.process_data(invalid_data)
         
         assert result["status"] == "error"
         assert "Invalid data" in result["message"]
     
-    @pytest.mark.asyncio
-    async def test_cached_data_processing(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_cached_data_processing(self, data_sub_agent):
         """Test data processing with caching."""
         test_data = {"id": 1, "content": "test"}
         
@@ -773,7 +726,7 @@ class TestDataSubAgentGoldenPatternSimplified:
         result1 = await data_sub_agent.process_with_cache(test_data)
         
         # Second call should await asyncio.sleep(0)
-    return cached result
+        return cached result
         result2 = await data_sub_agent.process_with_cache(test_data)
         
         assert result1 == result2
@@ -781,28 +734,26 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert hasattr(data_sub_agent, '_cache')
         assert len(data_sub_agent._cache) > 0
     
-    @pytest.mark.asyncio
-    async def test_batch_processing_with_errors(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_batch_processing_with_errors(self, data_sub_agent):
         """Test batch processing with mixed results."""
-    pass
         batch_data = [
-            {"id": 1, "valid": True},
-            {"id": 2, "valid": False},
-            {"id": 3, "valid": True}
+        {"id": 1, "valid": True},
+        {"id": 2, "valid": False},
+        {"id": 3, "valid": True}
         ]
         
         # Mock batch processing to await asyncio.sleep(0)
-    return mixed results
+        return mixed results
         async def mock_batch_processing(batch):
-    pass
-            results = []
-            for item in batch:
-                if item.get("valid"):
-                    results.append({"status": "success", "data": item})
-                else:
-                    results.append({"status": "error", "message": "Processing failed"})
-            await asyncio.sleep(0)
-    return results
+        results = []
+        for item in batch:
+        if item.get("valid"):
+        results.append({"status": "success", "data": item})
+        else:
+        results.append({"status": "error", "message": "Processing failed"})
+        await asyncio.sleep(0)
+        return results
         
         data_sub_agent.extended_ops.process_batch_safe.side_effect = mock_batch_processing
         
@@ -814,12 +765,12 @@ class TestDataSubAgentGoldenPatternSimplified:
         assert success_count == 2
         assert error_count == 1
     
-    # === Edge Cases and Stress Tests ===
+        # === Edge Cases and Stress Tests ===
     
-    @pytest.mark.asyncio
-    async def test_concurrent_execution_stress(self, data_sub_agent, execution_context):
+        @pytest.mark.asyncio
+        async def test_concurrent_execution_stress(self, data_sub_agent, execution_context):
         """Test concurrent execution stress."""
-        contexts = [MockExecutionContext(f"run_{i}") for i in range(20)]
+        contexts = [MockExecutionContext(f"run_{i]") for i in range(20)]
         
         # Execute all concurrently
         tasks = [data_sub_agent.execute_core_logic(ctx) for ctx in contexts]
@@ -828,29 +779,27 @@ class TestDataSubAgentGoldenPatternSimplified:
         # All should succeed
         assert len(results) == 20
         for result in results:
-            assert not isinstance(result, Exception)
+        assert not isinstance(result, Exception)
     
-    @pytest.mark.asyncio
-    async def test_timeout_handling(self, data_sub_agent, execution_context):
+        @pytest.mark.asyncio
+        async def test_timeout_handling(self, data_sub_agent, execution_context):
         """Test timeout handling."""
-    pass
         async def slow_operation():
-    pass
-            await asyncio.sleep(2)
-            await asyncio.sleep(0)
-    return {"result": "slow"}
+        await asyncio.sleep(2)
+        await asyncio.sleep(0)
+        return {"result": "slow"}
         
         data_sub_agent.core.execute_data_analysis.side_effect = slow_operation
         
         # Should timeout
         with pytest.raises(asyncio.TimeoutError):
-            await asyncio.wait_for(
-                data_sub_agent.execute_core_logic(execution_context),
-                timeout=0.5
-            )
+        await asyncio.wait_for(
+        data_sub_agent.execute_core_logic(execution_context),
+        timeout=0.5
+        )
     
-    @pytest.mark.asyncio
-    async def test_memory_pressure_handling(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_memory_pressure_handling(self, data_sub_agent):
         """Test behavior under memory pressure."""
         large_data = {"data": list(range(10000))}
         
@@ -861,11 +810,10 @@ class TestDataSubAgentGoldenPatternSimplified:
         # Should handle without memory errors
         assert len(results) == 10
         for result in results:
-            assert not isinstance(result, MemoryError)
+        assert not isinstance(result, MemoryError)
     
-    def test_cache_management(self, data_sub_agent):
+        def test_cache_management(self, data_sub_agent):
         """Test cache management functionality."""
-    pass
         # Setup cache
         data_sub_agent._cache = {"test": "data"}
         
@@ -878,8 +826,8 @@ class TestDataSubAgentGoldenPatternSimplified:
         # Verify internal cache cleared
         assert len(data_sub_agent._cache) == 0
     
-    @pytest.mark.asyncio
-    async def test_cleanup_resource_management(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_cleanup_resource_management(self, data_sub_agent):
         """Test proper cleanup and resource management."""
         state = state_instance  # Initialize appropriate service
         run_id = "test_run"

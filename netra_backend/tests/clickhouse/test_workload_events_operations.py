@@ -1,7 +1,9 @@
+import asyncio
+
 """
 Workload Events Table Operations Tests
 Tests workload_events table operations with real data
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -47,7 +49,7 @@ class TestWorkloadEventsTable:
         tables_result = await client.execute_query("SHOW TABLES")
         table_names = [row.get('name', '') for row in tables_result]
         workload_tables = [t for t in table_names if 'workload' in t.lower()]
-        print(f"[DEBUG] Current database: {current_db}, Available tables: {table_names}, Workload tables: {workload_tables}")
+        print(f"[DEBUG] Current database: {current_db], Available tables: {table_names], Workload tables: {workload_tables]")
 
     async def _insert_workload_events(self, client, test_events):
         """Insert workload events into ClickHouse"""
@@ -79,7 +81,7 @@ class TestWorkloadEventsTable:
             FROM workload_events
             ORDER BY timestamp DESC
             LIMIT 5
-            """
+            """"
             
             # Execute the test query
             result = await client.execute_query(test_query)
@@ -88,7 +90,7 @@ class TestWorkloadEventsTable:
             assert isinstance(result, list)
             for row in result:
                 if row.get('workload_id'):
-                    logger.info(f"Event: {row['event_id']} workload: {row['workload_id']} type: {row['event_type']}")
+                    logger.info(f"Event: {row['event_id']] workload: {row['workload_id']] type: {row['event_type']]")
 
     @pytest.mark.asyncio
     async def test_complex_aggregation_queries(self, setup_workload_table):
@@ -105,16 +107,16 @@ class TestWorkloadEventsTable:
             WHERE timestamp >= now() - INTERVAL 1 HOUR
             GROUP BY workload_id, event_type, event_category
             ORDER BY request_count DESC
-            """
+            """"
             
             result = await client.execute_query(aggregation_query)
             assert isinstance(result, list)
             
             for row in result:
-                logger.info(f"Workload {row['workload_id']}: "
-                          f"{row['request_count']} requests, "
-                          f"type: {row['event_type']}, "
-                          f"category: {row['event_category']}")
+                logger.info(f"Workload {row['workload_id']]: "
+                          f"{row['request_count']] requests, "
+                          f"type: {row['event_type']], "
+                          f"category: {row['event_category']]")
 
     @pytest.mark.asyncio
     async def test_time_series_analysis(self, setup_workload_table):
@@ -131,7 +133,7 @@ class TestWorkloadEventsTable:
             GROUP BY time_bucket
             ORDER BY time_bucket DESC
             LIMIT 60
-            """
+            """"
             
             result = await client.execute_query(time_series_query)
             assert isinstance(result, list)
@@ -139,6 +141,6 @@ class TestWorkloadEventsTable:
             if result:
                 logger.info(f"Time series data: {len(result)} time buckets")
                 latest = result[0]
-                logger.info(f"Latest minute: {latest['events_per_minute']} events, "
-                          f"unique users: {latest['unique_users']}, "
-                          f"unique workloads: {latest['unique_workloads']}")
+                logger.info(f"Latest minute: {latest['events_per_minute']] events, "
+                          f"unique users: {latest['unique_users']], "
+                          f"unique workloads: {latest['unique_workloads']]")

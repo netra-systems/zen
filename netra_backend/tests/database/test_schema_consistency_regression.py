@@ -1,14 +1,17 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Regression tests for database schema consistency.
 
 Business Value Justification (BVJ):
-- Segment: Platform stability (all tiers)
+    - Segment: Platform stability (all tiers)
 - Business Goal: Prevent runtime errors from schema mismatches
 - Value Impact: Ensures database operations don't fail due to missing columns/tables
 - Strategic Impact: Maintains data integrity and prevents deployment failures
 
 These tests verify that the database schema matches model definitions
 and that all required columns exist.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -39,90 +42,90 @@ class TestSchemaConsistency:
     async def db_engine(self):
         """Create database engine for testing."""
         # Use mock engine for tests to avoid real database dependencies
-        engine = MagicNone  # TODO: Use real service instance
+        engine = MagicMock()  # TODO: Use real service instance
         
         # Mock the async context manager properly
-        mock_conn = AsyncNone  # TODO: Use real service instance
-        async_context_manager = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
+        async_context_manager = AsyncMock()  # TODO: Use real service instance
         async_context_manager.__aenter__ = AsyncMock(return_value=mock_conn)
         async_context_manager.__aexit__ = AsyncMock(return_value=False)
         
         engine.begin = MagicMock(return_value=async_context_manager)
-        engine.dispose = AsyncNone  # TODO: Use real service instance
+        engine.dispose = AsyncMock()  # TODO: Use real service instance
         yield engine
     
-    @pytest.mark.skip(reason="Complex async mock - defer for later iteration")
-    @pytest.mark.asyncio
-    async def test_threads_table_has_deleted_at_column(self, db_engine):
+        @pytest.mark.skip(reason="Complex async mock - defer for later iteration")
+        @pytest.mark.asyncio
+        async def test_threads_table_has_deleted_at_column(self, db_engine):
         """Verify threads table has deleted_at column.
         
         This is a regression test for the missing deleted_at column error:
         'column threads.deleted_at does not exist'
-        """
+        """"
         
         # Mock the database result for deleted_at column
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_result.fetchone.return_value = ('deleted_at', 'timestamp without time zone', 'YES')
         
         # Patch the begin method to return our mocked connection
         with patch.object(db_engine, 'begin') as mock_begin:
-            mock_conn = AsyncNone  # TODO: Use real service instance
-            mock_conn.execute.return_value = mock_result
+        mock_conn = AsyncMock()  # TODO: Use real service instance
+        mock_conn.execute.return_value = mock_result
             
-            async_context_manager = AsyncNone  # TODO: Use real service instance
-            async_context_manager.__aenter__ = AsyncMock(return_value=mock_conn)
-            async_context_manager.__aexit__ = AsyncMock(return_value=False)
-            mock_begin.return_value.__aenter__ = AsyncMock(return_value=mock_conn)
-            mock_begin.return_value.__aexit__ = AsyncMock(return_value=False)
+        async_context_manager = AsyncMock()  # TODO: Use real service instance
+        async_context_manager.__aenter__ = AsyncMock(return_value=mock_conn)
+        async_context_manager.__aexit__ = AsyncMock(return_value=False)
+        mock_begin.return_value.__aenter__ = AsyncMock(return_value=mock_conn)
+        mock_begin.return_value.__aexit__ = AsyncMock(return_value=False)
             
-            async with db_engine.begin() as conn:
-                result = await conn.execute(text("""
-                    SELECT column_name, data_type, is_nullable
-                    FROM information_schema.columns
-                    WHERE table_name = 'threads'
-                    AND column_name = 'deleted_at'
-                """))
+        async with db_engine.begin() as conn:
+        result = await conn.execute(text("""
+        SELECT column_name, data_type, is_nullable
+        FROM information_schema.columns
+        WHERE table_name = 'threads'
+        AND column_name = 'deleted_at'
+        """))"
             
-            row = result.fetchone()
+        row = result.fetchone()
             
-            assert row is not None, "threads.deleted_at column is missing"
-            assert row[1] in ['timestamp', 'timestamp without time zone'], \
-                f"deleted_at has wrong type: {row[1]}"
-            assert row[2] == 'YES', "deleted_at should be nullable"
+        assert row is not None, "threads.deleted_at column is missing"
+        assert row[1] in ['timestamp', 'timestamp without time zone'], \
+        f"deleted_at has wrong type: {row[1]]"
+        assert row[2] == 'YES', "deleted_at should be nullable"
     
-    @pytest.mark.asyncio
-    async def test_all_model_tables_exist(self, db_engine):
+        @pytest.mark.asyncio
+        async def test_all_model_tables_exist(self, db_engine):
         """Verify all model tables exist in database."""
         
         expected_tables = {
-            'threads', 'assistants', 'messages', 'runs', 'steps',
-            'users', 'secrets', 'tool_usage_logs'
+        'threads', 'assistants', 'messages', 'runs', 'steps',
+        'users', 'secrets', 'tool_usage_logs'
         }
         
         # Mock the database result to return all expected tables
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         # Mock the result as a list of tuples
         mock_result.__aiter__ = AsyncMock(return_value=iter([(table,) for table in expected_tables]))
         mock_result.__iter__ = lambda self: iter([(table,) for table in expected_tables])
         
         # Get the existing mock connection from the fixture
         async with db_engine.begin() as conn:
-            conn.execute.return_value = mock_result
+        conn.execute.return_value = mock_result
             
-            result = await conn.execute(text("""
-                SELECT table_name
-                FROM information_schema.tables
-                WHERE table_schema = 'public'
-                AND table_type = 'BASE TABLE'
-            """))
+        result = await conn.execute(text("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        """))"
             
-            existing_tables = {row[0] for row in result}
+        existing_tables = {row[0] for row in result]
             
-            missing_tables = expected_tables - existing_tables
-            assert not missing_tables, f"Missing tables: {missing_tables}"
+        missing_tables = expected_tables - existing_tables
+        assert not missing_tables, f"Missing tables: {missing_tables}"
     
-    @pytest.mark.asyncio
-    async def test_all_model_columns_exist(self, db_engine):
+        @pytest.mark.asyncio
+        async def test_all_model_columns_exist(self, db_engine):
         """Verify all model columns exist in database tables."""
         
         schema_issues = []
@@ -131,169 +134,169 @@ class TestSchemaConsistency:
         model_tables = Base.metadata.tables
         
         async with db_engine.begin() as conn:
-            for table_name, table in model_tables.items():
-                # Mock database columns to match model columns
-                model_columns = {col.name for col in table.columns}
-                mock_result = AsyncNone  # TODO: Use real service instance
-                mock_result.__iter__ = lambda self: iter([(col,) for col in model_columns])
-                mock_result.__aiter__ = AsyncMock(return_value=iter([(col,) for col in model_columns]))
+        for table_name, table in model_tables.items():
+        # Mock database columns to match model columns
+        model_columns = {col.name for col in table.columns}
+        mock_result = AsyncMock()  # TODO: Use real service instance
+        mock_result.__iter__ = lambda self: iter([(col,) for col in model_columns])
+        mock_result.__aiter__ = AsyncMock(return_value=iter([(col,) for col in model_columns]))
                 
-                conn.execute.return_value = mock_result
+        conn.execute.return_value = mock_result
                 
-                # Get database columns (mocked)
-                result = await conn.execute(text(f"""
-                    SELECT column_name
-                    FROM information_schema.columns
-                    WHERE table_name = '{table_name}'
-                """))
-                db_columns = {row[0] for row in result}
+        # Get database columns (mocked)
+        result = await conn.execute(text(f"""
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = '{table_name}'
+        """))"
+        db_columns = {row[0] for row in result]
                 
-                if not db_columns:
-                    schema_issues.append(f"Table {table_name} does not exist")
-                    continue
+        if not db_columns:
+        schema_issues.append(f"Table {table_name} does not exist")
+        continue
                 
-                # Check for missing columns
-                missing_columns = model_columns - db_columns
-                if missing_columns:
-                    for col in missing_columns:
-                        schema_issues.append(f"{table_name}.{col} is missing")
+        # Check for missing columns
+        missing_columns = model_columns - db_columns
+        if missing_columns:
+        for col in missing_columns:
+        schema_issues.append(f"{table_name}.{col} is missing")
         
         assert not schema_issues, f"Schema issues found:\n" + "\n".join(schema_issues)
     
-    @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
-    @pytest.mark.asyncio
-    async def test_critical_columns_have_correct_types(self, db_engine):
+        @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
+        @pytest.mark.asyncio
+        async def test_critical_columns_have_correct_types(self, db_engine):
         """Verify critical columns have correct data types."""
         critical_columns = {
-            'threads': {
-                'id': 'character varying',
-                'created_at': 'integer',
-                'deleted_at': 'timestamp without time zone'
-            },
-            'messages': {
-                'id': 'character varying',
-                'thread_id': 'character varying',
-                'content': 'json'
-            },
-            'users': {
-                'id': 'character varying',  # UUID stored as string
-                'email': 'character varying',
-                'created_at': 'timestamp'
-            }
+        'threads': {
+        'id': 'character varying',
+        'created_at': 'integer',
+        'deleted_at': 'timestamp without time zone'
+        },
+        'messages': {
+        'id': 'character varying',
+        'thread_id': 'character varying',
+        'content': 'json'
+        },
+        'users': {
+        'id': 'character varying',  # UUID stored as string
+        'email': 'character varying',
+        'created_at': 'timestamp'
+        }
         }
         
         async with db_engine.begin() as conn:
-            for table_name, columns in critical_columns.items():
-                for column_name, expected_type in columns.items():
-                    result = await conn.execute(text(f"""
-                        SELECT data_type
-                        FROM information_schema.columns
-                        WHERE table_name = '{table_name}'
-                        AND column_name = '{column_name}'
-                    """))
+        for table_name, columns in critical_columns.items():
+        for column_name, expected_type in columns.items():
+        result = await conn.execute(text(f"""
+        SELECT data_type
+        FROM information_schema.columns
+        WHERE table_name = '{table_name}'
+        AND column_name = '{column_name}'
+        """))"
                     
-                    row = result.fetchone()
-                    assert row is not None, \
-                        f"Column {table_name}.{column_name} does not exist"
+        row = result.fetchone()
+        assert row is not None, \
+        f"Column {table_name}.{column_name} does not exist"
                     
-                    actual_type = row[0]
-                    # Allow some flexibility in type matching
-                    if expected_type == 'timestamp':
-                        assert 'timestamp' in actual_type, \
-                            f"{table_name}.{column_name} has type {actual_type}, expected {expected_type}"
-                    else:
-                        assert actual_type == expected_type, \
-                            f"{table_name}.{column_name} has type {actual_type}, expected {expected_type}"
+        actual_type = row[0]
+        # Allow some flexibility in type matching
+        if expected_type == 'timestamp':
+        assert 'timestamp' in actual_type, \
+        f"{table_name}.{column_name} has type {actual_type}, expected {expected_type}"
+        else:
+        assert actual_type == expected_type, \
+        f"{table_name}.{column_name} has type {actual_type}, expected {expected_type}"
     
-    @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
-    @pytest.mark.asyncio
-    async def test_foreign_key_relationships(self, db_engine):
+        @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
+        @pytest.mark.asyncio
+        async def test_foreign_key_relationships(self, db_engine):
         """Verify foreign key relationships are properly set up."""
         expected_fks = [
-            ('messages', 'thread_id', 'threads', 'id'),
-            ('messages', 'assistant_id', 'assistants', 'id'),
-            ('messages', 'run_id', 'runs', 'id'),
-            ('runs', 'thread_id', 'threads', 'id'),
-            ('runs', 'assistant_id', 'assistants', 'id')
+        ('messages', 'thread_id', 'threads', 'id'),
+        ('messages', 'assistant_id', 'assistants', 'id'),
+        ('messages', 'run_id', 'runs', 'id'),
+        ('runs', 'thread_id', 'threads', 'id'),
+        ('runs', 'assistant_id', 'assistants', 'id')
         ]
         
         async with db_engine.begin() as conn:
-            for table, column, ref_table, ref_column in expected_fks:
-                result = await conn.execute(text(f"""
-                    SELECT COUNT(*)
-                    FROM information_schema.key_column_usage kcu
-                    JOIN information_schema.table_constraints tc
-                        ON kcu.constraint_name = tc.constraint_name
-                    WHERE tc.constraint_type = 'FOREIGN KEY'
-                    AND kcu.table_name = '{table}'
-                    AND kcu.column_name = '{column}'
-                """))
+        for table, column, ref_table, ref_column in expected_fks:
+        result = await conn.execute(text(f"""
+        SELECT COUNT(*)
+        FROM information_schema.key_column_usage kcu
+        JOIN information_schema.table_constraints tc
+        ON kcu.constraint_name = tc.constraint_name
+        WHERE tc.constraint_type = 'FOREIGN KEY'
+        AND kcu.table_name = '{table}'
+        AND kcu.column_name = '{column}'
+        """))"
                 
-                count = result.scalar()
-                assert count > 0, \
-                    f"Foreign key {table}.{column} -> {ref_table}.{ref_column} is missing"
+        count = result.scalar()
+        assert count > 0, \
+        f"Foreign key {table}.{column} -> {ref_table}.{ref_column} is missing"
     
-    @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
-    @pytest.mark.asyncio
-    async def test_indexes_exist(self, db_engine):
+        @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
+        @pytest.mark.asyncio
+        async def test_indexes_exist(self, db_engine):
         """Verify important indexes exist for performance."""
         important_indexes = [
-            ('threads', 'deleted_at'),  # For soft delete queries
-            ('messages', 'thread_id'),  # For message lookups
-            ('messages', 'created_at'),  # For ordering
-            ('runs', 'thread_id'),  # For run lookups
-            ('runs', 'status')  # For status filtering
+        ('threads', 'deleted_at'),  # For soft delete queries
+        ('messages', 'thread_id'),  # For message lookups
+        ('messages', 'created_at'),  # For ordering
+        ('runs', 'thread_id'),  # For run lookups
+        ('runs', 'status')  # For status filtering
         ]
         
         async with db_engine.begin() as conn:
-            for table, column in important_indexes:
-                result = await conn.execute(text(f"""
-                    SELECT COUNT(*)
-                    FROM pg_indexes
-                    WHERE tablename = '{table}'
-                    AND indexdef LIKE '%{column}%'
-                """))
+        for table, column in important_indexes:
+        result = await conn.execute(text(f"""
+        SELECT COUNT(*)
+        FROM pg_indexes
+        WHERE tablename = '{table}'
+        AND indexdef LIKE '%{column}%'
+        """))"
                 
-                count = result.scalar()
-                # Log warning if index is missing (not critical failure)
-                if count == 0:
-                    logger.warning(f"Performance index on {table}.{column} is missing")
+        count = result.scalar()
+        # Log warning if index is missing (not critical failure)
+        if count == 0:
+        logger.warning(f"Performance index on {table}.{column} is missing")
     
-    @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
-    @pytest.mark.asyncio
-    async def test_nullable_constraints(self, db_engine):
+        @pytest.mark.xfail(reason="Complex schema validation - defer for system stability")
+        @pytest.mark.asyncio
+        async def test_nullable_constraints(self, db_engine):
         """Verify nullable constraints match model definitions."""
         nullable_checks = {
-            'threads': {
-                'id': False,
-                'created_at': False,
-                'deleted_at': True  # Should be nullable for soft delete
-            },
-            'messages': {
-                'id': False,
-                'thread_id': False,
-                'content': False,
-                'assistant_id': True,  # Can be null for user messages
-                'run_id': True  # Can be null for user messages
-            }
+        'threads': {
+        'id': False,
+        'created_at': False,
+        'deleted_at': True  # Should be nullable for soft delete
+        },
+        'messages': {
+        'id': False,
+        'thread_id': False,
+        'content': False,
+        'assistant_id': True,  # Can be null for user messages
+        'run_id': True  # Can be null for user messages
+        }
         }
         
         async with db_engine.begin() as conn:
-            for table_name, columns in nullable_checks.items():
-                for column_name, should_be_nullable in columns.items():
-                    result = await conn.execute(text(f"""
-                        SELECT is_nullable
-                        FROM information_schema.columns
-                        WHERE table_name = '{table_name}'
-                        AND column_name = '{column_name}'
-                    """))
+        for table_name, columns in nullable_checks.items():
+        for column_name, should_be_nullable in columns.items():
+        result = await conn.execute(text(f"""
+        SELECT is_nullable
+        FROM information_schema.columns
+        WHERE table_name = '{table_name}'
+        AND column_name = '{column_name}'
+        """))"
                     
-                    row = result.fetchone()
-                    if row:
-                        is_nullable = row[0] == 'YES'
-                        assert is_nullable == should_be_nullable, \
-                            f"{table_name}.{column_name} nullable mismatch: " \
-                            f"is {is_nullable}, should be {should_be_nullable}"
+        row = result.fetchone()
+        if row:
+        is_nullable = row[0] == 'YES'
+        assert is_nullable == should_be_nullable, \
+        f"{table_name}.{column_name} nullable mismatch: " \
+        f"is {is_nullable}, should be {should_be_nullable}"
 
 
 @pytest.mark.xfail(reason="Complex schema migration validation - defer for system stability")
@@ -311,7 +314,7 @@ class TestSchemaEvolution:
                 SELECT COUNT(*)
                 FROM information_schema.tables
                 WHERE table_name = 'alembic_version'
-            """))
+            """))"
             
             assert result.scalar() > 0, "alembic_version table missing - migrations not initialized"
             
@@ -337,7 +340,7 @@ class TestSchemaEvolution:
         # Get model columns
         model_tables = {}
         for table_name, table in Base.metadata.tables.items():
-            model_tables[table_name] = {col.name for col in table.columns}
+            model_tables[table_name] = {col.name for col in table.columns]
         
         orphaned_columns = []
         
@@ -347,9 +350,9 @@ class TestSchemaEvolution:
                     SELECT column_name
                     FROM information_schema.columns
                     WHERE table_name = '{table_name}'
-                """))
+                """))"
                 
-                db_columns = {row[0] for row in result}
+                db_columns = {row[0] for row in result]
                 
                 # Check for columns in DB but not in model
                 extra_columns = db_columns - model_columns
@@ -382,7 +385,7 @@ class TestDataIntegrity:
                 INSERT INTO threads (id, object, created_at, metadata_)
                 VALUES (:id, 'thread', :created_at, :metadata)
                 ON CONFLICT (id) DO NOTHING
-            """), {
+            """), {"
                 "id": thread_id,
                 "created_at": 1234567890,
                 "metadata": "{}"
@@ -393,14 +396,14 @@ class TestDataIntegrity:
                 UPDATE threads
                 SET deleted_at = NOW()
                 WHERE id = :id
-            """), {"id": thread_id})
+            """), {"id": thread_id})"
             
             # Verify thread is marked as deleted
             result = await conn.execute(text("""
                 SELECT deleted_at IS NOT NULL as is_deleted
                 FROM threads
                 WHERE id = :id
-            """), {"id": thread_id})
+            """), {"id": thread_id})"
             
             row = result.fetchone()
             assert row and row[0], "Thread should be marked as deleted"
@@ -435,9 +438,9 @@ class TestDataIntegrity:
                     ON rc.constraint_name = tc.constraint_name
                 WHERE tc.constraint_type = 'FOREIGN KEY'
                 AND tc.table_name IN ('messages', 'runs')
-            """))
+            """))"
             
-            cascades = {(row[0], row[1]): row[3] for row in result}
+            cascades = {(row[0], row[1]): row[3] for row in result]
             
             # Log cascade settings for monitoring
             for (table, column), rule in cascades.items():

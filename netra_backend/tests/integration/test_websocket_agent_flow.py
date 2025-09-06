@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Comprehensive Integration Tests: WebSocket to Agent Message Flow
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Development Velocity & System Reliability
 - Value Impact: Validates complete WebSocket-Agent integration pipeline
 - Strategic Impact: Ensures real-time AI agent communication works end-to-end
 
 Tests the complete integration flow:
-1. WebSocket message receipt
+    1. WebSocket message receipt
 2. Message validation and routing
 3. Agent handler selection
 4. Agent execution
@@ -16,7 +18,7 @@ Tests the complete integration flow:
 6. Response delivery via WebSocket
 
 Critical for ensuring the AgentMessageHandler and MessageHandlerService integration works correctly.
-"""
+""""
 
 import asyncio
 import json
@@ -41,31 +43,29 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.fixture
- def real_websocket():
+def real_websocket():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock WebSocket for testing."""
-    pass
     websocket = MockWebSocket()
     # Mock: Generic component isolation for controlled unit testing
-    websocket.accept = AsyncNone  # TODO: Use real service instance
+    websocket.accept = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    websocket.send_json = AsyncNone  # TODO: Use real service instance
+    websocket.send_json = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    websocket.send_text = AsyncNone  # TODO: Use real service instance
+    websocket.send_text = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    websocket.close = AsyncNone  # TODO: Use real service instance
+    websocket.close = AsyncMock()  # TODO: Use real service instance
     return websocket
 
 
 @pytest.fixture
- def real_supervisor():
+def real_supervisor():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock supervisor agent."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
-    supervisor = AsyncNone  # TODO: Use real service instance
+    supervisor = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     supervisor.run = AsyncMock(return_value="Agent response successful")
     supervisor.thread_id = None
@@ -75,13 +75,12 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.fixture
- def real_thread_service():
+def real_thread_service():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock thread service."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
-    thread_service = AsyncNone  # TODO: Use real service instance
+    thread_service = AsyncMock()  # TODO: Use real service instance
     
     # Mock thread object
     # Mock: Generic component isolation for controlled unit testing
@@ -99,25 +98,24 @@ logger = central_logger.get_logger(__name__)
     # Mock: Async component isolation for testing without real async operations
     thread_service.get_thread = AsyncMock(return_value=mock_thread)
     # Mock: Generic component isolation for controlled unit testing
-    thread_service.create_message = AsyncNone  # TODO: Use real service instance
+    thread_service.create_message = AsyncMock()  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     thread_service.create_run = AsyncMock(return_value=mock_run)
     # Mock: Generic component isolation for controlled unit testing
-    thread_service.mark_run_completed = AsyncNone  # TODO: Use real service instance
+    thread_service.mark_run_completed = AsyncMock()  # TODO: Use real service instance
     
     return thread_service
 
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock database session."""
-    pass
     # Mock: Session isolation for controlled testing without external state
-    db_session = AsyncNone  # TODO: Use real service instance
+    db_session = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    db_session.close = AsyncNone  # TODO: Use real service instance
+    db_session.close = AsyncMock()  # TODO: Use real service instance
     return db_session
 
 
@@ -126,7 +124,6 @@ def message_handler_service(mock_supervisor, mock_thread_service):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create MessageHandlerService with mocked dependencies."""
-    pass
     return MessageHandlerService(mock_supervisor, mock_thread_service)
 
 
@@ -135,7 +132,6 @@ def agent_handler(message_handler_service):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create AgentMessageHandler with MessageHandlerService."""
-    pass
     return AgentMessageHandler(message_handler_service)
 
 
@@ -210,15 +206,15 @@ class TestWebSocketAgentFlow:
         
         # Mock the WebSocket manager with proper attributes
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = AsyncNone  # TODO: Use real service instance
+        mock_manager = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.broadcasting = AsyncNone  # TODO: Use real service instance
+        mock_manager.broadcasting = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.broadcasting.join_room = AsyncNone  # TODO: Use real service instance
+        mock_manager.broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_error = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_error = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Mock database session creation and websocket manager
         with patch.object(agent_handler, '_get_database_session', return_value=mock_db_session):
@@ -523,11 +519,10 @@ class TestWebSocketAgentFlow:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.dependencies.get_db_dependency') as mock_dep:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_session = AsyncMock()  # TODO: Use real service instance
             
             # Mock the async generator
             async def mock_generator():
-    pass
                 yield mock_session
             
             mock_dep.return_value = mock_generator()

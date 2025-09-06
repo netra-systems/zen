@@ -1,8 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical Integration Test #1: SSO/SAML Authentication Integration for Enterprise tier ($200K+ MRR protection)
 
 Business Value Justification (BVJ):
-- Segment: Enterprise ($200K+ MRR protection) 
+    - Segment: Enterprise ($200K+ MRR protection) 
 - Business Goal: Enterprise authentication flow protecting critical revenue
 - Value Impact: Prevents auth failures that cause enterprise customer churn
 - Strategic Impact: Validates complete SSO integration across all services
@@ -12,17 +14,17 @@ PERFORMANCE TARGET: <100ms authentication flow
 COMPLIANCE: Real service interaction patterns, minimal mocking
 
 Test Scenarios:
-1. SAML assertion validation and parsing
+    1. SAML assertion validation and parsing
 2. SSO token exchange and JWT generation 
 3. Multi-tenant isolation during SSO authentication
 4. Session management and persistence post-SSO
 
 Architecture Requirements:
-- File ≤300 lines, Functions ≤8 lines
+    - File ≤300 lines, Functions ≤8 lines
 - Real service integration patterns
 - Async/await throughout
 - Comprehensive error handling
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -75,15 +77,15 @@ async def session_manager():
 async def valid_saml_assertion():
     """Valid SAML assertion for testing"""
     assertion_data = {
-        "issuer": "https://enterprise-idp.example.com",
-        "subject": "admin@enterprise.com",
-        "issued_at": datetime.now(timezone.utc).isoformat(),
-        "attributes": {
-            "enterprise_id": "ent_12345",
-            "email": "admin@enterprise.com",
-            "permissions": ["admin", "user"],
-            "mfa_verified": True
-        }
+    "issuer": "https://enterprise-idp.example.com",
+    "subject": "admin@enterprise.com",
+    "issued_at": datetime.now(timezone.utc).isoformat(),
+    "attributes": {
+    "enterprise_id": "ent_12345",
+    "email": "admin@enterprise.com",
+    "permissions": ["admin", "user"],
+    "mfa_verified": True
+    }
     }
     yield base64.b64encode(json.dumps(assertion_data).encode()).decode()
 
@@ -96,11 +98,11 @@ async def enterprise_tenant_id():
 async def db_session():
     """Database session fixture"""
     async with get_db() as session:
-        try:
-            yield session
-        finally:
-            if hasattr(session, "close"):
-                await session.close()
+    try:
+    yield session
+    finally:
+    if hasattr(session, "close"):
+    await session.close()
 
 # Core Integration Tests
 @pytest.mark.asyncio

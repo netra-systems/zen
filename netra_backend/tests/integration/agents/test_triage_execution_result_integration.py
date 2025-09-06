@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration tests for TriageSubAgent ExecutionResult handling.
 
@@ -5,21 +7,21 @@ This test suite validates the end-to-end ExecutionResult handling in the TriageS
 after the ExecutionStatus consolidation regression (commit e32a97b31). 
 
 Tests focus on:
-1. Full agent execution with proper ExecutionResult creation
+    1. Full agent execution with proper ExecutionResult creation
 2. Status handling consistency across execution paths
 3. WebSocket integration with ExecutionResult
 4. Error scenarios with proper ExecutionResult error handling
 5. Integration with other agent components
 
 Uses real components where possible to catch integration issues.
-"""
+""""
 
 import pytest
 import json
 import asyncio
 from typing import Dict, Any
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -36,21 +38,20 @@ from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock LLM manager with realistic responses."""
-    pass
     mock = Mock(spec=LLMManager)
     
     # Default successful response
     default_response = json.dumps({
-        "category": "Cost Optimization",
-        "sub_category": "Model Selection",
-        "priority": "high",
-        "complexity": "medium",
-        "confidence_score": 0.85,
-        "next_steps": ["analyze_usage", "recommend_models"]
+    "category": "Cost Optimization",
+    "sub_category": "Model Selection",
+    "priority": "high",
+    "complexity": "medium",
+    "confidence_score": 0.85,
+    "next_steps": ["analyze_usage", "recommend_models"]
     })
     
     mock.ask_llm = AsyncMock(return_value=default_response)
@@ -59,20 +60,18 @@ from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock tool dispatcher."""
-    pass
     return Mock(spec=ToolDispatcher)
 
 
 @pytest.fixture
- def real_redis_manager():
+def real_redis_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock Redis manager."""
-    pass
     mock = Mock(spec=RedisManager)
     mock.get = AsyncMock(return_value=None)  # Cache miss by default
     mock.set = AsyncMock(return_value=True)
@@ -80,16 +79,15 @@ from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture
- def real_websocket_manager():
+def real_websocket_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock WebSocket manager."""
-    mock = AsyncNone  # TODO: Use real service instance
-    pass
-    mock.send_message = AsyncNone  # TODO: Use real service instance
-    mock.send_agent_update = AsyncNone  # TODO: Use real service instance
-    mock.send_agent_thinking = AsyncNone  # TODO: Use real service instance
-    mock.send_agent_completed = AsyncNone  # TODO: Use real service instance
+    mock = AsyncMock()  # TODO: Use real service instance
+    mock.send_message = AsyncMock()  # TODO: Use real service instance
+    mock.send_agent_update = AsyncMock()  # TODO: Use real service instance
+    mock.send_agent_thinking = AsyncMock()  # TODO: Use real service instance
+    mock.send_agent_completed = AsyncMock()  # TODO: Use real service instance
     return mock
 
 
@@ -98,7 +96,6 @@ def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a TriageSubAgent instance with mocked dependencies."""
-    pass
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
 
@@ -107,9 +104,8 @@ def sample_state():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a sample DeepAgentState with a realistic request."""
-    pass
     return DeepAgentState(
-        user_request="Optimize my GPT-4 costs by reducing tokens while maintaining quality"
+    user_request="Optimize my GPT-4 costs by reducing tokens while maintaining quality"
     )
 
 
@@ -310,7 +306,6 @@ class TestTriageExecutionResultCrossAgentIntegration:
         """Test that ExecutionResult timing information is accurate."""
         # Add delay to LLM response to test timing
         async def delayed_llm_response(*args, **kwargs):
-    pass
             await asyncio.sleep(0.1)  # 100ms delay
             await asyncio.sleep(0)
     return json.dumps({"category": "Test", "priority": "low"})

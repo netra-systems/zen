@@ -1,15 +1,17 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 E2E Tests for Middleware and Hook Ordering
 
 Tests middleware and hook ordering and execution sequences:
-- Middleware execution order and coordination
+    - Middleware execution order and coordination
 - Hook execution sequence in middleware
 - Mixin composition within middleware systems
 - Security and metrics middleware interaction
 
-All functions ≤8 lines per CLAUDE.md requirements.
-Module ≤300 lines per CLAUDE.md requirements.
-"""
+All functions <=8 lines per CLAUDE.md requirements.
+Module <=300 lines per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path
@@ -201,7 +203,7 @@ class TestHookExecutionSequence:
              patch.object(middleware, '_validate_url') as url_mock, \
              patch.object(middleware, '_validate_headers') as header_mock:
             
-            await middleware._perform_security_validations(request)
+                 await middleware._perform_security_validations(request)
             
             size_mock.assert_called_once()
             url_mock.assert_called_once()
@@ -343,7 +345,7 @@ class TestMetricsMiddlewareIntegration:
         
         @metrics_middleware.track_agent_operation()
         @pytest.mark.asyncio
-        async def test_operation():
+    async def test_operation():
             return "success"
         
         # Verify decorator was applied

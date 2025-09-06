@@ -4,7 +4,7 @@ This test ensures all expected agents are properly registered and available.
 
 FIVE WHYS ROOT CAUSE FIX: This test addresses the process gap (WHY #4) where
 agent registration failures were not detected during testing.
-"""
+""""
 
 import pytest
 import logging
@@ -77,7 +77,7 @@ class TestAgentRegistrationValidation:
             f"Available agents: {sorted(available_agents)}"
         )
         
-        logger.info(f"✅ All {len(self.CRITICAL_AGENTS)} critical agents registered")
+        logger.info(f" All {len(self.CRITICAL_AGENTS)} critical agents registered")
     
     def test_agent_class_retrieval(self):
         """Test that agent classes can be retrieved from registry."""
@@ -95,13 +95,13 @@ class TestAgentRegistrationValidation:
             # Verify it's a class (not an instance)
             assert isinstance(agent_class, type), f"Retrieved object for {agent_name} is not a class"
             
-            logger.info(f"✅ Retrieved class for {agent_name}: {agent_class.__name__}")
+            logger.info(f" Retrieved class for {agent_name}: {agent_class.__name__}")
     
     def test_synthetic_data_agent_registration(self):
         """
         Specific test for synthetic_data agent registration.
         This addresses the exact error from the Five Whys analysis.
-        """
+        """"
         registry = get_agent_class_registry()
         
         # Ensure registry is initialized
@@ -136,7 +136,7 @@ class TestAgentRegistrationValidation:
             f"Wrong class registered for synthetic_data: {agent_class.__name__}"
         )
         
-        logger.info(f"✅ synthetic_data agent properly registered: {agent_class}")
+        logger.info(f" synthetic_data agent properly registered: {agent_class}")
     
     def test_agent_metadata_completeness(self):
         """Test that all registered agents have complete metadata."""
@@ -165,7 +165,7 @@ class TestAgentRegistrationValidation:
             f"Agents with incomplete metadata:\n" + "\n".join(incomplete_metadata)
         )
         
-        logger.info("✅ All agents have complete metadata")
+        logger.info(" All agents have complete metadata")
     
     def test_registry_health_status(self):
         """Test that the registry reports healthy status."""
@@ -178,17 +178,17 @@ class TestAgentRegistrationValidation:
         stats = registry.get_registry_stats()
         
         assert stats['health_status'] == 'healthy', (
-            f"Registry health check failed: {stats['health_status']}\n"
+            f"Registry health check failed: {stats['health_status'}]\n"
             f"Stats: {stats}"
         )
         
-        logger.info(f"✅ Registry health status: {stats['health_status']}")
+        logger.info(f" Registry health status: {stats['health_status'}]")
     
     def test_no_import_errors_during_registration(self):
         """
         Test that agent registration completes without critical import errors.
         This specifically addresses the opentelemetry import issue.
-        """
+        """"
         import sys
         from io import StringIO
         import contextlib
@@ -222,7 +222,7 @@ class TestAgentRegistrationValidation:
             # Ignore opentelemetry errors as they're handled gracefully
             pytest.fail(f"Critical import errors during registration:\n{errors}")
         
-        logger.info("✅ No critical import errors during agent registration")
+        logger.info(" No critical import errors during agent registration")
 
 
 if __name__ == "__main__":

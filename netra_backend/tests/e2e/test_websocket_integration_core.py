@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Core Tests - Split from test_websocket_integration.py"""
 
 from netra_backend.app.websocket_core import WebSocketManager
@@ -76,7 +78,6 @@ from netra_backend.app.websocket_core.handlers import (
 #     return MockWebSocket()
 
 @pytest.fixture
-
 def connection_manager() -> ConnectionManager:
 
     """Create connection manager for testing."""
@@ -84,7 +85,6 @@ def connection_manager() -> ConnectionManager:
     return get_websocket_manager()
 
 @pytest.fixture
-
 def ws_manager() -> WebSocketManager:
 
     """Create WebSocket manager for testing."""
@@ -92,20 +92,19 @@ def ws_manager() -> WebSocketManager:
     return WebSocketManager()
 
 @pytest.fixture
-
 def sample_message() -> Dict[str, Any]:
 
     """Create sample WebSocket message."""
 
     return {
 
-        "type": "agent_request",
+    "type": "agent_request",
 
-        "content": "What is the status of my optimization project?",
+    "content": "What is the status of my optimization project?",
 
-        "thread_id": "thread_123",
+    "thread_id": "thread_123",
 
-        "user_id": "user_123"
+    "user_id": "user_123"
 
     }
 

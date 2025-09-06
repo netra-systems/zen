@@ -1,22 +1,24 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Microservice Dependency Startup Sequence Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Platform Stability, Zero-Downtime Deployments
 - Value Impact: Ensures correct service orchestration preventing cascading failures that render platform unusable
 - Strategic/Revenue Impact: Prevents cascade failures affecting $18K/month infrastructure costs. 
   Enterprise SLAs require 99.9% uptime - incorrect startup order causes complete platform unavailability.
 
 Tests comprehensive microservice startup orchestration:
-- Auth Service → Main Backend → Frontend dependency order
+    - Auth Service → Main Backend → Frontend dependency order
 - Service health check dependencies
 - Graceful handling of delayed service startup
 - Service discovery and registration timing
 - Recovery from partial startup failures
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -58,7 +60,7 @@ def docker_integration_available() -> bool:
     
     Returns False unless DOCKER_INTEGRATION_TESTS environment variable is set,
     ensuring these resource-intensive tests only run in appropriate environments.
-    """
+    """"
     import os
     
     # Only enable Docker integration tests if explicitly requested
@@ -255,7 +257,7 @@ class StartupSequenceOrchestrator:
     """Orchestrates microservice startup sequence for testing."""
     
     def __init__(self):
-        self.services: Dict[str, MicroserviceContainer] = {}
+        self.services: Dict[str, MicroserviceContainer] = {]
         self.startup_order: List[str] = []
         self.startup_events: List[Dict[str, Any]] = []
         # Only create Docker client if Docker is available
@@ -432,7 +434,7 @@ class TestMicroserviceDependencyStartupSequence:
     
     Validates Auth → Backend → Frontend startup order and
     dependency resolution in containerized environment.
-    """
+    """"
     
     @pytest.fixture
     async def orchestrator(self):
@@ -444,31 +446,30 @@ class TestMicroserviceDependencyStartupSequence:
         
         await orchestrator.teardown_test_environment()
     
-    @pytest.fixture
-    async def smoke_orchestrator(self):
+        @pytest.fixture
+        async def smoke_orchestrator(self):
         """Create a lightweight orchestrator for smoke tests that doesn't require Docker."""
         orchestrator = StartupSequenceOrchestrator()
         
         # Mock the Docker client and test network setup for smoke tests
         class MockDockerClient:
-            def ping(self):
-                return True
+        def ping(self):
+        return True
                 
-            class MockNetworks:
-                def create(self, name, driver):
-                    class MockNetwork:
-                        def __init__(self, network_name):
-                            self.name = network_name
-                        def remove(self):
-                            pass
-                    return MockNetwork(name)
+        class MockNetworks:
+        def create(self, name, driver):
+        class MockNetwork:
+        def __init__(self, network_name):
+        self.name = network_name
+        def remove(self):
+        return MockNetwork(name)
             
-            networks = MockNetworks()
+        networks = MockNetworks()
         
         orchestrator.docker_client = MockDockerClient()
         orchestrator.test_network = orchestrator.docker_client.networks.create(
-            name="mock_test_network",
-            driver="bridge"
+        name="mock_test_network",
+        driver="bridge"
         )
         
         yield orchestrator
@@ -477,39 +478,38 @@ class TestMicroserviceDependencyStartupSequence:
         orchestrator.startup_order.clear()
         orchestrator.services.clear()
     
-    @pytest.fixture
-    def microservices(self):
+        @pytest.fixture
+        def microservices(self):
         """Create microservice containers with dependencies."""
         return {
-            "auth_service": MicroserviceContainer(
-                name="auth_service",
-                image="netra-auth-service:test",
-                port=8080,
-                depends_on=[]
-            ),
-            "backend": MicroserviceContainer(
-                name="backend",
-                image="gcr.io/netra-staging/netra-backend-staging:latest",
-                port=8000,
-                depends_on=["auth_service"]
-            ),
-            "frontend": MicroserviceContainer(
-                name="frontend",
-                image="gcr.io/netra-staging/netra-frontend-staging:latest",
-                port=3000,
-                depends_on=["backend", "auth_service"]
-            )
+        "auth_service": MicroserviceContainer(
+        name="auth_service",
+        image="netra-auth-service:test",
+        port=8080,
+        depends_on=[]
+        ),
+        "backend": MicroserviceContainer(
+        name="backend",
+        image="gcr.io/netra-staging/netra-backend-staging:latest",
+        port=8000,
+        depends_on=["auth_service"]
+        ),
+        "frontend": MicroserviceContainer(
+        name="frontend",
+        image="gcr.io/netra-staging/netra-frontend-staging:latest",
+        port=3000,
+        depends_on=["backend", "auth_service"]
+        )
         }
     
-    def _mock_container_images(self):
+        def _mock_container_images(self):
         """Mock container images for testing when real images unavailable."""
         # In production tests, use real service images
         # For unit testing, mock the container behavior
-        pass
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_correct_startup_dependency_order(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_correct_startup_dependency_order(self, orchestrator, microservices):
         """
         Test services start in correct dependency order.
         
@@ -518,10 +518,10 @@ class TestMicroserviceDependencyStartupSequence:
         - Backend waits for auth service
         - Frontend waits for both backend and auth
         - Startup completes successfully
-        """
+        """"
         # Register all services
         for service in microservices.values():
-            orchestrator.register_service(service)
+        orchestrator.register_service(service)
         
         # Start services with dependency resolution
         start_time = time.time()
@@ -533,7 +533,7 @@ class TestMicroserviceDependencyStartupSequence:
         
         # Validate correct startup order
         assert await orchestrator.validate_startup_order(), \
-            "Services did not start in correct dependency order"
+        "Services did not start in correct dependency order"
         
         # Validate startup performance
         assert total_time < 60, f"Startup took {total_time:.2f}s (max: 60s)"
@@ -546,9 +546,9 @@ class TestMicroserviceDependencyStartupSequence:
         health_status = await orchestrator.cascade_health_check()
         assert all(health_status.values()), f"Some services unhealthy: {health_status}"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_backend_waits_for_auth_service_availability(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_backend_waits_for_auth_service_availability(self, orchestrator, microservices):
         """
         Test backend waits for auth service to be healthy before starting.
         
@@ -556,7 +556,7 @@ class TestMicroserviceDependencyStartupSequence:
         - Backend does not start if auth is unavailable
         - Backend retries until auth is available
         - Proper timeout handling
-        """
+        """"
         # Only register backend and auth
         auth_service = microservices["auth_service"]
         backend_service = microservices["backend"]
@@ -566,17 +566,17 @@ class TestMicroserviceDependencyStartupSequence:
         
         # Simulate delayed auth service startup
         async def delayed_auth_start():
-            await asyncio.sleep(5)  # 5 second delay
-            return await auth_service.start(
-                orchestrator.test_network.name if orchestrator.test_network else "bridge"
-            )
+        await asyncio.sleep(5)  # 5 second delay
+        return await auth_service.start(
+        orchestrator.test_network.name if orchestrator.test_network else "bridge"
+        )
         
         # Start auth with delay and backend immediately
         auth_task = asyncio.create_task(delayed_auth_start())
         backend_task = asyncio.create_task(
-            backend_service.start(
-                orchestrator.test_network.name if orchestrator.test_network else "bridge"
-            )
+        backend_service.start(
+        orchestrator.test_network.name if orchestrator.test_network else "bridge"
+        )
         )
         
         # Wait for both with timeout
@@ -584,18 +584,18 @@ class TestMicroserviceDependencyStartupSequence:
         
         # Validate auth started first
         auth_events = [e for e in auth_service.startup_events 
-                      if e["event_type"] == "startup_completed"]
+        if e["event_type"] == "startup_completed"]
         backend_events = [e for e in backend_service.startup_events 
-                         if e["event_type"] == "startup_completed"]
+        if e["event_type"] == "startup_completed"]
         
         if auth_events and backend_events:
-            auth_time = datetime.fromisoformat(auth_events[0]["timestamp"])
-            backend_time = datetime.fromisoformat(backend_events[0]["timestamp"])
-            assert auth_time < backend_time, "Backend started before auth service"
+        auth_time = datetime.fromisoformat(auth_events[0]["timestamp"])
+        backend_time = datetime.fromisoformat(backend_events[0]["timestamp"])
+        assert auth_time < backend_time, "Backend started before auth service"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_graceful_shutdown_on_dependency_failure(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_graceful_shutdown_on_dependency_failure(self, orchestrator, microservices):
         """
         Test graceful shutdown when dependency fails.
         
@@ -603,10 +603,10 @@ class TestMicroserviceDependencyStartupSequence:
         - Dependent services detect failure
         - Cascade shutdown is orderly
         - Resources are cleaned up properly
-        """
+        """"
         # Register and start all services
         for service in microservices.values():
-            orchestrator.register_service(service)
+        orchestrator.register_service(service)
         
         success = await orchestrator.start_services_with_dependencies()
         assert success, "Initial startup failed"
@@ -627,9 +627,9 @@ class TestMicroserviceDependencyStartupSequence:
         shutdown_success = await orchestrator.teardown_test_environment()
         assert shutdown_success, "Graceful shutdown failed"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_health_check_cascading_during_startup(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_health_check_cascading_during_startup(self, orchestrator, microservices):
         """
         Test health check cascading during startup phase.
         
@@ -637,22 +637,22 @@ class TestMicroserviceDependencyStartupSequence:
         - Health checks propagate through dependencies
         - Services wait for dependencies to be healthy
         - Health status is accurately reported
-        """
+        """"
         for service in microservices.values():
-            orchestrator.register_service(service)
+        orchestrator.register_service(service)
         
         # Track health check events
         health_events = []
         
         async def monitor_health():
-            """Monitor health status during startup."""
-            while len(orchestrator.startup_order) < 3:
-                status = await orchestrator.cascade_health_check()
-                health_events.append({
-                    "timestamp": datetime.now(),
-                    "status": status
-                })
-                await asyncio.sleep(1)
+        """Monitor health status during startup."""
+        while len(orchestrator.startup_order) < 3:
+        status = await orchestrator.cascade_health_check()
+        health_events.append({
+        "timestamp": datetime.now(),
+        "status": status
+        })
+        await asyncio.sleep(1)
         
         # Start monitoring and services concurrently
         monitor_task = asyncio.create_task(monitor_health())
@@ -668,9 +668,9 @@ class TestMicroserviceDependencyStartupSequence:
         final_status = await orchestrator.cascade_health_check()
         assert all(final_status.values()), "Not all services healthy after startup"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_service_discovery_and_registration(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_service_discovery_and_registration(self, orchestrator, microservices):
         """
         Test service discovery and registration during startup.
         
@@ -678,9 +678,9 @@ class TestMicroserviceDependencyStartupSequence:
         - Services register themselves correctly
         - Service discovery works across dependencies
         - Registration timing is correct
-        """
+        """"
         for service in microservices.values():
-            orchestrator.register_service(service)
+        orchestrator.register_service(service)
         
         # Verify initial registration
         assert len(orchestrator.services) == 3, "Not all services registered"
@@ -691,16 +691,16 @@ class TestMicroserviceDependencyStartupSequence:
         # Verify services can discover each other
         # In real implementation, would test actual service discovery mechanism
         for service_name, service in orchestrator.services.items():
-            # Check service knows about its dependencies
-            for dep in service.depends_on:
-                assert dep in orchestrator.services, f"{service_name} cannot find dependency {dep}"
-                dep_service = orchestrator.services[dep]
-                assert dep_service.state == ServiceState.HEALTHY, \
-                    f"Dependency {dep} not healthy for {service_name}"
+        # Check service knows about its dependencies
+        for dep in service.depends_on:
+        assert dep in orchestrator.services, f"{service_name} cannot find dependency {dep}"
+        dep_service = orchestrator.services[dep]
+        assert dep_service.state == ServiceState.HEALTHY, \
+        f"Dependency {dep} not healthy for {service_name}"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_startup_timeout_handling(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_startup_timeout_handling(self, orchestrator, microservices):
         """
         Test handling of startup timeouts.
         
@@ -708,18 +708,18 @@ class TestMicroserviceDependencyStartupSequence:
         - Services timeout if dependencies don't start
         - Timeout errors are properly reported
         - System remains stable after timeout
-        """
+        """"
         # Create a service that will never become healthy
         stuck_auth = MicroserviceContainer(
-            name="auth_service",
-            image="netra-auth-service:test",
-            port=8080,
-            depends_on=[]
+        name="auth_service",
+        image="netra-auth-service:test",
+        port=8080,
+        depends_on=[]
         )
         
         # Override health check to always fail
         async def always_fail_health():
-            return False
+        return False
         stuck_auth.health_check = always_fail_health
         
         orchestrator.register_service(stuck_auth)
@@ -730,10 +730,10 @@ class TestMicroserviceDependencyStartupSequence:
         
         # This should fail due to auth never becoming healthy
         with pytest.raises(asyncio.TimeoutError):
-            await asyncio.wait_for(
-                orchestrator.start_services_with_dependencies(),
-                timeout=10
-            )
+        await asyncio.wait_for(
+        orchestrator.start_services_with_dependencies(),
+        timeout=10
+        )
         
         duration = time.time() - start_time
         assert duration < 15, "Timeout took too long"
@@ -741,9 +741,9 @@ class TestMicroserviceDependencyStartupSequence:
         # Verify proper cleanup
         assert stuck_auth.state == ServiceState.FAILED or stuck_auth.state == ServiceState.UNHEALTHY
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_startup_retry_mechanism_on_transient_failures(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_startup_retry_mechanism_on_transient_failures(self, orchestrator, microservices):
         """
         Test startup retry mechanism for transient failures.
         
@@ -751,22 +751,22 @@ class TestMicroserviceDependencyStartupSequence:
         - Services retry on transient failures
         - Exponential backoff is applied
         - Maximum retry limit is respected
-        """
+        """"
         # Create auth service that fails first 2 attempts
         attempt_count = 0
         
         class RetryableAuthService(MicroserviceContainer):
-            async def health_check(self):
-                nonlocal attempt_count
-                attempt_count += 1
-                # Fail first 2 attempts, succeed on 3rd
-                return attempt_count >= 3
+        async def health_check(self):
+        nonlocal attempt_count
+        attempt_count += 1
+        # Fail first 2 attempts, succeed on 3rd
+        return attempt_count >= 3
         
         retry_auth = RetryableAuthService(
-            name="auth_service",
-            image="netra-auth-service:test",
-            port=8080,
-            depends_on=[]
+        name="auth_service",
+        image="netra-auth-service:test",
+        port=8080,
+        depends_on=[]
         )
         
         orchestrator.register_service(retry_auth)
@@ -781,12 +781,12 @@ class TestMicroserviceDependencyStartupSequence:
         
         # Verify retry events were recorded
         retry_events = [e for e in orchestrator.startup_events 
-                       if "retry" in e.get("event_type", "").lower()]
+        if "retry" in e.get("event_type", "").lower()]
         assert len(retry_events) > 0, "No retry events recorded"
     
-    @pytest.mark.asyncio
-    @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
-    async def test_partial_failure_recovery(self, orchestrator, microservices):
+        @pytest.mark.asyncio
+        @pytest.mark.skipif(not docker_integration_available(), reason="Docker integration not available or images missing")
+        async def test_partial_failure_recovery(self, orchestrator, microservices):
         """
         Test recovery from partial startup failures.
         
@@ -794,10 +794,10 @@ class TestMicroserviceDependencyStartupSequence:
         - System can recover from partial failures
         - Failed services can be restarted
         - Dependencies are re-validated after recovery
-        """
+        """"
         # Start all services successfully first
         for service in microservices.values():
-            orchestrator.register_service(service)
+        orchestrator.register_service(service)
         
         await orchestrator.start_services_with_dependencies()
         
@@ -813,7 +813,7 @@ class TestMicroserviceDependencyStartupSequence:
         backend = orchestrator.services["backend"]
         backend.state = ServiceState.UNINITIALIZED  # Reset state
         recovery_success = await backend.start(
-            orchestrator.test_network.name if orchestrator.test_network else "bridge"
+        orchestrator.test_network.name if orchestrator.test_network else "bridge"
         )
         
         assert recovery_success, "Backend recovery failed"
@@ -824,60 +824,60 @@ class TestMicroserviceDependencyStartupSequence:
         
         # Frontend might need restart too depending on implementation
         if not health_after["frontend"]:
-            frontend = orchestrator.services["frontend"]
-            frontend.state = ServiceState.UNINITIALIZED
-            await frontend.start(
-                orchestrator.test_network.name if orchestrator.test_network else "bridge"
-            )
+        frontend = orchestrator.services["frontend"]
+        frontend.state = ServiceState.UNINITIALIZED
+        await frontend.start(
+        orchestrator.test_network.name if orchestrator.test_network else "bridge"
+        )
     
-    @pytest.mark.smoke
-    @pytest.mark.asyncio
-    async def test_basic_startup_smoke_test(self, smoke_orchestrator):
+        @pytest.mark.smoke
+        @pytest.mark.asyncio
+        async def test_basic_startup_smoke_test(self, smoke_orchestrator):
         """
         Quick smoke test for basic startup functionality.
         
         Should complete in <30 seconds for CI/CD.
         Tests the orchestration logic without requiring actual Docker containers.
-        """
+        """"
         start_time = time.time()
         
         # Create minimal service set
         auth = MicroserviceContainer(
-            name="auth_service",
-            image="netra-auth-service:test",
-            port=8080,
-            depends_on=[]
+        name="auth_service",
+        image="netra-auth-service:test",
+        port=8080,
+        depends_on=[]
         )
         
         smoke_orchestrator.register_service(auth)
         
         # Mock the Docker container operations for smoke test
         async def mock_start(network_name: str = "test_network") -> bool:
-            """Mock container start that simulates successful startup."""
-            start_time = time.time()
-            auth.state = ServiceState.STARTING
-            auth._record_event("startup_initiated")
+        """Mock container start that simulates successful startup."""
+        start_time = time.time()
+        auth.state = ServiceState.STARTING
+        auth._record_event("startup_initiated")
             
-            # Simulate startup delay
-            await asyncio.sleep(0.1)
+        # Simulate startup delay
+        await asyncio.sleep(0.1)
             
-            auth.state = ServiceState.HEALTHY
-            auth.startup_time = time.time() - start_time
-            auth._record_event("startup_completed", {"duration": auth.startup_time})
-            return True
+        auth.state = ServiceState.HEALTHY
+        auth.startup_time = time.time() - start_time
+        auth._record_event("startup_completed", {"duration": auth.startup_time})
+        return True
         
         async def mock_stop() -> bool:
-            """Mock container stop."""
-            auth.state = ServiceState.STOPPING
-            auth._record_event("shutdown_initiated")
-            await asyncio.sleep(0.1)
-            auth.state = ServiceState.STOPPED
-            auth._record_event("shutdown_completed")
-            return True
+        """Mock container stop."""
+        auth.state = ServiceState.STOPPING
+        auth._record_event("shutdown_initiated")
+        await asyncio.sleep(0.1)
+        auth.state = ServiceState.STOPPED
+        auth._record_event("shutdown_completed")
+        return True
         
         async def mock_health():
-            """Mock health check that returns healthy."""
-            return auth.state == ServiceState.HEALTHY
+        """Mock health check that returns healthy."""
+        return auth.state == ServiceState.HEALTHY
         
         # Override methods for smoke test
         auth.start = mock_start

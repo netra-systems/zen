@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Database Transaction Coordination L3 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Data Consistency - Ensure ACID properties across dual-database architecture
 - Value Impact: Prevents data inconsistencies that could impact billing and analytics
 - Strategic Impact: Critical for enterprise customers requiring audit trails
@@ -11,7 +13,7 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 - Tests distributed transaction coordination with rollback scenarios
 - Validates data consistency across both databases
 - Tests failure recovery and compensating transactions
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -229,7 +231,7 @@ class DatabaseTransactionCoordinatorL3:
                 status VARCHAR(20) DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-        """
+        """"
         
         async with get_postgres_session() as session:
             for statement in postgres_schema.split(';'):
@@ -256,7 +258,7 @@ class DatabaseTransactionCoordinatorL3:
                 timestamp DateTime
             ) ENGINE = MergeTree()
             ORDER BY (session_id, timestamp);
-        """
+        """"
         
         async with get_clickhouse_client() as client:
             for statement in clickhouse_schema.split(';'):
@@ -265,9 +267,9 @@ class DatabaseTransactionCoordinatorL3:
     
     def create_test_transaction_data(self, scenario: str) -> TransactionTestData:
         """Create test data for transaction scenarios."""
-        transaction_id = f"test_tx_{uuid.uuid4().hex[:12]}"
-        user_id = f"user_{uuid.uuid4().hex[:8]}"
-        session_id = f"session_{uuid.uuid4().hex[:8]}"
+        transaction_id = f"test_tx_{uuid.uuid4().hex[:12]]"
+        user_id = f"user_{uuid.uuid4().hex[:8]]"
+        session_id = f"session_{uuid.uuid4().hex[:8]]"
         
         scenarios = {
             "dual_write_success": TransactionTestData(
@@ -288,14 +290,14 @@ class DatabaseTransactionCoordinatorL3:
                 },
                 clickhouse_data={
                     "activity_event": {
-                        "event_id": f"event_{uuid.uuid4().hex[:8]}",
+                        "event_id": f"event_{uuid.uuid4().hex[:8]]",
                         "user_id": user_id,
                         "event_type": "session_start",
                         "timestamp": datetime.now(timezone.utc),
                         "metadata": json.dumps({"session_id": session_id})
                     },
                     "metric": {
-                        "metric_id": f"metric_{uuid.uuid4().hex[:8]}",
+                        "metric_id": f"metric_{uuid.uuid4().hex[:8]]",
                         "session_id": session_id,
                         "metric_type": "initial_cost",
                         "value": 1000.0,
@@ -321,7 +323,7 @@ class DatabaseTransactionCoordinatorL3:
                 },
                 clickhouse_data={
                     "activity_event": {
-                        "event_id": f"event_{uuid.uuid4().hex[:8]}",
+                        "event_id": f"event_{uuid.uuid4().hex[:8]]",
                         "user_id": user_id,
                         "event_type": "session_start",
                         "timestamp": datetime.now(timezone.utc),
@@ -402,7 +404,7 @@ class DatabaseTransactionCoordinatorL3:
                     INSERT INTO users (user_id, email, tier, created_at)
                     VALUES (%(user_id)s, %(email)s, %(tier)s, CURRENT_TIMESTAMP)
                     RETURNING user_id
-                """
+                """"
                 result = await tx.postgres_session.execute(query, user_data)
                 results.append({
                     "success": True,
@@ -417,7 +419,7 @@ class DatabaseTransactionCoordinatorL3:
                     INSERT INTO optimization_sessions (session_id, user_id, status, created_at)
                     VALUES (%(session_id)s, %(user_id)s, %(status)s, CURRENT_TIMESTAMP)
                     RETURNING session_id
-                """
+                """"
                 result = await tx.postgres_session.execute(query, session_data)
                 results.append({
                     "success": True,
@@ -446,7 +448,7 @@ class DatabaseTransactionCoordinatorL3:
                     INSERT INTO user_activity_events 
                     (event_id, user_id, event_type, timestamp, metadata)
                     VALUES (%(event_id)s, %(user_id)s, %(event_type)s, %(timestamp)s, %(metadata)s)
-                """
+                """"
                 await tx.clickhouse_client.execute_query(query, event_data)
                 results.append({
                     "success": True,
@@ -461,7 +463,7 @@ class DatabaseTransactionCoordinatorL3:
                     INSERT INTO optimization_metrics
                     (metric_id, session_id, metric_type, value, timestamp)
                     VALUES (%(metric_id)s, %(session_id)s, %(metric_type)s, %(value)s, %(timestamp)s)
-                """
+                """"
                 await tx.clickhouse_client.execute_query(query, metric_data)
                 results.append({
                     "success": True,
@@ -514,7 +516,7 @@ class DatabaseTransactionCoordinatorL3:
                     FROM users u 
                     LEFT JOIN optimization_sessions os ON u.user_id = os.user_id
                     WHERE u.user_id = %(user_id)s
-                """
+                """"
                 result = await session.execute(query, {"user_id": user_id})
                 rows = result.fetchall()
                 
@@ -533,7 +535,7 @@ class DatabaseTransactionCoordinatorL3:
                     SELECT COUNT(*) as event_count
                     FROM user_activity_events 
                     WHERE user_id = %(user_id)s
-                """
+                """"
                 result = await client.fetch(query, {"user_id": user_id})
                 
                 return result[0]["event_count"] > 0 if result else False
@@ -608,7 +610,7 @@ async def test_dual_write_success_l3(db_transaction_coordinator_l3):
     result = await db_transaction_coordinator_l3.execute_distributed_transaction(test_data)
     
     # Validate transaction success
-    assert result["success"] is True, f"Transaction failed: {result.get('error')}"
+    assert result["success"] is True, f"Transaction failed: {result.get('error')]"
     assert result["execution_time"] < 5.0, "Transaction took too long"
     assert result["postgres_operations"] >= 2, "Insufficient PostgreSQL operations"
     assert result["clickhouse_operations"] >= 2, "Insufficient ClickHouse operations"

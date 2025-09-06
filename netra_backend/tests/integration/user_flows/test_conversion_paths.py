@@ -1,20 +1,22 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 User conversion path testing across all tiers.
 Critical for protecting the entire revenue funnel.
 
 BVJ (Business Value Justification):
-1. Segment: All tiers (Complete conversion funnel)
+    1. Segment: All tiers (Complete conversion funnel)
 2. Business Goal: Protect $570K MRR by ensuring smooth tier transitions
 3. Value Impact: Validates upgrade triggers and conversion mechanisms
 4. Strategic Impact: Optimizes revenue funnel and reduces churn
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -115,7 +117,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     # Simulate enterprise requirements
     response = await async_client.post(
         "/api/organizations/create",
-        json={"name": "Enterprise Corp", "compliance_requirements": ["SOC2"]},
+        json={"name": "Enterprise Corp", "compliance_requirements": ["SOC2"]],
         headers=headers
     )
     # Should prompt for Enterprise upgrade

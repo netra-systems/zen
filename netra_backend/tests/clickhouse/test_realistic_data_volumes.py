@@ -1,7 +1,9 @@
+import asyncio
+
 """
 Realistic Data Volumes Tests
 Test with realistic data volumes
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -42,7 +44,7 @@ class TestRealisticDataVolumes:
         HAVING event_count > 1000
         ORDER BY hour DESC
         LIMIT 10000
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(query)
         is_valid, error = validate_clickhouse_query(fixed_query)
@@ -67,7 +69,7 @@ class TestRealisticDataVolumes:
             sum(output_tokens) as total_output_tokens
         FROM llm_events
         GROUP BY hour, model, workload_type
-        """
+        """"
         
         # Materialized view syntax should be valid
         assert "CREATE MATERIALIZED VIEW" in view_query
@@ -88,7 +90,7 @@ class TestRealisticDataVolumes:
             AND workload_type IN ('rag_pipeline', 'simple_chat')
         GROUP BY month, workload_type
         ORDER BY month DESC, workload_type
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(partition_query)
         assert is_valid, f"Partition pruning query failed: {error}"
@@ -118,7 +120,7 @@ class TestRealisticDataVolumes:
         HAVING daily_requests > 10
         ORDER BY total_duration DESC
         LIMIT 100000
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(high_cardinality_query)
         assert is_valid, f"High cardinality aggregation failed: {error}"
@@ -167,7 +169,7 @@ class TestRealisticDataVolumes:
             daily_samples / (24 * 60) as avg_samples_per_minute
         FROM day_metrics
         ORDER BY day DESC
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(downsampling_query)
         is_valid, error = validate_clickhouse_query(fixed_query)
@@ -230,7 +232,7 @@ class TestRealisticDataVolumes:
         LEFT JOIN user_errors ue ON up.user_id = ue.user_id
         ORDER BY value_score DESC
         LIMIT 10000
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(complex_join_query)
         assert is_valid, f"Complex join performance query failed: {error}"
@@ -289,7 +291,7 @@ class TestRealisticDataVolumes:
             END as anomaly_status
         FROM sliding_window_metrics
         ORDER BY time_window DESC, workload_type
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(streaming_query)
         assert is_valid, f"Streaming aggregation simulation failed: {error}"

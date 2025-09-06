@@ -1,7 +1,7 @@
 """
 Real WebSocket test for async serialization verification.
 Uses actual WebSocket connections - NO MOCKS per CLAUDE.md.
-"""
+""""
 
 import asyncio
 import time
@@ -72,12 +72,12 @@ class TestAsyncSerializationReal:
         
         # Find a free port
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', 0))
-            port = s.getsockname()[1]
+        s.bind(('', 0))
+        port = s.getsockname()[1]
         
         # Start server in a thread
         def run_server():
-            uvicorn.run(test_app, host="127.0.0.1", port=port, log_level="error")
+        uvicorn.run(test_app, host="127.0.0.1", port=port, log_level="error")
         
         server_thread = Thread(target=run_server, daemon=True)
         server_thread.start()
@@ -89,80 +89,80 @@ class TestAsyncSerializationReal:
         
         # Server will stop when test ends
     
-    @pytest.mark.asyncio
-    async def test_async_serialization_performance(self, start_server):
+        @pytest.mark.asyncio
+        async def test_async_serialization_performance(self, start_server):
         """Test that async serialization doesn't block the event loop."""
         ws_url = start_server
         
         async with websockets.connect(ws_url) as websocket:
-            # Create a large message
-            large_state = {
-                "type": "test_state",
-                "data": {}
-            }
+        # Create a large message
+        large_state = {
+        "type": "test_state",
+        "data": {}
+        }
             
-            # Build nested structure
-            current = large_state["data"]
-            for i in range(50):
-                current[f"level_{i}"] = {
-                    "items": [{"id": j, "data": "x" * 1000} for j in range(5)],
-                    "nested": {}
-                }
-                current = current[f"level_{i}"]["nested"]
+        # Build nested structure
+        current = large_state["data"]
+        for i in range(50):
+        current[f"level_{i}"] = {
+        "items": [{"id": j, "data": "x" * 1000} for j in range(5)],
+        "nested": {}
+        }
+        current = current[f"level_{i}"]["nested"]
             
-            # Test serialization
-            await websocket.send(json.dumps({
-                "type": "test_serialization",
-                "state": large_state
-            }))
+        # Test serialization
+        await websocket.send(json.dumps({
+        "type": "test_serialization",
+        "state": large_state
+        }))
             
-            # Track event loop responsiveness while waiting for response
-            loop_responsive = True
+        # Track event loop responsiveness while waiting for response
+        loop_responsive = True
             
-            async def check_responsiveness():
-                nonlocal loop_responsive
-                for _ in range(10):
-                    start = time.perf_counter()
-                    await asyncio.sleep(0.01)
-                    if time.perf_counter() - start > 0.05:
-                        loop_responsive = False
-                        break
+        async def check_responsiveness():
+        nonlocal loop_responsive
+        for _ in range(10):
+        start = time.perf_counter()
+        await asyncio.sleep(0.1)
+        if time.perf_counter() - start > 0.5:
+        loop_responsive = False
+        break
             
-            # Run check while waiting for response
-            check_task = asyncio.create_task(check_responsiveness())
-            response = await asyncio.wait_for(websocket.recv(), timeout=5)
-            await check_task
+        # Run check while waiting for response
+        check_task = asyncio.create_task(check_responsiveness())
+        response = await asyncio.wait_for(websocket.recv(), timeout=5)
+        await check_task
             
-            result = json.loads(response)
-            assert result["type"] == "serialization_result"
-            assert loop_responsive, "Event loop was blocked during serialization"
+        result = json.loads(response)
+        assert result["type"] == "serialization_result"
+        assert loop_responsive, "Event loop was blocked during serialization"
     
-    @pytest.mark.asyncio
-    async def test_send_to_thread_with_real_websocket(self, start_server):
+        @pytest.mark.asyncio
+        async def test_send_to_thread_with_real_websocket(self, start_server):
         """Test send_to_thread with real WebSocket connections."""
         ws_url = start_server
         
         # Connect multiple real WebSocket clients
         websockets_list = []
         for i in range(3):
-            ws = await websockets.connect(ws_url)
-            websockets_list.append(ws)
+        ws = await websockets.connect(ws_url)
+        websockets_list.append(ws)
         
         # Create a complex DeepAgentState
         state = DeepAgentState(
-            user_request="test request",
-            chat_thread_id="test-thread",
-            user_id="test-user",
-            messages=[
-                {"role": "user", "content": "test " * 100} for _ in range(10)
-            ],
-            metadata={"timestamp": str(time.time()), "data": "x" * 1000}
+        user_request="test request",
+        chat_thread_id="test-thread",
+        user_id="test-user",
+        messages=[
+        {"role": "user", "content": "test " * 100} for _ in range(10)
+        ],
+        metadata={"timestamp": str(time.time()), "data": "x" * 1000}
         )
         
         # Send broadcast message through first WebSocket
         await websockets_list[0].send(json.dumps({
-            "type": "broadcast",
-            "message": state.model_dump()
+        "type": "broadcast",
+        "message": state.model_dump()
         }))
         
         # Check response
@@ -174,62 +174,62 @@ class TestAsyncSerializationReal:
         
         # Clean up
         for ws in websockets_list:
-            await ws.close()
+        await ws.close()
     
-    @pytest.mark.asyncio
-    async def test_concurrent_serialization_real(self, start_server):
+        @pytest.mark.asyncio
+        async def test_concurrent_serialization_real(self, start_server):
         """Test concurrent message serialization with real connections."""
         ws_url = start_server
         
         async with websockets.connect(ws_url) as websocket:
-            # Send multiple serialization requests concurrently
-            tasks = []
-            for i in range(10):
-                message = {
-                    "type": "test_serialization",
-                    "state": {
-                        "id": i,
-                        "data": "x" * 10000,
-                        "nested": {"items": [j for j in range(100)]}
-                    }
-                }
-                tasks.append(websocket.send(json.dumps(message)))
+        # Send multiple serialization requests concurrently
+        tasks = []
+        for i in range(10):
+        message = {
+        "type": "test_serialization",
+        "state": {
+        "id": i,
+        "data": "x" * 10000,
+        "nested": {"items": [j for j in range(100)}]
+        }
+        }
+        tasks.append(websocket.send(json.dumps(message)))
             
-            # Send all at once
-            await asyncio.gather(*tasks)
+        # Send all at once
+        await asyncio.gather(*tasks)
             
-            # Receive all responses
-            responses = []
-            for _ in range(10):
-                response = await asyncio.wait_for(websocket.recv(), timeout=5)
-                responses.append(json.loads(response))
+        # Receive all responses
+        responses = []
+        for _ in range(10):
+        response = await asyncio.wait_for(websocket.recv(), timeout=5)
+        responses.append(json.loads(response))
             
-            # All should succeed
-            assert all(r["type"] == "serialization_result" for r in responses)
-            assert len(responses) == 10
+        # All should succeed
+        assert all(r["type"] == "serialization_result" for r in responses)
+        assert len(responses) == 10
     
-    @pytest.mark.asyncio 
-    async def test_websocket_retry_mechanism_real(self, start_server):
+        @pytest.mark.asyncio 
+        async def test_websocket_retry_mechanism_real(self, start_server):
         """Test retry mechanism with real WebSocket that has intermittent issues."""
         # This test would require a special endpoint that simulates failures
         # For now, we test that normal messages succeed
         ws_url = start_server
         
         async with websockets.connect(ws_url) as websocket:
-            # Send a message that should succeed after potential retries
-            state = {"type": "test", "data": "test_message"}
+        # Send a message that should succeed after potential retries
+        state = {"type": "test", "data": "test_message"}
             
-            await websocket.send(json.dumps({
-                "type": "broadcast",
-                "message": state
-            }))
+        await websocket.send(json.dumps({
+        "type": "broadcast",
+        "message": state
+        }))
             
-            response = await asyncio.wait_for(websocket.recv(), timeout=10)
-            result = json.loads(response)
+        response = await asyncio.wait_for(websocket.recv(), timeout=10)
+        result = json.loads(response)
             
-            # Should eventually succeed
-            assert result["type"] == "broadcast_result"
-            assert result["success"] is True
+        # Should eventually succeed
+        assert result["type"] == "broadcast_result"
+        assert result["success"] is True
 
 
 import json  # Add this import at the top

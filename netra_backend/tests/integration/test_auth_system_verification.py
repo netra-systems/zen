@@ -1,7 +1,7 @@
 """
 Integration test for auth system verification during dev launcher startup.
 Tests auth service health checks and readiness verification.
-"""
+""""
 import pytest
 import asyncio
 import requests
@@ -113,7 +113,7 @@ class TestAuthSystemVerification:
             db_url = config.database_url
             
             assert db_url.startswith(('postgresql://', 'postgres://', 'postgresql+asyncpg://')), \
-                f"Database URL format appears incorrect: {db_url[:20]}..."
+                f"Database URL format appears incorrect: {db_url[:20}]..."
             
             # Check that it's not using obvious default values
             assert 'user:pass' not in db_url, "Database URL contains default credentials"

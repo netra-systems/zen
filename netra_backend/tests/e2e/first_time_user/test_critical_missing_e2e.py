@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Critical Missing E2E Tests - Highest revenue impact first-time user flows
 
@@ -9,7 +12,7 @@ Critical Missing E2E Tests - Highest revenue impact first-time user flows
 5. **Growth Engine**: Tests the TOP 5 revenue-critical moments that kill conversions
 
 These tests validate the missing critical paths that cause the highest revenue loss.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -39,7 +42,7 @@ class TestCriticalMissingE2E:
         BVJ: Security concerns are #1 reason enterprises don't adopt tools.
         Failed API key setup = instant abandonment. Enterprise segment = $999/month.
         This test prevents 40% of Enterprise conversion failures.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: API key input and validation
@@ -63,7 +66,7 @@ class TestCriticalMissingE2E:
         
         BVJ: First 5 minutes determine 80% of conversion probability. Dashboard
         loading failures = instant abandonment. This prevents 35% of conversions lost.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Dashboard initialization and data loading
@@ -87,7 +90,7 @@ class TestCriticalMissingE2E:
         
         BVJ: Teams convert 5x higher than individuals. Team workspaces increase
         LTV by 300%. This test validates the highest-value conversion path.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Team creation and workspace setup
@@ -111,7 +114,7 @@ class TestCriticalMissingE2E:
         
         BVJ: This is the direct revenue path. Payment friction causes 30% of
         ready-to-pay users to abandon. Perfect billing flow = +$200K ARR.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Plan selection and pricing display
@@ -135,7 +138,7 @@ class TestCriticalMissingE2E:
         
         BVJ: C-suite decision makers need reports to approve purchases. Report
         generation triggers 60% of enterprise upgrades. Executive buy-in = $999/month.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Report configuration and selection
@@ -162,7 +165,7 @@ class TestCriticalMissingE2E:
     async def _test_api_key_encryption(self, env, validation_result):
         """Test API key encryption and secure storage"""
         # Mock: Generic component isolation for controlled unit testing
-        encryption_mock = AsyncNone  # TODO: Use real service instance
+        encryption_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         encryption_mock.encrypt_api_key = AsyncMock(return_value={"encrypted": True, "key_id": "enc_123"})
         encrypted_result = await encryption_mock.encrypt_api_key(validation_result["api_data"])
@@ -171,7 +174,7 @@ class TestCriticalMissingE2E:
     async def _test_provider_connection(self, env, encryption_result):
         """Test actual connection to AI provider"""
         # Mock: Generic component isolation for controlled unit testing
-        connection_mock = AsyncNone  # TODO: Use real service instance
+        connection_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         connection_mock.test_connection = AsyncMock(return_value={"connected": True, "latency": 120})
         connection_result = await connection_mock.test_connection()
@@ -179,7 +182,7 @@ class TestCriticalMissingE2E:
 
     async def _confirm_security_compliance(self, env, connection_result):
         """Confirm security compliance and display trust indicators"""
-        security_indicators = {"ssl_verified": True, "encryption_level": "AES-256", "compliance": ["SOC2", "GDPR"]}
+        security_indicators = {"ssl_verified": True, "encryption_level": "AES-256", "compliance": ["SOC2", "GDPR"]]
         await env["websocket_manager"].send_security_confirmation(security_indicators)
         env["metrics_tracker"].security_confirmation_time = datetime.now(timezone.utc)
 
@@ -220,9 +223,9 @@ class TestCriticalMissingE2E:
 
     async def _send_team_invitations(self, env, team_result):
         """Send team member invitations via email"""
-        invitations = [{"email": "teammate1@test.com", "role": "analyst"}, {"email": "teammate2@test.com", "role": "viewer"}]
+        invitations = [{"email": "teammate1@test.com", "role": "analyst"], {"email": "teammate2@test.com", "role": "viewer"]]
         # Mock: Generic component isolation for controlled unit testing
-        invitation_mock = AsyncNone  # TODO: Use real service instance
+        invitation_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         invitation_mock.send_invitations = AsyncMock(return_value={"sent": 2, "pending": 2})
         invitation_result = await invitation_mock.send_invitations(invitations)
@@ -246,7 +249,7 @@ class TestCriticalMissingE2E:
 
     async def _select_upgrade_plan(self, env):
         """Handle plan selection and pricing display"""
-        available_plans = {"growth": {"price": 99, "features": ["basic_optimization"]}, "pro": {"price": 299, "features": ["advanced_optimization", "team_features"]}}
+        available_plans = {"growth": {"price": 99, "features": ["basic_optimization"]], "pro": {"price": 299, "features": ["advanced_optimization", "team_features"]]]
         selected_plan = {"plan": "pro", "billing_cycle": "monthly", "price": 299}
         return {"available": available_plans, "selected": selected_plan}
 
@@ -254,7 +257,7 @@ class TestCriticalMissingE2E:
         """Collect and validate payment method information"""
         payment_data = {"card_number": "4242424242424242", "exp_month": 12, "exp_year": 2025, "cvc": "123"}
         # Mock: Generic component isolation for controlled unit testing
-        payment_mock = AsyncNone  # TODO: Use real service instance
+        payment_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         payment_mock.validate_payment_method = AsyncMock(return_value={"valid": True, "payment_method_id": "pm_123"})
         validation_result = await payment_mock.validate_payment_method(payment_data)
@@ -263,7 +266,7 @@ class TestCriticalMissingE2E:
     async def _process_purchase_transaction(self, env, payment_result):
         """Process the actual purchase transaction"""
         # Mock: Generic component isolation for controlled unit testing
-        transaction_mock = AsyncNone  # TODO: Use real service instance
+        transaction_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         transaction_mock.process_payment = AsyncMock(return_value={"success": True, "transaction_id": "txn_123", "amount": 299})
         transaction_result = await transaction_mock.process_payment(payment_result["payment"])
@@ -299,9 +302,9 @@ class TestCriticalMissingE2E:
 
     async def _export_executive_report(self, env, analysis_result):
         """Export report in multiple formats for sharing"""
-        export_options = {"formats": ["pdf", "powerpoint", "excel"], "branding": "custom", "interactive": True}
+        export_options = {"formats": ["pdf", "powerpoint", "excel"], "branding": "custom", "interactive": True]
         # Mock: Generic component isolation for controlled unit testing
-        export_mock = AsyncNone  # TODO: Use real service instance
+        export_mock = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         export_mock.generate_exports = AsyncMock(return_value={"pdf_url": "/reports/exec_123.pdf", "pptx_url": "/reports/exec_123.pptx"})
         export_result = await export_mock.generate_exports(export_options)

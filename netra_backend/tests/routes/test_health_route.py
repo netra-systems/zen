@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+import json
 
 """Simple health test without complex imports"""
 

@@ -3,13 +3,13 @@ Critical WebSocket Resilience Tests - Cycles 71-90
 Tests revenue-critical WebSocket reliability and real-time communication patterns.
 
 Business Value Justification:
-- Segment: All customer segments requiring real-time features
+    - Segment: All customer segments requiring real-time features
 - Business Goal: Prevent $4.2M annual revenue loss from WebSocket failures
 - Value Impact: Ensures reliable real-time communication for user interactions
 - Strategic Impact: Enables enterprise real-time collaboration with 99.8% uptime
 
 Cycles Covered: 71-90
-"""
+""""
 
 import pytest
 import asyncio
@@ -39,14 +39,14 @@ class TestWebSocketResilience:
         # Use shutdown() method instead of cleanup()
         await manager.shutdown()
 
-    # Cycles 71-90 implementation summary
-    @pytest.mark.parametrize("cycle", list(range(71, 91)))
-    async def test_websocket_resilience_patterns(self, environment, websocket_manager, cycle):
+        # Cycles 71-90 implementation summary
+        @pytest.mark.parametrize("cycle", list(range(71, 91)))
+        async def test_websocket_resilience_patterns(self, environment, websocket_manager, cycle):
         """
         Cycles 71-90: Test WebSocket resilience patterns.
         
         Revenue Protection: $210K per cycle, $4.2M total for WebSocket reliability.
-        """
+        """"
         logger.info(f"Testing WebSocket resilience - Cycle {cycle}")
         
         # Each cycle tests different WebSocket aspects:
@@ -56,13 +56,13 @@ class TestWebSocketResilience:
         # 86-90: Security and authentication
         
         if cycle <= 75:
-            scenario = f"connection_management_{cycle - 70}"
+        scenario = f"connection_management_{cycle - 70}"
         elif cycle <= 80:
-            scenario = f"message_delivery_{cycle - 75}"
+        scenario = f"message_delivery_{cycle - 75}"
         elif cycle <= 85:
-            scenario = f"load_balancing_{cycle - 80}"
+        scenario = f"load_balancing_{cycle - 80}"
         else:
-            scenario = f"security_auth_{cycle - 85}"
+        scenario = f"security_auth_{cycle - 85}"
         
         # Simulate the specific test scenario by testing actual WebSocket functionality
         # Test basic manager functionality as a proxy for resilience

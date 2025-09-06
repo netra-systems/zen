@@ -1,9 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration Tests for WebSocket Agent Handler - Tests 1-10
 
 Business Value: Validates end-to-end flows with real services
 ensuring reliable multi-user agent execution.
-"""
+""""
 
 import asyncio
 import uuid
@@ -90,7 +92,7 @@ class TestAgentHandlerIntegration:
         Integration Test 1: Complete agent execution flow from WebSocket to completion.
         
         Business Impact: Validates core chat functionality ($500K+ ARR).
-        """
+        """"
         # Track WebSocket events
         events_received = []
         
@@ -188,7 +190,7 @@ class TestAgentHandlerIntegration:
         Integration Test 2: Multi-user concurrent agent execution with event isolation.
         
         Business Impact: Ensures platform can handle multiple users simultaneously.
-        """
+        """"
         num_users = 5
         users_data = []
         
@@ -220,7 +222,7 @@ class TestAgentHandlerIntegration:
             message = WebSocketMessage(
                 type=MessageType.START_AGENT,
                 payload={
-                    "user_request": f"Test request for {user_data['user_id']}",
+                    "user_request": f"Test request for {user_data['user_id']]",
                     "thread_id": user_data["thread_id"]
                 },
                 thread_id=user_data["thread_id"],
@@ -304,7 +306,7 @@ class TestAgentHandlerIntegration:
         Integration Test 3: Database state persistence across agent lifecycle.
         
         Business Impact: Ensures conversation history is preserved.
-        """
+        """"
         user_id = f"persist_user_{uuid.uuid4()}"
         thread_id = f"persist_thread_{uuid.uuid4()}"
         
@@ -388,7 +390,7 @@ class TestAgentHandlerIntegration:
         Integration Test 4: WebSocket event delivery for all critical events.
         
         Business Impact: Ensures users receive real-time updates.
-        """
+        """"
         user_id = f"event_user_{uuid.uuid4()}"
         thread_id = f"event_thread_{uuid.uuid4()}"
         
@@ -487,7 +489,7 @@ class TestAgentHandlerIntegration:
         Integration Test 5: Error propagation across service boundaries.
         
         Business Impact: Ensures graceful error handling maintains user experience.
-        """
+        """"
         error_scenarios = []
         
         class ErrorTrackingWebSocket:
@@ -506,8 +508,8 @@ class TestAgentHandlerIntegration:
                 pass
         
         # Test database connection error
-        async def test_db_error():
-            ws = ErrorTrackingWebSocket()
+            async def test_db_error():
+                ws = ErrorTrackingWebSocket()
             
             # Create handler with invalid database
             from netra_backend.app.agents.supervisor.unified_supervisor import UnifiedSupervisor
@@ -584,12 +586,12 @@ class TestAgentHandlerIntegration:
         # Verify error handling
         for scenario in error_scenarios:
             assert scenario["handled"], \
-                f"Error not handled properly in {scenario['scenario']}"
+                f"Error not handled properly in {scenario['scenario']]"
             
             if "errors" in scenario:
                 # User should receive error notifications
                 assert len(scenario["errors"]) > 0 or scenario.get("exception"), \
-                    f"No error feedback in {scenario['scenario']}"
+                    f"No error feedback in {scenario['scenario']]"
 
 
 # ============================================================================
@@ -610,7 +612,7 @@ class TestAgentHandlerAdvancedIntegration:
         Integration Test 6: Agent workflow with tool execution notifications.
         
         Business Impact: Validates complete agent transparency through events.
-        """
+        """"
         # Implementation would follow similar pattern to tests above
         # Focusing on tool execution events and notifications
         pass
@@ -624,7 +626,7 @@ class TestAgentHandlerAdvancedIntegration:
         Integration Test 7: Thread continuity across multiple sessions.
         
         Business Impact: Ensures conversation context is maintained.
-        """
+        """"
         # Implementation would test reconnection and context preservation
         pass
     
@@ -636,7 +638,7 @@ class TestAgentHandlerAdvancedIntegration:
         Integration Test 8: Configuration cascade testing across environments.
         
         Business Impact: Prevents configuration regression issues.
-        """
+        """"
         # Implementation would test environment-specific configurations
         pass
     
@@ -649,7 +651,7 @@ class TestAgentHandlerAdvancedIntegration:
         Integration Test 9: Agent supervisor isolation testing.
         
         Business Impact: Ensures supervisor instances are properly isolated.
-        """
+        """"
         # Implementation would test supervisor factory pattern isolation
         pass
     
@@ -662,6 +664,6 @@ class TestAgentHandlerAdvancedIntegration:
         Integration Test 10: Realistic load simulation with 10 users.
         
         Business Impact: Validates production readiness.
-        """
+        """"
         # Implementation would simulate realistic user load patterns
         pass

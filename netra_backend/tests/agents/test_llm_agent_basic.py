@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Basic LLM Agent E2E Tests
 Core functionality tests with ≤8 line functions for architectural compliance
-"""
+""""
 
 import sys
 from pathlib import Path

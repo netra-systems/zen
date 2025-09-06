@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Simple Agent Flow E2E Test
 Tests agent workflow without complex service orchestration.
@@ -6,13 +8,13 @@ PRIORITY: CRITICAL - Core agent functionality
 BVJ: Core business functionality worth $45K MRR
 
 This test validates basic agent flow:
-1. Agent creation and setup
+    1. Agent creation and setup
 2. Mock LLM integration 
 3. State transitions
 4. Response generation
 
 Uses simplified setup to avoid Docker orchestration issues.
-"""
+""""
 
 import pytest
 import asyncio
@@ -21,7 +23,7 @@ from typing import Dict, Any
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -39,10 +41,10 @@ class TestSimpleAgentFlow:
     async def test_agent_creation_and_basic_flow(self):
         """Test basic agent creation and simple flow."""
         # Create mock dependencies
-        db_session = AsyncNone  # TODO: Use real service instance
+        db_session = AsyncMock()  # TODO: Use real service instance
         
         # Mock LLM manager
-        llm_manager = MagicNone  # TODO: Use real service instance
+        llm_manager = MagicMock()  # TODO: Use real service instance
         llm_manager.call_llm = AsyncMock(return_value={
             "content": "Test optimization analysis complete", 
             "tool_calls": []
@@ -50,12 +52,12 @@ class TestSimpleAgentFlow:
         llm_manager.ask_llm = AsyncMock(return_value='{"analysis": "test result"}')
         
         # Mock WebSocket manager
-        websocket_manager = MagicNone  # TODO: Use real service instance
-        websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
-        websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
+        websocket_manager.send_message = AsyncMock()  # TODO: Use real service instance
+        websocket_manager.send_agent_log = AsyncMock()  # TODO: Use real service instance
         
         # Mock tool dispatcher
-        tool_dispatcher = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicMock()  # TODO: Use real service instance
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={"result": "success"})
         
         # Create supervisor agent
@@ -204,10 +206,10 @@ class TestSimpleAgentFlow:
     async def test_websocket_manager_integration(self):
         """Test WebSocket manager integration works."""
         # Create mock WebSocket manager
-        websocket_manager = MagicNone  # TODO: Use real service instance
-        websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
-        websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instance
-        websocket_manager.send_sub_agent_update = AsyncNone  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
+        websocket_manager.send_message = AsyncMock()  # TODO: Use real service instance
+        websocket_manager.send_agent_log = AsyncMock()  # TODO: Use real service instance
+        websocket_manager.send_sub_agent_update = AsyncMock()  # TODO: Use real service instance
         
         # Test sending messages
         user_id = str(uuid.uuid4())
@@ -230,7 +232,7 @@ class TestSimpleAgentFlow:
     async def test_llm_manager_integration(self):
         """Test LLM manager integration works."""
         # Create mock LLM manager
-        llm_manager = MagicNone  # TODO: Use real service instance
+        llm_manager = MagicMock()  # TODO: Use real service instance
         llm_manager.call_llm = AsyncMock(return_value={
             "content": "This is a test response from the LLM",
             "tool_calls": []
@@ -262,10 +264,10 @@ class TestAgentFlowPerformance:
         start_time = time.time()
         
         # Create mock dependencies quickly
-        db_session = AsyncNone  # TODO: Use real service instance
-        llm_manager = MagicNone  # TODO: Use real service instance
-        websocket_manager = MagicNone  # TODO: Use real service instance
-        tool_dispatcher = MagicNone  # TODO: Use real service instance
+        db_session = AsyncMock()  # TODO: Use real service instance
+        llm_manager = MagicMock()  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
+        tool_dispatcher = MagicMock()  # TODO: Use real service instance
         
         # Create supervisor
         supervisor = SupervisorAgent(

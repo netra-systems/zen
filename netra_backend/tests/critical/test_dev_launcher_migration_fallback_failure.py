@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for Migration Failure Fallback Issues  
 Critical dev launcher issue: Migration failures cause uncontrolled table creation fallback
@@ -10,11 +12,11 @@ Root Cause: When migrations fail, the system falls back to creating tables direc
 which can lead to inconsistent schema state and bypassing proper migration tracking.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Database Integrity & Development Velocity  
 - Value Impact: Ensures predictable database schema evolution and migration tracking
 - Strategic Impact: Prevents data corruption and schema inconsistencies across environments
-"""
+""""
 
 import pytest
 import asyncio
@@ -42,13 +44,13 @@ class TestMigrationFailureFallbackIssues:
         FAILING TEST: Demonstrates uncontrolled table creation after migration failure.
         
         This test reproduces the scenario where:
-        1. Migration fails due to database state issues
+            1. Migration fails due to database state issues
         2. System falls back to creating tables directly
         3. Migration history becomes inconsistent with actual database state
         
         Expected behavior: Should handle migration failures gracefully without bypassing tracking
         Current behavior: Falls back to direct table creation, bypassing migration system
-        """
+        """"
         initializer = DatabaseInitializer()
         
         # Mock a migration failure scenario
@@ -89,7 +91,7 @@ class TestMigrationFailureFallbackIssues:
         
         Expected behavior: Should maintain schema consistency between migration tracking and actual state
         Current behavior: Creates inconsistency between alembic_version and actual schema
-        """
+        """"
         initializer = DatabaseInitializer()
         
         # Mock scenario where migration partially succeeds, then fails
@@ -137,7 +139,7 @@ class TestMigrationFailureFallbackIssues:
         
         Expected behavior: Should maintain proper dependency resolution even in fallback scenarios
         Current behavior: Direct table creation may create tables in wrong order or miss dependencies
-        """
+        """"
         initializer = DatabaseInitializer()
         
         # Mock a scenario where migration fails due to dependency issue
@@ -153,7 +155,7 @@ class TestMigrationFailureFallbackIssues:
             
             def mock_create_table(*args, **kwargs):
                 create_table_calls.append(args[0] if args else 'unknown_table')
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             with patch('sqlalchemy.Table.create', side_effect=mock_create_table):
                 with patch.object(initializer, 'create_tables_if_missing') as mock_create_tables:
@@ -197,7 +199,7 @@ class TestMigrationFailureFallbackIssues:
         
         Expected behavior: Should retry migrations for transient failures before falling back
         Current behavior: Immediately falls back to table creation on any migration failure
-        """
+        """"
         initializer = DatabaseInitializer()
         
         # Mock transient failure followed by success
@@ -248,7 +250,7 @@ class TestMigrationFailureFallbackIssues:
         
         Expected behavior: Should provide detailed error context and remediation steps
         Current behavior: Generic error messages that don't help with debugging
-        """
+        """"
         # Mock a migration failure scenario
         test_error = ProgrammingError(
             "index 'idx_userbase_created_at' does not exist",

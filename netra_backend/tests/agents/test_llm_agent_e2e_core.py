@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Core E2E LLM Agent Tests
 Basic functionality, initialization, and core agent tests
 Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
 BVJ:
-1. Segment: Growth & Enterprise  
+    1. Segment: Growth & Enterprise  
 2. Business Goal: Ensure agent reliability and basic functionality
 3. Value Impact: Prevents agent failures that could cost customers optimization opportunities
 4. Revenue Impact: Maintains customer trust and prevents churn from failed optimizations
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -160,7 +162,7 @@ async def test_agent_registry():
     tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service
     
     # Mock persistence to avoid hanging
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
@@ -192,7 +194,7 @@ async def test_basic_error_handling():
     llm_manager.call_llm = AsyncMock(side_effect=Exception("LLM error"))
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -256,7 +258,7 @@ def _setup_basic_llm_mock():
 def _setup_basic_persistence_mock():
     """Setup basic persistence mock"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution

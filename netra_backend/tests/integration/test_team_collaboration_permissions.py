@@ -1,14 +1,14 @@
 """Team Collaboration Permissions Integration Tests - REFACTORED
 
 Business Value Justification (BVJ):
-- Segment: Mid to Enterprise (team collaboration features)
+    - Segment: Mid to Enterprise (team collaboration features)
 - Business Goal: Multi-user workflows protecting $100K-$200K MRR
 - Value Impact: Team productivity, enterprise sales, user retention
 - Strategic Impact: Revenue Pipeline tier differentiation and enterprise adoption
 
 NOTE: This large test file has been refactored into smaller, focused modules:
 
-1. test_helpers/team_collaboration_base.py - Shared utilities and test infrastructure
+    1. test_helpers/team_collaboration_base.py - Shared utilities and test infrastructure
 2. critical_paths/test_team_creation_permissions.py - Team creation and role management
 3. critical_paths/test_user_invitation_flow.py - Invitation workflow and validation
 4. critical_paths/test_workspace_resource_sharing.py - Workspace management and sharing
@@ -23,7 +23,7 @@ To run all team collaboration tests:
 
 Performance: <100ms permission checks, 100% access control enforcement.
 Coverage Target: 100% for all team collaboration features.
-"""
+""""
 
 # Import and run tests from refactored modules
 

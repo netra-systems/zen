@@ -1,3 +1,4 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 """Unified test harness for backend testing."""
 
 import asyncio

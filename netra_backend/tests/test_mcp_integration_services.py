@@ -1,3 +1,4 @@
+from datetime import datetime
 """Services Tests - Split from test_mcp_integration.py"""
 
 import sys

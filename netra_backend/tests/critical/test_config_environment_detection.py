@@ -3,14 +3,16 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
-"""Critical Configuration Environment Detection Tests
+from unittest.mock import Mock, patch, MagicMock
+
+"""Critical Configuration Environment Detection Tests"""
 
 Business Value: Protects $25K MRR risk from configuration environment detection failures.
 Prevents config mismatches that could cause billing errors and service disruptions.
 
 ULTRA DEEP THINKING APPLIED: Each test designed for maximum config reliability protection.
-All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
-"""
+All functions <=8 lines. File <=300 lines as per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path

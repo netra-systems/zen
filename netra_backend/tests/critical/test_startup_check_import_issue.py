@@ -1,9 +1,12 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Critical test to expose StartupCheckResult import issue in environment_checks.py
 
@@ -11,17 +14,17 @@ This test exposes the critical bug where environment_checks.py imports StartupCh
 from the wrong module (apex_optimizer_agent.models) instead of startup_checks.models.
 
 The two StartupCheckResult classes have incompatible signatures:
-- startup_checks.models: __init__(name, success, message, critical=True, duration_ms=0)
+    - startup_checks.models: __init__(name, success, message, critical=True, duration_ms=0)
 - apex_optimizer_agent.models: __init__(success=True, message="", details=None)
 
 This causes a runtime error: "StartupCheckResult.__init__() got an unexpected keyword argument 'name'"
 
 Business Value Justification (BVJ):
-- Segment: All (Free to Enterprise)
+    - Segment: All (Free to Enterprise)
 - Business Goal: Stability
 - Value Impact: Prevents complete startup failure that blocks all operations
 - Revenue Impact: Prevents 100% service outage affecting all customers
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -41,7 +44,7 @@ class TestStartupCheckResultImportIssue:
         
         This test will FAIL until the import is fixed in environment_checks.py.
         The error demonstrates the exact issue seen in production.
-        """
+        """"
         # Import the EnvironmentChecker which has the wrong import
         from netra_backend.app.services.apex_optimizer_agent.models import (
             StartupCheckResult as WrongModel,
@@ -81,7 +84,7 @@ class TestStartupCheckResultImportIssue:
         Test that check_environment_variables fails due to wrong StartupCheckResult import.
         
         This directly tests the method that fails in production.
-        """
+        """"
         from netra_backend.app.startup_checks.environment_checks import (
             EnvironmentChecker,
         )
@@ -106,7 +109,7 @@ class TestStartupCheckResultImportIssue:
     def test_startup_check_result_signature_mismatch(self):
         """
         Test that demonstrates the signature mismatch between the two StartupCheckResult classes.
-        """
+        """"
         from netra_backend.app.services.apex_optimizer_agent.models import (
             StartupCheckResult as WrongModel,
         )
@@ -137,7 +140,7 @@ class TestStartupCheckResultImportIssue:
         Test that all startup check modules import the correct StartupCheckResult.
         
         This comprehensive test checks all modules in startup_checks package.
-        """
+        """"
         import importlib
         import inspect
         from pathlib import Path
@@ -193,13 +196,13 @@ class TestStartupCheckIntegration:
         Test the full startup check sequence to ensure it can complete.
         
         This test will fail if any startup check module has the wrong import.
-        """
+        """"
 
         from netra_backend.app.startup_checks.checker import StartupChecker
         
         # Create a mock app
         # Mock: Generic component isolation for controlled unit testing
-        app = MagicNone  # TODO: Use real service instance
+        app = MagicMock()  # TODO: Use real service instance
         
         # Create the checker
         checker = StartupChecker(app)

@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Test database session GeneratorExit handling fix.
 
 This test verifies that the critical session lifecycle fix properly handles
 GeneratorExit exceptions without causing IllegalStateChangeError.
 
 Business Value Justification (BVJ):
-- Segment: Platform stability (all tiers)
+    - Segment: Platform stability (all tiers)
 - Business Goal: Prevent production outages from session state conflicts
 - Value Impact: Ensures reliable database operations under high concurrency
 - Strategic Impact: Critical for system reliability and data consistency
-"""
+""""
 
 import asyncio
 import pytest
@@ -28,9 +30,9 @@ async def test_session_generatorexit_handling():
     # Mock session with proper async context manager behavior
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
-    mock_session.close = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
+    mock_session.close = AsyncMock()  # TODO: Use real service instance
     
     # Mock session factory
     @asynccontextmanager
@@ -63,8 +65,8 @@ async def test_session_cancellation_handling():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -93,8 +95,8 @@ async def test_session_normal_exception_handling():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -123,8 +125,8 @@ async def test_session_successful_commit():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -161,8 +163,8 @@ async def test_concurrent_session_generators():
         mock_session = AsyncMock(spec=AsyncSession)
         mock_session.id = len(sessions_created)  # Unique ID
         mock_session.in_transaction = Mock(return_value=True)
-        mock_session.commit = AsyncNone  # TODO: Use real service instance
-        mock_session.rollback = AsyncNone  # TODO: Use real service instance
+        mock_session.commit = AsyncMock()  # TODO: Use real service instance
+        mock_session.rollback = AsyncMock()  # TODO: Use real service instance
         sessions_created.append(mock_session)
         yield mock_session
     
@@ -202,8 +204,8 @@ async def test_session_no_transaction_skip_operations():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=False)  # No active transaction
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():

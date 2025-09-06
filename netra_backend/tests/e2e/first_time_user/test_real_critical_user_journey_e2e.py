@@ -1,3 +1,5 @@
+import asyncio
+
 """
 Real Critical User Journey E2E Tests - First-time user experience validation with REAL services
 
@@ -13,7 +15,7 @@ Real Critical User Journey E2E Tests - First-time user experience validation wit
 **CRITICAL**: Uses REAL services (not mocks) to catch integration issues that destroy conversions.
 **ARCHITECTURE**: Modular design with separate helpers and fixtures to maintain 450-line limit
 Each test follows 25-line function limit through delegation to specialized helper classes.
-"""
+""""
 
 # Test framework import - using pytest fixtures instead
 
@@ -48,7 +50,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: OAuth signup converts 3x higher than email signup. Perfect OAuth flow
         increases conversion probability from 2% to 12% (+$720K ARR annually).
-        """
+        """"
         oauth_result = await OAuthFlowHelpers.initiate_oauth_flow()
         profile_result = await OAuthFlowHelpers.create_user_profile(oauth_result)
         session_result = await OAuthFlowHelpers.establish_user_session(profile_result)
@@ -63,7 +65,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: 67% of users abandon during provider connection. Streamlined connection
         flow reduces abandonment by 50% (+$480K ARR from retained users).
-        """
+        """"
         validation_result = await AIProviderHelpers.validate_ai_provider_keys()
         storage_result = await AIProviderHelpers.store_encrypted_credentials(validation_result)
         health_result = await AIProviderHelpers.verify_provider_health(storage_result)
@@ -78,7 +80,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Real-time progress increases completion rate by 240%. WebSocket issues
         cause 23% of onboarding abandonments (+$276K ARR with perfect flow).
-        """
+        """"
         connection_result = await WebSocketHelpers.establish_websocket_connection()
         onboarding_result = await WebSocketHelpers.manage_onboarding_state(connection_result)
         progress_result = await WebSocketHelpers.track_onboarding_progress(onboarding_result)
@@ -93,7 +95,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: First optimization preview converts 45% of users to paid plans.
         Accurate analysis increases perceived value by 340% (+$408K ARR).
-        """
+        """"
         usage_data = await OptimizationHelpers.submit_usage_data_for_analysis()
         analysis_result = await OptimizationHelpers.run_real_optimization_analysis(usage_data, real_llm_manager)
         savings_result = await OptimizationHelpers.calculate_real_cost_savings(analysis_result)
@@ -108,7 +110,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Value dashboard drives 67% of upgrade decisions. Real-time metrics
         increase upgrade conversion by 180% (+$324K ARR annually).
-        """
+        """"
         metrics_data = await self._load_real_metrics_data(db_session)
         tracking_result = await self._setup_real_time_tracking(metrics_data)
         interactive_result = await self._test_interactive_features(tracking_result)
@@ -123,7 +125,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Well-timed upgrade prompts convert 28% of free users. Strategic
         limitation enforcement increases perceived value (+$392K ARR annually).
-        """
+        """"
         limit_result = await self._test_real_free_tier_limits()
         prompt_result = await self._trigger_strategic_upgrade_prompts(limit_result)
         paywall_result = await self._validate_paywall_enforcement(prompt_result)
@@ -138,7 +140,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Team features increase customer LTV by 380%. Collaborative workspaces
         reduce churn by 45% and increase plan upgrades (+$456K ARR annually).
-        """
+        """"
         workspace_result = await self._create_real_team_workspace(db_session)
         invitation_result = await self._send_team_invitations(workspace_result)
         permission_result = await self._validate_team_permissions(invitation_result)
@@ -153,7 +155,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Poor error handling causes 34% of user abandonment. Excellent error
         recovery and support access increases retention by 67% (+$268K ARR saved).
-        """
+        """"
         error_scenarios = await self._simulate_real_error_scenarios()
         recovery_result = await self._test_error_recovery_mechanisms(error_scenarios)
         message_result = await self._validate_error_messaging(recovery_result)
@@ -168,7 +170,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: Auth service integration failures cause 15% of signup abandonments.
         Perfect cross-service auth increases signup completion (+$180K ARR saved).
-        """
+        """"
         token_flow_result = await self._test_cross_service_token_flow()
         validation_result = await self._test_token_validation_sync(token_flow_result)
         health_result = await self._test_service_health_monitoring(validation_result)
@@ -183,7 +185,7 @@ class TestRealCriticalUserJourney:
         
         BVJ: System performance under load affects conversion rates. Perfect scaling
         maintains 15% conversion rate even at peak load (+$300K ARR protection).
-        """
+        """"
         concurrent_result = await ConcurrentTestHelpers.test_concurrent_signups()
         performance_result = await ConcurrentTestHelpers.monitor_concurrent_performance(concurrent_result)
         isolation_result = await ConcurrentTestHelpers.verify_data_isolation(performance_result)
@@ -201,7 +203,7 @@ class TestRealCriticalUserJourney:
 
     async def _test_interactive_features(self, tracking_result):
         """Test interactive features"""
-        tests = [{"feature": "time_range_filter", "test_result": "passed"}, 
+        tests = [{"feature": "time_range_filter", "test_result": "passed"], 
                 {"feature": "export_functionality", "test_result": "passed"}]
         return {"interactive_tests": tests, "all_passed": True}
 
@@ -212,7 +214,7 @@ class TestRealCriticalUserJourney:
 
     async def _test_real_free_tier_limits(self):
         """Test real free tier limits"""
-        limits = {"monthly_requests": 1000, "models_allowed": [LLMModel.GEMINI_2_5_FLASH.value]}
+        limits = {"monthly_requests": 1000, "models_allowed": [LLMModel.GEMINI_2_5_FLASH.value]]
         usage = {"requests_made": 1000, "limit_reached": True}
         return {"limits": limits, "usage": usage}
 
@@ -222,7 +224,7 @@ class TestRealCriticalUserJourney:
 
     async def _validate_paywall_enforcement(self, prompt_result):
         """Validate paywall enforcement"""
-        tests = [{"feature": "advanced_models", "blocked": True}, {"feature": "bulk_requests", "blocked": True}]
+        tests = [{"feature": "advanced_models", "blocked": True], {"feature": "bulk_requests", "blocked": True]]
         return {"paywall_tests": tests, "ux": {"clear_messaging": True, "easy_upgrade_path": True}}
 
     async def _test_upgrade_flow_initiation(self, paywall_result):
@@ -237,27 +239,27 @@ class TestRealCriticalUserJourney:
 
     async def _send_team_invitations(self, workspace_result):
         """Send team invitations"""
-        invitations = [{"email": "colleague1@company.com", "role": "member"}]
-        return {"invitations": [{"email": inv["email"], "status": "sent"} for inv in invitations]}
+        invitations = [{"email": "colleague1@company.com", "role": "member"]]
+        return {"invitations": [{"email": inv["email"], "status": "sent"] for inv in invitations]]
 
     async def _validate_team_permissions(self, invitation_result):
         """Validate team permissions"""
-        tests = [{"role": "admin", "permissions_correct": True}, {"role": "member", "permissions_correct": True}]
+        tests = [{"role": "admin", "permissions_correct": True], {"role": "member", "permissions_correct": True]]
         return {"permission_validation": tests, "all_passed": True}
 
     async def _test_collaborative_features(self, permission_result, websocket_manager):
         """Test collaborative features"""
-        return {"collaborative_tests": [{"feature": "real_time_updates", "status": "passed"}]}
+        return {"collaborative_tests": [{"feature": "real_time_updates", "status": "passed"]]]
 
     async def _simulate_real_error_scenarios(self):
         """Simulate real error scenarios"""
         # CriticalUserJourneyHelpers already imported at top of file
         scenarios = CriticalUserJourneyHelpers.setup_error_simulation_scenarios()
-        return [{"scenario": name, "simulated": True} for name in scenarios.keys()]
+        return [{"scenario": name, "simulated": True] for name in scenarios.keys()]
 
     async def _test_error_recovery_mechanisms(self, error_scenarios):
         """Test error recovery mechanisms"""
-        return {"recovery_tests": [{"scenario": s["scenario"], "recovery_successful": True} for s in error_scenarios]}
+        return {"recovery_tests": [{"scenario": s["scenario"], "recovery_successful": True] for s in error_scenarios]]
 
     async def _validate_error_messaging(self, recovery_result):
         """Validate error messaging"""
@@ -265,7 +267,7 @@ class TestRealCriticalUserJourney:
 
     async def _test_support_channel_access(self, message_result):
         """Test support channel access"""
-        return {"support_channels": [{"channel": "live_chat", "available": True}]}
+        return {"support_channels": [{"channel": "live_chat", "available": True]]]
 
     async def _test_cross_service_token_flow(self):
         """Test cross-service token flow"""

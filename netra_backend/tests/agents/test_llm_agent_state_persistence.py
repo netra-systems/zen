@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 LLM Agent State Persistence Tests
 Tests agent state persistence, recovery, and error handling
 Split from oversized test_llm_agent_e2e_real.py
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -96,7 +98,7 @@ async def test_error_recovery(supervisor_agent):
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     
     # Mock interrupted state
     interrupted_state = DeepAgentState(
@@ -121,7 +123,7 @@ async def test_state_recovery_from_interruption():
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     
     # Mock persistence failure
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -164,7 +166,7 @@ async def test_state_serialization_consistency():
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     
     # Mock concurrent operations
     async def mock_save_with_delay(*args, **kwargs):

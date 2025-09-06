@@ -1,18 +1,20 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test Idempotent Migration Handling - Comprehensive Coverage
 
 This test file verifies that the database migration system handles:
-1. "relation already exists" errors gracefully
+    1. "relation already exists" errors gracefully
 2. Coordination between Alembic and DatabaseInitializer systems  
 3. All 25 expected database tables are created correctly
 4. Idempotent operations that can be run multiple times safely
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Database Reliability & Startup Success
 - Value Impact: Eliminates "relation already exists" errors causing startup failures
 - Revenue Impact: Critical for system availability and preventing 100% downtime
-"""
+""""
 
 import asyncio
 import logging
@@ -64,7 +66,7 @@ class TestIdempotentMigrationHandling:
         initializer.add_database(config)
         
         # Mock connection that simulates Alembic-managed database
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate Alembic version table exists
         mock_conn.fetchval.side_effect = [
@@ -81,7 +83,7 @@ class TestIdempotentMigrationHandling:
             'userbase', 'schema_version', 'events', 'metrics', 'additional_table'
         ]
         
-        mock_conn.fetch.return_value = [{'table_name': name} for name in alembic_tables]
+        mock_conn.fetch.return_value = [{'table_name': name] for name in alembic_tables]
         
         with patch('asyncpg.connect', return_value=mock_conn):
             with patch('psycopg2.connect'):
@@ -116,7 +118,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate Alembic version exists with 25 tables
         mock_conn.fetchval.side_effect = [
@@ -133,7 +135,7 @@ class TestIdempotentMigrationHandling:
             'userbase', 'schema_version', 'events', 'metrics', 'sessions'  # sessions already exists
         ]
         
-        mock_conn.fetch.return_value = [{'table_name': name} for name in existing_tables]
+        mock_conn.fetch.return_value = [{'table_name': name] for name in existing_tables]
         
         # Simulate concurrent creation causing "relation already exists" for api_keys
         def simulate_concurrent_creation(*args, **kwargs):
@@ -168,7 +170,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate no Alembic version table (fresh database)
         mock_conn.fetchval.side_effect = [
@@ -254,7 +256,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Track how many times each table creation is attempted
         creation_attempts = {}
@@ -298,7 +300,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate partial Alembic schema (some tables missing)
         mock_conn.fetchval.side_effect = [
@@ -315,7 +317,7 @@ class TestIdempotentMigrationHandling:
             # Missing: sessions, api_keys, userbase, events, metrics
         ]
         
-        mock_conn.fetch.return_value = [{'table_name': name} for name in partial_tables]
+        mock_conn.fetch.return_value = [{'table_name': name] for name in partial_tables]
         
         with patch('asyncpg.connect', return_value=mock_conn):
             with patch('psycopg2.connect'):
@@ -348,7 +350,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate Alembic managed schema
         mock_conn.fetchval.side_effect = [
@@ -365,7 +367,7 @@ class TestIdempotentMigrationHandling:
             'userbase', 'schema_version', 'events', 'metrics', 'sessions'
         ]
         
-        mock_conn.fetch.return_value = [{'table_name': name} for name in full_schema_tables]
+        mock_conn.fetch.return_value = [{'table_name': name] for name in full_schema_tables]
         
         with patch('asyncpg.connect', return_value=mock_conn):
             with patch('psycopg2.connect'):
@@ -398,7 +400,7 @@ class TestIdempotentMigrationHandling:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate database with users table but no sessions table initially
         # Sequence: alembic_version_exists, current_alembic_version, fk_sessions_exists, fk_api_keys_exists
@@ -415,7 +417,7 @@ class TestIdempotentMigrationHandling:
         
         mock_conn.fetch.side_effect = [
             # First call in _record_alembic_managed_schema -> _get_existing_tables
-            [{'table_name': name} for name in ['alembic_version', 'users', 'secrets']]
+            [{'table_name': name] for name in ['alembic_version', 'users', 'secrets']]
         ]
         
         # Track all execute calls
@@ -466,7 +468,7 @@ class TestErrorRecoveryAndResilience:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate direct initialization (no Alembic)
         mock_conn.fetchval.return_value = False
@@ -501,13 +503,13 @@ class TestErrorRecoveryAndResilience:
     async def test_circuit_breaker_prevents_cascading_failures(self):
         """Test that circuit breaker prevents cascading failures"""
         # Mock DatabaseInitializer
-        initializer = MagicNone  # TODO: Use real service instance
+        initializer = MagicMock()  # TODO: Use real service instance
         initializer.initialize_database = AsyncMock(return_value=False)
-        initializer.add_database = MagicNone  # TODO: Use real service instance
+        initializer.add_database = MagicMock()  # TODO: Use real service instance
         
         # Mock circuit breakers 
         mock_circuit_breaker = {"is_open": True, "failure_count": 3}
-        mock_circuit_breakers = MagicNone  # TODO: Use real service instance
+        mock_circuit_breakers = MagicMock()  # TODO: Use real service instance
         mock_circuit_breakers.get = MagicMock(return_value=mock_circuit_breaker)
         initializer.circuit_breakers = mock_circuit_breakers
         
@@ -538,7 +540,7 @@ class TestErrorRecoveryAndResilience:
         """ITERATION 22: Prevent schema corruption from failed migration rollbacks.
         
         Business Value: Prevents database corruption events worth $50K+ in data recovery.
-        """
+        """"
         initializer = DatabaseInitializer()
         config = DatabaseConfig(
             type=DatabaseType.POSTGRESQL,
@@ -547,7 +549,7 @@ class TestErrorRecoveryAndResilience:
         )
         initializer.add_database(config)
         
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         
         # Simulate migration failure requiring rollback
         rollback_called = False

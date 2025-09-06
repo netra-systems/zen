@@ -1,7 +1,7 @@
 """Simple test for UVS Requirements - Only 2 Required Agents.
 
 This test validates the simplified UVS architecture without complex dependencies.
-"""
+""""
 
 import pytest
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
@@ -85,9 +85,9 @@ class TestUVSSimplified:
                 f"For data_sufficiency='{data_sufficiency}', expected {expected_agents}, got {agent_names}"
             
             # Always verify reporting is last and has no dependencies
-            assert agent_names[-1] == "reporting", f"Reporting must be last for {data_sufficiency}"
+            assert agent_names[-1] == "reporting", f"Reporting must be last for {data_sufficiency]"
             reporting_step = next(s for s in workflow_steps if s.agent_name == "reporting")
-            assert reporting_step.dependencies == [], f"Reporting must have no dependencies for {data_sufficiency}"
+            assert reporting_step.dependencies == [], f"Reporting must have no dependencies for {data_sufficiency]"
     
     def test_uvs_principles(self):
         """Test that core UVS principles are implemented."""

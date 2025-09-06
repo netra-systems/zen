@@ -2,7 +2,7 @@ from shared.isolated_environment import get_env
 """
 Test to verify and fix Redis configuration loading issues.
 This test identifies why redis_url is None and provides a fix.
-"""
+""""
 import pytest
 import os
 from netra_backend.app.config import get_config

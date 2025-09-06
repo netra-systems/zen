@@ -6,7 +6,7 @@ Tests to ensure security headers are properly added to responses.
 import pytest
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware

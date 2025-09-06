@@ -4,7 +4,7 @@ These tests validate actual supply chain research and vendor analysis using real
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures accurate vendor evaluation and supply chain optimization.
-"""
+""""
 
 import asyncio
 import json
@@ -47,9 +47,9 @@ async def real_tool_dispatcher():
 async def real_supply_researcher_agent(real_llm_manager, real_tool_dispatcher):
     """Create real SupplyResearcherAgent instance."""
     agent = SupplyResearcherAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=None  # Real websocket in production
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=None  # Real websocket in production
     )
     yield agent
     # Cleanup not needed for tests
@@ -156,7 +156,7 @@ class TestSupplyResearcherAgentRealLLM:
         assert "negotiation_leverage" in result
         assert len(result["negotiation_leverage"]) >= 2
         
-        logger.info(f"Assessed {len(assessment['vendor_scores'])} vendors with primary recommendation: {recommendations['primary_vendor']}")
+        logger.info(f"Assessed {len(assessment['vendor_scores'])] vendors with primary recommendation: {recommendations['primary_vendor']]")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -251,7 +251,7 @@ class TestSupplyResearcherAgentRealLLM:
             assert "actions" in phase
             assert "risk_level" in phase
         
-        logger.info(f"Optimized supply chain with {len(vendor_mix)} vendors and {redundancy['redundancy_factor']}x redundancy")
+        logger.info(f"Optimized supply chain with {len(vendor_mix)] vendors and {redundancy['redundancy_factor']]x redundancy")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -482,7 +482,7 @@ class TestSupplyResearcherAgentRealLLM:
         assert "threats" in insights
         assert "vendor_recommendations" in insights
         
-        logger.info(f"Benchmarked against {len(analysis['gap_analysis'])} metrics, positioned at {positioning['percentile']} percentile")
+        logger.info(f"Benchmarked against {len(analysis['gap_analysis'])] metrics, positioned at {positioning['percentile']] percentile")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -631,7 +631,7 @@ class TestSupplyResearcherAgentRealLLM:
         assert "flexibility_clauses" in optimized
         assert "exit_clauses" in optimized
         
-        logger.info(f"Identified {len(analysis['optimization_opportunities'])} contract optimization opportunities with potential savings")
+        logger.info(f"Identified {len(analysis['optimization_opportunities'])] contract optimization opportunities with potential savings")
 
 
 if __name__ == "__main__":

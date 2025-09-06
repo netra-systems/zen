@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Test SSL/TLS configuration for database connections."""
 
 import pytest
@@ -35,7 +37,7 @@ class TestSSLConfiguration:
         
         # Mock invalid SSL certificate
         with patch('ssl.create_default_context') as mock_ssl:
-            mock_context = MagicNone  # TODO: Use real service instance
+            mock_context = MagicMock()  # TODO: Use real service instance
             mock_context.check_hostname = True
             mock_context.verify_mode = ssl.CERT_REQUIRED
             mock_ssl.return_value = mock_context
@@ -64,7 +66,7 @@ class TestSSLConfiguration:
         
         # Mock TLS context with old version
         with patch('ssl.create_default_context') as mock_ssl:
-            mock_context = MagicNone  # TODO: Use real service instance
+            mock_context = MagicMock()  # TODO: Use real service instance
             mock_context.minimum_version = ssl.TLSVersion.TLSv1  # Old version
             mock_ssl.return_value = mock_context
             

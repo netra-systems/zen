@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 WebSocket State Persistence Integration Tests
 
@@ -12,7 +14,7 @@ and comprehensive state recovery scenarios. Critical for maintaining workflow in
 
 COVERAGE TARGET: 100% for message queue and state persistence functionality
 All functions ≤8 lines per CLAUDE.md requirements.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -48,15 +50,14 @@ class TestWebSocketMessageQueueRecovery:
     """Message queue behavior during WebSocket disconnection and recovery tests."""
     
     @pytest.fixture
-
     async def queue_recovery_setup(self):
 
         """Setup for message queue recovery tests."""
 
         return await setup_test_manager_with_helper()
     
-    @pytest.mark.asyncio
-    async def test_message_queue_during_disconnection(self, queue_recovery_setup):
+        @pytest.mark.asyncio
+        async def test_message_queue_during_disconnection(self, queue_recovery_setup):
 
         """Test message queue behavior during WebSocket disconnection."""
 
@@ -74,7 +75,7 @@ class TestWebSocketMessageQueueRecovery:
 
         await self._verify_message_queue_recovery(manager, user_id, queued_state)
     
-    async def _setup_connection_with_message_queue(self, manager: WebSocketManager, user_id: str) -> dict:
+        async def _setup_connection_with_message_queue(self, manager: WebSocketManager, user_id: str) -> dict:
 
         """Setup connection and create message queue during disconnection."""
 
@@ -94,9 +95,9 @@ class TestWebSocketMessageQueueRecovery:
 
         return {"websocket": websocket, "message_sent": test_message, "result": result}
     
-    async def _verify_message_queue_recovery(self, manager: WebSocketManager, 
+        async def _verify_message_queue_recovery(self, manager: WebSocketManager, 
 
-                                           user_id: str, queued_state: dict) -> None:
+        user_id: str, queued_state: dict) -> None:
 
         """Verify message queue recovery after reconnection."""
 
@@ -110,8 +111,8 @@ class TestWebSocketMessageQueueRecovery:
 
         assert stats["pending_messages"] >= 0, "Message queue should be in valid state"
     
-    @pytest.mark.asyncio
-    async def test_message_priority_during_queue_recovery(self, queue_recovery_setup):
+        @pytest.mark.asyncio
+        async def test_message_priority_during_queue_recovery(self, queue_recovery_setup):
 
         """Test message priority handling during queue recovery."""
 
@@ -129,7 +130,7 @@ class TestWebSocketMessageQueueRecovery:
 
         await self._verify_priority_preservation(manager, user_id, priority_queue)
     
-    async def _create_prioritized_message_queue(self, manager: WebSocketManager, user_id: str) -> dict:
+        async def _create_prioritized_message_queue(self, manager: WebSocketManager, user_id: str) -> dict:
 
         """Create message queue with different priority messages."""
 
@@ -141,21 +142,21 @@ class TestWebSocketMessageQueueRecovery:
         
         prioritized_messages = [
 
-            {"type": "urgent_update", "priority": "high", "sequence": 1},
+        {"type": "urgent_update", "priority": "high", "sequence": 1},
 
-            {"type": "progress_update", "priority": "medium", "sequence": 2}
+        {"type": "progress_update", "priority": "medium", "sequence": 2}
 
         ]
 
         for msg in prioritized_messages:
 
-            await manager.send_message_to_user(user_id, msg, retry=True)
+        await manager.send_message_to_user(user_id, msg, retry=True)
         
         return {"websocket": websocket, "queued_count": len(prioritized_messages)}
     
-    async def _verify_priority_preservation(self, manager: WebSocketManager,
+        async def _verify_priority_preservation(self, manager: WebSocketManager,
 
-                                          user_id: str, priority_queue: dict) -> None:
+        user_id: str, priority_queue: dict) -> None:
 
         """Verify priority message handling during recovery."""
 
@@ -218,7 +219,7 @@ class TestWebSocketPartialMessageRecovery:
 
                                              user_id: str, partial_state: dict) -> None:
 
-        """Verify partial message handling during recovery."""
+                                                 """Verify partial message handling during recovery."""
 
         new_websocket = MockWebSocket(user_id)
 
@@ -265,7 +266,7 @@ class TestWebSocketPartialMessageRecovery:
 
                                             user_id: str, large_message_state: dict) -> None:
 
-        """Verify system stability with large message handling."""
+                                                """Verify system stability with large message handling."""
 
         stats = manager.get_unified_stats()
 
@@ -307,7 +308,7 @@ class TestWebSocketComprehensiveStateRecovery:
 
                                               helper: StateRecoveryTestHelper, user_id: str) -> dict:
 
-        """Establish complex workflow state for testing."""
+                                                  """Establish complex workflow state for testing."""
 
         websocket = MockWebSocket(user_id)
 
@@ -319,9 +320,9 @@ class TestWebSocketComprehensiveStateRecovery:
 
         state_messages = [
 
-            {"type": "create_thread", "thread_id": state_data["thread_id"]},
+            {"type": "create_thread", "thread_id": state_data["thread_id"]],
 
-            {"type": "start_agent", "agents": state_data["active_agents"]}
+            {"type": "start_agent", "agents": state_data["active_agents"]]
 
         ]
 
@@ -335,7 +336,7 @@ class TestWebSocketComprehensiveStateRecovery:
 
                                                         user_id: str, initial_state: dict) -> None:
 
-        """Test disconnection while preserving complex state."""
+                                                            """Test disconnection while preserving complex state."""
 
         websocket = MockWebSocket(user_id)
 
@@ -361,7 +362,7 @@ class TestWebSocketComprehensiveStateRecovery:
 
                                            helper: StateRecoveryTestHelper, user_id: str) -> None:
 
-        """Verify comprehensive state recovery after reconnection."""
+                                               """Verify comprehensive state recovery after reconnection."""
 
         new_websocket = MockWebSocket(user_id)
 

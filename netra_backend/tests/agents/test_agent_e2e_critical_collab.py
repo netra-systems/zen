@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Collaboration and authentication critical end-to-end tests.
 Tests 7-8: Authentication/authorization, multi-agent collaboration.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -30,7 +32,7 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
         - Test user authentication before agent execution
         - Test authorization for different agent capabilities
         - Test secure token handling
-        """
+        """"
         infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
@@ -178,7 +180,7 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
         - Test parallel sub-agent execution
         - Test inter-agent communication
         - Test collaborative decision making
-        """
+        """"
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         run_id = str(uuid.uuid4())

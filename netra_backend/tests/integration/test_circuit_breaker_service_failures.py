@@ -5,7 +5,7 @@ BVJ: Circuit breaker protection prevents cascading failures and ensures platform
 stability during service degradation, critical for maintaining SLA compliance.
 
 Tests circuit breaker behavior with real service failures using Docker containers.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -36,14 +36,14 @@ class TestCircuitBreakerServiceFailuresL3:
         yield client
         client.close()
     
-    @pytest.fixture(scope="class")
-    async def failing_service_container(self, docker_client):
+        @pytest.fixture(scope="class")
+        async def failing_service_container(self, docker_client):
         """Start a container that can simulate service failures."""
         container = docker_client.containers.run(
-            "nginx:alpine",
-            ports={'80/tcp': None},
-            detach=True,
-            name="circuit_breaker_test_service"
+        "nginx:alpine",
+        ports={'80/tcp': None},
+        detach=True,
+        name="circuit_breaker_test_service"
         )
         
         # Get assigned port
@@ -58,52 +58,49 @@ class TestCircuitBreakerServiceFailuresL3:
         container.stop()
         container.remove()
     
-    async def _wait_for_service(self, url: str, timeout: int = 30):
+        async def _wait_for_service(self, url: str, timeout: int = 30):
         """Wait for service to be available."""
         start_time = time.time()
         while time.time() - start_time < timeout:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=1)) as response:
-                        if response.status == 200:
-                            return
-            except:
-                pass
-            await asyncio.sleep(0.5)
+        try:
+        async with aiohttp.ClientSession() as session:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=1)) as response:
+        if response.status == 200:
+        return
+        except:
+        await asyncio.sleep(0.5)
         raise TimeoutError(f"Service at {url} not ready within {timeout}s")
     
-    def _stop_service_container(self, docker_client, container_name: str):
+        def _stop_service_container(self, docker_client, container_name: str):
         """Stop service container to simulate failure."""
         try:
-            container = docker_client.containers.get(container_name)
-            container.stop()
+        container = docker_client.containers.get(container_name)
+        container.stop()
         except docker.errors.NotFound:
-            pass
     
-    def _start_service_container(self, docker_client, container_name: str):
+        def _start_service_container(self, docker_client, container_name: str):
         """Start service container to simulate recovery."""
         try:
-            container = docker_client.containers.get(container_name)
-            container.start()
+        container = docker_client.containers.get(container_name)
+        container.start()
         except docker.errors.NotFound:
-            pass
     
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_opens_on_failures(
+        @pytest.mark.asyncio
+        async def test_circuit_breaker_opens_on_failures(
         self, 
         docker_client, 
         failing_service_container
-    ):
+        ):
         """Test that circuit breaker opens after consecutive failures."""
         circuit_breaker = CircuitBreaker(
-            failure_threshold=3,
-            timeout=5.0,
-            recovery_timeout=10.0
+        failure_threshold=3,
+        timeout=5.0,
+        recovery_timeout=10.0
         )
         
         client = ExternalServiceClient(
-            base_url=failing_service_container,
-            circuit_breaker=circuit_breaker
+        base_url=failing_service_container,
+        circuit_breaker=circuit_breaker
         )
         
         # Stop the service to cause failures
@@ -112,40 +109,39 @@ class TestCircuitBreakerServiceFailuresL3:
         # Generate failures to trip circuit breaker
         failure_count = 0
         for i in range(5):
-            try:
-                await client.make_request("/health")
-            except Exception:
-                failure_count += 1
+        try:
+        await client.make_request("/health")
+        except Exception:
+        failure_count += 1
         
         assert failure_count >= 3
         assert circuit_breaker.state == "open"
     
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_half_open_recovery(
+        @pytest.mark.asyncio
+        async def test_circuit_breaker_half_open_recovery(
         self, 
         docker_client, 
         failing_service_container
-    ):
+        ):
         """Test circuit breaker half-open state and recovery."""
         circuit_breaker = CircuitBreaker(
-            failure_threshold=2,
-            timeout=2.0,
-            recovery_timeout=3.0
+        failure_threshold=2,
+        timeout=2.0,
+        recovery_timeout=3.0
         )
         
         client = ExternalServiceClient(
-            base_url=failing_service_container,
-            circuit_breaker=circuit_breaker
+        base_url=failing_service_container,
+        circuit_breaker=circuit_breaker
         )
         
         # Trip circuit breaker
         self._stop_service_container(docker_client, "circuit_breaker_test_service")
         
         for _ in range(3):
-            try:
-                await client.make_request("/health")
-            except:
-                pass
+        try:
+        await client.make_request("/health")
+        except:
         
         assert circuit_breaker.state == "open"
         
@@ -164,23 +160,23 @@ class TestCircuitBreakerServiceFailuresL3:
         assert response is not None
         assert circuit_breaker.state == "closed"
     
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_metrics_collection(
+        @pytest.mark.asyncio
+        async def test_circuit_breaker_metrics_collection(
         self, 
         docker_client, 
         failing_service_container
-    ):
+        ):
         """Test that circuit breaker collects proper metrics."""
         circuit_breaker = CircuitBreaker(
-            failure_threshold=2,
-            timeout=1.0,
-            recovery_timeout=2.0,
-            enable_metrics=True
+        failure_threshold=2,
+        timeout=1.0,
+        recovery_timeout=2.0,
+        enable_metrics=True
         )
         
         client = ExternalServiceClient(
-            base_url=failing_service_container,
-            circuit_breaker=circuit_breaker
+        base_url=failing_service_container,
+        circuit_breaker=circuit_breaker
         )
         
         # Generate mix of success and failures
@@ -188,10 +184,9 @@ class TestCircuitBreakerServiceFailuresL3:
         
         # Cause failures
         for _ in range(3):
-            try:
-                await client.make_request("/health")
-            except:
-                pass
+        try:
+        await client.make_request("/health")
+        except:
         
         metrics = circuit_breaker.get_metrics()
         assert metrics["total_requests"] >= 3
@@ -199,54 +194,53 @@ class TestCircuitBreakerServiceFailuresL3:
         assert metrics["circuit_opened_count"] >= 1
         assert metrics["state"] == "open"
     
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_with_timeout_failures(
+        @pytest.mark.asyncio
+        async def test_circuit_breaker_with_timeout_failures(
         self, 
         docker_client, 
         failing_service_container
-    ):
+        ):
         """Test circuit breaker behavior with timeout failures."""
         circuit_breaker = CircuitBreaker(
-            failure_threshold=2,
-            timeout=0.1,  # Very short timeout
-            recovery_timeout=2.0
+        failure_threshold=2,
+        timeout=0.1,  # Very short timeout
+        recovery_timeout=2.0
         )
         
         client = ExternalServiceClient(
-            base_url=failing_service_container,
-            circuit_breaker=circuit_breaker,
-            request_timeout=0.05  # Even shorter request timeout
+        base_url=failing_service_container,
+        circuit_breaker=circuit_breaker,
+        request_timeout=0.5  # Even shorter request timeout
         )
         
         # Even with service running, timeouts should trip breaker
         timeout_failures = 0
         for _ in range(4):
-            try:
-                await client.make_request("/")
-            except asyncio.TimeoutError:
-                timeout_failures += 1
-            except:
-                pass
+        try:
+        await client.make_request("/")
+        except asyncio.TimeoutError:
+        timeout_failures += 1
+        except:
         
         assert timeout_failures >= 2
         assert circuit_breaker.state == "open"
     
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_concurrent_requests(
+        @pytest.mark.asyncio
+        async def test_circuit_breaker_concurrent_requests(
         self, 
         docker_client, 
         failing_service_container
-    ):
+        ):
         """Test circuit breaker with concurrent requests during failures."""
         circuit_breaker = CircuitBreaker(
-            failure_threshold=3,
-            timeout=1.0,
-            recovery_timeout=3.0
+        failure_threshold=3,
+        timeout=1.0,
+        recovery_timeout=3.0
         )
         
         client = ExternalServiceClient(
-            base_url=failing_service_container,
-            circuit_breaker=circuit_breaker
+        base_url=failing_service_container,
+        circuit_breaker=circuit_breaker
         )
         
         # Stop service
@@ -255,8 +249,8 @@ class TestCircuitBreakerServiceFailuresL3:
         # Make concurrent requests
         tasks = []
         for _ in range(10):
-            task = asyncio.create_task(self._safe_request(client, "/health"))
-            tasks.append(task)
+        task = asyncio.create_task(self._safe_request(client, "/health"))
+        tasks.append(task)
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
@@ -265,9 +259,9 @@ class TestCircuitBreakerServiceFailuresL3:
         assert failures >= 8
         assert circuit_breaker.state == "open"
     
-    async def _safe_request(self, client, path: str):
+        async def _safe_request(self, client, path: str):
         """Make a safe request that handles exceptions."""
         try:
-            return await client.make_request(path)
+        return await client.make_request(path)
         except Exception as e:
-            return e
+        return e

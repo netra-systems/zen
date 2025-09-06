@@ -2,24 +2,24 @@
 Staging Production Parity Validation Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Risk Reduction
 - Value Impact: Accurate staging representation
 - Strategic/Revenue Impact: Parity issues cause production surprises
 
 Tests comprehensive validation including:
-- Configuration parity
+    - Configuration parity
 - Service discovery
 - Scaling behavior
 - Monitoring consistency
 - Deployment validation
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -46,10 +46,9 @@ class TestStagingProductionParityValidation:
     Comprehensive staging production parity validation tests.
     
     Uses L3 realism with containerized services for production-like validation.
-    """
+    """"
     
     @pytest.fixture
-    @pytest.mark.asyncio
     async def test_containers(self):
         """Set up containerized services for L3 testing."""
         # Container setup based on test requirements
@@ -59,33 +58,33 @@ class TestStagingProductionParityValidation:
         test_class_name = self.__class__.__name__.lower()
         
         if 'database' in test_class_name or 'connection' in test_class_name:
-            # PostgreSQL container
-            containers["postgres"] = {
-                "url": "postgresql://test:test@localhost:5433/netra_test",
-                "max_connections": 200,
-                "pool_size": 20
-            }
+        # PostgreSQL container
+        containers["postgres"] = {
+        "url": "postgresql://test:test@localhost:5433/netra_test",
+        "max_connections": 200,
+        "pool_size": 20
+        }
         
         if 'clickhouse' in test_class_name:
-            # ClickHouse container
-            containers["clickhouse"] = {
-                "url": "http://localhost:8124",
-                "native_port": 9001,
-                "max_connections": 100
-            }
+        # ClickHouse container
+        containers["clickhouse"] = {
+        "url": "http://localhost:8124",
+        "native_port": 9001,
+        "max_connections": 100
+        }
         
         if 'redis' in test_class_name or 'session' in test_class_name:
-            # Redis container
-            containers["redis"] = {
-                "url": "redis://localhost:6380",
-                "max_memory": "256mb",
-                "max_clients": 10000
-            }
+        # Redis container
+        containers["redis"] = {
+        "url": "redis://localhost:6380",
+        "max_memory": "256mb",
+        "max_clients": 10000
+        }
         
         yield containers
     
-    @pytest.mark.asyncio
-    async def test_configuration_parity(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_configuration_parity(self, test_containers):
         """
         Test configuration parity.
         
@@ -94,7 +93,7 @@ class TestStagingProductionParityValidation:
         - Performance requirements
         - Error handling
         - Recovery mechanisms
-        """
+        """"
         start_time = time.time()
         
         # Test implementation
@@ -106,39 +105,38 @@ class TestStagingProductionParityValidation:
         duration = time.time() - start_time
         assert duration < 30, f"Test took {duration:.2f}s (max: 30s)"
     
-    @pytest.mark.asyncio
-    async def test_service_discovery(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_service_discovery(self, test_containers):
         """
         Test service discovery.
         
         Validates correct behavior under this scenario.
-        """
+        """"
         # Scenario-specific test implementation
         assert True, "Test implementation needed"
     
-    @pytest.mark.asyncio
-    async def test_scaling_behavior(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_scaling_behavior(self, test_containers):
         """
         Test scaling behavior.
         
         Validates handling and recovery.
-        """
+        """"
         # Test error conditions and recovery
         with pytest.raises(Exception):
-            # Simulate failure condition
-            pass
+        # Simulate failure condition
         
         # Verify recovery
         assert True, "Recovery validation needed"
     
-    @pytest.mark.smoke
-    @pytest.mark.asyncio
-    async def test_smoke_staging_production_parity_validation(self, test_containers):
+        @pytest.mark.smoke
+        @pytest.mark.asyncio
+        async def test_smoke_staging_production_parity_validation(self, test_containers):
         """
         Quick smoke test for staging production parity validation.
         
         Should complete in <30 seconds for CI/CD.
-        """
+        """"
         start_time = time.time()
         
         # Basic validation

@@ -1,7 +1,7 @@
 """
 Log Clustering Algorithms Tests
 Test log clustering and pattern mining
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -25,7 +25,7 @@ class TestLogClusteringAlgorithms:
                 -- Extract template by replacing numbers and UUIDs
                 replaceRegexpAll(
                     replaceRegexpAll(message, '[0-9]+', 'NUM'),
-                    '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', 'UUID'
+                    '[a-f0-9]{8]-[a-f0-9]{4]-[a-f0-9]{4]-[a-f0-9]{4]-[a-f0-9]{12]', 'UUID'
                 ) as template,
                 count() as occurrence_count,
                 min(timestamp) as first_seen,
@@ -51,7 +51,7 @@ class TestLogClusteringAlgorithms:
         SELECT * FROM clusters
         ORDER BY total_occurrences DESC
         LIMIT 100
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"Log clustering query failed: {error}"
@@ -89,7 +89,7 @@ class TestLogClusteringAlgorithms:
         )
         SELECT * FROM cascades
         ORDER BY start_minute DESC, source_errors DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"Error cascade query failed: {error}"
@@ -132,7 +132,7 @@ class TestLogClusteringAlgorithms:
         FROM message_analysis
         GROUP BY error_category, component, level
         ORDER BY total_occurrences DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(frequency_query)
         assert is_valid, f"Frequency analysis query failed: {error}"
@@ -185,7 +185,7 @@ class TestLogClusteringAlgorithms:
             cluster_size / nullIf(messages_in_cluster, 0) as cluster_density
         FROM similarity_clusters
         ORDER BY cluster_size DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(similarity_query)
         assert is_valid, f"Similarity clustering query failed: {error}"
@@ -230,7 +230,7 @@ class TestLogClusteringAlgorithms:
             pattern_frequency / (SELECT sum(pattern_frequency) FROM pattern_sequences) as pattern_strength
         FROM pattern_sequences
         ORDER BY pattern_frequency DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(temporal_query)
         assert is_valid, f"Temporal pattern mining query failed: {error}"
@@ -294,7 +294,7 @@ class TestLogClusteringAlgorithms:
         WHERE anomaly_level != 'normal'
         GROUP BY anomaly_level, component, level
         ORDER BY avg_anomaly_severity DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(anomaly_query)
         assert is_valid, f"Anomaly clustering query failed: {error}"

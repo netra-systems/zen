@@ -1,14 +1,16 @@
+import asyncio
+
 """Subscription Tier Enforcement Integration Test ($1.2M impact)
 
 L2 realism level - tests user tier validation across service boundaries
 using real internal dependencies for tier enforcement.
 
 Business Value Justification:
-- Segment: All paid tiers ($1.2M revenue impact)
+    - Segment: All paid tiers ($1.2M revenue impact)
 - Business Goal: Revenue Protection - Tier limit enforcement
 - Value Impact: Prevents revenue leakage from tier bypass attempts
 - Strategic Impact: Essential for subscription business model integrity
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -57,26 +59,25 @@ async def permission_service(l2_services):
     yield ToolPermissionService(None)
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_users():
     """Test users for different subscription tiers"""
     return {
-        "free_user": User(
-            id="user_free_001", email="free@test.com", plan_tier="free",
-            plan_started_at=datetime.now(timezone.utc)
-        ),
-        "pro_user": User(
-            id="user_pro_001", email="pro@test.com", plan_tier="pro",
-            plan_started_at=datetime.now(timezone.utc)
-        ),
-        "enterprise_user": User(
-            id="user_ent_001", email="enterprise@test.com", plan_tier="enterprise",
-            plan_started_at=datetime.now(timezone.utc)
-        ),
-        "expired_user": User(
-            id="user_exp_001", email="expired@test.com", plan_tier="pro",
-            plan_expires_at=datetime.now(timezone.utc) - timedelta(days=1)
-        )
+    "free_user": User(
+    id="user_free_001", email="free@test.com", plan_tier="free",
+    plan_started_at=datetime.now(timezone.utc)
+    ),
+    "pro_user": User(
+    id="user_pro_001", email="pro@test.com", plan_tier="pro",
+    plan_started_at=datetime.now(timezone.utc)
+    ),
+    "enterprise_user": User(
+    id="user_ent_001", email="enterprise@test.com", plan_tier="enterprise",
+    plan_started_at=datetime.now(timezone.utc)
+    ),
+    "expired_user": User(
+    id="user_exp_001", email="expired@test.com", plan_tier="pro",
+    plan_expires_at=datetime.now(timezone.utc) - timedelta(days=1)
+    )
     }
 
 @pytest.fixture

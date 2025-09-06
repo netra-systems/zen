@@ -2,7 +2,7 @@
 
 This test verifies that the configuration loop issue is fixed in actual
 Docker environments by monitoring log output.
-"""
+""""
 import unittest
 import subprocess
 import time
@@ -53,13 +53,13 @@ class TestDockerConfigurationIntegration(unittest.TestCase):
         
         Returns:
             Container ID
-        """
+        """"
         # Build docker run command
         cmd = ["docker", "run", "-d", "--name", self.container_name]
         
         # Add environment variables
         for key, value in env_vars.items():
-            cmd.extend(["-e", f"{key}={value}"])
+            cmd.extend(["-e", f"{key]={value]"])
         
         # Add the image
         cmd.append("netra-backend:latest")

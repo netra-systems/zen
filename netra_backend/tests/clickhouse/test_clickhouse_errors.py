@@ -1,7 +1,9 @@
+import asyncio
+
 """
 ClickHouse Error Handling Tests
 Tests for error handling and recovery mechanisms
-"""
+""""
 
 import sys
 from pathlib import Path

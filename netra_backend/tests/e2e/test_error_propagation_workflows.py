@@ -1,15 +1,17 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 E2E Tests for Error Propagation and Real Workflow Integration
 
 Tests error propagation through layers and real workflow integration:
-- Error propagation through middleware layers
+    - Error propagation through middleware layers
 - Recovery coordination across different layers
 - Real workflow integration points
 - Agent workflow hooks integration
 
-All functions ≤8 lines per CLAUDE.md requirements.
-Module ≤300 lines per CLAUDE.md requirements.
-"""
+All functions <=8 lines per CLAUDE.md requirements.
+Module <=300 lines per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path
@@ -329,7 +331,7 @@ class TestRealWorkflowIntegration:
         # Mock: Generic component isolation for controlled unit testing
         monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
+        monitoring.record_quality_event = AsyncMock()  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_security_middleware(self) -> SecurityMiddleware:

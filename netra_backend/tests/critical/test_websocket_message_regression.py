@@ -1,13 +1,15 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Comprehensive L3 regression test suite for WebSocket message handling - Real Services.
 
 Business Value Justification (BVJ):
-- Segment: All tiers (Free, Early, Mid, Enterprise)
+    - Segment: All tiers (Free, Early, Mid, Enterprise)
 - Business Goal: Message reliability protecting $20K MRR
 - Value Impact: Prevents message loss and communication failures
 - Strategic Impact: Core real-time communication foundation
 
 L3 Testing Standards:
-- Real WebSocket connections via TestClient
+    - Real WebSocket connections via TestClient
 - Real message processing with actual handlers
 - Real error propagation and response patterns
 - Real threading and async processing
@@ -15,7 +17,7 @@ L3 Testing Standards:
 
 This suite tests the critical connection point between frontend and backend,
 ensuring proper error handling and preventing silent failures using real services.
-"""
+""""
 
 import asyncio
 import json
@@ -50,7 +52,7 @@ class TestWebSocketMessageRegression:
     def _create_valid_test_token(self, user_id: str = None) -> str:
         """Create valid JWT token for WebSocket testing."""
         if user_id is None:
-            user_id = f"test-user-{uuid.uuid4().hex[:8]}"
+            user_id = f"test-user-{uuid.uuid4().hex[:8]]"
         
         return self.jwt_handler.create_access_token(
             user_id=user_id,
@@ -61,9 +63,9 @@ class TestWebSocketMessageRegression:
     def _create_test_message(self, message_type: str = "user_message", 
                            content: str = "Test message", 
                            thread_id: str = None) -> Dict[str, Any]:
-        """Create test message payload."""
+                               """Create test message payload."""
         if thread_id is None:
-            thread_id = f"thread-{uuid.uuid4().hex[:8]}"
+            thread_id = f"thread-{uuid.uuid4().hex[:8]]"
         
         return {
             "type": message_type,
@@ -116,7 +118,7 @@ class TestWebSocketMessageRegression:
         malformed_message = {
             "type": "user_message",
             "payload": {
-                "thread_id": f"thread-{uuid.uuid4().hex[:8]}",
+                "thread_id": f"thread-{uuid.uuid4().hex[:8]]",
                 # Missing content field
                 "references": [],
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -303,7 +305,7 @@ class TestRealWebSocketErrorHandling:
     def _create_valid_test_token(self) -> str:
         """Create mock JWT token for testing."""
         # Return mock token for testing
-        user_id = f"error-test-{uuid.uuid4().hex[:8]}"
+        user_id = f"error-test-{uuid.uuid4().hex[:8]]"
         return f"mock-token-{user_id}"
     
     @pytest.mark.asyncio
@@ -362,7 +364,7 @@ class TestRealWebSocketErrorHandling:
                     "type": "user_message",
                     "payload": {
                         "content": "Complex request that might take time to process " * 50,
-                        "thread_id": f"timeout-test-{uuid.uuid4().hex[:8]}"
+                        "thread_id": f"timeout-test-{uuid.uuid4().hex[:8]]"
                     }
                 }
                 

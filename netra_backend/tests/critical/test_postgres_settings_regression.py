@@ -1,8 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Test for postgres_events settings regression.
 
 This test reproduces the critical issue where settings is not defined
 in postgres_events.py, causing startup failures.
-"""
+""""
 
 import pytest
 import asyncio
@@ -39,7 +41,7 @@ def test_postgres_events_settings_not_defined():
     # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn = TestDatabaseManager().get_session()
     # Mock: Generic component isolation for controlled unit testing
-    mock_dbapi_conn.cursor.return_value.__enter__ = Mock(return_value=return_value_instance  # Initialize appropriate service)
+    mock_dbapi_conn.cursor.return_value.__enter__ = Mock(return_value=return_value_instance)  # Initialize appropriate service
     # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn.cursor.return_value.__exit__ = __exit___instance  # Initialize appropriate service
     # Mock: Component isolation for controlled unit testing
@@ -57,7 +59,6 @@ def test_postgres_events_settings_not_defined():
 
 def test_postgres_events_checkout_handler_settings_error():
     """Test checkout handler fails with undefined settings."""
-    pass
     from netra_backend.app.db import postgres_events
     
     # Mock: Component isolation for controlled unit testing
@@ -96,11 +97,11 @@ async def test_postgres_session_integration_with_events():
     # Mock: Session isolation for controlled testing without external state
     with patch('netra_backend.app.db.postgres_core.async_session_factory') as mock_factory:
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = MagicNone  # TODO: Use real service instance
+        mock_session = MagicMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_factory.return_value.__aenter__ = MagicMock(return_value=mock_session)
         # Mock: Generic component isolation for controlled unit testing
-        mock_factory.return_value.__aexit__ = MagicNone  # TODO: Use real service instance
+        mock_factory.return_value.__aexit__ = MagicMock()  # TODO: Use real service instance
         
         from netra_backend.app.db.postgres_session import get_async_db
         
@@ -116,7 +117,6 @@ async def test_postgres_session_integration_with_events():
 
 def test_all_settings_references_need_initialization():
     """Verify all places in postgres_events that reference settings."""
-    pass
     import ast
     import inspect
     from netra_backend.app.db import postgres_events

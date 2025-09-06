@@ -1,8 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test module: Supervisor Prompts and Utils
 Split from large test file for architecture compliance
 Test classes: TestAgentPromptsTemplateRendering, TestEnhancedPromptsContextBuilding, TestAgentUtilsHelperFunctions
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -161,7 +163,7 @@ class TestAgentPromptsTemplateRendering:
         User: {user_query}
         Context: {context}
         History: {history}
-        """
+        """"
         
         variables = {
             "system_prompt": "You are an AI optimizer",
@@ -305,12 +307,12 @@ class TestAgentUtilsHelperFunctions:
         
         state2 = DeepAgentState(
             user_request="Query",
-            optimizations_result={"optimizations": [{"type": "batch"}]},
+            optimizations_result={"optimizations": [{"type": "batch"]]],
             data_result={"analysis": {"metric2": 20}}
         )
         
         merged = utils.merge_states(state1, state2)
         
         assert merged.user_request == "Query"
-        assert merged.optimizations_result == {"optimizations": [{"type": "batch"}]}
+        assert merged.optimizations_result == {"optimizations": [{"type": "batch"]]]
         assert merged.data_result == {"analysis": {"metric1": 10, "metric2": 20}}

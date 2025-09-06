@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Rate Limit Impact Analysis Tests
 Tests rate limit impact analysis for scaling scenarios.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
@@ -22,13 +24,13 @@ from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAg
 def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for scaling impact analysis testing."""
     agents = {
-        'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
-        'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
+    'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
+    'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
     }
     return {
-        'agents': agents,
-        'llm_manager': real_llm_manager,
-        'websocket_manager': real_websocket_manager
+    'agents': agents,
+    'llm_manager': real_llm_manager,
+    'websocket_manager': real_websocket_manager
     }
 
 class TestRateLimitImpactAnalysis:

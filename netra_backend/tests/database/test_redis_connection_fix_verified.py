@@ -1,15 +1,17 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 env = get_env()
 Test that verifies the Redis connection fix for Python 3.12 compatibility.
 
 This test confirms that the database_connector now uses redis.asyncio
 which is compatible with Python 3.12, instead of the incompatible aioredis 2.0.1.
-"""
+""""
 
 import asyncio
 import os
@@ -26,7 +28,7 @@ async def test_redis_connection_works_with_python312():
     
     The fix uses redis.asyncio (from redis 4.3+) which is compatible with Python 3.12,
     falling back to aioredis only if the newer library is not available.
-    """
+    """"
     # Setup environment for Redis connection
     env.set("REDIS_URL", "redis://localhost:6379/0", "test")
     
@@ -41,10 +43,10 @@ async def test_redis_connection_works_with_python312():
     
     # Mock Redis connection for testing
     with patch('redis.asyncio.from_url') as mock_from_url:
-        mock_client = AsyncNone  # TODO: Use real service instance
+        mock_client = AsyncMock()  # TODO: Use real service instance
         mock_from_url.return_value = mock_client
         mock_client.ping = AsyncMock(return_value=True)
-        mock_client.aclose = AsyncNone  # TODO: Use real service instance
+        mock_client.aclose = AsyncMock()  # TODO: Use real service instance
         
         # Test the actual connection - this should now work with Python 3.12
         result = await connector._test_redis_connection(redis_conn)
@@ -59,7 +61,7 @@ async def test_dev_launcher_database_validation_succeeds():
     Test that the dev launcher database validation succeeds with all databases.
     
     This simulates the fixed behavior when running `python scripts/dev_launcher.py`.
-    """
+    """"
     # Setup environment
     env.set("DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5433/netra_dev", "test")
     env.set("REDIS_URL", "redis://localhost:6379/0", "test")
@@ -99,7 +101,7 @@ def test_redis_asyncio_import_works():
     Test that redis.asyncio can be imported successfully on Python 3.12.
     
     This is the fix for the aioredis incompatibility issue.
-    """
+    """"
     try:
         import redis.asyncio as redis_async
         
@@ -119,7 +121,7 @@ def test_fallback_to_aioredis_if_needed():
     Test that the implementation falls back to aioredis if redis.asyncio is not available.
     
     This ensures backward compatibility for older environments.
-    """
+    """"
     # This test verifies the fallback logic exists
 # Removed broken import statement
 if __name__ == "__main__":

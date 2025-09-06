@@ -1,16 +1,18 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Tests for RequestScopedToolDispatcher and ToolExecutorFactory.
 
 This test suite validates that the request-scoped tool execution system provides
 complete user isolation and eliminates global state issues.
 
 Test Categories:
-- User isolation validation
+    - User isolation validation
 - WebSocket event routing
 - Concurrent user handling
 - Resource cleanup
 - Performance monitoring
 - Error handling and recovery
-"""
+""""
 
 import asyncio
 import pytest
@@ -47,48 +49,44 @@ class TestRequestScopedToolDispatcher:
     
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test user context."""
-    pass
         return UserExecutionContext(
-            user_id=f"test_user_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
-            run_id=f"test_run_{uuid.uuid4().hex[:8]}"
+        user_id=f"test_user_{uuid.uuid4().hex[:8]]",
+        thread_id=f"test_thread_{uuid.uuid4().hex[:8]]",
+        run_id=f"test_run_{uuid.uuid4().hex[:8]]"
         )
     
-    @pytest.fixture
- def real_websocket_emitter():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_websocket_emitter():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock WebSocket emitter."""
-    pass
         emitter = Mock(spec=WebSocketEventEmitter)
         emitter.notify_tool_executing = AsyncMock(return_value=True)
         emitter.notify_tool_completed = AsyncMock(return_value=True)
-        emitter.dispose = AsyncNone  # TODO: Use real service instance
+        emitter.dispose = AsyncMock()  # TODO: Use real service instance
         emitter.get_context = get_context_instance  # Initialize appropriate service
         return emitter
     
-    @pytest.fixture
-    def simple_tool(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def simple_tool(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create a simple test tool."""
-    pass
         def simple_tool_func(*args, **kwargs):
-    pass
-            return {"result": "test_success", "args": args, "kwargs": kwargs}
+        return {"result": "test_success", "args": args, "kwargs": kwargs}
         
         simple_tool_func.name = "simple_tool"
         simple_tool_func.description = "A simple test tool"
         return simple_tool_func
     
-    async def test_dispatcher_creation_with_user_context(self, user_context, mock_websocket_emitter):
+        async def test_dispatcher_creation_with_user_context(self, user_context, mock_websocket_emitter):
         """Test that dispatcher is created with proper user context isolation."""
         dispatcher = RequestScopedToolDispatcher(
-            user_context=user_context,
-            websocket_emitter=mock_websocket_emitter
+        user_context=user_context,
+        websocket_emitter=mock_websocket_emitter
         )
         
         # Verify context binding
@@ -108,19 +106,18 @@ class TestRequestScopedToolDispatcher:
         
         await dispatcher.cleanup()
     
-    async def test_user_isolation_between_dispatchers(self, mock_websocket_emitter):
+        async def test_user_isolation_between_dispatchers(self, mock_websocket_emitter):
         """Test that multiple dispatchers maintain complete user isolation."""
-    pass
         # Create contexts for two different users
         user1_context = UserExecutionContext(
-            user_id="user1",
-            thread_id="thread1", 
-            run_id="run1"
+        user_id="user1",
+        thread_id="thread1", 
+        run_id="run1"
         )
         user2_context = UserExecutionContext(
-            user_id="user2",
-            thread_id="thread2",
-            run_id="run2"
+        user_id="user2",
+        thread_id="thread2",
+        run_id="run2"
         )
         
         # Create dispatchers for each user
@@ -142,22 +139,22 @@ class TestRequestScopedToolDispatcher:
         await dispatcher1.cleanup()
         await dispatcher2.cleanup()
     
-    async def test_tool_registration_isolation(self, user_context, mock_websocket_emitter):
+        async def test_tool_registration_isolation(self, user_context, mock_websocket_emitter):
         """Test that tool registrations are isolated per dispatcher."""
         dispatcher1 = RequestScopedToolDispatcher(user_context, websocket_emitter=mock_websocket_emitter)
         
         # Create second user context
         user2_context = UserExecutionContext(
-            user_id="user2",
-            thread_id="thread2", 
-            run_id="run2"
+        user_id="user2",
+        thread_id="thread2", 
+        run_id="run2"
         )
         dispatcher2 = RequestScopedToolDispatcher(user2_context, websocket_emitter=mock_websocket_emitter)
         
         # Register tool only in first dispatcher
         def user1_tool():
-            await asyncio.sleep(0)
-    return "user1_result"
+        await asyncio.sleep(0)
+        return "user1_result"
         
         dispatcher1.register_tool("user1_tool", user1_tool)
         
@@ -167,7 +164,7 @@ class TestRequestScopedToolDispatcher:
         
         # Register different tool in second dispatcher
         def user2_tool():
-            return "user2_result"
+        return "user2_result"
         
         dispatcher2.register_tool("user2_tool", user2_tool)
         
@@ -180,9 +177,8 @@ class TestRequestScopedToolDispatcher:
         await dispatcher1.cleanup()
         await dispatcher2.cleanup()
     
-    async def test_websocket_event_isolation(self, mock_websocket_emitter):
+        async def test_websocket_event_isolation(self, mock_websocket_emitter):
         """Test that WebSocket events are properly isolated per user."""
-    pass
         # Create contexts for two users
         user1_context = UserExecutionContext(user_id="user1", thread_id="thread1", run_id="run1")
         user2_context = UserExecutionContext(user_id="user2", thread_id="thread2", run_id="run2")
@@ -191,12 +187,12 @@ class TestRequestScopedToolDispatcher:
         emitter1 = Mock(spec=WebSocketEventEmitter)
         emitter1.notify_tool_executing = AsyncMock(return_value=True)
         emitter1.notify_tool_completed = AsyncMock(return_value=True)
-        emitter1.dispose = AsyncNone  # TODO: Use real service instance
+        emitter1.dispose = AsyncMock()  # TODO: Use real service instance
         
         emitter2 = Mock(spec=WebSocketEventEmitter)
         emitter2.notify_tool_executing = AsyncMock(return_value=True)
         emitter2.notify_tool_completed = AsyncMock(return_value=True)
-        emitter2.dispose = AsyncNone  # TODO: Use real service instance
+        emitter2.dispose = AsyncMock()  # TODO: Use real service instance
         
         # Create dispatchers with separate emitters
         dispatcher1 = RequestScopedToolDispatcher(user1_context, websocket_emitter=emitter1)
@@ -204,9 +200,8 @@ class TestRequestScopedToolDispatcher:
         
         # Register same tool in both dispatchers
         def test_tool():
-    pass
-            await asyncio.sleep(0)
-    return "tool_result"
+        await asyncio.sleep(0)
+        return "tool_result"
         
         dispatcher1.register_tool("test_tool", test_tool)
         dispatcher2.register_tool("test_tool", test_tool)
@@ -231,40 +226,40 @@ class TestRequestScopedToolDispatcher:
         await dispatcher1.cleanup()
         await dispatcher2.cleanup()
     
-    async def test_concurrent_tool_execution(self, mock_websocket_emitter):
+        async def test_concurrent_tool_execution(self, mock_websocket_emitter):
         """Test concurrent tool execution across multiple users."""
         # Create multiple user contexts
         contexts = [
-            UserExecutionContext(
-                user_id=f"user_{i}",
-                thread_id=f"thread_{i}",
-                run_id=f"run_{i}"
-            )
-            for i in range(5)
+        UserExecutionContext(
+        user_id=f"user_{i}",
+        thread_id=f"thread_{i}",
+        run_id=f"run_{i}"
+        )
+        for i in range(5)
         ]
         
         # Create dispatchers for each context
         dispatchers = [
-            RequestScopedToolDispatcher(context, websocket_emitter=mock_websocket_emitter)
-            for context in contexts
+        RequestScopedToolDispatcher(context, websocket_emitter=mock_websocket_emitter)
+        for context in contexts
         ]
         
         # Define a slow tool to test concurrency
         async def slow_tool(delay: float = 0.1):
-            await asyncio.sleep(delay)
-            await asyncio.sleep(0)
-    return {"user_id": "from_tool", "timestamp": time.time()}
+        await asyncio.sleep(delay)
+        await asyncio.sleep(0)
+        return {"user_id": "from_tool", "timestamp": time.time()}
         
         # Register tool in all dispatchers
         for i, dispatcher in enumerate(dispatchers):
-            dispatcher.register_tool("slow_tool", slow_tool)
+        dispatcher.register_tool("slow_tool", slow_tool)
         
         # Execute tools concurrently
         start_time = time.time()
         tasks = []
         for dispatcher in dispatchers:
-            task = asyncio.create_task(dispatcher.dispatch("slow_tool", delay=0.2))
-            tasks.append(task)
+        task = asyncio.create_task(dispatcher.dispatch("slow_tool", delay=0.2))
+        tasks.append(task)
         
         results = await asyncio.gather(*tasks)
         total_time = time.time() - start_time
@@ -272,30 +267,28 @@ class TestRequestScopedToolDispatcher:
         # Verify all executions succeeded
         assert len(results) == 5
         for result in results:
-            assert result.status == ToolStatus.SUCCESS
+        assert result.status == ToolStatus.SUCCESS
         
         # Verify concurrent execution (should be faster than sequential)
         assert total_time < 0.8  # Should be much faster than 5 * 0.2 = 1.0 seconds
         
         # Verify metrics are properly tracked per dispatcher
         for dispatcher in dispatchers:
-            metrics = dispatcher.get_metrics()
-            assert metrics['tools_executed'] == 1
-            assert metrics['successful_executions'] == 1
-            assert metrics['failed_executions'] == 0
+        metrics = dispatcher.get_metrics()
+        assert metrics['tools_executed'] == 1
+        assert metrics['successful_executions'] == 1
+        assert metrics['failed_executions'] == 0
         
         # Cleanup all dispatchers
         await asyncio.gather(*[dispatcher.cleanup() for dispatcher in dispatchers])
     
-    async def test_run_id_validation_security(self, user_context, mock_websocket_emitter):
+        async def test_run_id_validation_security(self, user_context, mock_websocket_emitter):
         """Test that run_id validation prevents cross-user access."""
-    pass
         dispatcher = RequestScopedToolDispatcher(user_context, websocket_emitter=mock_websocket_emitter)
         
         def test_tool():
-    pass
-            await asyncio.sleep(0)
-    return "secure_result"
+        await asyncio.sleep(0)
+        return "secure_result"
         
         dispatcher.register_tool("test_tool", test_tool)
         
@@ -311,7 +304,7 @@ class TestRequestScopedToolDispatcher:
         
         await dispatcher.cleanup()
     
-    async def test_resource_cleanup(self, user_context, mock_websocket_emitter):
+        async def test_resource_cleanup(self, user_context, mock_websocket_emitter):
         """Test proper resource cleanup when dispatcher is disposed."""
         dispatcher = RequestScopedToolDispatcher(user_context, websocket_emitter=mock_websocket_emitter)
         
@@ -337,45 +330,43 @@ class TestRequestScopedToolDispatcher:
         
         # Verify disposed dispatcher cannot be used
         with pytest.raises(RuntimeError, match="has been disposed"):
-            dispatcher.has_tool("tool1")
+        dispatcher.has_tool("tool1")
         
         with pytest.raises(RuntimeError, match="has been disposed"):
-            await dispatcher.dispatch("tool1")
+        await dispatcher.dispatch("tool1")
     
-    async def test_context_manager_usage(self, user_context):
+        async def test_context_manager_usage(self, user_context):
         """Test using dispatcher as async context manager."""
-    pass
         tool_executed = False
         
         def test_tool():
-    pass
-            nonlocal tool_executed
-            tool_executed = True
-            await asyncio.sleep(0)
-    return "context_result"
+        nonlocal tool_executed
+        tool_executed = True
+        await asyncio.sleep(0)
+        return "context_result"
         
         # Test context manager with automatic cleanup
         async with request_scoped_tool_dispatcher_scope(user_context) as dispatcher:
-            dispatcher.register_tool("test_tool", test_tool)
-            result = await dispatcher.dispatch("test_tool")
-            assert result.status == ToolStatus.SUCCESS
-            assert tool_executed
-            assert dispatcher.is_active()
+        dispatcher.register_tool("test_tool", test_tool)
+        result = await dispatcher.dispatch("test_tool")
+        assert result.status == ToolStatus.SUCCESS
+        assert tool_executed
+        assert dispatcher.is_active()
         
         # Verify cleanup happened automatically
         assert not dispatcher.is_active()
     
-    async def test_metrics_tracking(self, user_context, mock_websocket_emitter):
+        async def test_metrics_tracking(self, user_context, mock_websocket_emitter):
         """Test comprehensive metrics tracking."""
         dispatcher = RequestScopedToolDispatcher(user_context, websocket_emitter=mock_websocket_emitter)
         
         # Register tools
         def success_tool():
-            await asyncio.sleep(0)
-    return "success"
+        await asyncio.sleep(0)
+        return "success"
         
         def failure_tool():
-            raise ValueError("Tool failure")
+        raise ValueError("Tool failure")
         
         dispatcher.register_tool("success_tool", success_tool)
         dispatcher.register_tool("failure_tool", failure_tool)
@@ -402,22 +393,20 @@ class TestWebSocketBridgeAdapter:
     
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test user context."""
-    pass
         return UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread", 
-            run_id="test_run"
+        user_id="test_user",
+        thread_id="test_thread", 
+        run_id="test_run"
         )
     
-    @pytest.fixture
- def real_emitter():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_emitter():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock WebSocket emitter."""
-    pass
         emitter = Mock(spec=WebSocketEventEmitter)
         emitter.notify_tool_executing = AsyncMock(return_value=True)
         emitter.notify_tool_completed = AsyncMock(return_value=True)
@@ -427,7 +416,7 @@ class TestWebSocketBridgeAdapter:
         emitter.notify_agent_error = AsyncMock(return_value=True)
         return emitter
     
-    async def test_adapter_method_delegation(self, user_context, mock_emitter):
+        async def test_adapter_method_delegation(self, user_context, mock_emitter):
         """Test that adapter properly delegates to WebSocketEventEmitter."""
         adapter = WebSocketBridgeAdapter(mock_emitter, user_context)
         
@@ -455,28 +444,26 @@ class TestToolExecutorFactory:
     
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test user context."""
-    pass
         await asyncio.sleep(0)
-    return UserExecutionContext(
-            user_id=f"factory_user_{uuid.uuid4().hex[:8]}",
-            thread_id=f"factory_thread_{uuid.uuid4().hex[:8]}",
-            run_id=f"factory_run_{uuid.uuid4().hex[:8]}"
+        return UserExecutionContext(
+        user_id=f"factory_user_{uuid.uuid4().hex[:8]]",
+        thread_id=f"factory_thread_{uuid.uuid4().hex[:8]]",
+        run_id=f"factory_run_{uuid.uuid4().hex[:8]]"
         )
     
-    @pytest.fixture
- def real_websocket_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_websocket_manager():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock WebSocket manager."""
-    pass
         manager = manager_instance  # Initialize appropriate service
         manager.send_to_thread = AsyncMock(return_value=True)
         return manager
     
-    async def test_factory_creation(self, mock_websocket_manager):
+        async def test_factory_creation(self, mock_websocket_manager):
         """Test factory creation and configuration."""
         factory = ToolExecutorFactory(websocket_manager=mock_websocket_manager)
         
@@ -489,9 +476,8 @@ class TestToolExecutorFactory:
         assert metrics['dispatchers_created'] == 0
         assert metrics['has_websocket_manager'] is True
     
-    async def test_tool_executor_creation(self, user_context, mock_websocket_manager):
+        async def test_tool_executor_creation(self, user_context, mock_websocket_manager):
         """Test tool executor creation with proper isolation."""
-    pass
         factory = ToolExecutorFactory(websocket_manager=mock_websocket_manager)
         
         # Create executor
@@ -506,7 +492,7 @@ class TestToolExecutorFactory:
         assert metrics['executors_created'] == 1
         assert metrics['active_instances'] == 1
     
-    async def test_request_scoped_dispatcher_creation(self, user_context, mock_websocket_manager):
+        async def test_request_scoped_dispatcher_creation(self, user_context, mock_websocket_manager):
         """Test request-scoped dispatcher creation."""
         factory = ToolExecutorFactory(websocket_manager=mock_websocket_manager)
         
@@ -525,16 +511,15 @@ class TestToolExecutorFactory:
         
         await dispatcher.cleanup()
     
-    async def test_scoped_creation_patterns(self, user_context, mock_websocket_manager):
+        async def test_scoped_creation_patterns(self, user_context, mock_websocket_manager):
         """Test scoped creation with automatic cleanup."""
-    pass
         factory = ToolExecutorFactory(websocket_manager=mock_websocket_manager)
         
         # Test scoped executor creation
         async with factory.create_scoped_tool_executor(user_context, mock_websocket_manager) as executor:
-            assert executor is not None
-            metrics = factory.get_factory_metrics()
-            assert metrics['active_instances'] == 1
+        assert executor is not None
+        metrics = factory.get_factory_metrics()
+        assert metrics['active_instances'] == 1
         
         # Verify cleanup
         metrics = factory.get_factory_metrics()
@@ -542,17 +527,17 @@ class TestToolExecutorFactory:
         
         # Test scoped dispatcher creation
         async with factory.create_scoped_dispatcher(user_context, websocket_manager=mock_websocket_manager) as dispatcher:
-            assert isinstance(dispatcher, RequestScopedToolDispatcher)
-            assert dispatcher.is_active()
-            metrics = factory.get_factory_metrics()
-            assert metrics['active_instances'] == 1
+        assert isinstance(dispatcher, RequestScopedToolDispatcher)
+        assert dispatcher.is_active()
+        metrics = factory.get_factory_metrics()
+        assert metrics['active_instances'] == 1
         
         # Verify cleanup
         assert not dispatcher.is_active()
         metrics = factory.get_factory_metrics()
         assert metrics['active_instances'] == 0
     
-    async def test_factory_health_validation(self, user_context, mock_websocket_manager):
+        async def test_factory_health_validation(self, user_context, mock_websocket_manager):
         """Test factory health validation."""
         factory = ToolExecutorFactory(websocket_manager=mock_websocket_manager)
         
@@ -563,9 +548,8 @@ class TestToolExecutorFactory:
         assert 'factory_metrics' in health_status
         assert isinstance(health_status['issues'], list)
     
-    async def test_global_factory_instance(self):
+        async def test_global_factory_instance(self):
         """Test global factory instance management."""
-    pass
         # Get global factory
         factory1 = get_tool_executor_factory()
         factory2 = get_tool_executor_factory()
@@ -580,18 +564,17 @@ class TestToolDispatcherCompatibility:
     
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test user context."""
-    pass
         await asyncio.sleep(0)
-    return UserExecutionContext(
-            user_id="compat_user",
-            thread_id="compat_thread",
-            run_id="compat_run"
+        return UserExecutionContext(
+        user_id="compat_user",
+        thread_id="compat_thread",
+        run_id="compat_run"
         )
     
-    async def test_static_factory_methods(self, user_context):
+        async def test_static_factory_methods(self, user_context):
         """Test static factory methods on ToolDispatcher."""
         # Test request-scoped dispatcher creation
         dispatcher = await ToolDispatcher.create_request_scoped_dispatcher(user_context)
@@ -601,17 +584,16 @@ class TestToolDispatcherCompatibility:
         
         await dispatcher.cleanup()
     
-    async def test_scoped_context_creation(self, user_context):
+        async def test_scoped_context_creation(self, user_context):
         """Test scoped context manager creation."""
-    pass
         async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-            assert isinstance(dispatcher, RequestScopedToolDispatcher)
-            assert dispatcher.is_active()
+        assert isinstance(dispatcher, RequestScopedToolDispatcher)
+        assert dispatcher.is_active()
         
         # Verify automatic cleanup
         assert not dispatcher.is_active()
     
-    async def test_isolation_status_reporting(self):
+        async def test_isolation_status_reporting(self):
         """Test isolation status reporting on legacy dispatcher."""
         # Create legacy dispatcher
         legacy_dispatcher = ToolDispatcher()
@@ -623,14 +605,13 @@ class TestToolDispatcherCompatibility:
         assert 'warning_needed' in status
         assert status['recommended_migration'] == 'RequestScopedToolDispatcher'
     
-    async def test_deprecation_warnings(self):
+        async def test_deprecation_warnings(self):
         """Test that deprecation warnings are emitted for global state usage."""
-    pass
         legacy_dispatcher = ToolDispatcher()
         
         # Test that warnings are emitted
         with pytest.warns(UserWarning, match="uses global state"):
-            await legacy_dispatcher.dispatch_with_isolation_warning("nonexistent_tool")
+        await legacy_dispatcher.dispatch_with_isolation_warning("nonexistent_tool")
 
 
 class TestConcurrentUserScenarios:

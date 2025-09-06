@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Model Selection Example Prompts Test Suite
 Tests specific example prompts EP-005, EP-008, EP-009 with real LLM validation.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -55,7 +57,7 @@ def _create_ep_005_state() -> DeepAgentState:
     """Create state for EP-005 example prompt test."""
     return DeepAgentState(
         user_request="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
-        metadata={'test_type': 'ep_005', 'prompt_id': 'EP-005', 'candidate_models': ['gpt-4o', LLMModel.GEMINI_2_5_FLASH.value]}
+        metadata={'test_type': 'ep_005', 'prompt_id': 'EP-005', 'candidate_models': ['gpt-4o', LLMModel.GEMINI_2_5_FLASH.value]]
     )
 
 def _create_ep_008_state() -> DeepAgentState:

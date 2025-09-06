@@ -2,7 +2,7 @@
 Real Agent Orchestration E2E Test Suite
 Tests complete agent workflow with real LLM calls and proper state transitions.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -219,13 +219,13 @@ class TestRealAgentInterimArtifactValidation:
     async def _execute_with_interim_validation_reporting(self, setup: Dict, 
                                                        state: DeepAgentState, 
                                                        reporter: StateValidationReporter):
-        """Execute agents with interim validation reporting."""
+                                                           """Execute agents with interim validation reporting."""
         # Execute triage and validate immediately
         triage_agent = setup['agents']['triage']
         triage_agent.websocket_manager = setup['websocket']
         await triage_agent.run(state, setup['run_id'], True)
         triage_report = reporter.validate_and_report_triage(state)
-        assert triage_report['success'], f"Triage validation failed: {triage_report['issues']}"
+        assert triage_report['success'], f"Triage validation failed: {triage_report['issues']]"
         
         # Store triage result for handoff validation
         original_triage = state.triage_result
@@ -236,8 +236,8 @@ class TestRealAgentInterimArtifactValidation:
         await data_agent.run(state, setup['run_id'], True)
         data_report = reporter.validate_and_report_data(state)
         handoff_report = reporter.validate_and_report_handoff(state, original_triage)
-        assert data_report['success'], f"Data validation failed: {data_report['issues']}"
-        assert handoff_report['success'], f"Handoff validation failed: {handoff_report['issues']}"
+        assert data_report['success'], f"Data validation failed: {data_report['issues']]"
+        assert handoff_report['success'], f"Handoff validation failed: {handoff_report['issues']]"
     
     async def _validate_validation_reports(self, reporter: StateValidationReporter):
         """Validate validation reports are comprehensive."""

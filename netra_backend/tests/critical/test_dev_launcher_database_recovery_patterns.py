@@ -7,17 +7,17 @@ discovered in migration 66e0e5d9662d analysis. The tests are intentionally desig
 to fail to expose specific database state management problems.
 
 Root Cause Analysis:
-1. Migration 66e0e5d9662d has non-idempotent index operations
+    1. Migration 66e0e5d9662d has non-idempotent index operations
 2. Partial migration states can leave database in inconsistent state
 3. Concurrent migrations can cause deadlocks and corruption
 4. Cross-database consistency validation is missing
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Database Integrity & Development Velocity
 - Value Impact: Ensures reliable database migrations in all environments
 - Strategic Impact: Prevents data corruption and reduces deployment risk
-"""
+""""
 
 import pytest
 import asyncio
@@ -48,7 +48,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Index drops should be idempotent with if_exists=True parameter
         Current behavior: Direct DROP INDEX operations fail if index doesn't exist
-        """
+        """"
         # Read migration file to check for idempotency patterns
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -68,7 +68,7 @@ class TestMigration66e0e5d9662dIdempotency:
         ]
         
         # This should fail because migration has non-idempotent index drops
-        assert len(non_idempotent_drops) == 0, f"Found {len(non_idempotent_drops)} non-idempotent index drop operations: {non_idempotent_drops[:3]}"
+        assert len(non_idempotent_drops) == 0, f"Found {len(non_idempotent_drops)] non-idempotent index drop operations: {non_idempotent_drops[:3]]"
     
     @fast_test
     @pytest.mark.critical
@@ -81,7 +81,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Migration should check for partial states and handle them gracefully
         Current behavior: No partial state detection logic exists
-        """
+        """"
         # Read migration file to check for partial state detection
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -120,7 +120,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Migration should include concurrency protection
         Current behavior: No concurrency control mechanisms
-        """
+        """"
         # Read migration file to check for concurrency protection
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -158,7 +158,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Migration should validate cross-database consistency
         Current behavior: No validation of referenced table states
-        """
+        """"
         # Read migration file to check for cross-database validation
         import os
         from pathlib import Path
@@ -210,7 +210,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Rollback operations should be idempotent
         Current behavior: Rollback operations assume specific database state
-        """
+        """"
         # Read migration file to check for idempotent rollback patterns
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -249,7 +249,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Index creation should validate dependencies first
         Current behavior: Index operations assume table/column existence
-        """
+        """"
         # Read migration file to check for dependency validation
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -291,7 +291,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Migration should document state assumptions and recovery procedures
         Current behavior: No documentation of database state requirements
-        """
+        """"
         # Read migration file to check for state documentation
         import os
         from pathlib import Path
@@ -332,7 +332,7 @@ class TestMigration66e0e5d9662dIdempotency:
         
         Expected behavior: Related operations should be wrapped in explicit transactions
         Current behavior: Relies on alembic's default transaction handling
-        """
+        """"
         # Read migration file to check for transaction management
         migration_file = Path(__file__).parent.parent.parent / "app" / "alembic" / "versions" / "66e0e5d9662d_add_missing_tables_and_columns_complete.py"
         
@@ -374,7 +374,7 @@ class TestDatabaseRecoveryPatterns:
         
         Expected behavior: System should validate database state and auto-recover
         Current behavior: No automated recovery patterns implemented
-        """
+        """"
         # Check for database recovery utilities in the codebase
         recovery_files_to_check = [
             'netra_backend/app/db/database_manager.py',
@@ -421,7 +421,7 @@ class TestDatabaseRecoveryPatterns:
         
         Expected behavior: System should track migration progress and enable recovery
         Current behavior: No migration state tracking beyond alembic version
-        """
+        """"
         # Check for migration state tracking in database files
         from pathlib import Path
         

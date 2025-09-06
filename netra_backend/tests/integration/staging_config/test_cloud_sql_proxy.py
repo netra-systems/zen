@@ -3,7 +3,7 @@ Test Cloud SQL Proxy Connectivity
 
 Validates database connectivity through Cloud SQL proxy
 in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -162,7 +162,7 @@ class TestCloudSQLProxyConnectivity(StagingConfigTestBase):
                     conn = psycopg2.connect(url)
                     conn.close()
                 except psycopg2.Error as e:
-                    self.fail(f"Connection format '{conn_format['name']}' failed: {e}")
+                    self.fail(f"Connection format '{conn_format['name']]' failed: {e]")
                     
     @pytest.mark.asyncio
     async def test_async_connection_pool(self):

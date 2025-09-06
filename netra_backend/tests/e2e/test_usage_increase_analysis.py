@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Usage Increase Analysis Tests
 Tests agent analysis of usage increase scenarios for scaling impact.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path

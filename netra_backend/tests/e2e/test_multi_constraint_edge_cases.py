@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Multi-Constraint Edge Cases Test Module
 Tests edge cases in multi-constraint optimization.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path

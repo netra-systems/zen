@@ -3,7 +3,7 @@ Critical test suite for WebSocket import errors.
 
 This test validates that all WebSocket imports are using the correct
 netra_backend.app.websocket_core module and not the legacy paths.
-"""
+""""
 
 import pytest
 import importlib

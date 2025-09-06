@@ -1,3 +1,5 @@
+import asyncio
+
 """
 Conversion Flow E2E Tests - Cost calculator and upgrade flows
 
@@ -9,7 +11,7 @@ Conversion Flow E2E Tests - Cost calculator and upgrade flows
 5. **Growth Engine**: ROI demonstration drives immediate purchase decisions
 
 These tests validate Tests 7 and 8 from the critical conversion paths.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -36,7 +38,7 @@ class TestConversionFlowE2E:
         
         BVJ: Cost calculator is the #1 conversion driver. Users who engage with
         calculator convert at 40%+ rates vs <5% without calculator usage.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Interactive cost calculator usage
@@ -57,7 +59,7 @@ class TestConversionFlowE2E:
         
         BVJ: Well-timed limit prompts convert 25-35% of users. Poorly timed
         prompts convert <2%. Timing and messaging are revenue-critical.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Gradual approach to limits

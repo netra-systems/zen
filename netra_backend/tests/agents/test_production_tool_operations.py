@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Unit tests for ProductionTool specific operations."""
 
 import sys
@@ -119,7 +122,7 @@ class TestProductionToolSpecificOperations:
         """Execute with search service mock."""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.corpus.corpus_service') as mock_service:
-            mock_results = {"results": ["doc1", "doc2"], "total": 2}
+            mock_results = {"results": ["doc1", "doc2"], "total": 2]
             # Mock: Async component isolation for testing without real async operations
             mock_service.search_corpus_content = AsyncMock(return_value=mock_results)
             return await tool._execute_search_corpus({"corpus_id": "123", "query": "test", "limit": 10})
@@ -128,8 +131,8 @@ class TestProductionToolSpecificOperations:
         """Execute with validation mock."""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.synthetic_data.validate_data') as mock_validate:
-            mock_validate.return_value = {"valid": True, "errors": []}
-            return await tool._execute_validate_synthetic_data({"data": ["item1", "item2"]})
+            mock_validate.return_value = {"valid": True, "errors": []]
+            return await tool._execute_validate_synthetic_data({"data": ["item1", "item2"]])
     
     async def _execute_with_storage_mock(self, tool: ProductionTool) -> dict:
         """Execute with storage mock."""
@@ -137,7 +140,7 @@ class TestProductionToolSpecificOperations:
         with patch('netra_backend.app.services.synthetic_data.synthetic_data_service') as mock_service:
             # Mock: Async component isolation for testing without real async operations
             mock_service.ingest_batch = AsyncMock(return_value={"stored": 10})
-            return await tool._execute_store_synthetic_data({"data": ["item1", "item2"], "table_name": "test_table"})
+            return await tool._execute_store_synthetic_data({"data": ["item1", "item2"], "table_name": "test_table"])
     
     def _create_mock_corpus(self) -> Mock:
         """Create mock corpus object."""

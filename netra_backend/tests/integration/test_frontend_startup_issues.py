@@ -2,7 +2,7 @@ from shared.isolated_environment import get_env
 """
 Integration test for frontend startup issues during dev launcher.
 Tests frontend service configuration, build process, and startup dependencies.
-"""
+""""
 import pytest
 import requests
 import subprocess
@@ -117,7 +117,7 @@ class TestFrontendStartupIssues:
             
             # Check for frontend files
             frontend_files = os.listdir(frontend_dir)
-            print(f"Frontend files: {frontend_files[:5]}...")  # Show first 5
+            print(f"Frontend files: {frontend_files[:5]]...")  # Show first 5
             
             # Look for package.json
             if 'package.json' in frontend_files:

@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Redis Session State Core Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core session management functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core session management functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from session state failures
 - Value Impact: Ensures WebSocket connect → Redis state → multiple connections → state consistency
 - Revenue Impact: Prevents customer session loss/desync that would cause immediate churn
@@ -10,11 +12,11 @@ Business Value Justification (BVJ):
 Core Redis session state synchronization tests.
 
 UPDATE: Refactored to use REAL services per CLAUDE.md standards:
-- Uses real Redis service instead of mocks
+    - Uses real Redis service instead of mocks
 - Uses IsolatedEnvironment for all environment access
 - Uses proper absolute imports
 - Validates real system under test behavior
-"""
+""""
 
 import asyncio
 import time
@@ -23,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -49,7 +51,6 @@ class MockWebSocketConnection:
     """Simple mock WebSocket for testing Redis integration."""
     
     def __init__(self, user_id: str, connection_id: str):
-    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.state = "connected"
@@ -69,7 +70,6 @@ class MockWebSocketConnection:
 
 class TestRedisSessionStateCore:
     """Core Redis session state synchronization tests using REAL services."""
-    pass
 
     @pytest.fixture
     async def redis_service(self):
@@ -79,29 +79,27 @@ class TestRedisSessionStateCore:
         yield service
         await service.disconnect()
 
-    @pytest.fixture
-    async def session_manager(self, redis_service):
+        @pytest.fixture
+        async def session_manager(self, redis_service):
         """Create real Redis session manager."""
-    pass
         await asyncio.sleep(0)
-    return RedisSessionManager(redis_client=redis_service)
+        return RedisSessionManager(redis_client=redis_service)
         
-    @pytest.fixture
-    def websocket_manager(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def websocket_manager(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Get real WebSocket manager."""
-    pass
         return get_websocket_manager()
 
-    @pytest.mark.asyncio
-    async def test_redis_session_state_creation_and_retrieval(self, redis_service, session_manager):
+        @pytest.mark.asyncio
+        async def test_redis_session_state_creation_and_retrieval(self, redis_service, session_manager):
         """BVJ: Validates Redis session creation and state storage works correctly."""
         
         user_id = "test_user_session_create"
         initial_data = {
-            "user_preferences": {"theme": "dark", "notifications": True},
-            "current_context": {"page": "dashboard", "tab": "overview"}
+        "user_preferences": {"theme": "dark", "notifications": True},
+        "current_context": {"page": "dashboard", "tab": "overview"}
         }
         
         start_time = time.time()
@@ -133,8 +131,8 @@ class TestRedisSessionStateCore:
         
         logger.info(f"Redis session creation validated: {creation_time:.3f}s creation time")
 
-    @pytest.mark.asyncio
-    async def test_multiple_session_state_consistency(self, redis_service, session_manager):
+        @pytest.mark.asyncio
+        async def test_multiple_session_state_consistency(self, redis_service, session_manager):
         """BVJ: Validates multiple sessions can share consistent state updates."""
         
         user_id = "multi_session_user"
@@ -142,18 +140,18 @@ class TestRedisSessionStateCore:
         
         # Create multiple sessions for the same user
         for i in range(3):
-            session_data = {
-                "connection_info": f"connection_{i+1}",
-                "initial_state": {"active": True, "connection_number": i+1}
-            }
-            session_id = await session_manager.create_session(user_id, session_data)
-            session_ids.append(session_id)
+        session_data = {
+        "connection_info": f"connection_{i+1}",
+        "initial_state": {"active": True, "connection_number": i+1}
+        }
+        session_id = await session_manager.create_session(user_id, session_data)
+        session_ids.append(session_id)
         
         # Update state for each session
         state_updates = {
-            "current_thread": "thread_123", 
-            "agent_mode": "optimization", 
-            "preferences": {"theme": "dark", "notifications": True}
+        "current_thread": "thread_123", 
+        "agent_mode": "optimization", 
+        "preferences": {"theme": "dark", "notifications": True}
         }
         
         start_time = time.time()
@@ -161,8 +159,8 @@ class TestRedisSessionStateCore:
         # Update each session with the same state
         update_results = []
         for session_id in session_ids:
-            result = await session_manager.update_session(session_id, state_updates)
-            update_results.append(result)
+        result = await session_manager.update_session(session_id, state_updates)
+        update_results.append(result)
         
         sync_time = time.time() - start_time
         
@@ -171,14 +169,14 @@ class TestRedisSessionStateCore:
         
         # Validate state consistency across sessions
         for i, session_id in enumerate(session_ids):
-            session_data = await session_manager.get_session(session_id)
-            assert session_data is not None, f"Session {i+1} not found after update"
+        session_data = await session_manager.get_session(session_id)
+        assert session_data is not None, f"Session {i+1} not found after update"
             
-            session_state = session_data["data"]
-            assert session_state["current_thread"] == "thread_123", f"Thread mismatch in session {i+1}"
-            assert session_state["agent_mode"] == "optimization", f"Agent mode mismatch in session {i+1}"
-            assert session_state["preferences"]["theme"] == "dark", f"Theme mismatch in session {i+1}"
-            assert session_state["preferences"]["notifications"] is True, f"Notifications mismatch in session {i+1}"
+        session_state = session_data["data"]
+        assert session_state["current_thread"] == "thread_123", f"Thread mismatch in session {i+1]"
+        assert session_state["agent_mode"] == "optimization", f"Agent mode mismatch in session {i+1]"
+        assert session_state["preferences"]["theme"] == "dark", f"Theme mismatch in session {i+1]"
+        assert session_state["preferences"]["notifications"] is True, f"Notifications mismatch in session {i+1]"
         
         # Validate performance
         assert sync_time < 1.0, f"State sync took {sync_time:.3f}s, exceeds 1s limit"
@@ -188,28 +186,28 @@ class TestRedisSessionStateCore:
         assert len(user_sessions) == 3, f"Expected 3 user sessions, got {len(user_sessions)}"
         
         for session_id in session_ids:
-            assert session_id in user_sessions, f"Session {session_id} not in user sessions list"
+        assert session_id in user_sessions, f"Session {session_id} not in user sessions list"
         
         logger.info(f"Multiple session consistency validated: {len(session_ids)} sessions in {sync_time:.3f}s")
 
-    @pytest.mark.asyncio
-    async def test_session_persistence_and_deletion(self, redis_service, session_manager):
+        @pytest.mark.asyncio
+        async def test_session_persistence_and_deletion(self, redis_service, session_manager):
         """BVJ: Validates session persistence and proper cleanup."""
         
         user_id = "persistence_test_user"
         
         # Create session with complex state
         session_state = {
-            "conversation_history": ["Hello", "Hi there!", "Can you help with optimization?"],
-            "current_context": {
-                "topic": "gpu_optimization", 
-                "complexity": "intermediate", 
-                "user_preferences": {"detailed_analysis": True}
-            },
-            "agent_memory": {
-                "user_expertise": "intermediate", 
-                "previous_requests": ["memory_optimization", "cost_analysis"]
-            }
+        "conversation_history": ["Hello", "Hi there!", "Can you help with optimization?"],
+        "current_context": {
+        "topic": "gpu_optimization", 
+        "complexity": "intermediate", 
+        "user_preferences": {"detailed_analysis": True}
+        },
+        "agent_memory": {
+        "user_expertise": "intermediate", 
+        "previous_requests": ["memory_optimization", "cost_analysis"]
+        }
         }
         
         # Create session
@@ -263,15 +261,15 @@ class TestRedisSessionStateCore:
         
         logger.info(f"Session persistence and cleanup validated successfully")
 
-    @pytest.mark.asyncio
-    async def test_websocket_manager_redis_integration(self, redis_service, websocket_manager):
+        @pytest.mark.asyncio
+        async def test_websocket_manager_redis_integration(self, redis_service, websocket_manager):
         """BVJ: Validates WebSocket manager integrates properly with Redis session management."""
         
-        user_id = f"websocket_integration_{uuid.uuid4().hex[:8]}"
+        user_id = f"websocket_integration_{uuid.uuid4().hex[:8]]"
         
         # Create a mock WebSocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Test WebSocket connection creation
         start_time = time.time()
@@ -310,12 +308,12 @@ class TestRedisSessionStateCore:
         
         logger.info(f"WebSocket-Redis integration validated: {connection_time:.3f}s connection time")
 
-    @pytest.mark.asyncio
-    async def test_redis_service_real_operations(self, redis_service):
+        @pytest.mark.asyncio
+        async def test_redis_service_real_operations(self, redis_service):
         """BVJ: Validates real Redis service operations work correctly."""
         
         # Test basic key-value operations
-        test_key = f"test_key_{uuid.uuid4().hex[:8]}"
+        test_key = f"test_key_{uuid.uuid4().hex[:8]]"
         test_value = "test_value_with_special_chars_!@#$%"
         
         # Test set operation
@@ -331,11 +329,11 @@ class TestRedisSessionStateCore:
         assert key_exists, "Key should exist after set operation"
         
         # Test JSON operations
-        json_key = f"json_key_{uuid.uuid4().hex[:8]}"
+        json_key = f"json_key_{uuid.uuid4().hex[:8]]"
         json_data = {
-            "user_id": "test_user",
-            "session_data": {"theme": "dark", "notifications": True},
-            "timestamp": datetime.now(timezone.utc).isoformat()
+        "user_id": "test_user",
+        "session_data": {"theme": "dark", "notifications": True},
+        "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         json_set_result = await redis_service.set_json(json_key, json_data, ex=60)
@@ -347,9 +345,9 @@ class TestRedisSessionStateCore:
         assert retrieved_json["session_data"]["theme"] == "dark", "JSON nested data mismatch"
         
         # Test hash operations
-        hash_key = f"hash_key_{uuid.uuid4().hex[:8]}"
+        hash_key = f"hash_key_{uuid.uuid4().hex[:8]]"
         hash_field = "session_id"
-        hash_value = f"session_{uuid.uuid4().hex[:8]}"
+        hash_value = f"session_{uuid.uuid4().hex[:8]]"
         
         hset_result = await redis_service.hset(hash_key, hash_field, hash_value)
         assert hset_result, "Redis hset operation failed"
@@ -363,11 +361,11 @@ class TestRedisSessionStateCore:
         
         logger.info("Real Redis service operations validated successfully")
 
-    @pytest.mark.asyncio
-    async def test_session_manager_performance_requirements(self, redis_service, session_manager):
+        @pytest.mark.asyncio
+        async def test_session_manager_performance_requirements(self, redis_service, session_manager):
         """BVJ: Validates session manager meets performance requirements for <2s response times."""
         
-        user_id = f"perf_test_user_{uuid.uuid4().hex[:8]}"
+        user_id = f"perf_test_user_{uuid.uuid4().hex[:8]]"
         session_count = 10
         session_ids = []
         
@@ -375,14 +373,14 @@ class TestRedisSessionStateCore:
         start_time = time.time()
         
         for i in range(session_count):
-            session_data = {
-                "connection_id": f"conn_{i}",
-                "user_preferences": {"theme": "dark" if i % 2 == 0 else "light"},
-                "created_batch": True,
-                "batch_index": i
-            }
-            session_id = await session_manager.create_session(user_id, session_data)
-            session_ids.append(session_id)
+        session_data = {
+        "connection_id": f"conn_{i}",
+        "user_preferences": {"theme": "dark" if i % 2 == 0 else "light"},
+        "created_batch": True,
+        "batch_index": i
+        }
+        session_id = await session_manager.create_session(user_id, session_data)
+        session_ids.append(session_id)
         
         creation_time = time.time() - start_time
         
@@ -394,8 +392,8 @@ class TestRedisSessionStateCore:
         
         retrieved_sessions = []
         for session_id in session_ids:
-            session_data = await session_manager.get_session(session_id)
-            retrieved_sessions.append(session_data)
+        session_data = await session_manager.get_session(session_id)
+        retrieved_sessions.append(session_data)
         
         retrieval_time = time.time() - start_time
         
@@ -405,8 +403,8 @@ class TestRedisSessionStateCore:
         update_data = {"batch_updated": True, "update_timestamp": datetime.now(timezone.utc).isoformat()}
         update_results = []
         for session_id in session_ids:
-            result = await session_manager.update_session(session_id, update_data)
-            update_results.append(result)
+        result = await session_manager.update_session(session_id, update_data)
+        update_results.append(result)
         
         update_time = time.time() - start_time
         
@@ -429,15 +427,15 @@ class TestRedisSessionStateCore:
         
         # Validate updated data
         for session_id in session_ids:
-            updated_session = await session_manager.get_session(session_id)
-            assert updated_session["data"]["batch_updated"] is True, "Batch update not applied"
+        updated_session = await session_manager.get_session(session_id)
+        assert updated_session["data"]["batch_updated"] is True, "Batch update not applied"
         
         # Clean up
         cleanup_start = time.time()
         cleanup_results = []
         for session_id in session_ids:
-            result = await session_manager.delete_session(session_id)
-            cleanup_results.append(result)
+        result = await session_manager.delete_session(session_id)
+        cleanup_results.append(result)
         cleanup_time = time.time() - cleanup_start
         
         assert cleanup_time < 2.0, f"Batch session cleanup took {cleanup_time:.3f}s, exceeds 2s limit"
@@ -445,14 +443,14 @@ class TestRedisSessionStateCore:
         
         logger.info(f"Performance validated - Create: {creation_time:.3f}s, Retrieve: {retrieval_time:.3f}s, Update: {update_time:.3f}s, Cleanup: {cleanup_time:.3f}s")
 
-    @pytest.mark.asyncio 
-    async def test_session_manager_error_handling(self, redis_service, session_manager):
+        @pytest.mark.asyncio 
+        async def test_session_manager_error_handling(self, redis_service, session_manager):
         """BVJ: Validates session manager handles errors gracefully."""
         
         # Test getting non-existent session
         non_existent_session = await session_manager.get_session("non_existent_session_id")
-        assert non_existent_session is None, "Non-existent session should await asyncio.sleep(0)
-    return None"
+        assert non_existent_session is None, "Non-existent session should await asyncio.sleep(0)"
+        return None""
         
         # Test updating non-existent session
         update_result = await session_manager.update_session("non_existent_session_id", {"test": "data"})
@@ -484,8 +482,8 @@ class TestRedisSessionStateCore:
         
         logger.info("Session manager error handling validated successfully")
 
-    @pytest.mark.asyncio
-    async def test_isolated_environment_usage(self):
+        @pytest.mark.asyncio
+        async def test_isolated_environment_usage(self):
         """BVJ: Validates test uses IsolatedEnvironment correctly per CLAUDE.md standards."""
         
         # Validate IsolatedEnvironment is being used
@@ -516,7 +514,7 @@ class TestRedisSessionStateCore:
         # Test environment variable deletion
         env.delete(test_key)
         assert not env.exists(test_key), "Deleted environment variable should not exist"
-        assert env.get(test_key) is None, "Deleted environment variable should await asyncio.sleep(0)
-    return None"
+        assert env.get(test_key) is None, "Deleted environment variable should await asyncio.sleep(0)"
+        return None""
         
         logger.info("IsolatedEnvironment usage validation completed successfully")

@@ -30,13 +30,12 @@ class TestAgentServiceCritical:
     """Critical agent service tests for essential functionality."""
     
     @pytest.fixture
- def real_supervisor():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_supervisor(self):
         """Create mock supervisor."""
-    pass
+        # TODO: Initialize real service
         # Mock: Generic component isolation for controlled unit testing
-        supervisor = AsyncNone  # TODO: Use real service instance
+        supervisor = None  # TODO: Use real service instance
+        return supervisor
         # Mock: Async component isolation for testing without real async operations
         supervisor.run = AsyncMock(return_value={'status': 'completed'})
         return supervisor

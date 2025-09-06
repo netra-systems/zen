@@ -1,7 +1,7 @@
 """
 Parameterized Example Prompts E2E Tests with Real LLM Calls
 Replaces 90 individual test methods with parameterized testing
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -92,7 +92,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
     """
     Parameterized test class for example prompts with real LLM calls.
     Uses pytest.mark.parametrize to generate all 90 test combinations.
-    """
+    """"
     
     @pytest.fixture(autouse=True)
     def setup(self):
@@ -100,7 +100,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
-    def test_prompt_diversity_and_quality_analysis(self):
+        def test_prompt_diversity_and_quality_analysis(self):
         """Test that validates prompt diversity and content quality metrics."""
         # Analyze all example prompts for diversity metrics
         prompt_texts = EXAMPLE_PROMPTS  # Already a list of strings
@@ -116,14 +116,14 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         
         # Test 3: Keyword diversity (different optimization focuses)
         optimization_keywords = [
-            "cost", "latency", "performance", "capacity", "model", "function",
-            "audit", "optimize", "reduce", "improve", "evaluate", "migrate"
+        "cost", "latency", "performance", "capacity", "model", "function",
+        "audit", "optimize", "reduce", "improve", "evaluate", "migrate"
         ]
         
         keyword_coverage = {}
         for keyword in optimization_keywords:
-            keyword_coverage[keyword] = sum(1 for text in prompt_texts 
-                                          if keyword.lower() in text.lower())
+        keyword_coverage[keyword] = sum(1 for text in prompt_texts 
+        if keyword.lower() in text.lower())
         
         # At least 3 different optimization types should be covered
         covered_keywords = sum(1 for count in keyword_coverage.values() if count > 0)
@@ -137,8 +137,8 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         action_indicators = ["optimize", "reduce", "improve", "analyze", "evaluate", "migrate"]
         actionable_prompts = 0
         for text in prompt_texts:
-            if any(indicator in text.lower() for indicator in action_indicators):
-                actionable_prompts += 1
+        if any(indicator in text.lower() for indicator in action_indicators):
+        actionable_prompts += 1
         
         actionable_ratio = actionable_prompts / len(prompt_texts)
         assert actionable_ratio >= 0.5, f"Only {actionable_ratio:.1%} of prompts are actionable (need at least 50%)"
@@ -152,24 +152,24 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         print(f"  Actionable ratio: {actionable_ratio:.1%}")
         print(f"  Context types: {len(context_types)}")
     
-    @pytest.mark.parametrize("prompt_index", range(9))
-    @pytest.mark.parametrize("variation_num", range(10))
-    @pytest.mark.asyncio
-    async def test_prompt_variations(
+        @pytest.mark.parametrize("prompt_index", range(9))
+        @pytest.mark.parametrize("variation_num", range(10))
+        @pytest.mark.asyncio
+        async def test_prompt_variations(
         self, 
         prompt_index: int, 
         variation_num: int,
         real_infrastructure
-    ):
+        ):
         """
         Test each prompt with 10 variations.
         This single parameterized test replaces 90 individual test methods.
         
         Args:
-            prompt_index: Index of the prompt (0-8)
-            variation_num: Variation number (0-9)
-            real_infrastructure: Fixture providing test infrastructure
-        """
+        prompt_index: Index of the prompt (0-8)
+        variation_num: Variation number (0-9)
+        real_infrastructure: Fixture providing test infrastructure
+        """"
         # Get the base prompt
         base_prompt = EXAMPLE_PROMPTS[prompt_index]
         
@@ -187,27 +187,27 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         
         # Run the test
         result = await self.test_runner.run_single_test(
-            prompt=test_prompt,
-            context=context,
-            infra=real_infrastructure
+        prompt=test_prompt,
+        context=context,
+        infra=real_infrastructure
         )
         
         # Assertions
-        assert result["success"], f"Test failed: {result.get('error', 'Unknown error')}"
+        assert result["success"], f"Test failed: {result.get('error', 'Unknown error')]"
         assert result["response"], "Response should not be empty"
         assert len(result["response"]) >= 50, "Response too short"
         
         # Validate response quality
         validation = result.get("validation", {})
-        assert validation.get("valid", False), f"Quality validation failed: {validation.get('feedback', [])}"
+        assert validation.get("valid", False), f"Quality validation failed: {validation.get('feedback', [])]"
         assert validation.get("score", 0) >= 70, f"Quality score too low: {validation.get('score', 0)}"
         
         # Check metrics
         metrics = result.get("metrics", {})
         if metrics.get("execution_time"):
-            assert metrics["execution_time"] < 30, "Execution took too long"
+        assert metrics["execution_time"] < 30, "Execution took too long"
     
-    @pytest.mark.parametrize("prompt_index,expected_type", [
+        @pytest.mark.parametrize("prompt_index,expected_type", [
         (0, "cost_reduction"),
         (1, "latency_optimization"),
         (2, "capacity_planning"),
@@ -217,14 +217,14 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         (6, "multi_objective"),
         (7, "tool_migration"),
         (8, "rollback_analysis"),
-    ])
-    @pytest.mark.asyncio
-    async def test_prompt_context_mapping(
+        ])
+        @pytest.mark.asyncio
+        async def test_prompt_context_mapping(
         self, 
         prompt_index: int, 
         expected_type: str,
         real_infrastructure
-    ):
+        ):
         """Test that each prompt gets the correct context type"""
         context_type = PROMPT_CONTEXT_MAPPING.get(prompt_index)
         assert context_type == expected_type, f"Wrong context type for prompt {prompt_index}"
@@ -234,40 +234,40 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         assert context, "Context should not be empty"
         assert isinstance(context, dict), "Context should be a dictionary"
     
-    @pytest.mark.slow
-    @pytest.mark.asyncio
-    async def test_all_prompts_summary(self, real_infrastructure):
+        @pytest.mark.slow
+        @pytest.mark.asyncio
+        async def test_all_prompts_summary(self, real_infrastructure):
         """Run a summary test of all prompts with basic validation"""
         results = []
         
         for prompt_index, prompt in enumerate(EXAMPLE_PROMPTS):
-            context_type = PROMPT_CONTEXT_MAPPING.get(prompt_index, "default")
-            context = self.context_generator.generate_synthetic_context(context_type)
+        context_type = PROMPT_CONTEXT_MAPPING.get(prompt_index, "default")
+        context = self.context_generator.generate_synthetic_context(context_type)
             
-            # Run with variation 0 (original prompt)
-            result = await self.test_runner.run_single_test(
-                prompt=prompt,
-                context=context,
-                infra=real_infrastructure
-            )
-            results.append(result)
+        # Run with variation 0 (original prompt)
+        result = await self.test_runner.run_single_test(
+        prompt=prompt,
+        context=context,
+        infra=real_infrastructure
+        )
+        results.append(result)
         
         # Analyze aggregate results
         analysis = self.test_runner.analyze_test_results(results)
         
         # Summary assertions
-        assert analysis["success_rate"] >= 0.8, f"Success rate too low: {analysis['success_rate']}"
-        assert analysis["average_quality_score"] >= 70, f"Average quality too low: {analysis['average_quality_score']}"
+        assert analysis["success_rate"] >= 0.8, f"Success rate too low: {analysis['success_rate']]"
+        assert analysis["average_quality_score"] >= 70, f"Average quality too low: {analysis['average_quality_score']]"
         
         # Print summary for debugging
         print(f"\nTest Summary:")
-        print(f"  Total tests: {analysis['total_tests']}")
-        print(f"  Successful: {analysis['successful_tests']}")
-        print(f"  Success rate: {analysis['success_rate']:.2%}")
-        print(f"  Avg quality: {analysis['average_quality_score']:.1f}")
+        print(f"  Total tests: {analysis['total_tests']]")
+        print(f"  Successful: {analysis['successful_tests']]")
+        print(f"  Success rate: {analysis['success_rate']:.2%]")
+        print(f"  Avg quality: {analysis['average_quality_score']:.1f]")
         
         if analysis["failed_tests"]:
-            print(f"  Failed tests: {analysis['failed_tests']}")
+        print(f"  Failed tests: {analysis['failed_tests']]")
 
 # Additional focused test groups for specific scenarios
 @pytest.mark.real_llm
@@ -280,43 +280,43 @@ class TestPromptGroups(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
-    @pytest.mark.parametrize("prompt_index", [0, 6])  # Cost-related prompts
-    @pytest.mark.asyncio
-    async def test_cost_optimization_prompts(
+        @pytest.mark.parametrize("prompt_index", [0, 6])  # Cost-related prompts
+        @pytest.mark.asyncio
+        async def test_cost_optimization_prompts(
         self, 
         prompt_index: int,
         real_infrastructure
-    ):
+        ):
         """Test prompts related to cost optimization"""
         prompt = EXAMPLE_PROMPTS[prompt_index]
         context = self.context_generator.generate_synthetic_context("cost_reduction")
         
         result = await self.test_runner.run_single_test(
-            prompt=prompt,
-            context=context,
-            infra=real_infrastructure
+        prompt=prompt,
+        context=context,
+        infra=real_infrastructure
         )
         
         assert result["success"]
         assert "cost" in result["response"].lower() or "budget" in result["response"].lower()
     
-    @pytest.mark.parametrize("prompt_index", [1, 3])  # Performance-related prompts
-    @pytest.mark.asyncio
-    async def test_performance_optimization_prompts(
+        @pytest.mark.parametrize("prompt_index", [1, 3])  # Performance-related prompts
+        @pytest.mark.asyncio
+        async def test_performance_optimization_prompts(
         self, 
         prompt_index: int,
         real_infrastructure
-    ):
+        ):
         """Test prompts related to performance optimization"""
         prompt = EXAMPLE_PROMPTS[prompt_index]
         context = self.context_generator.generate_synthetic_context("latency_optimization")
         
         result = await self.test_runner.run_single_test(
-            prompt=prompt,
-            context=context,
-            infra=real_infrastructure
+        prompt=prompt,
+        context=context,
+        infra=real_infrastructure
         )
         
         assert result["success"]
         assert any(word in result["response"].lower() 
-                  for word in ["latency", "performance", "speed", "optimization"])
+        for word in ["latency", "performance", "speed", "optimization"])

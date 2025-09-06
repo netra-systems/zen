@@ -1,16 +1,18 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 E2E Tests for Middleware Validation and Security Systems
 
 Tests middleware validation and security functionality:
-- Request validation middleware
+    - Request validation middleware
 - Response transformation middleware  
 - Error handling middleware chains
 - Rate limiting middleware
 - Authentication/authorization middleware
 
-All functions ≤8 lines per CLAUDE.md requirements.
-Module ≤300 lines per CLAUDE.md requirements.
-"""
+All functions <=8 lines per CLAUDE.md requirements.
+Module <=300 lines per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path

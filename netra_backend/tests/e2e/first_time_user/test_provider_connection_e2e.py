@@ -1,3 +1,5 @@
+import asyncio
+
 """
 AI Provider Connection & Optimization E2E Tests
 
@@ -9,7 +11,7 @@ AI Provider Connection & Optimization E2E Tests
 5. **Growth Engine**: "Aha moment" when users see their actual AI costs
 
 These tests validate Tests 3, 4, and 6 from the critical conversion paths.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -38,7 +40,7 @@ class TestProviderConnectionE2E:
         
         BVJ: Users who connect their AI provider convert 8x higher. This test
         validates the critical "aha moment" where users see their actual costs.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: AI provider connection flow
@@ -59,7 +61,7 @@ class TestProviderConnectionE2E:
         
         BVJ: Users who see their first successful optimization convert at 60%+ rates.
         This is the moment of maximum conversion probability.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Run first optimization
@@ -80,7 +82,7 @@ class TestProviderConnectionE2E:
         
         BVJ: Successful first interaction increases conversion probability by 300%.
         Failed first interaction reduces conversion to near 0%.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Guided first agent interaction
@@ -114,7 +116,7 @@ class TestProviderConnectionE2E:
             {"type": "request_batching", "savings": "$300/month"},
             {"type": "cache_optimization", "savings": "$200/month"}
         ]
-        await env["websocket_manager"].send_optimization_result({"opportunities": opportunities})
+        await env["websocket_manager"].send_optimization_result({"opportunities": opportunities])
 
     async def _run_first_optimization(self, env):
         """Execute user's first actual optimization"""

@@ -2,24 +2,24 @@
 Startup Performance Timing Validation Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Operational Excellence
 - Value Impact: Fast deployments and scaling
 - Strategic/Revenue Impact: Slow startup affects scaling response
 
 Tests comprehensive validation including:
-- 10-second target validation
+    - 10-second target validation
 - Load condition testing
 - Cold vs warm start
 - Parallel optimization
 - Regression detection
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -46,10 +46,9 @@ class TestStartupPerformanceTimingValidation:
     Comprehensive startup performance timing validation tests.
     
     Uses L3 realism with containerized services for production-like validation.
-    """
+    """"
     
     @pytest.fixture
-    @pytest.mark.asyncio
     async def test_containers(self, request):
         """Set up containerized services for L3 testing."""
         # Container setup based on test requirements
@@ -59,33 +58,33 @@ class TestStartupPerformanceTimingValidation:
         test_name = request.node.name.lower()
         
         if 'database' in test_name or 'connection' in test_name:
-            # PostgreSQL container
-            containers["postgres"] = {
-                "url": "postgresql://test:test@localhost:5433/netra_test",
-                "max_connections": 200,
-                "pool_size": 20
-            }
+        # PostgreSQL container
+        containers["postgres"] = {
+        "url": "postgresql://test:test@localhost:5433/netra_test",
+        "max_connections": 200,
+        "pool_size": 20
+        }
         
         if 'clickhouse' in test_name:
-            # ClickHouse container
-            containers["clickhouse"] = {
-                "url": "http://localhost:8124",
-                "native_port": 9001,
-                "max_connections": 100
-            }
+        # ClickHouse container
+        containers["clickhouse"] = {
+        "url": "http://localhost:8124",
+        "native_port": 9001,
+        "max_connections": 100
+        }
         
         if 'redis' in test_name or 'session' in test_name:
-            # Redis container
-            containers["redis"] = {
-                "url": "redis://localhost:6380",
-                "max_memory": "256mb",
-                "max_clients": 10000
-            }
+        # Redis container
+        containers["redis"] = {
+        "url": "redis://localhost:6380",
+        "max_memory": "256mb",
+        "max_clients": 10000
+        }
         
         yield containers
     
-    @pytest.mark.asyncio
-    async def test_10_second_target_validation(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_10_second_target_validation(self, test_containers):
         """
         Test 10-second target validation.
         
@@ -94,7 +93,7 @@ class TestStartupPerformanceTimingValidation:
         - Performance requirements
         - Error handling
         - Recovery mechanisms
-        """
+        """"
         start_time = time.time()
         
         # Test implementation
@@ -106,39 +105,38 @@ class TestStartupPerformanceTimingValidation:
         duration = time.time() - start_time
         assert duration < 30, f"Test took {duration:.2f}s (max: 30s)"
     
-    @pytest.mark.asyncio
-    async def test_load_condition_testing(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_load_condition_testing(self, test_containers):
         """
         Test load condition testing.
         
         Validates correct behavior under this scenario.
-        """
+        """"
         # Scenario-specific test implementation
         assert True, "Test implementation needed"
     
-    @pytest.mark.asyncio
-    async def test_cold_vs_warm_start(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_cold_vs_warm_start(self, test_containers):
         """
         Test cold vs warm start.
         
         Validates handling and recovery.
-        """
+        """"
         # Test error conditions and recovery
         with pytest.raises(Exception):
-            # Simulate failure condition
-            pass
+        # Simulate failure condition
         
         # Verify recovery
         assert True, "Recovery validation needed"
     
-    @pytest.mark.smoke
-    @pytest.mark.asyncio
-    async def test_smoke_startup_performance_timing_validation(self, test_containers):
+        @pytest.mark.smoke
+        @pytest.mark.asyncio
+        async def test_smoke_startup_performance_timing_validation(self, test_containers):
         """
         Quick smoke test for startup performance timing validation.
         
         Should complete in <30 seconds for CI/CD.
-        """
+        """"
         start_time = time.time()
         
         # Basic validation

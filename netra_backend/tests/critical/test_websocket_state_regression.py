@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical regression test for WebSocket state management.
 
@@ -11,7 +13,7 @@ wasn't always set by Starlette/FastAPI.
 
 Solution: Check both client_state (Starlette's attribute) and application_state
 with proper fallback logic.
-"""
+""""
 
 import pytest
 from starlette.websockets import WebSocketState
@@ -34,7 +36,6 @@ class TestWebSocketStateRegression:
     
     def test_is_connected_with_application_state(self):
         """Test WebSocket is connected when application_state is CONNECTED."""
-    pass
         websocket = UnifiedWebSocketManager()
         # No client_state attribute
         websocket.application_state = WebSocketState.CONNECTED
@@ -51,7 +52,6 @@ class TestWebSocketStateRegression:
     
     def test_is_disconnected_with_client_state(self):
         """Test WebSocket is disconnected when client_state is DISCONNECTED."""
-    pass
         websocket = UnifiedWebSocketManager()
         websocket.client_state = WebSocketState.DISCONNECTED
         
@@ -67,7 +67,6 @@ class TestWebSocketStateRegression:
     
     def test_is_connected_with_no_state_attributes(self):
         """Test WebSocket defaults to connected when no state attributes exist."""
-    pass
         websocket = Mock(spec=[])  # No attributes
         
         # Should default to True to allow receive() to handle disconnection
@@ -84,7 +83,6 @@ class TestWebSocketStateRegression:
     
     def test_mixed_states_client_disconnected(self):
         """Test when client_state is DISCONNECTED but application_state is CONNECTED."""
-    pass
         websocket = UnifiedWebSocketManager()
         websocket.client_state = WebSocketState.DISCONNECTED
         websocket.application_state = WebSocketState.CONNECTED
@@ -98,7 +96,7 @@ class TestWebSocketStateRegression:
         from netra_backend.app.routes.websocket import _handle_websocket_messages
         
         # Mock WebSocket with proper client_state
-        websocket = AsyncNone  # TODO: Use real service instance
+        websocket = AsyncMock()  # TODO: Use real service instance
         websocket.client_state = WebSocketState.CONNECTED
         websocket.receive_text = AsyncMock(side_effect=Exception("Test disconnect"))
         
@@ -131,10 +129,9 @@ class TestWebSocketStateRegression:
     
     def test_regression_starlette_websocket_state(self):
         """
-    pass
         Regression test for the specific issue where Starlette WebSockets
         have client_state but not application_state.
-        """
+        """"
         # Simulate real Starlette WebSocket
         websocket = UnifiedWebSocketManager()
         websocket.client_state = WebSocketState.CONNECTED
@@ -151,8 +148,7 @@ class TestWebSocketStateRegression:
         """
         Regression test for FastAPI WebSockets which might have
         different state attribute names.
-        """
-    pass
+        """"
         # Simulate WebSocket with only application_state
         websocket = UnifiedWebSocketManager()
         del websocket.client_state  # Remove default Mock attribute
@@ -175,9 +171,9 @@ class TestWebSocketStateIntegration:
         from netra_backend.app.websocket_core.utils import safe_websocket_send
         
         manager = WebSocketManager()
-        websocket = AsyncNone  # TODO: Use real service instance
+        websocket = AsyncMock()  # TODO: Use real service instance
         websocket.client_state = WebSocketState.CONNECTED
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Connect user
         connection_id = await manager.connect_user("test_user", websocket)

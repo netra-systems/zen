@@ -2,17 +2,17 @@
 LLM Provider Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from LLM integration failures
 - Value Impact: Validates LLM provider integration and fallback mechanisms
 - Revenue Impact: Prevents customer AI requests from failing due to broken LLM integration
 
 REQUIREMENTS:
-- LLM provider response generation functionality
+    - LLM provider response generation functionality
 - Provider fallback mechanisms validation
 - Response time performance requirements
 - Error handling and circuit breaker functionality
-"""
+""""
 
 import sys
 from pathlib import Path

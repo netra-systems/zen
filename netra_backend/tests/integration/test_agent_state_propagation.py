@@ -1,20 +1,22 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 State Propagation and Context Preservation Tests for Multi-Agent Orchestration
 
 Business Value Justification (BVJ):
-- Segment: Mid/Enterprise
+    - Segment: Mid/Enterprise
 - Business Goal: Agent reliability and state consistency
 - Value Impact: Ensures agent outputs and context are preserved across the pipeline
 - Strategic Impact: Prevents data loss and maintains user experience continuity
 
 This module tests critical state propagation and context preservation requirements:
-1. Context preservation across agent boundaries
+    1. Context preservation across agent boundaries
 2. Metadata tracking through the pipeline
 3. Session state consistency
 4. User context maintenance
 5. State integrity when agents pass data between each other
 6. Proper accumulation of agent outputs in the state
-"""
+""""
 
 import asyncio
 import json
@@ -23,7 +25,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -66,17 +68,17 @@ async def test_redis():
     """Setup test Redis connection."""
     # Use the isolated_redis_client fixture
     async for client in isolated_redis_client():
-        yield client
-        break
+    yield client
+    break
 
 
 @pytest.fixture
 async def test_database():
     """Setup test database connection."""
     return {
-        "database_url": "sqlite+aiosqlite:///:memory:",
-        "schema_created": True,
-        "test_data_loaded": False
+    "database_url": "sqlite+aiosqlite:///:memory:",
+    "schema_created": True,
+    "test_data_loaded": False
     }
 
 
@@ -100,14 +102,14 @@ def test_user():
     # TODO: Initialize real service
     """Create test user data."""
     return {
-        "id": "test_user_123",
-        "email": "test@example.com",
-        "username": "test_user",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "preferences": {
-            "language": "en",
-            "timezone": "UTC"
-        }
+    "id": "test_user_123",
+    "email": "test@example.com",
+    "username": "test_user",
+    "created_at": datetime.now(timezone.utc).isoformat(),
+    "preferences": {
+    "language": "en",
+    "timezone": "UTC"
+    }
     }
 
 
@@ -117,11 +119,11 @@ def test_thread():
     # TODO: Initialize real service
     """Create test thread data."""
     return {
-        "id": "test_thread_123", 
-        "user_id": "test_user_123",
-        "title": "Test Thread",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "metadata": {}
+    "id": "test_thread_123", 
+    "user_id": "test_user_123",
+    "title": "Test Thread",
+    "created_at": datetime.now(timezone.utc).isoformat(),
+    "metadata": {}
     }
 
 
@@ -131,32 +133,32 @@ def base_execution_context(test_user, test_thread):
     # TODO: Initialize real service
     """Create base execution context."""
     return AgentExecutionContext(
-        run_id=str(uuid.uuid4()),
-        thread_id=test_thread["id"],
-        user_id=test_user["id"],
-        agent_name="test_agent",
-        metadata={
-            "user_preferences": {
-                "language": "en",
-                "timezone": "UTC",
-                "theme": "dark"
-            },
-            "request_params": {
-                "query": "test optimization",
-                "priority": "high",
-                "category": "performance"
-            },
-            "auth_context": {
-                "permissions": ["read", "write"],
-                "roles": ["user", "analyst"],
-                "tenant_id": "test_tenant"
-            },
-            "session_info": {
-                "session_id": str(uuid.uuid4()),
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "user_agent": "test-client"
-            }
-        }
+    run_id=str(uuid.uuid4()),
+    thread_id=test_thread["id"],
+    user_id=test_user["id"],
+    agent_name="test_agent",
+    metadata={
+    "user_preferences": {
+    "language": "en",
+    "timezone": "UTC",
+    "theme": "dark"
+    },
+    "request_params": {
+    "query": "test optimization",
+    "priority": "high",
+    "category": "performance"
+    },
+    "auth_context": {
+    "permissions": ["read", "write"},
+    "roles": ["user", "analyst"],
+    "tenant_id": "test_tenant"
+    },
+    "session_info": {
+    "session_id": str(uuid.uuid4()),
+    "created_at": datetime.now(timezone.utc).isoformat(),
+    "user_agent": "test-client"
+    }
+    }
     )
 
 
@@ -166,24 +168,24 @@ def initial_state(test_user, test_thread):
     # TODO: Initialize real service
     """Create initial agent state."""
     return DeepAgentState(
-        user_request="Analyze performance optimization opportunities",
-        chat_thread_id=test_thread["id"],
-        user_id=test_user["id"],
-        agent_input={
-            "original_query": "Analyze performance optimization opportunities",
-            "context": "Production system with latency issues",
-            "requirements": ["cost_effective", "minimal_disruption"]
-        },
-        metadata=AgentMetadata(
-            execution_context={
-                "pipeline_stage": "initialization",
-                "request_timestamp": datetime.now(timezone.utc).isoformat()
-            },
-            custom_fields={
-                "priority_level": "high",
-                "department": "engineering"
-            }
-        )
+    user_request="Analyze performance optimization opportunities",
+    chat_thread_id=test_thread["id"],
+    user_id=test_user["id"],
+    agent_input={
+    "original_query": "Analyze performance optimization opportunities",
+    "context": "Production system with latency issues",
+    "requirements": ["cost_effective", "minimal_disruption"}
+    },
+    metadata=AgentMetadata(
+    execution_context={
+    "pipeline_stage": "initialization",
+    "request_timestamp": datetime.now(timezone.utc).isoformat()
+    },
+    custom_fields={
+    "priority_level": "high",
+    "department": "engineering"
+    }
+    )
     )
 
 
@@ -369,7 +371,7 @@ async def test_session_state_consistency(
             metadata={
                 **base_execution_context.metadata,
                 "session_info": {
-                    **base_execution_context.metadata["session_info"],
+                    **base_execution_context.metadata["session_info"},
                     "session_id": session_id  # Same session ID
                 }
             }
@@ -378,10 +380,10 @@ async def test_session_state_consistency(
     
     # Store session-level state
     session_state = {
-        "user_preferences": base_execution_context.metadata["user_preferences"],
+        "user_preferences": base_execution_context.metadata["user_preferences"},
         "auth_context": base_execution_context.metadata["auth_context"],
         "session_data": {
-            "active_runs": [],
+            "active_runs": [},
             "accumulated_context": {}
         }
     }
@@ -396,7 +398,7 @@ async def test_session_state_consistency(
         # Add context data to session
         current_session_state["session_data"]["accumulated_context"][context.run_id] = {
             "agent": context.agent_name,
-            "request_params": context.metadata["request_params"],
+            "request_params": context.metadata["request_params"},
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
@@ -432,7 +434,7 @@ async def test_user_context_maintenance(
 ):
     """Test that user context is maintained throughout agent execution."""
     user_context = {
-        "user_id": test_user["id"],
+        "user_id": test_user["id"},
         "preferences": {
             "language": "en",
             "notification_settings": {"email": True, "push": False},
@@ -445,13 +447,13 @@ async def test_user_context_maintenance(
         },
         "subscription": {
             "tier": "premium",
-            "features": ["advanced_analytics", "custom_reports"],
+            "features": ["advanced_analytics", "custom_reports"},
             "limits": {"api_calls_per_hour": 1000}
         }
     }
     
     # Store user context
-    await state_manager.set(f"user_context:{test_user['id']}", user_context)
+    await state_manager.set(f"user_context:{test_user['id'}]", user_context)
     
     # Create execution contexts with different agents
     contexts = []
@@ -468,7 +470,7 @@ async def test_user_context_maintenance(
     # Execute agents and verify user context preservation
     for context in contexts:
         # Retrieve user context
-        stored_user_context = await state_manager.get(f"user_context:{test_user['id']}")
+        stored_user_context = await state_manager.get(f"user_context:{test_user['id'}]")
         assert stored_user_context is not None
         
         # Create state with user context
@@ -478,7 +480,7 @@ async def test_user_context_maintenance(
             user_id=context.user_id,
             metadata=AgentMetadata(
                 execution_context={
-                    "user_preferences": stored_user_context["preferences"],
+                    "user_preferences": stored_user_context["preferences"},
                     "user_permissions": stored_user_context["permissions"],
                     "user_subscription": stored_user_context["subscription"]
                 }
@@ -571,10 +573,10 @@ async def test_agent_output_accumulation_in_state(
     # Create pipeline of specialized agents
     agents_config = [
         ("triage_agent", {"triage_result": {"priority": "high", "category": "performance"}}),
-        ("data_agent", {"data_result": {"metrics": [1, 2, 3], "trends": ["increasing"]}}),
-        ("optimization_agent", {"optimizations_result": {"recommendations": ["cache_optimization", "query_tuning"]}}),
-        ("action_plan_agent", {"action_plan_result": {"steps": ["step1", "step2"], "timeline": "2 weeks"}}),
-        ("report_agent", {"report_result": {"summary": "Optimization complete", "attachments": ["report.pdf"]}})
+        ("data_agent", {"data_result": {"metrics": [1, 2, 3}, "trends": ["increasing"]]]),
+        ("optimization_agent", {"optimizations_result": {"recommendations": ["cache_optimization", "query_tuning"}]]),
+        ("action_plan_agent", {"action_plan_result": {"steps": ["step1", "step2"}, "timeline": "2 weeks"]]),
+        ("report_agent", {"report_result": {"summary": "Optimization complete", "attachments": ["report.pdf"}]])
     ]
     
     current_state = initial_state
@@ -624,7 +626,7 @@ async def test_state_transaction_atomicity(base_execution_context):
     # Initial state
     initial_data = {
         "counter": 0,
-        "items": [],
+        "items": [},
         "metadata": {"version": 1}
     }
     await state_manager.set(state_key, initial_data)
@@ -712,12 +714,12 @@ async def test_authentication_context_preservation(
 ):
     """Test that authentication context is preserved throughout agent execution."""
     auth_context = {
-        "user_id": test_user["id"],
+        "user_id": test_user["id"},
         "token_info": {
             "access_token": "test_access_token",
             "refresh_token": "test_refresh_token",
             "expires_at": (datetime.now(timezone.utc).timestamp() + 3600),
-            "scopes": ["read", "write", "admin"]
+            "scopes": ["read", "write", "admin"}
         },
         "session_info": {
             "session_id": str(uuid.uuid4()),
@@ -726,14 +728,14 @@ async def test_authentication_context_preservation(
             "login_time": datetime.now(timezone.utc).isoformat()
         },
         "permissions": {
-            "resources": ["threads", "agents", "reports"],
+            "resources": ["threads", "agents", "reports"},
             "actions": ["create", "read", "update", "delete"],
             "restrictions": []
         }
     }
     
     # Store authentication context
-    auth_key = f"auth:{test_user['id']}"
+    auth_key = f"auth:{test_user['id'}]"
     await state_manager.set(auth_key, auth_context)
     
     # Create execution context with auth requirements
@@ -744,7 +746,7 @@ async def test_authentication_context_preservation(
         agent_name="auth_sensitive_agent",
         metadata={
             "requires_auth": True,
-            "required_scopes": ["read", "write"],
+            "required_scopes": ["read", "write"},
             "required_resources": ["threads"]
         }
     )
@@ -796,14 +798,14 @@ async def test_request_parameters_flow_through_agents(
             "query": "optimization analysis",
             "filters": {
                 "date_range": "last_30_days",
-                "severity": ["high", "medium"],
+                "severity": ["high", "medium"},
                 "categories": ["performance", "cost"]
             },
             "output_format": "detailed_report",
             "export_options": {
                 "format": "pdf",
                 "include_charts": True,
-                "email_recipients": ["user@example.com"]
+                "email_recipients": ["user@example.com"}
             },
             "analysis_depth": "comprehensive",
             "comparison_baseline": "previous_month"

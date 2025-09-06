@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 REALISTIC MCP SERVICE INTEGRATION TESTS
 =====================================
@@ -6,27 +8,27 @@ REPLACEMENT for mock-heavy unit tests - focuses on critical user paths with
 real service components and actual database persistence.
 
 Business Value Justification:
-- Segment: Platform/Internal - Core MCP functionality
+    - Segment: Platform/Internal - Core MCP functionality
 - Business Goal: Stability & Risk Reduction - Catch real integration issues
 - Value Impact: Ensures MCP service reliability for API partnerships
 - Strategic Impact: Validates critical paths users actually depend on
 
 CRITICAL PATHS TESTED:
-1. Service initialization with real dependencies
+    1. Service initialization with real dependencies
 2. Session management with real storage
 3. Client registration with real security
 4. Tool execution pipeline 
 5. Database persistence operations
 
 REAL COMPONENTS USED:
-- Real SQLAlchemy database sessions (in-memory SQLite for portability)
+    - Real SQLAlchemy database sessions (in-memory SQLite for portability)
 - Real SecurityService for password hashing
 - Real MCPService with actual dependencies
 - Real session storage and management
 - Actual tool execution pipeline
 
 NO MOCKS - Tests real integration behavior
-"""
+""""
 
 import asyncio
 import pytest
@@ -55,59 +57,56 @@ class TestMCPServiceRealisticIntegration:
     
     Replaces the 1300+ line mock-heavy unit test with focused tests that
     use actual services and can catch real integration issues.
-    """
+    """"
     
     @pytest.fixture
     def real_security_service(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Real SecurityService instance for password hashing"""
-    pass
         return SecurityService()
     
-    @pytest.fixture
-    def minimal_real_services(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def minimal_real_services(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create minimal real service instances for testing"""
-    pass
         # Create minimal service instances that don't require heavy dependencies
         
         # We use lightweight real services where possible, minimal mocks only for heavy deps
         services = {
-            'security_service': SecurityService(),  # Real security service
-            'agent_service': None  # TODO: Use real service instance,       # Minimal mock for heavy dependency
-            'thread_service': None  # TODO: Use real service instance,      # Minimal mock for heavy dependency  
-            'corpus_service': None  # TODO: Use real service instance,      # Minimal mock for heavy dependency
-            'synthetic_data_service': None  # TODO: Use real service instance,  # Minimal mock for heavy dependency
-            'supply_catalog_service': None  # TODO: Use real service instance,  # Minimal mock for heavy dependency
-            'llm_manager': None
+        'security_service': SecurityService(),  # Real security service
+        'agent_service': Mock()  # TODO: Use real service instance,       # Minimal mock for heavy dependency
+        'thread_service': Mock()  # TODO: Use real service instance,      # Minimal mock for heavy dependency  
+        'corpus_service': Mock()  # TODO: Use real service instance,      # Minimal mock for heavy dependency
+        'synthetic_data_service': Mock()  # TODO: Use real service instance,  # Minimal mock for heavy dependency
+        'supply_catalog_service': Mock()  # TODO: Use real service instance,  # Minimal mock for heavy dependency
+        'llm_manager': None
         }
         return services
     
-    @pytest.fixture
-    def real_mcp_service(self, minimal_real_services):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_mcp_service(self, minimal_real_services):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Real MCPService with minimal realistic dependencies"""
-    pass
         return MCPService(
-            agent_service=minimal_real_services['agent_service'],
-            thread_service=minimal_real_services['thread_service'], 
-            corpus_service=minimal_real_services['corpus_service'],
-            synthetic_data_service=minimal_real_services['synthetic_data_service'],
-            security_service=minimal_real_services['security_service'],
-            supply_catalog_service=minimal_real_services['supply_catalog_service'],
-            llm_manager=minimal_real_services['llm_manager']
+        agent_service=minimal_real_services['agent_service'],
+        thread_service=minimal_real_services['thread_service'], 
+        corpus_service=minimal_real_services['corpus_service'],
+        synthetic_data_service=minimal_real_services['synthetic_data_service'],
+        security_service=minimal_real_services['security_service'],
+        supply_catalog_service=minimal_real_services['supply_catalog_service'],
+        llm_manager=minimal_real_services['llm_manager']
         )
     
-    @pytest.mark.asyncio
-    async def test_realistic_client_registration_with_database_persistence(
+        @pytest.mark.asyncio
+        async def test_realistic_client_registration_with_database_persistence(
         self, 
         real_mcp_service,
         test_db_session,
         real_security_service
-    ):
+        ):
         """
         REALISTIC TEST: Client registration with actual database and security service
         
@@ -116,9 +115,9 @@ class TestMCPServiceRealisticIntegration:
         - Real security service for password hashing
         - Real MCPService instance
         - Actual error handling
-        """
-        print("
-=== Testing Client Registration with Real Database ===")
+        """"
+        print(""
+=== Testing Client Registration with Real Database ===")"
         
         # Enterprise client registration
         client_data = {
@@ -165,7 +164,7 @@ class TestMCPServiceRealisticIntegration:
         assert persisted_client.api_key_hash == registered_client.api_key_hash
         
         print(f"✓ Successfully registered client: {registered_client.id}")
-        print(f"✓ API key properly hashed: {registered_client.api_key_hash[:20]}...")
+        print(f"✓ API key properly hashed: {registered_client.api_key_hash[:20]]...")
         print(f"✓ Database persistence verified")
         
         # Test error handling with duplicate registration
@@ -211,12 +210,12 @@ class TestMCPServiceRealisticIntegration:
         REALISTIC TEST: Permission validation with real database lookups
         
         Tests the complete authentication and authorization flow with:
-        - Real database persistence
+            - Real database persistence
         - Real permission checking logic
         - Actual client activity tracking
-        """
-        print("
-=== Testing Permission Validation with Real Auth ===")
+        """"
+        print(""
+=== Testing Permission Validation with Real Auth ===")"
         
         # Create clients with different permission levels
         admin_client = await real_mcp_service.register_client(
@@ -338,9 +337,9 @@ class TestMCPServiceRealisticIntegration:
         
         Tests session creation, activity tracking, cleanup with actual
         in-memory storage and concurrent access patterns.
-        """
-        print("
-=== Testing Session Lifecycle Management ===")
+        """"
+        print(""
+=== Testing Session Lifecycle Management ===")"
         
         initial_session_count = len(real_mcp_service.active_sessions)
         
@@ -458,13 +457,13 @@ class TestMCPServiceRealisticIntegration:
         REALISTIC TEST: Tool execution with real persistence
         
         Tests the complete tool execution pipeline with:
-        - Real tool execution tracking
+            - Real tool execution tracking
         - Database persistence of execution records
         - Session activity updates
         - Error handling
-        """
-        print("
-=== Testing Tool Execution Pipeline ===")
+        """"
+        print(""
+=== Testing Tool Execution Pipeline ===")"
         
         # Register client for tool execution
         client = await real_mcp_service.register_client(
@@ -547,7 +546,7 @@ class TestMCPServiceRealisticIntegration:
         for exec_record in session_executions:
             if (exec_record.tool_name == "test_integration_tool" and 
                 exec_record.client_id == client.id):
-                test_exec_found = True
+                    test_exec_found = True
                 assert exec_record.status in ["success", "completed", "pending"]
                 break
         
@@ -599,13 +598,13 @@ class TestMCPServiceRealisticIntegration:
         REALISTIC TEST: Service initialization and operational stability
         
         Tests complete service lifecycle with:
-        - Real component initialization
+            - Real component initialization
         - Server info retrieval
         - Service shutdown and cleanup
         - Reinitialization capability
-        """
-        print("
-=== Testing Service Initialization and Stability ===")
+        """"
+        print(""
+=== Testing Service Initialization and Stability ===")"
         
         # Test service initialization
         await real_mcp_service.initialize()
@@ -647,7 +646,7 @@ class TestMCPServiceRealisticIntegration:
         assert isinstance(server_info["tools_available"], list)
         assert len(server_info["tools_available"]) > 0
         
-        print(f"✓ Server info retrieved: {len(server_info['tools_available'])} tools available")
+        print(f"✓ Server info retrieved: {len(server_info['tools_available'])] tools available")
         
         # Test FastMCP app retrieval (if available)
         try:
@@ -714,9 +713,9 @@ class TestMCPServiceRealisticIntegration:
         
         Simulates a realistic enterprise user workflow from registration
         to tool execution to cleanup. Tests the integration of all components.
-        """
-        print("
-=== Testing Complete End-to-End User Workflow ===")
+        """"
+        print(""
+=== Testing Complete End-to-End User Workflow ===")"
         
         # PHASE 1: Client Onboarding
         print("Phase 1: Enterprise client onboarding...")
@@ -813,11 +812,11 @@ class TestMCPServiceRealisticIntegration:
                     user_context=user_context
                 )
                 execution_results.append((tool_config["name"], "success", result))
-                print(f"  ✓ {tool_config['name']} executed successfully")
+                print(f"  ✓ {tool_config['name']] executed successfully")
                 
             except Exception as e:
                 execution_results.append((tool_config["name"], "error", str(e)))
-                print(f"  ! {tool_config['name']} failed (acceptable): {e}")
+                print(f"  ! {tool_config['name']] failed (acceptable): {e]")
             
             # Update session activity after each tool
             await real_mcp_service.update_session_activity(user_session)
@@ -884,7 +883,7 @@ class TestMCPServiceRealisticIntegration:
         time_diff = datetime.now(UTC) - updated_client.last_active
         assert time_diff.total_seconds() < 120  # Within last 2 minutes
         
-        print(f"✓ Session processed {final_session_data['request_count']} requests")
+        print(f"✓ Session processed {final_session_data['request_count']] requests")
         print(f"✓ Client activity updated (last active: {time_diff.total_seconds():.1f}s ago)")
         
         # PHASE 7: Cleanup
@@ -908,9 +907,9 @@ class TestMCPServiceRealisticIntegration:
         
         Tests how the MCP service handles various error conditions with
         real components and actual error scenarios.
-        """
-        print("
-=== Testing Error Handling and Resilience ===")
+        """"
+        print(""
+=== Testing Error Handling and Resilience ===")"
         
         # Test registration with invalid data
         print("Testing registration error handling...")
@@ -990,9 +989,9 @@ class TestMCPServiceRealisticIntegration:
         
         Tests system behavior under concurrent load with real components.
         This stress test simulates realistic concurrent usage patterns.
-        """
-        print("
-=== Testing Concurrent Operations Under Stress ===")
+        """"
+        print(""
+=== Testing Concurrent Operations Under Stress ===")"
         
         # Register multiple clients concurrently
         print("Phase 1: Concurrent client registrations...")
@@ -1125,7 +1124,6 @@ class TestMCPServiceModuleFunctionsRealistic:
     @pytest.mark.asyncio
     async def test_module_execute_tool_realistic(self):
         """Test module-level execute_tool with real implementation"""
-    pass
         from netra_backend.app.services.mcp_service import execute_tool
         
         result = await execute_tool("realistic_test_tool", {"test_param": "realistic_value"})

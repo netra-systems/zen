@@ -1,13 +1,15 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 ClickHouse Connection Timeout Staging Regression Tests
 
 Tests to replicate ClickHouse connection issues found in GCP staging audit:
-- Connection timeouts to ClickHouse database
+    - Connection timeouts to ClickHouse database
 - Missing proper timeout configurations  
 - Service communication failures due to ClickHouse unavailability
 
@@ -15,12 +17,12 @@ Business Value: Prevents data analytics pipeline failures costing $50K+ MRR
 Critical for metrics collection and performance monitoring.
 
 Root Cause from Staging Audit:
-- ClickHouse connection attempts timeout in staging environment
+    - ClickHouse connection attempts timeout in staging environment
 - Missing connection retry logic and circuit breaker patterns
 - Service continues to attempt connections without proper fallback
 
 These tests will FAIL initially to confirm the issues exist, then PASS after fixes.
-"""
+""""
 
 import os
 import pytest
@@ -45,7 +47,7 @@ class TestClickHouseConnectionTimeoutRegression:
         Root cause: ClickHouse service unreachable or timing out in staging.
         
         Expected failure: Connection timeout after default timeout period
-        """
+        """"
         # Arrange - Mock staging ClickHouse configuration
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -88,11 +90,11 @@ class TestClickHouseConnectionTimeoutRegression:
         Root cause: Single connection attempt without retry mechanism.
         
         Expected failure: No retry attempts when connection fails
-        """
+        """"
         # Arrange - Mock connection failure scenarios
         with patch('clickhouse_driver.Client') as mock_client_class:
             # Simulate connection failures
-            mock_client = MagicNone  # TODO: Use real service instance
+            mock_client = MagicMock()  # TODO: Use real service instance
             mock_client.execute.side_effect = [
                 ConnectionError("Connection refused"),  # First attempt fails
                 ConnectionError("Connection refused"),  # Second attempt fails  
@@ -128,7 +130,7 @@ class TestClickHouseConnectionTimeoutRegression:
         Root cause: Default timeouts too long for staging environment.
         
         Expected failure: Default timeouts not suitable for staging
-        """
+        """"
         # Arrange - Check various timeout configurations
         timeout_configs = [
             'CLICKHOUSE_CONNECT_TIMEOUT',
@@ -201,10 +203,10 @@ class TestClickHouseConnectionTimeoutRegression:
         Root cause: Continuous connection attempts even when service is down.
         
         Expected failure: No circuit breaker to prevent cascade failures
-        """
+        """"
         # Arrange - Mock repeated connection failures
         with patch('clickhouse_driver.Client') as mock_client_class:
-            mock_client = MagicNone  # TODO: Use real service instance
+            mock_client = MagicMock()  # TODO: Use real service instance
             mock_client.execute.side_effect = ConnectionError("ClickHouse unavailable")
             mock_client_class.return_value = mock_client
             
@@ -235,7 +237,7 @@ class TestClickHouseConnectionTimeoutRegression:
         Root cause: Poor connection pool settings causing timeouts.
         
         Expected failure: Connection pool configuration missing or suboptimal
-        """
+        """"
         # Arrange - Check connection pool configuration
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             
@@ -301,10 +303,10 @@ class TestClickHouseServiceCommunicationRegression:
         
         This test should FAIL initially to confirm service communication issues.
         Root cause: Services wait indefinitely for ClickHouse responses.
-        """
+        """"
         # Arrange - Mock async ClickHouse client with timeout
         with patch('netra_backend.app.db.clickhouse.get_clickhouse_service') as mock_client_class:
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             
             # Simulate timeout in service communication
             async def slow_query(*args, **kwargs):
@@ -328,7 +330,7 @@ class TestClickHouseServiceCommunicationRegression:
         
         This test should FAIL initially if fallback mechanisms are missing.
         Root cause: Services crash when ClickHouse is down instead of degrading gracefully.
-        """
+        """"
         # Arrange - Mock ClickHouse unavailable
         with patch('clickhouse_driver.Client') as mock_client_class:
             mock_client_class.side_effect = ConnectionError("ClickHouse server unavailable")
@@ -356,10 +358,10 @@ class TestClickHouseServiceCommunicationRegression:
         
         This test should FAIL initially if health check timeouts aren't handled.
         Root cause: Health checks hang or fail ungracefully.
-        """
+        """"
         # Arrange - Mock slow health check
         with patch('clickhouse_driver.Client') as mock_client_class:
-            mock_client = MagicNone  # TODO: Use real service instance
+            mock_client = MagicMock()  # TODO: Use real service instance
             
             # Simulate slow health check response
             def slow_health_check(*args, **kwargs):

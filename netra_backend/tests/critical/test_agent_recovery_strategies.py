@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Critical Agent Recovery Strategy Tests
+from unittest.mock import Mock, patch, MagicMock
+
+"""Critical Agent Recovery Strategy Tests""""
 
 Business Value: Protects $30K MRR risk from agent recovery failures.
 Prevents agent downtime that affects high-value customer workflows.
 
 ULTRA DEEP THINKING APPLIED: Each test designed for maximum agent reliability protection.
-All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
+All functions <=8 lines. File <=300 lines as per CLAUDE.md requirements.
 """
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -186,7 +188,7 @@ class TestTriageRecoveryExecution:
         # Act - Execute with mocked exception
         with patch.object(strategy, '_create_simplified_triage_result', 
                          side_effect=Exception("Recovery error")):
-            result = await strategy.execute_primary_recovery(context)
+                             result = await strategy.execute_primary_recovery(context)
             
         # Assert - Exception handled gracefully
         assert result is None  # Should return None on failure
@@ -325,7 +327,7 @@ class TestAgentRecoveryErrorEscalation:
         # Mock: Component isolation for controlled unit testing
         context = Mock(spec=RecoveryContext)
         context.error = original_error
-        context.timestamp = "2025-08-18T10:00:00Z"
+        context.timestamp = "2025-8-18T10:0:0Z"
         
         # Mock: Agent service isolation for testing without LLM agent execution
         config = Mock(spec=AgentRecoveryConfig)

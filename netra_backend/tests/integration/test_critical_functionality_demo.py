@@ -3,7 +3,7 @@
 Critical Functionality Demo Test
 Creates a failing test to demonstrate that we can create failing tests for critical functionality.
 This test will initially fail, showing that our testing infrastructure can catch issues.
-"""
+""""
 import pytest
 import asyncio
 from datetime import datetime
@@ -23,7 +23,7 @@ async def thread_service():
 async def db_session():
     """Database session for testing."""
     async with get_async_db() as db:
-        yield db
+    yield db
 
 
 class TestCriticalFunctionalityDemo:
@@ -89,7 +89,7 @@ class TestCriticalFunctionalityDemo:
     async def test_concurrent_operations_basic(self, thread_service: ThreadService):
         """Test basic concurrent operations - should pass."""
         # Test that we can run multiple WebSocket events concurrently
-        user_ids = [f"concurrent_user_{i}" for i in range(3)]
+        user_ids = [f"concurrent_user_{i]" for i in range(3)]
         
         tasks = []
         for user_id in user_ids:

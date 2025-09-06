@@ -11,7 +11,7 @@ from shared.isolated_environment import get_env
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.database,
-    pytest.mark.environment
+    pytest.mark.environment,
 ]
 
 
@@ -28,8 +28,8 @@ class TestDatabaseURLBuilderIntegration:
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_dev',
             'POSTGRES_USER': 'postgres',
-            'POSTGRES_PASSWORD': 'postgres'
-        }
+            'POSTGRES_PASSWORD': 'postgres',
+}
         
         builder = DatabaseURLBuilder(mock_env)
         url = builder.get_url_for_environment()
@@ -48,15 +48,15 @@ class TestDatabaseURLBuilderIntegration:
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_staging',
             'POSTGRES_USER': 'staging_user',
-            'POSTGRES_PASSWORD': 'staging_password'
-        }
+            'POSTGRES_PASSWORD': 'staging_password',
+}
         
         builder = DatabaseURLBuilder(mock_env)
         url = builder.get_url_for_environment()
         
         # Should enforce SSL in staging
         assert url is not None
-        assert 'sslmode=require' in url or 'ssl=require' in url
+        assert 'sslmode = require' in url or 'ssl = require' in url
         
     def test_production_credential_validation(self):
         """Test production environment credential validation."""
@@ -67,8 +67,8 @@ class TestDatabaseURLBuilderIntegration:
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_prod',
             'POSTGRES_USER': 'postgres',
-            'POSTGRES_PASSWORD': 'password'  # Weak password
-        }
+            'POSTGRES_PASSWORD': 'password'  # Weak password,
+}
         
         builder = DatabaseURLBuilder(mock_env)
         is_valid, error = builder.validate()
@@ -85,8 +85,8 @@ class TestDatabaseURLBuilderIntegration:
             'POSTGRES_HOST': '/cloudsql/invalid-format',  # Invalid format
             'POSTGRES_DB': 'netra_staging',
             'POSTGRES_USER': 'cloud_user',
-            'POSTGRES_PASSWORD': 'cloud_password'
-        }
+            'POSTGRES_PASSWORD': 'cloud_password',
+}
         
         builder = DatabaseURLBuilder(mock_env)
         is_valid, error = builder.validate()
@@ -122,7 +122,7 @@ class TestDatabaseURLBuilderIntegration:
         test_urls = [
             "postgres://user:pass@host:5432/db",
             "postgresql://user:pass@host:5432/db",
-            "postgresql+asyncpg://user:pass@host:5432/db?sslmode=require",
+            "postgresql+asyncpg://user:pass@host:5432/db?sslmode = require",
         ]
         
         for url in test_urls:
@@ -137,21 +137,21 @@ class TestDatabaseURLBuilderIntegration:
     def test_driver_specific_formatting(self):
         """Test driver-specific URL formatting."""
         # This should initially fail - incomplete driver formatting
-        base_url = "postgresql://user:pass@host:5432/db?sslmode=require"
+        base_url = "postgresql://user:pass@host:5432/db?sslmode = require"
         
         # Test asyncpg formatting
         asyncpg_url = DatabaseURLBuilder.format_url_for_driver(base_url, 'asyncpg')
         assert asyncpg_url.startswith('postgresql+asyncpg://')
         
-        # asyncpg should use ssl= not sslmode=
+        # asyncpg should use ssl =  not sslmode = 
         if 'ssl' in asyncpg_url:
-            assert 'ssl=' in asyncpg_url
-            assert 'sslmode=' not in asyncpg_url
+            assert 'ssl==' in asyncpg_url
+            assert 'sslmode = ' not in asyncpg_url
         
         # Test psycopg formatting  
         psycopg_url = DatabaseURLBuilder.format_url_for_driver(base_url, 'psycopg')
         assert psycopg_url.startswith('postgresql+psycopg://')
         
-        # psycopg should use sslmode=
+        # psycopg should use sslmode = 
         if 'ssl' in psycopg_url:
-            assert 'sslmode=' in psycopg_url
+            assert 'sslmode = ' in psycopg_url

@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 LLM Agent End-to-End Flow Tests
 Tests complete optimization flows and concurrent request handling
 Split from oversized test_llm_agent_e2e_real.py
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -46,7 +48,7 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
 @pytest.mark.asyncio
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
-    """Test handling multiple concurrent requests"""
+                                              """Test handling multiple concurrent requests"""
     mock_persistence = _create_concurrent_persistence_mock()
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
@@ -102,7 +104,7 @@ async def test_complex_multi_step_flow():
     setup_websocket_manager(ws_manager)
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -135,7 +137,7 @@ async def test_flow_interruption_and_recovery():
     interrupted_state.triage_result = {"category": "optimization", "step": "analysis"}
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=interrupted_state)
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -162,7 +164,7 @@ async def test_flow_performance_benchmarks():
 def _create_concurrent_persistence_mock():
     """Create persistence mock for concurrent testing"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     
     async def mock_save_agent_state(*args, **kwargs):
         if len(args) == 2:
@@ -184,7 +186,7 @@ def _create_concurrent_persistence_mock():
 
 def _create_concurrent_supervisors(mock_db_session, mock_llm_manager, 
                                   mock_websocket_manager, mock_tool_dispatcher, mock_persistence):
-    """Create supervisors for concurrent testing"""
+                                      """Create supervisors for concurrent testing"""
     supervisors = []
     for i in range(5):
         supervisor = SupervisorAgent(
@@ -224,7 +226,7 @@ def _create_e2e_test_infrastructure():
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': Mock(spec=LLMManager),
         # Mock: Generic component isolation for controlled unit testing
-        'ws_manager': None  # TODO: Use real service instance
+        'ws_manager': Mock()  # TODO: Use real service instance
     }
 
 def _setup_e2e_llm_responses(llm_manager):
@@ -232,7 +234,7 @@ def _setup_e2e_llm_responses(llm_manager):
     responses = [
         {"category": "optimization", "requires_analysis": True},
         {"bottleneck": "memory", "utilization": 0.95},
-        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
+        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]]
     ]
     
     response_index = 0
@@ -251,12 +253,12 @@ def _setup_e2e_llm_responses(llm_manager):
 def _setup_e2e_websocket(ws_manager):
     """Setup WebSocket for E2E testing"""
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager.send_message = AsyncNone  # TODO: Use real service instance
+    ws_manager.send_message = AsyncMock()  # TODO: Use real service instance
 
 def _create_e2e_supervisor(infrastructure):
     """Create supervisor for E2E testing"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     
     async def mock_save_agent_state(*args, **kwargs):
         if len(args) == 2:
@@ -340,7 +342,7 @@ def _create_benchmark_tasks(concurrency_level):
         setup_llm_responses(llm_manager)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_persistence = AsyncNone  # TODO: Use real service instance
+        mock_persistence = AsyncMock()  # TODO: Use real service instance
         # Mock: Agent service isolation for testing without LLM agent execution
         mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{i}"))
         # Mock: Agent service isolation for testing without LLM agent execution

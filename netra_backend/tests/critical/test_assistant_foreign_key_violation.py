@@ -2,6 +2,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 env = get_env()
 
@@ -10,7 +11,7 @@ Test to reproduce and fix the assistant foreign key violation error.
 
 Error: insert or update on table "runs" violates foreign key constraint "runs_assistant_id_fkey"
 DETAIL: Key (assistant_id)=(netra-assistant) is not present in table "assistants".
-"""
+""""
 import os
 import pytest
 import asyncio
@@ -135,7 +136,7 @@ class TestAssistantForeignKeyViolation:
         
         # Mock WebSocket manager
         with patch('netra_backend.app.services.websocket.message_handler.manager') as mock_manager:
-            mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+            mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
             
             # Create message handler
             handler = MessageHandler()

@@ -1,13 +1,15 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration and performance tests for Data Sub Agent
 Focuses on integration with other components and performance
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -39,7 +41,7 @@ class TestIntegration(SharedTestIntegration):
         # Mock: Generic component isolation for controlled unit testing
         mock_ws = UnifiedWebSocketManager()
         # Mock: Generic component isolation for controlled unit testing
-        mock_ws.send = AsyncNone  # TODO: Use real service instance
+        mock_ws.send = AsyncMock()  # TODO: Use real service instance
         
         data = {"content": "realtime data"}
         await agent.process_and_stream(data, mock_ws)
@@ -89,7 +91,7 @@ class TestIntegration(SharedTestIntegration):
             "action": "process_data",
             "data": {"content": "from supervisor"},
             # Mock: Generic component isolation for controlled unit testing
-            "callback": AsyncNone  # TODO: Use real service instance
+            "callback": AsyncMock()  # TODO: Use real service instance
         }
         
         result = await agent.handle_supervisor_request(supervisor_request)
@@ -109,7 +111,7 @@ class TestPerformance:
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Create 100 data items
-        data_items = [{"id": i, "content": f"data_{i}"} for i in range(100)]
+        data_items = [{"id": i, "content": f"data_{i]"] for i in range(100)]
         
         start_time = asyncio.get_event_loop().time()
         results = await agent.process_concurrent(data_items, max_concurrent=10)
@@ -167,7 +169,7 @@ class TestStateManagement:
             mock_redis = TestRedisManager().get_client()
             MockRedis.return_value = mock_redis
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncNone  # TODO: Use real service instance
+            mock_redis.set = AsyncMock()  # TODO: Use real service instance
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=None)  # Simulate no existing state
             
@@ -216,7 +218,7 @@ class TestStateManagement:
             mock_redis = TestRedisManager().get_client()
             MockRedis.return_value = mock_redis
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncNone  # TODO: Use real service instance
+            mock_redis.set = AsyncMock()  # TODO: Use real service instance
             
             # Simulate failure and recovery
             await agent.save_state()

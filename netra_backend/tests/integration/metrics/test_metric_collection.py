@@ -1,18 +1,20 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Metric Collection Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from monitoring blind spots
 - Value Impact: Validates user actions trigger metric collection correctly
 - Revenue Impact: Ensures metrics are captured with proper metadata within 1 second
 
 REQUIREMENTS:
-- User actions trigger metric collection
+    - User actions trigger metric collection
 - Metrics are captured with proper metadata
 - Metric capture within 1 second
 - 100% metric collection reliability
-"""
+""""
 
 import sys
 from pathlib import Path

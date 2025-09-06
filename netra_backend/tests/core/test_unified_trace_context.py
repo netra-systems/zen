@@ -1,12 +1,12 @@
 """Comprehensive tests for UnifiedTraceContext with W3C Trace Context support.
 
 Tests cover:
-- Context creation and propagation
+    - Context creation and propagation
 - W3C header serialization and deserialization
 - Span management
 - WebSocket event context generation
 - Parent-child context relationships
-"""
+""""
 
 import asyncio
 import json
@@ -138,7 +138,7 @@ class TestSpanManagement:
         assert len(span.events) == 1
         event = span.events[0]
         assert event["name"] == "test_event"
-        assert event["attributes"] == {"detail": "test_value"}
+        assert event["attributes"] == {"detail": "test_value"]
         assert "timestamp" in event
 
 
@@ -339,7 +339,7 @@ class TestDecorators:
         context = UnifiedTraceContext(user_id="user123")
         
         @with_trace_context(context)
-        def test_func():
+    def test_func():
             current = get_current_trace_context()
             assert current is not None
             assert current.user_id == "user123"
@@ -443,8 +443,8 @@ class TestContextSerialization:
         assert data["user_id"] == "user456"
         assert data["thread_id"] == "thread789"
         assert data["request_id"] == "req000"
-        assert data["baggage"] == {"key": "value"}
-        assert data["flags"] == {"sampled": True}
+        assert data["baggage"] == {"key": "value"]
+        assert data["flags"] == {"sampled": True]
         assert data["current_span_id"] == span.span_id
         assert data["span_count"] == 1
 

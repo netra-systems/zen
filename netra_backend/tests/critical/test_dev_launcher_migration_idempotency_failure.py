@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for Non-Idempotent Migration Issues
 Critical dev launcher issue: Migration drops non-existent index "idx_userbase_created_at"
@@ -10,11 +12,11 @@ Root Cause: Migration 66e0e5d9662d attempts to drop idx_userbase_created_at inde
 that may not exist in all environments, making the migration non-idempotent.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Development Velocity & Database Integrity
 - Value Impact: Ensures migrations can be run safely in any environment state
 - Strategic Impact: Prevents database corruption and reduces developer friction
-"""
+""""
 
 import pytest
 import asyncio
@@ -38,13 +40,13 @@ class TestMigrationIdempotencyFailures:
         FAILING TEST: Demonstrates migration failure when dropping non-existent index.
         
         This test reproduces the exact error from dev launcher logs:
-        "ProgrammingError: (psycopg2.errors.UndefinedObject) index 'idx_userbase_created_at' does not exist"
+            "ProgrammingError: (psycopg2.errors.UndefinedObject) index 'idx_userbase_created_at' does not exist"
         
         Expected behavior: Migration should check if index exists before attempting to drop it
         Current behavior: Migration fails when index doesn't exist, making it non-idempotent
-        """
+        """"
         # Mock scenario where index doesn't exist in database
-        mock_connection = MagicNone  # TODO: Use real service instance
+        mock_connection = MagicMock()  # TODO: Use real service instance
         mock_connection.execute.side_effect = ProgrammingError(
             "index 'idx_userbase_created_at' does not exist",
             None,
@@ -80,9 +82,9 @@ class TestMigrationIdempotencyFailures:
         
         Expected behavior: Downgrade should handle cases where indexes may not have existed originally
         Current behavior: May fail to properly restore state when indexes weren't originally present
-        """
+        """"
         # Mock scenario where we try to restore indexes that never existed
-        mock_connection = MagicNone  # TODO: Use real service instance
+        mock_connection = MagicMock()  # TODO: Use real service instance
         mock_connection.execute.side_effect = [
             ProgrammingError("index already exists", None, None),  # First index fails
             None,  # Other operations succeed
@@ -120,7 +122,7 @@ class TestMigrationIdempotencyFailures:
         
         Expected behavior: All index operations should include IF EXISTS/IF NOT EXISTS clauses
         Current behavior: Index operations assume specific database state
-        """
+        """"
         # Read the migration file content to check for idempotency patterns
         import os
         from pathlib import Path
@@ -148,7 +150,7 @@ class TestMigrationIdempotencyFailures:
         
         # This should fail because the migration lacks idempotency checks
         # If this test passes, it means idempotency patterns were found (which is good)
-        assert not has_idempotency, f"Migration should lack idempotency checks for this test to demonstrate the issue. Found patterns in: {migration_content[:500]}..."
+        assert not has_idempotency, f"Migration should lack idempotency checks for this test to demonstrate the issue. Found patterns in: {migration_content[:500]]..."
     
     @fast_test
     @pytest.mark.critical
@@ -162,9 +164,9 @@ class TestMigrationIdempotencyFailures:
         
         Expected behavior: Migration should be idempotent and succeed on multiple runs
         Current behavior: Second run fails due to non-idempotent index operations
-        """
+        """"
         # Mock a successful first run followed by a failing second run
-        mock_connection = MagicNone  # TODO: Use real service instance
+        mock_connection = MagicMock()  # TODO: Use real service instance
         
         # First call succeeds (index exists and gets dropped)
         # Second call fails (index no longer exists)
@@ -204,7 +206,7 @@ class TestMigrationIdempotencyFailures:
         
         Expected behavior: Migration should document database state assumptions
         Current behavior: No documentation of required pre-migration state
-        """
+        """"
         # Read the migration file to check for documentation
         import os
         from pathlib import Path

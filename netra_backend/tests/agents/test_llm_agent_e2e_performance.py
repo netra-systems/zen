@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Performance E2E LLM Agent Tests  
 Performance metrics, concurrency, error recovery, and complete optimization flows
 Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
 BVJ:
-1. Segment: Growth & Enterprise
+    1. Segment: Growth & Enterprise
 2. Business Goal: Ensure agent performance meets customer SLA requirements
 3. Value Impact: Prevents performance degradation that could reduce optimization efficiency  
 4. Revenue Impact: Maintains customer satisfaction and prevents performance-related churn
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -236,7 +238,7 @@ def _create_e2e_supervisor(infrastructure):
     db_session, llm_manager, ws_manager = infrastructure
     _setup_e2e_responses(llm_manager)
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager.send_message = AsyncNone  # TODO: Use real service instance
+    ws_manager.send_message = AsyncMock()  # TODO: Use real service instance
     
     mock_persistence = _create_e2e_persistence_mock()
     return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
@@ -263,7 +265,7 @@ def _setup_complex_flow_responses(llm_manager, ws_manager):
 def _create_flow_persistence_mock():
     """Create persistence mock for flow testing"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -301,7 +303,7 @@ def _create_interrupted_state():
 def _create_recovery_persistence_mock(interrupted_state):
     """Create recovery persistence mock"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=interrupted_state)
     # Mock: Agent service isolation for testing without LLM agent execution

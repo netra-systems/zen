@@ -2,16 +2,18 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical test suite for staging startup initialization order issues.
 
 This test reproduces the initialization order problems seen in staging where:
-- Uvicorn startup error at `/usr/local/bin/uvicorn:8`
+    - Uvicorn startup error at `/usr/local/bin/uvicorn:8`
 - Services start before dependencies are properly initialized
 - Logger and configuration systems aren't ready when needed
 
 The tests verify proper initialization sequence and detect order-dependent failures.
-"""
+""""
 
 import pytest
 import sys
@@ -29,8 +31,8 @@ class TestStagingStartupInitializationOrder:
         FAILING TEST: Uvicorn starts before configuration system is ready.
         
         This reproduces the exact error from staging:
-        `/usr/local/bin/uvicorn:8` - startup fails because config isn't initialized.
-        """
+            `/usr/local/bin/uvicorn:8` - startup fails because config isn't initialized.
+        """"
         # Mock uvicorn to simulate startup before config is ready
         startup_attempts = []
         
@@ -40,7 +42,7 @@ class TestStagingStartupInitializationOrder:
             from netra_backend.app.core.configuration.base import get_unified_config
             config = get_unified_config()  # This should fail if config isn't ready
             # Mock: Generic component isolation for controlled unit testing
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         # Mock configuration to not be ready during uvicorn startup
         # Mock: Component isolation for testing without external dependencies
@@ -62,7 +64,7 @@ class TestStagingStartupInitializationOrder:
         
         This tests the initialization order issue where logger setup happens
         before the configuration system is properly initialized.
-        """
+        """"
         initialization_order = []
         
         def track_config_init(self, *args, **kwargs):
@@ -95,7 +97,7 @@ class TestStagingStartupInitializationOrder:
         
         This reproduces the scenario where database services try to connect
         during startup before database configuration is available.
-        """
+        """"
         connection_attempts = []
         
         def mock_db_connect(*args, **kwargs):
@@ -123,7 +125,7 @@ class TestStagingStartupInitializationOrder:
         
         This tests the scenario where WebSocket manager tries to initialize
         before configuration, logging, and database systems are ready.
-        """
+        """"
         startup_sequence = []
         
         def mock_websocket_init(self, *args, **kwargs):
@@ -161,7 +163,7 @@ class TestApplicationLifecycleInitializationOrder:
         
         This tests the scenario where lifespan events fire before
         critical systems are initialized.
-        """
+        """"
         lifespan_events = []
         
         async def mock_startup_event():
@@ -194,7 +196,7 @@ class TestApplicationLifecycleInitializationOrder:
         
         This reproduces the scenario where the FastAPI app tries to initialize
         routes and middleware before configuration system is available.
-        """
+        """"
         app_creation_steps = []
         
         def mock_create_app():
@@ -206,7 +208,7 @@ class TestApplicationLifecycleInitializationOrder:
             # Try to setup middleware based on config
             cors_enabled = config.cors_enabled  # Should fail if config not ready
             # Mock: Generic component isolation for controlled unit testing
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         # Mock config to not be available during app creation
         # Mock: Component isolation for testing without external dependencies
@@ -226,7 +228,7 @@ class TestApplicationLifecycleInitializationOrder:
         
         This tests the scenario where FastAPI dependency injection system
         tries to provide services that haven't been properly initialized yet.
-        """
+        """"
         injection_attempts = []
         
         def mock_get_database_dependency():
@@ -275,7 +277,7 @@ class TestEnvironmentSpecificInitializationOrder:
         
         This reproduces the scenario where environment detection happens
         before environment variables are properly loaded.
-        """
+        """"
         detection_attempts = []
         
         def mock_detect_environment():
@@ -302,7 +304,7 @@ class TestEnvironmentSpecificInitializationOrder:
         
         This tests the scenario where secret manager tries to load secrets
         before the configuration system knows where to find them.
-        """
+        """"
         secret_loading_steps = []
         
         def mock_load_secrets():
@@ -334,7 +336,7 @@ class TestEnvironmentSpecificInitializationOrder:
         
         This tests that initialization order is consistent between environments
         and detects when staging has different (broken) order.
-        """
+        """"
         # Track initialization order for different environments
         production_order = []
         staging_order = []
@@ -372,7 +374,7 @@ class TestCriticalStartupDependencyFailures:
         
         This reproduces how a single initialization failure can cause
         the entire Uvicorn startup process to fail.
-        """
+        """"
         failure_cascade = []
         
         def mock_database_service_init():
@@ -405,7 +407,7 @@ class TestCriticalStartupDependencyFailures:
         
         This tests the scenario where services have circular dependencies
         that prevent any of them from starting successfully.
-        """
+        """"
         initialization_attempts = []
         
         def mock_service_a_init():
@@ -434,7 +436,7 @@ class TestCriticalStartupDependencyFailures:
         
         This reproduces the scenario where initialization takes too long
         and times out, causing startup failure.
-        """
+        """"
         import time
         
         timeout_events = []

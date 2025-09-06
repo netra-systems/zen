@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 Realistic Log Ingestion Tests
 Test realistic log ingestion patterns
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -43,7 +46,7 @@ class TestRealisticLogIngestion:
                 INSERT INTO netra_app_internal_logs 
                 (timestamp, level, component, message, metadata)
                 VALUES
-                """
+                """"
                 
                 await mock_clickhouse_client.execute(query, batch)
             
@@ -71,7 +74,7 @@ class TestRealisticLogIngestion:
         SELECT * FROM log_patterns
         ORDER BY occurrence_count DESC
         LIMIT 100
-        """
+        """"
         
         # Verify query is valid
         is_valid, error = validate_clickhouse_query(pattern_query)
@@ -92,7 +95,7 @@ class TestRealisticLogIngestion:
         WHERE timestamp >= now() - INTERVAL 24 HOUR
         GROUP BY hour, component, level
         ORDER BY hour DESC, log_count DESC
-        """
+        """"
         
         # Validate the volume estimation query
         is_valid, error = validate_clickhouse_query(volume_query)
@@ -110,7 +113,7 @@ class TestRealisticLogIngestion:
         WHERE timestamp < now() - INTERVAL 30 DAY
         GROUP BY date, component
         ORDER BY date ASC
-        """
+        """"
         
         # Validate retention query
         is_valid, error = validate_clickhouse_query(retention_query)
@@ -141,7 +144,7 @@ class TestRealisticLogIngestion:
         GROUP BY et1.minute, et1.request_id
         HAVING affected_components > 1
         ORDER BY total_errors DESC
-        """
+        """"
         
         # Validate correlation query
         is_valid, error = validate_clickhouse_query(correlation_query)
@@ -161,7 +164,7 @@ class TestRealisticLogIngestion:
         WHERE timestamp >= now() - INTERVAL 1 HOUR
         GROUP BY component, level
         ORDER BY total_logs DESC
-        """
+        """"
         
         # Validate sampling query
         is_valid, error = validate_clickhouse_query(sampling_query)

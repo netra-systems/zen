@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical Cross-Service Authentication Security Tests - Cycles 46-50
 Tests revenue-critical cross-service authentication security patterns.
 
 Business Value Justification:
-- Segment: Enterprise customers requiring multi-service workflows
+    - Segment: Enterprise customers requiring multi-service workflows
 - Business Goal: Prevent $3.6M annual revenue loss from inter-service security breaches
 - Value Impact: Ensures secure service-to-service authentication
 - Strategic Impact: Enables microservice security compliance and zero-trust architecture
 
 Cycles Covered: 46, 47, 48, 49, 50
-"""
+""""
 
 import pytest
 import asyncio
@@ -36,56 +38,52 @@ logger = get_logger(__name__)
 @pytest.mark.parametrize("environment", ["test"])
 class TestCrossServiceAuthSecurity:
     """Critical cross-service authentication security test suite."""
-    pass
 
     @pytest.fixture
     def auth_middleware(self, environment):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create isolated auth middleware for testing."""
-    pass
         # Mock FastAPI app for middleware initialization
         mock_app = mock_app_instance  # Initialize appropriate service
         middleware = FastAPIAuthMiddleware(app=mock_app)
         return middleware
 
-    @pytest.fixture
-    def token_service(self, environment):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def token_service(self, environment):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create isolated token service for testing."""
-    pass
         service = TokenService()
         service.initialize()
         return service
 
-    @pytest.mark.cycle_46
-    async def test_service_token_validation_prevents_token_spoofing(self, environment, auth_middleware, token_service):
+        @pytest.mark.cycle_46
+        async def test_service_token_validation_prevents_token_spoofing(self, environment, auth_middleware, token_service):
         """
         Cycle 46: Test service token validation prevents inter-service token spoofing.
         
         Revenue Protection: $580K annually from preventing service impersonation.
-        """
-    pass
+        """"
         logger.info("Testing service token validation - Cycle 46")
         
         # Create legitimate service token
         legitimate_service_data = {
-            "service_id": "auth_service",
-            "service_name": "authentication",
-            "permissions": ["user_lookup", "token_validation"],
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "auth_service",
+        "service_name": "authentication",
+        "permissions": ["user_lookup", "token_validation"},
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         legitimate_token = token_service.create_service_token(legitimate_service_data)
         
         # Test legitimate service token
-        service_request = MagicNone  # TODO: Use real service instance
+        service_request = MagicMock()  # TODO: Use real service instance
         service_request.method = "POST"
         service_request.url.path = "/api/internal/validate_user"
         service_request.headers = {
-            "Authorization": f"Bearer {legitimate_token}",
-            "X-Service-ID": "auth_service"
+        "Authorization": f"Bearer {legitimate_token}",
+        "X-Service-ID": "auth_service"
         }
         service_request.client.host = "10.0.1.100"  # Internal service IP
         
@@ -95,18 +93,18 @@ class TestCrossServiceAuthSecurity:
         
         # Test spoofed service token (user token trying to impersonate service)
         user_token_data = {
-            "user_id": "malicious_user",
-            "role": "user",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "user_id": "malicious_user",
+        "role": "user",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         spoofed_token = token_service.create_token(user_token_data)  # User token, not service token
         
-        spoofed_request = MagicNone  # TODO: Use real service instance
+        spoofed_request = MagicMock()  # TODO: Use real service instance
         spoofed_request.method = "POST"
         spoofed_request.url.path = "/api/internal/validate_user"
         spoofed_request.headers = {
-            "Authorization": f"Bearer {spoofed_token}",
-            "X-Service-ID": "auth_service"  # Claiming to be auth service
+        "Authorization": f"Bearer {spoofed_token}",
+        "X-Service-ID": "auth_service"  # Claiming to be auth service
         }
         spoofed_request.client.host = "192.168.1.100"  # External IP
         
@@ -115,12 +113,12 @@ class TestCrossServiceAuthSecurity:
         assert "invalid_service_token" in spoofed_result.get("error", ""), "Spoofing not detected"
         
         # Test service ID mismatch
-        mismatch_request = MagicNone  # TODO: Use real service instance
+        mismatch_request = MagicMock()  # TODO: Use real service instance
         mismatch_request.method = "POST"
         mismatch_request.url.path = "/api/internal/validate_user"
         mismatch_request.headers = {
-            "Authorization": f"Bearer {legitimate_token}",
-            "X-Service-ID": "frontend_service"  # Wrong service ID
+        "Authorization": f"Bearer {legitimate_token}",
+        "X-Service-ID": "frontend_service"  # Wrong service ID
         }
         mismatch_request.client.host = "10.0.1.100"
         
@@ -130,39 +128,38 @@ class TestCrossServiceAuthSecurity:
         
         logger.info("Service token validation verified")
 
-    @pytest.mark.cycle_47
-    async def test_service_request_source_validation_prevents_external_impersonation(self, environment, auth_middleware, token_service):
+        @pytest.mark.cycle_47
+        async def test_service_request_source_validation_prevents_external_impersonation(self, environment, auth_middleware, token_service):
         """
         Cycle 47: Test service request source validation prevents external impersonation attempts.
         
         Revenue Protection: $640K annually from preventing external service impersonation.
-        """
-    pass
+        """"
         logger.info("Testing service request source validation - Cycle 47")
         
         # Create service token
         service_data = {
-            "service_id": "frontend_service",
-            "service_name": "frontend",
-            "permissions": ["user_data", "session_management"],
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "frontend_service",
+        "service_name": "frontend",
+        "permissions": ["user_data", "session_management"},
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_token = token_service.create_service_token(service_data)
         
         # Configure allowed service IP ranges
         await auth_middleware.configure_service_ip_allowlist({
-            "frontend_service": ["10.0.0.0/16", "172.16.0.0/12"],  # Internal networks
-            "auth_service": ["10.0.1.0/24"],  # Specific subnet
+        "frontend_service": ["10.0.0.0/16", "172.16.0.0/12"},  # Internal networks
+        "auth_service": ["10.0.1.0/24"],  # Specific subnet
         })
         
         # Test request from allowed internal IP
-        internal_request = MagicNone  # TODO: Use real service instance
+        internal_request = MagicMock()  # TODO: Use real service instance
         internal_request.method = "GET"
         internal_request.url.path = "/api/internal/user_sessions"
         internal_request.headers = {
-            "Authorization": f"Bearer {service_token}",
-            "X-Service-ID": "frontend_service"
+        "Authorization": f"Bearer {service_token}",
+        "X-Service-ID": "frontend_service"
         }
         internal_request.client.host = "10.0.2.50"  # Within allowed range
         
@@ -170,12 +167,12 @@ class TestCrossServiceAuthSecurity:
         assert internal_result["authenticated"] == True, "Internal service request failed"
         
         # Test request from external IP (should be blocked)
-        external_request = MagicNone  # TODO: Use real service instance
+        external_request = MagicMock()  # TODO: Use real service instance
         external_request.method = "GET"
         external_request.url.path = "/api/internal/user_sessions"
         external_request.headers = {
-            "Authorization": f"Bearer {service_token}",
-            "X-Service-ID": "frontend_service"
+        "Authorization": f"Bearer {service_token}",
+        "X-Service-ID": "frontend_service"
         }
         external_request.client.host = "203.0.113.10"  # External IP
         
@@ -184,12 +181,12 @@ class TestCrossServiceAuthSecurity:
         assert "unauthorized_source_ip" in external_result.get("error", ""), "External IP not blocked"
         
         # Test request from wrong internal subnet
-        wrong_subnet_request = MagicNone  # TODO: Use real service instance
+        wrong_subnet_request = MagicMock()  # TODO: Use real service instance
         wrong_subnet_request.method = "GET"
         wrong_subnet_request.url.path = "/api/internal/user_sessions"
         wrong_subnet_request.headers = {
-            "Authorization": f"Bearer {service_token}",
-            "X-Service-ID": "frontend_service"
+        "Authorization": f"Bearer {service_token}",
+        "X-Service-ID": "frontend_service"
         }
         wrong_subnet_request.client.host = "10.1.0.50"  # Not in allowed range for frontend
         
@@ -198,42 +195,41 @@ class TestCrossServiceAuthSecurity:
         
         logger.info("Service request source validation verified")
 
-    @pytest.mark.cycle_48
-    async def test_service_permission_boundaries_prevent_privilege_escalation(self, environment, auth_middleware, token_service):
+        @pytest.mark.cycle_48
+        async def test_service_permission_boundaries_prevent_privilege_escalation(self, environment, auth_middleware, token_service):
         """
         Cycle 48: Test service permission boundaries prevent cross-service privilege escalation.
         
         Revenue Protection: $720K annually from preventing service privilege escalation.
-        """
-    pass
+        """"
         logger.info("Testing service permission boundaries - Cycle 48")
         
         # Create service tokens with different permission levels
         limited_service_data = {
-            "service_id": "analytics_service",
-            "service_name": "analytics",
-            "permissions": ["read_metrics", "read_events"],  # Read-only permissions
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "analytics_service",
+        "service_name": "analytics",
+        "permissions": ["read_metrics", "read_events"},  # Read-only permissions
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         limited_token = token_service.create_service_token(limited_service_data)
         
         admin_service_data = {
-            "service_id": "admin_service",
-            "service_name": "admin",
-            "permissions": ["read_metrics", "write_config", "manage_users", "admin_access"],
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "admin_service",
+        "service_name": "admin",
+        "permissions": ["read_metrics", "write_config", "manage_users", "admin_access"},
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         admin_token = token_service.create_service_token(admin_service_data)
         
         # Test limited service accessing allowed resource
-        read_request = MagicNone  # TODO: Use real service instance
+        read_request = MagicMock()  # TODO: Use real service instance
         read_request.method = "GET"
         read_request.url.path = "/api/internal/metrics"
         read_request.headers = {
-            "Authorization": f"Bearer {limited_token}",
-            "X-Service-ID": "analytics_service"
+        "Authorization": f"Bearer {limited_token}",
+        "X-Service-ID": "analytics_service"
         }
         read_request.client.host = "10.0.3.100"
         
@@ -242,17 +238,17 @@ class TestCrossServiceAuthSecurity:
         
         # Check if service has required permission
         has_read_permission = auth_middleware.check_service_permission(
-            read_result["service"], "read_metrics"
+        read_result["service"], "read_metrics"
         )
         assert has_read_permission == True, "Service missing required read permission"
         
         # Test limited service attempting privileged operation (should fail)
-        write_request = MagicNone  # TODO: Use real service instance
+        write_request = MagicMock()  # TODO: Use real service instance
         write_request.method = "POST"
         write_request.url.path = "/api/internal/admin/delete_user"
         write_request.headers = {
-            "Authorization": f"Bearer {limited_token}",
-            "X-Service-ID": "analytics_service"
+        "Authorization": f"Bearer {limited_token}",
+        "X-Service-ID": "analytics_service"
         }
         write_request.client.host = "10.0.3.100"
         
@@ -261,17 +257,17 @@ class TestCrossServiceAuthSecurity:
         assert write_auth_result["authenticated"] == True, "Service token should authenticate"
         
         has_admin_permission = auth_middleware.check_service_permission(
-            write_auth_result["service"], "admin_access"
+        write_auth_result["service"], "admin_access"
         )
         assert has_admin_permission == False, "Limited service incorrectly granted admin permission"
         
         # Test admin service accessing privileged resource (should succeed)
-        admin_request = MagicNone  # TODO: Use real service instance
+        admin_request = MagicMock()  # TODO: Use real service instance
         admin_request.method = "POST"
         admin_request.url.path = "/api/internal/admin/delete_user"
         admin_request.headers = {
-            "Authorization": f"Bearer {admin_token}",
-            "X-Service-ID": "admin_service"
+        "Authorization": f"Bearer {admin_token}",
+        "X-Service-ID": "admin_service"
         }
         admin_request.client.host = "10.0.4.100"
         
@@ -279,42 +275,41 @@ class TestCrossServiceAuthSecurity:
         assert admin_result["authenticated"] == True, "Admin service authentication failed"
         
         has_admin_access = auth_middleware.check_service_permission(
-            admin_result["service"], "admin_access"
+        admin_result["service"], "admin_access"
         )
         assert has_admin_access == True, "Admin service missing admin permission"
         
         logger.info("Service permission boundaries verified")
 
-    @pytest.mark.cycle_49
-    async def test_service_token_rotation_prevents_stale_credential_abuse(self, environment, auth_middleware, token_service):
+        @pytest.mark.cycle_49
+        async def test_service_token_rotation_prevents_stale_credential_abuse(self, environment, auth_middleware, token_service):
         """
         Cycle 49: Test service token rotation prevents stale credential abuse.
         
         Revenue Protection: $480K annually from preventing stale credential attacks.
-        """
-    pass
+        """"
         logger.info("Testing service token rotation - Cycle 49")
         
         service_id = "rotation_test_service"
         
         # Create initial service token
         initial_token_data = {
-            "service_id": service_id,
-            "service_name": "rotation_test",
-            "permissions": ["test_permission"],
-            "token_type": "service_token",
-            "token_version": 1,
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": service_id,
+        "service_name": "rotation_test",
+        "permissions": ["test_permission"},
+        "token_type": "service_token",
+        "token_version": 1,
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         initial_token = token_service.create_service_token(initial_token_data)
         
         # Verify initial token works
-        initial_request = MagicNone  # TODO: Use real service instance
+        initial_request = MagicMock()  # TODO: Use real service instance
         initial_request.method = "GET"
         initial_request.url.path = "/api/internal/test"
         initial_request.headers = {
-            "Authorization": f"Bearer {initial_token}",
-            "X-Service-ID": service_id
+        "Authorization": f"Bearer {initial_token}",
+        "X-Service-ID": service_id
         }
         initial_request.client.host = "10.0.5.100"
         
@@ -323,30 +318,30 @@ class TestCrossServiceAuthSecurity:
         
         # Rotate service token
         rotated_token_data = {
-            "service_id": service_id,
-            "service_name": "rotation_test",
-            "permissions": ["test_permission"],
-            "token_type": "service_token",
-            "token_version": 2,  # New version
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": service_id,
+        "service_name": "rotation_test",
+        "permissions": ["test_permission"},
+        "token_type": "service_token",
+        "token_version": 2,  # New version
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         rotated_token = token_service.create_service_token(rotated_token_data)
         
         # Register token rotation
         await token_service.rotate_service_token(
-            service_id=service_id,
-            old_token_version=1,
-            new_token_version=2,
-            grace_period_seconds=30  # 30 second grace period
+        service_id=service_id,
+        old_token_version=1,
+        new_token_version=2,
+        grace_period_seconds=30  # 30 second grace period
         )
         
         # Verify new token works
-        rotated_request = MagicNone  # TODO: Use real service instance
+        rotated_request = MagicMock()  # TODO: Use real service instance
         rotated_request.method = "GET"
         rotated_request.url.path = "/api/internal/test"
         rotated_request.headers = {
-            "Authorization": f"Bearer {rotated_token}",
-            "X-Service-ID": service_id
+        "Authorization": f"Bearer {rotated_token}",
+        "X-Service-ID": service_id
         }
         rotated_request.client.host = "10.0.5.100"
         
@@ -354,12 +349,12 @@ class TestCrossServiceAuthSecurity:
         assert rotated_result["authenticated"] == True, "Rotated token failed"
         
         # Old token should still work during grace period
-        old_token_request = MagicNone  # TODO: Use real service instance
+        old_token_request = MagicMock()  # TODO: Use real service instance
         old_token_request.method = "GET"
         old_token_request.url.path = "/api/internal/test"
         old_token_request.headers = {
-            "Authorization": f"Bearer {initial_token}",
-            "X-Service-ID": service_id
+        "Authorization": f"Bearer {initial_token}",
+        "X-Service-ID": service_id
         }
         old_token_request.client.host = "10.0.5.100"
         
@@ -380,54 +375,53 @@ class TestCrossServiceAuthSecurity:
         
         logger.info("Service token rotation verified")
 
-    @pytest.mark.cycle_50
-    @pytest.mark.skip(reason="Chain depth checking logic needs debugging - requires complex service interaction setup")
-    async def test_inter_service_request_tracing_prevents_circular_attacks(self, environment, auth_middleware, token_service):
+        @pytest.mark.cycle_50
+        @pytest.mark.skip(reason="Chain depth checking logic needs debugging - requires complex service interaction setup")
+        async def test_inter_service_request_tracing_prevents_circular_attacks(self, environment, auth_middleware, token_service):
         """
         Cycle 50: Test inter-service request tracing prevents circular request attacks.
         
         Revenue Protection: $520K annually from preventing service request loops.
-        """
-    pass
+        """"
         logger.info("Testing inter-service request tracing - Cycle 50")
         
         # Create service tokens for testing circular requests
         service_a_data = {
-            "service_id": "service_a",
-            "service_name": "service_a",
-            "permissions": ["call_service_b"],
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "service_a",
+        "service_name": "service_a",
+        "permissions": ["call_service_b"},
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_a_token = token_service.create_service_token(service_a_data)
         
         service_b_data = {
-            "service_id": "service_b",
-            "service_name": "service_b",
-            "permissions": ["call_service_c"],
-            "token_type": "service_token",
-            "exp": datetime.now(UTC) + timedelta(hours=1)
+        "service_id": "service_b",
+        "service_name": "service_b",
+        "permissions": ["call_service_c"},
+        "token_type": "service_token",
+        "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_b_token = token_service.create_service_token(service_b_data)
         
         # Configure circular request detection
         await auth_middleware.configure_request_tracing(
-            max_chain_depth=5,
-            circular_detection=True,
-            trace_timeout=30
+        max_chain_depth=5,
+        circular_detection=True,
+        trace_timeout=30
         )
         
         # Start request chain - Service A calls Service B
         trace_id = secrets.token_hex(16)
         
-        request_a_to_b = MagicNone  # TODO: Use real service instance
+        request_a_to_b = MagicMock()  # TODO: Use real service instance
         request_a_to_b.method = "POST"
         request_a_to_b.url.path = "/api/internal/process_data"
         request_a_to_b.headers = {
-            "Authorization": f"Bearer {service_a_token}",
-            "X-Service-ID": "service_a",
-            "X-Trace-ID": trace_id,
-            "X-Request-Chain": "service_a"
+        "Authorization": f"Bearer {service_a_token}",
+        "X-Service-ID": "service_a",
+        "X-Trace-ID": trace_id,
+        "X-Request-Chain": "service_a"
         }
         request_a_to_b.client.host = "10.0.6.100"
         
@@ -435,14 +429,14 @@ class TestCrossServiceAuthSecurity:
         assert result_a["authenticated"] == True, "Service A to B request failed"
         
         # Service B calls Service C (normal chain extension)
-        request_b_to_c = MagicNone  # TODO: Use real service instance
+        request_b_to_c = MagicMock()  # TODO: Use real service instance
         request_b_to_c.method = "POST"
         request_b_to_c.url.path = "/api/internal/analyze_data"
         request_b_to_c.headers = {
-            "Authorization": f"Bearer {service_b_token}",
-            "X-Service-ID": "service_b",
-            "X-Trace-ID": trace_id,
-            "X-Request-Chain": "service_a->service_b"
+        "Authorization": f"Bearer {service_b_token}",
+        "X-Service-ID": "service_b",
+        "X-Trace-ID": trace_id,
+        "X-Request-Chain": "service_a->service_b"
         }
         request_b_to_c.client.host = "10.0.7.100"
         
@@ -450,14 +444,14 @@ class TestCrossServiceAuthSecurity:
         assert result_b["authenticated"] == True, "Service B to C request failed"
         
         # Simulate circular request - Service B tries to call Service A again
-        circular_request = MagicNone  # TODO: Use real service instance
+        circular_request = MagicMock()  # TODO: Use real service instance
         circular_request.method = "POST"
         circular_request.url.path = "/api/internal/circular_call"
         circular_request.headers = {
-            "Authorization": f"Bearer {service_a_token}",  # Service A token again
-            "X-Service-ID": "service_a",
-            "X-Trace-ID": trace_id,
-            "X-Request-Chain": "service_a->service_b->service_a"  # Circular chain
+        "Authorization": f"Bearer {service_a_token}",  # Service A token again
+        "X-Service-ID": "service_a",
+        "X-Trace-ID": trace_id,
+        "X-Request-Chain": "service_a->service_b->service_a"  # Circular chain
         }
         circular_request.client.host = "10.0.6.100"
         
@@ -468,14 +462,14 @@ class TestCrossServiceAuthSecurity:
         # Test chain depth limit
         deep_chain = "service_a" + "->service_b" * 10  # Very deep chain
         
-        deep_request = MagicNone  # TODO: Use real service instance
+        deep_request = MagicMock()  # TODO: Use real service instance
         deep_request.method = "POST"
         deep_request.url.path = "/api/internal/deep_call"
         deep_request.headers = {
-            "Authorization": f"Bearer {service_b_token}",
-            "X-Service-ID": "service_b",
-            "X-Trace-ID": trace_id,
-            "X-Request-Chain": deep_chain
+        "Authorization": f"Bearer {service_b_token}",
+        "X-Service-ID": "service_b",
+        "X-Trace-ID": trace_id,
+        "X-Request-Chain": deep_chain
         }
         deep_request.client.host = "10.0.7.100"
         

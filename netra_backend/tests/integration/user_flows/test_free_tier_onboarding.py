@@ -1,20 +1,22 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Free tier user onboarding and basic functionality tests.
 Critical for protecting the Free → Early conversion funnel.
 
 BVJ (Business Value Justification):
-1. Segment: Free tier (Primary conversion source)
+    1. Segment: Free tier (Primary conversion source)
 2. Business Goal: Protect $150K MRR from free user onboarding failures
 3. Value Impact: Ensures new users get immediate value demonstration
 4. Strategic Impact: Validates critical conversion triggers
 
 Test Coverage:
-- User registration and email verification
+    - User registration and email verification
 - First chat session initialization
 - Free tier limits and notifications
 - Basic feature access validation
 - Usage tracking fundamentals
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -22,7 +24,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -107,7 +109,7 @@ async def test_free_user_registration_with_verification(
 
     response = await async_client.post(
 
-        f"/auth/verify-email/{reg_data['verification_token']}"
+        f"/auth/verify-email/{reg_data['verification_token']]"
 
     )
 

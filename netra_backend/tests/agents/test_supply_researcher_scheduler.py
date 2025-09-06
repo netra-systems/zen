@@ -1,6 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Tests for SupplyResearchScheduler functionality
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -95,7 +98,7 @@ class TestSupplyResearchScheduler:
             mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             with patch.object(SupplyResearcherAgent, 'process_scheduled_research', new_callable=AsyncMock) as mock_process:
-                mock_process.return_value = {"results": []}
+                mock_process.return_value = {"results": []]
                 
                 result = await scheduler._execute_scheduled_research(schedule)
                 

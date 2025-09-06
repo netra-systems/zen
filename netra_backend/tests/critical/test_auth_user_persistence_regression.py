@@ -3,13 +3,15 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.database.test_database_manager import TestDatabaseManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Regression tests for auth service user persistence.
 Ensures auth service creates real database users, not just tokens.
 
 CRITICAL: These tests prevent regression of the WebSocket auth failure
 where tokens were created but users didn't exist in the database.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -36,9 +38,9 @@ class TestAuthUserPersistenceRegression:
         """Test that WebSocket auth fails if user doesn't exist in database."""
         # Setup
         # Mock: Generic component isolation for controlled unit testing
-        websocket = AsyncNone  # TODO: Use real service instance
+        websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
-        security_service = AsyncNone  # TODO: Use real service instance
+        security_service = AsyncMock()  # TODO: Use real service instance
         
         # Create token with user ID that doesn't exist in DB
         fake_user_id = "non-existent-user-123"
@@ -155,13 +157,13 @@ class TestAuthUserPersistenceRegression:
     async def test_websocket_auth_succeeds_with_database_user(self):
         """Test that WebSocket auth succeeds when user exists in database."""
         # Mock: Generic component isolation for controlled unit testing
-        websocket = AsyncNone  # TODO: Use real service instance
+        websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
-        security_service = AsyncNone  # TODO: Use real service instance
+        security_service = AsyncMock()  # TODO: Use real service instance
         
         # Create mock user that exists in DB
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_user.id = "dev-user-123"
         mock_user.email = "dev@example.com"
         mock_user.is_active = True
@@ -181,7 +183,7 @@ class TestAuthUserPersistenceRegression:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncNone  # TODO: Use real service instance
+                mock_session = AsyncMock()  # TODO: Use real service instance
                 mock_db.return_value.__aenter__.return_value = mock_session
                 # Mock: JWT token handling isolation to avoid real crypto dependencies
                 mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_auth_validation)
@@ -246,7 +248,7 @@ class TestAuthUserPersistenceRegression:
             user = User(
                 id=test_case["user_id"],
                 email=test_case["email"],
-                full_name=f"{test_case['method'].title()} User",
+                full_name=f"{test_case['method'}.title()] User",
                 is_active=True,
                 role="user"
             )
@@ -260,7 +262,7 @@ class TestAuthUserPersistenceRegression:
             # Test that each user would pass validation
             from netra_backend.app.routes.utils.validators import validate_user_active
             result = validate_user_active(user)
-            assert result == test_case["user_id"], f"{test_case['method']} auth must create valid users"
+            assert result == test_case["user_id"], f"{test_case['method'}] auth must create valid users"
 
 class TestAuthServiceIntegration:
     """Integration tests for auth service with main app."""

@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 WebSocket Error Recovery Integration Tests
 
@@ -12,7 +14,7 @@ and recovery behavior with corrupted state. Critical for system reliability and 
 
 COVERAGE TARGET: 100% for error recovery and performance scenarios
 All functions ≤8 lines per CLAUDE.md requirements.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -92,7 +94,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                                      connections: list) -> None:
 
-        """Simulate mass disconnection for performance testing."""
+                                                         """Simulate mass disconnection for performance testing."""
 
         for conn in connections:
 
@@ -104,7 +106,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                        start_time: float, connections: list) -> None:
 
-        """Verify performance metrics under load."""
+                                           """Verify performance metrics under load."""
 
         recovery_time = time.time() - start_time
 
@@ -155,7 +157,7 @@ class TestWebSocketPerformanceUnderLoad:
 
                                                  expected_size: int) -> None:
 
-        """Verify message queue processing performance."""
+                                                     """Verify message queue processing performance."""
 
         stats = await manager.get_transactional_stats()
 
@@ -208,7 +210,7 @@ class TestWebSocketErrorScenarios:
 
                                             user_id: str, invalid_state: dict) -> None:
 
-        """Verify graceful recovery from invalid state."""
+                                                """Verify graceful recovery from invalid state."""
 
         stats = manager.get_unified_stats()
 
@@ -291,7 +293,7 @@ class TestWebSocketNetworkConditionRecovery:
 
                                                       user_id: str) -> dict:
 
-        """Setup scenario with intermittent connectivity."""
+                                                          """Setup scenario with intermittent connectivity."""
 
         websocket = MockWebSocket(user_id)
 
@@ -315,7 +317,7 @@ class TestWebSocketNetworkConditionRecovery:
 
                                           user_id: str, intermittent_state: dict) -> None:
 
-        """Verify recovery under intermittent network conditions."""
+                                              """Verify recovery under intermittent network conditions."""
 
         stats = manager.get_unified_stats()
 
@@ -362,7 +364,7 @@ class TestWebSocketNetworkConditionRecovery:
 
                                           user_id: str, latency_state: dict) -> None:
 
-        """Verify system performance under high latency conditions."""
+                                              """Verify system performance under high latency conditions."""
         # System should remain stable even with high latency
 
         stats = manager.get_unified_stats()
@@ -422,7 +424,7 @@ class TestWebSocketCircuitBreakerRecovery:
 
                                              user_id: str, circuit_state: dict) -> None:
 
-        """Verify circuit breaker recovery behavior."""
+                                                 """Verify circuit breaker recovery behavior."""
         # System should track circuit breaker activations
 
         stats = manager.get_unified_stats()

@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Multi-Constraint Priority Workflow Test Module
 Tests workflows with constraint prioritization.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -56,7 +58,7 @@ class TestConstraintPriorityWorkflows:
         setup = multi_constraint_setup
         state = create_priority_optimization_state()
         state.metadata.update({
-            'hierarchy': {'critical': ['quality'], 'important': ['cost'], 'nice_to_have': ['latency']}
+            'hierarchy': {'critical': ['quality'], 'important': ['cost'], 'nice_to_have': ['latency']]
         })
         results = await execute_multi_constraint_workflow(setup, state)
         validate_hierarchical_results(results, state)

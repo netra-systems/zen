@@ -4,18 +4,18 @@ Tests actual LLM agent interactions with comprehensive coverage
 Refactored into modular architecture with ≤300 lines per module and ≤8 lines per function
 
 ARCHITECTURAL COMPLIANCE:
-✅ File: ≤300 lines
+    ✅ File: ≤300 lines
 ✅ Functions: ≤8 lines each
 ✅ Modular design
 ✅ Single responsibility per module
 ✅ Composable and reusable components
 
 MODULES:
-- test_fixtures.py: All pytest fixtures with ≤8 line functions
+    - test_fixtures.py: All pytest fixtures with ≤8 line functions
 - test_helpers.py: Helper functions with ≤8 line functions  
 - test_llm_agent_basic.py: Basic tests with ≤8 line functions
 - test_llm_agent_advanced_integration.py: Integration tests with ≤8 line functions
-"""
+""""
 
 import sys
 from pathlib import Path

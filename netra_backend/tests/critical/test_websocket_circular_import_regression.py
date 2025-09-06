@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Critical test for WebSocket circular import regression.
 
 This test specifically prevents the regression where WebSocket modules
@@ -5,7 +8,7 @@ importing BaseExecutionEngine caused circular dependencies that prevented
 agent registration and message processing.
 
 REGRESSION HISTORY:
-- Date: 2025-01-19
+    - Date: 2025-01-19
 - Issue: Circular import between app.websocket_core modules and app.agents.base.executor
 - Impact: Agents couldn't be imported, WebSocket messages sent but no responses
 - Fix: Removed BaseExecutionEngine imports from WebSocket modules
@@ -14,13 +17,13 @@ REGRESSION HISTORY:
 - Issue: Circular import between connection.py, connection_executor.py, and connection_manager.py
 - Impact: Module-level initialization of connection_manager caused import loops
 - Fix: Made connection_manager lazy-loaded with get_connection_monitor_instance()
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -166,7 +169,7 @@ class TestCircularImportRegression:
         
         # Create mock supervisor
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = AsyncNone  # TODO: Use real service instance
+        mock_supervisor = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
         
@@ -200,7 +203,7 @@ class TestConnectionModuleCircularImportPrevention:
         
         Business Value: Prevents import-time initialization causing circular deps.
         Protects $50K+ MRR from WebSocket connection failures.
-        """
+        """"
         # Clear module cache
         modules_to_clear = [
             'netra_backend.app.websocket_core',
@@ -236,7 +239,7 @@ class TestConnectionModuleCircularImportPrevention:
         """Test each connection module imports independently.
         
         Business Value: Ensures microservice independence per SPEC requirements.
-        """
+        """"
         test_cases = [
             # These modules no longer exist in the unified WebSocket architecture
             # All functionality is now in websocket_core modules
@@ -270,7 +273,7 @@ class TestConnectionModuleCircularImportPrevention:
         """Test all legacy exports remain available.
         
         Business Value: Prevents breaking changes in dependent services.
-        """
+        """"
         from netra_backend.app import websocket_core
         
         # Core exports in the unified WebSocket architecture
@@ -284,19 +287,19 @@ class TestIndirectCircularImportPrevention:
     """Test for indirect circular imports that manifest at runtime.
     
     REGRESSION HISTORY:
-    - Date: 2025-08-21
+        - Date: 2025-08-21
     - Issue: Indirect circular import: ws_manager → synthetic_data.error_handler → 
              synthetic_data → job_manager → ws_manager
     - Impact: Tests couldn't detect the circular dependency because it manifested 
               only during runtime initialization
     - Fix: Use lazy imports in job_manager.py for WebSocket manager references
-    """
+    """"
     
     def test_no_websocket_manager_import_in_synthetic_data_modules(self):
         """Synthetic data modules should use lazy imports for WebSocket manager.
         
         Business Value: Prevents $50K+ MRR loss from service initialization failures.
-        """
+        """"
         import ast
         import os
         
@@ -333,8 +336,8 @@ class TestIndirectCircularImportPrevention:
                             if (isinstance(parent, ast.If) and 
                                 isinstance(parent.test, ast.Name) and
                                 parent.test.id == 'TYPE_CHECKING'):
-                                if node in ast.walk(parent):
-                                    is_type_checking = True
+                                    if node in ast.walk(parent):
+                                        is_type_checking = True
                                     break
                         
                         if not is_type_checking:
@@ -347,7 +350,7 @@ class TestIndirectCircularImportPrevention:
         """Test that WebSocket → Synthetic Data import chain doesn't create cycles.
         
         Business Value: Ensures microservice independence per SPEC requirements.
-        """
+        """"
         import importlib
         import sys
         
@@ -400,7 +403,7 @@ class TestIndirectCircularImportPrevention:
         """Verify job_manager uses lazy imports for WebSocket manager.
         
         Business Value: Prevents service startup failures worth $100K+ annual revenue.
-        """
+        """"
         import os
         
         job_manager_path = os.path.join(
@@ -413,7 +416,7 @@ class TestIndirectCircularImportPrevention:
             content = f.read()
         
         # Check that ws_manager import is either:
-        # 1. Inside TYPE_CHECKING block
+            # 1. Inside TYPE_CHECKING block
         # 2. Inside method definitions (lazy)
         
         lines = content.split('\n')

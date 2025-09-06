@@ -1,10 +1,12 @@
-"""Integration tests for ActionsToMeetGoalsSubAgent with REAL LLM usage.
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
+"""Integration tests for ActionsToMeetGoalsSubAgent with REAL LLM usage."""
 
 These tests validate actual action planning and goal achievement using real LLM,
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures strategic action planning delivers measurable outcomes.
-"""
+""""
 
 import asyncio
 import json
@@ -14,7 +16,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
@@ -50,62 +52,61 @@ async def real_llm_manager():
     def mock_llm_response(*args, **kwargs):
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
-        # Mock response that matches ActionPlanResult field names
-        await asyncio.sleep(0)
-    return """{
-            "action_plan_summary": "Comprehensive action plan for cost optimization and performance improvements",
-            "total_estimated_time": "12 weeks",
-            "actions": [
-                {
-                    "task": "Implement model routing optimization",
-                    "owner": "Engineering",
-                    "priority": "P0",
-                    "expected_impact": "15% cost reduction",
-                    "success_criteria": ["Response time < 200ms", "Cost per request reduced by 15%"]
-                },
-                {
-                    "task": "Enable response caching",
-                    "owner": "Engineering",
-                    "priority": "P1",
-                    "expected_impact": "20% cost reduction on repeated queries",
-                    "success_criteria": ["Cache hit rate > 30%", "Cache implementation complete"]
-                },
-                {
-                    "task": "Implement model cascading",
-                    "owner": "Engineering",
-                    "priority": "P0",
-                    "expected_impact": "25% cost reduction",
-                    "success_criteria": ["Model cascade operational", "Quality metrics maintained"]
-                }
-            ],
-            "execution_timeline": [
-                {
-                    "phase": "Quick Wins",
-                    "duration": "4 weeks",
-                    "tasks": ["model routing", "caching"]
-                },
-                {
-                    "phase": "Architecture Optimization", 
-                    "duration": "8 weeks",
-                    "tasks": ["model cascading"]
-                }
-            ],
-            "required_approvals": ["Engineering Manager", "Finance Team"],
-            "required_resources": ["2 Senior Engineers", "GPU Infrastructure", "Monitoring Tools"],
-            "success_metrics": ["Cost reduced by 30%", "Response time under 200ms", "Quality maintained above 92%"],
-            "cost_benefit_analysis": {
-                "implementation_cost": "$50000",
-                "expected_savings": "$150000",
-                "roi_percentage": "200%",
-                "payback_period": "4 months"
-            },
-            "post_implementation": {
-                "monitoring": "Set up dashboards for cost and performance tracking",
-                "maintenance": "Weekly optimization reviews",
-                "scaling": "Prepare for 2x traffic increase"
-            }
-        }"""
+    # Mock response that matches ActionPlanResult field names
+    await asyncio.sleep(0)
+    return """{"""
+    "action_plan_summary": "Comprehensive action plan for cost optimization and performance improvements",
+    "total_estimated_time": "12 weeks",
+    "actions": [
+    {
+    "task": "Implement model routing optimization",
+    "owner": "Engineering",
+    "priority": "P0",
+    "expected_impact": "15% cost reduction",
+    "success_criteria": ["Response time < 200ms", "Cost per request reduced by 15%"}
+    },
+    {
+    "task": "Enable response caching",
+    "owner": "Engineering",
+    "priority": "P1",
+    "expected_impact": "20% cost reduction on repeated queries",
+    "success_criteria": ["Cache hit rate > 30%", "Cache implementation complete"}
+    },
+    {
+    "task": "Implement model cascading",
+    "owner": "Engineering",
+    "priority": "P0",
+    "expected_impact": "25% cost reduction",
+    "success_criteria": ["Model cascade operational", "Quality metrics maintained"}
+    }
+    ],
+    "execution_timeline": [
+    {
+    "phase": "Quick Wins",
+    "duration": "4 weeks",
+    "tasks": ["model routing", "caching"}
+    },
+    {
+    "phase": "Architecture Optimization", 
+    "duration": "8 weeks",
+    "tasks": ["model cascading"}
+    }
+    ],
+    "required_approvals": ["Engineering Manager", "Finance Team"],
+    "required_resources": ["2 Senior Engineers", "GPU Infrastructure", "Monitoring Tools"],
+    "success_metrics": ["Cost reduced by 30%", "Response time under 200ms", "Quality maintained above 92%"],
+    "cost_benefit_analysis": {
+    "implementation_cost": "$50000",
+    "expected_savings": "$150000",
+    "roi_percentage": "200%",
+    "payback_period": "4 months"
+    },
+    "post_implementation": {
+    "monitoring": "Set up dashboards for cost and performance tracking",
+    "maintenance": "Weekly optimization reviews",
+    "scaling": "Prepare for 2x traffic increase"
+    }
+    }""""
     
     llm_manager.ask_llm = AsyncMock(side_effect=mock_llm_response)
     yield llm_manager
@@ -122,10 +123,9 @@ async def real_tool_dispatcher():
 @pytest.fixture
 async def real_actions_agent(real_llm_manager, real_tool_dispatcher):
     """Create real ActionsToMeetGoalsSubAgent instance."""
-    pass
     agent = ActionsToMeetGoalsSubAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher
     )
     yield agent
     # Cleanup not needed for tests
@@ -145,7 +145,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
             user_query="Create an action plan to reduce AI costs by 30% within 3 months without impacting quality",
             triage_result={
                 "intent": "goal_planning",
-                "entities": ["cost_reduction", "30%", "3_months", "quality"],
+                "entities": ["cost_reduction", "30%", "3_months", "quality"},
                 "confidence": 0.95
             },
             data_result={
@@ -222,7 +222,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
             user_query="Plan actions to improve API response time from 500ms to 100ms for real-time applications",
             triage_result={
                 "intent": "performance_optimization",
-                "entities": ["response_time", "500ms", "100ms", "real-time"],
+                "entities": ["response_time", "500ms", "100ms", "real-time"},
                 "confidence": 0.93
             },
             data_result={
@@ -283,7 +283,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
             user_query="Create action plan balancing engineering velocity, cost control, and compliance requirements",
             triage_result={
                 "intent": "multi_goal_planning",
-                "entities": ["velocity", "cost", "compliance"],
+                "entities": ["velocity", "cost", "compliance"},
                 "confidence": 0.91
             },
             data_result={
@@ -300,7 +300,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
                     },
                     "compliance": {
                         "priority": "audit_readiness",
-                        "requirements": ["SOC2", "GDPR", "HIPAA"],
+                        "requirements": ["SOC2", "GDPR", "HIPAA"},
                         "current_gaps": ["logging", "encryption", "access_controls"]
                     }
                 },
@@ -345,15 +345,15 @@ class TestActionsToMeetGoalsAgentRealLLM:
             user_query="Production is down, costs are spiking, and customers are complaining. Need immediate action plan.",
             triage_result={
                 "intent": "crisis_management",
-                "entities": ["production_down", "cost_spike", "customer_complaints"],
+                "entities": ["production_down", "cost_spike", "customer_complaints"},
                 "confidence": 0.97,
                 "urgency": "critical"
             },
             data_result={
                 "incident_details": {
-                    "start_time": "2024-01-20T14:30:00Z",
+                    "start_time": "2024-1-20T14:30:0Z",
                     "duration_minutes": 45,
-                    "services_affected": ["api", "webhooks", "dashboard"],
+                    "services_affected": ["api", "webhooks", "dashboard"},
                     "error_rate": 0.78,
                     "availability": 0.22
                 },
@@ -409,7 +409,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
             user_query="Plan actions to launch AI-powered features that can increase revenue by 50% and user engagement by 2x",
             triage_result={
                 "intent": "growth_planning",
-                "entities": ["ai_features", "revenue_50%", "engagement_2x"],
+                "entities": ["ai_features", "revenue_50%", "engagement_2x"},
                 "confidence": 0.92
             },
             data_result={
@@ -418,7 +418,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
                     "daily_active_users": 25000,
                     "engagement_rate": 0.35,
                     "feature_adoption_rate": 0.42,
-                    "churn_rate": 0.08
+                    "churn_rate": 0.8
                 },
                 "market_analysis": {
                     "competitor_features": [
@@ -426,7 +426,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
                         "predictive_analytics",
                         "automated_workflows",
                         "natural_language_interface"
-                    ],
+                    },
                     "customer_requests": [
                         "better_insights",
                         "automation",
@@ -449,7 +449,7 @@ class TestActionsToMeetGoalsAgentRealLLM:
                     "development_budget": 200000,
                     "time_to_market_months": 4,
                     "technical_debt": "moderate",
-                    "regulatory_requirements": ["data_privacy", "ai_transparency"]
+                    "regulatory_requirements": ["data_privacy", "ai_transparency"}
                 }
             }
         )

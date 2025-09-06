@@ -3,7 +3,7 @@ Test WebSocket Load Balancer
 
 Validates WebSocket connectivity through load balancer
 and ingress in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path

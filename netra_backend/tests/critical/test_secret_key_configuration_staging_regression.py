@@ -1,16 +1,18 @@
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 env = get_env()
 SECRET_KEY Configuration Staging Regression Tests
 
 Tests to replicate critical SECRET_KEY issues found in GCP staging audit:
-- Backend service missing proper SECRET_KEY configuration
+    - Backend service missing proper SECRET_KEY configuration
 - JWT token generation failures due to incorrect secret configuration
 - Service authentication breaking due to missing or malformed secrets
 
@@ -18,12 +20,12 @@ Business Value: Prevents $100K+ revenue loss from authentication failures
 Critical for enterprise customer access and security compliance.
 
 Root Cause from Staging Audit:
-- Backend service not receiving proper SECRET_KEY from environment
+    - Backend service not receiving proper SECRET_KEY from environment
 - JWT token generation failing with invalid secret configuration
 - Missing fallback mechanisms when secrets are unavailable
 
 These tests will FAIL initially to confirm the issues exist, then PASS after fixes.
-"""
+""""
 
 import os
 import pytest
@@ -46,7 +48,7 @@ class TestSecretKeyConfigurationRegression:
         Root cause: SECRET_KEY not properly configured in staging deployment.
         
         Expected failure: SecretManagerError or None returned for SECRET_KEY
-        """
+        """"
         # Arrange - Simulate staging environment without SECRET_KEY
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -89,11 +91,11 @@ class TestSecretKeyConfigurationRegression:
         Root cause: JWT library cannot generate tokens without proper secret key.
         
         Expected failure: JWT generation throws error or returns invalid token
-        """
+        """"
         # Arrange - Mock JWT token generation without proper SECRET_KEY
         with patch('netra_backend.app.core.auth.jwt_manager.JWTManager') as mock_jwt:
             # Simulate missing or invalid SECRET_KEY
-            mock_jwt_instance = MagicNone  # TODO: Use real service instance
+            mock_jwt_instance = MagicMock()  # TODO: Use real service instance
             mock_jwt_instance.generate_token.side_effect = ValueError("Invalid secret key")
             mock_jwt.return_value = mock_jwt_instance
             
@@ -110,7 +112,7 @@ class TestSecretKeyConfigurationRegression:
         Root cause: Staging may have malformed SECRET_KEY that passes basic checks.
         
         Expected failure: System accepts invalid SECRET_KEY format
-        """
+        """"
         # Arrange - Test various invalid SECRET_KEY formats that might exist in staging
         invalid_secret_keys = [
             "",  # Empty string
@@ -139,7 +141,7 @@ class TestSecretKeyConfigurationRegression:
         Root cause: Staging has no backup when Secret Manager is unavailable.
         
         Expected failure: System crashes instead of using fallback secret
-        """
+        """"
         # Arrange - Mock GCP Secret Manager failure
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -171,7 +173,7 @@ class TestSecretKeyConfigurationRegression:
         Root cause: Staging deployment succeeds even without proper SECRET_KEY.
         
         Expected failure: Deployment validation missing for critical secrets
-        """
+        """"
         # Arrange - Simulate deployment environment check
         deployment_required_secrets = [
             'SECRET_KEY',
@@ -206,7 +208,7 @@ class TestSecretKeyConfigurationRegression:
         Root cause: Different secret managers returning different values.
         
         Expected failure: Inconsistent secret values between managers
-        """
+        """"
         # Arrange - Initialize both secret managers
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -241,7 +243,7 @@ class TestSecretKeyJWTIntegrationRegression:
         
         This test should FAIL initially to confirm JWT signing issues.
         Root cause: Staging SECRET_KEY format incompatible with JWT library.
-        """
+        """"
         # Arrange - Mock staging SECRET_KEY scenarios
         staging_scenarios = [
             {'SECRET_KEY': '', 'expected_error': 'Empty secret key'},
@@ -268,7 +270,7 @@ class TestSecretKeyJWTIntegrationRegression:
         
         This test should FAIL initially if secret rotation breaks JWT verification.
         Root cause: Old tokens can't be verified with new SECRET_KEY.
-        """
+        """"
         import jwt
         
         # Arrange - Create token with old secret, verify with new secret

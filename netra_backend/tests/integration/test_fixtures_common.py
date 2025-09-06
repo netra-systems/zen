@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -9,7 +11,7 @@ from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -31,8 +33,6 @@ from netra_backend.app.db.models_postgres import Message, Run, Thread, User
 from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
-
-@pytest.mark.asyncio
 async def test_database():
 
     """Setup test database for integration testing"""
@@ -47,7 +47,7 @@ async def test_database():
     
     async with engine.begin() as conn:
 
-        await conn.run_sync(Base.metadata.create_all)
+    await conn.run_sync(Base.metadata.create_all)
     
     session = async_session()
 
@@ -60,7 +60,7 @@ async def test_database():
     os.unlink(db_file.name)
 
 @pytest.fixture
- def real_infrastructure():
+def real_infrastructure():
     """Use real service instance."""
     # TODO: Initialize real service
     await asyncio.sleep(0)
@@ -87,11 +87,11 @@ async def test_database():
     
     return {
 
-        "llm_manager": llm_manager,
+    "llm_manager": llm_manager,
 
-        "ws_manager": ws_manager,
+    "ws_manager": ws_manager,
 
-        "cache_service": cache_service
+    "cache_service": cache_service
 
     }
 
@@ -147,16 +147,16 @@ async def setup_clickhouse_mock():
     ch_mock = ch_mock_instance  # Initialize appropriate service
 
     # Mock: Generic component isolation for controlled unit testing
-    ch_mock.execute = AsyncNone  # TODO: Use real service instance
+    ch_mock.execute = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Generic component isolation for controlled unit testing
-    ch_mock.begin_transaction = AsyncNone  # TODO: Use real service instance
+    ch_mock.begin_transaction = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Generic component isolation for controlled unit testing
-    ch_mock.commit = AsyncNone  # TODO: Use real service instance
+    ch_mock.commit = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Generic component isolation for controlled unit testing
-    ch_mock.rollback = AsyncNone  # TODO: Use real service instance
+    ch_mock.rollback = AsyncMock()  # TODO: Use real service instance
 
     await asyncio.sleep(0)
     return ch_mock

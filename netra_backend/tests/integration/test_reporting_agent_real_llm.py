@@ -4,7 +4,7 @@ These tests validate actual report generation and data visualization using real 
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures accurate and insightful reporting for decision-making.
-"""
+""""
 
 import asyncio
 import json
@@ -47,9 +47,9 @@ async def real_tool_dispatcher():
 async def real_reporting_agent(real_llm_manager, real_tool_dispatcher):
     """Create real ReportingSubAgent instance."""
     agent = ReportingSubAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=None  # Real websocket in production
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=None  # Real websocket in production
     )
     yield agent
     # Cleanup not needed for tests

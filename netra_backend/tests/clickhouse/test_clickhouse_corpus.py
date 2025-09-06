@@ -1,7 +1,9 @@
+import asyncio
+
 """
 ClickHouse Corpus Table Tests
 Tests for corpus table creation and management operations
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -59,7 +61,7 @@ class TestCorpusTableOperations:
             version UInt32 DEFAULT 1, embedding Array(Float32) DEFAULT [],
             tags Array(String) DEFAULT []
         ) ENGINE = MergeTree() PARTITION BY toYYYYMM(created_at)
-        ORDER BY (workload_type, created_at, record_id)"""
+        ORDER BY (workload_type, created_at, record_id)""""
 
     async def _test_corpus_table_operations(self, client, table_name, corpus_id):
         """Test corpus table operations"""
@@ -77,7 +79,7 @@ class TestCorpusTableOperations:
         metadata, domain, tags) VALUES ('test_workload', 
         'Test prompt for corpus', 'Test response from model',
         '{{"test": true, "corpus_id": "{corpus_id}"}}', 'testing',
-        ['test', 'automated', 'corpus'])"""
+        ['test', 'automated', 'corpus'])""""
         await client.execute_query(insert_query)
 
     async def _verify_corpus_test_data(self, client, table_name):

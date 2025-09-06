@@ -1,8 +1,8 @@
 """
 KV Cache Audit E2E Test Suite
 Tests KV cache auditing and optimization using real LLM agents.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import asyncio
 import uuid
@@ -33,34 +33,33 @@ from netra_backend.app.services.quality_gate_service import (
 )
 
 @pytest.fixture
-
 def kv_cache_audit_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
 
     """Setup real agent environment for KV cache audit testing."""
     # Import additional agents to avoid circular dependencies
     from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
 
-        ActionsToMeetGoalsSubAgent,
+    ActionsToMeetGoalsSubAgent,
 
     )
     from netra_backend.app.agents.optimizations_core_sub_agent import (
 
-        OptimizationsCoreSubAgent,
+    OptimizationsCoreSubAgent,
 
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     agents = {
 
-        'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
+    'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'data': DataSubAgent(real_llm_manager, real_tool_dispatcher),
+    'data': DataSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'optimization': OptimizationsCoreSubAgent(real_llm_manager, real_tool_dispatcher),
+    'optimization': OptimizationsCoreSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'actions': ActionsToMeetGoalsSubAgent(real_llm_manager, real_tool_dispatcher),
+    'actions': ActionsToMeetGoalsSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'reporting': ReportingSubAgent(real_llm_manager, real_tool_dispatcher)
+    'reporting': ReportingSubAgent(real_llm_manager, real_tool_dispatcher)
 
     }
 
@@ -87,7 +86,7 @@ class TestKVCacheAuditWorkflow:
     @pytest.mark.asyncio
     async def test_ep_006_kv_cache_audit_real_llm(self, kv_cache_audit_setup):
 
-        """Test EP-006: KV cache audit for optimization opportunities using real LLM."""
+        """Test EP-6: KV cache audit for optimization opportunities using real LLM."""
 
         setup = kv_cache_audit_setup
 
@@ -125,13 +124,13 @@ class TestKVCacheAuditWorkflow:
 
 def _create_ep_006_state() -> DeepAgentState:
 
-    """Create state for EP-006 example prompt test."""
+    """Create state for EP-6 example prompt test."""
 
     return DeepAgentState(
 
         user_request="I want to audit all uses of KV caching in my system to find optimization opportunities.",
 
-        metadata={'test_type': 'ep_006', 'prompt_id': 'EP-006', 'audit_type': 'kv_cache', 'scope': 'system_wide'}
+        metadata={'test_type': 'ep_006', 'prompt_id': 'EP-6', 'audit_type': 'kv_cache', 'scope': 'system_wide'}
 
     )
 
@@ -218,7 +217,7 @@ def _create_audit_execution_result(step_name: str, agent, state: DeepAgentState,
 
 async def _validate_ep_006_results(results: List[Dict], state: DeepAgentState, setup: Dict):
 
-    """Validate EP-006 results with enhanced quality checks."""
+    """Validate EP-6 results with enhanced quality checks."""
 
     assert len(results) == 5, "All 5 workflow steps must execute"
 
@@ -314,7 +313,7 @@ def _validate_optimization_recommendations_results(results: List[Dict], state: D
 
 async def _validate_response_quality_ep_006(results: List[Dict], setup: Dict):
 
-    """Validate response quality for EP-006 using quality gate service."""
+    """Validate response quality for EP-6 using quality gate service."""
 
     quality_service = QualityGateService()
 
@@ -330,9 +329,9 @@ async def _validate_response_quality_ep_006(results: List[Dict], setup: Dict):
 
         )
 
-        assert is_valid, f"EP-006 response quality validation failed: {feedback}"
+        assert is_valid, f"EP-6 response quality validation failed: {feedback}"
 
-        assert score >= 70, f"EP-006 quality score too low: {score}"
+        assert score >= 70, f"EP-6 quality score too low: {score}"
 
 @pytest.mark.real_llm
 

@@ -1,10 +1,12 @@
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """Staging Integration Flow Tests
 
 env = get_env()
@@ -13,7 +15,7 @@ Prevents deployment failures that impact customer confidence.
 
 Tests the entire staging deployment pipeline from config to health checks.
 Each function ≤8 lines, file ≤300 lines.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -42,40 +44,40 @@ def staging_environment():
     # TODO: Initialize real service
     """Set up staging environment for tests."""
     env_vars = {
-        "ENVIRONMENT": "staging",
-        "DATABASE_URL": "postgresql://test:test@/staging?host=/cloudsql/test",
-        "REDIS_URL": "redis://staging-redis:6379",
-        "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-        "CLICKHOUSE_PASSWORD": "test-password",
-        "JWT_SECRET_KEY": "test-jwt-secret-key-32-characters-minimum",
-        "FERNET_KEY": "test-fernet-key-44-characters-exactly1234567=",
-        "GCP_PROJECT_ID": "netra-staging",
-        "ENABLE_STARTUP_CHECKS": "true",
-        "LOG_LEVEL": "INFO"
+    "ENVIRONMENT": "staging",
+    "DATABASE_URL": "postgresql://test:test@/staging?host=/cloudsql/test",
+    "REDIS_URL": "redis://staging-redis:6379",
+    "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+    "CLICKHOUSE_PASSWORD": "test-password",
+    "JWT_SECRET_KEY": "test-jwt-secret-key-32-characters-minimum",
+    "FERNET_KEY": "test-fernet-key-44-characters-exactly1234567=",
+    "GCP_PROJECT_ID": "netra-staging",
+    "ENABLE_STARTUP_CHECKS": "true",
+    "LOG_LEVEL": "INFO"
     }
     with patch.dict(os.environ, env_vars):
-        yield env_vars
+    yield env_vars
 
 @pytest.fixture
 async def mock_external_services():
     """Mock external services for staging tests."""
     # Mock: Component isolation for testing without external dependencies
     with patch("psycopg2.connect") as mock_pg:
-        # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch("redis.Redis") as mock_redis:
-            # Mock: ClickHouse external database isolation for unit testing performance
-            with patch("clickhouse_connect.get_client") as mock_ch:
-                # Mock: Generic component isolation for controlled unit testing
-                mock_pg.return_value = MagicNone  # TODO: Use real service instance
-                # Mock: Redis external service isolation for fast, reliable tests without network dependency
-                mock_redis.return_value = MagicNone  # TODO: Use real service instance
-                # Mock: Generic component isolation for controlled unit testing
-                mock_ch.return_value = MagicNone  # TODO: Use real service instance
-                yield {
-                    "postgres": mock_pg,
-                    "redis": mock_redis,
-                    "clickhouse": mock_ch
-                }
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
+    with patch("redis.Redis") as mock_redis:
+    # Mock: ClickHouse external database isolation for unit testing performance
+    with patch("clickhouse_connect.get_client") as mock_ch:
+    # Mock: Generic component isolation for controlled unit testing
+    mock_pg.return_value = MagicMock()  # TODO: Use real service instance
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
+    mock_redis.return_value = MagicMock()  # TODO: Use real service instance
+    # Mock: Generic component isolation for controlled unit testing
+    mock_ch.return_value = MagicMock()  # TODO: Use real service instance
+    yield {
+    "postgres": mock_pg,
+    "redis": mock_redis,
+    "clickhouse": mock_ch
+    }
 
 class TestStagingStartupFlow:
     """Test staging application startup flow."""

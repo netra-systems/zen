@@ -1,27 +1,29 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Agent Pipeline E2E Tests - Complete Agent Processing Validation
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-- Segment: All customer tiers (Free → Enterprise)
+    - Segment: All customer tiers (Free -> Enterprise)
 - Business Goal: Agent intelligence and response quality
 - Value Impact: Agent reliability drives customer satisfaction and retention
 - Strategic Impact: Agent quality differentiates Netra's AI optimization platform
 
 Tests the complete agent processing pipeline:
-1. Message reception and routing
+    1. Message reception and routing
 2. Supervisor agent orchestration
 3. Sub-agent execution and tool usage
 4. Response generation and validation
 5. Error handling and fallback scenarios
 
 COVERAGE:
-- Supervisor agent message processing
+    - Supervisor agent message processing
 - Sub-agent delegation and execution
 - Tool dispatcher functionality
 - LLM integration and response generation
 - Quality gates and validation
 - Error recovery and fallback responses
-"""
+""""
 
 import asyncio
 import json
@@ -63,83 +65,83 @@ class TestAgentMessageProcessing:
         """Create agent service for testing."""
         return AgentService()
     
-    @pytest.fixture
-    def sample_user_message(self) -> Dict[str, Any]:
+        @pytest.fixture
+        def sample_user_message(self) -> Dict[str, Any]:
         """Create sample user message for testing."""
         return {
-            "type": "agent_request",
-            "content": "Help me optimize my AI infrastructure costs",
-            "user_id": "user_123",
-            "thread_id": "thread_456",
-            "timestamp": "2025-01-20T10:00:00Z"
+        "type": "agent_request",
+        "content": "Help me optimize my AI infrastructure costs",
+        "user_id": "user_123",
+        "thread_id": "thread_456",
+        "timestamp": "2025-1-20T10:0:0Z"
         }
     
-    @pytest.mark.asyncio
-    async def test_agent_service_processes_message(self, agent_service, sample_user_message):
+        @pytest.mark.asyncio
+        async def test_agent_service_processes_message(self, agent_service, sample_user_message):
         """Test agent service successfully processes user messages."""
         # Mock dependencies
         # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.services.agent_service.SupervisorAgent') as mock_supervisor:
-            # Mock: Async component isolation for testing without real async operations
-            mock_supervisor.return_value.process_message = AsyncMock(
-                return_value={
-                    "response": "I'll help you optimize your AI costs. Let me analyze your current setup.",
-                    "status": "completed"
-                }
-            )
+        # Mock: Async component isolation for testing without real async operations
+        mock_supervisor.return_value.process_message = AsyncMock(
+        return_value={
+        "response": "I'll help you optimize your AI costs. Let me analyze your current setup.",
+        "status": "completed"
+        }
+        )
             
-            # Process message
-            result = await agent_service.process_message(sample_user_message)
+        # Process message
+        result = await agent_service.process_message(sample_user_message)
             
-            # Verify processing succeeded
-            assert result is not None
-            assert "response" in result
-            assert "optimize" in result["response"].lower()
+        # Verify processing succeeded
+        assert result is not None
+        assert "response" in result
+        assert "optimize" in result["response"].lower()
     
-    @pytest.mark.asyncio
-    async def test_message_routing_to_supervisor(self, agent_service, sample_user_message):
+        @pytest.mark.asyncio
+        async def test_message_routing_to_supervisor(self, agent_service, sample_user_message):
         """Test messages are correctly routed to supervisor agent."""
         # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
-            mock_process.return_value = {"response": "Supervisor processed"}
+        mock_process.return_value = {"response": "Supervisor processed"}
             
-            # Process message
-            await agent_service.process_message(sample_user_message)
+        # Process message
+        await agent_service.process_message(sample_user_message)
             
-            # Verify supervisor was called
-            mock_process.assert_called_once()
-            call_args = mock_process.call_args[0][0]
-            assert call_args["content"] == sample_user_message["content"]
+        # Verify supervisor was called
+        mock_process.assert_called_once()
+        call_args = mock_process.call_args[0][0]
+        assert call_args["content"] == sample_user_message["content"]
     
-    @pytest.mark.asyncio
-    async def test_message_validation_before_processing(self, agent_service):
+        @pytest.mark.asyncio
+        async def test_message_validation_before_processing(self, agent_service):
         """Test message validation before agent processing."""
         # Test invalid message structure
         invalid_message = {"invalid": "structure"}
         
         with pytest.raises(Exception):
-            await agent_service.process_message(invalid_message)
+        await agent_service.process_message(invalid_message)
     
-    @pytest.mark.asyncio
-    async def test_concurrent_message_processing(self, agent_service):
+        @pytest.mark.asyncio
+        async def test_concurrent_message_processing(self, agent_service):
         """Test concurrent processing of multiple messages."""
         messages = [
-            {"type": "agent_request", "content": f"Message {i}", "user_id": f"user_{i}", "thread_id": f"thread_{i}"}
-            for i in range(5)
+        {"type": "agent_request", "content": f"Message {i}", "user_id": f"user_{i}", "thread_id": f"thread_{i}"}
+        for i in range(5)
         ]
         
         # Mock supervisor responses
         # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
-            mock_process.return_value = {"response": "Processed"}
+        mock_process.return_value = {"response": "Processed"}
             
-            # Process messages concurrently
-            tasks = [agent_service.process_message(msg) for msg in messages]
-            results = await asyncio.gather(*tasks)
+        # Process messages concurrently
+        tasks = [agent_service.process_message(msg) for msg in messages]
+        results = await asyncio.gather(*tasks)
             
-            # Verify all messages processed
-            assert len(results) == 5
-            assert all(result is not None for result in results)
+        # Verify all messages processed
+        assert len(results) == 5
+        assert all(result is not None for result in results)
 
 class TestSupervisorAgentOrchestration:
     """Supervisor agent orchestration and delegation tests."""
@@ -149,106 +151,106 @@ class TestSupervisorAgentOrchestration:
         """Create supervisor agent for testing."""
         return SupervisorAgent()
     
-    @pytest.fixture
-    def optimization_request(self) -> Dict[str, Any]:
+        @pytest.fixture
+        def optimization_request(self) -> Dict[str, Any]:
         """Create optimization request message."""
         return {
-            "type": "agent_request",
-            "content": "I need to reduce my LLM costs by 30% while maintaining quality",
-            "user_id": "user_123",
-            "thread_id": "thread_456"
+        "type": "agent_request",
+        "content": "I need to reduce my LLM costs by 30% while maintaining quality",
+        "user_id": "user_123",
+        "thread_id": "thread_456"
         }
     
-    @pytest.mark.asyncio
-    async def test_supervisor_delegates_to_data_agent(self, supervisor_agent, optimization_request):
+        @pytest.mark.asyncio
+        async def test_supervisor_delegates_to_data_agent(self, supervisor_agent, optimization_request):
         """Test supervisor delegates data analysis to data sub-agent."""
         # Mock data sub-agent
         # Mock: Agent service isolation for testing without LLM agent execution
         with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataSubAgent.process_request') as mock_data_agent:
-            mock_data_agent.return_value = {
-                "analysis": "Current costs: $5000/month, optimization potential: 35%"
-            }
+        mock_data_agent.return_value = {
+        "analysis": "Current costs: $5000/month, optimization potential: 35%"
+        }
             
-            # Mock LLM response that triggers data agent
-            # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
-                mock_llm.return_value = MockLLMResponse(
-                    content="I need to analyze your current usage data.",
-                    tool_calls=[{"function": {"name": "data_analysis"}}]
-                )
+        # Mock LLM response that triggers data agent
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        mock_llm.return_value = MockLLMResponse(
+        content="I need to analyze your current usage data.",
+        tool_calls=[{"function": {"name": "data_analysis"}]]
+        )
                 
-                # Process request
-                result = await supervisor_agent.process_message(optimization_request)
+        # Process request
+        result = await supervisor_agent.process_message(optimization_request)
                 
-                # Verify data agent was called
-                mock_data_agent.assert_called_once()
+        # Verify data agent was called
+        mock_data_agent.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_supervisor_delegates_to_triage_agent(self, supervisor_agent):
+        @pytest.mark.asyncio
+        async def test_supervisor_delegates_to_triage_agent(self, supervisor_agent):
         """Test supervisor delegates complex requests to triage agent."""
         complex_request = {
-            "type": "agent_request",
-            "content": "I have multiple issues: slow responses, high costs, and poor quality",
-            "user_id": "user_123",
-            "thread_id": "thread_456"
+        "type": "agent_request",
+        "content": "I have multiple issues: slow responses, high costs, and poor quality",
+        "user_id": "user_123",
+        "thread_id": "thread_456"
         }
         
         # Mock triage sub-agent
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.triage.unified_triage_agent.UnifiedTriageAgent.process_request') as mock_triage:
-            mock_triage.return_value = {
-                "prioritized_issues": ["performance", "cost", "quality"],
-                "recommendations": ["Optimize model selection", "Implement caching"]
-            }
+        mock_triage.return_value = {
+        "prioritized_issues": ["performance", "cost", "quality"},
+        "recommendations": ["Optimize model selection", "Implement caching"]
+        }
             
-            # Mock LLM response that triggers triage
-            # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
-                mock_llm.return_value = MockLLMResponse(
-                    content="This requires issue triage and prioritization.",
-                    tool_calls=[{"function": {"name": "triage_issues"}}]
-                )
+        # Mock LLM response that triggers triage
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        mock_llm.return_value = MockLLMResponse(
+        content="This requires issue triage and prioritization.",
+        tool_calls=[{"function": {"name": "triage_issues"}]]
+        )
                 
-                # Process request
-                result = await supervisor_agent.process_message(complex_request)
+        # Process request
+        result = await supervisor_agent.process_message(complex_request)
                 
-                # Verify triage agent was called
-                mock_triage.assert_called_once()
+        # Verify triage agent was called
+        mock_triage.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_supervisor_orchestrates_multiple_agents(self, supervisor_agent):
+        @pytest.mark.asyncio
+        async def test_supervisor_orchestrates_multiple_agents(self, supervisor_agent):
         """Test supervisor orchestrates multiple sub-agents for complex tasks."""
         complex_optimization = {
-            "type": "agent_request",
-            "content": "Create a comprehensive AI optimization strategy with cost analysis and performance metrics",
-            "user_id": "user_123",
-            "thread_id": "thread_456"
+        "type": "agent_request",
+        "content": "Create a comprehensive AI optimization strategy with cost analysis and performance metrics",
+        "user_id": "user_123",
+        "thread_id": "thread_456"
         }
         
         # Mock multiple sub-agents
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataSubAgent.process_request') as mock_data, \
-             patch('netra_backend.app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
+        patch('netra_backend.app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
             
-            mock_data.return_value = {"cost_analysis": "Current: $5000, Potential: $3500"}
-            mock_reporting.return_value = {"strategy_report": "Comprehensive optimization plan"}
+        mock_data.return_value = {"cost_analysis": "Current: $5000, Potential: $3500"}
+        mock_reporting.return_value = {"strategy_report": "Comprehensive optimization plan"}
             
-            # Mock LLM responses
-            # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
-                # Sequence of LLM calls
-                mock_llm.side_effect = [
-                    MockLLMResponse("Need data analysis", [{"function": {"name": "data_analysis"}}]),
-                    MockLLMResponse("Need report generation", [{"function": {"name": "generate_report"}}]),
-                    MockLLMResponse("Final comprehensive strategy based on analysis and report")
-                ]
+        # Mock LLM responses
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
+        # Sequence of LLM calls
+        mock_llm.side_effect = [
+        MockLLMResponse("Need data analysis", [{"function": {"name": "data_analysis"}]]),
+        MockLLMResponse("Need report generation", [{"function": {"name": "generate_report"}]]),
+        MockLLMResponse("Final comprehensive strategy based on analysis and report")
+        ]
                 
-                # Process request
-                result = await supervisor_agent.process_message(complex_optimization)
+        # Process request
+        result = await supervisor_agent.process_message(complex_optimization)
                 
-                # Verify multiple agents were called
-                mock_data.assert_called_once()
-                mock_reporting.assert_called_once()
+        # Verify multiple agents were called
+        mock_data.assert_called_once()
+        mock_reporting.assert_called_once()
 
 class TestSubAgentExecution:
     """Sub-agent execution and specialization tests."""
@@ -260,7 +262,7 @@ class TestSubAgentExecution:
         
         analysis_request = {
             "type": "data_analysis",
-            "metrics": ["cost", "latency", "quality"],
+            "metrics": ["cost", "latency", "quality"},
             "time_range": "last_30_days"
         }
         
@@ -268,8 +270,8 @@ class TestSubAgentExecution:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse.ClickHouseClient.query') as mock_query:
             mock_query.return_value = [
-                {"metric": "cost", "value": 5000, "date": "2025-01-01"},
-                {"metric": "latency", "value": 250, "date": "2025-01-01"}
+                {"metric": "cost", "value": 5000, "date": "2025-1-1"},
+                {"metric": "latency", "value": 250, "date": "2025-1-1"}
             ]
             
             # Process analysis request
@@ -290,7 +292,7 @@ class TestSubAgentExecution:
                 "High latency in API responses",
                 "Increasing costs without quality improvement", 
                 "User complaints about response quality"
-            ]
+            }
         }
         
         # Mock LLM for issue analysis
@@ -362,13 +364,13 @@ class TestAgentResponseGeneration:
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
-                content="""Based on your cost-sensitive requirements, I recommend:
+                content="""Based on your cost-sensitive requirements, I recommend:"""
                 
-                1. **GPT-3.5-turbo** for general tasks (90% cost reduction vs GPT-4)
+                    1. **GPT-3.5-turbo** for general tasks (90% cost reduction vs GPT-4)
                 2. **Claude-3-haiku** for simple queries (fastest, most cost-effective)
                 3. **Mixtral-8x7B** for complex reasoning (open-source alternative)
                 
-                Expected savings: 70-80% compared to GPT-4 while maintaining quality."""
+                Expected savings: 70-80% compared to GPT-4 while maintaining quality.""""
             )
             
             # Process request
@@ -401,9 +403,9 @@ class TestAgentResponseGeneration:
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
-                content="""Here's your optimization plan:
+                content="""Here's your optimization plan:"""
                 
-                **Immediate Actions:**
+                    **Immediate Actions:**
                 1. Switch high-volume tasks to GPT-3.5-turbo (save 90%)
                 2. Implement response caching (save 40-60%)
                 3. Use function calling instead of prompt engineering
@@ -413,7 +415,7 @@ class TestAgentResponseGeneration:
                 - Set up cost monitoring alerts
                 - Test model alternatives for quality acceptance
                 
-                **Expected Impact:** $2,000-3,000 monthly savings"""
+                **Expected Impact:** $2,0-3,0 monthly savings""""
             )
             
             # Process request

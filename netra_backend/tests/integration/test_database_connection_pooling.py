@@ -1,18 +1,18 @@
 """Integration tests for database connection pooling efficiency
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Database performance optimization
 - Value Impact: Ensures connection pooling works efficiently under load
 - Strategic Impact: Prevents connection exhaustion and performance degradation
 
 This test suite validates:
-1. Connection pool initialization and configuration
+    1. Connection pool initialization and configuration
 2. Pool size limits and overflow handling
 3. Connection reuse and recycling
 4. Performance under concurrent load
 5. Pool cleanup and resource management
-"""
+""""
 
 import asyncio
 import time

@@ -1,18 +1,20 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical Test: Staging Configuration Must Not Use Localhost Defaults
 
 Business Value Justification (BVJ):
-- Segment: Enterprise (prevents $12K MRR loss)
+    - Segment: Enterprise (prevents $12K MRR loss)
 - Business Goal: System Stability & Reliability
 - Value Impact: Prevents staging/production configuration errors
 - Strategic Impact: Ensures proper cloud configuration in non-dev environments
 
 This test suite prevents regression where staging/production environments
 accidentally use localhost as default values for database hosts.
-"""
+""""
 
 import os
 import pytest

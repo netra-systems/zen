@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Utilities Tests - Split from test_critical_integration.py"""
 
 from netra_backend.app.websocket_core import WebSocketManager
@@ -48,14 +50,13 @@ from netra_backend.app.websocket_core import WebSocketManager
 class TestSyntaxFix:
 
     """Test class for orphaned methods"""
-    pass
 
     def _setup_supervisor_with_database(self, db_setup, infra, test_entities):
 
         """Setup supervisor agent with database and infrastructure"""
 
         # Mock: Session state isolation for predictable testing
-        supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], None  # TODO: Use real service instance)
+        supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], Mock()  # TODO: Use real service instance)
 
         supervisor.thread_id = test_entities["thread"].id
 

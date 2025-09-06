@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Critical regression tests for WebSocket authentication failures.
 
 Suite 1: Authentication Error Propagation
 Ensures all auth failures are loud and properly propagated.
-"""
+""""
 
 import asyncio
 import json
@@ -37,7 +39,7 @@ class TestAuthenticationErrorPropagation:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         
@@ -61,7 +63,7 @@ class TestAuthenticationErrorPropagation:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         
@@ -83,7 +85,7 @@ class TestAuthenticationErrorPropagation:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         
@@ -116,7 +118,7 @@ class TestUserLookupFailures:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         # Mock: Security component isolation for controlled auth testing
@@ -135,7 +137,7 @@ class TestUserLookupFailures:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncNone  # TODO: Use real service instance
+                mock_session = AsyncMock()  # TODO: Use real service instance
                 # Mock the database query result for log_empty_database_warning
                 # Mock: Generic component isolation for controlled unit testing
                 mock_result = mock_result_instance  # Initialize appropriate service
@@ -157,7 +159,7 @@ class TestUserLookupFailures:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         
@@ -181,7 +183,7 @@ class TestUserLookupFailures:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncNone  # TODO: Use real service instance
+                mock_session = AsyncMock()  # TODO: Use real service instance
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
                 with pytest.raises(ValueError) as exc_info:
@@ -196,7 +198,7 @@ class TestUserLookupFailures:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Security component isolation for controlled auth testing
         security_service = security_service_instance  # Initialize appropriate service
         
@@ -223,9 +225,9 @@ class TestUserLookupFailures:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncNone  # TODO: Use real service instance
+                mock_session = AsyncMock()  # TODO: Use real service instance
                 # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session.rollback = AsyncNone  # TODO: Use real service instance
+                mock_session.rollback = AsyncMock()  # TODO: Use real service instance
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
                 result = await authenticate_websocket_user(websocket, "token", security_service)
@@ -246,7 +248,7 @@ class TestWebSocketMessageHandling:
     def _create_valid_test_token(self, user_id: str = None) -> str:
         """Create valid JWT token for WebSocket testing."""
         if user_id is None:
-            user_id = f"test-user-{uuid.uuid4().hex[:8]}"
+            user_id = f"test-user-{uuid.uuid4().hex[:8]]"
         
         # Return a mock token for testing
         return f"mock-token-{user_id}"
@@ -257,7 +259,7 @@ class TestWebSocketMessageHandling:
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_message = AsyncNone  # TODO: Use real service instance  # Updated to match actual implementation
+        manager.send_message = AsyncMock()  # TODO: Use real service instance  # Updated to match actual implementation
         
         result = await parse_json_message("{invalid json", "user-123", manager)
         

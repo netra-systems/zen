@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Comprehensive Example Prompts E2E Real LLM Testing Suite
 Tests all 9 example prompts with real LLM calls and complete validation.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import sys
 from pathlib import Path
@@ -44,7 +46,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_001_cost_quality_optimization(self, real_llm_prompt_setup):
-        """Test EP-001: Cost reduction with quality preservation constraints."""
+        """Test EP-1: Cost reduction with quality preservation constraints."""
         setup = real_llm_prompt_setup
         state = create_ep_001_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[0], state)
@@ -52,7 +54,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_002_latency_budget_constraint(self, real_llm_prompt_setup):
-        """Test EP-002: Latency optimization with budget constraints."""
+        """Test EP-2: Latency optimization with budget constraints."""
         setup = real_llm_prompt_setup
         state = create_ep_002_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[1], state)
@@ -60,7 +62,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_003_capacity_planning_analysis(self, real_llm_prompt_setup):
-        """Test EP-003: Capacity planning for usage increase."""
+        """Test EP-3: Capacity planning for usage increase."""
         setup = real_llm_prompt_setup
         state = create_ep_003_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[2], state)
@@ -68,7 +70,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_004_function_optimization(self, real_llm_prompt_setup):
-        """Test EP-004: Advanced function optimization methods."""
+        """Test EP-4: Advanced function optimization methods."""
         setup = real_llm_prompt_setup
         state = create_ep_004_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[3], state)
@@ -76,7 +78,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_005_model_selection_evaluation(self, real_llm_prompt_setup):
-        """Test EP-005: Model selection and effectiveness analysis."""
+        """Test EP-5: Model selection and effectiveness analysis."""
         setup = real_llm_prompt_setup
         state = create_ep_005_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[4], state)
@@ -84,7 +86,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_006_kv_cache_audit(self, real_llm_prompt_setup):
-        """Test EP-006: KV cache audit and optimization opportunities."""
+        """Test EP-6: KV cache audit and optimization opportunities."""
         setup = real_llm_prompt_setup
         state = create_ep_006_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[5], state)
@@ -92,7 +94,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_007_multi_constraint_optimization(self, real_llm_prompt_setup):
-        """Test EP-007: Multi-constraint optimization with usage scaling."""
+        """Test EP-7: Multi-constraint optimization with usage scaling."""
         setup = real_llm_prompt_setup
         state = create_ep_007_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[6], state)
@@ -100,7 +102,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_008_tool_migration_analysis(self, real_llm_prompt_setup):
-        """Test EP-008: Tool migration to new models analysis."""
+        """Test EP-8: Tool migration to new models analysis."""
         setup = real_llm_prompt_setup
         state = create_ep_008_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[7], state)
@@ -108,7 +110,7 @@ class TestExamplePromptsComprehensive:
     
     @pytest.mark.asyncio
     async def test_ep_009_rollback_cost_analysis(self, real_llm_prompt_setup):
-        """Test EP-009: Rollback analysis and cost-effectiveness evaluation."""
+        """Test EP-9: Rollback analysis and cost-effectiveness evaluation."""
         setup = real_llm_prompt_setup
         state = create_ep_009_state()
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[8], state)

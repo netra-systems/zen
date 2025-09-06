@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 LLM Metrics Aggregation Tests
 Test LLM-specific metrics and optimizations
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -19,11 +22,11 @@ from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_quer
 def llm_metrics_batch():
     """Mock fixture for LLM metrics batch data"""
     return {
-        "model": LLMModel.GEMINI_2_5_FLASH.value,
-        "workload_type": "analysis",
-        "latency_ms": 150,
-        "cost_cents": 5,
-        "success": True
+    "model": LLMModel.GEMINI_2_5_FLASH.value,
+    "workload_type": "analysis",
+    "latency_ms": 150,
+    "cost_cents": 5,
+    "success": True
     }
 
 def generate_llm_metrics():
@@ -83,7 +86,7 @@ class TestLLMMetricsAggregation:
         SELECT * FROM optimization_opportunities
         WHERE potential_savings > 0
         ORDER BY potential_savings DESC
-        """
+        """"
         
         # This complex query should be valid
         is_valid, error = validate_clickhouse_query(query)
@@ -107,7 +110,7 @@ class TestLLMMetricsAggregation:
         WHERE timestamp >= now() - INTERVAL 24 HOUR
         GROUP BY hour, model, workload_type
         ORDER BY hour DESC, total_cost DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid
@@ -144,7 +147,7 @@ class TestLLMMetricsAggregation:
             rank() OVER (PARTITION BY workload_type ORDER BY error_rate ASC) as reliability_rank
         FROM model_performance
         ORDER BY workload_type, latency_rank
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(performance_query)
         assert is_valid, f"Performance benchmarking query failed: {error}"
@@ -169,7 +172,7 @@ class TestLLMMetricsAggregation:
         GROUP BY model, workload_type
         HAVING total_requests > 20
         ORDER BY cost_per_output_token ASC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(efficiency_query)
         assert is_valid, f"Token efficiency query failed: {error}"
@@ -203,7 +206,7 @@ class TestLLMMetricsAggregation:
         GROUP BY user_id
         HAVING active_days >= 5
         ORDER BY total_cost_30d DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(behavior_query)
         assert is_valid, f"User behavior analysis query failed: {error}"
@@ -226,7 +229,7 @@ class TestLLMMetricsAggregation:
         GROUP BY model, workload_type
         HAVING count() > 10
         ORDER BY success_rate DESC, avg_total_tokens_per_request ASC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(quality_query)
         assert is_valid, f"Quality metrics query failed: {error}"

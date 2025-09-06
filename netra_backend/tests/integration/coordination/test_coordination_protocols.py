@@ -2,17 +2,17 @@
 Coordination Protocol Integration Tests
 
 BVJ:
-- Segment: Platform/Internal (foundation for ALL customer segments)
+    - Segment: Platform/Internal (foundation for ALL customer segments)
 - Business Goal: Platform Stability - Prevent $35K MRR loss from coordination failures
 - Value Impact: Validates coordination protocols and agent collaboration workflows
 - Revenue Impact: Ensures complex multi-agent workflows execute reliably
 
 REQUIREMENTS:
-- Validate coordination protocols
+    - Validate coordination protocols
 - Agent collaboration workflow execution
 - Protocol compliance verification
 - Coordination state management
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -77,7 +77,7 @@ class TestCoordinationProtocols:
             assert len(worker.message_inbox) == 1
             task = worker.message_inbox[0]["message"]
             assert task["workflow_id"] == workflow_id
-            assert task["task_id"] == f"task_{i}"
+            assert task["task_id"] == f"task_{i]"
 
     @pytest.mark.asyncio
     async def test_coordination_state_management(self, coordination_agents):

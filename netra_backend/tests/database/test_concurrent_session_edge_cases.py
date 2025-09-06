@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Edge case tests for concurrent database session operations.
 
 These tests ensure that the database session management can handle
 extreme concurrent access patterns without raising IllegalStateChangeError.
-"""
+""""
 
 import asyncio
 import pytest
@@ -72,7 +74,7 @@ class TestConcurrentEdgeCases:
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.id = len(active_sessions)
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncNone  # TODO: Use real service instance
+                mock_session.rollback = AsyncMock()  # TODO: Use real service instance
                 active_sessions.append(mock_session)
                 try:
                     yield mock_session
@@ -167,7 +169,7 @@ class TestConcurrentEdgeCases:
                 async def log_execute(query):
                     operation_log.append(("execute", session_id, query))
                     await asyncio.sleep(random.uniform(0.001, 0.005))  # Variable delay
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 
                 async def log_commit():
                     operation_log.append(("commit", session_id))
@@ -227,11 +229,11 @@ class TestConcurrentEdgeCases:
                     if "long" in query:
                         # Simulate timeout
                         raise asyncio.TimeoutError("Query timeout")
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 
                 mock_session.execute = execute_with_timeout
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncNone  # TODO: Use real service instance
+                mock_session.rollback = AsyncMock()  # TODO: Use real service instance
                 
                 yield mock_session
             
@@ -265,7 +267,7 @@ class TestConcurrentEdgeCases:
                 
                 async def begin_nested():
                     transaction_stack.append((session_id, "active"))
-                    return AsyncNone  # TODO: Use real service instance
+                    return AsyncMock()  # TODO: Use real service instance
                 
                 async def commit():
                     if transaction_stack:
@@ -349,7 +351,7 @@ class TestConcurrentEdgeCases:
                         # First few operations fail
                         raise OperationalError("Database unavailable", None, None)
                     # Then recover
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 
                 mock_session.execute = cascade_failure
                 mock_session.commit = cascade_failure
@@ -388,7 +390,7 @@ class TestMemoryAndResourceManagement:
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.id = len(session_refs)
                 mock_session.in_transaction = MagicMock(return_value=True)
-                mock_session.rollback = AsyncNone  # TODO: Use real service instance
+                mock_session.rollback = AsyncMock()  # TODO: Use real service instance
                 
                 # Track session creation
                 session_refs.append(mock_session)

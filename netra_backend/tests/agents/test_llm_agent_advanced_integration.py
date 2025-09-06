@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Advanced LLM Agent Integration Tests
 Complex integration tests with ≤8 line functions for architectural compliance
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -59,7 +61,7 @@ async def _run_concurrent_requests(supervisors):
 @pytest.mark.asyncio
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
-    """Test handling multiple concurrent requests"""
+                                              """Test handling multiple concurrent requests"""
     db_session, llm_manager, ws_manager, mock_persistence = _setup_concurrent_infrastructure()
     
     # Mock: Agent supervisor isolation for testing without spawning real agents

@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test Suite 1: Query Correctness Tests
 Tests the correctness of ClickHouse queries and their results
-"""
+""""
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
@@ -80,7 +82,7 @@ class TestCorpusQueries:
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -119,17 +121,17 @@ class TestCorpusQueries:
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock database corpus
 
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicNone  # TODO: Use real service instance
+            db = MagicMock()  # TODO: Use real service instance
 
             # Mock: Generic component isolation for controlled unit testing
-            corpus = MagicNone  # TODO: Use real service instance
+            corpus = MagicMock()  # TODO: Use real service instance
 
             corpus.id = "test_id"
 
@@ -182,17 +184,17 @@ class TestCorpusQueries:
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock database corpus
 
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicNone  # TODO: Use real service instance
+            db = MagicMock()  # TODO: Use real service instance
 
             # Mock: Generic component isolation for controlled unit testing
-            corpus = MagicNone  # TODO: Use real service instance
+            corpus = MagicMock()  # TODO: Use real service instance
 
             corpus.status = "available"
 
@@ -233,7 +235,7 @@ class TestCorpusQueries:
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -244,7 +246,7 @@ class TestCorpusQueries:
             await service._copy_corpus_content(
 
                 # Mock: Generic component isolation for controlled unit testing
-                source_table, dest_table, "new_id", MagicNone  # TODO: Use real service instance
+                source_table, dest_table, "new_id", MagicMock()  # TODO: Use real service instance
 
             )
             
@@ -535,7 +537,7 @@ class TestGenerationServiceQueries:
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_db.return_value = mock_instance
 
@@ -569,7 +571,7 @@ class TestGenerationServiceQueries:
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_db.return_value = mock_instance
             
@@ -611,7 +613,7 @@ class TestTableInitializationQueries:
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
 
@@ -652,7 +654,7 @@ class TestTableInitializationQueries:
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
 
             mock_client.return_value.__aenter__.return_value = mock_instance
 

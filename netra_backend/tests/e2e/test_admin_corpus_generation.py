@@ -4,6 +4,8 @@ from test_framework.database.test_database_manager import TestDatabaseManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 env = get_env()
 E2E Admin Corpus Generation Test Suite
@@ -11,7 +13,7 @@ E2E Admin Corpus Generation Test Suite
 Comprehensive E2E testing for admin corpus generation workflow.
 Follows 450-line limit and 25-line function requirements.
 Targets 95% coverage of corpus generation functionality.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -48,28 +50,28 @@ def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispa
     """Setup admin corpus test environment with real or mock dependencies"""
     import os
     if env.get("ENABLE_REAL_LLM_TESTING") == "true":
-        # Use real dependencies for E2E testing
-        agent = CorpusAdminSubAgent(real_llm_manager, real_tool_dispatcher)
-        agent.websocket_manager = real_websocket_manager
-        return {
-            "agent": agent, "llm": real_llm_manager,
-            "dispatcher": real_tool_dispatcher, "websocket": real_websocket_manager,
-            "session_id": "test-session-real-001"
-        }
+    # Use real dependencies for E2E testing
+    agent = CorpusAdminSubAgent(real_llm_manager, real_tool_dispatcher)
+    agent.websocket_manager = real_websocket_manager
+    return {
+    "agent": agent, "llm": real_llm_manager,
+    "dispatcher": real_tool_dispatcher, "websocket": real_websocket_manager,
+    "session_id": "test-session-real-1"
+    }
     else:
-        # Fall back to mocks for regular testing
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncMock(spec=LLMManager)
-        # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_dispatcher = AsyncMock(spec=ToolDispatcher)
-        # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        agent = CorpusAdminSubAgent(mock_llm, mock_dispatcher)
-        agent.websocket_manager = mock_websocket
-        return {
-            "agent": agent, "llm": mock_llm, "dispatcher": mock_dispatcher,
-            "websocket": mock_websocket, "session_id": "test-session-001"
-        }
+    # Fall back to mocks for regular testing
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    mock_llm = AsyncMock(spec=LLMManager)
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
+    mock_dispatcher = AsyncMock(spec=ToolDispatcher)
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
+    mock_websocket = AsyncMock()  # TODO: Use real service instance
+    agent = CorpusAdminSubAgent(mock_llm, mock_dispatcher)
+    agent.websocket_manager = mock_websocket
+    return {
+    "agent": agent, "llm": mock_llm, "dispatcher": mock_dispatcher,
+    "websocket": mock_websocket, "session_id": "test-session-1"
+    }
 
 class TestAdminCorpusGeneration:
     """Main test class for admin corpus generation E2E workflow"""
@@ -91,7 +93,7 @@ class TestAdminCorpusGeneration:
         """Verify discovery response contains valid corpus types"""
         expected_types = ["optimization", "performance", "knowledge_base"]
         response = CorpusDiscoveryResponse(
-            intent=request.intent, items=[{"type": t, "desc": f"{t} corpus"} for t in expected_types],
+            intent=request.intent, items=[{"type": t, "desc": f"{t} corpus"] for t in expected_types],
             session_id=request.session_id
         )
         assert len(response.items) == 3
@@ -146,11 +148,11 @@ class TestAdminCorpusGeneration:
     async def _execute_generation_workflow(self, request, setup):
         """Execute and validate generation workflow"""
         response = CorpusGenerationResponse(
-            success=True, corpus_id="corpus-001", status="started", 
+            success=True, corpus_id="corpus-1", status="started", 
             message="Initiated", session_id=request.session_id
         )
         assert response.success
-        assert response.corpus_id == "corpus-001"
+        assert response.corpus_id == "corpus-1"
     
     async def _execute_real_generation_workflow(self, setup: Dict, request):
         """Execute real corpus generation workflow with agent."""
@@ -217,7 +219,7 @@ class TestDiscoveryWorkflow:
     
     async def _validate_parameter_discovery(self, request, setup):
         """Validate parameter discovery response"""
-        params = {"required": ["domain", "data_size"], "optional": ["complexity", "quality_level"]}
+        params = {"required": ["domain", "data_size"}, "optional": ["complexity", "quality_level"]]
         response = CorpusDiscoveryResponse(
             intent="suggest", parameters=params, session_id=request.session_id
         )
@@ -304,7 +306,7 @@ class TestPerformanceScenarios:
     
     async def _process_single_request(self, request, setup):
         """Process single generation request"""
-        await asyncio.sleep(0.05)  # Simulate processing
+        await asyncio.sleep(0.5)  # Simulate processing
         return f"Processed {request.session_id}"
     
     @pytest.mark.asyncio

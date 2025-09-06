@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Comprehensive test suite to protect against IllegalStateChangeError in database sessions.
 
 This test suite ensures that the critical fix for handling IllegalStateChangeError,
@@ -5,7 +7,7 @@ GeneratorExit, and concurrent session access remains stable and effective.
 
 CRITICAL: These tests protect against the staging error where SQLAlchemy raises
 IllegalStateChangeError during concurrent session operations or cleanup.
-"""
+""""
 
 import asyncio
 import pytest
@@ -58,7 +60,6 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_illegal_state_change_error_caught(self):
         """Test that IllegalStateChangeError is caught and handled during cleanup."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
@@ -66,7 +67,6 @@ class TestIllegalStateChangeProtection:
             
             @asynccontextmanager
             async def mock_session_context():
-    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
@@ -88,8 +88,8 @@ class TestIllegalStateChangeProtection:
                     mock_session = AsyncMock(spec=AsyncSession)
                     mock_session.id = len(sessions_created)
                     mock_session.in_transaction = MagicMock(return_value=False)
-                    mock_session.commit = AsyncNone  # TODO: Use real service instance
-                    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+                    mock_session.commit = AsyncMock()  # TODO: Use real service instance
+                    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
                     sessions_created.append(mock_session)
                     yield mock_session
                 await asyncio.sleep(0)
@@ -116,14 +116,12 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_cancellation_with_shield(self):
         """Test that cancellation is handled with asyncio.shield for critical operations."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
             rollback_called = False
             
             async def mock_rollback():
-    pass
                 nonlocal rollback_called
                 rollback_called = True
                 await asyncio.sleep(0.01)
@@ -132,14 +130,12 @@ class TestIllegalStateChangeProtection:
             
             @asynccontextmanager
             async def mock_session_context():
-    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
             
             # Create a task that will be cancelled
             async def cancellable_operation():
-    pass
                 async with DatabaseManager.get_async_session() as session:
                     await asyncio.sleep(1)  # Will be cancelled before this completes
             
@@ -163,11 +159,11 @@ class TestIllegalStateChangeProtection:
                 # Session without in_transaction method
                 AsyncMock(spec=['commit', 'rollback']),
                 # Session with non-callable in_transaction
-                type('MockSession', (), {'in_transaction': True, 'commit': AsyncNone  # TODO: Use real service instance})(),
+                type('MockSession', (), {'in_transaction': True, 'commit': AsyncMock()  # TODO: Use real service instance})(),
                 # Session that raises AttributeError on state check
                 type('MockSession', (), {
                     'in_transaction': MagicMock(side_effect=AttributeError("No attribute")),
-                    'commit': AsyncNone  # TODO: Use real service instance
+                    'commit': AsyncMock()  # TODO: Use real service instance
                 })(),
             ]
             
@@ -185,15 +181,13 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_exception_during_transaction(self):
         """Test that exceptions during transaction are handled with proper rollback."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
-            mock_session.rollback = AsyncNone  # TODO: Use real service instance
+            mock_session.rollback = AsyncMock()  # TODO: Use real service instance
             
             @asynccontextmanager
             async def mock_session_context():
-    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
@@ -230,16 +224,14 @@ class TestIllegalStateChangeProtection:
     @pytest.mark.asyncio
     async def test_normal_operation_flow(self):
         """Test that normal operations work correctly with the fix in place."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.in_transaction = MagicMock(return_value=True)
-            mock_session.commit = AsyncNone  # TODO: Use real service instance
+            mock_session.commit = AsyncMock()  # TODO: Use real service instance
             mock_session.execute = AsyncMock(return_value=MagicMock(scalar=MagicMock(return_value=42)))
             
             @asynccontextmanager
             async def mock_session_context():
-    pass
                 yield mock_session
             
             mock_factory.return_value = MagicMock(return_value=mock_session_context())
@@ -311,18 +303,15 @@ class TestStressScenarios:
     @pytest.mark.asyncio
     async def test_session_cleanup_during_shutdown(self):
         """Test that sessions are cleaned up properly during shutdown scenarios."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             cleanup_attempted = []
             
             @asynccontextmanager
             async def create_mock_session():
-    pass
                 mock_session = AsyncMock(spec=AsyncSession)
                 mock_session.in_transaction = MagicMock(return_value=True)
                 
                 async def cleanup_with_error():
-    pass
                     cleanup_attempted.append(True)
                     raise IllegalStateChangeError("Shutdown in progress")
                 
@@ -386,9 +375,9 @@ class TestRegressionPrevention:
     @pytest.mark.asyncio
     async def test_fix_handles_all_exception_types(self):
         """Ensure the fix handles IllegalStateChangeError explicitly."""
-        source_file = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\
+        source_file = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\"
 etra-core-generation-1\
-etra_backend\\app\\db\\database_manager.py"
+etra_backend\\app\\db\\database_manager.py""
         
         # Read the actual implementation to verify the fix is in place
         with open(source_file, 'r') as f:
@@ -409,7 +398,6 @@ etra_backend\\app\\db\\database_manager.py"
     @pytest.mark.asyncio
     async def test_fix_prevents_staging_error(self):
         """Test the exact scenario that caused the staging error."""
-    pass
         with patch('netra_backend.app.db.database_manager.DatabaseManager.get_application_session') as mock_factory:
             mock_session = AsyncMock(spec=AsyncSession)
             
@@ -417,7 +405,6 @@ etra_backend\\app\\db\\database_manager.py"
             connection_call_count = 0
             
             def connection_for_bind():
-    pass
                 nonlocal connection_call_count
                 connection_call_count += 1
                 if connection_call_count > 1:
@@ -428,7 +415,7 @@ etra_backend\\app\\db\\database_manager.py"
                         "one Connection per Engine at a time."
                     )
                 await asyncio.sleep(0)
-    return MagicNone  # TODO: Use real service instance
+    return MagicMock()  # TODO: Use real service instance
             
             mock_session._connection_for_bind = connection_for_bind
             mock_session.in_transaction = MagicMock(return_value=True)
@@ -436,7 +423,6 @@ etra_backend\\app\\db\\database_manager.py"
             
             @asynccontextmanager
             async def mock_session_context():
-    pass
                 yield mock_session
                 # Context manager cleanup would trigger the error
                 try:

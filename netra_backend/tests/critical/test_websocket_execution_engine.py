@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Critical WebSocket Execution Engine Tests
 
 Tests to prevent regression of WebSocket execution engine being None.
@@ -5,7 +7,7 @@ These tests ensure all WebSocket components have properly initialized
 execution engines and can process messages end-to-end.
 
 Business Value: Prevents $8K MRR loss from WebSocket failures.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -100,7 +102,7 @@ class TestWebSocketMessageFlow:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = application_state_instance  # Initialize appropriate service
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Create test message
         from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
@@ -129,7 +131,7 @@ class TestWebSocketMessageFlow:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = application_state_instance  # Initialize appropriate service
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Create test message (heartbeat which has a handler)
         raw_message = {"type": "ping", "data": "test_data"}
@@ -149,11 +151,11 @@ class TestWebSocketMessageFlow:
         # Mock: Generic component isolation for controlled unit testing
         mock_conn1 = mock_conn1_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn1.send_json = AsyncNone  # TODO: Use real service instance
+        mock_conn1.send_json = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
         mock_conn2 = mock_conn2_instance  # Initialize appropriate service 
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn2.send_json = AsyncNone  # TODO: Use real service instance
+        mock_conn2.send_json = AsyncMock()  # TODO: Use real service instance
         
         connections = [mock_conn1, mock_conn2]
         
@@ -216,7 +218,7 @@ class TestWebSocketErrorHandling:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = application_state_instance  # Initialize appropriate service
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Unknown message type
         message = {"type": "unknown_type", "data": "test"}
@@ -294,7 +296,7 @@ class TestMetricsCollectorResilience:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = application_state_instance  # Initialize appropriate service
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Try to route message
         result = await router.route_message("test_user", mock_websocket, {"type": "test"})

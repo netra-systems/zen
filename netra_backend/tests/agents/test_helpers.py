@@ -1,7 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 E2E Test Helpers - Modular Support Functions
 All helper functions broken into ≤8 line functions for architectural compliance
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -35,7 +38,7 @@ def _create_optimization_responses():
     return [
         {"category": "optimization", "requires_analysis": True},
         {"bottleneck": "memory", "utilization": 0.95},
-        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
+        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]]
     ]
 
 def _setup_structured_llm_responses(llm_manager, responses):
@@ -59,12 +62,12 @@ def setup_llm_responses(llm_manager):
 def setup_websocket_manager(ws_manager):
     """Setup websocket manager for testing"""
     # Mock: Generic component isolation for controlled unit testing
-    ws_manager.send_message = AsyncNone  # TODO: Use real service instance
+    ws_manager.send_message = AsyncMock()  # TODO: Use real service instance
 
 def create_mock_persistence():
     """Create mock persistence service"""
     # Mock: Generic component isolation for controlled unit testing
-    mock_persistence = AsyncNone  # TODO: Use real service instance
+    mock_persistence = AsyncMock()  # TODO: Use real service instance
     # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=_mock_save_agent_state)
     _setup_persistence_methods(mock_persistence)
@@ -175,7 +178,7 @@ def setup_mock_llm_with_retry():
         call_counter["count"] += 1
         if call_counter["count"] == 1:
             raise Exception("LLM call timed out")
-        return {"content": "Successful response after retry", "tool_calls": []}
+        return {"content": "Successful response after retry", "tool_calls": []]
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
     return llm_manager, call_counter

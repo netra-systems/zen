@@ -1,15 +1,18 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Enterprise Environment Configuration Tests for Netra Apex
 BVJ: Custom environment configuration enables enterprise compliance requirements
 Revenue Impact: Unlocks regulated industry customers requiring custom env configs
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -74,7 +77,7 @@ class TestEnterpriseEnvironmentConfig:
                 rule = validation_rules[var_name]
                 validation_results[var_name] = await validate_single_env_var(var_name, var_value, rule)
             else:
-                validation_results[var_name] = {"valid": True, "note": "custom_variable"}
+                validation_results[var_name] = {"valid": True, "note": "custom_variable"]
         
         # Mock: Async component isolation for testing without real async operations
         infra["config_validator"].validate_environment = AsyncMock(return_value={
@@ -94,7 +97,7 @@ class TestEnterpriseEnvironmentConfig:
         injection_strategy = {
             "method": "docker_env_file",
             "secrets_management": "gcp_secret_manager",
-            "config_map_name": f"netra-enterprise-config-{validation['validation_id'][:8]}",
+            "config_map_name": f"netra-enterprise-config-{validation['validation_id'][:8]]",
             "namespace": "netra-enterprise"
         }
         
@@ -117,7 +120,7 @@ class TestEnterpriseEnvironmentConfig:
         for var_name, result in validation_results.items():
             if result.get("valid"):
                 if "parsed_value" in result:
-                    env_file_content.append(f"{var_name}={result['parsed_value']}")
+                    env_file_content.append(f"{var_name]={result['parsed_value']]")
                 else:
                     env_file_content.append(f"{var_name}=placeholder_value")
         return env_file_content
@@ -190,12 +193,12 @@ class TestEnterpriseEnvironmentConfig:
         """Build validation results for mandatory configurations"""
         validation_results = {}
         for category, configs in mandatory_configurations.items():
-            validation_results[category] = {}
+            validation_results[category] = {]
             for config_key, required_value in configs.items():
                 if isinstance(required_value, bool):
-                    validation_results[category][config_key] = {"required": required_value, "configured": True, "valid": True}
+                    validation_results[category][config_key] = {"required": required_value, "configured": True, "valid": True]
                 elif isinstance(required_value, int):
-                    validation_results[category][config_key] = {"required_min": required_value, "configured_value": required_value + 10, "valid": True}
+                    validation_results[category][config_key] = {"required_min": required_value, "configured_value": required_value + 10, "valid": True]
         return validation_results
 
     async def _perform_compliance_validation(self, infra, config_validation):

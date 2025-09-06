@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Regression test for logging source location depth configuration.
 
 This test ensures that log messages show the actual caller's location,
@@ -5,7 +7,7 @@ not the wrapper's location (unified_logging.py).
 
 Business Value: Accurate logging source locations reduce debugging time
 and improve operational efficiency for all customer segments.
-"""
+""""
 
 import inspect
 import os
@@ -27,8 +29,8 @@ class TestLoggingDepthConfiguration:
         unified_logger = UnifiedLogger()
         
         # Create mock for logger.opt
-        mock_opt_result = MagicNone  # TODO: Use real service instance
-        mock_opt_result.log = MagicNone  # TODO: Use real service instance
+        mock_opt_result = MagicMock()  # TODO: Use real service instance
+        mock_opt_result.log = MagicMock()  # TODO: Use real service instance
         
         with patch.object(logger, 'opt', return_value=mock_opt_result) as mock_opt:
             # Call _emit_log directly
@@ -45,8 +47,8 @@ class TestLoggingDepthConfiguration:
         unified_logger = UnifiedLogger()
         
         # Create mock for logger.opt
-        mock_opt_result = MagicNone  # TODO: Use real service instance
-        mock_opt_result.log = MagicNone  # TODO: Use real service instance
+        mock_opt_result = MagicMock()  # TODO: Use real service instance
+        mock_opt_result.log = MagicMock()  # TODO: Use real service instance
         
         # Mock _has_exception_info to return True
         with patch.object(unified_logger, '_has_exception_info', return_value=True):
@@ -68,8 +70,8 @@ class TestLoggingDepthConfiguration:
         
         for level in log_levels:
             # Create fresh mock for each level
-            mock_opt_result = MagicNone  # TODO: Use real service instance
-            mock_opt_result.log = MagicNone  # TODO: Use real service instance
+            mock_opt_result = MagicMock()  # TODO: Use real service instance
+            mock_opt_result.log = MagicMock()  # TODO: Use real service instance
             
             with patch.object(logger, 'opt', return_value=mock_opt_result) as mock_opt:
                 # Call _emit_log for each level
@@ -84,7 +86,7 @@ class TestLoggingDepthConfiguration:
         
         This test verifies that the depth parameter correctly skips the wrapper
         layers so that the actual caller location is reported, not the wrapper.
-        """
+        """"
         # Create a test logger that captures records
         captured_records = []
         
@@ -111,7 +113,7 @@ class TestLoggingDepthConfiguration:
         
         # Temporarily replace logger with our capture function
         with patch.object(logger, 'opt') as mock_opt:
-            mock_log = MagicNone  # TODO: Use real service instance
+            mock_log = MagicMock()  # TODO: Use real service instance
             mock_opt.return_value.log = mock_log
             
             # Create and use the unified logger
@@ -145,14 +147,14 @@ class TestLoggingDepthConfiguration:
         """Regression test: Ensure unified_logging.py:202 is never shown as source.
         
         This specific test prevents regression of the bug where logs showed:
-        'netra_backend.app.core.unified_logging:_emit_log:202'
+            'netra_backend.app.core.unified_logging:_emit_log:202'
         instead of the actual source location.
-        """
+        """"
         unified_logger = UnifiedLogger()
         
         # Mock the logger.opt to verify it's called correctly
         with patch.object(logger, 'opt') as mock_opt:
-            mock_log_method = MagicNone  # TODO: Use real service instance
+            mock_log_method = MagicMock()  # TODO: Use real service instance
             mock_opt.return_value.log = mock_log_method
             
             # Test warning (case from the bug report)
@@ -197,7 +199,7 @@ def test_all_log_methods_use_correct_depth(log_method, level):
     unified_logger = UnifiedLogger()
     
     with patch.object(logger, 'opt') as mock_opt:
-        mock_log = MagicNone  # TODO: Use real service instance
+        mock_log = MagicMock()  # TODO: Use real service instance
         mock_opt.return_value.log = mock_log
         
         # Get the actual log method

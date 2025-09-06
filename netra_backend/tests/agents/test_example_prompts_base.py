@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Base infrastructure and utilities for Example Prompts E2E Tests
 Provides shared fixtures and helper methods for test execution
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -88,13 +90,13 @@ def _create_mock_db_session():
     db_session = AsyncMock(spec=AsyncSession)
 
     # Mock: Session isolation for controlled testing without external state
-    db_session.commit = AsyncNone  # TODO: Use real service instance
+    db_session.commit = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Session isolation for controlled testing without external state
-    db_session.rollback = AsyncNone  # TODO: Use real service instance
+    db_session.rollback = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Session isolation for controlled testing without external state
-    db_session.close = AsyncNone  # TODO: Use real service instance
+    db_session.close = AsyncMock()  # TODO: Use real service instance
 
     return db_session
 
@@ -112,7 +114,7 @@ def _create_mock_llm_manager():
     llm_manager.ask_structured_llm = _get_mock_ask_structured_llm()
 
     # Mock: LLM provider isolation to prevent external API usage and costs
-    llm_manager.get = Mock(return_value=return_value_instance  # Initialize appropriate service)  # Add get method for config access
+    llm_manager.get = Mock(return_value=return_value_instance)  # Initialize appropriate service  # Add get method for config access
 
     return llm_manager
 
@@ -123,7 +125,7 @@ def _get_mock_call_llm():
     async def mock_call_llm(*args, **kwargs):
 
         await asyncio.sleep(0)
-    return {"content": "Based on analysis, reduce costs by switching to efficient models.", "tool_calls": []}
+    return {"content": "Based on analysis, reduce costs by switching to efficient models.", "tool_calls": []]
 
     return mock_call_llm
 
@@ -149,7 +151,6 @@ def _get_mock_ask_structured_llm():
     """Get mock ask_structured_llm async function"""
 
     async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
-    pass
         from netra_backend.app.schemas.unified_tools import TriageResult
 
         if schema == TriageResult:
@@ -216,7 +217,7 @@ def _create_additional_mocks():
     agent_service = Mock(spec=AgentService)
 
     # Mock: Async component isolation for testing without real async operations
-    agent_service.process_message = AsyncMock(return_value={"response": "Test response", "tool_calls": []})
+    agent_service.process_message = AsyncMock(return_value={"response": "Test response", "tool_calls": []])
     
     # Mock: Component isolation for controlled unit testing
     apex_tool_selector = Mock(spec=ApexToolSelector)
@@ -228,7 +229,7 @@ def _create_additional_mocks():
     state_persistence_service_mock = Mock(spec=state_persistence_service)
 
     # Mock: Generic component isolation for controlled unit testing
-    state_persistence_service_mock.save_state = AsyncNone  # TODO: Use real service instance
+    state_persistence_service_mock.save_state = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Async component isolation for testing without real async operations
     state_persistence_service_mock.load_state = AsyncMock(return_value=None)
@@ -279,7 +280,6 @@ def setup_real_infrastructure():
     }
 
 class ExamplePromptsTestBase:
-    pass
 
     """Base class with shared functionality for example prompts testing"""
     
@@ -321,7 +321,7 @@ class ExamplePromptsTestBase:
 
         if context.get("metadata", {}).get("budget_constraint"):
 
-            varied_prompt = f"{varied_prompt} (Budget: ${context['metadata']['budget_constraint']})"
+            varied_prompt = f"{varied_prompt] (Budget: ${context['metadata']['budget_constraint']])"
             
         return varied_prompt
     

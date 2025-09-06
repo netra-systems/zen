@@ -1,15 +1,17 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Regression tests for ExecutionContext hashable type error.
 
 Tests ensure ExecutionContext and similar dataclasses are never used 
 as hashable types (dict keys, set members, etc).
 
 Business Value: Prevents runtime crashes from type errors.
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -35,21 +37,20 @@ class TestExecutionContextHashableRegression:
     
     @pytest.fixture
     def execution_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test execution context."""
-    pass
         state = DeepAgentState(user_request="test request")
         return ExecutionContext(
-            run_id="test-run-123",
-            agent_name="test_agent",
-            state=state,
-            user_id="user-456",
-            thread_id="thread-789",
-            metadata={"test": "data"}
+        run_id="test-run-123",
+        agent_name="test_agent",
+        state=state,
+        user_id="user-456",
+        thread_id="thread-789",
+        metadata={"test": "data"}
         )
     
-    def test_execution_context_is_hashable(self, execution_context):
+        def test_execution_context_is_hashable(self, execution_context):
         """Test that ExecutionContext is now hashable."""
         # Should be able to hash the context
         context_hash = hash(execution_context)
@@ -69,23 +70,22 @@ class TestExecutionContextHashableRegression:
         # Different contexts with same ids should have same hash
         state2 = DeepAgentState(user_request="different request")
         context2 = ExecutionContext(
-            run_id="test-run-123",
-            agent_name="test_agent",
-            state=state2,
-            user_id="different-user"
+        run_id="test-run-123",
+        agent_name="test_agent",
+        state=state2,
+        user_id="different-user"
         )
         assert hash(context2) == hash(execution_context)
         assert context2 == execution_context
     
-    @pytest.fixture
-    def error_handler(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    pass
+        @pytest.fixture
+        def error_handler(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test error handler."""
         return ExecutionErrorHandler
     
-    def test_error_handler_cache_fallback_no_hashable_context(self, execution_context, error_handler):
+        def test_error_handler_cache_fallback_no_hashable_context(self, execution_context, error_handler):
         """Test that cache_fallback_data doesn't use ExecutionContext as hashable."""
         test_data = {"result": "test"}
         
@@ -105,9 +105,8 @@ class TestExecutionContextHashableRegression:
         assert cached["context"]["run_id"] == execution_context.run_id
         assert cached["context"]["agent_name"] == execution_context.agent_name
     
-    def test_execution_monitor_doesnt_use_context_as_key(self, execution_context):
+        def test_execution_monitor_doesnt_use_context_as_key(self, execution_context):
         """Test ExecutionMonitor doesn't use ExecutionContext as dict key."""
-    pass
         monitor = ExecutionMonitor()
         
         # Start execution should use run_id as key, not context
@@ -123,16 +122,16 @@ class TestExecutionContextHashableRegression:
         
         # Complete execution
         result = ExecutionResult(
-            success=True,
-            status=ExecutionStatus.COMPLETED,
-            result={"test": "result"}
+        success=True,
+        status=ExecutionStatus.COMPLETED,
+        result={"test": "result"}
         )
         monitor.complete_execution(execution_context, result)
         
         # Verify context was never used as key
         assert execution_context.run_id not in monitor._active_executions
     
-    def test_dataclass_serialization_instead_of_direct_storage(self, execution_context):
+        def test_dataclass_serialization_instead_of_direct_storage(self, execution_context):
         """Test that dataclasses are serialized before storage in dicts."""
         # Test pattern that could cause issues
         storage_dict = {}
@@ -142,21 +141,20 @@ class TestExecutionContextHashableRegression:
         
         # GOOD: Use serializable identifier
         storage_dict[execution_context.run_id] = {
-            "context_data": {
-                "run_id": execution_context.run_id,
-                "agent_name": execution_context.agent_name,
-                "user_id": execution_context.user_id
-            },
-            "value": "test_value"
+        "context_data": {
+        "run_id": execution_context.run_id,
+        "agent_name": execution_context.agent_name,
+        "user_id": execution_context.user_id
+        },
+        "value": "test_value"
         }
         
         assert execution_context.run_id in storage_dict
         assert storage_dict[execution_context.run_id]["value"] == "test_value"
     
-    @pytest.mark.asyncio
-    async def test_websocket_connection_executor_context_handling(self):
+        @pytest.mark.asyncio
+        async def test_websocket_connection_executor_context_handling(self):
         """Test WebSocket connection executor handles context correctly."""
-    pass
         from netra_backend.app.websocket_core.connection_executor import ConnectionExecutor
         
         executor = ConnectionExecutor()
@@ -164,53 +162,53 @@ class TestExecutionContextHashableRegression:
         # Create test context
         state = DeepAgentState(user_request="websocket test")
         context = ExecutionContext(
-            run_id="ws-test-123",
-            agent_name="websocket_connection",
-            state=state,
-            metadata={
-                "operation_type": "get_connection_stats",
-                "operation_data": {}
-            }
+        run_id="ws-test-123",
+        agent_name="websocket_connection",
+        state=state,
+        metadata={
+        "operation_type": "get_connection_stats",
+        "operation_data": {}
+        }
         )
         
         # Validate preconditions shouldn't use context as hashable
         is_valid = await executor.validate_preconditions(context)
         assert isinstance(is_valid, bool)
     
-    def test_mcp_context_manager_storage(self):
+        def test_mcp_context_manager_storage(self):
         """Test MCP context manager doesn't use ExecutionContext as key."""
         try:
-            from netra_backend.app.agents.mcp_integration.context_manager import (
-                MCPContextManager)
+        from netra_backend.app.agents.mcp_integration.context_manager import (
+        MCPContextManager)
             
-            # Mock dependencies
-            # Mock: Generic component isolation for controlled unit testing
-            mock_service = mock_service_instance  # Initialize appropriate service
-            # Mock: Generic component isolation for controlled unit testing
-            mock_discovery = mock_discovery_instance  # Initialize appropriate service
-            # Mock: Generic component isolation for controlled unit testing
-            mock_monitor = mock_monitor_instance  # Initialize appropriate service
+        # Mock dependencies
+        # Mock: Generic component isolation for controlled unit testing
+        mock_service = mock_service_instance  # Initialize appropriate service
+        # Mock: Generic component isolation for controlled unit testing
+        mock_discovery = mock_discovery_instance  # Initialize appropriate service
+        # Mock: Generic component isolation for controlled unit testing
+        mock_monitor = mock_monitor_instance  # Initialize appropriate service
             
-            manager = MCPContextManager(mock_service, mock_discovery, mock_monitor)
+        manager = MCPContextManager(mock_service, mock_discovery, mock_monitor)
             
-            # Create MCP context
-            run_id = "mcp-test-123"
-            agent_name = "test_agent"
+        # Create MCP context
+        run_id = "mcp-test-123"
+        agent_name = "test_agent"
             
-            # Context should be stored by run_id, not by context object
-            mcp_context = manager.create_context(run_id, agent_name)
+        # Context should be stored by run_id, not by context object
+        mcp_context = manager.create_context(run_id, agent_name)
             
-            assert run_id in manager.active_contexts
-            assert manager.active_contexts[run_id] == mcp_context
+        assert run_id in manager.active_contexts
+        assert manager.active_contexts[run_id] == mcp_context
             
-            # Cleanup should work without hashable issues
-            mock_result = mock_result_instance  # Initialize appropriate service
-            manager.cleanup_context(run_id, mock_result)
+        # Cleanup should work without hashable issues
+        mock_result = mock_result_instance  # Initialize appropriate service
+        manager.cleanup_context(run_id, mock_result)
             
-            assert run_id not in manager.active_contexts
+        assert run_id not in manager.active_contexts
         except ImportError:
-            # Skip if MCP integration not available
-            pytest.skip("MCP integration not available")
+        # Skip if MCP integration not available
+        pytest.skip("MCP integration not available")
 
 class TestDataclassSerializationPatterns:
     """Test correct serialization patterns for dataclasses."""
@@ -277,11 +275,10 @@ class TestDataclassSerializationPatterns:
         
         class SafeCache:
             def __init__(self):
-                self._cache: Dict[str, Dict[str, Any]] = {}
+                self._cache: Dict[str, Dict[str, Any]] = {]
             
             def store_context(self, context: ExecutionContext, data: Any):
                 """Store context data safely."""
-    pass
                 key = f"{context.agent_name}:{context.run_id}"
                 self._cache[key] = {
                     "data": data,
@@ -346,7 +343,6 @@ class TestErrorHandlerRegressionFixes:
     @pytest.mark.asyncio
     async def test_error_handler_full_flow_no_hashable_errors(self):
         """Test full error handling flow doesn't produce hashable errors."""
-    pass
         handler = ExecutionErrorHandler
         
         state = DeepAgentState(user_request="error flow test")

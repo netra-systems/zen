@@ -1,14 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Comprehensive test suite to prevent configuration loop regression across all environments.
 
 This test suite ensures that configuration management works correctly across:
-- Development
+    - Development
 - Testing
 - Staging  
 - Production
 
 It prevents the regression of the configuration loop issue where the system
 incorrectly identified non-test environments as test contexts.
-"""
+""""
 import unittest
 import logging
 import sys
@@ -16,7 +18,7 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 
 
@@ -35,11 +37,11 @@ class ConfigurationRegressionTestBase:
     
     def assert_no_configuration_loop(self, config_manager: UnifiedConfigManager, 
                                     iterations: int = 10) -> None:
-        """Assert that configuration is not repeatedly cleared."""
+                                        """Assert that configuration is not repeatedly cleared."""
         # Track method calls to detect loops
         with patch.object(config_manager, '_clear_all_caches', 
                          wraps=config_manager._clear_all_caches) as mock_clear:
-            # Call get_config multiple times
+                             # Call get_config multiple times
             for _ in range(iterations):
                 _ = config_manager.get_config()
             
@@ -54,7 +56,7 @@ class ConfigurationRegressionTestBase:
     
     def assert_configuration_cached(self, config_manager: UnifiedConfigManager,
                                    iterations: int = 5) -> None:
-        """Assert that configuration is properly cached."""
+                                       """Assert that configuration is properly cached."""
         configs = []
         for _ in range(iterations):
             configs.append(config_manager.get_config())
@@ -82,12 +84,11 @@ class TestDevelopmentEnvironment(unittest.TestCase, ConfigurationRegressionTestB
         
         with patch('netra_backend.app.core.configuration.base.get_env', 
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_no_loop_with_empty_test_vars(self):
         """Test that empty test variables don't trigger test context."""
-    pass
         env_vars = {
             'ENVIRONMENT': 'development',
             'TEST_MODE': '',  # Empty string
@@ -97,7 +98,7 @@ class TestDevelopmentEnvironment(unittest.TestCase, ConfigurationRegressionTestB
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_caching_enabled_in_development(self):
@@ -110,7 +111,7 @@ class TestDevelopmentEnvironment(unittest.TestCase, ConfigurationRegressionTestB
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_configuration_cached(config_manager)
 
 
@@ -128,12 +129,11 @@ class TestStagingEnvironment(unittest.TestCase, ConfigurationRegressionTestBase)
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_staging_with_accidentally_set_test_vars(self):
         """Test staging behavior even if test vars are accidentally set to false."""
-    pass
         env_vars = {
             'ENVIRONMENT': 'staging',
             'TEST_MODE': 'false',  # Might be set accidentally
@@ -143,7 +143,7 @@ class TestStagingEnvironment(unittest.TestCase, ConfigurationRegressionTestBase)
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_caching_enabled_in_staging(self):
@@ -155,7 +155,7 @@ class TestStagingEnvironment(unittest.TestCase, ConfigurationRegressionTestBase)
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_configuration_cached(config_manager)
 
 
@@ -173,12 +173,11 @@ class TestProductionEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_production_ignores_test_vars(self):
         """Test that production ignores test variables even if set."""
-    pass
         env_vars = {
             'ENVIRONMENT': 'production',
             'TEST_MODE': 'false',  # Should be ignored
@@ -188,7 +187,7 @@ class TestProductionEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_no_configuration_loop(config_manager)
     
     def test_caching_always_enabled_in_production(self):
@@ -201,7 +200,7 @@ class TestProductionEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assert_configuration_cached(config_manager, iterations=20)
 
 
@@ -218,11 +217,11 @@ class TestActualTestEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             
             with patch.object(config_manager, '_clear_all_caches',
                             wraps=config_manager._clear_all_caches) as mock_clear:
-                # Call get_config multiple times
+                                # Call get_config multiple times
                 for _ in range(3):
                     _ = config_manager.get_config()
                 
@@ -235,9 +234,8 @@ class TestActualTestEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
     
     def test_pytest_detection(self):
         """Test that pytest is properly detected as test context."""
-    pass
         # Simulate pytest being loaded
-        with patch.dict(sys.modules, {'pytest': MagicNone  # TODO: Use real service instance}):
+        with patch.dict(sys.modules, {'pytest': MagicMock()  # TODO: Use real service instance}):
             env_vars = {
                 'ENVIRONMENT': 'development',  # Even in dev
                 'TEST_MODE': 'false'
@@ -245,7 +243,7 @@ class TestActualTestEnvironment(unittest.TestCase, ConfigurationRegressionTestBa
             
             with patch('netra_backend.app.core.configuration.base.get_env',
                       return_value=self.create_mock_env(env_vars)):
-                config_manager = UnifiedConfigManager()
+                          config_manager = UnifiedConfigManager()
                 
                 # Should detect pytest and treat as test context
                 self.assertTrue(config_manager._is_test_context())
@@ -288,7 +286,7 @@ class TestEdgeCases(unittest.TestCase, ConfigurationRegressionTestBase):
                 
                 with patch('netra_backend.app.core.configuration.base.get_env',
                           return_value=self.create_mock_env(env_vars)):
-                    config_manager = UnifiedConfigManager()
+                              config_manager = UnifiedConfigManager()
                     is_test = config_manager._is_test_context()
                     
                     self.assertEqual(
@@ -299,7 +297,6 @@ class TestEdgeCases(unittest.TestCase, ConfigurationRegressionTestBase):
     
     def test_environment_priority(self):
         """Test that ENVIRONMENT=test/testing takes priority."""
-    pass
         env_vars = {
             'ENVIRONMENT': 'test',  # This should trigger test context
             'TEST_MODE': 'false',   # Even though this is false
@@ -308,7 +305,7 @@ class TestEdgeCases(unittest.TestCase, ConfigurationRegressionTestBase):
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             self.assertTrue(config_manager._is_test_context())
     
     def test_hot_reload_doesnt_cause_loop(self):
@@ -321,7 +318,7 @@ class TestEdgeCases(unittest.TestCase, ConfigurationRegressionTestBase):
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             
             # Hot reload should work without causing loops
             config_manager.reload_config(force=True)
@@ -344,7 +341,7 @@ class TestPerformance(unittest.TestCase, ConfigurationRegressionTestBase):
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             
             # Measure time for multiple config accesses
             start_time = time.time()
@@ -361,7 +358,6 @@ class TestPerformance(unittest.TestCase, ConfigurationRegressionTestBase):
     
     def test_memory_usage_stable(self):
         """Test that repeated config access doesn't leak memory."""
-    pass
         env_vars = {
             'ENVIRONMENT': 'production',
             'TEST_MODE': None
@@ -369,7 +365,7 @@ class TestPerformance(unittest.TestCase, ConfigurationRegressionTestBase):
         
         with patch('netra_backend.app.core.configuration.base.get_env',
                   return_value=self.create_mock_env(env_vars)):
-            config_manager = UnifiedConfigManager()
+                      config_manager = UnifiedConfigManager()
             
             # Get initial config
             first_config = config_manager.get_config()

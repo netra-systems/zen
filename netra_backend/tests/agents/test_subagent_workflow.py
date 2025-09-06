@@ -13,71 +13,69 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import (
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
     SupervisorAgent as Supervisor)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 import asyncio
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncNone  # TODO: Use real service instance
+    return AsyncMock()  # TODO: Use real service instance
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = MagicMock(spec=LLMManager)
     # Create AsyncMock with proper return values
     async def mock_ask_llm(*args, **kwargs):
-    pass
-        # Return proper JSON strings based on the config or prompt context
-        prompt = args[0] if args else ""
+    # Return proper JSON strings based on the config or prompt context
+    prompt = args[0] if args else ""
         
-        # Determine response based on the agent type/prompt
-        if "triage" in prompt.lower() or "category" in prompt.lower():
-            await asyncio.sleep(0)
+    # Determine response based on the agent type/prompt
+    if "triage" in prompt.lower() or "category" in prompt.lower():
+    await asyncio.sleep(0)
     return '{"category": "Data Analysis", "confidence_score": 0.9}'
-        elif "data" in prompt.lower() and "analysis" in prompt.lower():
-            return '{"analysis_results": "Sample data analysis"}'
-        elif "optimization" in prompt.lower():
-            return '{"optimizations": ["Optimization 1"], "cost_savings": 1000}'
-        elif "action" in prompt.lower() and "plan" in prompt.lower():
-            return '{"action_plan": ["Action 1", "Action 2"], "timeline": "2 weeks"}'
-        elif "report" in prompt.lower():
-            return '{"report": "Final comprehensive analysis report with detailed findings and recommendations", "report_type": "analysis", "sections": [{"title": "Summary", "content": "Analysis complete"}]}'
-        else:
-            return '{"status": "completed"}'
+    elif "data" in prompt.lower() and "analysis" in prompt.lower():
+    return '{"analysis_results": "Sample data analysis"}'
+    elif "optimization" in prompt.lower():
+    return '{"optimizations": ["Optimization 1"], "cost_savings": 1000]'
+    elif "action" in prompt.lower() and "plan" in prompt.lower():
+    return '{"action_plan": ["Action 1", "Action 2"], "timeline": "2 weeks"]'
+    elif "report" in prompt.lower():
+    return '{"report": "Final comprehensive analysis report with detailed findings and recommendations", "report_type": "analysis", "sections": [{"title": "Summary", "content": "Analysis complete"]]]'
+    else:
+    return '{"status": "completed"}'
     
     llm_manager.ask_llm = mock_ask_llm
     return llm_manager
 
 @pytest.fixture
- def real_websocket_manager():
+def real_websocket_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncNone  # TODO: Use real service instance
+    return AsyncMock()  # TODO: Use real service instance
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncNone  # TODO: Use real service instance
+    return AsyncMock()  # TODO: Use real service instance
 
 @pytest.mark.asyncio
 async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
-    pass
     # Arrange
     # Mock the state persistence to avoid the coroutine issue
     with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service') as mock_state_persistence:
-        mock_state_persistence.save_agent_state = AsyncNone  # TODO: Use real service instance
+        mock_state_persistence.save_agent_state = AsyncMock()  # TODO: Use real service instance
         mock_state_persistence.load_agent_state = AsyncMock(return_value=None)
         # Mock: Async component isolation for testing without real async operations
         mock_state_persistence.get_thread_context = AsyncMock(return_value=None)
@@ -85,9 +83,8 @@ async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, m
         supervisor = Supervisor(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher)
         
         # Create a mock reporting agent that properly sets state
-        mock_reporting_agent = AsyncNone  # TODO: Use real service instance
+        mock_reporting_agent = AsyncMock()  # TODO: Use real service instance
         async def mock_reporting_execute_impl(state, run_id, stream_updates):
-    pass
             print(f"DEBUG: Mock reporting agent called with state.step_count={state.step_count}")
             from netra_backend.app.agents.state import ReportResult
             state.report_result = ReportResult(

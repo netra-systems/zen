@@ -3,11 +3,11 @@ CLAUDE.md Compliance Tests
 Created during iterations 76-78 to ensure system compliance with CLAUDE.md specifications.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (affects all segments)
+    - Segment: Platform/Internal (affects all segments)
 - Business Goal: Architecture Compliance - Maintain system coherence
 - Value Impact: Prevents technical debt and ensures maintainability 
 - Strategic Impact: Reduces development friction by 40%
-"""
+""""
 
 import ast
 import os
@@ -116,7 +116,7 @@ class TestClaudeMdCompliance:
         
         assert len(violations) <= max_allowed_violations, (
             f"Relative import violations found: {len(violations)}, max allowed: {max_allowed_violations}. "
-            f"First 5 violations: {violations[:5]}"
+            f"First 5 violations: {violations[:5]]"
         )
         
     @fast_test
@@ -182,7 +182,7 @@ class TestClaudeMdCompliance:
         for module, stats in type_hint_stats.items():
             if stats["total_functions"] > 5:  # Only check modules with substantial code
                 assert stats["percentage"] >= min_coverage, (
-                    f"Module {module} has {stats['percentage']:.1f}% type hint coverage, "
+                    f"Module {module] has {stats['percentage']:.1f]% type hint coverage, "
                     f"minimum required: {min_coverage}%"
                 )
     
@@ -273,7 +273,7 @@ class TestClaudeMdCompliance:
         assert len(files_without_bvj) <= max_files_without_bvj, (
             f"Test files without BVJ: {len(files_without_bvj)}, "
             f"max allowed: {max_files_without_bvj}. "
-            f"Files: {files_without_bvj[:5]}..."
+            f"Files: {files_without_bvj[:5]]..."
         )
         
     def _find_pattern_implementations(self, project_root: Path, pattern: str) -> List[str]:
@@ -348,7 +348,7 @@ class TestArchitecturalCompliance:
         assert len(cross_service_imports) <= max_allowed_cross_imports, (
             f"Cross-service imports found: {len(cross_service_imports)}, "
             f"max allowed: {max_allowed_cross_imports}. "
-            f"Violations: {cross_service_imports[:3]}..."
+            f"Violations: {cross_service_imports[:3]]..."
         )
         
     @fast_test
@@ -430,5 +430,5 @@ class TestArchitecturalCompliance:
         # Should have reasonable error handling
         assert error_handling_stats["try_except_blocks"] >= 10, (
             f"Expected at least 10 try-except blocks in core modules, "
-            f"found: {error_handling_stats['try_except_blocks']}"
+            f"found: {error_handling_stats['try_except_blocks']]"
         )

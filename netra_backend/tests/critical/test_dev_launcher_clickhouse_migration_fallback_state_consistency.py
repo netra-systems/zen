@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical test for ClickHouse connection fallback state consistency during migration failures.
 
@@ -5,16 +7,16 @@ This test validates that when ClickHouse migrations fail, the system maintains
 consistent state between connection status, migration tracking, and application behavior.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal → Enterprise
+    - Segment: Platform/Internal → Enterprise
 - Business Goal: Platform Stability & Data Integrity  
 - Value Impact: Prevents database corruption and system outages
 - Strategic/Revenue Impact: $540K-960K prevented churn, 4500-8000% ROI
 
 Risk Mitigation:
-- Prevents complete platform outages lasting 2-4 hours
+    - Prevents complete platform outages lasting 2-4 hours
 - Avoids data corruption requiring manual recovery
 - Protects against cascading failures across services
-"""
+""""
 
 import asyncio
 import pytest
@@ -23,7 +25,7 @@ import sys
 import os
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test path setup removed - using absolute imports as per CLAUDE.md
@@ -45,33 +47,33 @@ async def test_clickhouse_migration_failure_fallback_state_inconsistency_fails()
     Test that detects state inconsistency when ClickHouse migration fails and fallback occurs.
     
     This test should FAIL because the current implementation has inconsistent state management:
-    1. Connection status shows FALLBACK_AVAILABLE
+        1. Connection status shows FALLBACK_AVAILABLE
     2. Migration tracking thinks migrations are complete
     3. Application expects migrated schema but gets fallback state
-    """
+    """"
     # Setup
     with patch('aiohttp.ClientSession') as mock_session_class, \
          patch('asyncpg.connect') as mock_asyncpg_connect, \
          patch('redis.Redis') as mock_redis:
         
-        # Mock ClickHouse HTTP health check (initially succeeds, then fails during migration)
-        mock_response = AsyncNone  # TODO: Use real service instance
+             # Mock ClickHouse HTTP health check (initially succeeds, then fails during migration)
+        mock_response = AsyncMock()  # TODO: Use real service instance
         mock_response.status = 200  # Health check succeeds
         mock_response.text = AsyncMock(return_value="Ok.")
         
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_session.get = AsyncMock(return_value=mock_response)
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_session_class.return_value = mock_session
         
         # Mock PostgreSQL (healthy)
-        mock_pg_conn = AsyncNone  # TODO: Use real service instance
+        mock_pg_conn = AsyncMock()  # TODO: Use real service instance
         mock_pg_conn.fetchval = AsyncMock(return_value=1)
         mock_asyncpg_connect.return_value = mock_pg_conn
         
         # Mock Redis (healthy)
-        mock_redis_instance = MagicNone  # TODO: Use real service instance
+        mock_redis_instance = MagicMock()  # TODO: Use real service instance
         mock_redis_instance.ping = MagicMock(return_value=True)
         mock_redis.return_value = mock_redis_instance
         
@@ -80,7 +82,7 @@ async def test_clickhouse_migration_failure_fallback_state_inconsistency_fails()
         
         # Mock migration runner to track state
         with patch('dev_launcher.database_connector.MigrationRunner') as mock_migration_runner:
-            mock_runner = MagicNone  # TODO: Use real service instance
+            mock_runner = MagicMock()  # TODO: Use real service instance
             mock_runner.check_and_run_migrations = AsyncMock(
                 side_effect=Exception("Migration failed")
             )
@@ -123,10 +125,10 @@ async def test_clickhouse_fallback_mode_application_behavior_inconsistency_fails
     Test that detects inconsistency between fallback mode indication and actual application behavior.
     
     This test should FAIL because:
-    1. System indicates fallback mode
+        1. System indicates fallback mode
     2. But application still tries to use ClickHouse features
     3. Leading to runtime errors
-    """
+    """"
     with patch('dev_launcher.database_connector.ClickHouseClient') as mock_ch_client:
         # Setup ClickHouse to fail immediately
         mock_ch_client.side_effect = Exception("Connection refused")
@@ -173,10 +175,10 @@ async def test_clickhouse_migration_retry_state_tracking_inconsistency_fails():
     Test that detects state tracking inconsistency during ClickHouse migration retries.
     
     This test should FAIL because retry state is not properly synchronized:
-    1. Connection retries are tracked
+        1. Connection retries are tracked
     2. Migration retries are separate
     3. State becomes inconsistent between components
-    """
+    """"
     with patch('dev_launcher.database_connector.ClickHouseClient') as mock_ch_client:
         # Setup intermittent failures
         call_count = 0
@@ -188,7 +190,7 @@ async def test_clickhouse_migration_retry_state_tracking_inconsistency_fails():
                 raise Exception(f"Temporary failure {call_count}")
             return None
             
-        mock_ch_instance = MagicNone  # TODO: Use real service instance
+        mock_ch_instance = MagicMock()  # TODO: Use real service instance
         mock_ch_instance.execute = mock_execute
         mock_ch_client.return_value = mock_ch_instance
         
@@ -235,13 +237,13 @@ async def test_clickhouse_fallback_recovery_state_synchronization_fails():
     Test that detects state synchronization issues when ClickHouse recovers from fallback mode.
     
     This test should FAIL because recovery doesn't properly update all state:
-    1. Connection recovers
+        1. Connection recovers
     2. But migration state remains in fallback
     3. Application behavior is inconsistent
-    """
+    """"
     with patch('dev_launcher.database_connector.ClickHouseClient') as mock_ch_client:
         # Start with failed state
-        mock_ch_instance = MagicNone  # TODO: Use real service instance
+        mock_ch_instance = MagicMock()  # TODO: Use real service instance
         mock_ch_instance.execute = AsyncMock(side_effect=Exception("Initial failure"))
         mock_ch_client.return_value = mock_ch_instance
         
@@ -289,7 +291,7 @@ async def test_clickhouse_migration_fallback_state_validation_missing_fails():
     Test that validates comprehensive state validation exists for migration fallback scenarios.
     
     This test should FAIL because the system lacks proper state validation methods.
-    """
+    """"
     connector = DatabaseConnector(use_emoji=False)
     
     # ASSERTION 1: Should have method to validate state consistency (THIS WILL FAIL)
@@ -321,7 +323,7 @@ class SchemaConsistencyValidator:
         
         In the real implementation, this would check that the application's
         expected schema matches what the fallback mode can provide.
-        """
+        """"
         # This would check for schema consistency
         # For now, return False to indicate inconsistency
         return False

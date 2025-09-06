@@ -48,7 +48,7 @@ class StateMergeUtil:
                     merged_dict = val1.copy()
                     for k, v in val2.items():
                         if k in merged_dict and isinstance(merged_dict[k], dict) and isinstance(v, dict):
-                            merged_dict[k] = {**merged_dict[k], **v}
+                            merged_dict[k] = {**merged_dict[k], **v]
                         else:
                             merged_dict[k] = v
                     setattr(merged, attr, merged_dict)

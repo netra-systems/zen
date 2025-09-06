@@ -1,7 +1,7 @@
 """
 Tests for custom agent error classes.
 All functions ≤8 lines per requirements.
-"""
+""""
 
 import sys
 from pathlib import Path

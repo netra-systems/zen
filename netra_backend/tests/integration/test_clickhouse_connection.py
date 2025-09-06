@@ -3,16 +3,16 @@ Integration test for ClickHouse connection authentication.
 Tests ClickHouse authentication and basic connectivity issues.
 
 Enhanced with specific validation for the ClickHouse configuration fixes:
-- Port 8123 HTTP interface access
+    - Port 8123 HTTP interface access
 - Authentication with configured credentials
 - Proper password handling
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: ClickHouse reliability and data pipeline stability
 - Value Impact: Ensures analytics and logging systems function correctly
 - Strategic Impact: Validates production-ready ClickHouse configuration
-"""
+""""
 import pytest
 import asyncio
 import time
@@ -133,7 +133,7 @@ class TestClickHouseConnection:
         
         This test specifically validates the ClickHouse HTTP interface
         configuration fix, ensuring port 8123 is accessible with authentication.
-        """
+        """"
         env = get_env()
         
         # Get ClickHouse HTTP configuration
@@ -150,14 +150,14 @@ class TestClickHouseConnection:
             pytest.skip("ClickHouse not configured for this test environment")
         
         print(f"\n=== CLICKHOUSE HTTP PORT 8123 TEST ===")
-        print(f"Host: {ch_config['host']}")
-        print(f"HTTP Port: {ch_config['http_port']}")
-        print(f"User: {ch_config['user']}")
-        print(f"Database: {ch_config['database']}")
-        print(f"Password Length: {len(ch_config['password'])} chars")
+        print(f"Host: {ch_config['host']]")
+        print(f"HTTP Port: {ch_config['http_port']]")
+        print(f"User: {ch_config['user']]")
+        print(f"Database: {ch_config['database']]")
+        print(f"Password Length: {len(ch_config['password'])] chars")
         
         # Test HTTP interface connectivity
-        http_url = f"http://{ch_config['host']}:{ch_config['http_port']}"
+        http_url = f"http://{ch_config['host']]:{ch_config['http_port']]"
         auth = (ch_config['user'], ch_config['password']) if ch_config['password'] else None
         
         start_time = time.time()
@@ -171,7 +171,7 @@ class TestClickHouseConnection:
             
             assert ping_response.status_code == 200, (
                 f"ClickHouse HTTP ping failed: HTTP {ping_response.status_code}\n"
-                f"Response: {ping_response.text[:200]}"
+                f"Response: {ping_response.text[:200]]"
             )
             
             # Test basic query
@@ -186,7 +186,7 @@ class TestClickHouseConnection:
             
             assert query_response.status_code == 200, (
                 f"ClickHouse HTTP query failed: HTTP {query_response.status_code}\n"
-                f"Response: {query_response.text[:200]}"
+                f"Response: {query_response.text[:200]]"
             )
             
             # Validate query result
@@ -198,14 +198,14 @@ class TestClickHouseConnection:
             
         except requests.exceptions.ConnectionError as e:
             pytest.fail(
-                f"ClickHouse HTTP connection failed on port {ch_config['http_port']}:\n"
+                f"ClickHouse HTTP connection failed on port {ch_config['http_port']]:\n"
                 f"URL: {http_url}\n"
                 f"Error: {e}\n\n"
-                f"Ensure ClickHouse is running and HTTP interface is enabled on port {ch_config['http_port']}"
+                f"Ensure ClickHouse is running and HTTP interface is enabled on port {ch_config['http_port']]"
             )
         except requests.exceptions.Timeout as e:
             pytest.fail(
-                f"ClickHouse HTTP request timeout on port {ch_config['http_port']}:\n"
+                f"ClickHouse HTTP request timeout on port {ch_config['http_port']]:\n"
                 f"URL: {http_url}\n"
                 f"This may indicate ClickHouse is not responding on the HTTP interface"
             )
@@ -223,7 +223,7 @@ class TestClickHouseConnection:
         
         This test validates that ClickHouse authentication works correctly
         with the configured username and password.
-        """
+        """"
         env = get_env()
         
         ch_config = {
@@ -239,10 +239,10 @@ class TestClickHouseConnection:
             pytest.skip("ClickHouse not configured for this test environment")
         
         print(f"\n=== CLICKHOUSE AUTHENTICATION TEST ===")
-        print(f"User: {ch_config['user']}")
-        print(f"Password: {'*' * len(ch_config['password'])} (length: {len(ch_config['password'])})")
+        print(f"User: {ch_config['user']]")
+        print(f"Password: {'*' * len(ch_config['password'])] (length: {len(ch_config['password'])])")
         
-        http_url = f"http://{ch_config['host']}:{ch_config['http_port']}"
+        http_url = f"http://{ch_config['host']]:{ch_config['http_port']]"
         
         # Test with correct credentials
         if ch_config['password']:
@@ -260,13 +260,13 @@ class TestClickHouseConnection:
                 
                 assert response.status_code == 200, (
                     f"Authentication failed: HTTP {response.status_code}\n"
-                    f"Response: {response.text[:200]}"
+                    f"Response: {response.text[:200]]"
                 )
                 
                 # Validate we're authenticated as the expected user
                 current_user = response.text.strip()
                 assert current_user == ch_config['user'], (
-                    f"Unexpected authenticated user: expected '{ch_config['user']}', got '{current_user}'"
+                    f"Unexpected authenticated user: expected '{ch_config['user']]', got '{current_user]'"
                 )
                 
                 print("✅ Authentication successful")
@@ -275,7 +275,7 @@ class TestClickHouseConnection:
                 if e.response.status_code == 401:
                     pytest.fail(
                         f"ClickHouse authentication failed:\n"
-                        f"User: {ch_config['user']}\n"
+                        f"User: {ch_config['user']]\n"
                         f"HTTP 401 Unauthorized - check username/password configuration"
                     )
                 else:
@@ -306,7 +306,7 @@ class TestClickHouseConnection:
         
         This test validates that ClickHouse can perform basic database operations
         with the configured database name.
-        """
+        """"
         env = get_env()
         
         ch_config = {
@@ -322,16 +322,16 @@ class TestClickHouseConnection:
             pytest.skip("ClickHouse not configured for this test environment")
         
         print(f"\n=== CLICKHOUSE DATABASE ACCESS TEST ===")
-        print(f"Database: {ch_config['database']}")
+        print(f"Database: {ch_config['database']]")
         
-        http_url = f"http://{ch_config['host']}:{ch_config['http_port']}"
+        http_url = f"http://{ch_config['host']]:{ch_config['http_port']]"
         auth = (ch_config['user'], ch_config['password']) if ch_config['password'] else None
         
         operations = {
             'show_databases': f"SHOW DATABASES",
             'current_database': f"SELECT currentDatabase() as db",
             'create_test_table': f"CREATE TABLE IF NOT EXISTS test_connectivity_{int(time.time())} (id UInt32, name String) ENGINE = Memory",
-            'show_tables': f"SHOW TABLES FROM {ch_config['database']}",
+            'show_tables': f"SHOW TABLES FROM {ch_config['database']]",
         }
         
         results = {}
@@ -366,7 +366,7 @@ class TestClickHouseConnection:
                 response_text = result['response'][:100] + "..." if len(result['response']) > 100 else result['response']
                 print(f"  Response: {response_text}")
             elif not result['success']:
-                print(f"  Error: {result['error']}")
+                print(f"  Error: {result['error']]")
         
         # Clean up test table if created
         if results.get('create_test_table', {}).get('success'):
@@ -382,11 +382,11 @@ class TestClickHouseConnection:
         
         # Validate critical operations
         critical_ops = ['show_databases', 'current_database']
-        failed_critical = [op for op in critical_ops if not results.get(op, {}).get('success')]
+        failed_critical = [op for op in critical_ops if not results.get(op, {]).get('success')]
         
         assert len(failed_critical) == 0, (
             f"Critical ClickHouse operations failed: {failed_critical}\n"
-            f"Database access is not working properly with configured database '{ch_config['database']}'"
+            f"Database access is not working properly with configured database '{ch_config['database']]'"
         )
         
         # Validate we can access the configured database
@@ -407,7 +407,7 @@ class TestClickHouseConnectionEnhanced:
         
         This test ensures all ClickHouse configuration is consistent between
         environment variables and application configuration.
-        """
+        """"
         env = get_env()
         config = get_config()
         
@@ -446,12 +446,12 @@ class TestClickHouseConnectionEnhanced:
             # Validate consistency (where applicable)
             if hasattr(app_config, 'host'):
                 assert app_config.host == env_config['host'], (
-                    f"Host mismatch: env='{env_config['host']}', app='{app_config.host}'"
+                    f"Host mismatch: env='{env_config['host']]', app='{app_config.host]'"
                 )
             
             if hasattr(app_config, 'user'):
                 assert app_config.user == env_config['user'], (
-                    f"User mismatch: env='{env_config['user']}', app='{app_config.user}'"
+                    f"User mismatch: env='{env_config['user']]', app='{app_config.user]'"
                 )
         
         # Validate required configuration is present

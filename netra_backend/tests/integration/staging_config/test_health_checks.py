@@ -3,7 +3,7 @@ Test Health Checks
 
 Validates health check endpoints and monitoring
 in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path

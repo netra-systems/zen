@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for Redis Connection Timeout Issues
 Critical staging issue: Timeout connecting to server
@@ -7,11 +9,11 @@ found in GCP staging logs. The tests are intentionally designed to fail to expos
 the specific timeout and connection problems that need fixing.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability - prevent Redis connection failures in staging
 - Value Impact: Ensures Redis-dependent features work reliably (caching, sessions)
 - Strategic Impact: Critical for scalable session management and performance
-"""
+""""
 
 import pytest
 import asyncio
@@ -20,7 +22,7 @@ from redis.exceptions import ConnectionError, TimeoutError
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.core.configuration.base import get_unified_config
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -35,14 +37,14 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Demonstrates Redis connection timeout during initialization.
         
         This test reproduces the exact error from GCP staging logs:
-        "Timeout connecting to server"
+            "Timeout connecting to server"
         
         Expected behavior: Should handle connection timeouts gracefully with proper fallback
         Current behavior: May not have proper timeout handling or fallback mechanisms
-        """
+        """"
         # Mock Redis to simulate connection timeout
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Simulate connection timeout during ping
@@ -62,12 +64,12 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis socket timeout during normal operations.
         
         Tests timeout handling during normal Redis operations after connection established.
-        """
+        """"
         redis_manager = RedisManager()
         
         # Mock successful initial connection
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Initial connection succeeds
@@ -89,9 +91,9 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis connection refused with inadequate fallback.
         
         Tests scenario where Redis server is unreachable and fallback behavior.
-        """
+        """"
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Simulate connection refused (Redis server down)
@@ -117,11 +119,11 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis host unreachable leading to connection timeout.
         
         Tests scenario where Redis host is unreachable (network issues).
-        """
+        """"
         # Configure Redis with unreachable host
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            mock_config.return_value = MagicNone  # TODO: Use real service instance
-            mock_config.return_value.redis = MagicNone  # TODO: Use real service instance
+            mock_config.return_value = MagicMock()  # TODO: Use real service instance
+            mock_config.return_value.redis = MagicMock()  # TODO: Use real service instance
             mock_config.return_value.redis.host = "unreachable.redis.host"
             mock_config.return_value.redis.port = 6379
             mock_config.return_value.redis.username = None
@@ -132,7 +134,7 @@ class TestRedisConnectionTimeouts:
             mock_config.return_value.dev_mode_redis_enabled = True
             
             with patch('redis.asyncio.Redis') as mock_redis_class:
-                mock_redis_instance = AsyncNone  # TODO: Use real service instance
+                mock_redis_instance = AsyncMock()  # TODO: Use real service instance
                 mock_redis_class.return_value = mock_redis_instance
                 
                 # Simulate timeout to unreachable host
@@ -152,9 +154,9 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis authentication timeout.
         
         Tests scenario where Redis authentication takes too long and times out.
-        """
+        """"
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Simulate auth timeout
@@ -174,11 +176,11 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis reconnection logic after initial timeout.
         
         Tests whether Redis can reconnect after an initial connection timeout.
-        """
+        """"
         redis_manager = RedisManager()
         
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # First connection attempt times out
@@ -206,9 +208,9 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis connection pool exhaustion leading to timeouts.
         
         Tests scenario where connection pool is exhausted and new connections timeout.
-        """
+        """"
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Simulate connection pool exhaustion
@@ -228,9 +230,9 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis DNS resolution timeout.
         
         Tests scenario where Redis hostname cannot be resolved within timeout period.
-        """
+        """"
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Simulate DNS resolution timeout
@@ -250,11 +252,11 @@ class TestRedisConnectionTimeouts:
         FAILING TEST: Redis operation timeout with fallback behavior testing.
         
         Tests whether Redis operations properly fall back when timeouts occur.
-        """
+        """"
         redis_manager = RedisManager(test_mode=True)  # Enable test mode for fallback
         
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            mock_redis_instance = AsyncNone  # TODO: Use real service instance
+            mock_redis_instance = AsyncMock()  # TODO: Use real service instance
             mock_redis_class.return_value = mock_redis_instance
             
             # Connection succeeds but operations timeout

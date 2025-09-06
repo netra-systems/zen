@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Capacity Planning Workflow Tests
 Tests capacity planning workflows for different scaling scenarios.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import sys
 from pathlib import Path
@@ -34,14 +36,14 @@ from netra_backend.app.services.quality_gate_service import (
 def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for scaling impact analysis testing."""
     agents = {
-        'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
-        'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
+    'triage': UnifiedTriageAgent(real_llm_manager, real_tool_dispatcher),
+    'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
     }
     # TODO: Implement create_scaling_setup helper function
     return {
-        'agents': agents,
-        'llm_manager': real_llm_manager,
-        'websocket_manager': real_websocket_manager
+    'agents': agents,
+    'llm_manager': real_llm_manager,
+    'websocket_manager': real_websocket_manager
     }
 
 class TestCapacityPlanningWorkflows:
@@ -65,25 +67,25 @@ class TestCapacityPlanningWorkflows:
 
 @pytest.mark.real_llm
 class TestExamplePromptsCapacityPlanning:
-    """Test specific example prompt EP-003 with real LLM validation."""
+    """Test specific example prompt EP-3 with real LLM validation."""
     
     @pytest.mark.asyncio
     async def test_ep_003_usage_increase_impact_real_llm(self, scaling_analysis_setup):
-        """Test EP-003: Usage increase impact analysis using real LLM."""
+        """Test EP-3: Usage increase impact analysis using real LLM."""
         setup = scaling_analysis_setup
         state = _create_ep_003_state()
         results = await _execute_scaling_workflow(setup, state)
         await _validate_ep_003_results(results, state, setup)
 
 def _create_ep_003_state() -> DeepAgentState:
-    """Create state for EP-003 example prompt test."""
+    """Create state for EP-3 example prompt test."""
     return DeepAgentState(
         user_request="I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
-        metadata={'test_type': 'ep_003', 'prompt_id': 'EP-003', 'usage_increase': '50%', 'timeframe': 'next_month'}
+        metadata={'test_type': 'ep_003', 'prompt_id': 'EP-3', 'usage_increase': '50%', 'timeframe': 'next_month'}
     )
 
 async def _validate_ep_003_results(results, state: DeepAgentState, setup):
-    """Validate EP-003 results with enhanced quality checks."""
+    """Validate EP-3 results with enhanced quality checks."""
     _validate_capacity_planning_results(results, state)
     await _validate_response_quality_ep_003(results, setup)
 
@@ -95,7 +97,7 @@ def _validate_capacity_planning_results(results, state: DeepAgentState):
     assert any('cost' in str(result).lower() or 'rate limit' in str(result).lower() for result in results)
 
 async def _validate_response_quality_ep_003(results, setup):
-    """Validate response quality for EP-003 using quality gate service."""
+    """Validate response quality for EP-3 using quality gate service."""
     quality_service = QualityGateService()
     final_result = results[-1] if results else None
     
@@ -104,8 +106,8 @@ async def _validate_response_quality_ep_003(results, setup):
         is_valid, score, feedback = await quality_service.validate_content(
             content=response_text, content_type=ContentType.CAPACITY_ANALYSIS, quality_level=QualityLevel.MEDIUM
         )
-        assert is_valid, f"EP-003 response quality validation failed: {feedback}"
-        assert score >= 70, f"EP-003 quality score too low: {score}"
+        assert is_valid, f"EP-3 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-3 quality score too low: {score}"
 
 def _extract_response_text(result) -> str:
     """Extract response text from workflow result."""

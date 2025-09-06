@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Unit tests for ProductionTool class and internal execution."""
 
 import sys
@@ -124,7 +127,7 @@ class TestProductionToolInternalExecution:
         tool = self._setup_batch_generation_test()
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.synthetic_data.synthetic_data_service.generate_batch') as mock_service:
-            mock_service.return_value = [{"data": "item1"}, {"data": "item2"}]
+            mock_service.return_value = [{"data": "item1"], {"data": "item2"]]
             result = await tool._try_synthetic_tools({"batch_size": 100})
             self._verify_batch_generation_result_real(result)
     @pytest.mark.asyncio
@@ -158,7 +161,7 @@ class TestProductionToolInternalExecution:
         tool = self._setup_corpus_search_test()
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.corpus.corpus_service.search_corpus_content') as mock_service:
-            mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2}
+            mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2]
             result = await tool._try_corpus_tools({"corpus_id": "123", "query": "test"})
             assert_tool_execute_response_success(result)
     @pytest.mark.asyncio
@@ -247,5 +250,5 @@ class TestProductionToolInternalExecution:
         """Setup corpus search test."""
         tool = ProductionTool("search_corpus")
         # Mock: Async component isolation for testing without real async operations
-        tool._execute_search_corpus = AsyncMock(return_value={"success": True, "results": []})
+        tool._execute_search_corpus = AsyncMock(return_value={"success": True, "results": []])
         return tool

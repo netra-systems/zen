@@ -9,13 +9,13 @@ CRITICAL: These tests are designed to FAIL in the current state where multiple e
 patterns exist. They will PASS once proper SSOT consolidation is achieved.
 
 Integration Test Focus:
-1. Execution engine consistency across agents
+    1. Execution engine consistency across agents
 2. Execution context handling uniformity
 3. Pre/post execution hook consistency
 4. Error handling in execution patterns
 5. Timing and monitoring integration
 6. Execution result handling consistency
-"""
+""""
 
 import pytest
 import asyncio
@@ -45,7 +45,7 @@ class TestExecutionEngineConsistency:
         
         Current State: SHOULD FAIL - Different execution engine integration patterns
         Expected: All agents integrate with execution engine identically
-        """
+        """"
         # Create agents with different configurations
         agents = [
             BaseAgent(name="ModernAgent1", enable_execution_engine=True, enable_reliability=True),
@@ -98,7 +98,7 @@ class TestExecutionEngineConsistency:
         
         Current State: SHOULD FAIL - Different execution patterns in different agents
         Expected: All agents use consistent execution patterns based on their configuration
-        """
+        """"
         # Create test state for execution
         test_state = DeepAgentState(
             user_id="test_user",
@@ -175,7 +175,7 @@ class TestExecutionEngineConsistency:
         
         Current State: SHOULD FAIL - Different execution result formats
         Expected: All execution patterns return consistent result formats
-        """
+        """"
         # Create agents with different execution patterns
         agents = [
             BaseAgent(name="ResultAgent1", enable_execution_engine=True),
@@ -232,8 +232,8 @@ class TestExecutionEngineConsistency:
         
         # Check result content consistency
         if len(execution_results) >= 2:
-            result1_content = execution_results[0][2] if execution_results[0][2] else {}
-            result2_content = execution_results[1][2] if execution_results[1][2] else {}
+            result1_content = execution_results[0][2] if execution_results[0][2] else {]
+            result2_content = execution_results[1][2] if execution_results[1][2] else {]
             
             # Both should be dict-like or both should be simple values
             result1_is_dict = isinstance(result1_content, dict)
@@ -256,7 +256,7 @@ class TestExecutionContextConsistency:
         
         Current State: SHOULD FAIL - Different execution context patterns
         Expected: All agents create execution contexts using consistent patterns
-        """
+        """"
         # Create agents with modern execution
         agents = [
             BaseAgent(name="ContextAgent1", enable_execution_engine=True),
@@ -344,7 +344,7 @@ class TestExecutionContextConsistency:
         
         Current State: SHOULD FAIL - Different or missing execution hooks
         Expected: All agents implement consistent execution hooks
-        """
+        """"
         # Create agents with execution engine
         agents = [
             BaseAgent(name="HookAgent1", enable_execution_engine=True, enable_reliability=True),
@@ -423,7 +423,7 @@ class TestExecutionTimingAndMonitoring:
         
         Current State: SHOULD FAIL - Inconsistent or missing timing collection
         Expected: All agents collect execution timing data consistently
-        """
+        """"
         # Create agents with full infrastructure
         agents = [
             BaseAgent(name="TimingAgent1", enable_execution_engine=True),
@@ -484,7 +484,7 @@ class TestExecutionTimingAndMonitoring:
         
         Current State: SHOULD FAIL - Inconsistent monitoring integration
         Expected: All agents integrate execution monitoring consistently
-        """
+        """"
         # Create agents with execution monitoring
         agents = [
             BaseAgent(name="MonitorAgent1", enable_execution_engine=True),
@@ -557,7 +557,7 @@ class TestExecutionErrorHandlingConsistency:
         
         Current State: SHOULD FAIL - Inconsistent error handling in execution patterns
         Expected: All agents handle execution errors consistently
-        """
+        """"
         # Create agents with different configurations
         agents = [
             BaseAgent(name="ErrorAgent1", enable_execution_engine=True, enable_reliability=True),
@@ -626,7 +626,7 @@ class TestExecutionErrorHandlingConsistency:
         
         Current State: SHOULD FAIL - Inconsistent fallback behaviors
         Expected: All agents implement consistent fallback patterns when execution fails
-        """
+        """"
         # Create agents with different execution capabilities
         modern_agent = BaseAgent(name="ModernFallbackAgent", enable_execution_engine=True)
         

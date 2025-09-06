@@ -1,8 +1,10 @@
-"""Tests for validating context length handling in agents.
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
+"""Tests for validating context length handling in agents."""
 
 This test suite validates actual token counting and context length
 management across all agent types.
-"""
+""""
 
 import json
 from typing import Dict, Any
@@ -25,25 +27,23 @@ import asyncio
 
 class TestContextLengthValidation:
     """Test context length validation across agents."""
-    pass
 
     @pytest.fixture
- def real_llm_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_llm_manager():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create mock LLM manager with context limits."""
-    pass
         manager = MagicMock(spec=LLMManager)
         manager.generate = AsyncMock(return_value="test response")
         # Claude 3 Sonnet context window
         manager.model_config = {
-            "max_tokens": 4096,
-            "context_window": 200000  # 200k tokens
+        "max_tokens": 4096,
+        "context_window": 200000  # 200k tokens
         }
         return manager
 
-    @pytest.mark.asyncio
-    async def test_supervisor_agent_context_length(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_supervisor_agent_context_length(self, mock_llm_manager):
         """Test supervisor agent handles context length properly."""
         supervisor = SupervisorAgent(mock_llm_manager)
         
@@ -52,118 +52,116 @@ class TestContextLengthValidation:
         
         # Supervisor should handle this without error
         with patch.object(supervisor.llm_manager, 'generate') as mock_generate:
-            mock_generate.return_value = json.dumps({
-                "agent": "data_sub_agent",
-                "task": "analyze",
-                "should_continue": False
-            })
+        mock_generate.return_value = json.dumps({
+        "agent": "data_sub_agent",
+        "task": "analyze",
+        "should_continue": False
+        })
             
-            result = await supervisor.orchestrate(large_query, {})
+        result = await supervisor.orchestrate(large_query, {})
             
-            # Check that prompt was passed to LLM
-            mock_generate.assert_called()
-            call_args = mock_generate.call_args[0]
-            prompt = call_args[0] if isinstance(call_args[0], str) else call_args[0][0]
+        # Check that prompt was passed to LLM
+        mock_generate.assert_called()
+        call_args = mock_generate.call_args[0]
+        prompt = call_args[0] if isinstance(call_args[0], str) else call_args[0][0]
             
-            # Prompt should include query but might be truncated
-            assert len(prompt) > 0
-            assert len(prompt) < 1000000  # Should not exceed reasonable limit
+        # Prompt should include query but might be truncated
+        assert len(prompt) > 0
+        assert len(prompt) < 1000000  # Should not exceed reasonable limit
 
-    @pytest.mark.asyncio
-    async def test_data_agent_context_with_large_dataset(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_data_agent_context_with_large_dataset(self, mock_llm_manager):
         """Test data agent handles large dataset context."""
-    pass
         data_agent = DataSubAgent(mock_llm_manager)
         
         # Create large dataset context
         large_data = {
-            "corpus_data": [{"text": "data" * 100} for _ in range(1000)],
-            "metrics": {"values": list(range(10000))},
-            "history": ["Previous analysis " * 50 for _ in range(100)]
+        "corpus_data": [{"text": "data" * 100} for _ in range(1000)],
+        "metrics": {"values": list(range(10000))},
+        "history": ["Previous analysis " * 50 for _ in range(100)]
         }
         
         query = "Analyze the patterns in this data"
         
         # Should handle large context
         with patch.object(data_agent.llm_manager, 'generate') as mock_generate:
-            mock_generate.return_value = json.dumps({
-                "insights": ["Pattern found"],
-                "recommendations": ["Optimize"]
-            })
+        mock_generate.return_value = json.dumps({
+        "insights": ["Pattern found"},
+        "recommendations": ["Optimize"]
+        })
             
-            result = await data_agent.process(query, large_data)
+        result = await data_agent.process(query, large_data)
             
-            # Verify LLM was called
-            mock_generate.assert_called()
+        # Verify LLM was called
+        mock_generate.assert_called()
             
-            # Check prompt size passed to LLM
-            call_args = mock_generate.call_args
-            if call_args[0]:  # Positional args
-                prompt = call_args[0][0] if isinstance(call_args[0], (list, tuple)) else str(call_args[0])
-            else:  # Keyword args
-                prompt = call_args[1].get('prompt', '')
+        # Check prompt size passed to LLM
+        call_args = mock_generate.call_args
+        if call_args[0]:  # Positional args
+        prompt = call_args[0][0] if isinstance(call_args[0], (list, tuple)) else str(call_args[0])
+        else:  # Keyword args
+        prompt = call_args[1].get('prompt', '')
             
-            # Should have processed the data
-            assert result is not None
+        # Should have processed the data
+        assert result is not None
 
-    @pytest.mark.asyncio
-    async def test_triage_agent_history_truncation(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_triage_agent_history_truncation(self, mock_llm_manager):
         """Test triage agent truncates conversation history appropriately."""
         triage_agent = TriageSubAgent(mock_llm_manager)
         
         # Create extensive conversation history
         history = []
         for i in range(500):
-            history.append({
-                "role": "user" if i % 2 == 0 else "assistant",
-                "content": f"Message {i}: " + "content " * 100
-            })
+        history.append({
+        "role": "user" if i % 2 == 0 else "assistant",
+        "content": f"Message {i}: " + "content " * 100
+        })
         
         context = {
-            "conversation_history": history,
-            "current_state": {"status": "analyzing"}
+        "conversation_history": history,
+        "current_state": {"status": "analyzing"}
         }
         
         query = "What's the issue?"
         
         # Should truncate history
         with patch.object(triage_agent, '_prepare_context_for_llm') as mock_prepare:
-            mock_prepare.return_value = {
-                "conversation_history": history[-10:],  # Keep last 10
-                "current_state": context["current_state"]
-            }
+        mock_prepare.return_value = {
+        "conversation_history": history[-10:},  # Keep last 10
+        "current_state": context["current_state"]
+        }
             
-            with patch.object(triage_agent.llm_manager, 'generate') as mock_generate:
-                mock_generate.return_value = json.dumps({
-                    "issue_type": "performance",
-                    "severity": "medium"
-                })
+        with patch.object(triage_agent.llm_manager, 'generate') as mock_generate:
+        mock_generate.return_value = json.dumps({
+        "issue_type": "performance",
+        "severity": "medium"
+        })
                 
-                result = await triage_agent.process(query, context)
+        result = await triage_agent.process(query, context)
                 
-                # Should have called prepare context
-                mock_prepare.assert_called()
+        # Should have called prepare context
+        mock_prepare.assert_called()
 
-    @pytest.mark.asyncio
-    async def test_corpus_admin_agent_document_batching(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_corpus_admin_agent_document_batching(self, mock_llm_manager):
         """Test corpus admin agent batches large document sets."""
-    pass
         # Mock tool dispatcher required by CorpusAdminSubAgent
-        mock_tool_dispatcher = MagicNone  # TODO: Use real service instance
+        mock_tool_dispatcher = MagicMock()  # TODO: Use real service instance
         corpus_agent = CorpusAdminSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # Create large document set
         documents = []
         for i in range(1000):
-            documents.append({
-                "id": f"doc_{i}",
-                "content": f"Document content {i}: " + "text " * 200,
-                "metadata": {"tags": [f"tag_{j}" for j in range(10)]}
-            })
+        documents.append({
+        "id": f"doc_{i}",
+        "content": f"Document content {i}: " + "text " * 200,
+        "metadata": {"tags": [f"tag_{j}" for j in range(10)]]
+        })
         
         context = {
-            "corpus_name": "test_corpus",
-            "documents": documents
+        "corpus_name": "test_corpus",
+        "documents": documents
         }
         
         # Create a mock state with the context data
@@ -174,73 +172,72 @@ class TestContextLengthValidation:
         # Test simply validates that the agent can be instantiated and execute
         # without throwing import errors. The actual execution is mocked.
         with patch.object(corpus_agent, '_execute_corpus_operation_workflow') as mock_workflow:
-            # Simulate successful execution
-            mock_workflow.return_value = None
+        # Simulate successful execution
+        mock_workflow.return_value = None
             
-            # Execute should handle large document sets without error
-            await corpus_agent.execute(mock_state, "test_run", True)
+        # Execute should handle large document sets without error
+        await corpus_agent.execute(mock_state, "test_run", True)
             
-            # Should have executed the workflow (validates instantiation worked)
-            mock_workflow.assert_called()
+        # Should have executed the workflow (validates instantiation worked)
+        mock_workflow.assert_called()
 
-    @pytest.mark.asyncio
-    async def test_synthetic_data_agent_generation_limits(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_synthetic_data_agent_generation_limits(self, mock_llm_manager):
         """Test synthetic data agent respects generation limits."""
         synthetic_agent = SyntheticDataSubAgent(mock_llm_manager)
         
         # Request large synthetic dataset
         context = {
-            "num_samples": 10000,
-            "sample_template": {
-                "fields": ["id", "name", "description", "data"],
-                "description_length": 1000
-            }
+        "num_samples": 10000,
+        "sample_template": {
+        "fields": ["id", "name", "description", "data"},
+        "description_length": 1000
+        }
         }
         
         query = "Generate synthetic dataset"
         
         # Should limit generation size
         with patch.object(synthetic_agent.llm_manager, 'generate') as mock_generate:
-            mock_generate.return_value = json.dumps({
-                "samples": [{"id": i, "name": f"item_{i}"} for i in range(100)]
-            })
+        mock_generate.return_value = json.dumps({
+        "samples": [{"id": i, "name": f"item_{i}"] for i in range(100)]
+        })
             
-            result = await synthetic_agent.process(query, context)
+        result = await synthetic_agent.process(query, context)
             
-            # Check max_tokens was set appropriately
-            call_kwargs = mock_generate.call_args[1] if mock_generate.call_args[1] else {}
-            max_tokens = call_kwargs.get('max_tokens', 0)
+        # Check max_tokens was set appropriately
+        call_kwargs = mock_generate.call_args[1] if mock_generate.call_args[1] else {}
+        max_tokens = call_kwargs.get('max_tokens', 0)
             
-            # Should have reasonable token limit
-            assert max_tokens > 0
-            assert max_tokens <= 8192  # Reasonable limit for generation
+        # Should have reasonable token limit
+        assert max_tokens > 0
+        assert max_tokens <= 8192  # Reasonable limit for generation
 
-    @pytest.mark.asyncio
-    async def test_agent_prompt_size_reporting(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_agent_prompt_size_reporting(self, mock_llm_manager):
         """Test agents report prompt sizes for observability."""
-    pass
         agents = [
-            BaseAgent(mock_llm_manager, name="TestAgent1"),
-            DataSubAgent(mock_llm_manager),
-            TriageSubAgent(mock_llm_manager)
+        BaseAgent(mock_llm_manager, name="TestAgent1"),
+        DataSubAgent(mock_llm_manager),
+        TriageSubAgent(mock_llm_manager)
         ]
         
         for agent in agents:
-            # Create test prompt
-            prompt = "Test prompt " * 1000
+        # Create test prompt
+        prompt = "Test prompt " * 1000
             
-            with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
-                # Trigger prompt size logging if it exists
-                if hasattr(agent, '_log_prompt_size'):
-                    agent._log_prompt_size(prompt, "test_run")
+        with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
+        # Trigger prompt size logging if it exists
+        if hasattr(agent, '_log_prompt_size'):
+        agent._log_prompt_size(prompt, "test_run")
                     
-                    # Should log the size
-                    mock_logger.info.assert_called()
-                    log_call = mock_logger.info.call_args[0][0]
-                    assert "MB" in log_call or "size" in log_call.lower()
+        # Should log the size
+        mock_logger.info.assert_called()
+        log_call = mock_logger.info.call_args[0][0]
+        assert "MB" in log_call or "size" in log_call.lower()
 
-    @pytest.mark.asyncio
-    async def test_context_window_overflow_handling(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_context_window_overflow_handling(self, mock_llm_manager):
         """Test handling when context exceeds model limits."""
         agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
@@ -249,57 +246,55 @@ class TestContextLengthValidation:
         massive_context = "x" * 1000000  # ~250k tokens
         
         with patch.object(agent.llm_manager, 'generate') as mock_generate:
-            # Simulate context length error from LLM
-            mock_generate.side_effect = Exception(
-                "This model's maximum context length is 200000 tokens. "
-                "However, your messages resulted in 250000 tokens."
-            )
+        # Simulate context length error from LLM
+        mock_generate.side_effect = Exception(
+        "This model's maximum context length is 200000 tokens. "
+        "However, your messages resulted in 250000 tokens."
+        )
             
-            # Should handle gracefully
-            with pytest.raises(Exception) as exc_info:
-                await agent.process("query", {"data": massive_context})
+        # Should handle gracefully
+        with pytest.raises(Exception) as exc_info:
+        await agent.process("query", {"data": massive_context})
             
-            assert "context length" in str(exc_info.value).lower()
+        assert "context length" in str(exc_info.value).lower()
 
-    @pytest.mark.asyncio
-    async def test_multi_agent_context_accumulation(self, mock_llm_manager):
+        @pytest.mark.asyncio
+        async def test_multi_agent_context_accumulation(self, mock_llm_manager):
         """Test context accumulation across multiple agent interactions."""
-    pass
         supervisor = SupervisorAgent(mock_llm_manager)
         
         # Simulate multiple rounds of agent interaction
         accumulated_context = {
-            "round_1": {"data": "x" * 10000, "result": "analysis1"},
-            "round_2": {"data": "y" * 20000, "result": "analysis2"},
-            "round_3": {"data": "z" * 30000, "result": "analysis3"},
-            "round_4": {"data": "w" * 40000, "result": "analysis4"}
+        "round_1": {"data": "x" * 10000, "result": "analysis1"},
+        "round_2": {"data": "y" * 20000, "result": "analysis2"},
+        "round_3": {"data": "z" * 30000, "result": "analysis3"},
+        "round_4": {"data": "w" * 40000, "result": "analysis4"}
         }
         
         # Each round adds to context
         for round_key, round_data in accumulated_context.items():
-            with patch.object(supervisor.llm_manager, 'generate') as mock_generate:
-                mock_generate.return_value = json.dumps({
-                    "agent": "data_sub_agent",
-                    "should_continue": round_key != "round_4"
-                })
+        with patch.object(supervisor.llm_manager, 'generate') as mock_generate:
+        mock_generate.return_value = json.dumps({
+        "agent": "data_sub_agent",
+        "should_continue": round_key != "round_4"
+        })
                 
-                # Process with accumulated context
-                result = await supervisor.orchestrate(
-                    f"Process {round_key}",
-                    accumulated_context
-                )
+        # Process with accumulated context
+        result = await supervisor.orchestrate(
+        f"Process {round_key}",
+        accumulated_context
+        )
                 
-                # Context should be managed to stay within limits
-                call_args = mock_generate.call_args
-                if call_args and call_args[0]:
-                    prompt = str(call_args[0][0]) if call_args[0] else ""
-                    # Even with accumulation, prompt should be manageable
-                    assert len(prompt) < 500000  # Well within limits
+        # Context should be managed to stay within limits
+        call_args = mock_generate.call_args
+        if call_args and call_args[0]:
+        prompt = str(call_args[0][0]) if call_args[0] else ""
+        # Even with accumulation, prompt should be manageable
+        assert len(prompt) < 500000  # Well within limits
 
 
 class TestContextMetricsAndObservability:
     """Test context metrics collection and observability."""
-    pass
 
     @pytest.mark.asyncio
     async def test_context_metrics_per_agent(self):
@@ -332,7 +327,6 @@ class TestContextMetricsAndObservability:
     @pytest.mark.asyncio
     async def test_token_usage_tracking(self):
         """Test tracking of token usage across agent lifecycle."""
-    pass
         mock_llm = MagicMock(spec=LLMManager)
         agent = BaseAgent(mock_llm, name="TestAgent")
         

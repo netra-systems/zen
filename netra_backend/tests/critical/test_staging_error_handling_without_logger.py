@@ -1,14 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical test suite for staging error handling without functional logger.
 
 This test reproduces the error handling failures seen in staging where:
-- Logger is not available when errors occur
+    - Logger is not available when errors occur
 - Error reporting mechanisms fail during startup
 - Cascading failures occur when logging system is down
 - Critical errors go unreported due to logger unavailability
 
 These tests verify error handling resilience when logging is not functional.
-"""
+""""
 
 import pytest
 import sys
@@ -30,7 +32,7 @@ class TestErrorHandlingWithoutLogger:
         
         This reproduces the scenario where configuration loading fails
         but the error can't be logged because the logger system is also broken.
-        """
+        """"
         error_handling_attempts = []
         
         def mock_config_load_with_error():
@@ -67,7 +69,7 @@ class TestErrorHandlingWithoutLogger:
         
         This tests the scenario where a critical exception occurs during startup
         but there's no way to log it because logger hasn't been initialized.
-        """
+        """"
         startup_failures = []
         
         def mock_critical_startup_error():
@@ -102,7 +104,7 @@ class TestErrorHandlingWithoutLogger:
         
         This tests the scenario where primary logging fails and
         fallback mechanisms (like stderr, file logging) also fail.
-        """
+        """"
         fallback_attempts = []
         
         def mock_primary_logging_failure():
@@ -147,7 +149,7 @@ class TestErrorHandlingWithoutLogger:
         
         This tests the dangerous scenario where critical errors occur
         but fail silently because there's no way to report them.
-        """
+        """"
         silent_failures = []
         
         def mock_critical_operation_with_silent_failure():
@@ -188,7 +190,7 @@ class TestLoggerInitializationFailureScenarios:
         
         This reproduces the scenario where loguru package is not available
         or fails to import, causing logging system failure.
-        """
+        """"
         import_failures = []
         
         def mock_loguru_import_failure():
@@ -201,7 +203,7 @@ class TestLoggerInitializationFailureScenarios:
             with patch('builtins.__import__', side_effect=lambda name, *args, **kwargs: 
                        mock_loguru_import_failure() if name == 'loguru' else __import__(name, *args, **kwargs)):
                 
-                # This should fail because loguru can't be imported
+                           # This should fail because loguru can't be imported
                 with pytest.raises(ImportError) as exc_info:
                     from netra_backend.app.core.unified_logging import UnifiedLogger
                     logger = UnifiedLogger()
@@ -216,7 +218,7 @@ class TestLoggerInitializationFailureScenarios:
         
         This tests the scenario where logger handlers can't be configured
         due to system-level issues (permissions, disk space, etc.).
-        """
+        """"
         handler_failures = []
         
         def mock_handler_config_failure():
@@ -242,7 +244,7 @@ class TestLoggerInitializationFailureScenarios:
         
         This tests the scenario where logger context management system
         fails to initialize, causing contextual logging to break.
-        """
+        """"
         context_failures = []
         
         def mock_context_setup_failure():
@@ -269,7 +271,7 @@ class TestLoggerInitializationFailureScenarios:
         
         This tests the scenario where sensitive data filter can't be initialized,
         potentially exposing sensitive data in logs.
-        """
+        """"
         filter_failures = []
         
         def mock_filter_init_failure():
@@ -298,7 +300,7 @@ class TestCascadingFailuresWithoutLogger:
         
         This tests how configuration validation failures cascade when
         there's no logging system to report intermediate failures.
-        """
+        """"
         cascade_steps = []
         
         def mock_config_validation_failure():
@@ -337,7 +339,7 @@ class TestCascadingFailuresWithoutLogger:
         
         This tests how service startup failures cascade and become
         difficult to diagnose without a functioning logging system.
-        """
+        """"
         service_failures = []
         
         def mock_database_service_failure():
@@ -381,7 +383,7 @@ class TestCascadingFailuresWithoutLogger:
         
         This tests the scenario where exception chains and stack traces
         are lost because there's no logging system to preserve them.
-        """
+        """"
         exception_chain = []
         
         def mock_deep_exception_chain():
@@ -427,7 +429,7 @@ class TestAlternativeErrorReportingWhenLoggerFails:
         
         This tests the scenario where even basic stderr output fails
         when the logging system is down.
-        """
+        """"
         stderr_attempts = []
         
         def mock_stderr_output_failure():
@@ -464,7 +466,7 @@ class TestAlternativeErrorReportingWhenLoggerFails:
         
         This tests the scenario where attempts to write errors directly
         to files also fail due to filesystem issues.
-        """
+        """"
         file_attempts = []
         
         def mock_file_write_failure():
@@ -498,7 +500,7 @@ class TestAlternativeErrorReportingWhenLoggerFails:
         
         This tests the worst-case scenario where all error reporting
         mechanisms fail, leaving critical errors completely unobservable.
-        """
+        """"
         reporting_attempts = []
         
         def mock_all_reporting_mechanisms_fail():

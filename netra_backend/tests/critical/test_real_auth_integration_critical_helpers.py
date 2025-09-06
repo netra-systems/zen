@@ -2,7 +2,7 @@
 
 This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
-"""
+""""
 
 import sys
 from pathlib import Path

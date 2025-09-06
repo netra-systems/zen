@@ -2,7 +2,7 @@
 Model Effectiveness Analysis Workflows Test Suite
 Tests real LLM agents for model effectiveness and GPT-5 migration workflows.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import asyncio
 import uuid
@@ -27,18 +27,17 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
-
 def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
 
     """Setup real agent environment for model selection testing."""
     from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
 
-        ActionsToMeetGoalsSubAgent,
+    ActionsToMeetGoalsSubAgent,
 
     )
     from netra_backend.app.agents.optimizations_core_sub_agent import (
 
-        OptimizationsCoreSubAgent,
+    OptimizationsCoreSubAgent,
 
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
@@ -153,7 +152,7 @@ def _create_comparative_analysis_state() -> DeepAgentState:
 
         user_request="Compare performance characteristics of GPT-4, Claude-3, and Gemini models for our workload.",
 
-        metadata={'test_type': 'comparative_analysis', 'models': [LLMModel.GEMINI_2_5_FLASH.value, 'claude-3', 'gemini']}
+        metadata={'test_type': 'comparative_analysis', 'models': [LLMModel.GEMINI_2_5_FLASH.value, 'claude-3', 'gemini']]
 
     )
 

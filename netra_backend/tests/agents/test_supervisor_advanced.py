@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test module: Supervisor Advanced Features
 Split from large test file for architecture compliance
 Test classes: TestSupervisorAdvancedFeatures
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -46,20 +48,20 @@ class TestSupervisorAdvancedFeatures:
         """Test supervisor handles agent initialization errors gracefully"""
         # Mock dependencies with proper async context managers
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_db.begin = AsyncMock(return_value=AsyncNone  # TODO: Use real service instance)
+        mock_db.begin = AsyncMock(return_value=AsyncMock()  # TODO: Use real service instance)
         # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aenter__ = AsyncMock(return_value=mock_db)
         # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aexit__ = AsyncMock(return_value=None)
         
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance 
+        mock_websocket = AsyncMock()  # TODO: Use real service instance 
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         
@@ -95,16 +97,15 @@ class TestSupervisorAdvancedFeatures:
     @pytest.mark.asyncio
     async def test_supervisor_state_management(self):
         """Test supervisor properly manages agent states"""
-    pass
         # Mock dependencies
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         
@@ -126,20 +127,20 @@ class TestSupervisorAdvancedFeatures:
         """Test supervisor handles multiple concurrent requests"""
         # Mock dependencies with proper async context managers
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_db.begin = AsyncMock(return_value=AsyncNone  # TODO: Use real service instance)
+        mock_db.begin = AsyncMock(return_value=AsyncMock()  # TODO: Use real service instance)
         # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aenter__ = AsyncMock(return_value=mock_db)
         # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aexit__ = AsyncMock(return_value=None)
         
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         
@@ -158,8 +159,8 @@ class TestSupervisorAdvancedFeatures:
         supervisor.agents["triage"] = mock_triage
         
         # Create multiple concurrent requests
-        requests = [f"Message {i}" for i in range(5)]
-        run_ids = [f"run_{i}" for i in range(5)]
+        requests = [f"Message {i]" for i in range(5)]
+        run_ids = [f"run_{i]" for i in range(5)]
         
         tasks = []
         for req, run_id in zip(requests, run_ids):
@@ -195,15 +196,14 @@ class TestSupervisorAdvancedFeatures:
     @pytest.mark.asyncio
     async def test_supervisor_resource_cleanup(self):
         """Test supervisor properly cleans up resources"""
-    pass
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         
@@ -211,7 +211,6 @@ class TestSupervisorAdvancedFeatures:
         supervisor.cleanup_called = False
         
         async def mock_cleanup():
-    pass
             supervisor.cleanup_called = True
         
         supervisor.cleanup = mock_cleanup
@@ -224,13 +223,13 @@ class TestSupervisorAdvancedFeatures:
     async def test_supervisor_metrics_tracking(self):
         """Test supervisor tracks execution metrics"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         
@@ -277,15 +276,14 @@ class TestSupervisorAdvancedFeatures:
         assert supervisor.metrics["failures"] == 0
     def _setup_circuit_breaker_supervisor(self):
         """Setup supervisor with circuit breaker tracking"""
-    pass
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm = AsyncNone  # TODO: Use real service instance
+        mock_llm = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instance
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         supervisor.circuit_breaker = {"failures": 0, "state": "closed", "last_failure": None}
         return supervisor
@@ -299,7 +297,6 @@ class TestSupervisorAdvancedFeatures:
 
     async def _mock_circuit_breaker_execute(self, supervisor, state, run_id, stream_updates=True):
         """Mock execute function with circuit breaker logic"""
-    pass
         call_count = getattr(supervisor, '_cb_call_count', 0) + 1
         supervisor._cb_call_count = call_count
         circuit_state = self._get_circuit_state(supervisor)
@@ -326,7 +323,6 @@ class TestSupervisorAdvancedFeatures:
 
     def _create_circuit_breaker_context(self):
         """Create execution context for circuit breaker test"""
-    pass
         state = DeepAgentState(user_request="Test recovery")
         context = AgentExecutionContext(
             run_id="recovery-test",
@@ -347,7 +343,6 @@ class TestSupervisorAdvancedFeatures:
 
     async def _execute_circuit_breaker_attempts(self, supervisor, state, context):
         """Execute multiple attempts to trigger circuit breaker"""
-    pass
         for attempt in range(6):
             try:
                 result = await supervisor._route_to_agent(state, context, "triage")
@@ -364,7 +359,6 @@ class TestSupervisorAdvancedFeatures:
     @pytest.mark.asyncio
     async def test_supervisor_circuit_breaker_recovery(self):
         """Test supervisor can recover from circuit breaker state"""
-    pass
         supervisor = self._setup_circuit_breaker_supervisor()
         self._setup_circuit_breaker_agent(supervisor)
         state, context = self._create_circuit_breaker_context()

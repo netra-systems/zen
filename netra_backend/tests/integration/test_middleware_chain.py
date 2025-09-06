@@ -1,13 +1,13 @@
 """Integration tests for middleware chain.
 
 Tests to ensure all middleware work together correctly in the chain.
-"""
+""""
 
 import pytest
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 from fastapi.responses import JSONResponse
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -24,10 +24,9 @@ class TestMiddlewareChain:
     
     @pytest.fixture
     def app(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create a test FastAPI app with middleware chain."""
-    pass
         app = FastAPI()
         
         # Add middleware in the same order as production
@@ -39,45 +38,40 @@ class TestMiddlewareChain:
         # Add test endpoints
         @app.get("/test/success")
         async def success_endpoint():
-    pass
-            await asyncio.sleep(0)
-    return {"status": "success"}
+        await asyncio.sleep(0)
+        return {"status": "success"}
         
         @app.get("/test/error")
         async def error_endpoint():
-    pass
-            raise ValueError("Test error")
+        raise ValueError("Test error")
         
         @app.post("/test/data")
         async def data_endpoint(request: Request):
-    pass
-            await asyncio.sleep(0)
-    return {"received": "data"}
+        await asyncio.sleep(0)
+        return {"received": "data"}
         
         @app.get("/test/timeout")
         async def timeout_endpoint():
-    pass
-            raise TimeoutError("Request timeout")
+        raise TimeoutError("Request timeout")
         
         await asyncio.sleep(0)
-    return app
+        return app
     
-    @pytest.fixture
-    def client(self, app):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def client(self, app):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test client."""
-    pass
         return TestClient(app)
     
-    def test_middleware_chain_success_flow(self, client):
+        def test_middleware_chain_success_flow(self, client):
         """Test successful request through entire middleware chain."""
         response = client.get(
-            "/test/success",
-            headers={
-                "Origin": "http://localhost:3000",
-                "User-Agent": "test-client"
-            }
+        "/test/success",
+        headers={
+        "Origin": "http://localhost:3000",
+        "User-Agent": "test-client"
+        }
         )
         
         assert response.status_code == 200
@@ -92,14 +86,13 @@ class TestMiddlewareChain:
         assert response.headers["x-content-type-options"] == "nosniff"
         assert "x-frame-options" in response.headers
     
-    def test_middleware_chain_error_handling(self, client):
+        def test_middleware_chain_error_handling(self, client):
         """Test error handling through middleware chain."""
-    pass
         response = client.get(
-            "/test/error",
-            headers={
-                "Origin": "http://localhost:3000"
-            }
+        "/test/error",
+        headers={
+        "Origin": "http://localhost:3000"
+        }
         )
         
         # ErrorRecoveryMiddleware should handle the error
@@ -115,15 +108,15 @@ class TestMiddlewareChain:
         response_data = response.json()
         assert "Test error" not in str(response_data)
     
-    def test_middleware_chain_cors_preflight(self, client):
+        def test_middleware_chain_cors_preflight(self, client):
         """Test CORS preflight request through chain."""
         response = client.options(
-            "/test/data",
-            headers={
-                "Origin": "http://localhost:3000",
-                "Access-Control-Request-Method": "POST",
-                "Access-Control-Request-Headers": "Content-Type"
-            }
+        "/test/data",
+        headers={
+        "Origin": "http://localhost:3000",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "Content-Type"
+        }
         )
         
         assert response.status_code in [200, 204]
@@ -133,14 +126,13 @@ class TestMiddlewareChain:
         assert "access-control-allow-methods" in response.headers
         assert "access-control-allow-headers" in response.headers
     
-    def test_middleware_chain_invalid_origin(self, client):
+        def test_middleware_chain_invalid_origin(self, client):
         """Test request with invalid origin."""
-    pass
         response = client.get(
-            "/test/success",
-            headers={
-                "Origin": "http://evil.com"
-            }
+        "/test/success",
+        headers={
+        "Origin": "http://evil.com"
+        }
         )
         
         assert response.status_code == 200
@@ -151,13 +143,13 @@ class TestMiddlewareChain:
         # Security headers should still be present
         assert "x-content-type-options" in response.headers
     
-    def test_middleware_chain_timeout_error(self, client):
+        def test_middleware_chain_timeout_error(self, client):
         """Test timeout error handling through chain."""
         response = client.get(
-            "/test/timeout",
-            headers={
-                "Origin": "http://localhost:3000"
-            }
+        "/test/timeout",
+        headers={
+        "Origin": "http://localhost:3000"
+        }
         )
         
         # Should get appropriate error status
@@ -166,16 +158,15 @@ class TestMiddlewareChain:
         # Headers should still be added
         assert "x-content-type-options" in response.headers
     
-    def test_middleware_chain_post_request(self, client):
+        def test_middleware_chain_post_request(self, client):
         """Test POST request through middleware chain."""
-    pass
         response = client.post(
-            "/test/data",
-            json={"test": "data"},
-            headers={
-                "Origin": "http://localhost:3000",
-                "Content-Type": "application/json"
-            }
+        "/test/data",
+        json={"test": "data"},
+        headers={
+        "Origin": "http://localhost:3000",
+        "Content-Type": "application/json"
+        }
         )
         
         assert response.status_code == 200
@@ -185,8 +176,8 @@ class TestMiddlewareChain:
         assert "access-control-allow-origin" in response.headers
         assert "x-content-type-options" in response.headers
     
-    @pytest.mark.asyncio
-    async def test_middleware_order_matters(self):
+        @pytest.mark.asyncio
+        async def test_middleware_order_matters(self):
         """Test that middleware order affects behavior."""
         app = FastAPI()
         
@@ -196,7 +187,7 @@ class TestMiddlewareChain:
         
         @app.get("/test")
         async def test_endpoint():
-            raise Exception("Test error")
+        raise Exception("Test error")
         
         client = TestClient(app)
         response = client.get("/test", headers={"Origin": "http://localhost:3000"})
@@ -205,39 +196,37 @@ class TestMiddlewareChain:
         assert response.status_code == 500
         assert "access-control-allow-origin" in response.headers
     
-    def test_middleware_chain_handles_none_response(self, client):
+        def test_middleware_chain_handles_none_response(self, client):
         """Test middleware chain handles endpoints that await asyncio.sleep(0)
-    return None."""
-    pass
+        return None.""""
         # Add endpoint that returns None
         @client.app.get("/test/none")
         async def none_endpoint():
-    pass
-            await asyncio.sleep(0)
-    return None
+        await asyncio.sleep(0)
+        return None
         
         response = client.get(
-            "/test/none",
-            headers={"Origin": "http://localhost:3000"}
+        "/test/none",
+        headers={"Origin": "http://localhost:3000"}
         )
         
         # Should handle gracefully
         assert response.status_code in [200, 204]
         assert "x-content-type-options" in response.headers
     
-    def test_middleware_chain_preserves_custom_headers(self, client):
+        def test_middleware_chain_preserves_custom_headers(self, client):
         """Test that custom headers are preserved through chain."""
         @client.app.get("/test/custom")
         async def custom_endpoint():
-            response = JSONResponse({"data": "test"})
-            response.headers["X-Custom-Header"] = "custom-value"
-            response.headers["Cache-Control"] = "no-cache"
-            await asyncio.sleep(0)
-    return response
+        response = JSONResponse({"data": "test"})
+        response.headers["X-Custom-Header"] = "custom-value"
+        response.headers["Cache-Control"] = "no-cache"
+        await asyncio.sleep(0)
+        return response
         
         response = client.get(
-            "/test/custom",
-            headers={"Origin": "http://localhost:3000"}
+        "/test/custom",
+        headers={"Origin": "http://localhost:3000"}
         )
         
         assert response.status_code == 200
@@ -250,22 +239,20 @@ class TestMiddlewareChain:
         assert "access-control-allow-origin" in response.headers
         assert "x-content-type-options" in response.headers
     
-    @pytest.mark.parametrize("status_code", [400, 401, 403, 404, 422, 500, 502, 503])
-    def test_middleware_chain_various_status_codes(self, client, status_code):
+        @pytest.mark.parametrize("status_code", [400, 401, 403, 404, 422, 500, 502, 503])
+        def test_middleware_chain_various_status_codes(self, client, status_code):
         """Test middleware chain with various HTTP status codes."""
-    pass
         @client.app.get(f"/test/status/{status_code}")
         async def status_endpoint():
-    pass
-            await asyncio.sleep(0)
-    return JSONResponse(
-                content={"error": f"Status {status_code}"},
-                status_code=status_code
-            )
+        await asyncio.sleep(0)
+        return JSONResponse(
+        content={"error": f"Status {status_code}"},
+        status_code=status_code
+        )
         
         response = client.get(
-            f"/test/status/{status_code}",
-            headers={"Origin": "http://localhost:3000"}
+        f"/test/status/{status_code}",
+        headers={"Origin": "http://localhost:3000"}
         )
         
         assert response.status_code == status_code

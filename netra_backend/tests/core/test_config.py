@@ -1,13 +1,15 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Unit tests for config
 Coverage Target: 80%
 Business Value: Platform stability and performance
-"""
+""""
 
 import pytest
 from netra_backend.app.core.config import get_config, get_settings, reload_config
 from netra_backend.app.schemas.config import AppConfig
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestConfig:
@@ -21,7 +23,6 @@ class TestConfig:
     
     def test_get_settings_returns_app_config(self):
         """Test get_settings returns AppConfig instance"""
-    pass
         settings = get_settings()
         assert settings is not None
         assert isinstance(settings, AppConfig)
@@ -35,7 +36,6 @@ class TestConfig:
     
     def test_reload_config_clears_cache(self):
         """Test reload_config clears the configuration cache"""
-    pass
         # Get initial config
         config1 = get_settings()
         
@@ -59,8 +59,7 @@ class TestConfig:
         assert hasattr(config, 'log_level')
     
         def test_fallback_when_unified_config_fails(self, mock_get_unified_config):
-        """Test fallback behavior when unified config fails"""
-    pass
+            """Test fallback behavior when unified config fails"""
         # Clear cache first
         get_settings.cache_clear()
         

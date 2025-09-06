@@ -1,7 +1,7 @@
 """
 Time Series Analysis Tests
 Test time-series analysis capabilities
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -42,7 +42,7 @@ class TestTimeSeriesAnalysis:
             ) as moving_avg_1hour
         FROM time_series
         ORDER BY minute DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"Moving average query failed: {error}"
@@ -86,7 +86,7 @@ class TestTimeSeriesAnalysis:
         FROM recent_data rd
         CROSS JOIN baseline b
         ORDER BY z_score DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"Anomaly detection query failed: {error}"
@@ -134,7 +134,7 @@ class TestTimeSeriesAnalysis:
         FROM hourly_patterns h
         CROSS JOIN daily_patterns d
         ORDER BY h.hour_of_day, d.day_of_week
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(seasonal_query)
         assert is_valid, f"Seasonal pattern query failed: {error}"
@@ -175,7 +175,7 @@ class TestTimeSeriesAnalysis:
             abs(slope) as trend_magnitude
         FROM regression_stats
         CROSS JOIN (SELECT slope FROM regression_stats LIMIT 1) s
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(trend_query)
         assert is_valid, f"Trend analysis query failed: {error}"
@@ -224,7 +224,7 @@ class TestTimeSeriesAnalysis:
             latest_12h_avg - usage_volatility as lower_bound_forecast,
             usage_volatility as forecast_uncertainty
         FROM forecast_base
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(forecast_query)
         assert is_valid, f"Forecast calculation query failed: {error}"
@@ -261,7 +261,7 @@ class TestTimeSeriesAnalysis:
         FROM windowed_metrics
         WHERE prev_error_rate IS NOT NULL
         ORDER BY hour DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(change_point_query)
         assert is_valid, f"Change point detection query failed: {error}"

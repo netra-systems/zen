@@ -1,7 +1,7 @@
 """Utilities Tests - Split from test_real_user_session_management.py
 
 Business Value Justification (BVJ):
-- Segment: All paid tiers (Early, Mid, Enterprise)
+    - Segment: All paid tiers (Early, Mid, Enterprise)
 - Business Goal: Protect user onboarding and session security
 - Value Impact: Prevents user creation failures and session hijacking
 - Revenue Impact: User creation issues = 100% customer churn. Session issues = security breaches
@@ -10,16 +10,16 @@ This module tests REAL user creation and session management with auth service.
 Replaces mocked tests with actual service integration and database validation.
 
 ARCHITECTURE:
-- Tests real user creation via auth service endpoints
+    - Tests real user creation via auth service endpoints
 - Validates session creation, management, and destruction
 - Ensures database state consistency for users and sessions
 - NO MOCKING - Uses real HTTP calls and database queries
 
 COMPLIANCE:
-- Module ≤300 lines ✓
+    - Module ≤300 lines ✓
 - Functions ≤8 lines ✓
 - Strong typing with Pydantic ✓
-"""
+""""
 
 import sys
 from pathlib import Path

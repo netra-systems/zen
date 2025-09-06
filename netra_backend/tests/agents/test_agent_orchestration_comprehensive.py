@@ -1,13 +1,15 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Comprehensive Agent Orchestration Tests
 Tests critical agent system functionality including lifecycle management,
 communication patterns, and multi-agent coordination.
 
 This test file focuses on orchestration gaps not covered by existing tests:
-1. Agent lifecycle state management and transitions
+    1. Agent lifecycle state management and transitions
 2. WebSocket communication failure recovery patterns 
 3. Multi-agent coordination and error propagation
-"""
+""""
 
 import asyncio
 import time
@@ -36,7 +38,7 @@ class MockAgentForTesting(AgentStateMixin, AgentCommunicationMixin):
         self.name = name
         self.agent_id = f"agent_{name}"
         self.state = SubAgentLifecycle.PENDING
-        self.logger = MagicNone  # TODO: Use real service instance
+        self.logger = MagicMock()  # TODO: Use real service instance
         self.websocket_manager = None
         self._user_id = "test_user_123"
         
@@ -165,7 +167,7 @@ class TestAgentCommunicationOrchestration:
         agent = MockAgentForTesting()
         
         # Mock WebSocket manager that fails initially then succeeds
-        websocket_manager = MagicNone  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
         websocket_manager.send_message = AsyncMock(side_effect=[
             ConnectionError("Connection lost"),  # First attempt fails
             ConnectionError("Still failing"),    # Second attempt fails  
@@ -185,7 +187,7 @@ class TestAgentCommunicationOrchestration:
         agent = MockAgentForTesting()
         
         # Mock WebSocket manager that always fails
-        websocket_manager = MagicNone  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
         websocket_manager.send_message = AsyncMock(side_effect=ConnectionError("Permanent failure"))
         agent.websocket_manager = websocket_manager
         
@@ -206,8 +208,8 @@ class TestAgentCommunicationOrchestration:
     async def test_agent_communication_event_types(self):
         """Test different agent communication event types used in orchestration"""
         agent = MockAgentForTesting()
-        websocket_manager = MagicNone  # TODO: Use real service instance
-        websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
+        websocket_manager = MagicMock()  # TODO: Use real service instance
+        websocket_manager.send_message = AsyncMock()  # TODO: Use real service instance
         agent.websocket_manager = websocket_manager
         
         run_id = "run_test_123"
@@ -259,7 +261,7 @@ class TestMultiAgentCoordinationOrchestration:
         agent2 = MockOrchestrationAgent("agent2") 
         agent2.execution_delay = 0.2
         agent3 = MockOrchestrationAgent("agent3")
-        agent3.execution_delay = 0.05
+        agent3.execution_delay = 0.5
         
         agents = [agent1, agent2, agent3]
         state = MockAgentState()
@@ -272,7 +274,7 @@ class TestMultiAgentCoordinationOrchestration:
         
         # Verify parallel execution (should be faster than sequential)
         assert len(results) == 3
-        assert total_time < 0.35  # Should be much less than 0.35s (0.1+0.2+0.05)
+        assert total_time < 0.35  # Should be much less than 0.35s (0.1+0.2+0.5)
         assert all(result.success and result.error is None for result in results)
         
     @pytest.mark.asyncio  

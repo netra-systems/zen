@@ -21,7 +21,7 @@ import pytest
 from datetime import datetime, timedelta
 from typing import Dict, List
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.factories.clickhouse_factory import (

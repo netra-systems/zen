@@ -3,7 +3,7 @@ Test CORS Configuration
 
 Validates Cross-Origin Resource Sharing configuration
 with staging URLs.
-"""
+""""
 
 import sys
 from pathlib import Path

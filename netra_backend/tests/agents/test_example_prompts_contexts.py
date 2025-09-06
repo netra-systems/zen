@@ -1,7 +1,7 @@
 """
 Context generation utilities for Example Prompts E2E Tests
 Generates synthetic contexts for different test scenarios
-"""
+""""
 
 import sys
 from pathlib import Path

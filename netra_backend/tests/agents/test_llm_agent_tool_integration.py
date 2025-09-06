@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 LLM Agent Tool Integration Tests
 Tests tool dispatcher integration and tool execution with LLM agents
 Split from oversized test_llm_agent_e2e_real.py
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -143,7 +145,7 @@ async def test_tool_call_integration_complex():
         # Simulate different execution times and results
         if tool_name == "data_fetcher":
             await asyncio.sleep(0.1)  # Simulate I/O
-            result = {"data": [1, 2, 3], "count": 3}
+            result = {"data": [1, 2, 3], "count": 3]
         elif tool_name == "analyzer":
             result = {"analysis": "Data looks good", "score": 0.95}
         else:
@@ -179,11 +181,11 @@ async def test_llm_tool_chain_execution():
     responses = [
         {
             "content": "I need to fetch data first",
-            "tool_calls": [{"name": "data_fetcher", "parameters": {"source": "metrics"}}]
+            "tool_calls": [{"name": "data_fetcher", "parameters": {"source": "metrics"]]]
         },
         {
             "content": "Now I'll analyze the data",
-            "tool_calls": [{"name": "analyzer", "parameters": {"data_source": "fetched"}}]
+            "tool_calls": [{"name": "analyzer", "parameters": {"data_source": "fetched"]]]
         },
         {
             "content": "Finally, I'll provide recommendations",

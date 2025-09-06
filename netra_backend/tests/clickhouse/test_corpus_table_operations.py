@@ -1,7 +1,9 @@
+import asyncio
+
 """
 Corpus Table Operations Tests
 Test corpus table creation and management
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -70,7 +72,7 @@ class TestCorpusTableOperations:
         metadata, domain, tags) VALUES ('test_workload', 
         'Test prompt for corpus', 'Test response from model',
         '{{"test": true, "corpus_id": "{corpus_id}"}}', 'testing',
-        ['test', 'automated', 'corpus'])"""
+        ['test', 'automated', 'corpus'])""""
         await client.execute_query(insert_query)
 
     async def _verify_corpus_test_data(self, client, table_name):

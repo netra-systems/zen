@@ -1,32 +1,34 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Multi-Service Integration E2E Tests - Cross-Service Communication Validation
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-- Segment: All customer tiers (Free → Enterprise) 
+    - Segment: All customer tiers (Free → Enterprise) 
 - Business Goal: Seamless service integration and data consistency
 - Value Impact: Service reliability prevents revenue loss and customer churn
 - Strategic Impact: Multi-service architecture enables platform scalability
 
 Tests cross-service integration between:
-1. Main Backend (/app) - Core application logic
+    1. Main Backend (/app) - Core application logic
 2. Auth Service (/auth_service) - Authentication microservice  
 3. Frontend (/frontend) - User interface layer
 
 COVERAGE:
-- Cross-service authentication flow
+    - Cross-service authentication flow
 - Database state consistency
 - Service discovery and communication
 - Health monitoring coordination  
 - Transaction boundaries
 - Error propagation and recovery
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -67,121 +69,121 @@ class TestCrossServiceAuthentication:
     def service_endpoints(self) -> Dict[str, ServiceEndpoint]:
         """Define service endpoints for testing."""
         return {
-            "backend": ServiceEndpoint("backend", "http://localhost:8000"),
-            "auth": ServiceEndpoint("auth_service", "http://localhost:8081"),  # Docker default port
-            "frontend": ServiceEndpoint("frontend", "http://localhost:3000", "/api/health")
+        "backend": ServiceEndpoint("backend", "http://localhost:8000"),
+        "auth": ServiceEndpoint("auth_service", "http://localhost:8081"),  # Docker default port
+        "frontend": ServiceEndpoint("frontend", "http://localhost:3000", "/api/health")
         }
     
-    @pytest.fixture
-    def test_user_data(self) -> Dict[str, Any]:
+        @pytest.fixture
+        def test_user_data(self) -> Dict[str, Any]:
         """Test user data for authentication tests."""
         return {
-            "user_id": "test_user_123",
-            "email": "test@netrasystems.ai",
-            "plan": "free",
-            "permissions": ["read", "write"]
+        "user_id": "test_user_123",
+        "email": "test@netrasystems.ai",
+        "plan": "free",
+        "permissions": ["read", "write"]
         }
     
-    @pytest.mark.asyncio
-    @pytest.mark.l4  # L4 - Real service integration
-    async def test_auth_service_creates_valid_tokens(self, test_user_data, container_helper):
+        @pytest.mark.asyncio
+        @pytest.mark.l4  # L4 - Real service integration
+        async def test_auth_service_creates_valid_tokens(self, test_user_data, container_helper):
         """Test auth service creates tokens that backend can validate."""
         # L4 test - test real auth client functionality if available
         async with container_helper.redis_container() as (redis_container, redis_url):
-            try:
-                # Test if auth client has token creation capability
-                if hasattr(auth_client, 'create_token'):
-                    token = await auth_client.create_token(test_user_data)
+        try:
+        # Test if auth client has token creation capability
+        if hasattr(auth_client, 'create_token'):
+        token = await auth_client.create_token(test_user_data)
                     
-                    # Verify token created with real implementation
-                    if token:  # May return None if auth service not available
-                        assert isinstance(token, str)
-                        assert len(token) > 20
-                    else:
-                        # Auth service not available - acceptable for L4 test
-                        pytest.skip("Auth service not available for token creation")
-                else:
-                    # Method not available - skip test
-                    pytest.skip("create_token method not available on auth client")
+        # Verify token created with real implementation
+        if token:  # May return None if auth service not available
+        assert isinstance(token, str)
+        assert len(token) > 20
+        else:
+        # Auth service not available - acceptable for L4 test
+        pytest.skip("Auth service not available for token creation")
+        else:
+        # Method not available - skip test
+        pytest.skip("create_token method not available on auth client")
                     
-            except Exception as e:
-                # L4 tests allow graceful degradation
-                pytest.skip(f"Auth service unavailable: {e}")
+        except Exception as e:
+        # L4 tests allow graceful degradation
+        pytest.skip(f"Auth service unavailable: {e}")
     
-    @pytest.mark.asyncio
-    @pytest.mark.l4  # L4 - Real service integration
-    async def test_backend_validates_auth_service_tokens(self, test_user_data, container_helper):
+        @pytest.mark.asyncio
+        @pytest.mark.l4  # L4 - Real service integration
+        async def test_backend_validates_auth_service_tokens(self, test_user_data, container_helper):
         """Test backend can validate tokens from auth service."""
         async with container_helper.redis_container() as (redis_container, redis_url):
-            try:
-                # Test with real token validation
-                valid_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload"
-                result = await auth_client.validate_token_jwt(valid_token)
+        try:
+        # Test with real token validation
+        valid_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload"
+        result = await auth_client.validate_token_jwt(valid_token)
                 
-                # L4 test - verify real validation or graceful failure
-                if result is None:
-                    # Token validation failed - expected for test tokens
-                    assert True  # This is acceptable L4 behavior
-                else:
-                    # Real token validation succeeded
-                    assert "user_id" in result or "sub" in result
+        # L4 test - verify real validation or graceful failure
+        if result is None:
+        # Token validation failed - expected for test tokens
+        assert True  # This is acceptable L4 behavior
+        else:
+        # Real token validation succeeded
+        assert "user_id" in result or "sub" in result
                     
-            except Exception as e:
-                # L4 tests allow auth service unavailability
-                pytest.skip(f"Auth service validation unavailable: {e}")
+        except Exception as e:
+        # L4 tests allow auth service unavailability
+        pytest.skip(f"Auth service validation unavailable: {e}")
     
-    @pytest.mark.asyncio
-    async def test_frontend_auth_flow_with_backend(self, service_endpoints, test_user_data):
+        @pytest.mark.asyncio
+        async def test_frontend_auth_flow_with_backend(self, service_endpoints, test_user_data):
         """Test complete auth flow from frontend through backend to auth service."""
         # Mock the complete auth chain
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate, \
-             patch('app.services.user_service.CRUDUser.get') as mock_get_user:
+        patch('app.services.user_service.CRUDUser.get') as mock_get_user:
             
-            mock_validate.return_value = test_user_data
-            mock_get_user.return_value = test_user_data
+        mock_validate.return_value = test_user_data
+        mock_get_user.return_value = test_user_data
             
-            # Simulate frontend request with auth header
-            auth_header = {"Authorization": "Bearer valid_token"}
+        # Simulate frontend request with auth header
+        auth_header = {"Authorization": "Bearer valid_token"}
             
-            # Mock HTTP request to backend
-            async with httpx.AsyncClient() as client:
-                try:
-                    # This would normally be a real HTTP request
-                    # For testing, we verify the auth flow logic
-                    user_data = await auth_client.validate_token_jwt("valid_token")
-                    user_service = CRUDUser("user_service", User)
-                    # Mock a database session for the CRUDUser.get call
-                    # Mock: Generic component isolation for controlled unit testing
-                    mock_db = AsyncNone  # TODO: Use real service instance
-                    user_details = await user_service.get(mock_db, user_data["user_id"])
+        # Mock HTTP request to backend
+        async with httpx.AsyncClient() as client:
+        try:
+        # This would normally be a real HTTP request
+        # For testing, we verify the auth flow logic
+        user_data = await auth_client.validate_token_jwt("valid_token")
+        user_service = CRUDUser("user_service", User)
+        # Mock a database session for the CRUDUser.get call
+        # Mock: Generic component isolation for controlled unit testing
+        mock_db = AsyncMock()  # TODO: Use real service instance
+        user_details = await user_service.get(mock_db, user_data["user_id"])
                     
-                    # Verify auth flow succeeded
-                    assert user_details is not None
-                    assert user_details["user_id"] == test_user_data["user_id"]
+        # Verify auth flow succeeded
+        assert user_details is not None
+        assert user_details["user_id"] == test_user_data["user_id"]
                     
-                except Exception as e:
-                    # Auth flow should not fail with valid token
-                    pytest.fail(f"Auth flow failed: {e}")
+        except Exception as e:
+        # Auth flow should not fail with valid token
+        pytest.fail(f"Auth flow failed: {e}")
     
-    @pytest.mark.asyncio
-    async def test_token_consistency_across_services(self, test_user_data):
+        @pytest.mark.asyncio
+        async def test_token_consistency_across_services(self, test_user_data):
         """Test token validation is consistent across all services."""
         token = "consistent_test_token"
         
         # Mock consistent validation across services
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
-            mock_validate.return_value = test_user_data
+        mock_validate.return_value = test_user_data
             
-            # Validate token in multiple contexts
-            backend_validation = await auth_client.validate_token_jwt(token)
-            websocket_validation = await auth_client.validate_token_jwt(token)
-            api_validation = await auth_client.validate_token_jwt(token)
+        # Validate token in multiple contexts
+        backend_validation = await auth_client.validate_token_jwt(token)
+        websocket_validation = await auth_client.validate_token_jwt(token)
+        api_validation = await auth_client.validate_token_jwt(token)
             
-            # Verify consistency
-            assert backend_validation == websocket_validation == api_validation
-            assert all(v["user_id"] == test_user_data["user_id"] for v in [backend_validation, websocket_validation, api_validation])
+        # Verify consistency
+        assert backend_validation == websocket_validation == api_validation
+        assert all(v["user_id"] == test_user_data["user_id"] for v in [backend_validation, websocket_validation, api_validation])
 
 class TestDatabaseConsistency:
     """Database state consistency across services tests."""
@@ -194,9 +196,9 @@ class TestDatabaseConsistency:
         with patch('app.db.postgres.get_async_db') as mock_postgres, \
              patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
             
-            # Mock user data in PostgreSQL
+                 # Mock user data in PostgreSQL
             # Mock: PostgreSQL database isolation for testing without real database connections
-            mock_postgres_client = AsyncNone  # TODO: Use real service instance
+            mock_postgres_client = AsyncMock()  # TODO: Use real service instance
             mock_postgres_client.fetchrow.return_value = {
                 "user_id": "user_123",
                 "email": "test@netrasystems.ai",
@@ -206,7 +208,7 @@ class TestDatabaseConsistency:
             
             # Mock corresponding analytics data in ClickHouse
             # Mock: ClickHouse database isolation for fast testing without external database dependency
-            mock_clickhouse_client = AsyncNone  # TODO: Use real service instance
+            mock_clickhouse_client = AsyncMock()  # TODO: Use real service instance
             mock_clickhouse_client.query.return_value = [
                 {"user_id": "user_123", "event_type": "login", "timestamp": "2025-01-20T10:00:00Z"}
             ]
@@ -234,13 +236,13 @@ class TestDatabaseConsistency:
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.begin.return_value = AsyncNone  # TODO: Use real service instance
+            mock_client.begin.return_value = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.commit = AsyncNone  # TODO: Use real service instance
+            mock_client.commit = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            mock_client.rollback = AsyncNone  # TODO: Use real service instance
+            mock_client.rollback = AsyncMock()  # TODO: Use real service instance
             mock_postgres.return_value = mock_client
             
             user_data = {
@@ -259,7 +261,7 @@ class TestDatabaseConsistency:
                 # Simulate atomic operation across services
                 # Mock a database session for the CRUDUser.create call
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncNone  # TODO: Use real service instance
+                mock_db = AsyncMock()  # TODO: Use real service instance
                 await user_service.create(mock_db, obj_in=user_data)
                 await thread_service.create_thread(user_data['user_id'], mock_db)
                 
@@ -280,7 +282,7 @@ class TestDatabaseConsistency:
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_postgres.return_value = mock_client
             
             # Write data
@@ -291,8 +293,8 @@ class TestDatabaseConsistency:
             # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_ch_client = AsyncNone  # TODO: Use real service instance
-                mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time}]
+                mock_ch_client = AsyncMock()  # TODO: Use real service instance
+                mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time]]
                 mock_clickhouse.return_value = mock_ch_client
                 
                 # Verify sync within acceptable time
@@ -351,7 +353,7 @@ class TestServiceDiscovery:
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_service', 
                   side_effect=mock_start_service):
             
-            # Simulate coordinated startup
+                      # Simulate coordinated startup
             services = ["auth_service", "backend", "frontend"]
             for service in services:
                 await mock_start_service(service)
@@ -429,14 +431,14 @@ class TestErrorPropagation:
             # Mock: PostgreSQL database isolation for testing without real database connections
             with patch('app.db.postgres.get_async_db') as mock_postgres:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_client = AsyncNone  # TODO: Use real service instance
+                mock_client = AsyncMock()  # TODO: Use real service instance
                 mock_client.fetchrow.return_value = {"user_id": "test", "email": "test@test.com"}
                 mock_postgres.return_value = mock_client
                 
                 # Should still be able to get user data
                 # Mock a database session for the CRUDUser.get call
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncNone  # TODO: Use real service instance
+                mock_db = AsyncMock()  # TODO: Use real service instance
                 user_data = await user_service.get(mock_db, "test")
                 assert user_data is not None
     
@@ -502,7 +504,7 @@ class TestMultiServiceIntegration:
                 user_service = CRUDUser("user_service", User)
                 # Mock a database session for the CRUDUser.get call
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncNone  # TODO: Use real service instance
+                mock_db = AsyncMock()  # TODO: Use real service instance
                 user_data = await user_service.get(mock_db, auth_result["user_id"])
                 assert user_data["user_id"] == "journey_user"
                 
@@ -519,7 +521,7 @@ class TestMultiServiceIntegration:
                     # Mock: ClickHouse database isolation for fast testing without external database dependency
                     with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                         # Mock: Generic component isolation for controlled unit testing
-                        mock_client = AsyncNone  # TODO: Use real service instance
+                        mock_client = AsyncMock()  # TODO: Use real service instance
                         mock_clickhouse.return_value = mock_client
                         
                         # Log user activity
@@ -562,7 +564,7 @@ class TestMultiServiceIntegration:
             mock_postgres.side_effect = [
                 Exception("Primary database unavailable"),
                 # Mock: Database isolation for unit testing without external database connections
-                AsyncNone  # TODO: Use real service instance  # Replica database available
+                AsyncMock()  # TODO: Use real service instance  # Replica database available
             ]
             
             try:
@@ -586,7 +588,7 @@ class TestMultiServiceIntegration:
             with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_auth, \
                  patch('app.services.user_service.CRUDUser.get') as mock_user:
                 
-                mock_auth.return_value = {"user_id": f"user_{request_id}"}
+                     mock_auth.return_value = {"user_id": f"user_{request_id}"}
                 mock_user.return_value = {"user_id": f"user_{request_id}", "email": f"user_{request_id}@test.com"}
                 
                 # Simulate processing time

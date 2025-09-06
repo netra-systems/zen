@@ -7,7 +7,7 @@ preventing massive revenue loss from database connectivity failures.
 NOTE: These tests are currently DISABLED as they test an outdated ConnectionPoolManager API
 that has been DEPRECATED in favor of DatabaseManager (SSOT compliance). The tests need to be
 rewritten to use the current database architecture.
-"""
+""""
 import pytest
 import asyncio
 from test_framework.database.test_database_manager import TestDatabaseManager
@@ -26,7 +26,7 @@ async def test_connection_pool_exhaustion_graceful_degradation():
     TODO: Rewrite to use DatabaseManager instead of deprecated ConnectionPoolManager.
     The current ConnectionPoolManager class doesn't have max_connections, get_connection(),
     or release_connection() methods as expected by this test.
-    """
+    """"
     # This test needs to be rewritten for the current database architecture
     pytest.skip("Test needs rewrite for current DatabaseManager architecture")
 
@@ -38,7 +38,7 @@ async def test_deadlock_prevention_concurrent_transactions():
     """ITERATION 23: Prevent database deadlocks that cause transaction failures.
     
     Business Value: Prevents transaction deadlocks worth $25K+ in lost revenue per incident.
-    """
+    """"
     from netra_backend.app.db.database_manager import DatabaseManager
     
     # Test concurrent transaction deadlock prevention
@@ -58,7 +58,7 @@ async def test_deadlock_prevention_concurrent_transactions():
             
             # Verify pool remains stable under concurrent access
             pool_status = DatabaseManager.get_pool_status(engine)
-            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id}"
+            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id]"
             
             return f"tx_{tx_id}_success"
         except Exception as e:
@@ -89,7 +89,7 @@ async def test_connection_pool_recovery_after_database_outage():
     TODO: Rewrite to use DatabaseManager instead of deprecated ConnectionPoolManager.
     The current ConnectionPoolManager class doesn't have get_connection() method,
     and Database class doesn't have get_sync_session() method as expected by this test.
-    """
+    """"
     # This test needs to be rewritten for the current database architecture
     pytest.skip("Test needs rewrite for current DatabaseManager architecture")
 
@@ -101,7 +101,7 @@ async def test_deadlock_prevention_concurrent_transactions():
     """ITERATION 23: Prevent database deadlocks that cause transaction failures.
     
     Business Value: Prevents transaction deadlocks worth $25K+ in lost revenue per incident.
-    """
+    """"
     from netra_backend.app.db.database_manager import DatabaseManager
     
     # Test concurrent transaction deadlock prevention
@@ -121,7 +121,7 @@ async def test_deadlock_prevention_concurrent_transactions():
             
             # Verify pool remains stable under concurrent access
             pool_status = DatabaseManager.get_pool_status(engine)
-            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id}"
+            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id]"
             
             return f"tx_{tx_id}_success"
         except Exception as e:
@@ -152,7 +152,7 @@ async def test_connection_leak_detection_and_cleanup():
     TODO: Rewrite to use DatabaseManager instead of deprecated ConnectionPoolManager.
     The current ConnectionPoolManager class doesn't have max_connections, leak_timeout,
     get_connection(), or cleanup_leaked_connections() methods as expected by this test.
-    """
+    """"
     # This test needs to be rewritten for the current database architecture
     pytest.skip("Test needs rewrite for current DatabaseManager architecture")
 
@@ -164,7 +164,7 @@ async def test_deadlock_prevention_concurrent_transactions():
     """ITERATION 23: Prevent database deadlocks that cause transaction failures.
     
     Business Value: Prevents transaction deadlocks worth $25K+ in lost revenue per incident.
-    """
+    """"
     from netra_backend.app.db.database_manager import DatabaseManager
     
     # Test concurrent transaction deadlock prevention
@@ -184,7 +184,7 @@ async def test_deadlock_prevention_concurrent_transactions():
             
             # Verify pool remains stable under concurrent access
             pool_status = DatabaseManager.get_pool_status(engine)
-            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id}"
+            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id]"
             
             return f"tx_{tx_id}_success"
         except Exception as e:
@@ -215,7 +215,7 @@ async def test_connection_pool_load_balancing_under_pressure():
     TODO: Rewrite to use DatabaseManager instead of deprecated ConnectionPoolManager.
     The current ConnectionPoolManager class doesn't have max_connections, get_connection(),
     or release_connection() methods as expected by this test.
-    """
+    """"
     # This test needs to be rewritten for the current database architecture
     pytest.skip("Test needs rewrite for current DatabaseManager architecture")
 
@@ -227,7 +227,7 @@ async def test_deadlock_prevention_concurrent_transactions():
     """ITERATION 23: Prevent database deadlocks that cause transaction failures.
     
     Business Value: Prevents transaction deadlocks worth $25K+ in lost revenue per incident.
-    """
+    """"
     from netra_backend.app.db.database_manager import DatabaseManager
     
     # Test concurrent transaction deadlock prevention
@@ -247,7 +247,7 @@ async def test_deadlock_prevention_concurrent_transactions():
             
             # Verify pool remains stable under concurrent access
             pool_status = DatabaseManager.get_pool_status(engine)
-            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id}"
+            assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id]"
             
             return f"tx_{tx_id}_success"
         except Exception as e:

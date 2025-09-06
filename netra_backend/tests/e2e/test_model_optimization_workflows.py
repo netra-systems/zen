@@ -2,7 +2,7 @@
 Model Optimization and Edge Case Workflows Test Suite
 Tests real-time chat optimization, data flow, edge cases, and workflow integrity.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -44,7 +44,7 @@ def _create_real_time_chat_state() -> DeepAgentState:
     """Create state for real-time chat optimization."""
     return DeepAgentState(
         user_request="@Netra GPT-5 is way too expensive for the real time chat feature. Move to claude 4.1 or GPT-5-mini? Validate quality impact",
-        metadata={'test_type': 'real_time_chat', 'feature': 'chat', 'alternatives': ['claude-4.1', 'GPT-5-mini']}
+        metadata={'test_type': 'real_time_chat', 'feature': 'chat', 'alternatives': ['claude-4.1', 'GPT-5-mini']]
     )
 
 def _create_latency_cost_tradeoff_state() -> DeepAgentState:
@@ -159,14 +159,14 @@ def _create_unavailable_model_state() -> DeepAgentState:
     """Create state for unavailable model test."""
     return DeepAgentState(
         user_request="Switch all tools to use GPT-7 and Claude-5 models for maximum performance.",
-        metadata={'test_type': 'unavailable_model', 'models': ['GPT-7', 'Claude-5']}
+        metadata={'test_type': 'unavailable_model', 'models': ['GPT-7', 'Claude-5']]
     )
 
 def _create_conflicting_requirements_state() -> DeepAgentState:
     """Create state for conflicting requirements test."""
     return DeepAgentState(
         user_request="I need the highest quality model but also the cheapest option with zero latency increase.",
-        metadata={'test_type': 'conflicting_requirements', 'conflicts': ['quality', 'cost', 'latency']}
+        metadata={'test_type': 'conflicting_requirements', 'conflicts': ['quality', 'cost', 'latency']]
     )
 
 def _validate_unavailable_model_handling(results: List[Dict]):

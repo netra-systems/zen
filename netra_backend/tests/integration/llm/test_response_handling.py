@@ -1,18 +1,20 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 LLM Response Handling Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from LLM integration failures
 - Value Impact: Validates LLM response handling and formatting for agent integration
 - Revenue Impact: Ensures agent responses are properly formatted for customer consumption
 
 REQUIREMENTS:
-- LLM response formatting and validation
+    - LLM response formatting and validation
 - Agent-specific response handling
 - Response content verification
 - Error response handling and fallback
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -151,7 +153,7 @@ class TestResponseHandling:
     @pytest.mark.asyncio
     async def test_concurrent_response_handling(self, mock_llm_manager):
         """BVJ: Validates concurrent response handling works correctly."""
-        prompts = [f"Concurrent test {i}" for i in range(5)]
+        prompts = [f"Concurrent test {i]" for i in range(5)]
         
         tasks = [mock_llm_manager.generate_response(prompt) for prompt in prompts]
         responses = await asyncio.gather(*tasks)

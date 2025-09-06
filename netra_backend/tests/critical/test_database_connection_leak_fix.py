@@ -1,14 +1,14 @@
-"""Critical Test: Database Connection Leak Prevention
+"""Critical Test: Database Connection Leak Prevention"""
 
 This test verifies that SQLAlchemy connections are properly returned to the pool
 and not leaked when garbage collection occurs.
 
 Business Value Justification (BVJ):
-- Segment: Platform stability (all tiers)
+    - Segment: Platform stability (all tiers)
 - Business Goal: Prevent connection pool exhaustion and system crashes
 - Value Impact: Ensures database connections are properly managed
 - Strategic Impact: Critical for system reliability and scalability
-"""
+""""
 
 import asyncio
 import gc
@@ -33,11 +33,11 @@ class TestDatabaseConnectionLeaks:
     
     @pytest.mark.asyncio
     async def test_session_cleanup_no_garbage_collection_warning(self, caplog):
-        """Verify sessions are properly cleaned up without GC warnings.
+        """Verify sessions are properly cleaned up without GC warnings."""
         
         The error we're preventing:
-        'The garbage collector is trying to clean up non-checked-in connection'
-        """
+            'The garbage collector is trying to clean up non-checked-in connection'
+        """"
         with caplog.at_level(logging.WARNING):
             # Create and use sessions normally
             sessions_created = []
@@ -60,7 +60,7 @@ class TestDatabaseConnectionLeaks:
                 and "non-checked-in connection" in record.message.lower()
             ]
             
-            assert len(gc_warnings) == 0, f"Found GC warnings: {[w.message for w in gc_warnings]}"
+            assert len(gc_warnings) == 0, f"Found GC warnings: {[w.message for w in gc_warnings}]"
     
     @pytest.mark.asyncio
     async def test_unit_of_work_cleanup_on_exception(self, caplog):
@@ -90,7 +90,7 @@ class TestDatabaseConnectionLeaks:
                 and "non-checked-in connection" in record.message.lower()
             ]
             
-            assert len(gc_warnings) == 0, f"UnitOfWork leaked connections: {[w.message for w in gc_warnings]}"
+            assert len(gc_warnings) == 0, f"UnitOfWork leaked connections: {[w.message for w in gc_warnings}]"
     
     @pytest.mark.asyncio
     async def test_connection_pool_metrics_after_usage(self):
@@ -227,4 +227,4 @@ async def test_connection_leak_prevention_integration():
         ]
         
         assert len(sqlalchemy_warnings) == 0, \
-            f"Found SQLAlchemy warnings: {[str(w.message) for w in sqlalchemy_warnings]}"
+            f"Found SQLAlchemy warnings: {[str(w.message) for w in sqlalchemy_warnings}]"

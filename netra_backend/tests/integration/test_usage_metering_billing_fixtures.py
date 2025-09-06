@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Fixtures Tests - Split from test_usage_metering_billing.py
 
 BVJ: Protects $100K-$200K MRR through accurate consumption tracking
@@ -7,12 +9,12 @@ Value Impact: Real-time usage tracking for API calls, agent execution, tokens, s
 Strategic Impact: Foundation for consumption-based pricing and overage billing
 
 Tests comprehensive usage metering pipeline:
-- Real-time usage capture across all service boundaries  
+    - Real-time usage capture across all service boundaries  
 - ClickHouse integration for high-volume metrics storage
 - Billing calculation accuracy with performance fee model
 - Overage handling and usage alerts
 - Multi-tenant usage isolation
-"""
+""""
 
 import sys
 from pathlib import Path

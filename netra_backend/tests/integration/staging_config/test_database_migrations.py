@@ -5,7 +5,7 @@ Test Database Migrations
 
 Validates Alembic migrations work correctly with Cloud SQL
 in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -54,7 +54,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                     SELECT FROM information_schema.tables 
                     WHERE table_name = 'alembic_version'
                 )
-            """)
+            """)"
             
             table_exists = cursor.fetchone()[0]
             self.assertTrue(table_exists, "Alembic version table missing")
@@ -180,7 +180,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                         SELECT FROM information_schema.tables 
                         WHERE table_name = %s
                     )
-                """, (table,))
+                """, (table,))"
                 
                 if not cursor.fetchone()[0]:
                     missing_tables.append(table)
@@ -192,7 +192,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
             cursor.execute("""
                 SELECT indexname FROM pg_indexes 
                 WHERE schemaname = 'public'
-            """)
+            """)"
             
             indexes = [row[0] for row in cursor.fetchall()]
             
@@ -233,7 +233,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                         SELECT COUNT(*) FROM messages m
                         LEFT JOIN threads t ON m.thread_id = t.id
                         WHERE t.id IS NULL
-                    """
+                    """"
                 },
                 {
                     'name': 'Orphaned threads',
@@ -241,7 +241,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                         SELECT COUNT(*) FROM threads t
                         LEFT JOIN users u ON t.user_id = u.id
                         WHERE u.id IS NULL
-                    """
+                    """"
                 }
             ]
             
@@ -253,7 +253,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                 
                 if count > 0:
                     integrity_issues.append(
-                        f"{check['name']}: {count} records"
+                        f"{check['name']]: {count] records"
                     )
                     
             if integrity_issues:
@@ -284,7 +284,7 @@ class TestDatabaseMigrations(StagingConfigTestBase):
                 WHERE schemaname = 'public'
                 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
                 LIMIT 10
-            """)
+            """)"
             
             large_tables = cursor.fetchall()
             

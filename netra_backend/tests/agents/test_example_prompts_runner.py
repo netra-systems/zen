@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test runner for Example Prompts E2E Tests
 Provides test execution functionality for parameterized tests
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -78,7 +80,7 @@ class TestRunner:
             
         Returns:
             Dictionary containing test results and metrics
-        """
+        """"
         start_time = datetime.now()
         result = {
             "success": False,
@@ -135,7 +137,7 @@ class TestRunner:
                     result["validation"] = {
                         "valid": True,
                         "score": 80,
-                        "feedback": [f"Quality service unavailable, using mock validation: {str(e)}"]
+                        "feedback": [f"Quality service unavailable, using mock validation: {str(e)]"]
                     }
             else:
                 # Provide default validation result when no quality gate
@@ -175,7 +177,7 @@ class TestRunner:
             
         Returns:
             List of test results
-        """
+        """"
         semaphore = asyncio.Semaphore(concurrency)
         
         async def run_with_semaphore(prompt, context):
@@ -198,7 +200,7 @@ class TestRunner:
             
         Returns:
             Dictionary containing analysis metrics
-        """
+        """"
         if not results:
             return {
                 "total_tests": 0,

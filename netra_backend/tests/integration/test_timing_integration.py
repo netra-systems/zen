@@ -6,7 +6,7 @@ during agent execution.
 
 Business Value: Validates performance monitoring capabilities
 BVJ: Platform | Stability | Ensures timing infrastructure works correctly
-"""
+""""
 
 import asyncio
 import time

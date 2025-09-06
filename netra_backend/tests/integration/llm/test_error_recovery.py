@@ -2,17 +2,17 @@
 LLM Error Recovery Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core AI functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from LLM integration failures
 - Value Impact: Validates error recovery mechanisms for LLM failures
 - Revenue Impact: Ensures customer requests continue working despite LLM provider issues
 
 REQUIREMENTS:
-- Error recovery for LLM failures
+    - Error recovery for LLM failures
 - Circuit breaker functionality
 - Graceful degradation mechanisms
 - Provider failover handling
-"""
+""""
 
 import sys
 from pathlib import Path

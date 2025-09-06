@@ -1,7 +1,7 @@
 """
 ClickHouse Permission Helpers
 Centralized permission checking utilities for ClickHouse tests
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -66,7 +66,7 @@ async def _check_table_insert_permission(client, table_name):
 
 async def _check_table_create_permission(client):
     """Check if user has CREATE TABLE permission"""
-    test_table = f"temp_permission_test_{uuid.uuid4().hex[:8]}"
+    test_table = f"temp_permission_test_{uuid.uuid4().hex[:8]]"
     try:
         await client.execute_query(f"CREATE TABLE {test_table} (id Int32) ENGINE = Memory")
         await client.execute_query(f"DROP TABLE {test_table}")

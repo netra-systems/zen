@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
-from redis import Redis
+import redis
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool_permission import ToolExecutionContext
@@ -19,7 +19,7 @@ from netra_backend.app.services.rate_limiter import RateLimiter as CoreRateLimit
 class ToolPermissionRateLimiter:
     """Handles rate limiting functionality"""
 
-    def __init__(self, redis_client: Optional[Redis] = None):
+    def __init__(self, redis_client: Optional[redis.Redis] = None):
         self.redis = redis_client
 
     async def check_rate_limits(

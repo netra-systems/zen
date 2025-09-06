@@ -1,8 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Repository authentication and operations tests
 Tests user authentication, optimization storage, and metric aggregation
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path

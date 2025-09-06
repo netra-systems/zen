@@ -4,7 +4,7 @@ These tests validate actual corpus management and knowledge base operations usin
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures accurate knowledge management and retrieval for AI systems.
-"""
+""""
 
 import asyncio
 import json
@@ -47,9 +47,9 @@ async def real_tool_dispatcher():
 async def real_corpus_admin_agent(real_llm_manager, real_tool_dispatcher):
     """Create real CorpusAdminSubAgent instance."""
     agent = CorpusAdminSubAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=None  # Real websocket in production
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=None  # Real websocket in production
     )
     yield agent
     # Cleanup not needed for tests
@@ -165,7 +165,7 @@ class TestCorpusAdminAgentRealLLM:
         assert "retrievability_score" in metrics
         assert metrics["retrievability_score"] >= 0.90
         
-        logger.info(f"Organized {len(enrichment)} documents with {len(taxonomy['primary_categories'])} primary categories")
+        logger.info(f"Organized {len(enrichment)] documents with {len(taxonomy['primary_categories'])] primary categories")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -276,7 +276,7 @@ class TestCorpusAdminAgentRealLLM:
             assert "relationship_type" in ref
             assert "link_text" in ref
         
-        logger.info(f"Identified {len(analysis['duplicate_clusters'])} duplicate clusters with {improvements['reduced_redundancy_percentage']}% redundancy reduction")
+        logger.info(f"Identified {len(analysis['duplicate_clusters'])] duplicate clusters with {improvements['reduced_redundancy_percentage']]% redundancy reduction")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -389,7 +389,7 @@ class TestCorpusAdminAgentRealLLM:
             assert "optimization_applied" in solution
             assert "expected_result" in solution
         
-        logger.info(f"Optimized semantic search with {projections['relevance_improvement']*100:.1f}% relevance improvement")
+        logger.info(f"Optimized semantic search with {projections['relevance_improvement']*100:.1f]% relevance improvement")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -636,7 +636,7 @@ class TestCorpusAdminAgentRealLLM:
         assert "maintenance_costs" in costs
         assert "roi_projection" in costs
         
-        logger.info(f"Set up multilingual corpus for {len(prioritization['tier1_languages'])} tier-1 languages with cross-language retrieval")
+        logger.info(f"Set up multilingual corpus for {len(prioritization['tier1_languages'])] tier-1 languages with cross-language retrieval")
 
 
 if __name__ == "__main__":

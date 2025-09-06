@@ -1,3 +1,5 @@
+import asyncio
+
 """
 Integration tests for user update operations regression prevention.
 
@@ -5,13 +7,13 @@ This test suite provides end-to-end validation of user update operations,
 specifically targeting the regression fixed in commit 7a9f176cb.
 
 These tests verify that:
-1. User update operations work correctly with the fixed UserUpdate schema
+    1. User update operations work correctly with the fixed UserUpdate schema
 2. CRUDUser service integration works properly with database operations
 3. Partial updates are handled correctly without affecting unspecified fields
 4. Real database interactions work with the corrected schema definitions
 
 The tests use real database sessions to ensure actual integration behavior.
-"""
+""""
 
 import pytest
 import uuid
@@ -47,9 +49,9 @@ class TestUserUpdateOperationsIntegration:
         
         # Create test user
         user_create = UserCreate(
-            email=f"test-update-{uuid.uuid4().hex}@example.com",
-            password="testpassword123",
-            full_name="Original Test User"
+        email=f"test-update-{uuid.uuid4().hex}@example.com",
+        password="testpassword123",
+        full_name="Original Test User"
         )
         
         created_user = await crud_user.create(test_db_session, obj_in=user_create)
@@ -58,24 +60,24 @@ class TestUserUpdateOperationsIntegration:
         # Cleanup
         await cleanup_test_user(test_db_session, created_user.id)
 
-    @pytest.fixture
-    def crud_service(self):
+        @pytest.fixture
+        def crud_service(self):
         """Create CRUDUser service instance with proper initialization."""
         return CRUDUser("integration_test_service", User)
 
-    async def test_user_partial_update_integration(
+        async def test_user_partial_update_integration(
         self, 
         test_db_session: AsyncSession,
         test_user: User,
         crud_service: CRUDUser
-    ):
+        ):
         """Test partial user update integration with database.
         
         This test verifies the core regression fix:
         - UserUpdate schema allows partial updates without validation errors
         - CRUDUser service properly handles partial updates
         - Database operations work correctly with the fixed schema
-        """
+        """"
         original_email = test_user.email
         original_full_name = test_user.full_name
         
@@ -84,9 +86,9 @@ class TestUserUpdateOperationsIntegration:
         
         # Perform the update operation
         updated_user = await crud_service.update(
-            test_db_session,
-            db_obj=test_user,
-            obj_in=user_update
+        test_db_session,
+        db_obj=test_user,
+        obj_in=user_update
         )
         
         # Verify the update was successful
@@ -105,27 +107,27 @@ class TestUserUpdateOperationsIntegration:
         assert db_user.full_name == "Updated Integration User"
         assert db_user.email == original_email
 
-    async def test_user_multiple_field_update_integration(
+        async def test_user_multiple_field_update_integration(
         self, 
         test_db_session: AsyncSession,
         test_user: User,
         crud_service: CRUDUser
-    ):
+        ):
         """Test updating multiple fields while leaving others unchanged."""
         original_email = test_user.email
         
         # Create update with multiple fields
         user_update = UserUpdate(
-            full_name="Multi-Field Updated User",
-            picture="https://example.com/new-picture.jpg",
-            is_active=False  # Change active status
+        full_name="Multi-Field Updated User",
+        picture="https://example.com/new-picture.jpg",
+        is_active=False  # Change active status
         )
         
         # Perform the update
         updated_user = await crud_service.update(
-            test_db_session,
-            db_obj=test_user,
-            obj_in=user_update
+        test_db_session,
+        db_obj=test_user,
+        obj_in=user_update
         )
         
         # Verify all specified fields were updated
@@ -143,12 +145,12 @@ class TestUserUpdateOperationsIntegration:
         assert db_user.is_active is False
         assert db_user.email == original_email
 
-    async def test_user_empty_update_integration(
+        async def test_user_empty_update_integration(
         self, 
         test_db_session: AsyncSession,
         test_user: User,
         crud_service: CRUDUser
-    ):
+        ):
         """Test that empty updates don't cause issues (regression prevention)."""
         # Store original values
         original_email = test_user.email
@@ -161,9 +163,9 @@ class TestUserUpdateOperationsIntegration:
         
         # Perform the update - should succeed without changes
         updated_user = await crud_service.update(
-            test_db_session,
-            db_obj=test_user,
-            obj_in=user_update
+        test_db_session,
+        db_obj=test_user,
+        obj_in=user_update
         )
         
         # Verify no fields were changed
@@ -179,34 +181,34 @@ class TestUserUpdateOperationsIntegration:
         assert db_user.is_active == original_is_active
         assert db_user.picture == original_picture
 
-    async def test_user_none_value_update_integration(
+        async def test_user_none_value_update_integration(
         self, 
         test_db_session: AsyncSession,
         test_user: User,
         crud_service: CRUDUser
-    ):
+        ):
         """Test updating fields to None values explicitly."""
         # Ensure test user has some initial values
         initial_update = UserUpdate(
-            full_name="Initial Name",
-            picture="https://example.com/initial.jpg"
+        full_name="Initial Name",
+        picture="https://example.com/initial.jpg"
         )
         await crud_service.update(
-            test_db_session,
-            db_obj=test_user,
-            obj_in=initial_update
+        test_db_session,
+        db_obj=test_user,
+        obj_in=initial_update
         )
         
         # Now update fields to None explicitly
         none_update = UserUpdate(
-            full_name=None,  # Explicitly set to None
-            picture=None     # Explicitly set to None
+        full_name=None,  # Explicitly set to None
+        picture=None     # Explicitly set to None
         )
         
         updated_user = await crud_service.update(
-            test_db_session,
-            db_obj=test_user,
-            obj_in=none_update
+        test_db_session,
+        db_obj=test_user,
+        obj_in=none_update
         )
         
         # Verify None values were set
@@ -230,7 +232,7 @@ class TestCRUDUserServiceIntegration:
         
         This test validates that the CRUDUser initialization fix works in practice
         by performing a complete create-read-update-delete cycle.
-        """
+        """"
         # Create service with proper initialization (regression prevention)
         crud_service = CRUDUser("lifecycle_test_service", User)
         

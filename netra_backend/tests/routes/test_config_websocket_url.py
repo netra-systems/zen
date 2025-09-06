@@ -1,3 +1,4 @@
+import json
 """Test WebSocket URL configuration endpoint regression test."""
 
 import sys
@@ -36,7 +37,7 @@ def authenticated_client():
     # TODO: Initialize real service
     """Create test client with basic authentication."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_user = mock_user_instance  # Initialize appropriate service
+    mock_user == mock_user_instance  # Initialize appropriate service
     mock_user.id = "test_user"
     mock_user.is_admin = False
     
@@ -49,7 +50,7 @@ def authenticated_client():
 
 def test_api_config_includes_ws_url(admin_client):
     """Test that /api/config endpoint returns ws_url field."""
-    response = admin_client.get("/api/config")
+    response == admin_client.get("/api/config")
     assert response.status_code == 200
     
     config = response.json()

@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Integration tests for BaseAgent token tracking and context metadata integration."""
 
 import pytest
@@ -142,7 +145,7 @@ class TestAgentTokenIntegration:
     async def test_emit_thinking_with_token_context(self):
         """Test that emit_thinking includes token information when context provided."""
         # Mock the WebSocket adapter
-        self.agent._websocket_adapter.emit_thinking = AsyncNone  # TODO: Use real service instance
+        self.agent._websocket_adapter.emit_thinking = AsyncMock()  # TODO: Use real service instance
         
         # Add token usage to context
         self.agent.track_llm_usage(
@@ -172,7 +175,7 @@ class TestAgentTokenIntegration:
     async def test_emit_thinking_without_context(self):
         """Test that emit_thinking works normally without context."""
         # Mock the WebSocket adapter
-        self.agent._websocket_adapter.emit_thinking = AsyncNone  # TODO: Use real service instance
+        self.agent._websocket_adapter.emit_thinking = AsyncMock()  # TODO: Use real service instance
         
         # Emit thinking without context
         await self.agent.emit_thinking("I'm processing the request")
@@ -186,7 +189,7 @@ class TestAgentTokenIntegration:
     async def test_emit_agent_completed_with_cost_analysis(self):
         """Test that emit_agent_completed includes cost analysis."""
         # Mock the WebSocket adapter
-        self.agent._websocket_adapter.emit_agent_completed = AsyncNone  # TODO: Use real service instance
+        self.agent._websocket_adapter.emit_agent_completed = AsyncMock()  # TODO: Use real service instance
         
         # Add token usage and optimizations to context
         self.agent.track_llm_usage(
@@ -228,7 +231,7 @@ class TestAgentTokenIntegration:
     async def test_emit_agent_completed_without_context(self):
         """Test that emit_agent_completed works normally without context."""
         # Mock the WebSocket adapter
-        self.agent._websocket_adapter.emit_agent_completed = AsyncNone  # TODO: Use real service instance
+        self.agent._websocket_adapter.emit_agent_completed = AsyncMock()  # TODO: Use real service instance
         
         original_result = {"status": "completed"}
         
@@ -365,11 +368,11 @@ class TestTokenTrackingEdgeCases:
     async def test_emit_thinking_with_empty_token_operations(self):
         """Test emit_thinking when token_usage exists but has no operations."""
         # Mock the WebSocket adapter
-        self.agent._websocket_adapter.emit_thinking = AsyncNone  # TODO: Use real service instance
+        self.agent._websocket_adapter.emit_thinking = AsyncMock()  # TODO: Use real service instance
         
         # Set up context with empty token usage
         self.context.metadata["token_usage"] = {
-            "operations": [],
+            "operations": [},
             "cumulative_cost": 0.0,
             "cumulative_tokens": 0
         }

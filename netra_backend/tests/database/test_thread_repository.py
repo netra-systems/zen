@@ -1,8 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Thread repository operations tests
 Tests thread CRUD operations and soft delete functionality
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -58,7 +61,7 @@ class TestThreadRepositoryOperations:
         assert retrieved.id == thread.id
         
         # Test Update
-        update_data = {"metadata_": {**thread_data["metadata_"], "status": "updated"}}
+        update_data = {"metadata_": {**thread_data["metadata_"], "status": "updated"]]
         updated_thread = MockThread(
             id="thread123",
             **{**thread_data, **update_data},
@@ -83,7 +86,7 @@ class TestThreadRepositoryOperations:
         
         # Set up mock result for queries
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_session.execute.return_value = mock_result
         
         # Soft delete
@@ -106,7 +109,7 @@ def _create_thread_data():
     return {
         "user_id": "user123",
         "title": "Test Thread",
-        "metadata_": {"tags": ["test", "demo"]}
+        "metadata_": {"tags": ["test", "demo"]]
     }
 
 def _setup_update_mock(mock_session):

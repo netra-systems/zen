@@ -1,17 +1,19 @@
-"""Agent Message Flow End-to-End Test
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
+"""Agent Message Flow End-to-End Test"""
 
 PRIORITY: CRITICAL
 BVJ: Core functionality worth $45K MRR
 
 This test validates the complete agent message flow:
-1. User message → Backend → Agent processing  
-2. Agent response → WebSocket → Frontend
+    1. User message -> Backend -> Agent processing  
+2. Agent response -> WebSocket -> Frontend
 3. Message ordering guarantees
 4. Streaming response handling
 
 Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
-"""
+""""
 
 from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -44,7 +46,6 @@ from netra_backend.app.services.thread_service import ThreadService
 logger = central_logger.get_logger(__name__)
 
 class MessageOrderTracker:
-    pass
 
     """Tracks message ordering for validation."""
     
@@ -89,7 +90,6 @@ class MessageOrderTracker:
         return True
 
 class WebSocketMessageCapture:
-    pass
 
     """Captures WebSocket messages sent to users."""
     
@@ -156,7 +156,6 @@ class WebSocketMessageCapture:
         return self.streaming_chunks.get(user_id, [])
 
 @pytest.fixture
-
 def message_tracker():
     """Use real service instance."""
     # TODO: Initialize real service
@@ -167,7 +166,6 @@ def message_tracker():
     return MessageOrderTracker()
 
 @pytest.fixture
-
 def websocket_capture():
     """Use real service instance."""
     # TODO: Initialize real service
@@ -182,19 +180,18 @@ def real_websocket_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Fixture providing real WebSocket manager."""
-    pass
     from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
     manager = get_unified_manager()
     
     # Add broadcasting attribute if it doesn't exist
     if not hasattr(manager, 'broadcasting'):
-        # Mock: Generic component isolation for controlled unit testing
-        mock_broadcasting = MagicNone  # TODO: Use real service instance
-        # Mock: Generic component isolation for controlled unit testing
-        mock_broadcasting.join_room = AsyncNone  # TODO: Use real service instance
-        # Mock: Generic component isolation for controlled unit testing
-        mock_broadcasting.leave_all_rooms = AsyncNone  # TODO: Use real service instance
-        manager.broadcasting = mock_broadcasting
+    # Mock: Generic component isolation for controlled unit testing
+    mock_broadcasting = MagicMock()  # TODO: Use real service instance
+    # Mock: Generic component isolation for controlled unit testing
+    mock_broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
+    # Mock: Generic component isolation for controlled unit testing
+    mock_broadcasting.leave_all_rooms = AsyncMock()  # TODO: Use real service instance
+    manager.broadcasting = mock_broadcasting
     
     return manager
 
@@ -203,9 +200,8 @@ def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Fixture providing real tool dispatcher."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
-    mock_dispatcher = MagicNone  # TODO: Use real service instance
+    mock_dispatcher = MagicMock()  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     mock_dispatcher.dispatch = AsyncMock(return_value="Tool executed successfully")
     return mock_dispatcher
@@ -221,70 +217,67 @@ async def real_thread_service():
     
     # Create a mock session factory that returns a proper async session
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session = AsyncNone  # TODO: Use real service instance
+    mock_session = AsyncMock()  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncMock()  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.close = AsyncNone  # TODO: Use real service instance
+    mock_session.close = AsyncMock()  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.add = MagicNone  # TODO: Use real service instance
+    mock_session.add = MagicMock()  # TODO: Use real service instance
     # Mock: Database session isolation for transaction testing without real database dependency
-    mock_session.execute = AsyncNone  # TODO: Use real service instance
+    mock_session.execute = AsyncMock()  # TODO: Use real service instance
     
     # Mock session factory that returns the session directly
     async def mock_session_factory():
-        try:
-            yield mock_session
-        finally:
-            if hasattr(mock_session, "close"):
-                await mock_session.close()
+    try:
+    yield mock_session
+    finally:
+    if hasattr(mock_session, "close"):
+    await mock_session.close()
     
     # Patch the async_session_factory to use our mock
     with patch.object(postgres_module, 'async_session_factory', mock_session_factory):
-        yield ThreadService()
+    yield ThreadService()
 
 @pytest.fixture
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
     """Fixture providing real supervisor agent with real components."""
-    pass
     from netra_backend.app.core.config import get_config
     
     try:
-        # Try to create real LLM manager
-        from netra_backend.app.llm.llm_manager import LLMManager
-        config = get_config()
-        llm_manager = LLMManager(config)
+    # Try to create real LLM manager
+    from netra_backend.app.llm.llm_manager import LLMManager
+    config = get_config()
+    llm_manager = LLMManager(config)
     except Exception:
-        # Fallback to mock for testing
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager = llm_manager_instance  # Initialize appropriate service
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.ask_llm = AsyncMock(return_value="Test agent response")
+    # Fallback to mock for testing
+    # Mock: LLM provider isolation to prevent external API usage and costs
+    llm_manager = llm_manager_instance  # Initialize appropriate service
+    # Mock: LLM provider isolation to prevent external API usage and costs
+    llm_manager.ask_llm = AsyncMock(return_value="Test agent response")
     
     # Create supervisor with real components including db_session
     supervisor = SupervisorAgent(
-        db_session=mock_db_session,
-        llm_manager=llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=real_websocket_manager
+    db_session=mock_db_session,
+    llm_manager=llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=real_websocket_manager
     )
     
     # Mock the supervisor run method to await asyncio.sleep(0)
     return a response
     async def mock_supervisor_run(user_request, thread_id, user_id, run_id):
-    pass
-        # The message_processing module will send the agent_completed message
-        # We just need to await asyncio.sleep(0)
+    # The message_processing module will send the agent_completed message
+    # We just need to await asyncio.sleep(0)
     return the response content
-        return f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
+    return f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
     
     supervisor.run = mock_supervisor_run
     yield supervisor
 
 @pytest.fixture
-
 async def real_agent_service(real_supervisor_agent):
 
     """Fixture providing real agent service."""
@@ -293,11 +286,10 @@ async def real_agent_service(real_supervisor_agent):
     return AgentService(real_supervisor_agent)
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     """Fixture providing mock database session."""
-    pass
     from sqlalchemy.ext.asyncio import AsyncSession
     
     # Mock: Database session isolation for transaction testing without real database dependency
@@ -305,7 +297,7 @@ async def real_agent_service(real_supervisor_agent):
     
     # Create proper async context manager mock for db_session.begin()
     # Mock: Generic component isolation for controlled unit testing
-    mock_transaction = AsyncNone  # TODO: Use real service instance
+    mock_transaction = AsyncMock()  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
     # Mock: Async component isolation for testing without real async operations
@@ -314,15 +306,15 @@ async def real_agent_service(real_supervisor_agent):
     session.begin = MagicMock(return_value=mock_transaction)
     
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncNone  # TODO: Use real service instance
+    session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.flush = AsyncNone  # TODO: Use real service instance
+    session.flush = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.refresh = AsyncNone  # TODO: Use real service instance
+    session.refresh = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.close = AsyncNone  # TODO: Use real service instance
+    session.close = AsyncMock()  # TODO: Use real service instance
     
     # Mock thread retrieval
     # Mock: Component isolation for controlled unit testing
@@ -354,36 +346,31 @@ def setup_database_and_mocks():
     """Use real service instance."""
     # TODO: Initialize real service
     """Auto-setup database session factory and mocks for all tests in this file."""
-    pass
     import netra_backend.app.db.postgres_core as postgres_module
     import netra_backend.app.services.database.unit_of_work as uow_module
     from netra_backend.app.db.models_postgres import Thread, Run
     
     # Create proper async session factory mock
     class MockAsyncSessionFactory:
-        def __init__(self):
-    pass
-            # Mock: Session isolation for controlled testing without external state
-            self.session = AsyncNone  # TODO: Use real service instance
-            # Mock: Session isolation for controlled testing without external state
-            self.session.commit = AsyncNone  # TODO: Use real service instance
-            # Mock: Session isolation for controlled testing without external state
-            self.session.rollback = AsyncNone  # TODO: Use real service instance
-            # Mock: Session isolation for controlled testing without external state
-            self.session.close = AsyncNone  # TODO: Use real service instance
+    def __init__(self):
+    # Mock: Session isolation for controlled testing without external state
+    self.session = AsyncMock()  # TODO: Use real service instance
+    # Mock: Session isolation for controlled testing without external state
+    self.session.commit = AsyncMock()  # TODO: Use real service instance
+    # Mock: Session isolation for controlled testing without external state
+    self.session.rollback = AsyncMock()  # TODO: Use real service instance
+    # Mock: Session isolation for controlled testing without external state
+    self.session.close = AsyncMock()  # TODO: Use real service instance
             
-        def __call__(self):
-    pass
-            return self
+    def __call__(self):
+    return self
             
-        async def __aenter__(self):
-    pass
-            await asyncio.sleep(0)
+    async def __aenter__(self):
+    await asyncio.sleep(0)
     return self.session
             
-        async def __aexit__(self, exc_type, exc_val, exc_tb):
-    pass
-            await asyncio.sleep(0)
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    await asyncio.sleep(0)
     return None
     
     mock_factory = MockAsyncSessionFactory()
@@ -403,31 +390,30 @@ def setup_database_and_mocks():
     
     # Patch all database and service methods
     with patch.object(postgres_module, 'async_session_factory', mock_factory):
-        with patch.object(uow_module, 'async_session_factory', mock_factory):
-            # Mock: Async component isolation for testing without real async operations
-            with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock) as mock_get_thread:
-                # Mock: Async component isolation for testing without real async operations
-                with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock) as mock_create_thread:
-                    # Mock: Async component isolation for testing without real async operations
-                    with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock) as mock_create_message:
-                        # Mock: Async component isolation for testing without real async operations
-                        with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock) as mock_create_run:
-                            # Mock: Async component isolation for testing without real async operations
-                            with patch('netra_backend.app.services.thread_service.ThreadService.update_run_status', new_callable=AsyncMock) as mock_update_run:
+    with patch.object(uow_module, 'async_session_factory', mock_factory):
+    # Mock: Async component isolation for testing without real async operations
+    with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock) as mock_get_thread:
+    # Mock: Async component isolation for testing without real async operations
+    with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock) as mock_create_thread:
+    # Mock: Async component isolation for testing without real async operations
+    with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock) as mock_create_message:
+    # Mock: Async component isolation for testing without real async operations
+    with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock) as mock_create_run:
+    # Mock: Async component isolation for testing without real async operations
+    with patch('netra_backend.app.services.thread_service.ThreadService.update_run_status', new_callable=AsyncMock) as mock_update_run:
                                 
-                                # Setup all mocks to return proper objects
-                                mock_get_thread.return_value = mock_thread
-                                mock_create_thread.return_value = mock_thread
-                                mock_create_message.return_value = None
-                                mock_create_run.return_value = mock_run
-                                mock_update_run.return_value = mock_run
+    # Setup all mocks to return proper objects
+    mock_get_thread.return_value = mock_thread
+    mock_create_thread.return_value = mock_thread
+    mock_create_message.return_value = None
+    mock_create_run.return_value = mock_run
+    mock_update_run.return_value = mock_run
                                 
-                                yield
+    yield
 
 @pytest.mark.asyncio
 
 class TestAgentMessageFlow:
-    pass
 
     """Test complete agent message flow end-to-end."""
     
@@ -440,11 +426,11 @@ class TestAgentMessageFlow:
         real_websocket_manager
     ):
 
-        """Test: User message → Backend → Agent → WebSocket → Response
+        """Test: User message -> Backend -> Agent -> WebSocket -> Response"""
         
         Validates complete message flow with real agent processing.
 
-        """
+        """"
 
         user_id = "test_user_001"
 
@@ -453,7 +439,7 @@ class TestAgentMessageFlow:
             "payload": {
                 "content": "Optimize my AI costs for GPT-4 usage in production",
                 "thread_id": "test_thread_123", 
-                "references": []
+                "references": [}
             }
         }
         
@@ -463,7 +449,7 @@ class TestAgentMessageFlow:
                 # Record message start
                 await message_tracker.record_message({
                     "stage": "input",
-                    "type": test_message["type"],
+                    "type": test_message["type"},
                     "user_id": user_id
                 })
                 
@@ -525,11 +511,11 @@ class TestAgentMessageFlow:
 
     ):
 
-        """Test message ordering guarantees under concurrent load.
+        """Test message ordering guarantees under concurrent load."""
         
         Validates messages are processed and responded to in correct order.
 
-        """
+        """"
 
         user_id = "test_user_002"
 
@@ -632,11 +618,11 @@ class TestAgentMessageFlow:
 
     ):
 
-        """Test streaming response handling for agent messages.
+        """Test streaming response handling for agent messages."""
         
         Validates streaming chunks are sent in correct order.
 
-        """
+        """"
 
         user_id = "test_user_003"
 
@@ -650,7 +636,7 @@ class TestAgentMessageFlow:
 
                 "thread_id": "test_thread_streaming",
 
-                "references": [],
+                "references": [},
 
                 "stream": True
 
@@ -738,11 +724,11 @@ class TestAgentMessageFlow:
 
     ):
 
-        """Test agent error handling and recovery mechanisms.
+        """Test agent error handling and recovery mechanisms."""
         
         Validates proper error responses are sent via WebSocket.
 
-        """
+        """"
 
         user_id = "test_user_004"
         
@@ -800,11 +786,11 @@ class TestAgentMessageFlow:
 
     ):
 
-        """Test message isolation between concurrent users.
+        """Test message isolation between concurrent users."""
         
         Validates messages from different users don't interfere.
 
-        """
+        """"
 
         users = ["user_a", "user_b", "user_c"]
 
@@ -884,11 +870,11 @@ class TestAgentMessageFlow:
 
     ):
 
-        """Test agent processing continues after WebSocket disconnection.
+        """Test agent processing continues after WebSocket disconnection."""
         
         Validates graceful handling of connection issues.
 
-        """
+        """"
 
         user_id = "test_user_recovery"
 
@@ -902,7 +888,7 @@ class TestAgentMessageFlow:
 
                 "thread_id": "recovery_thread",
 
-                "references": []
+                "references": [}
 
             }
 
@@ -966,7 +952,6 @@ class TestAgentMessageFlow:
 @pytest.mark.asyncio
 
 class TestAgentMessageFlowPerformance:
-    pass
 
     """Performance tests for agent message flow."""
     
@@ -999,7 +984,7 @@ class TestAgentMessageFlowPerformance:
 
                 "thread_id": "perf_thread", 
 
-                "references": []
+                "references": [}
 
             }
 

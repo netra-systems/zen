@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Core SupplyResearcherAgent tests - LLM, WebSocket, State, Multi-provider
 Modular design with ≤300 lines, ≤8 lines per function
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -81,7 +83,7 @@ class TestSupplyResearcherCore:
         """Setup research API mock (≤8 lines)"""
         with patch.object(agent.research_engine, 'call_deep_research_api', 
                          new_callable=AsyncMock) as mock_api:
-            mock_api.return_value = {
+                             mock_api.return_value = {
                 "session_id": "ws_test",
                 "status": "completed",
                 "questions_answered": [],
@@ -121,7 +123,7 @@ class TestSupplyResearcherCore:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = TestRedisManager().get_client()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncNone  # TODO: Use real service instance
+            mock_redis.set = AsyncMock()  # TODO: Use real service instance
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=json.dumps({
                 "research_session_id": "cached_session",
@@ -244,7 +246,7 @@ class TestSupplyResearcherCore:
     def _create_low_confidence_extracted(self):
         """Create low confidence extracted data (≤8 lines)"""
         from decimal import Decimal
-        return [{"pricing_input": Decimal("30")}]
+        return [{"pricing_input": Decimal("30")]]
 
     def _verify_low_confidence_score(self, score):
         """Verify low confidence score (≤8 lines)"""

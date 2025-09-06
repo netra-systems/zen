@@ -16,7 +16,7 @@ import asyncio
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

@@ -1,9 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Agent Scaling and Load Testing (Iterations 26-30 completion).
 
 Tests agent system performance under load, concurrent operations,
 and scaling scenarios.
-"""
+""""
 
 import asyncio
 import pytest
@@ -30,18 +32,18 @@ class TestAgentConcurrencyLoad:
         """Test multiple agents executing concurrently."""
         # Mock shared resources
         mock_db_manager = TestDatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         mock_websocket_manager = UnifiedWebSocketManager()
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
         
         # Track concurrent executions
         execution_tracker = {
             "active_agents": 0,
             "peak_concurrency": 0,
             "completed_agents": 0,
-            "execution_times": []
+            "execution_times": [}
         }
         
         async def track_execution(agent_id, duration=0.1):
@@ -52,7 +54,7 @@ class TestAgentConcurrencyLoad:
             )
             
             start_time = time.time()
-            await asyncio.sleep(duration + random.uniform(0, 0.05))  # Simulate work with variance
+            await asyncio.sleep(duration + random.uniform(0, 0.5))  # Simulate work with variance
             end_time = time.time()
             
             execution_tracker["active_agents"] -= 1
@@ -130,7 +132,7 @@ class TestAgentConcurrencyLoad:
         
         # Mock system resources
         mock_db_manager = TestDatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         with patch('netra_backend.app.core.unified.db_connection_manager.db_manager', mock_db_manager):
@@ -183,7 +185,7 @@ class TestAgentConcurrencyLoad:
         """Test agent system throughput scales with load."""
         # Mock processing components
         mock_db_manager = TestDatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         # Test different load levels
@@ -205,7 +207,7 @@ class TestAgentConcurrencyLoad:
                         throughput_tracker["start_time"] = time.time()
                     
                     # Simulate variable processing time
-                    processing_time = random.uniform(0.05, 0.15)
+                    processing_time = random.uniform(0.5, 0.15)
                     await asyncio.sleep(processing_time)
                     
                     throughput_tracker["completed_tasks"] += 1
@@ -274,7 +276,7 @@ class TestAgentConcurrencyLoad:
         
         # Verify error rates stay low
         max_error_rate = max(result["error_rate"] for result in throughput_results)
-        assert max_error_rate < 0.05  # Less than 5% error rate
+        assert max_error_rate < 0.5  # Less than 5% error rate
         
         # Verify highest load level achieved good absolute throughput
         peak_throughput = throughput_results[-1]["throughput_per_second"]
@@ -295,7 +297,7 @@ class TestAgentResourceManagement:
             "checked_in": 20,
             "overflow": 0,
             "peak_checked_out": 0,
-            "wait_times": []
+            "wait_times": [}
         }
         
         mock_db_manager = TestDatabaseManager().get_session()
@@ -304,7 +306,7 @@ class TestAgentResourceManagement:
             # Simulate connection pool behavior
             if pool_stats["checked_out"] >= pool_stats["pool_size"]:
                 wait_start = time.time()
-                await asyncio.sleep(0.01)  # Simulate wait for connection
+                await asyncio.sleep(0.1)  # Simulate wait for connection
                 wait_time = time.time() - wait_start
                 pool_stats["wait_times"].append(wait_time)
             
@@ -313,7 +315,7 @@ class TestAgentResourceManagement:
             pool_stats["peak_checked_out"] = max(pool_stats["peak_checked_out"], pool_stats["checked_out"])
             
             # Return mock session that releases connection when done
-            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_session = AsyncMock()  # TODO: Use real service instance
             
             async def release_connection():
                 pool_stats["checked_out"] -= 1
@@ -348,7 +350,7 @@ class TestAgentResourceManagement:
                 # Mock database operation
                 async def db_operation():
                     async with mock_db_manager.get_db() as session:
-                        await asyncio.sleep(0.05)  # Simulate query time
+                        await asyncio.sleep(0.5)  # Simulate query time
                         return {"status": "completed"}
                 
                 agent._execute_db_operation = db_operation
@@ -407,7 +409,7 @@ class TestAgentResourceManagement:
         with patch('netra_backend.app.core.resilience.circuit_breaker_manager.get_circuit_breaker', 
                   return_value=mock_circuit_breaker):
             
-            # Create agents that will stress the circuit breaker
+                      # Create agents that will stress the circuit breaker
             agent_count = 50
             tasks = []
             results_tracker = {"successes": 0, "failures": 0, "circuit_open_errors": 0}

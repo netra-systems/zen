@@ -1,13 +1,15 @@
+import asyncio
+
 """
 Critical regression tests for DeepAgentState JSON serialization.
 
 This test suite ensures that DeepAgentState objects can be properly serialized
 to JSON for WebSocket transmission, preventing the error:
-"Object of type DeepAgentState is not JSON serializable"
+    "Object of type DeepAgentState is not JSON serializable"
 
 Issue fixed: 2025-08-27
 Error location: netra_backend.app.websocket_core.manager:_send_to_connection:337
-"""
+""""
 
 import json
 from datetime import datetime, timezone
@@ -127,7 +129,7 @@ class TestDeepAgentStateSerialization:
             action_plan_result=ActionPlanResult(
                 action_plan_summary="Test action plan",
                 total_estimated_time="1h",
-                actions=[{"step": "action1", "description": "Do something"}]
+                actions=[{"step": "action1", "description": "Do something"]]
             ),
             report_result=ReportResult(
                 report_type="summary",
@@ -347,9 +349,9 @@ class TestDeepAgentStateSerialization:
     def test_regression_prevention_for_websocket_error(self):
         """
         Regression test for the specific error:
-        2025-08-27 22:45:47.043 | ERROR | netra_backend.app.websocket_core.manager:_send_to_connection:337
+            2025-08-27 22:45:47.043 | ERROR | netra_backend.app.websocket_core.manager:_send_to_connection:337
         Error sending to connection conn_dev-temp-df9fae96_e3398d5d: Object of type DeepAgentState is not JSON serializable
-        """
+        """"
         # Create state that would have caused the error
         state = DeepAgentState(
             user_request="Regression test for WebSocket error",

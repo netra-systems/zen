@@ -1,19 +1,21 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 End-to-End Metrics Pipeline Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from monitoring blind spots
 - Value Impact: Validates complete end-to-end metrics pipeline performance
 - Revenue Impact: Ensures pipeline efficiency supports high-volume operations
 
 REQUIREMENTS:
-- Complete pipeline performance validation
+    - Complete pipeline performance validation
 - High-volume metric collection reliability
 - Buffer overflow handling
 - Pipeline efficiency metrics
 - End-to-end processing within 30 seconds
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -51,7 +53,7 @@ class TestMetricsPipeline:
         """BVJ: Validates complete end-to-end metrics pipeline performance."""
         pipeline_start_time = time.time()
         
-        users = [f"pipeline_user_{i}" for i in range(10)]
+        users = [f"pipeline_user_{i]" for i in range(10)]
         total_actions = 0
         
         # Generate user activities
@@ -116,7 +118,7 @@ class TestMetricsPipeline:
     @pytest.mark.asyncio
     async def test_pipeline_metric_accuracy(self, user_action_tracker, metrics_aggregator, metrics_storage):
         """BVJ: Validates pipeline produces accurate metric counts."""
-        users = [f"accuracy_user_{i}" for i in range(5)]
+        users = [f"accuracy_user_{i]" for i in range(5)]
         
         for user_id in users:
             await user_action_tracker.track_user_action("user_session", user_id, {
@@ -247,7 +249,7 @@ class TestMetricsPipeline:
     @pytest.mark.asyncio
     async def test_concurrent_pipeline_operations(self, user_action_tracker, metrics_aggregator, metrics_storage):
         """BVJ: Validates pipeline handles concurrent operations correctly."""
-        concurrent_users = [f"concurrent_user_{i}" for i in range(5)]
+        concurrent_users = [f"concurrent_user_{i]" for i in range(5)]
         
         # Generate concurrent user activities
         concurrent_tasks = []

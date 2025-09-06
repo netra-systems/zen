@@ -1,7 +1,7 @@
 """
 Multi-Source Aggregation Tests
 Test aggregation across multiple data sources
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -68,7 +68,7 @@ class TestMultiSourceCorrelation:
         FULL OUTER JOIN workload_metrics w ON l.minute = w.minute
         FULL OUTER JOIN log_metrics lg ON l.minute = lg.minute
         ORDER BY l.minute DESC
-        """
+        """"
         
         # Fix array syntax if needed
         fixed_query = fix_clickhouse_array_syntax(query)
@@ -90,7 +90,7 @@ class TestMultiSourceCorrelation:
         WHERE timestamp >= now() - INTERVAL 1 HOUR
         GROUP BY minute
         ORDER BY minute DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(health_query)
         assert is_valid, f"System health dashboard query failed: {error}"
@@ -151,7 +151,7 @@ class TestMultiSourceCorrelation:
         FULL OUTER JOIN activity_metrics a ON r.hour = a.hour
         FULL OUTER JOIN error_metrics e ON r.hour = e.hour
         ORDER BY r.hour DESC
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(utilization_query)
         is_valid, error = validate_clickhouse_query(fixed_query)
@@ -218,7 +218,7 @@ class TestBusinessMetricsAggregation:
         LEFT JOIN user_costs uc ON ua.date = uc.date AND ua.user_id = uc.user_id
         LEFT JOIN user_issues ui ON ua.date = ui.date AND ua.user_id = ui.user_id
         ORDER BY ua.date DESC, engagement_score DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(business_query)
         assert is_valid, f"Business metrics aggregation failed: {error}"
@@ -281,7 +281,7 @@ class TestBusinessMetricsAggregation:
         LEFT JOIN error_periods e ON p.hour = e.hour
         LEFT JOIN cost_periods c ON p.hour = c.hour
         ORDER BY p.hour DESC
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(impact_query)
         assert is_valid, f"Performance impact correlation failed: {error}"

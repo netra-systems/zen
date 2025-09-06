@@ -1,7 +1,9 @@
+import asyncio
+
 """
 ClickHouse Array Operations Tests
 Test proper array operations and the query fixer
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -33,7 +35,7 @@ class TestClickHouseArrayOperations:
             metrics.unit[idx] as metric_unit
         FROM workload_events
         WHERE metrics.name[1] = 'latency_ms'
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(incorrect_query)
         
@@ -91,7 +93,7 @@ class TestClickHouseArrayOperations:
             IF(gpu_idx > 0, arrayElement(metrics.value, gpu_idx), 0) as gpu_util,
             IF(mem_idx > 0, metrics.value[mem_idx], 0) as memory_mb
         FROM workload_events
-        """
+        """"
         
         # Fix the query
         fixed_query = fix_clickhouse_array_syntax(complex_query)
@@ -109,7 +111,7 @@ class TestClickHouseArrayOperations:
             values.data[position] as data_value
         FROM events_table
         WHERE tags.priority[1] = 'high'
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(nested_query)
         
@@ -132,7 +134,7 @@ class TestClickHouseArrayOperations:
                 ELSE 0
             END as primary_metric
         FROM workload_events
-        """
+        """"
         
         fixed_query = fix_clickhouse_array_syntax(conditional_query)
         

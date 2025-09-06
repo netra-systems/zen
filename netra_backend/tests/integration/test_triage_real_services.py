@@ -2,7 +2,7 @@
 
 Tests real-world integration scenarios using actual services (database, Redis, LLM).
 Minimal mocking - focuses on end-to-end behavior with real dependencies.
-"""
+""""
 
 import asyncio
 import json
@@ -257,7 +257,7 @@ class TestDatabaseTransactionConsistency:
                         await conn.execute(
                             """INSERT INTO triage_results 
                                (request_id, user_id, result_data, created_at) 
-                               VALUES ($1, $2, $3, NOW())""",
+                               VALUES ($1, $2, $3, NOW())""","
                             context.request_id,
                             context.user_id,
                             json.dumps(result.data) if result.data else "{}"
@@ -314,7 +314,7 @@ class TestDatabaseTransactionConsistency:
                 user_id=f"user_{i}",
                 session_id=f"session_{i}"
             )
-            task = agents[i].execute(context, {"query": f"Query {i}"})
+            task = agents[i].execute(context, {"query": f"Query {i]"])
             tasks.append(task)
         
         # Some should succeed, some may fail due to pool exhaustion
@@ -619,15 +619,15 @@ class TestEndToEndErrorInjection:
             
             # Execute triage during error condition
             context = ExecutionContext(
-                request_id=f"error_{scenario['type']}_{i}",
+                request_id=f"error_{scenario['type']]_{i]",
                 user_id=f"user_error_{i}",
                 session_id=f"session_error_{i}",
-                metadata={"error_scenario": scenario["type"]}
+                metadata={"error_scenario": scenario["type"]]
             )
             
             try:
                 result = await triage_agent.execute(context, {
-                    "query": f"Test query during {scenario['type']} error"
+                    "query": f"Test query during {scenario['type']] error"
                 })
                 results.append(result)
             except Exception as e:
@@ -663,7 +663,7 @@ class TestEndToEndErrorInjection:
             
             # Verify recovery
             if recovery_result.status == ExecutionStatus.SUCCESS:
-                logger.info(f"Recovered from {scenario['type']} successfully")
+                logger.info(f"Recovered from {scenario['type']] successfully")
         
         # Analyze results
         total_scenarios = len(error_scenarios)

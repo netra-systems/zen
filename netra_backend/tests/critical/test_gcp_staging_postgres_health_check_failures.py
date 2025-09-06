@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for PostgreSQL Health Check Failures
 Critical staging issue: Database health checks failing regularly
@@ -7,11 +9,11 @@ found in GCP staging logs. The tests are intentionally designed to fail to expos
 the specific health check reliability and performance problems that need fixing.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Platform Stability - reliable health monitoring in staging
 - Value Impact: Ensures accurate health status for load balancer and monitoring systems
 - Strategic Impact: Critical for staging environment reliability and deployment confidence
-"""
+""""
 
 import pytest
 import asyncio
@@ -45,7 +47,7 @@ class TestPostgreSQLHealthCheckFailures:
         
         Expected behavior: Should handle pool exhaustion gracefully with proper error reporting
         Current behavior: May not properly handle or report pool exhaustion scenarios
-        """
+        """"
         # Mock database session with connection pool exhaustion
         mock_db = AsyncMock(spec=AsyncSession)
         mock_db.execute.side_effect = OperationalError(
@@ -66,7 +68,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check query timeout.
         
         Tests scenario where health check query takes too long and times out.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate query timeout
@@ -88,7 +90,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check with lost database connection.
         
         Tests scenario where database connection is lost during health check.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate connection lost
@@ -110,13 +112,13 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: Readiness check fails due to database dependency issues.
         
         Tests the overall readiness check when database dependency injection fails.
-        """
+        """"
         # Mock database dependency failure
         with patch('netra_backend.app.routes.health.get_db_dependency') as mock_get_db:
             mock_get_db.side_effect = Exception("Database dependency injection failed")
             
             # Mock request object
-            mock_request = MagicNone  # TODO: Use real service instance
+            mock_request = MagicMock()  # TODO: Use real service instance
             mock_request.app.state.startup_complete = True
             
             # This should fail due to dependency injection issues but might not be handled properly
@@ -134,7 +136,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check SSL certificate validation failure.
         
         Tests scenario where SSL certificate validation fails during health check.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate SSL certificate failure
@@ -156,7 +158,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check with invalid credentials.
         
         Tests scenario where database credentials are invalid or expired.
-        """
+        """"
         # Test the database manager credential validation
         invalid_url = "postgresql://invalid_user:wrong_password@localhost:5432/test_db"
         
@@ -179,7 +181,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check when target database doesn't exist.
         
         Tests scenario where the configured database doesn't exist.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate database not found
@@ -201,7 +203,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check with concurrent connection limit exceeded.
         
         Tests scenario where database has reached maximum concurrent connections.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate too many connections
@@ -223,18 +225,18 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: Readiness check timeout under high load conditions.
         
         Tests scenario where readiness check times out due to system load.
-        """
+        """"
         # Mock slow database response
         mock_db = AsyncMock(spec=AsyncSession)
         
         async def slow_execute(*args, **kwargs):
             await asyncio.sleep(10)  # Simulate slow query
-            return MagicNone  # TODO: Use real service instance
+            return MagicMock()  # TODO: Use real service instance
         
         mock_db.execute = slow_execute
         
         # Mock request object
-        mock_request = MagicNone  # TODO: Use real service instance
+        mock_request = MagicMock()  # TODO: Use real service instance
         mock_request.app.state.startup_complete = True
         
         with patch('netra_backend.app.routes.health.get_db_dependency') as mock_get_db:
@@ -258,7 +260,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: PostgreSQL health check during network partition.
         
         Tests scenario where network connectivity to database is lost.
-        """
+        """"
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate network partition
@@ -280,7 +282,7 @@ class TestPostgreSQLHealthCheckFailures:
         FAILING TEST: Database manager credential validation with empty credentials.
         
         Tests the DatabaseManager credential validation that should catch empty credentials.
-        """
+        """"
         # Test empty username
         empty_username_url = "postgresql://:password@localhost:5432/test_db"
         

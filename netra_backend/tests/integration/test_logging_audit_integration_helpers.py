@@ -1,3 +1,4 @@
+from datetime import datetime
 """Utilities Tests - Split from test_logging_audit_integration.py"""
 
 import sys
@@ -43,5 +44,5 @@ class AuditEventHelper:
             "resource": self.resource,
             "action": self.action,
             "timestamp": self.timestamp.isoformat(),
-            "request_id": self.request_id
-        }
+            "request_id": self.request_id,
+}

@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test module: Supervisor Agent Routing
 Split from large test file for architecture compliance
 Test classes: TestSupervisorConsolidatedAgentRouting, TestSupervisorErrorCascadePrevention
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -135,7 +137,7 @@ class TestSupervisorConsolidatedAgentRouting:
         for agent_name in ["triage", "data", "optimization"]:
             agent = supervisor.agents.get(agent_name)
             # Mock: Generic component isolation for controlled unit testing
-            agent.execute = AsyncNone  # TODO: Use real service instance
+            agent.execute = AsyncMock()  # TODO: Use real service instance
             agent.execute.return_value = create_agent_state("Complex query")
         
         pipeline = create_pipeline_config(

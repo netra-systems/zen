@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from typing import Dict, List, Optional, Any, Tuple
 """Assertion helper functions for ToolDispatcher tests."""
 
 from typing import Any, Dict

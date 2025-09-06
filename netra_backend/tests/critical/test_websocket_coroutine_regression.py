@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Critical test suite to prevent WebSocket coroutine regression.
 
 Business Value: Prevents WebSocket failures that disconnect users, protecting $8K MRR.
 Tests ensure proper async/await usage and coroutine handling in WebSocket message processing.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -37,7 +39,7 @@ class TestCoroutineHandling:
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         # Pass coroutine object (not awaited)
         coroutine_obj = fake_coroutine()
@@ -49,11 +51,10 @@ class TestCoroutineHandling:
     @pytest.mark.asyncio
     async def test_parse_json_message_handles_valid_json(self):
         """Verify parse_json_message properly handles valid JSON string."""
-    pass
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         valid_json = '{"type": "ping", "data": "test"}'
         result = await parse_json_message(valid_json, "test_user", manager)
@@ -67,7 +68,7 @@ class TestCoroutineHandling:
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         dict_data = {"type": "ping", "data": "test"}
         result = await parse_json_message(dict_data, "test_user", manager)
@@ -78,11 +79,10 @@ class TestCoroutineHandling:
     @pytest.mark.asyncio
     async def test_parse_json_message_handles_invalid_json(self):
         """Verify parse_json_message handles invalid JSON gracefully."""
-    pass
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         invalid_json = '{"type": "ping", invalid}'
         result = await parse_json_message(invalid_json, "test_user", manager)
@@ -111,15 +111,14 @@ class TestCoroutineHandling:
     @pytest.mark.asyncio
     async def test_handle_ping_message_processes_ping(self):
         """Verify _handle_ping_message properly handles ping messages."""
-    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         ping_message = {"type": "ping"}
         # Mock: Generic component isolation for controlled unit testing
-        with patch('netra_backend.app.routes.utils.websocket_helpers._send_pong_response', new=AsyncNone  # TODO: Use real service instance):
+        with patch('netra_backend.app.routes.utils.websocket_helpers._send_pong_response', new=AsyncMock()  # TODO: Use real service instance):
             result = await _handle_ping_message(ping_message, websocket)
         
         assert result is True
@@ -138,7 +137,6 @@ class TestCoroutineHandling:
     @pytest.mark.asyncio
     async def test_validate_and_handle_message_with_ping(self):
         """Verify validate_and_handle_message processes ping correctly."""
-    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
@@ -149,7 +147,7 @@ class TestCoroutineHandling:
         with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message', 
                   # Mock: Async component isolation for testing without real async operations
                   new=AsyncMock(return_value=True)):
-            result = await validate_and_handle_message(
+                      result = await validate_and_handle_message(
                 "test_user", websocket, ping_message, manager
             )
         
@@ -170,7 +168,7 @@ class TestCoroutineHandling:
         with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message',
                   # Mock: Async component isolation for testing without real async operations
                   new=AsyncMock(return_value=False)):
-            result = await validate_and_handle_message(
+                      result = await validate_and_handle_message(
                 "test_user", websocket, regular_message, manager
             )
         
@@ -182,7 +180,6 @@ class TestCoroutineHandling:
     @pytest.mark.asyncio
     async def test_handle_with_manager_returns_false_on_failure(self):
         """Verify _handle_with_manager returns False when manager fails."""
-    pass
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
@@ -212,14 +209,14 @@ class TestAsyncAwaitChain:
         # Mock: Generic component isolation for controlled unit testing
         agent_service = AgentRegistry().get_agent("supervisor")
         # Mock: Generic component isolation for controlled unit testing
-        agent_service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
+        agent_service.handle_websocket_message = AsyncMock()  # TODO: Use real service instance
         
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Async component isolation for testing without real async operations
         manager.handle_message = AsyncMock(return_value=True)
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.websockets.manager', manager) as mock_manager, \
@@ -228,17 +225,15 @@ class TestAsyncAwaitChain:
              patch('app.routes.websockets.handle_pong_message', 
                    new=AsyncMock(return_value=False)) as mock_pong, \
              patch('app.routes.websockets.process_agent_message', 
-                   new=AsyncNone  # TODO: Use real service instance) as mock_process:
+                   new=AsyncMock()  # TODO: Use real service instance) as mock_process:
             
-            # Should not raise any coroutine-related errors
+                       # Should not raise any coroutine-related errors
             await _process_single_message("test_user", websocket, agent_service)
     
     @pytest.mark.asyncio
     async def test_coroutine_detection_in_pipeline(self):
         """Test that coroutines are detected early in the pipeline."""
-    pass
         async def fake_receive():
-    pass
             await asyncio.sleep(0)
     return '{"type": "test"}'
         
@@ -259,7 +254,7 @@ class TestAsyncAwaitChain:
             with patch('app.routes.websockets.parse_json_message',
                       # Mock: Async component isolation for testing without real async operations
                       new=AsyncMock(return_value=None)) as mock_parse:
-                await _process_single_message("test_user", websocket, agent_service)
+                          await _process_single_message("test_user", websocket, agent_service)
                 
                 # Verify parse_json_message was called
                 mock_parse.assert_called_once()
@@ -281,7 +276,7 @@ class TestCoroutineErrorScenarios:
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         # Get the nested coroutine
         nested = await outer_coroutine()
@@ -293,11 +288,10 @@ class TestCoroutineErrorScenarios:
     @pytest.mark.asyncio
     async def test_mixed_valid_and_coroutine_messages(self):
         """Test handling mix of valid messages and coroutines."""
-    pass
         # Mock: Generic component isolation for controlled unit testing
         manager = manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         manager.handle_message = AsyncMock(return_value=True)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
@@ -312,13 +306,12 @@ class TestCoroutineErrorScenarios:
         
         # Coroutine (should be handled gracefully)
         async def fake_msg():
-    pass
             await asyncio.sleep(0)
     return {"type": "message"}
         
         with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message',
                   new=AsyncMock(return_value=False)):
-            coroutine_msg = fake_msg()
+                      coroutine_msg = fake_msg()
             # Should handle without crashing
             result2 = await validate_and_handle_message(
                 "user2", websocket, coroutine_msg, manager
@@ -370,7 +363,6 @@ class TestRegressionPrevention:
     @pytest.mark.asyncio
     async def test_all_await_points_present(self):
         """Verify all async functions are properly awaited."""
-    pass
         # This test checks that common async functions are awaited
         import inspect
 
@@ -397,7 +389,7 @@ class TestRegressionPrevention:
     return {"type": "test"}
         
         manager = manager_instance  # Initialize appropriate service
-        manager.send_error = AsyncNone  # TODO: Use real service instance
+        manager.send_error = AsyncMock()  # TODO: Use real service instance
         
         # Should detect coroutine immediately without awaiting it
         coro = slow_coroutine()

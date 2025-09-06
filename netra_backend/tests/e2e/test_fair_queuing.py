@@ -1,8 +1,8 @@
 """
 Fair Queuing Mechanism Tests
 Tests fair queuing of requests under load.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import sys
 from pathlib import Path
@@ -67,7 +67,7 @@ class TestFairQueuing:
             ) as response:
                 wait_time = time.time() - start_time
                 return {
-                    'user_id': request['user_id'],
+                    'user_id': request['user_id'},
                     'priority': request['priority'],
                     'wait_time': wait_time,
                     'status': response.status

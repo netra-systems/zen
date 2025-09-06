@@ -2,24 +2,24 @@
 Startup Health Check Comprehensive Validation Integration Test
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Operational Excellence
 - Value Impact: Rapid issue detection
 - Strategic/Revenue Impact: Faster detection reduces MTTR
 
 Tests comprehensive validation including:
-- Sequential health checks
+    - Sequential health checks
 - Environment validation
 - Database connectivity
 - Service availability
 - Failure reporting
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -46,10 +46,9 @@ class TestStartupHealthCheckComprehensiveValidation:
     Comprehensive startup health check comprehensive validation tests.
     
     Uses L3 realism with containerized services for production-like validation.
-    """
+    """"
     
     @pytest.fixture
-    @pytest.mark.asyncio
     async def test_containers(self):
         """Set up containerized services for L3 testing."""
         # Container setup based on test requirements
@@ -59,33 +58,33 @@ class TestStartupHealthCheckComprehensiveValidation:
         test_class_name = self.__class__.__name__.lower()
         
         if 'database' in test_class_name or 'connection' in test_class_name:
-            # PostgreSQL container
-            containers["postgres"] = {
-                "url": "postgresql://test:test@localhost:5433/netra_test",
-                "max_connections": 200,
-                "pool_size": 20
-            }
+        # PostgreSQL container
+        containers["postgres"] = {
+        "url": "postgresql://test:test@localhost:5433/netra_test",
+        "max_connections": 200,
+        "pool_size": 20
+        }
         
         if 'clickhouse' in test_class_name:
-            # ClickHouse container
-            containers["clickhouse"] = {
-                "url": "http://localhost:8124",
-                "native_port": 9001,
-                "max_connections": 100
-            }
+        # ClickHouse container
+        containers["clickhouse"] = {
+        "url": "http://localhost:8124",
+        "native_port": 9001,
+        "max_connections": 100
+        }
         
         if 'redis' in test_class_name or 'session' in test_class_name:
-            # Redis container
-            containers["redis"] = {
-                "url": "redis://localhost:6380",
-                "max_memory": "256mb",
-                "max_clients": 10000
-            }
+        # Redis container
+        containers["redis"] = {
+        "url": "redis://localhost:6380",
+        "max_memory": "256mb",
+        "max_clients": 10000
+        }
         
         yield containers
     
-    @pytest.mark.asyncio
-    async def test_sequential_health_checks(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_sequential_health_checks(self, test_containers):
         """
         Test sequential health checks.
         
@@ -94,7 +93,7 @@ class TestStartupHealthCheckComprehensiveValidation:
         - Performance requirements
         - Error handling
         - Recovery mechanisms
-        """
+        """"
         start_time = time.time()
         
         # Test implementation
@@ -106,39 +105,39 @@ class TestStartupHealthCheckComprehensiveValidation:
         duration = time.time() - start_time
         assert duration < 30, f"Test took {duration:.2f}s (max: 30s)"
     
-    @pytest.mark.asyncio
-    async def test_environment_validation(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_environment_validation(self, test_containers):
         """
         Test environment validation.
         
         Validates correct behavior under this scenario.
-        """
+        """"
         # Scenario-specific test implementation
         assert True, "Test implementation needed"
     
-    @pytest.mark.asyncio
-    async def test_database_connectivity(self, test_containers):
+        @pytest.mark.asyncio
+        async def test_database_connectivity(self, test_containers):
         """
         Test database connectivity.
         
         Validates handling and recovery.
-        """
+        """"
         # Test error conditions and recovery
         with pytest.raises(Exception):
-            # Simulate failure condition
-            raise Exception("Database connectivity test failure")
+        # Simulate failure condition
+        raise Exception("Database connectivity test failure")
         
         # Verify recovery
         assert True, "Recovery validation needed"
     
-    @pytest.mark.smoke
-    @pytest.mark.asyncio
-    async def test_smoke_startup_health_check_comprehensive_validation(self, test_containers):
+        @pytest.mark.smoke
+        @pytest.mark.asyncio
+        async def test_smoke_startup_health_check_comprehensive_validation(self, test_containers):
         """
         Quick smoke test for startup health check comprehensive validation.
         
         Should complete in <30 seconds for CI/CD.
-        """
+        """"
         start_time = time.time()
         
         # Basic validation

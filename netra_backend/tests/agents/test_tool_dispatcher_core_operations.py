@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Unit tests for ToolDispatcher core operations."""
 
 import sys
@@ -164,7 +166,7 @@ class TestToolDispatcherCoreOperations:
         """Test concurrent tool dispatch operations."""
         import asyncio
         # Create multiple tools for concurrent testing
-        tools = [create_mock_tool(f"tool_{i}") for i in range(5)]
+        tools = [create_mock_tool(f"tool_{i]") for i in range(5)]
         dispatcher = ToolDispatcher(tools)
         
         # Create concurrent dispatch tasks

@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """Unit tests for ToolDispatcher advanced operations."""
 
 import sys

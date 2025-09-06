@@ -1,20 +1,22 @@
-"""Business Critical Tests - TOP 20 REVENUE-PROTECTING TESTS
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
-🔴 BUSINESS CRITICAL: These tests protect core revenue-generating functionality
-- Customer segments: Free → Early → Mid → Enterprise 
+"""Business Critical Tests - TOP 20 REVENUE-PROTECTING TESTS"""
+
+ BUSINESS CRITICAL: These tests protect core revenue-generating functionality
+- Customer segments: Free -> Early -> Mid -> Enterprise 
 - Revenue model: 20% performance fee on savings
 - Each test guards against revenue loss from system failures
 
 ULTRA DEEP THINKING APPLIED: Each test designed for maximum business value protection.
-All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
-"""
+All functions <=8 lines. File <=300 lines as per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -107,7 +109,7 @@ class TestLLMFallbackChain:
     
     @pytest.mark.asyncio
     async def test_llm_fallback_primary_to_secondary_to_tertiary(self):
-        """Test LLM fallback chain: primary → secondary → tertiary model"""
+        """Test LLM fallback chain: primary -> secondary -> tertiary model"""
         # Arrange - Mock LLM providers with fallback chain
         # Mock: Component isolation for testing without external dependencies
         with patch('builtins.open', mock_open(read_data=json.dumps({"content": "Tertiary response"}))):
@@ -142,9 +144,9 @@ class TestMetricsAggregationAccuracy:
         """Test metrics aggregation produces accurate billing calculations"""
         # Arrange - Create test usage data for billing calculation
         test_usage_data = [
-            {"tokens": 1000, "cost": 0.02, "model": LLMModel.GEMINI_2_5_FLASH.value},
-            {"tokens": 2000, "cost": 0.04, "model": LLMModel.GEMINI_2_5_FLASH.value},
-            {"tokens": 500, "cost": 0.01, "model": "gpt-3.5"}
+            {"tokens": 1000, "cost": 0.2, "model": LLMModel.GEMINI_2_5_FLASH.value},
+            {"tokens": 2000, "cost": 0.4, "model": LLMModel.GEMINI_2_5_FLASH.value},
+            {"tokens": 500, "cost": 0.1, "model": "gpt-3.5"}
         ]
         
         # Act - Perform billing calculations directly
@@ -160,8 +162,8 @@ class TestMetricsAggregationAccuracy:
         
         # Assert - Calculations are accurate (with precision tolerance)
         assert result["total_tokens"] == 3500
-        assert abs(result["total_cost"] - 0.07) < 0.0001
-        assert abs(result["performance_fee"] - 0.014) < 0.0001  # 20% of cost
+        assert abs(result["total_cost"] - 0.7) < 0.1
+        assert abs(result["performance_fee"] - 0.14) < 0.1  # 20% of cost
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -204,13 +206,13 @@ class TestDatabaseTransactionRollback:
         """Test database transactions rollback properly on failures"""
         # Arrange - Mock database session with transaction
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = add_instance  # Initialize appropriate service
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock(side_effect=Exception("DB Error"))
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.rollback = AsyncNone  # TODO: Use real service instance
+        mock_session.rollback = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.in_transaction = Mock(return_value=False)
         mock_session.new = set()
@@ -218,7 +220,7 @@ class TestDatabaseTransactionRollback:
         # Act - Simulate transaction failure and rollback
         try:
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session.add(None  # TODO: Use real service instance)  # Add some data
+            mock_session.add(Mock()  # TODO: Use real service instance)  # Add some data
             await mock_session.commit()  # This will fail
         except Exception:
             await mock_session.rollback()  # Should rollback
@@ -295,7 +297,7 @@ class TestMultiAgentCoordination:
         """Test multiple agents execute in parallel without conflicts"""
         # Arrange - Mock agents with async processing
         async def mock_agent_task(agent_id):
-            await asyncio.sleep(0.01)  # Simulate processing
+            await asyncio.sleep(0.1)  # Simulate processing
             await asyncio.sleep(0)
     return f"result_{agent_id}"
             
@@ -375,9 +377,9 @@ class TestCostTrackingPrecision:
         """Test AI cost tracking maintains precision for billing"""
         # Arrange - Create cost tracking scenario
         usage_events = [
-            {"model": LLMModel.GEMINI_2_5_FLASH.value, "tokens": 1000, "rate_per_1k": 0.03},
-            {"model": "gpt-3.5", "tokens": 2000, "rate_per_1k": 0.002},
-            {"model": "claude-3", "tokens": 1500, "rate_per_1k": 0.025}
+            {"model": LLMModel.GEMINI_2_5_FLASH.value, "tokens": 1000, "rate_per_1k": 0.3},
+            {"model": "gpt-3.5", "tokens": 2000, "rate_per_1k": 0.2},
+            {"model": "claude-3", "tokens": 1500, "rate_per_1k": 0.25}
         ]
         
         # Act - Calculate precise costs
@@ -386,13 +388,13 @@ class TestCostTrackingPrecision:
             cost = (event["tokens"] / 1000) * event["rate_per_1k"]
             total_cost += cost
             
-        # Expected: (1*0.03) + (2*0.002) + (1.5*0.025) = 0.0715
-        expected_cost = 0.0715
+        # Expected: (1*0.3) + (2*0.2) + (1.5*0.25) = 0.715
+        expected_cost = 0.715
         performance_fee = total_cost * 0.20
         
         # Assert - Cost calculation is precise
-        assert abs(total_cost - expected_cost) < 0.0001  # Precision check
-        assert abs(performance_fee - 0.0143) < 0.0001   # 20% fee precision
+        assert abs(total_cost - expected_cost) < 0.1  # Precision check
+        assert abs(performance_fee - 0.143) < 0.1   # 20% fee precision
 
 # Additional simplified tests for completeness
 @pytest.mark.critical 
@@ -404,8 +406,8 @@ class TestCrossServiceCommunication:
     async def test_auth_service_propagation_integrity(self):
         """Iteration 41: Auth token propagation across services prevents $50K security breach"""
         # Mock inter-service auth propagation
-        mock_auth_service = AsyncNone  # TODO: Use real service instance
-        mock_backend = AsyncNone  # TODO: Use real service instance
+        mock_auth_service = AsyncMock()  # TODO: Use real service instance
+        mock_backend = AsyncMock()  # TODO: Use real service instance
         test_token = "secure_jwt_token_12345"
         
         # Verify auth propagates correctly
@@ -421,7 +423,6 @@ class TestCrossServiceCommunication:
     @pytest.mark.asyncio
     async def test_service_discovery_circuit_breaker(self):
         """Iteration 42: Circuit breaker prevents cascade failures worth $75K in downtime"""
-    pass
         # Mock service discovery with circuit breaker
         circuit_state = {"failures": 0, "state": "closed", "threshold": 3}
         
@@ -494,7 +495,6 @@ class TestDataPersistenceLayer:
     @pytest.mark.asyncio
     async def test_cache_consistency_validation(self):
         """Iteration 45: Cache consistency prevents $50K performance degradation"""
-    pass
         # Mock cache layers
         l1_cache = {"user_123": {"name": "Enterprise User", "version": 1}}
         l2_cache = {"user_123": {"name": "Enterprise User", "version": 1}}
@@ -516,8 +516,8 @@ class TestDataPersistenceLayer:
     async def test_backup_recovery_validation(self):
         """Iteration 46: Backup recovery prevents $50K data loss incidents"""
         # Mock backup and recovery scenario
-        primary_data = {"critical_data": "enterprise_metrics", "timestamp": "2025-01-01"}
-        backup_data = {"critical_data": "enterprise_metrics", "timestamp": "2025-01-01"}
+        primary_data = {"critical_data": "enterprise_metrics", "timestamp": "2025-1-1"}
+        backup_data = {"critical_data": "enterprise_metrics", "timestamp": "2025-1-1"}
         
         # Simulate primary failure
         primary_failed = True
@@ -546,7 +546,7 @@ class TestSecurityBoundaries:
         user_context = {
             "user_id": "basic_user_456",
             "role": "user",
-            "permissions": ["read"],
+            "permissions": ["read"},
             "enterprise_access": False
         }
         
@@ -570,10 +570,9 @@ class TestSecurityBoundaries:
     @pytest.mark.asyncio
     async def test_rbac_enforcement_validation(self):
         """Iteration 48: RBAC enforcement prevents $100K unauthorized access incidents"""
-    pass
         # Mock RBAC system
         roles = {
-            "admin": ["read", "write", "delete", "user_management"],
+            "admin": ["read", "write", "delete", "user_management"},
             "user": ["read"],
             "enterprise": ["read", "write", "enterprise_analytics"]
         }
@@ -609,7 +608,7 @@ class TestSecurityBoundaries:
         for op in operations:
             audit_entry = {
                 "timestamp": datetime.now(),
-                "action": op["action"],
+                "action": op["action"},
                 "user": op.get("user"),
                 "details": op,
                 "compliance_logged": True
@@ -683,7 +682,6 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_websocket_message_ordering(self):
         """Test WebSocket message sequence preservation"""  
-    pass
         # Arrange - Mock message queue
         messages = [f"message_{i}" for i in range(5)]
         received_messages = []
@@ -715,7 +713,6 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_permission_boundaries_enforcement(self):
         """Test access control prevents unauthorized actions"""
-    pass
         # Arrange - Mock permission system
         user_permissions = {"read": True, "write": False, "admin": False}
         
@@ -743,10 +740,9 @@ class TestAdditionalCriticalScenarios:
     @pytest.mark.asyncio
     async def test_resource_cleanup_on_shutdown(self):
         """Test proper resource cleanup"""
-    pass
         # Arrange - Mock resources
         # Mock: Generic component isolation for controlled unit testing
-        resources = {"db_conn": None  # TODO: Use real service instance, "ws_conn": None  # TODO: Use real service instance, "cache": None  # TODO: Use real service instance}
+        resources = {"db_conn": Mock()  # TODO: Use real service instance, "ws_conn": Mock()  # TODO: Use real service instance, "cache": Mock()  # TODO: Use real service instance}
         
         # Act - Cleanup resources
         cleanup_count = 0

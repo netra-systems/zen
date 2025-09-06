@@ -1,16 +1,18 @@
 from shared.isolated_environment import get_env
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Critical test suite for staging configuration and logging circular dependency.
 
 This test reproduces the circular dependency error seen in staging:
-- Loguru handler emission error at `/usr/local/lib/python3.11/site-packages/loguru/_handler.py:133`
+    - Loguru handler emission error at `/usr/local/lib/python3.11/site-packages/loguru/_handler.py:133`
 - Configuration loading error at `/app/netra_backend/app/core/configuration/base.py:182`
 
 The issue is that UnifiedConfigManager imports central_logger, but UnifiedLogger
 tries to load config during initialization, creating a circular dependency.
-"""
+""""
 
 import pytest
 import sys
@@ -26,10 +28,10 @@ class TestConfigurationLoggingCircularDependency:
         FAILING TEST: Reproduces circular dependency between config and logger.
         
         This test demonstrates the exact circular dependency issue seen in staging:
-        1. UnifiedConfigManager imports central_logger during module load
+            1. UnifiedConfigManager imports central_logger during module load
         2. When logger is accessed, it tries to load config via _load_config()
         3. This creates infinite recursion or import failures
-        """
+        """"
         # Clear any cached imports to simulate fresh startup
         modules_to_clear = [
             m for m in sys.modules.keys() 
@@ -62,7 +64,7 @@ class TestConfigurationLoggingCircularDependency:
         
         This simulates the exact scenario where configuration loading is triggered
         but logger initialization fails because config isn't available yet.
-        """
+        """"
         # Mock the scenario where config is being loaded but logger needs config
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.unified_logging.UnifiedLogger._load_config') as mock_load_config:
@@ -84,11 +86,11 @@ class TestConfigurationLoggingCircularDependency:
         FAILING TEST: Reproduces recursive config loading when logger emits logs.
         
         This test simulates the scenario where:
-        1. Config starts loading
+            1. Config starts loading
         2. Logger tries to emit a log during config load
         3. Logger tries to load config for its configuration
         4. Creates recursive loop
-        """
+        """"
         # Track recursive calls
         call_count = {'config_load': 0, 'logger_setup': 0}
         
@@ -101,7 +103,7 @@ class TestConfigurationLoggingCircularDependency:
             from netra_backend.app.core.unified_logging import central_logger
             central_logger.info("Loading configuration...")  # This triggers recursion
             # Mock: Generic component isolation for controlled unit testing
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         def mock_logger_setup(self):
             call_count['logger_setup'] += 1
@@ -129,8 +131,8 @@ class TestConfigurationLoggingCircularDependency:
         FAILING TEST: Reproduces Loguru handler emission error during config initialization.
         
         This simulates the exact error from staging:
-        `/usr/local/lib/python3.11/site-packages/loguru/_handler.py:133`
-        """
+            `/usr/local/lib/python3.11/site-packages/loguru/_handler.py:133`
+        """"
         # Mock loguru handler to simulate emission failure during config load
         # Mock: Component isolation for testing without external dependencies
         with patch('loguru.logger') as mock_loguru:
@@ -160,7 +162,7 @@ class TestConfigurationBootstrapWithoutLogger:
         FAILING TEST: Config initialization fails when logger module is not available.
         
         This simulates staging scenario where logger import fails during config init.
-        """
+        """"
         # Mock the import to fail for logging modules
         original_import = __builtins__['__import__']
         
@@ -186,7 +188,7 @@ class TestConfigurationBootstrapWithoutLogger:
         
         This tests the scenario where configuration validation fails but
         error logging also fails, creating a cascading failure.
-        """
+        """"
         from netra_backend.app.core.configuration.base import UnifiedConfigManager
         
         manager = UnifiedConfigManager()
@@ -210,7 +212,7 @@ class TestConfigurationBootstrapWithoutLogger:
         
         This tests the scenario where logger falls back to environment variables
         but the fallback mechanism itself fails.
-        """
+        """"
         from netra_backend.app.core.unified_logging import UnifiedLogger
         
         logger = UnifiedLogger()
@@ -235,7 +237,7 @@ class TestStagingSpecificCircularDependencyScenarios:
         
         This reproduces the scenario where multiple threads try to initialize
         the singleton configuration manager simultaneously, creating circular dependencies.
-        """
+        """"
         from netra_backend.app.core.configuration.base import UnifiedConfigManager
         
         # Reset singleton state
@@ -284,7 +286,7 @@ class TestStagingSpecificCircularDependencyScenarios:
         FAILING TEST: Configuration loading flag doesn't prevent recursion properly.
         
         The current code has a _loading flag but it may not prevent all recursive scenarios.
-        """
+        """"
         from netra_backend.app.core.configuration.base import UnifiedConfigManager
         
         manager = UnifiedConfigManager()
@@ -303,7 +305,7 @@ class TestStagingSpecificCircularDependencyScenarios:
         
         This tests the scenario where logger's config cache is cleared
         while configuration is still being loaded.
-        """
+        """"
         from netra_backend.app.core.unified_logging import UnifiedLogger
         
         logger = UnifiedLogger()

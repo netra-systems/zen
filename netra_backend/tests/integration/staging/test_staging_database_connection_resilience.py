@@ -1,20 +1,22 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Staging Database Connection Resilience Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability and Data Integrity
 - Value Impact: Ensures database resilience in staging environment for mission-critical operations
 - Strategic Impact: Prevents data loss and service outages that could impact $2M+ ARR
 
 Tests PostgreSQL, ClickHouse, and Redis connection handling, pooling, failover,
 migration execution, and recovery mechanisms in staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -42,7 +44,7 @@ class StagingDatabaseResilience:
     """Simulates staging database resilience scenarios."""
     
     def __init__(self):
-        self.connections = {"postgres": [], "clickhouse": [], "redis": []}
+        self.connections = {"postgres": [], "clickhouse": [], "redis": []]
         self.connection_failures = {"postgres": 0, "clickhouse": 0, "redis": 0}
         self.recovery_attempts = {"postgres": 0, "clickhouse": 0, "redis": 0}
     
@@ -286,7 +288,7 @@ class TestStagingDatabaseConnectionResilience:
                 connection_healthy = await staging_db_resilience.test_connection(db_type)
                 health_status[db_type] = "healthy" if connection_healthy else "unhealthy"
             except Exception as e:
-                health_status[db_type] = f"error: {str(e)}"
+                health_status[db_type] = f"error: {str(e)]"
         
         # Verify health monitoring captures status
         assert "postgres" in health_status

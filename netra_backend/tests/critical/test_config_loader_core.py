@@ -1,18 +1,20 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
-"""Critical Config Loader Core Tests
+from unittest.mock import Mock, patch, MagicMock
+
+"""Critical Config Loader Core Tests"""
 
 env = get_env()
 Business Value: Protects $10K/hour risk from configuration loading failures.
 Prevents system unavailability due to config loading issues during startup.
 
 ULTRA DEEP THINKING APPLIED: Each test designed for maximum config loading reliability.
-All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
-"""
+All functions <=8 lines. File <=300 lines as per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path
@@ -192,8 +194,8 @@ class TestEnvironmentVariableLoading:
         # Assert - Loading fails gracefully
         assert result is False
     
-    def test_load_env_var_failure_missing_env_var(self):
-        """Test environment variable loading fails when env var missing"""
+            def test_load_env_var_failure_missing_env_var(self):
+                """Test environment variable loading fails when env var missing"""
         # Arrange - Mock config with field but no env var
         # Mock: Generic component isolation for controlled unit testing
         mock_config = mock_config_instance  # Initialize appropriate service
@@ -327,7 +329,7 @@ class TestLLMConfigurationLoading:
         
         for name in llm_names:
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            mock_config.llm_configs[name] = None  # TODO: Use real service instance
+            mock_config.llm_configs[name] = Mock()  # TODO: Use real service instance
             mock_config.llm_configs[name].api_key = None
             
         # Act - Set Gemini API key
@@ -345,7 +347,7 @@ class TestLLMConfigurationLoading:
         mock_config = mock_config_instance  # Initialize appropriate service
         mock_config.llm_configs = {
             # Mock: Generic component isolation for controlled unit testing
-            'analysis': None  # TODO: Use real service instance
+            'analysis': Mock()  # TODO: Use real service instance
         }
         mock_config.llm_configs['analysis'].api_key = None
         
@@ -467,8 +469,8 @@ class TestSecretApplicationLogic:
         # Assert - None returned for missing path
         assert parent is None
     
-    def test_get_attribute_or_none_success(self):
-        """Test getting attribute returns correct value when exists"""
+            def test_get_attribute_or_none_success(self):
+                """Test getting attribute returns correct value when exists"""
         # Arrange - Mock object with attribute
         # Mock: Generic component isolation for controlled unit testing
         mock_obj = mock_obj_instance  # Initialize appropriate service

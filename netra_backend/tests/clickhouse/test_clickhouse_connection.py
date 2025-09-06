@@ -1,7 +1,9 @@
+import asyncio
+
 """
 ClickHouse Basic Connection Tests
 Tests for basic ClickHouse connectivity and database operations
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -40,7 +42,7 @@ class TestRealClickHouseConnection:
         version_result = await client.execute_query("SELECT version() as version")
         assert len(version_result) == 1
         assert 'version' in version_result[0]
-        logger.info(f"Connected to ClickHouse version: {version_result[0]['version']}")
+        logger.info(f"Connected to ClickHouse version: {version_result[0]['version']]")
 
     @pytest.mark.asyncio
     async def test_real_database_operations(self, real_clickhouse_client):
@@ -81,7 +83,7 @@ class TestRealClickHouseConnection:
         metrics_query = """
         SELECT metric, value FROM system.metrics
         WHERE metric IN ('Query', 'HTTPConnection', 'TCPConnection')
-        """
+        """"
         metrics_result = await client.execute_query(metrics_query)
         assert isinstance(metrics_result, list)
         for row in metrics_result:

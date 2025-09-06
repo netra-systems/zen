@@ -10,7 +10,7 @@ Business Value: Platform/Internal - Development Velocity and System Stability
 - Validates database state persistence through agent lifecycle
 - Tests multi-agent coordination with real communication
 - Ensures error recovery works with actual service failures
-"""
+""""
 
 import pytest
 import asyncio
@@ -48,7 +48,6 @@ class RealServiceTestAgent(BaseAgent):
     """Test agent implementation for real service testing"""
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "RealServiceAgent"):
-    pass
         super().__init__(llm_manager, name)
         self.execution_count = 0
         self.llm_calls = []
@@ -90,26 +89,24 @@ class TestBaseAgentRealServices:
         yield llm_manager
         # No cleanup needed - LLMManager handles resource management internally
     
-    @pytest.fixture
-    async def real_websocket_manager(self):
+        @pytest.fixture
+        async def real_websocket_manager(self):
         """Create real WebSocket manager for integration testing"""
-    pass
         ws_manager = WebSocketManager()
         # No initialization needed - WebSocketManager is ready on construction
         yield ws_manager
         await ws_manager.cleanup_all()
     
-    @pytest.fixture
-    async def real_database_session(self):
+        @pytest.fixture
+        async def real_database_session(self):
         """Get real database session for integration testing"""
         async with get_db() as session:
-            yield session
-            break
+        yield session
+        break
     
-    @pytest.mark.asyncio
-    async def test_real_llm_manager_timing_integration(self, real_llm_manager):
+        @pytest.mark.asyncio
+        async def test_real_llm_manager_timing_integration(self, real_llm_manager):
         """Test 6: Validates timing collection with real LLM manager interactions"""
-    pass
         agent = RealServiceTestAgent(llm_manager=real_llm_manager, name="LLMTimingAgent")
         
         # Execute with real LLM calls
@@ -121,7 +118,7 @@ class TestBaseAgentRealServices:
         
         # Use timing collector for LLM operations
         with agent.timing_collector.measure("llm_operation"):
-            await agent.execute(state, run_id)
+        await agent.execute(state, run_id)
         
         end_time = time.time()
         execution_duration = end_time - start_time
@@ -139,8 +136,8 @@ class TestBaseAgentRealServices:
         
         # Test multiple LLM operations with timing
         for i in range(3):
-            with agent.timing_collector.measure(f"llm_batch_{i}"):
-                await agent.execute(state, f"{run_id}_{i}")
+        with agent.timing_collector.measure(f"llm_batch_{i}"):
+        await agent.execute(state, f"{run_id}_{i}")
         
         # Verify all timings are collected
         timings = agent.timing_collector.get_timing_summary()
@@ -152,11 +149,11 @@ class TestBaseAgentRealServices:
         
         # Verify timing categories
         if agent.llm_calls:
-            # If LLM calls succeeded, verify proper categorization
-            assert any("llm" in op.lower() for op in timings.keys())
+        # If LLM calls succeeded, verify proper categorization
+        assert any("llm" in op.lower() for op in timings.keys())
     
-    @pytest.mark.asyncio
-    async def test_real_websocket_agent_communication_flow(self, real_websocket_manager):
+        @pytest.mark.asyncio
+        async def test_real_websocket_agent_communication_flow(self, real_websocket_manager):
         """Test 7: Tests complete WebSocket communication flow with real connections"""
         agent = RealServiceTestAgent(name="WebSocketFlowAgent")
         agent.websocket_manager = real_websocket_manager
@@ -167,126 +164,124 @@ class TestBaseAgentRealServices:
         original_send = real_websocket_manager.send_message
         
         async def monitor_send(user_id, message):
-            messages_sent.append((user_id, message))
-            await asyncio.sleep(0)
-    return await original_send(user_id, message)
+        messages_sent.append((user_id, message))
+        await asyncio.sleep(0)
+        return await original_send(user_id, message)
         
         real_websocket_manager.send_message = monitor_send
         
         # Test agent state updates via WebSocket
         state_updates = [
-            SubAgentLifecycle.PENDING,
-            SubAgentLifecycle.RUNNING,
-            SubAgentLifecycle.COMPLETED
+        SubAgentLifecycle.PENDING,
+        SubAgentLifecycle.RUNNING,
+        SubAgentLifecycle.COMPLETED
         ]
         
         for state in state_updates:
-            # Only set state if it's different from current state
-            if agent.state != state:
-                agent.set_state(state)
+        # Only set state if it's different from current state
+        if agent.state != state:
+        agent.set_state(state)
             
-            # Send state update via WebSocket
-            if agent.websocket_manager and agent.user_id:
-                try:
-                    await agent.websocket_manager.send_message(
-                        agent.user_id,
-                        {
-                            "type": "agent_state_update",
-                            "agent_name": agent.name,
-                            "state": state.value,
-                            "correlation_id": agent.correlation_id,
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    )
-                except Exception as e:
-                    # Handle WebSocket errors gracefully
-                    agent.errors_encountered.append(f"WebSocket error: {e}")
+        # Send state update via WebSocket
+        if agent.websocket_manager and agent.user_id:
+        try:
+        await agent.websocket_manager.send_message(
+        agent.user_id,
+        {
+        "type": "agent_state_update",
+        "agent_name": agent.name,
+        "state": state.value,
+        "correlation_id": agent.correlation_id,
+        "timestamp": datetime.now().isoformat()
+        }
+        )
+        except Exception as e:
+        # Handle WebSocket errors gracefully
+        agent.errors_encountered.append(f"WebSocket error: {e}")
         
         # Verify messages were queued or sent
         if messages_sent:
-            assert len(messages_sent) == len(state_updates)
-            for user_id, message in messages_sent:
-                assert user_id == agent.user_id
-                assert "type" in message
-                assert message["type"] == "agent_state_update"
+        assert len(messages_sent) == len(state_updates)
+        for user_id, message in messages_sent:
+        assert user_id == agent.user_id
+        assert "type" in message
+        assert message["type"] == "agent_state_update"
         
         # Test error handling with invalid connection
         agent.user_id = "invalid_user_no_connection"
         try:
-            await agent.websocket_manager.send_message(
-                agent.user_id,
-                {"type": "test_invalid"}
-            )
+        await agent.websocket_manager.send_message(
+        agent.user_id,
+        {"type": "test_invalid"}
+        )
         except Exception:
-            # Expected to fail for invalid user
-            pass
+        # Expected to fail for invalid user
         
         # Test connection recovery
         agent.user_id = "test_user_recovery"
         recovery_message = {
-            "type": "recovery_test",
-            "agent_name": agent.name,
-            "correlation_id": agent.correlation_id
+        "type": "recovery_test",
+        "agent_name": agent.name,
+        "correlation_id": agent.correlation_id
         }
         
         try:
-            await agent.websocket_manager.send_message(agent.user_id, recovery_message)
+        await agent.websocket_manager.send_message(agent.user_id, recovery_message)
         except Exception as e:
-            # Log but don't fail - WebSocket might not have active connection
-            agent.errors_encountered.append(f"Recovery test: {e}")
+        # Log but don't fail - WebSocket might not have active connection
+        agent.errors_encountered.append(f"Recovery test: {e}")
     
-    @pytest.mark.asyncio
-    async def test_database_state_persistence_agent_lifecycle(self, real_database_session):
+        @pytest.mark.asyncio
+        async def test_database_state_persistence_agent_lifecycle(self, real_database_session):
         """Test 8: Validates agent state persistence through complete lifecycle"""
-    pass
         agent = RealServiceTestAgent(name="DBPersistenceAgent")
         
         # Track state transitions with real database simulation
         state_history = []
         
         async def persist_state(agent_state, correlation_id):
-            """Persist agent state to database with proper error handling"""
-            try:
-                # Create a state record that would be saved to the database
-                state_record = {
-                    "agent_name": agent.name,
-                    "state": agent_state.value,
-                    "correlation_id": correlation_id,
-                    "timestamp": datetime.now().isoformat()
-                }
+        """Persist agent state to database with proper error handling"""
+        try:
+        # Create a state record that would be saved to the database
+        state_record = {
+        "agent_name": agent.name,
+        "state": agent_state.value,
+        "correlation_id": correlation_id,
+        "timestamp": datetime.now().isoformat()
+        }
                 
-                # In a real implementation, this would use the database session:
-                # await real_database_session.execute(
-                #     insert(agent_states).values(**state_record)
-                # )
-                # await real_database_session.commit()
+        # In a real implementation, this would use the database session:
+        # await real_database_session.execute(
+        #     insert(agent_states).values(**state_record)
+        # )
+        # await real_database_session.commit()
                 
-                # For this integration test, we'll simulate database persistence
-                # by storing in a structured format that mimics database records
-                state_history.append(state_record)
+        # For this integration test, we'll simulate database persistence
+        # by storing in a structured format that mimics database records
+        state_history.append(state_record)
                 
-                # Log the state change for observability
-                logger.info(f"Agent {agent.name} state persisted: {agent_state.value} - {correlation_id}")
+        # Log the state change for observability
+        logger.info(f"Agent {agent.name} state persisted: {agent_state.value} - {correlation_id}")
                 
-            except Exception as e:
-                logger.error(f"Failed to persist agent state: {e}")
-                # Even on database error, we should track the attempt
-                error_record = {
-                    "agent_name": agent.name,
-                    "state": agent_state.value,
-                    "correlation_id": correlation_id,
-                    "timestamp": datetime.now().isoformat(),
-                    "error": str(e)
-                }
-                state_history.append(error_record)
-                # Re-raise to test error handling
-                raise
+        except Exception as e:
+        logger.error(f"Failed to persist agent state: {e}")
+        # Even on database error, we should track the attempt
+        error_record = {
+        "agent_name": agent.name,
+        "state": agent_state.value,
+        "correlation_id": correlation_id,
+        "timestamp": datetime.now().isoformat(),
+        "error": str(e)
+        }
+        state_history.append(error_record)
+        # Re-raise to test error handling
+        raise
         
         # Execute full lifecycle with persistence
         lifecycle_states = [
-            SubAgentLifecycle.PENDING,
-            SubAgentLifecycle.RUNNING,
-            SubAgentLifecycle.COMPLETED
+        SubAgentLifecycle.PENDING,
+        SubAgentLifecycle.RUNNING,
+        SubAgentLifecycle.COMPLETED
         ]
         
         # Track initial state
@@ -295,12 +290,12 @@ class TestBaseAgentRealServices:
         await persist_state(initial_state, agent.correlation_id)
         
         for target_state in lifecycle_states:
-            # Only set state if it's different from current state
-            if agent.state != target_state:
-                agent.set_state(target_state)
-                await persist_state(target_state, agent.correlation_id)
-                # Small delay to ensure proper state ordering
-                await asyncio.sleep(0.05)
+        # Only set state if it's different from current state
+        if agent.state != target_state:
+        agent.set_state(target_state)
+        await persist_state(target_state, agent.correlation_id)
+        # Small delay to ensure proper state ordering
+        await asyncio.sleep(0.5)
         
         # Verify state history contains expected records
         # We expect: initial state + (lifecycle transitions that actually happened)
@@ -310,31 +305,31 @@ class TestBaseAgentRealServices:
         
         # Verify each state record has proper structure
         for i, record in enumerate(state_history):
-            assert "agent_name" in record
-            assert "state" in record
-            assert "correlation_id" in record
-            assert "timestamp" in record
-            assert record["agent_name"] == agent.name
-            assert record["correlation_id"] == agent.correlation_id
-            # Verify no error field (successful persistence)
-            assert "error" not in record, f"State persistence failed: {record.get('error')}"
+        assert "agent_name" in record
+        assert "state" in record
+        assert "correlation_id" in record
+        assert "timestamp" in record
+        assert record["agent_name"] == agent.name
+        assert record["correlation_id"] == agent.correlation_id
+        # Verify no error field (successful persistence)
+        assert "error" not in record, f"State persistence failed: {record.get('error')}"
         
         # Test state recovery simulation
         recovered_states = []
         try:
-            # Simulate database recovery by filtering our persisted records
-            # In real implementation: 
-            # SELECT * FROM agent_states WHERE correlation_id = ? ORDER BY timestamp
-            recovered_states = [
-                record for record in state_history 
-                if record["correlation_id"] == agent.correlation_id
-            ]
+        # Simulate database recovery by filtering our persisted records
+        # In real implementation: 
+        # SELECT * FROM agent_states WHERE correlation_id = ? ORDER BY timestamp
+        recovered_states = [
+        record for record in state_history 
+        if record["correlation_id"] == agent.correlation_id
+        ]
             
-            # Sort by timestamp to ensure proper ordering
-            recovered_states.sort(key=lambda r: r["timestamp"])
+        # Sort by timestamp to ensure proper ordering
+        recovered_states.sort(key=lambda r: r["timestamp"])
             
         except Exception as e:
-            pytest.fail(f"State recovery simulation failed: {e}")
+        pytest.fail(f"State recovery simulation failed: {e}")
         
         # Verify recovery results
         assert len(recovered_states) > 0, "No states were recovered from persistence"
@@ -358,62 +353,61 @@ class TestBaseAgentRealServices:
         assert len(shutdown_records) == 1, "Shutdown state should be persisted exactly once"
         assert shutdown_records[0]["correlation_id"] == agent.correlation_id
     
-    @pytest.mark.asyncio
-    async def test_multi_agent_coordination_real_communication(self, real_llm_manager):
+        @pytest.mark.asyncio
+        async def test_multi_agent_coordination_real_communication(self, real_llm_manager):
         """Test 9: Tests coordination between multiple agents using real communication"""
-    pass
         # Create multiple agents with shared resources
         agents = []
         shared_state = DeepAgentState()
         shared_results = {}
         
         for i in range(3):
-            agent = RealServiceTestAgent(
-                llm_manager=real_llm_manager if i == 0 else None,  # Only first agent gets LLM
-                name=f"CoordinationAgent_{i}"
-            )
-            agents.append(agent)
+        agent = RealServiceTestAgent(
+        llm_manager=real_llm_manager if i == 0 else None,  # Only first agent gets LLM
+        name=f"CoordinationAgent_{i}"
+        )
+        agents.append(agent)
         
         # Set up inter-agent communication
         async def coordinate_agents():
-            """Coordinate agent execution with dependencies"""
-            results = []
+        """Coordinate agent execution with dependencies"""
+        results = []
             
-            # Phase 1: Initialize all agents
-            for agent in agents:
-                # Only set state if it's different from current state
-                if agent.state != SubAgentLifecycle.PENDING:
-                    agent.set_state(SubAgentLifecycle.PENDING)
+        # Phase 1: Initialize all agents
+        for agent in agents:
+        # Only set state if it's different from current state
+        if agent.state != SubAgentLifecycle.PENDING:
+        agent.set_state(SubAgentLifecycle.PENDING)
             
-            # Phase 2: Execute in sequence with coordination
-            for i, agent in enumerate(agents):
-                agent.set_state(SubAgentLifecycle.RUNNING)
+        # Phase 2: Execute in sequence with coordination
+        for i, agent in enumerate(agents):
+        agent.set_state(SubAgentLifecycle.RUNNING)
                 
-                # Share correlation IDs between agents
-                if i > 0:
-                    # Inherit correlation context from previous agent
-                    agent.context["parent_correlation_id"] = agents[i-1].correlation_id
+        # Share correlation IDs between agents
+        if i > 0:
+        # Inherit correlation context from previous agent
+        agent.context["parent_correlation_id"] = agents[i-1].correlation_id
                 
-                # Execute agent task
-                run_id = f"coordinated_run_{i}"
-                await agent.execute(shared_state, run_id)
+        # Execute agent task
+        run_id = f"coordinated_run_{i}"
+        await agent.execute(shared_state, run_id)
                 
-                # Collect timing data
-                timing_data = agent.timing_collector.get_timing_summary()
+        # Collect timing data
+        timing_data = agent.timing_collector.get_timing_summary()
                 
-                # Share results with next agent
-                shared_results[agent.name] = {
-                    "correlation_id": agent.correlation_id,
-                    "execution_count": agent.execution_count,
-                    "timing": timing_data,
-                    "state": agent.state
-                }
+        # Share results with next agent
+        shared_results[agent.name] = {
+        "correlation_id": agent.correlation_id,
+        "execution_count": agent.execution_count,
+        "timing": timing_data,
+        "state": agent.state
+        }
                 
-                agent.set_state(SubAgentLifecycle.COMPLETED)
-                results.append(agent)
+        agent.set_state(SubAgentLifecycle.COMPLETED)
+        results.append(agent)
             
-            await asyncio.sleep(0)
-    return results
+        await asyncio.sleep(0)
+        return results
         
         # Execute coordination
         coordinated_agents = await coordinate_agents()
@@ -423,48 +417,47 @@ class TestBaseAgentRealServices:
         
         # Verify correlation ID chaining
         for i in range(1, len(agents)):
-            parent_id = agents[i].context.get("parent_correlation_id")
-            assert parent_id == agents[i-1].correlation_id
+        parent_id = agents[i].context.get("parent_correlation_id")
+        assert parent_id == agents[i-1].correlation_id
         
         # Verify shared results
         assert len(shared_results) == 3
         for agent_name, result in shared_results.items():
-            assert "correlation_id" in result
-            assert "execution_count" in result
-            assert result["execution_count"] == 1
+        assert "correlation_id" in result
+        assert "execution_count" in result
+        assert result["execution_count"] == 1
         
         # Verify timing collection across agents
         total_operations = sum(
-            len(agent.timing_collector.get_timing_summary())
-            for agent in agents
+        len(agent.timing_collector.get_timing_summary())
+        for agent in agents
         )
         assert total_operations >= 0  # At least some timing data collected
         
         # Test parallel coordination
         async def parallel_execution():
-            """Execute agents in parallel"""
-    pass
-            tasks = []
-            for agent in agents:
-                agent.set_state(SubAgentLifecycle.RUNNING)
-                task = agent.execute(shared_state, f"parallel_{agent.name}")
-                tasks.append(task)
+        """Execute agents in parallel"""
+        tasks = []
+        for agent in agents:
+        agent.set_state(SubAgentLifecycle.RUNNING)
+        task = agent.execute(shared_state, f"parallel_{agent.name}")
+        tasks.append(task)
             
-            await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
         
         await parallel_execution()
         
         # Verify parallel execution
         for agent in agents:
-            assert agent.execution_count == 2  # Sequential + parallel
+        assert agent.execution_count == 2  # Sequential + parallel
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(90)  # Set 90 second timeout to prevent hanging
-    async def test_error_recovery_real_service_failures(self, real_llm_manager, real_websocket_manager):
+        @pytest.mark.asyncio
+        @pytest.mark.timeout(90)  # Set 90 second timeout to prevent hanging
+        async def test_error_recovery_real_service_failures(self, real_llm_manager, real_websocket_manager):
         """Test 10: Validates error recovery when real external services fail"""
         agent = RealServiceTestAgent(
-            llm_manager=real_llm_manager,
-            name="ErrorRecoveryAgent"
+        llm_manager=real_llm_manager,
+        name="ErrorRecoveryAgent"
         )
         agent.websocket_manager = real_websocket_manager
         
@@ -472,7 +465,7 @@ class TestBaseAgentRealServices:
         original_ask_llm = real_llm_manager.ask_llm
         
         async def failing_ask_llm(*args, **kwargs):
-            raise Exception("Simulated LLM service failure")
+        raise Exception("Simulated LLM service failure")
         
         # Inject failure
         real_llm_manager.ask_llm = failing_ask_llm
@@ -482,10 +475,9 @@ class TestBaseAgentRealServices:
         
         # Execute with LLM failure (use timeout to prevent hanging)
         try:
-            await asyncio.wait_for(agent.execute(state, run_id), timeout=30.0)
+        await asyncio.wait_for(agent.execute(state, run_id), timeout=30.0)
         except asyncio.TimeoutError:
-            # If the execute times out, that's also a valid test - the agent should handle it
-            pass
+        # If the execute times out, that's also a valid test - the agent should handle it
         
         # Verify error was captured (either from execution or timeout)
         assert len(agent.errors_encountered) > 0
@@ -494,10 +486,9 @@ class TestBaseAgentRealServices:
         # Restore and verify recovery
         real_llm_manager.ask_llm = original_ask_llm
         try:
-            await asyncio.wait_for(agent.execute(state, f"{run_id}_recovered"), timeout=30.0)
+        await asyncio.wait_for(agent.execute(state, f"{run_id}_recovered"), timeout=30.0)
         except asyncio.TimeoutError:
-            # If recovery times out, it's still a valid test result
-            pass
+        # If recovery times out, it's still a valid test result
         
         # Should succeed or at least not crash (execution_count should increase)
         assert agent.execution_count >= 1
@@ -507,20 +498,19 @@ class TestBaseAgentRealServices:
         
         # Force WebSocket error
         async def failing_send(*args, **kwargs):
-            raise ConnectionError("WebSocket connection lost")
+        raise ConnectionError("WebSocket connection lost")
         
         original_send = agent.websocket_manager.send_message
         agent.websocket_manager.send_message = failing_send
         
         # Try to send message with failed WebSocket
         try:
-            await agent.websocket_manager.send_message(
-                agent.user_id,
-                {"type": "test", "data": "failure_test"}
-            )
+        await agent.websocket_manager.send_message(
+        agent.user_id,
+        {"type": "test", "data": "failure_test"}
+        )
         except ConnectionError:
-            # Expected failure
-            pass
+        # Expected failure
         
         # Restore and test recovery
         agent.websocket_manager.send_message = original_send
@@ -529,21 +519,20 @@ class TestBaseAgentRealServices:
         db_errors = []
         
         async def database_operation_with_retry():
-            """Simulate database operation with retry logic"""
-    pass
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    if attempt < 2:
-                        raise ConnectionError(f"Database connection failed (attempt {attempt + 1})")
-                    # Success on third attempt
-                    await asyncio.sleep(0)
-    return {"status": "recovered", "attempts": attempt + 1}
-                except ConnectionError as e:
-                    db_errors.append(str(e))
-                    if attempt == max_retries - 1:
-                        raise
-                    await asyncio.sleep(0.01 * (attempt + 1))  # Reduced backoff for test speed
+        """Simulate database operation with retry logic"""
+        max_retries = 3
+        for attempt in range(max_retries):
+        try:
+        if attempt < 2:
+        raise ConnectionError(f"Database connection failed (attempt {attempt + 1})")
+        # Success on third attempt
+        await asyncio.sleep(0)
+        return {"status": "recovered", "attempts": attempt + 1}
+        except ConnectionError as e:
+        db_errors.append(str(e))
+        if attempt == max_retries - 1:
+        raise
+        await asyncio.sleep(0.1 * (attempt + 1))  # Reduced backoff for test speed
         
         # Execute with retry
         result = await database_operation_with_retry()
@@ -555,11 +544,10 @@ class TestBaseAgentRealServices:
         initial_timing_count = len(agent.timing_collector.get_timing_summary())
         
         with agent.timing_collector.measure("error_recovery_operation"):
-            # Simulate mixed success/failure operations
-            try:
-                await agent.execute(state, "timing_during_errors")
-            except Exception:
-                pass
+        # Simulate mixed success/failure operations
+        try:
+        await agent.execute(state, "timing_during_errors")
+        except Exception:
         
         # Timing should still be collected
         final_timing_count = len(agent.timing_collector.get_timing_summary())
@@ -573,12 +561,12 @@ class TestBaseAgentRealServices:
         
         # Simulate cascading failures (only test LLM for speed)
         try:
-            if agent.llm_manager:
-                agent.llm_manager.ask_llm = failing_ask_llm
-                await agent.execute(state, "cascade_llm")
-                agent.llm_manager.ask_llm = original_ask_llm
+        if agent.llm_manager:
+        agent.llm_manager.ask_llm = failing_ask_llm
+        await agent.execute(state, "cascade_llm")
+        agent.llm_manager.ask_llm = original_ask_llm
         except Exception as e:
-            agent.errors_encountered.append(f"Cascade llm: {e}")
+        agent.errors_encountered.append(f"Cascade llm: {e}")
         
         # Agent should still be able to shutdown gracefully
         await agent.shutdown()

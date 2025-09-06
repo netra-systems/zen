@@ -2,17 +2,17 @@
 Agent Communication Integration Tests
 
 BVJ:
-- Segment: Platform/Internal (foundation for ALL customer segments)
+    - Segment: Platform/Internal (foundation for ALL customer segments)
 - Business Goal: Platform Stability - Prevent $35K MRR loss from coordination failures
 - Value Impact: Validates inter-agent communication channels and message passing
 - Revenue Impact: Ensures reliable agent communication for coordinated workflows
 
 REQUIREMENTS:
-- Establish inter-agent communication channels
+    - Establish inter-agent communication channels
 - Verify message passing between agents
 - 100% message delivery success rate
 - Communication channel reliability
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -186,7 +186,7 @@ class TestAgentCommunication:
         receiver = agents[1]
         
         # Send multiple messages in sequence
-        messages = [{"id": i, "content": f"Ordered message {i}"} for i in range(5)]
+        messages = [{"id": i, "content": f"Ordered message {i]"] for i in range(5)]
         
         for message in messages:
             await sender.send_message(receiver.name, message)

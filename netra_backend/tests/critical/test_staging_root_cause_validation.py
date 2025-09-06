@@ -1,11 +1,13 @@
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 env = get_env()
 Critical Staging Root Cause Validation Tests
@@ -17,7 +19,7 @@ the exact conditions that cause each staging deployment error.
 QA Agent: Root Cause Analysis
 Created: 2025-08-24
 Purpose: Validate root causes through failing test reproduction
-"""
+""""
 
 import asyncio
 import pytest
@@ -42,7 +44,7 @@ class TestPostgreSQLAuthenticationFailure:
         
         Root Cause: DATABASE_URL secret contains wrong password for Cloud SQL user.
         This test MUST fail with "password authentication failed" error.
-        """
+        """"
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
         
         # Simulate exact staging secret with wrong password
@@ -82,7 +84,7 @@ class TestPostgreSQLAuthenticationFailure:
         
         Root Cause: Secret Manager has user 'postgres' but Cloud SQL instance 
         was created with different user (e.g., 'netra_user').
-        """
+        """"
         nonexistent_user_url = (
             "postgresql://nonexistent_user:any_password@"
             "/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require"
@@ -117,7 +119,7 @@ class TestSSLParameterMismatch:
         
         Root Cause: Converting sslmode=require to ssl=require breaks asyncpg 
         for Cloud SQL Unix socket connections.
-        """
+        """"
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
         
         # Cloud SQL URL with sslmode (common in Secret Manager)
@@ -153,7 +155,7 @@ class TestSSLParameterMismatch:
         
         Root Cause: Each service has different URL normalization logic,
         causing inconsistent SSL parameter handling.
-        """
+        """"
         test_url = (
             "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=require"
         )
@@ -181,7 +183,7 @@ class TestClickHouseLocalhostConnection:
         
         Root Cause: Missing CLICKHOUSE_URL in staging deployment causes 
         fallback to localhost default.
-        """
+        """"
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
         
         with patch.dict(os.environ, {
@@ -204,7 +206,7 @@ class TestClickHouseLocalhostConnection:
         FAILING TEST: Shows deployment script not configuring ClickHouse secrets.
         
         Root Cause: GCP deployment script missing CLICKHOUSE_URL in secret mapping.
-        """
+        """"
         # Read deployment script
         deploy_script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "deploy_to_gcp.py"
         
@@ -237,7 +239,7 @@ class TestRedisConfigurationDefault:
         
         Root Cause: Configuration classes have hardcoded localhost defaults 
         that override staging environment detection.
-        """
+        """"
         from auth_service.auth_core.config import AuthConfig
         
         with patch.dict(os.environ, {
@@ -255,7 +257,7 @@ class TestRedisConfigurationDefault:
         FAILING TEST: Shows REDIS_URL not configured in Cloud Run deployment.
         
         Root Cause: Deployment script not setting REDIS_URL secret properly.
-        """
+        """"
         deploy_script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "deploy_to_gcp.py"
         
         if deploy_script_path.exists():
@@ -287,7 +289,7 @@ class TestMissingEnvironmentVariables:
         
         Root Cause: No fail-fast validation to check required environment 
         variables before service initialization.
-        """
+        """"
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
         
         # Simulate completely missing configuration
@@ -321,7 +323,7 @@ class TestMissingEnvironmentVariables:
         
         Root Cause: Some required secrets not properly mapped from Secret Manager 
         to Cloud Run environment variables.
-        """
+        """"
         deploy_script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "deploy_to_gcp.py"
         
         if deploy_script_path.exists():
@@ -339,7 +341,7 @@ class TestMissingEnvironmentVariables:
             ]
             
             # Find secret mapping sections
-            secret_sections = re.findall(r'--set-secrets[^"]+', deploy_content)
+            secret_sections = re.findall(r'--set-secrets[^"]+', deploy_content)"
             all_secrets = " ".join(secret_sections)
             
             missing_critical = []
@@ -360,7 +362,7 @@ class TestConfigurationHierarchyIssues:
         
         Root Cause: Configuration loading prioritizes hardcoded defaults 
         over environment-specific detection.
-        """
+        """"
         from netra_backend.app.core.configuration.database import DatabaseConfigManager
         
         with patch.dict(os.environ, {
@@ -393,7 +395,7 @@ class TestConfigurationHierarchyIssues:
         
         Root Cause: Configuration system not properly prioritizing Secret Manager 
         secrets over local environment variables.
-        """
+        """"
         # Simulate conflicting configuration sources
         local_db_url = "postgresql://local:local@localhost:5432/local"
         secret_db_url = "postgresql://staging:staging@/staging?host=/cloudsql/instance"

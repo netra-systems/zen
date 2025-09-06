@@ -1,13 +1,15 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Triage agent core functionality tests
 Tests agent initialization, request validation, entity extraction, and intent determination
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -27,34 +29,31 @@ from netra_backend.app.redis_manager import RedisManager
 import asyncio
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock LLM manager."""
-    pass
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock = Mock(spec=LLMManager)
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock.ask_llm = AsyncNone  # TODO: Use real service instance
+    mock.ask_llm = AsyncMock()  # TODO: Use real service instance
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock tool dispatcher."""
-    pass
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
     return Mock(spec=ToolDispatcher)
 
 @pytest.fixture
- def real_redis_manager():
+def real_redis_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock Redis manager."""
-    pass
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = Mock(spec=RedisManager)
     # Mock: Async component isolation for testing without real async operations
@@ -68,7 +67,6 @@ def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a TriageSubAgent instance with mocked dependencies."""
-    pass
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
 @pytest.fixture
@@ -76,7 +74,6 @@ def sample_state():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a sample DeepAgentState."""
-    pass
     return DeepAgentState(user_request="Optimize my GPT-4 costs by 30% while maintaining latency under 100ms")
 
 class TestTriageSubAgentInitialization:
@@ -95,7 +92,6 @@ class TestTriageSubAgentInitialization:
     
     def test_initialization_without_redis(self, mock_llm_manager, mock_tool_dispatcher):
         """Test initialization without Redis manager."""
-    pass
         agent = TriageSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         assert agent.redis_manager == None
@@ -113,7 +109,6 @@ class TestRequestValidation:
     
     def test_request_too_short(self, triage_agent):
         """Test validation of request that's too short."""
-    pass
         validation = triage_agent._validate_request("ab")
         
         assert validation.is_valid == False
@@ -129,7 +124,6 @@ class TestRequestValidation:
     
     def test_request_with_injection_pattern(self, triage_agent):
         """Test detection of potential injection patterns."""
-    pass
         validation = triage_agent._validate_request("DROP TABLE users; SELECT * FROM data")
         
         assert validation.is_valid == False
@@ -158,7 +152,6 @@ class TestEntityExtraction:
     
     def test_extract_metrics(self, triage_agent):
         """Test extraction of performance metrics."""
-    pass
         request = "Reduce latency and improve throughput while managing cost"
         entities = triage_agent._extract_entities_from_request(request)
         
@@ -181,7 +174,6 @@ class TestEntityExtraction:
     
     def test_extract_time_ranges(self, triage_agent):
         """Test extraction of time ranges."""
-    pass
         request = "Analyze performance over the last 7 days"
         entities = triage_agent._extract_entities_from_request(request)
         
@@ -200,7 +192,6 @@ class TestIntentDetermination:
     
     def test_analyze_intent(self, triage_agent):
         """Test detection of analysis intent."""
-    pass
         request = "Analyze the usage patterns"
         intent = triage_agent._determine_intent(request)
         
@@ -216,7 +207,6 @@ class TestIntentDetermination:
     
     def test_complex_intent(self, triage_agent):
         """Test detection of complex multi-part intent."""
-    pass
         request = "Monitor my AI costs and automatically optimize when costs exceed $1000"
         intent = triage_agent._determine_intent(request)
         
@@ -261,7 +251,6 @@ class TestTriageAgentIntegration:
     @pytest.mark.asyncio
     async def test_triage_with_validation_failure(self, triage_agent):
         """Test triage process when request validation fails."""
-    pass
         invalid_state = DeepAgentState(user_request="ab")  # Too short
         
         # Execute the triage workflow with invalid state

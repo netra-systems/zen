@@ -1,11 +1,13 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Tests for TriageSubAgent initialization and validation
 Refactored to comply with 25-line function limit and 450-line file limit
-"""
+""""
 
 import sys
 from pathlib import Path
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -25,27 +27,24 @@ import asyncio
     ValidationHelpers)
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create enhanced mock LLM manager"""
-    pass
     return TriageMockHelpers.create_mock_llm_manager()
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock tool dispatcher"""
-    pass
     return TriageMockHelpers.create_mock_tool_dispatcher()
 
 @pytest.fixture
- def real_redis_manager():
+def real_redis_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock Redis manager"""
-    pass
     return TriageMockHelpers.create_mock_redis()
 
 @pytest.fixture
@@ -53,7 +52,6 @@ def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create TriageSubAgent with mocked dependencies"""
-    pass
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
 class TestAdvancedInitialization:
@@ -72,7 +70,6 @@ class TestAdvancedInitialization:
     
     def test_initialization_with_custom_config(self, mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
         """Test initialization with custom configuration"""
-    pass
         agent = TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
         
         agent.triage_core.cache_ttl = 7200
@@ -95,7 +92,6 @@ class TestValidationPatterns:
     
     def test_script_injection_patterns(self, triage_agent):
         """Test script injection pattern detection"""
-    pass
         patterns = ValidationHelpers.get_script_injection_patterns()
         
         for request in patterns:
@@ -114,7 +110,6 @@ class TestValidationPatterns:
     
     def test_benign_technical_content(self, triage_agent):
         """Test that benign technical content passes validation"""
-    pass
         benign_requests = ValidationHelpers.get_benign_requests()
         
         for request in benign_requests:
@@ -135,14 +130,13 @@ class TestSecurityAndValidation:
     
     def _get_harmful_inputs(self):
         """Get potentially harmful inputs"""
-    pass
         return [
             "<script>alert('xss')</script>Optimize costs",
             "Optimize'; DROP TABLE costs; --",
             "Costs\\x00\\x01\\x02optimization",
-            "Cost optimization\r
+            "Cost optimization\r"
 \r
-<img src=x onerror=alert(1)>",
+<img src=x onerror=alert(1)>","
         ]
     
     def _check_harmful_input_rejected(self, validation):
@@ -152,7 +146,6 @@ class TestSecurityAndValidation:
     
     def test_request_normalization(self, triage_agent):
         """Test request normalization for consistent processing"""
-    pass
         variations = self._get_request_variations()
         hashes = [triage_agent.triage_core.generate_request_hash(variation) for variation in variations]
         
@@ -165,13 +158,12 @@ class TestSecurityAndValidation:
             "  Optimize   my   AI   costs  ",
             "OPTIMIZE MY AI COSTS",
             "optimize my ai costs",
-            "Optimize\tmy
-AI\rcosts",
+            "Optimize\tmy"
+AI\rcosts","
         ]
     @pytest.mark.asyncio
     async def test_resource_limits(self, triage_agent):
         """Test resource limit enforcement"""
-    pass
         max_size_request = "a" * 10000
         over_limit_request = "a" * 10001
         

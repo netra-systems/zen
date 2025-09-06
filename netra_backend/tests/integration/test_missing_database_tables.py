@@ -1,7 +1,7 @@
 """
 Integration test for missing database tables during dev launcher startup.
 Tests database schema creation, table initialization, and migration status.
-"""
+""""
 import pytest
 import asyncio
 from sqlalchemy import create_engine, text, inspect
@@ -20,7 +20,7 @@ class TestMissingDatabaseTables:
         assert config.database_url, "Database URL is empty"
         
         db_url = config.database_url
-        print(f"Database URL: {db_url[:50]}...")
+        print(f"Database URL: {db_url[:50]]...")
         
         # Test basic connection
         try:
@@ -138,7 +138,7 @@ class TestMissingDatabaseTables:
                     print(f"✗ {table_name}: {description} - {e}")
         
         print(f"Existing critical tables: {existing_critical}")
-        print(f"Missing critical tables: {[name for name, _, _ in missing_critical]}")
+        print(f"Missing critical tables: {[name for name, _, _ in missing_critical]]")
         
         return existing_critical, missing_critical
 
@@ -159,7 +159,7 @@ class TestMissingDatabaseTables:
                         id SERIAL PRIMARY KEY,
                         test_column TEXT
                     )
-                """))
+                """))"
                 conn.commit()
                 
                 # Try to drop the test table
@@ -192,7 +192,7 @@ class TestMissingDatabaseTables:
                 
                 if migration_files:
                     print(f"✓ Found {len(migration_files)} migration files in {path}")
-                    print(f"Migration files: {migration_files[:3]}...")  # Show first 3
+                    print(f"Migration files: {migration_files[:3]]...")  # Show first 3
                     return True
                     
         print("⚠ No migration files found - database may need manual initialization")
@@ -256,7 +256,7 @@ class TestMissingDatabaseTables:
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         )
-                    """))
+                    """))"
                     conn.commit()
                     
                     print("✓ Created basic users table manually")

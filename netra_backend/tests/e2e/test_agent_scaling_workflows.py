@@ -1,8 +1,8 @@
 """
 Agent Scaling Workflows Test Suite - Modular Index
 Imports all scaling workflow tests from focused modules.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 # Import all test modules to ensure they're discovered by pytest
 

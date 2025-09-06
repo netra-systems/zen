@@ -1,15 +1,17 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical Security-Focused Auth Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - SECURITY CRITICAL
+    - Segment: ALL (Free → Enterprise) - SECURITY CRITICAL
 - Business Goal: Prevent auth vulnerabilities that could cause data breaches
 - Value Impact: Prevent potential multi-million dollar security incidents
 - Revenue Impact: Critical - Security breach = immediate reputation damage, customer churn
 - ESTIMATED RISK: -$500K+ potential impact from auth security failures
 
 SECURITY FOCUS AREAS:
-- Token lifecycle security (creation, validation, expiration, refresh)
+    - Token lifecycle security (creation, validation, expiration, refresh)
 - Authorization boundary enforcement  
 - Session hijacking prevention
 - Input sanitization and injection prevention
@@ -19,11 +21,11 @@ SECURITY FOCUS AREAS:
 - Privilege escalation prevention
 
 COMPLIANCE:
-- 90%+ test coverage required for security-critical components
+    - 90%+ test coverage required for security-critical components
 - Real security validation (not just mocks where possible)
 - Edge case testing for all attack vectors
 - Zero tolerance for security gaps
-"""
+""""
 
 import asyncio
 import time
@@ -62,10 +64,9 @@ def expired_token_credentials():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock credentials with an expired token"""
-    pass
     return HTTPAuthorizationCredentials(
-        scheme="Bearer",
-        credentials="expired_token_123"
+    scheme="Bearer",
+    credentials="expired_token_123"
     )
 
 
@@ -74,19 +75,17 @@ def malformed_token_credentials():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock credentials with malformed token"""
-    pass
     return HTTPAuthorizationCredentials(
-        scheme="Bearer", 
-        credentials="malformed.token"
+    scheme="Bearer", 
+    credentials="malformed.token"
     )
 
 
 @pytest.fixture
- def real_user_with_permissions():
+def real_user_with_permissions():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock user with specific permissions"""
-    pass
     user = Mock(spec=User)
     user.id = "user_123"
     user.email = "test@example.com"
@@ -101,7 +100,6 @@ def malformed_token_credentials():
 
 class TestTokenLifecycleSecurity:
     """Test token lifecycle security including creation, validation, expiration, refresh"""
-    pass
 
     @pytest.mark.asyncio
     async def test_token_expiration_enforcement(self, expired_token_credentials, mock_user_with_permissions):
@@ -127,7 +125,6 @@ class TestTokenLifecycleSecurity:
     @pytest.mark.asyncio
     async def test_malformed_token_rejection(self, malformed_token_credentials):
         """SECURITY: Verify malformed tokens are rejected without processing"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
@@ -181,7 +178,6 @@ class TestTokenLifecycleSecurity:
     @pytest.mark.asyncio
     async def test_token_tampering_detection(self):
         """SECURITY: Test detection of tampered tokens"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Simulate tampered token (real implementation would have signature mismatch)
@@ -244,14 +240,12 @@ class TestTokenLifecycleSecurity:
 
 class TestAuthorizationBoundarySecurity:
     """Test authorization boundary enforcement and privilege escalation prevention"""
-    pass
 
     @pytest.fixture
     def regular_user(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Regular user without elevated privileges"""
-    pass
         user = Mock(spec=User)
         user.id = "regular_123"
         user.email = "regular@example.com"
@@ -261,14 +255,13 @@ class TestAuthorizationBoundarySecurity:
         user.is_admin = False
         user.is_developer = False
         await asyncio.sleep(0)
-    return user
+        return user
 
-    @pytest.fixture
-    def admin_user(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def admin_user(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Admin user with elevated privileges"""
-    pass
         user = Mock(spec=User)
         user.id = "admin_123"
         user.email = "admin@example.com"
@@ -279,12 +272,11 @@ class TestAuthorizationBoundarySecurity:
         user.is_developer = False
         return user
 
-    @pytest.fixture
-    def developer_user(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def developer_user(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Developer user with specific dev privileges"""
-    pass
         user = Mock(spec=User)
         user.id = "dev_123"
         user.email = "dev@example.com"
@@ -295,13 +287,13 @@ class TestAuthorizationBoundarySecurity:
         user.is_developer = True
         return user
 
-    @pytest.mark.asyncio
-    async def test_admin_privilege_enforcement(self, regular_user, admin_user):
+        @pytest.mark.asyncio
+        async def test_admin_privilege_enforcement(self, regular_user, admin_user):
         """SECURITY: Verify admin endpoints reject non-admin users"""
         
         # Test regular user trying to access admin function
         with pytest.raises(HTTPException) as exc_info:
-            await require_admin(regular_user)
+        await require_admin(regular_user)
         
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
         assert "Admin access required" in str(exc_info.value.detail)
@@ -310,13 +302,13 @@ class TestAuthorizationBoundarySecurity:
         result = await require_admin(admin_user)
         assert result == admin_user
 
-    @pytest.mark.asyncio
-    async def test_developer_privilege_enforcement(self, regular_user, developer_user):
+        @pytest.mark.asyncio
+        async def test_developer_privilege_enforcement(self, regular_user, developer_user):
         """SECURITY: Verify developer endpoints reject non-developer users"""
         
         # Test regular user trying to access dev function
         with pytest.raises(HTTPException) as exc_info:
-            await require_developer(regular_user)
+        await require_developer(regular_user)
         
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
         assert "Developer access required" in str(exc_info.value.detail)
@@ -325,8 +317,8 @@ class TestAuthorizationBoundarySecurity:
         result = await require_developer(developer_user)
         assert result == developer_user
 
-    @pytest.mark.asyncio
-    async def test_permission_based_access_control(self, regular_user):
+        @pytest.mark.asyncio
+        async def test_permission_based_access_control(self, regular_user):
         """SECURITY: Test granular permission-based access control"""
         
         # Test user with permission can access
@@ -344,13 +336,13 @@ class TestAuthorizationBoundarySecurity:
         user_without_permission.permissions = ["read:basic"]
         
         with pytest.raises(HTTPException) as exc_info:
-            await permission_checker(user_without_permission)
+        await permission_checker(user_without_permission)
         
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
         assert "Permission 'read:sensitive_data' required" in str(exc_info.value.detail)
 
-    @pytest.mark.asyncio
-    async def test_privilege_escalation_prevention(self):
+        @pytest.mark.asyncio
+        async def test_privilege_escalation_prevention(self):
         """SECURITY: Test prevention of privilege escalation attacks"""
         
         # Mock user trying to elevate privileges via token manipulation
@@ -365,44 +357,43 @@ class TestAuthorizationBoundarySecurity:
         
         # Simulate user trying to access admin function despite not being admin
         with pytest.raises(HTTPException) as exc_info:
-            await require_admin(escalation_user)
+        await require_admin(escalation_user)
         
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
         
         # Simulate user trying to access developer function
         with pytest.raises(HTTPException) as exc_info:
-            await require_developer(escalation_user)
+        await require_developer(escalation_user)
         
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
 
-    @pytest.mark.asyncio
-    async def test_role_based_access_boundary_validation(self):
+        @pytest.mark.asyncio
+        async def test_role_based_access_boundary_validation(self):
         """SECURITY: Validate role-based access boundaries are properly enforced"""
         
         # Test different role combinations that should fail admin check
         test_cases = [
-            {"is_superuser": False, "role": "user", "is_admin": False},
-            {"is_superuser": False, "role": "moderator", "is_admin": False},
-            {"is_superuser": False, "role": "support", "is_admin": False},
-            {"is_superuser": False, "role": None, "is_admin": False},
+        {"is_superuser": False, "role": "user", "is_admin": False},
+        {"is_superuser": False, "role": "moderator", "is_admin": False},
+        {"is_superuser": False, "role": "support", "is_admin": False},
+        {"is_superuser": False, "role": None, "is_admin": False},
         ]
         
         for case in test_cases:
-            user = Mock(spec=User)
-            user.id = f"test_user_{hash(str(case))}"
-            user.is_superuser = case["is_superuser"]
-            user.role = case["role"]
-            user.is_admin = case["is_admin"]
+        user = Mock(spec=User)
+        user.id = f"test_user_{hash(str(case))}"
+        user.is_superuser = case["is_superuser"]
+        user.role = case["role"]
+        user.is_admin = case["is_admin"]
             
-            with pytest.raises(HTTPException) as exc_info:
-                await require_admin(user)
+        with pytest.raises(HTTPException) as exc_info:
+        await require_admin(user)
             
-            assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
+        assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
 
 
 class TestSessionHijackingPrevention:
     """Test session hijacking prevention and session security"""
-    pass
 
     @pytest.mark.asyncio
     async def test_session_token_isolation(self, mock_user_with_permissions):
@@ -459,7 +450,6 @@ class TestSessionHijackingPrevention:
     @pytest.mark.asyncio
     async def test_ip_address_validation_simulation(self):
         """SECURITY: Simulate IP address validation for session security"""
-    pass
         # Note: This test simulates what would happen with IP validation
         # In practice, IP validation would be handled by auth service or middleware
         
@@ -507,7 +497,6 @@ class TestSessionHijackingPrevention:
 
 class TestInputSanitizationSecurity:
     """Test input sanitization and injection prevention"""
-    pass
 
     @pytest.mark.asyncio
     async def test_token_injection_prevention(self):
@@ -546,7 +535,6 @@ class TestInputSanitizationSecurity:
     @pytest.mark.asyncio
     async def test_unicode_and_encoding_attacks(self):
         """SECURITY: Test handling of Unicode and encoding-based attacks"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Test various Unicode and encoding attacks
@@ -576,7 +564,6 @@ class TestInputSanitizationSecurity:
 
 class TestRateLimitingAndDOSPrevention:
     """Test rate limiting and DOS attack prevention"""
-    pass
 
     @pytest.mark.asyncio
     async def test_rapid_auth_request_handling(self, mock_user_with_permissions):
@@ -620,7 +607,6 @@ class TestRateLimitingAndDOSPrevention:
     @pytest.mark.asyncio
     async def test_auth_service_timeout_handling(self):
         """SECURITY: Test handling of auth service timeouts"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         credentials = HTTPAuthorizationCredentials(
             scheme="Bearer",
@@ -640,7 +626,6 @@ class TestRateLimitingAndDOSPrevention:
 
 class TestAuditLoggingSecurity:
     """Test audit logging completeness for security events"""
-    pass
 
     @pytest.mark.asyncio
     async def test_failed_authentication_logging(self):
@@ -654,7 +639,7 @@ class TestAuditLoggingSecurity:
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
              patch('netra_backend.app.auth_integration.auth.logger') as mock_logger:
             
-            mock_auth.validate_token_jwt = AsyncMock(return_value={"valid": False})
+                 mock_auth.validate_token_jwt = AsyncMock(return_value={"valid": False})
             
             with pytest.raises(HTTPException):
                 await get_current_user(credentials, mock_db)
@@ -665,7 +650,6 @@ class TestAuditLoggingSecurity:
     @pytest.mark.asyncio
     async def test_successful_authentication_logging(self, mock_user_with_permissions):
         """SECURITY: Verify successful authentication is logged"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         credentials = HTTPAuthorizationCredentials(
             scheme="Bearer",
@@ -680,7 +664,7 @@ class TestAuditLoggingSecurity:
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
              patch('netra_backend.app.auth_integration.auth.logger') as mock_logger:
             
-            mock_auth.validate_token_jwt = AsyncMock(return_value={
+                 mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "user_123"
             })
@@ -693,7 +677,6 @@ class TestAuditLoggingSecurity:
 
 class TestSecurityHeadersAndEnvironment:
     """Test security headers and environment-specific security measures"""
-    pass
 
     @pytest.mark.asyncio
     async def test_development_user_creation_security(self):
@@ -708,7 +691,7 @@ class TestSecurityHeadersAndEnvironment:
              patch('netra_backend.app.config.get_config') as mock_get_config, \
              patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
             
-            # Simulate development environment
+                 # Simulate development environment
             mock_config = mock_config_instance  # Initialize appropriate service
             mock_config.environment = "development"
             mock_get_config.return_value = mock_config
@@ -739,7 +722,6 @@ class TestSecurityHeadersAndEnvironment:
     @pytest.mark.asyncio
     async def test_production_user_creation_prevention(self):
         """SECURITY: Verify user creation is blocked in production"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         credentials = HTTPAuthorizationCredentials(
             scheme="Bearer", 
@@ -749,7 +731,7 @@ class TestSecurityHeadersAndEnvironment:
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
              patch('netra_backend.app.config.get_config') as mock_get_config:
             
-            # Simulate production environment
+                 # Simulate production environment
             mock_config = mock_config_instance  # Initialize appropriate service
             mock_config.environment = "production"
             mock_get_config.return_value = mock_config
@@ -774,7 +756,6 @@ class TestSecurityHeadersAndEnvironment:
 
 class TestOptionalAuthenticationSecurity:
     """Test security of optional authentication flows"""
-    pass
 
     @pytest.mark.asyncio
     async def test_optional_auth_error_handling_security(self):
@@ -788,7 +769,7 @@ class TestOptionalAuthenticationSecurity:
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
              patch('netra_backend.app.auth_integration.auth.logger') as mock_logger:
             
-            # Simulate various error conditions
+                 # Simulate various error conditions
             error_cases = [
                 Exception("Network error"),
                 HTTPException(status_code=401, detail="Unauthorized"),
@@ -810,7 +791,6 @@ class TestOptionalAuthenticationSecurity:
     @pytest.mark.asyncio
     async def test_optional_auth_information_disclosure_prevention(self):
         """SECURITY: Verify optional auth doesn't leak information"""
-    pass
         mock_db = AsyncMock(spec=AsyncSession)
         
         # Test that optional auth with invalid credentials returns None

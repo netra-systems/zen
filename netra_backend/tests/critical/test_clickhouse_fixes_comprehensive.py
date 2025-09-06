@@ -1,20 +1,22 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Comprehensive test suite for ClickHouse connection and query execution fixes
 
 Tests:
-1. User_id parameter fix in circuit breaker fallback
+    1. User_id parameter fix in circuit breaker fallback
 2. ClickHouse database initialization (both netra_traces and netra_analytics)
 3. Table creation with migrations
 4. Connection pool stability
 5. Circuit breaker configuration and behavior
-"""
+""""
 
 import asyncio
 import pytest
 import time
 from typing import Dict, Any, List
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse import ClickHouseService, get_clickhouse_config
@@ -214,7 +216,7 @@ class TestClickHouseCriticalFixes:
         service._circuit_breaker.metrics.consecutive_failures = 10
         
         # Mock client to fail
-        service._client = AsyncNone  # TODO: Use real service instance
+        service._client = AsyncMock()  # TODO: Use real service instance
         service._client.execute = AsyncMock(side_effect=ConnectionError("Circuit open"))
         
         # Try to execute query - should fall back to cache
@@ -246,8 +248,8 @@ class TestClickHouseCriticalFixes:
         
         # Mock migration files
         mock_migrations = [
-            MagicMock(name='001_trace_tables.sql'),
-            MagicMock(name='002_analytics_tables.sql')
+            MagicMock(name='1_trace_tables.sql'),
+            MagicMock(name='2_analytics_tables.sql')
         ]
         
         executed_migrations = []

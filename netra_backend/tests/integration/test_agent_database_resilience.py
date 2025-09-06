@@ -6,11 +6,11 @@ Follows CLAUDE.md standards: Real Everything (LLM, Services) E2E > E2E > Integra
 MOCKS ARE FORBIDDEN - Uses real PostgreSQL, ClickHouse, and Redis services.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Stability and Risk Reduction
 - Value Impact: Ensures agent operations maintain resilience under database stress
 - Strategic Impact: Prevents database-related failures in production agent workflows
-"""
+""""
 
 import asyncio
 import pytest
@@ -140,7 +140,7 @@ class TestAgentDatabaseRealResilience:
         """Test concurrent agent state operations for race condition resilience."""
         async def create_agent_state(index: int) -> DeepAgentState:
             """Create an agent state with a slight delay to test concurrency."""
-            await asyncio.sleep(0.01)  # Small delay to create concurrency
+            await asyncio.sleep(0.1)  # Small delay to create concurrency
             return DeepAgentState(
                 user_request=f"concurrent test {index}",
                 chat_thread_id=f"concurrent_thread_{index}",

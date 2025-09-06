@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Direct test for JSON extraction to debug the issue"""
 
 import sys

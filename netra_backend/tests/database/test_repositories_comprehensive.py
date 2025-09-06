@@ -1,12 +1,14 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Comprehensive repository tests (76-85) from top 100 missing tests.
 Tests database operations, queries, and repository patterns.
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -42,12 +44,12 @@ class TestThreadRepositoryOperations:
             "id": "thread123",
             "object": "thread",
             "created_at": int(now.timestamp()),
-            "metadata_": {"user_id": "user123", "title": "Test Thread", "tags": ["test", "demo"]}
+            "metadata_": {"user_id": "user123", "title": "Test Thread", "tags": ["test", "demo"]]
         }
         
         # Mock the return from the database - set up proper async mock chain
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = None  # Create will return new thread
         mock_session.execute.return_value = mock_result
         
@@ -61,14 +63,14 @@ class TestThreadRepositoryOperations:
             id="thread123",
             object="thread",
             created_at=int(now.timestamp()),
-            metadata_={"user_id": "user123", "title": "Test Thread", "tags": ["test", "demo"]}
+            metadata_={"user_id": "user123", "title": "Test Thread", "tags": ["test", "demo"]]
         )
         
         # Mock session.add and session.flush for create operation
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = AsyncNone  # TODO: Use real service instance
+        mock_session.add = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.flush = AsyncNone  # TODO: Use real service instance
+        mock_session.flush = AsyncMock()  # TODO: Use real service instance
         
         # Mock ThreadRepository.create to return our test thread
         with patch.object(repo, 'create', return_value=created_thread) as mock_create:
@@ -110,7 +112,7 @@ class TestThreadRepositoryOperations:
         
         # Set up mock result for queries
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_session.execute.return_value = mock_result
         
         # Create a simple mock thread object
@@ -482,7 +484,7 @@ class TestClickHouseConnectionPool:
                 self._connections = []
             
             async def initialize_pool(self):
-                self._connections = [f"conn_{i}" for i in range(self.pool_size)]
+                self._connections = [f"conn_{i]" for i in range(self.pool_size)]
             
             async def get_connection(self):
                 if self._connections:
@@ -578,18 +580,18 @@ class TestMigrationRunnerSafety:
         assert mock_session.rollback.called
     
     @pytest.mark.asyncio
-    async def test_migration_transaction_safety(self):
-        # Mock MigrationRunner class since it may not exist
+            async def test_migration_transaction_safety(self):
+                # Mock MigrationRunner class since it may not exist
         class MockMigrationRunner:
             def __init__(self, session):
                 self.session = session
                 # Mock the async session methods properly
                 # Mock: Session isolation for controlled testing without external state
-                self.session.begin = AsyncNone  # TODO: Use real service instance
+                self.session.begin = AsyncMock()  # TODO: Use real service instance
                 # Mock: Session isolation for controlled testing without external state
-                self.session.commit = AsyncNone  # TODO: Use real service instance
+                self.session.commit = AsyncMock()  # TODO: Use real service instance
                 # Mock: Session isolation for controlled testing without external state
-                self.session.rollback = AsyncNone  # TODO: Use real service instance
+                self.session.rollback = AsyncMock()  # TODO: Use real service instance
             
             async def run_migration(self, migration):
                 await self.session.begin()
@@ -642,7 +644,7 @@ class TestDatabaseHealthChecks:
         
         # Test connection health
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = 1
         mock_session.execute.return_value = mock_result
         
@@ -666,7 +668,7 @@ class TestDatabaseHealthChecks:
             
             async def check_slow_queries(self, threshold_ms=1000):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_result = AsyncNone  # TODO: Use real service instance
+                mock_result = AsyncMock()  # TODO: Use real service instance
                 mock_result.all.return_value = [
                     ("SELECT * FROM large_table", 5000)  # 5 second query
                 ]
@@ -682,7 +684,7 @@ class TestDatabaseHealthChecks:
             
             async def check_connection_pool(self, threshold_percent=80):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_result = AsyncNone  # TODO: Use real service instance
+                mock_result = AsyncMock()  # TODO: Use real service instance
                 mock_result.scalar.return_value = 95  # 95% pool usage
                 self.session.execute.return_value = mock_result
                 

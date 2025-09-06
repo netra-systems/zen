@@ -2,11 +2,11 @@
 First-time user onboarding flow integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Free → Early (Initial value demonstration)
+    1. Segment: Free → Early (Initial value demonstration)
 2. Business Goal: Protect $25K MRR by ensuring immediate value delivery
 3. Value Impact: Validates chat initialization and WebSocket reliability
 4. Strategic Impact: Critical for user activation and retention
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -245,7 +245,7 @@ async def test_multi_agent_coordination_flow(
     complex_request = {
         "content": """Analyze my AI costs, evaluate performance, and create roadmap""",
         "thread_id": str(uuid.uuid4()),
-        "context": {"monthly_spend": 10000, "models": [LLMModel.GEMINI_2_5_FLASH.value, "claude-3"]}
+        "context": {"monthly_spend": 10000, "models": [LLMModel.GEMINI_2_5_FLASH.value, "claude-3"]]
     }
     
     async with async_client.websocket_connect(f"/ws?token={access_token}") as websocket:

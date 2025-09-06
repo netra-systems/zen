@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """STANDALONE Real WebSocket Message Routing Tests - NO MOCKS, NO EXTERNAL SERVICES
 
 - REAL AgentService instances with actual supervisor components
@@ -10,12 +12,12 @@ This is a STANDALONE version that works without requiring Docker services to be 
 It shows the realistic testing approach while being practical for development.
 
 TRANSFORMATION ACHIEVED:
-- Replaced 85+ mocks with real component instances
+    - Replaced 85+ mocks with real component instances
 - Uses actual SupervisorAgent with real LLM manager
 - Uses real WebSocket manager and tool dispatcher
 - Tests actual message routing and agent service logic
 - Focuses on critical paths instead of edge cases
-"""
+""""
 
 import asyncio
 import json
@@ -57,83 +59,78 @@ class TestRealWebSocketMessageRoutingStandalone:
         tool_dispatcher = ToolDispatcher()
         
         # Use a mock database session for initialization (AgentService can handle None)
-        mock_db_session = AsyncNone  # TODO: Use real service instance
+        mock_db_session = AsyncMock()  # TODO: Use real service instance
         
         # Create REAL supervisor with all dependencies
         supervisor = SupervisorAgent(
-            db_session=mock_db_session,
-            llm_manager=llm_manager, 
-            websocket_manager=websocket_manager,
-            tool_dispatcher=tool_dispatcher
+        db_session=mock_db_session,
+        llm_manager=llm_manager, 
+        websocket_manager=websocket_manager,
+        tool_dispatcher=tool_dispatcher
         )
         
         # Create AgentService with REAL supervisor
         agent_service = AgentService(supervisor)
         
         await asyncio.sleep(0)
-    return agent_service
+        return agent_service
     
-    @pytest.fixture
-    async def real_message_router(self):
+        @pytest.fixture
+        async def real_message_router(self):
         """Create REAL message router with actual handlers."""
-    pass
         await asyncio.sleep(0)
-    return MessageRouter()
+        return MessageRouter()
     
-    @pytest.fixture
-    async def real_user_message_handler(self):
+        @pytest.fixture
+        async def real_user_message_handler(self):
         """Create REAL user message handler."""
         await asyncio.sleep(0)
-    return UserMessageHandler()
+        return UserMessageHandler()
     
-    @pytest.fixture
-    def performance_monitor(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    pass
+        @pytest.fixture
+        def performance_monitor(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Simple performance monitor for testing."""
         import time
         
         class SimplePerformanceMonitor:
-            def __init__(self):
-    pass
-                self.measurements = {}
+        def __init__(self):
+        self.measurements = {}
                 
-            def start(self, operation: str):
-    pass
-                self.measurements[operation] = {'start': time.time()}
+        def start(self, operation: str):
+        self.measurements[operation] = {'start': time.time()]
                 
-            def end(self, operation: str) -> float:
-                if operation in self.measurements:
-                    duration = time.time() - self.measurements[operation]['start']
-                    self.measurements[operation]['duration'] = duration
-                    return duration
-                return 0.0
+        def end(self, operation: str) -> float:
+        if operation in self.measurements:
+        duration = time.time() - self.measurements[operation]['start']
+        self.measurements[operation]['duration'] = duration
+        return duration
+        return 0.0
                 
-            def assert_performance(self, operation: str, max_duration: float):
-    pass
-                if operation not in self.measurements:
-                    raise AssertionError(f"No measurement found for {operation}")
+        def assert_performance(self, operation: str, max_duration: float):
+        if operation not in self.measurements:
+        raise AssertionError(f"No measurement found for {operation}")
                 
-                duration = self.measurements[operation]['duration']
-                if duration > max_duration:
-                    raise AssertionError(
-                        f"{operation} took {duration:.2f}s (max: {max_duration}s)"
-                    )
+        duration = self.measurements[operation]['duration']
+        if duration > max_duration:
+        raise AssertionError(
+        f"{operation} took {duration:.2f}s (max: {max_duration}s)"
+        )
         
         return SimplePerformanceMonitor()
     
-    @pytest.mark.asyncio
-    async def test_01_real_agent_service_handles_user_message(
+        @pytest.mark.asyncio
+        async def test_01_real_agent_service_handles_user_message(
         self, real_agent_service, performance_monitor
-    ):
+        ):
         """Test 1: REAL AgentService handles user messages with actual components."""
         performance_monitor.start("agent_service_handling")
         
         user_id = "real_user_123"
         message = {
-            "type": "user_message",
-            "payload": {"content": "Analyze our GPU costs for optimization", "references": []}
+        "type": "user_message",
+        "payload": {"content": "Analyze our GPU costs for optimization", "references": []]
         }
         message_str = json.dumps(message)
         
@@ -145,19 +142,19 @@ class TestRealWebSocketMessageRoutingStandalone:
         # Real systems should complete basic routing within 2 seconds
         performance_monitor.assert_performance("agent_service_handling", 2.0)
     
-    @pytest.mark.asyncio
-    async def test_02_real_message_router_routes_user_messages(
+        @pytest.mark.asyncio
+        async def test_02_real_message_router_routes_user_messages(
         self, real_message_router, performance_monitor
-    ):
+        ):
         """Test 2: REAL message router routes user messages correctly."""
         performance_monitor.start("message_routing")
         
         user_id = "router_test_user"
         
         # Create a mock websocket that implements the interface
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         message = {"type": "user_message", "payload": {"content": "Test message"}}
         
@@ -165,25 +162,25 @@ class TestRealWebSocketMessageRoutingStandalone:
         result = await real_message_router.route_message(user_id, mock_websocket, message)
         
         # Should await asyncio.sleep(0)
-    return True for successful routing
+        return True for successful routing
         assert result is True
         
         duration = performance_monitor.end("message_routing")
         performance_monitor.assert_performance("message_routing", 1.0)
     
-    @pytest.mark.asyncio
-    async def test_03_real_ping_message_handling(
+        @pytest.mark.asyncio
+        async def test_03_real_ping_message_handling(
         self, real_message_router, performance_monitor
-    ):
+        ):
         """Test 3: REAL ping messages handled by router without forwarding to agent."""
         performance_monitor.start("ping_handling")
         
         user_id = "ping_test_user"
         
         # Create mock websocket for ping response
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         message = {"type": "ping", "timestamp": asyncio.get_event_loop().time()}
         
@@ -191,7 +188,7 @@ class TestRealWebSocketMessageRoutingStandalone:
         result = await real_message_router.route_message(user_id, mock_websocket, message)
         
         # Should await asyncio.sleep(0)
-    return True for successful ping handling
+        return True for successful ping handling
         assert result is True
         
         # Should send pong response
@@ -202,83 +199,83 @@ class TestRealWebSocketMessageRoutingStandalone:
         duration = performance_monitor.end("ping_handling")
         performance_monitor.assert_performance("ping_handling", 0.5)
     
-    @pytest.mark.asyncio
-    async def test_04_real_agent_service_different_message_types(
+        @pytest.mark.asyncio
+        async def test_04_real_agent_service_different_message_types(
         self, real_agent_service, performance_monitor
-    ):
+        ):
         """Test 4: REAL AgentService handles different message types."""
         performance_monitor.start("multi_message_types")
         
         user_id = "multi_msg_user"
         
         messages = [
-            {
-                "type": "user_message",
-                "payload": {"content": "User message test", "references": []}
-            },
-            {
-                "type": "start_agent",
-                "payload": {"user_request": "Start agent test", "thread_id": str(uuid.uuid4())}
-            }
+        {
+        "type": "user_message",
+        "payload": {"content": "User message test", "references": []]
+        },
+        {
+        "type": "start_agent",
+        "payload": {"user_request": "Start agent test", "thread_id": str(uuid.uuid4())}
+        }
         ]
         
         # Process different message types with REAL AgentService
         for message in messages:
-            message_str = json.dumps(message)
-            await real_agent_service.handle_websocket_message(user_id, message_str, db_session=None)
+        message_str = json.dumps(message)
+        await real_agent_service.handle_websocket_message(user_id, message_str, db_session=None)
         
         duration = performance_monitor.end("multi_message_types")
         performance_monitor.assert_performance("multi_message_types", 3.0)
     
-    @pytest.mark.asyncio
-    async def test_05_real_concurrent_message_processing(
+        @pytest.mark.asyncio
+        async def test_05_real_concurrent_message_processing(
         self, real_agent_service, performance_monitor
-    ):
+        ):
         """Test 5: REAL concurrent message processing with actual AgentService."""
         performance_monitor.start("concurrent_processing")
         
         # Create multiple real messages for concurrent processing
         users_and_messages = [
-            (f"user_{i}", {
-                "type": "user_message",
-                "payload": {"content": f"Concurrent message {i}", "references": []}
-            })
-            for i in range(3)  # Start with 3 concurrent messages
+        (f"user_{i}", {
+        "type": "user_message",
+        "payload": {"content": f"Concurrent message {i]", "references": []]
+        })
+        for i in range(3)  # Start with 3 concurrent messages
         ]
         
         # Process all messages concurrently with REAL AgentService
         tasks = []
         for user_id, message in users_and_messages:
-            message_str = json.dumps(message)
-            task = asyncio.create_task(
-                real_agent_service.handle_websocket_message(user_id, message_str, db_session=None)
-            )
-            tasks.append(task)
+        message_str = json.dumps(message)
+        task = asyncio.create_task(
+        real_agent_service.handle_websocket_message(user_id, message_str, db_session=None)
+        )
+        tasks.append(task)
         
         # Wait for all REAL processing to complete
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # All should complete without exceptions
         for result in results:
-            assert not isinstance(result, Exception), f"Task failed with: {result}"
+        assert not isinstance(result, Exception), f"Task failed with: {result}"
         
         duration = performance_monitor.end("concurrent_processing")
         # Real concurrent processing should complete within reasonable time
         performance_monitor.assert_performance("concurrent_processing", 5.0)
     
-    @pytest.mark.asyncio
-    async def test_06_real_message_router_statistics(
+        @pytest.mark.asyncio
+        async def test_06_real_message_router_statistics(
         self, real_message_router, performance_monitor
-    ):
+        ):
         """Test 6: REAL message router tracks statistics with actual routing."""
         performance_monitor.start("router_statistics")
         
         user_id = "stats_test_user"
         
         # Create mock websocket for statistics test
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Get initial statistics
         initial_stats = real_message_router.get_stats()
@@ -286,29 +283,29 @@ class TestRealWebSocketMessageRoutingStandalone:
         
         # Process REAL messages through router
         messages = [
-            {"type": "user_message", "payload": {"content": "Message 1"}},
-            {"type": "ping"},
-            {"type": "user_message", "payload": {"content": "Another message 2"}}
+        {"type": "user_message", "payload": {"content": "Message 1"}},
+        {"type": "ping"},
+        {"type": "user_message", "payload": {"content": "Another message 2"}}
         ]
         
         for message in messages:
-            result = await real_message_router.route_message(user_id, mock_websocket, message)
-            assert result is True  # Router should handle all message types
+        result = await real_message_router.route_message(user_id, mock_websocket, message)
+        assert result is True  # Router should handle all message types
         
         # Verify REAL statistics were updated
         final_stats = real_message_router.get_stats()
         final_count = final_stats["messages_routed"]
         
         assert final_count == initial_count + len(messages), \
-            f"Expected {len(messages)} new messages routed, got {final_count - initial_count}"
+        f"Expected {len(messages)} new messages routed, got {final_count - initial_count}"
         
         duration = performance_monitor.end("router_statistics")
         performance_monitor.assert_performance("router_statistics", 2.0)
     
-    @pytest.mark.asyncio
-    async def test_07_real_json_message_parsing(
+        @pytest.mark.asyncio
+        async def test_07_real_json_message_parsing(
         self, real_agent_service, performance_monitor
-    ):
+        ):
         """Test 7: REAL JSON message parsing and handling."""
         performance_monitor.start("json_parsing")
         
@@ -316,16 +313,16 @@ class TestRealWebSocketMessageRoutingStandalone:
         
         # Test message with complex JSON structure
         message = {
-            "type": "user_message",
-            "payload": {
-                "content": "Test with special chars: 'quotes' "double" 
- newline",
-                "references": ["file1.txt", "data.json"],
-                "metadata": {
-                    "timestamp": asyncio.get_event_loop().time(),
-                    "session_id": str(uuid.uuid4())
-                }
-            }
+        "type": "user_message",
+        "payload": {
+        "content": "Test with special chars: 'quotes' "double" "
+        newline","
+        "references": ["file1.txt", "data.json"],
+        "metadata": {
+        "timestamp": asyncio.get_event_loop().time(),
+        "session_id": str(uuid.uuid4())
+        }
+        }
         }
         message_str = json.dumps(message)
         
@@ -335,28 +332,28 @@ class TestRealWebSocketMessageRoutingStandalone:
         duration = performance_monitor.end("json_parsing")
         performance_monitor.assert_performance("json_parsing", 1.0)
     
-    @pytest.mark.asyncio
-    async def test_08_real_end_to_end_message_flow(
+        @pytest.mark.asyncio
+        async def test_08_real_end_to_end_message_flow(
         self, real_agent_service, real_message_router, performance_monitor
-    ):
+        ):
         """Test 8: CRITICAL END-TO-END - Complete message flow with REAL components."""
         performance_monitor.start("end_to_end_flow")
         
         user_id = "e2e_test_user"
         
         # Create mock websocket for full flow test
-        mock_websocket = AsyncNone  # TODO: Use real service instance
-        mock_websocket.application_state = AsyncNone  # TODO: Use real service instance
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.application_state = AsyncMock()  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Simulate complete user message flow
         user_message = {
-            "type": "user_message",
-            "payload": {
-                "content": "@Netra What's my current AI spend optimization status?",
-                "references": [],
-                "thread_id": str(uuid.uuid4())
-            }
+        "type": "user_message",
+        "payload": {
+        "content": "@Netra What's my current AI spend optimization status?",
+        "references": [],
+        "thread_id": str(uuid.uuid4())
+        }
         }
         
         # Step 1: Route through REAL message router
@@ -392,7 +389,7 @@ class TestRealSystemComponents:
         llm_manager = LLMManager(config)
         websocket_manager = get_websocket_manager()
         tool_dispatcher = ToolDispatcher()
-        mock_db_session = AsyncNone  # TODO: Use real service instance
+        mock_db_session = AsyncMock()  # TODO: Use real service instance
         
         # Initialize REAL SupervisorAgent
         supervisor = SupervisorAgent(
@@ -412,7 +409,6 @@ class TestRealSystemComponents:
     @pytest.mark.asyncio
     async def test_real_tool_dispatcher_websocket_enhancement(self):
         """Test that REAL tool dispatcher gets WebSocket enhancement."""
-    pass
         from netra_backend.app.websocket_core import get_websocket_manager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
@@ -455,7 +451,6 @@ class TestRealSystemComponents:
     @pytest.mark.asyncio 
     async def test_real_llm_manager_initialization(self):
         """Test that REAL LLM manager initializes correctly."""
-    pass
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.core.configuration import unified_config_manager
         

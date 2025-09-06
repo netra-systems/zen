@@ -1,8 +1,10 @@
+import asyncio
+
 """Critical Test Suite: Prevent Inverted Logic in WebSocket Message Handling
 
 This is a placeholder test file. The actual WebSocket message handling tests
 are in other test files in the WebSocket test directories.
-"""
+""""
 
 import sys
 from pathlib import Path

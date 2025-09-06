@@ -14,7 +14,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 from typing import Any, Dict, Optional
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -54,11 +54,8 @@ def with_test_config_override(config_overrides: Dict[str, Any]):
             config = get_test_config()
             assert config.debug is True
     """
-    pass
     def decorator(func):
-    pass
         def wrapper(*args, **kwargs):
-    pass
             # Get original config
             original_config = get_test_config()
             

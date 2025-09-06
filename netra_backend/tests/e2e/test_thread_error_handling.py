@@ -1,6 +1,8 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Thread Error Handling and Recovery E2E Testing
 Tests comprehensive error scenarios and recovery mechanisms for thread operations.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -44,11 +46,10 @@ class ThreadDatabaseErrorTests:
         self, service: ThreadService, user_id: str, db_session: AsyncSession
     ) -> None:
         """Test various database error scenarios."""
-    pass
         # Test SQLAlchemy error
         db_session.execute.side_effect = SQLAlchemyError("Database connection failed")
         # Mock: Session isolation for controlled testing without external state
-        db_session.rollback = AsyncNone  # TODO: Use real service instance
+        db_session.rollback = AsyncMock()  # TODO: Use real service instance
         
         result = await service.get_or_create_thread(user_id, db_session)
         assert result is None
@@ -78,7 +79,7 @@ class ThreadDatabaseErrorTests:
         db_session.execute.side_effect = [mock_result_none, mock_result_existing]
         db_session.commit.side_effect = IntegrityError("statement", "params", "orig")
         # Mock: Session isolation for controlled testing without external state
-        db_session.rollback = AsyncNone  # TODO: Use real service instance
+        db_session.rollback = AsyncMock()  # TODO: Use real service instance
         
         result = await service.get_or_create_thread(user_id, db_session)
         
@@ -96,11 +97,10 @@ class ThreadDatabaseErrorTests:
         self, service: ThreadService, thread_id: str, db_session: AsyncSession
     ) -> None:
         """Test message creation error scenarios."""
-    pass
         # Test database error during message creation
         db_session.add.side_effect = SQLAlchemyError("Message creation failed")
         # Mock: Session isolation for controlled testing without external state
-        db_session.rollback = AsyncNone  # TODO: Use real service instance
+        db_session.rollback = AsyncMock()  # TODO: Use real service instance
         
         result = await service.create_message(
             thread_id, "user", "Test message", db=db_session
@@ -136,7 +136,6 @@ class ThreadStateErrorTests:
         self, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test state persistence error scenarios."""
-    pass
         # Mock state persistence service to fail
         with patch.object(state_persistence_service, 'save_agent_state') as mock_save:
             mock_save.side_effect = NetraException("State persistence failed")
@@ -173,7 +172,6 @@ class ThreadStateErrorTests:
     
     async def _test_recovery_error_scenarios(self, run_id: str, db_session: AsyncSession) -> None:
         """Test various state recovery error scenarios."""
-    pass
         with patch.object(state_persistence_service, 'recover_agent_state') as mock_recover:
             # Test recovery service failure
             mock_recover.return_value = (False, None)
@@ -206,7 +204,6 @@ class ThreadConcurrencyErrorTests:
         self, service: ThreadService, user_id: str, db_session: AsyncSession
     ) -> None:
         """Test concurrent access error scenarios."""
-    pass
         thread_id = f"thread_{user_id}"
         
         # Simulate concurrent operations that might conflict
@@ -234,9 +231,8 @@ class ThreadConcurrencyErrorTests:
         self, service: ThreadService, db_session: AsyncSession
     ) -> None:
         """Test deadlock scenarios and recovery."""
-    pass
         # Create multiple threads that might cause deadlocks
-        thread_ids = [f"deadlock_thread_{i}" for i in range(5)]
+        thread_ids = [f"deadlock_thread_{i]" for i in range(5)]
         
         # Create operations that access multiple threads
         cross_thread_operations = []
@@ -262,7 +258,6 @@ class ThreadConcurrencyErrorTests:
     ) -> Callable:
         """Create operation that accesses multiple threads."""
         async def cross_thread_op():
-    pass
             # Access threads in different order to potentially cause deadlocks
             access_order = thread_ids[operation_index:] + thread_ids[:operation_index]
             
@@ -294,7 +289,6 @@ class ThreadResourceErrorTests:
         self, service: ThreadService, db_session: AsyncSession
     ) -> None:
         """Test handling under memory pressure."""
-    pass
         # Simulate memory pressure by creating many large objects
         large_operations = []
         
@@ -320,7 +314,6 @@ class ThreadResourceErrorTests:
     ) -> Callable:
         """Create memory-intensive operation."""
         async def memory_op():
-    pass
             thread = await service.get_or_create_thread(user_id, db_session)
             
             # Create multiple messages with large content
@@ -347,7 +340,6 @@ class ThreadResourceErrorTests:
         self, service: ThreadService, db_session: AsyncSession
     ) -> None:
         """Test connection pool exhaustion scenarios."""
-    pass
         # Simulate many concurrent database operations
         connection_intensive_ops = []
         
@@ -382,12 +374,10 @@ class ThreadRecoveryTests:
         self, service: ThreadService, user_id: str, db_session: AsyncSession
     ) -> None:
         """Test automatic recovery mechanisms."""
-    pass
         # Mock intermittent failures
         call_count = 0
         
         async def intermittent_failure(*args, **kwargs):
-    pass
             nonlocal call_count
             call_count += 1
             if call_count <= 2:  # Fail first 2 attempts
@@ -421,7 +411,6 @@ class ThreadRecoveryTests:
         self, service: ThreadService, db_session: AsyncSession
     ) -> None:
         """Test manual recovery scenarios."""
-    pass
         # Simulate corrupted thread state
         corrupted_thread_id = "corrupted_thread"
         user_id = "recovery_test_user"
@@ -442,27 +431,26 @@ class ThreadRecoveryTests:
             assert new_thread is not None
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock database session with error simulation capabilities."""
-    pass
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncNone  # TODO: Use real service instance
+    session.begin = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncNone  # TODO: Use real service instance
+    session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.add = AsyncNone  # TODO: Use real service instance
+    session.add = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.flush = AsyncNone  # TODO: Use real service instance
+    session.flush = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.refresh = AsyncNone  # TODO: Use real service instance
+    session.refresh = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.execute = AsyncNone  # TODO: Use real service instance
+    session.execute = AsyncMock()  # TODO: Use real service instance
     await asyncio.sleep(0)
     return session
 
@@ -471,5 +459,4 @@ def thread_service():
     """Use real service instance."""
     # TODO: Initialize real service
     """Thread service fixture."""
-    pass
     return ThreadService()

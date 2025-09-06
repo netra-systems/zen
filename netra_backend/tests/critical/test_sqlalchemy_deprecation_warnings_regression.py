@@ -3,11 +3,13 @@ from test_framework.database.test_database_manager import TestDatabaseManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+import asyncio
+
 """
 SQLAlchemy Deprecation Warning Staging Regression Tests
 
 Tests to replicate SQLAlchemy deprecation issues found in GCP staging audit:
-- Using deprecated declarative_base() instead of DeclarativeBase class
+    - Using deprecated declarative_base() instead of DeclarativeBase class
 - SQLAlchemy version compatibility warnings in production environment
 - Future compatibility issues with SQLAlchemy 2.0+
 
@@ -15,12 +17,12 @@ Business Value: Prevents technical debt accumulation and future upgrade costs
 Critical for maintaining modern database ORM patterns and avoiding breaking changes.
 
 Root Cause from Staging Audit:
-- Codebase using deprecated SQLAlchemy declarative_base() function
+    - Codebase using deprecated SQLAlchemy declarative_base() function
 - Should migrate to DeclarativeBase class for SQLAlchemy 2.0+ compatibility
 - Deprecation warnings appearing in staging logs
 
 These tests will FAIL initially to confirm the issues exist, then PASS after fixes.
-"""
+""""
 
 import os
 import pytest
@@ -45,7 +47,7 @@ class TestSQLAlchemyDeprecationWarningsRegression:
         Root cause: Code still uses declarative_base() instead of DeclarativeBase.
         
         Expected failure: Deprecated declarative_base() found in codebase
-        """
+        """"
         # Arrange - Check for deprecated declarative_base usage
         import ast
         import inspect
@@ -103,7 +105,7 @@ class TestSQLAlchemyDeprecationWarningsRegression:
         Root cause: Using deprecated declarative_base() triggers warnings.
         
         Expected failure: Deprecation warnings caught during model creation
-        """
+        """"
         # Arrange - Capture warnings during model creation
         with warnings.catch_warnings(record=True) as warning_list:
             warnings.simplefilter("always")  # Capture all warnings
@@ -131,15 +133,15 @@ class TestSQLAlchemyDeprecationWarningsRegression:
                 # If there's an error, it might indicate the deprecated usage is breaking
                 pytest.fail(f"Error using deprecated declarative_base: {e}")
 
-    def test_modern_declarative_base_usage_missing_regression(self):
-        """
+                    def test_modern_declarative_base_usage_missing_regression(self):
+                        """
         REGRESSION TEST: Modern DeclarativeBase class not being used
         
         This test should FAIL initially if modern patterns are not implemented.
         Root cause: Codebase hasn't migrated to SQLAlchemy 2.0+ patterns.
         
         Expected failure: DeclarativeBase class usage not found in codebase
-        """
+        """"
         # Arrange - Check for modern DeclarativeBase usage
         from pathlib import Path
         
@@ -181,7 +183,7 @@ class TestSQLAlchemyDeprecationWarningsRegression:
         Root cause: Code not compatible with both SQLAlchemy 1.4+ and 2.0+.
         
         Expected failure: Version-specific compatibility issues
-        """
+        """"
         # Arrange - Check SQLAlchemy version compatibility
         sqlalchemy_version = sqlalchemy.__version__
         major_version = int(sqlalchemy_version.split('.')[0])
@@ -233,15 +235,15 @@ class TestSQLAlchemyDeprecationWarningsRegression:
         if compatibility_issues:
             pytest.fail(f"SQLAlchemy version compatibility issues: {compatibility_issues}")
 
-    def test_model_migration_pattern_missing_regression(self):
-        """
+                    def test_model_migration_pattern_missing_regression(self):
+                        """
         REGRESSION TEST: No migration pattern from old to new SQLAlchemy base
         
         This test should FAIL initially if migration strategy is not implemented.
         Root cause: No clear migration path from declarative_base to DeclarativeBase.
         
         Expected failure: Migration utilities or patterns not available
-        """
+        """"
         # Arrange - Check for migration utilities or patterns
         migration_patterns_found = []
         
@@ -279,7 +281,7 @@ class TestSQLAlchemyDeprecationWarningsRegression:
         Root cause: Deprecation warnings polluting production logs.
         
         Expected failure: Warning filtering not configured properly
-        """
+        """"
         # Arrange - Test warning handling in production-like environment
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging', 'TESTING': '0'}, clear=False):
             
@@ -323,7 +325,7 @@ class TestSQLAlchemyModernizationRegression:
         Root cause: Models not using SQLAlchemy 2.0+ typing patterns.
         
         Expected failure: Type annotations not found in model definitions
-        """
+        """"
         # Arrange - Check for modern typing patterns in models
         from pathlib import Path
         
@@ -373,7 +375,7 @@ class TestSQLAlchemyModernizationRegression:
         Root cause: Code not using modern async SQLAlchemy capabilities.
         
         Expected failure: Async database patterns not found
-        """
+        """"
         # Arrange - Check for async SQLAlchemy patterns
         from pathlib import Path
         
@@ -404,7 +406,7 @@ class TestSQLAlchemyModernizationRegression:
                         
                         file_async_patterns = [pattern for pattern in async_patterns if pattern in content]
                         if file_async_patterns:
-                            async_patterns_found.extend([f"{py_file}: {pattern}" for pattern in file_async_patterns])
+                            async_patterns_found.extend([f"{py_file]: {pattern]" for pattern in file_async_patterns])
                             
                     except (FileNotFoundError, PermissionError, UnicodeDecodeError):
                         continue

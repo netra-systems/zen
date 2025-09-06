@@ -1,27 +1,27 @@
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 """
 env = IsolatedEnvironment()
 Critical Config Loader Core Tests
 
 Business Value Justification (BVJ):
-- Segment: All segments
+    - Segment: All segments
 - Business Goal: Ensure reliable system startup and configuration
 - Value Impact: Config loading failures prevent system startup
 - Revenue Impact: System unavailability = 100% revenue loss during downtime. Estimated -$10K per hour
 
 Tests the config loader module that handles:
-- Configuration loading from multiple sources
+    - Configuration loading from multiple sources
 - Cloud environment detection (Cloud Run, App Engine, GKE)
 - Configuration validation and fallback mechanisms
 - Environment-specific configuration overrides
 
 COMPLIANCE:
-- Module ≤300 lines ✓
+    - Module ≤300 lines ✓
 - Functions ≤8 lines ✓ 
 - Strong typing with Pydantic ✓
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -53,7 +53,6 @@ def detect_app_engine_environment():
 
 def load_config_from_environment():
     """Load config from environment"""
-    pass
     from netra_backend.app.core.configuration.base import get_unified_config
     return get_unified_config()
 
@@ -63,30 +62,28 @@ def validate_required_config(config):
 
 class TestCloudEnvironmentDetection:
     """Test cloud environment detection functionality"""
-    pass
 
     @pytest.fixture
     def clean_environment(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Clean environment variables for isolated testing"""
-    pass
         original_env = env.get_all()
         # Clear cloud-related environment variables
         cloud_vars = [
-            'K_SERVICE', 'K_REVISION', 'K_CONFIGURATION',
-            'GAE_APPLICATION', 'GAE_VERSION', 'GAE_RUNTIME',
-            'KUBERNETES_SERVICE_HOST', 'GOOGLE_CLOUD_PROJECT',
-            'GCP_PROJECT', 'GCLOUD_PROJECT'
+        'K_SERVICE', 'K_REVISION', 'K_CONFIGURATION',
+        'GAE_APPLICATION', 'GAE_VERSION', 'GAE_RUNTIME',
+        'KUBERNETES_SERVICE_HOST', 'GOOGLE_CLOUD_PROJECT',
+        'GCP_PROJECT', 'GCLOUD_PROJECT'
         ]
         for var in cloud_vars:
-            os.environ.pop(var, None)
+        os.environ.pop(var, None)
         yield
         # Restore original environment
         env.clear()
         env.update(original_env, "test")
 
-    def test_detect_cloud_run_environment_with_k_service(self, clean_environment):
+        def test_detect_cloud_run_environment_with_k_service(self, clean_environment):
         """Test Cloud Run detection via K_SERVICE environment variable"""
         # Arrange
         env.set('K_SERVICE', 'netra-backend-service', "test")
@@ -98,9 +95,8 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-    def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
+        def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
         """Test Cloud Run staging environment detection"""
-    pass
         # Arrange
         env.set('K_SERVICE', 'netra-backend-staging', "test")
         env.set('K_CONFIGURATION', 'netra-backend-staging', "test")
@@ -111,7 +107,7 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "staging"
 
-    def test_detect_cloud_run_environment_not_present(self, clean_environment):
+        def test_detect_cloud_run_environment_not_present(self, clean_environment):
         """Test Cloud Run detection when not in Cloud Run environment"""
         # Act
         result = detect_cloud_run_environment()
@@ -119,9 +115,8 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result is None
 
-    def test_detect_app_engine_environment_standard(self, clean_environment):
+        def test_detect_app_engine_environment_standard(self, clean_environment):
         """Test App Engine standard environment detection"""
-    pass
         # Arrange
         env.set('GAE_APPLICATION', 'netra-project-123', "test")
         env.set('GAE_RUNTIME', 'python39', "test")
@@ -132,7 +127,7 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-    def test_detect_app_engine_environment_flex(self, clean_environment):
+        def test_detect_app_engine_environment_flex(self, clean_environment):
         """Test App Engine flexible environment detection"""
         # Arrange
         env.set('GAE_APPLICATION', 'netra-project-staging', "test")
@@ -144,9 +139,8 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "staging"
 
-    def test_detect_kubernetes_environment(self, clean_environment):
+        def test_detect_kubernetes_environment(self, clean_environment):
         """Test Google Kubernetes Engine detection"""
-    pass
         # Arrange
         env.set('KUBERNETES_SERVICE_HOST', '10.0.0.1', "test")
         env.set('GOOGLE_CLOUD_PROJECT', 'netra-gke-cluster', "test")
@@ -158,7 +152,7 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-    def test_detect_multiple_cloud_environments_precedence(self, clean_environment):
+        def test_detect_multiple_cloud_environments_precedence(self, clean_environment):
         """Test precedence when multiple cloud environments are detected"""
         # Arrange - Set up multiple cloud environment indicators
         env.set('K_SERVICE', 'netra-cloud-run', "test")  # Cloud Run
@@ -175,42 +169,40 @@ class TestCloudEnvironmentDetection:
 
 class TestConfigurationLoading:
     """Test configuration loading from various sources"""
-    pass
 
     @pytest.fixture
     def clean_environment(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Clean environment for config testing"""
-    pass
         original_env = env.get_all()
         config_vars = [
-            'DATABASE_URL', 'REDIS_URL', 'SECRET_KEY',
-            'DEBUG', 'LOG_LEVEL', 'PORT'
+        'DATABASE_URL', 'REDIS_URL', 'SECRET_KEY',
+        'DEBUG', 'LOG_LEVEL', 'PORT'
         ]
         for var in config_vars:
-            os.environ.pop(var, None)
+        os.environ.pop(var, None)
         yield
         env.clear()
         env.update(original_env, "test")
 
-    def test_load_config_from_environment_success(self, clean_environment):
+        def test_load_config_from_environment_success(self, clean_environment):
         """Test successful configuration loading from environment"""
         # Arrange
         config_mapping = {
-            'DATABASE_URL': 'database_url',
-            'REDIS_URL': 'redis_url',
-            'SECRET_KEY': 'secret_key',
-            'DEBUG': 'debug',
-            'LOG_LEVEL': 'log_level'
+        'DATABASE_URL': 'database_url',
+        'REDIS_URL': 'redis_url',
+        'SECRET_KEY': 'secret_key',
+        'DEBUG': 'debug',
+        'LOG_LEVEL': 'log_level'
         }
         
         env.update({
-            'DATABASE_URL': 'postgresql://localhost:5432/netra',
-            'REDIS_URL': 'redis://localhost:6379/0',
-            'SECRET_KEY': 'super-secret-key-123',
-            'DEBUG': 'false',
-            'LOG_LEVEL': 'INFO'
+        'DATABASE_URL': 'postgresql://localhost:5432/netra',
+        'REDIS_URL': 'redis://localhost:6379/0',
+        'SECRET_KEY': 'super-secret-key-123',
+        'DEBUG': 'false',
+        'LOG_LEVEL': 'INFO'
         }, "test")
         
         # Act
@@ -223,13 +215,12 @@ class TestConfigurationLoading:
         assert result['debug'] == 'false'
         assert result['log_level'] == 'INFO'
 
-    def test_load_config_from_environment_missing_variables(self, clean_environment):
+        def test_load_config_from_environment_missing_variables(self, clean_environment):
         """Test configuration loading with missing environment variables"""
-    pass
         # Arrange
         config_mapping = {
-            'REQUIRED_VAR': 'required_value',
-            'OPTIONAL_VAR': 'optional_value'
+        'REQUIRED_VAR': 'required_value',
+        'OPTIONAL_VAR': 'optional_value'
         }
         
         # Only set one of the required variables
@@ -237,38 +228,38 @@ class TestConfigurationLoading:
         
         # Act
         result = load_config_from_environment(
-            config_mapping, 
-            required_vars=['REQUIRED_VAR']
+        config_mapping, 
+        required_vars=['REQUIRED_VAR']
         )
         
         # Assert
         assert result['required_value'] == 'present'
         assert 'optional_value' not in result
 
-    def test_load_config_from_environment_type_conversion(self, clean_environment):
+        def test_load_config_from_environment_type_conversion(self, clean_environment):
         """Test automatic type conversion for configuration values"""
         # Arrange
         env.update({
-            'PORT': '8080',
-            'DEBUG': 'true',
-            'MAX_CONNECTIONS': '100',
-            'TIMEOUT': '30.5',
-            'ENABLE_FEATURE': 'false'
+        'PORT': '8080',
+        'DEBUG': 'true',
+        'MAX_CONNECTIONS': '100',
+        'TIMEOUT': '30.5',
+        'ENABLE_FEATURE': 'false'
         }, "test")
         
         type_mapping = {
-            'PORT': int,
-            'DEBUG': bool,
-            'MAX_CONNECTIONS': int,
-            'TIMEOUT': float,
-            'ENABLE_FEATURE': bool
+        'PORT': int,
+        'DEBUG': bool,
+        'MAX_CONNECTIONS': int,
+        'TIMEOUT': float,
+        'ENABLE_FEATURE': bool
         }
         
         # Act
         result = load_config_from_environment(
-            env_mapping={'PORT': 'port', 'DEBUG': 'debug', 'MAX_CONNECTIONS': 'max_connections',
-                        'TIMEOUT': 'timeout', 'ENABLE_FEATURE': 'enable_feature'},
-            type_mapping=type_mapping
+        env_mapping={'PORT': 'port', 'DEBUG': 'debug', 'MAX_CONNECTIONS': 'max_connections',
+        'TIMEOUT': 'timeout', 'ENABLE_FEATURE': 'enable_feature'},
+        type_mapping=type_mapping
         )
         
         # Assert
@@ -278,56 +269,55 @@ class TestConfigurationLoading:
         assert result['timeout'] == 30.5
         assert result['enable_feature'] is False
 
-    def test_load_config_with_default_values(self, clean_environment):
+        def test_load_config_with_default_values(self, clean_environment):
         """Test configuration loading with default values"""
-    pass
         # Arrange
         config_mapping = {
-            'CUSTOM_PORT': 'port',
-            'CUSTOM_DEBUG': 'debug'
+        'CUSTOM_PORT': 'port',
+        'CUSTOM_DEBUG': 'debug'
         }
         
         default_values = {
-            'port': 8000,
-            'debug': False
+        'port': 8000,
+        'debug': False
         }
         
         # Don't set any environment variables
         
         # Act
         result = load_config_from_environment(
-            config_mapping,
-            default_values=default_values
+        config_mapping,
+        default_values=default_values
         )
         
         # Assert
         assert result['port'] == 8000
         assert result['debug'] is False
 
-    def test_load_config_environment_override_defaults(self, clean_environment):
+        def test_load_config_environment_override_defaults(self, clean_environment):
         """Test that environment variables override default values"""
         # Arrange
         config_mapping = {
-            'PORT': 'port',
-            'DEBUG': 'debug'
+        'PORT': 'port',
+        'DEBUG': 'debug'
         }
         
         default_values = {
-            'port': 8000,
-            'debug': False
+        'port': 8000,
+        'debug': False
         }
         
         # Set environment variables that should override defaults
         env.update({
-            'PORT': '9000',
-            'DEBUG': 'true'
+        'PORT': '9000',
+        'DEBUG': 'true'
         }, "test")
         
         # Act
         result = load_config_from_environment(
-            config_mapping,
-            default_values=default_values,
-            type_mapping={'PORT': int, 'DEBUG': bool}
+        config_mapping,
+        default_values=default_values,
+        type_mapping={'PORT': int, 'DEBUG': bool}
         )
         
         # Assert
@@ -336,7 +326,6 @@ class TestConfigurationLoading:
 
 class TestConfigurationValidation:
     """Test configuration validation functionality"""
-    pass
 
     def test_validate_required_config_success(self):
         """Test successful validation of required configuration"""
@@ -354,7 +343,6 @@ class TestConfigurationValidation:
 
     def test_validate_required_config_missing_keys(self):
         """Test validation failure with missing required keys"""
-    pass
         # Arrange
         config = {
             'database_url': 'postgresql://localhost:5432/netra'
@@ -389,7 +377,6 @@ class TestConfigurationValidation:
 
     def test_validate_config_with_custom_validators(self):
         """Test configuration validation with custom validation functions"""
-    pass
         # Arrange
         config = {
             'database_url': 'postgresql://localhost:5432/netra',
@@ -398,12 +385,10 @@ class TestConfigurationValidation:
         }
         
         def validate_port(value):
-    pass
             if not isinstance(value, int) or value < 1 or value > 65535:
                 raise ValueError("Port must be between 1 and 65535")
         
         def validate_email(value):
-    pass
             if '@' not in value:
                 raise ValueError("Invalid email format")
         
@@ -444,29 +429,27 @@ class TestConfigurationValidation:
 
 class TestConfigurationFallbackMechanisms:
     """Test configuration fallback and error recovery"""
-    pass
 
     @pytest.fixture
     def clean_environment(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         original_env = env.get_all()
         yield
         env.clear()
         env.update(original_env, "test")
 
-    def test_fallback_to_default_configuration(self, clean_environment):
+        def test_fallback_to_default_configuration(self, clean_environment):
         """Test fallback to default configuration when environment loading fails"""
-    pass
         # Arrange
         config_mapping = {
-            'DATABASE_URL': 'database_url',
-            'NONEXISTENT_VAR': 'nonexistent'
+        'DATABASE_URL': 'database_url',
+        'NONEXISTENT_VAR': 'nonexistent'
         }
         
         fallback_config = {
-            'database_url': 'sqlite:///fallback.db',
-            'nonexistent': 'fallback_value'
+        'database_url': 'sqlite:///fallback.db',
+        'nonexistent': 'fallback_value'
         }
         
         # Set only partial environment
@@ -474,32 +457,32 @@ class TestConfigurationFallbackMechanisms:
         
         # Act
         result = load_config_from_environment(
-            config_mapping,
-            fallback_config=fallback_config
+        config_mapping,
+        fallback_config=fallback_config
         )
         
         # Assert
         assert result['database_url'] == 'postgresql://primary.db'  # From environment
         assert result['nonexistent'] == 'fallback_value'  # From fallback
 
-    def test_fallback_configuration_hierarchy(self, clean_environment):
+        def test_fallback_configuration_hierarchy(self, clean_environment):
         """Test configuration fallback hierarchy: environment > fallback > defaults"""
         # Arrange
         config_mapping = {
-            'SETTING_A': 'setting_a',
-            'SETTING_B': 'setting_b',
-            'SETTING_C': 'setting_c'
+        'SETTING_A': 'setting_a',
+        'SETTING_B': 'setting_b',
+        'SETTING_C': 'setting_c'
         }
         
         defaults = {
-            'setting_a': 'default_a',
-            'setting_b': 'default_b',
-            'setting_c': 'default_c'
+        'setting_a': 'default_a',
+        'setting_b': 'default_b',
+        'setting_c': 'default_c'
         }
         
         fallback_config = {
-            'setting_b': 'fallback_b',
-            'setting_c': 'fallback_c'
+        'setting_b': 'fallback_b',
+        'setting_c': 'fallback_c'
         }
         
         # Set only one environment variable
@@ -507,9 +490,9 @@ class TestConfigurationFallbackMechanisms:
         
         # Act
         result = load_config_from_environment(
-            config_mapping,
-            default_values=defaults,
-            fallback_config=fallback_config
+        config_mapping,
+        default_values=defaults,
+        fallback_config=fallback_config
         )
         
         # Assert
@@ -517,13 +500,12 @@ class TestConfigurationFallbackMechanisms:
         assert result['setting_b'] == 'fallback_b'  # From fallback
         assert result['setting_c'] == 'env_c'       # From environment
 
-    def test_graceful_degradation_partial_config_failure(self, clean_environment):
+        def test_graceful_degradation_partial_config_failure(self, clean_environment):
         """Test graceful degradation when partial configuration loading fails"""
-    pass
         # Arrange
         config_mapping = {
-            'CRITICAL_SETTING': 'critical',
-            'OPTIONAL_SETTING': 'optional'
+        'CRITICAL_SETTING': 'critical',
+        'OPTIONAL_SETTING': 'optional'
         }
         
         # Set critical setting but not optional
@@ -531,9 +513,9 @@ class TestConfigurationFallbackMechanisms:
         
         # Act
         result = load_config_from_environment(
-            config_mapping,
-            required_vars=['CRITICAL_SETTING'],
-            allow_partial=True
+        config_mapping,
+        required_vars=['CRITICAL_SETTING'],
+        allow_partial=True
         )
         
         # Assert
@@ -542,7 +524,6 @@ class TestConfigurationFallbackMechanisms:
 
 class TestConfigLoaderErrorHandling:
     """Test error handling and edge cases"""
-    pass
 
     def test_config_load_error_creation(self):
         """Test ConfigLoadError exception creation and details"""
@@ -564,7 +545,6 @@ class TestConfigLoaderErrorHandling:
 
     def test_config_loader_type_conversion_errors(self, clean_environment=None):
         """Test handling of type conversion errors"""
-    pass
         # Arrange
         env.update({
             'PORT': 'not_a_number',
@@ -611,7 +591,6 @@ class TestConfigLoaderErrorHandling:
 
 class TestConfigLoaderPerformance:
     """Test performance characteristics of config loader"""
-    pass
 
     def test_config_loading_performance_large_environment(self):
         """Test config loading performance with large number of environment variables"""
@@ -624,7 +603,7 @@ class TestConfigLoaderPerformance:
         for i in range(1000):
             env_key = f'CONFIG_VAR_{i}'
             config_key = f'config_var_{i}'
-            large_env[env_key] = f'value_{i}'
+            large_env[env_key] = f'value_{i]'
             config_mapping[env_key] = config_key
         
         with patch.dict(os.environ, large_env):
@@ -639,12 +618,11 @@ class TestConfigLoaderPerformance:
 
     def test_config_validation_performance(self):
         """Test performance of configuration validation"""
-    pass
         import time
         
         # Arrange - Large configuration
         large_config = {f'key_{i}': f'value_{i}' for i in range(1000)}
-        required_keys = [f'key_{i}' for i in range(0, 1000, 2)]  # Every other key
+        required_keys = [f'key_{i]' for i in range(0, 1000, 2)]  # Every other key
         
         # Act
         start_time = time.time()
@@ -673,7 +651,6 @@ class TestConfigLoaderPerformance:
 # Helper functions that would be in the actual config_loader module
 def resolve_config_references(config: Dict[str, Any]) -> Dict[str, Any]:
     """Resolve configuration references like ${other_setting}"""
-    pass
     # Simplified implementation for testing
     resolved = {}
     max_iterations = 10

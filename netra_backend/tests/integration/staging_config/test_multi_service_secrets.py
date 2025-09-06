@@ -3,7 +3,7 @@ Test Multi-Service Secrets
 
 Validates cross-service authentication and secret sharing
 between backend, auth service, and frontend in staging.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -65,16 +65,16 @@ class TestMultiServiceSecrets(StagingConfigTestBase):
                     
                     try:
                         response = await client.get(
-                            f"{service['url']}/health",
+                            f"{service['url']]/health",
                             headers=headers,
                             timeout=10.0
                         )
                         
                         self.assertIn(response.status_code, [200, 401],
-                                    f"Unexpected status from {service['name']}")
+                                    f"Unexpected status from {service['name']]")
                                     
                     except Exception as e:
-                        self.fail(f"Service {service['name']} auth failed: {e}")
+                        self.fail(f"Service {service['name']] auth failed: {e]")
                         
     def test_api_key_rotation(self):
         """Test API key rotation across services."""

@@ -1,8 +1,10 @@
-"""Test Agent Initialization - Verify robust startup mechanisms
+from unittest.mock import Mock, patch, MagicMock
+
+"""Test Agent Initialization - Verify robust startup mechanisms"""
 
 Simple test to validate that the agent initialization improvements work correctly.
 Tests fallback mechanisms, error handling, and graceful degradation.
-"""
+""""
 
 import asyncio
 import os
@@ -174,7 +176,7 @@ async def test_enhanced_registry():
         
         # Test registry health
         health = registry.get_registry_health()
-        print(f"[PASS] Registry health: {health['total_agents']} agents")
+        print(f"[PASS] Registry health: {health['total_agents'}] agents")
         
         return True
         

@@ -1,13 +1,15 @@
+import asyncio
+
 """
 Critical database transaction and state management integration tests.
 Business Value: Prevents $12K MRR loss from data consistency issues.
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -77,7 +79,7 @@ class TestDatabaseTransactionIntegration:
             
             await ch_mock.begin_transaction()
             for op in scenario["clickhouse_operations"]:
-                await ch_mock.execute(f"INSERT INTO {op['table']} VALUES ...")
+                await ch_mock.execute(f"INSERT INTO {op['table']] VALUES ...")
 
     async def _simulate_partial_failure_and_rollback(self, pg_session, ch_mock):
         """Simulate failure requiring complete rollback"""
@@ -104,7 +106,7 @@ class TestDatabaseTransactionIntegration:
         state = {
             "active_agents": [str(uuid.uuid4()) for _ in range(3)],
             "websocket_connections": [str(uuid.uuid4()) for _ in range(5)],
-            "pending_jobs": [{"id": str(uuid.uuid4()), "type": "optimization"} for _ in range(2)],
+            "pending_jobs": [{"id": str(uuid.uuid4()), "type": "optimization"] for _ in range(2)],
             "cache_state": {"hit_rate": 0.85, "size": 1024}
         }
         
@@ -113,12 +115,12 @@ class TestDatabaseTransactionIntegration:
 
     async def _simulate_system_restart(self, manager):
         """Simulate complete system restart"""
-        manager["runtime_state"] = {}
+        manager["runtime_state"] = {]
         manager["restart_timestamp"] = datetime.now(timezone.utc)
 
     async def _execute_state_recovery(self, manager):
         """Execute state recovery process"""
-        recovered = manager["state_store"]["data"].get("system_state", {})
+        recovered = manager["state_store"]["data"].get("system_state", {])
         manager["recovered_state"] = recovered
         return recovered
 
@@ -149,7 +151,7 @@ class TestDatabaseTransactionIntegration:
 
     async def _propagate_cache_update(self, topology, data):
         """Propagate cache update through all layers"""
-        key = f"optimization:{data['optimization_id']}"
+        key = f"optimization:{data['optimization_id']]"
         
         topology["database"]["data"][key] = data
         
@@ -159,7 +161,7 @@ class TestDatabaseTransactionIntegration:
 
     async def _verify_eventual_consistency(self, topology, data):
         """Verify eventual consistency across cache layers"""
-        key = f"optimization:{data['optimization_id']}"
+        key = f"optimization:{data['optimization_id']]"
         results = {}
         
         for cache_name in ["l1_cache", "l2_cache", "cdn_cache"]:

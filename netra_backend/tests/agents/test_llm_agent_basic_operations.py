@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Basic LLM Agent Integration Tests
 Tests basic agent initialization and core functionality
 Split from oversized test_llm_agent_e2e_real.py
-"""
+""""
 
 import sys
 from pathlib import Path

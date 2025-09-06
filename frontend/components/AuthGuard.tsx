@@ -51,10 +51,12 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   useEffect(() => {
     // Only check auth once when fully initialized with minimal dependencies
-    if (!isMounted.current || hasPerformedAuthCheck.current) return;
+    if (!isMounted.current) return;
     if (loading || !initialized) return;
     
-    hasPerformedAuthCheck.current = true;
+    // Don't re-check if we already determined authentication state
+    if (hasPerformedAuthCheck.current) return;
+    
     const isAuthenticated = !!user;
     const currentPath = window.location.pathname;
     
@@ -63,6 +65,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       // This helps with race conditions during initialization
       const storedToken = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
       if (!storedToken) {
+        // Only mark as checked when we actually make a decision
+        hasPerformedAuthCheck.current = true;
         trackError('auth_required', 'User not authenticated', currentPath, false);
         router.push(redirectTo);
       } else {
@@ -71,10 +75,12 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
           component: 'AuthGuard',
           currentPath
         });
-        // DO NOT reset hasPerformedAuthCheck - this causes infinite loops
+        // Don't mark as checked yet - we're still waiting for auth context
         // The auth context will update and trigger a re-render naturally
       }
     } else {
+      // User is authenticated - mark as checked
+      hasPerformedAuthCheck.current = true;
       trackPageView(currentPath, 'Protected Page Access');
     }
     

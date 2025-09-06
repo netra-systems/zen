@@ -1,19 +1,21 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Metric Aggregation Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from monitoring blind spots
 - Value Impact: Validates metrics aggregation processes collected data correctly
 - Revenue Impact: Ensures aggregated metrics provide accurate insights for platform optimization
 
 REQUIREMENTS:
-- Aggregation processes metrics correctly
+    - Aggregation processes metrics correctly
 - Request count aggregation via sum
 - Response time aggregation via average
 - Error rate calculation accuracy
 - Aggregation processing within 2 seconds
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -76,7 +78,7 @@ class TestMetricAggregation:
         
         if "request_count" in aggregation_results:
             request_count = aggregation_results["request_count"]
-            assert request_count["value"] == 5, f"Request count aggregation incorrect: {request_count['value']}"
+            assert request_count["value"] == 5, f"Request count aggregation incorrect: {request_count['value']]"
             assert request_count["aggregation_type"] == "sum", "Aggregation type incorrect"
 
     @pytest.mark.asyncio
@@ -180,7 +182,7 @@ class TestMetricAggregation:
         
         if "user_active_sessions" in aggregation_results:
             session_count = aggregation_results["user_active_sessions"]
-            assert session_count["value"] == 3, f"Unique session count incorrect: {session_count['value']}"
+            assert session_count["value"] == 3, f"Unique session count incorrect: {session_count['value']]"
             assert session_count["aggregation_type"] == "count_unique", "Session aggregation type incorrect"
 
     @pytest.mark.asyncio

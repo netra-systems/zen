@@ -1,8 +1,10 @@
+import asyncio
+
 """Test module: test_real_auth_integration_helpers.py
 
 This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
-"""
+""""
 
 import sys
 from pathlib import Path

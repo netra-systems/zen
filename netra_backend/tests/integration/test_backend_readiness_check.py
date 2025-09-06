@@ -1,7 +1,7 @@
 """
 Integration test for backend readiness check failures during dev launcher startup.
 Tests backend service health checks, database connectivity, and dependency readiness.
-"""
+""""
 import pytest
 import requests
 import asyncio
@@ -35,14 +35,14 @@ class TestBackendReadinessCheck:
         
         # Validate database URL format
         assert db_url.startswith(('postgresql://', 'postgres://', 'postgresql+asyncpg://')), \
-            f"Invalid database URL format: {db_url[:30]}..."
+            f"Invalid database URL format: {db_url[:30}]..."
         
         # Check for localhost (OK in development)
         if 'localhost' in db_url:
             assert config.environment == "development", \
                 "Database URL contains localhost in non-development environment"
         
-        print(f"Backend database URL: {db_url[:50]}...")
+        print(f"Backend database URL: {db_url[:50}]...")
 
     def test_backend_health_endpoint_accessibility(self):
         """Test backend health endpoint for readiness checks."""
@@ -113,7 +113,7 @@ class TestBackendReadinessCheck:
         if hasattr(config, 'clickhouse_url') and config.clickhouse_url:
             dependencies.append(('clickhouse', config.clickhouse_url))
         
-        print(f"Backend dependencies configured: {[name for name, _ in dependencies]}")
+        print(f"Backend dependencies configured: {[name for name, _ in dependencies}]")
         
         # At minimum should have database
         dependency_names = [name for name, _ in dependencies]

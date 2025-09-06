@@ -5,11 +5,11 @@ Tests focused on Redis-based cache invalidation including cascade propagation,
 tag-based invalidation, and distributed cache consistency.
 
 Business Value Justification (BVJ):
-1. Segment: Enterprise/Mid-tier ($50K-$100K MRR protection)
+    1. Segment: Enterprise/Mid-tier ($50K-$100K MRR protection)
 2. Business Goal: Data Consistency, Platform Stability, Risk Reduction
 3. Value Impact: Prevents stale data corruption in AI responses
 4. Strategic/Revenue Impact: Critical for enterprise customers requiring real-time consistency
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -55,8 +55,8 @@ class TestCacheRedisInvalidation:
         
         await self.cache_manager.cleanup()
     
-    @pytest.mark.asyncio
-    async def test_cascade_invalidation_propagation(self):
+        @pytest.mark.asyncio
+        async def test_cascade_invalidation_propagation(self):
         """Test cascade invalidation propagates through all cache layers."""
         logger.info("Testing cascade invalidation propagation")
         
@@ -66,14 +66,14 @@ class TestCacheRedisInvalidation:
         test_keys = random.sample(self.test_keys, 50)
         
         for key in test_keys:
-            cascade_time = await self.cache_manager.invalidate_cascade(key, tags={"user_data", "session_data"})
-            self.metrics.record_cascade(cascade_time)
+        cascade_time = await self.cache_manager.invalidate_cascade(key, tags={"user_data", "session_data"})
+        self.metrics.record_cascade(cascade_time)
             
-            consistency_check = await self.cache_manager.check_consistency(key)
-            self.metrics.record_consistency_check(consistency_check)
+        consistency_check = await self.cache_manager.check_consistency(key)
+        self.metrics.record_consistency_check(consistency_check)
             
-            assert cascade_time < CACHE_TEST_CONFIG["performance_targets"]["cascade_propagation_ms"]
-            assert consistency_check, f"Cache consistency violation detected for key {key}"
+        assert cascade_time < CACHE_TEST_CONFIG["performance_targets"]["cascade_propagation_ms"]
+        assert consistency_check, f"Cache consistency violation detected for key {key}"
         
         self.metrics.end_measurement()
         
@@ -85,53 +85,53 @@ class TestCacheRedisInvalidation:
         
         logger.info(f"Cascade test passed: avg_time={avg_cascade_time:.2f}ms, consistency={consistency_rate}%")
     
-    @pytest.mark.asyncio
-    async def test_tag_based_invalidation_redis(self):
+        @pytest.mark.asyncio
+        async def test_tag_based_invalidation_redis(self):
         """Test tag-based cache invalidation across Redis layer."""
         logger.info("Testing Redis tag-based invalidation")
         
         tag_scenarios = {
-            "user_session": [f"session:{i}" for i in range(20)],
-            "ai_model_cache": [f"model:response:{i}" for i in range(15)],
-            "schema_metadata": [f"schema:table:{i}" for i in range(10)]
+        "user_session": [f"session:{i}" for i in range(20)],
+        "ai_model_cache": [f"model:response:{i}" for i in range(15)],
+        "schema_metadata": [f"schema:table:{i}" for i in range(10)]
         }
         
         for tag, keys in tag_scenarios.items():
-            for key in keys:
-                value = f"tagged_value_{tag}_{uuid.uuid4().hex[:8]}"
-                await self.cache_manager.set_multi_layer(key, value, tags={tag})
+        for key in keys:
+        value = f"tagged_value_{tag}_{uuid.uuid4().hex[:8}]"
+        await self.cache_manager.set_multi_layer(key, value, tags={tag})
         
         self.metrics.start_measurement()
         
         for tag, expected_keys in tag_scenarios.items():
-            invalidation_start = time.time()
+        invalidation_start = time.time()
             
-            batch_size = 5
-            semaphore = asyncio.Semaphore(4)
+        batch_size = 5
+        semaphore = asyncio.Semaphore(4)
             
-            async def invalidate_key_batch(key_batch):
-                async with semaphore:
-                    tasks = [self.cache_manager.invalidate_cascade(key, tags={tag}) for key in key_batch]
-                    return await asyncio.gather(*tasks, return_exceptions=True)
+        async def invalidate_key_batch(key_batch):
+        async with semaphore:
+        tasks = [self.cache_manager.invalidate_cascade(key, tags={tag}) for key in key_batch]
+        return await asyncio.gather(*tasks, return_exceptions=True)
             
-            batch_tasks = []
-            for i in range(0, len(expected_keys), batch_size):
-                batch = expected_keys[i:i + batch_size]
-                batch_tasks.append(invalidate_key_batch(batch))
+        batch_tasks = []
+        for i in range(0, len(expected_keys), batch_size):
+        batch = expected_keys[i:i + batch_size]
+        batch_tasks.append(invalidate_key_batch(batch))
             
-            await asyncio.gather(*batch_tasks, return_exceptions=True)
+        await asyncio.gather(*batch_tasks, return_exceptions=True)
             
-            invalidated_count = 0
-            for key in expected_keys:
-                consistency_check = await self.cache_manager.check_consistency(key)
-                self.metrics.record_consistency_check(consistency_check)
-                if consistency_check:
-                    invalidated_count += 1
+        invalidated_count = 0
+        for key in expected_keys:
+        consistency_check = await self.cache_manager.check_consistency(key)
+        self.metrics.record_consistency_check(consistency_check)
+        if consistency_check:
+        invalidated_count += 1
             
-            invalidation_rate = (invalidated_count / len(expected_keys)) * 100
-            assert invalidation_rate >= 100.0
+        invalidation_rate = (invalidated_count / len(expected_keys)) * 100
+        assert invalidation_rate >= 100.0
             
-            logger.info(f"Tag invalidation {tag}: {invalidated_count}/{len(expected_keys)} keys")
+        logger.info(f"Tag invalidation {tag}: {invalidated_count}/{len(expected_keys)} keys")
         
         self.metrics.end_measurement()
         
@@ -140,37 +140,37 @@ class TestCacheRedisInvalidation:
         
         logger.info("Redis tag-based invalidation test passed")
     
-    @pytest.mark.asyncio
-    async def test_redis_distributed_consistency(self):
+        @pytest.mark.asyncio
+        async def test_redis_distributed_consistency(self):
         """Test Redis distributed cache consistency validation."""
         logger.info("Testing Redis distributed consistency")
         
         consistency_scenarios = [
-            {"key": "distributed:test:1", "layers": ["redis"], "value": "dist_value_1"},
-            {"key": "distributed:test:2", "layers": ["l1_cache", "redis"], "value": "dist_value_2"},
-            {"key": "distributed:test:3", "layers": ["l2_cache", "redis"], "value": "dist_value_3"}
+        {"key": "distributed:test:1", "layers": ["redis"}, "value": "dist_value_1"],
+        {"key": "distributed:test:2", "layers": ["l1_cache", "redis"}, "value": "dist_value_2"],
+        {"key": "distributed:test:3", "layers": ["l2_cache", "redis"}, "value": "dist_value_3"]
         ]
         
         self.metrics.start_measurement()
         
         for scenario in consistency_scenarios:
-            key = scenario["key"]
-            value = scenario["value"]
+        key = scenario["key"]
+        value = scenario["value"]
             
-            await self.cache_manager.set_multi_layer(key, value, tags={"distributed_test"})
+        await self.cache_manager.set_multi_layer(key, value, tags={"distributed_test"})
             
-            for layer in scenario["layers"]:
-                retrieved_value = await self.cache_manager.get_from_layer(layer, key)
-                assert retrieved_value == value, f"Value mismatch in {layer} for key {key}"
+        for layer in scenario["layers"]:
+        retrieved_value = await self.cache_manager.get_from_layer(layer, key)
+        assert retrieved_value == value, f"Value mismatch in {layer} for key {key}"
             
-            invalidation_time = await self.cache_manager.invalidate_single_layer("redis", key)
-            self.metrics.record_invalidation("redis", invalidation_time)
+        invalidation_time = await self.cache_manager.invalidate_single_layer("redis", key)
+        self.metrics.record_invalidation("redis", invalidation_time)
             
-            redis_value = await self.cache_manager.get_from_layer("redis", key)
-            assert redis_value is None, f"Redis value not invalidated for key {key}"
+        redis_value = await self.cache_manager.get_from_layer("redis", key)
+        assert redis_value is None, f"Redis value not invalidated for key {key}"
             
-            consistency_check = await self.cache_manager.check_consistency(key)
-            self.metrics.record_consistency_check(consistency_check)
+        consistency_check = await self.cache_manager.check_consistency(key)
+        self.metrics.record_consistency_check(consistency_check)
         
         self.metrics.end_measurement()
         
@@ -179,32 +179,32 @@ class TestCacheRedisInvalidation:
         
         logger.info("Redis distributed consistency test passed")
     
-    @pytest.mark.asyncio
-    async def test_redis_concurrent_invalidation(self):
+        @pytest.mark.asyncio
+        async def test_redis_concurrent_invalidation(self):
         """Test concurrent Redis invalidation operations."""
         logger.info("Testing Redis concurrent invalidation")
         
         concurrent_keys = [f"concurrent:redis:{i}" for i in range(30)]
         
         for key in concurrent_keys:
-            value = f"concurrent_value_{uuid.uuid4().hex[:8]}"
-            await self.cache_manager.set_multi_layer(key, value, tags={"concurrent_test"})
+        value = f"concurrent_value_{uuid.uuid4().hex[:8}]"
+        await self.cache_manager.set_multi_layer(key, value, tags={"concurrent_test"})
         
         self.metrics.start_measurement()
         
         async def concurrent_invalidation_worker(worker_keys):
-            for key in worker_keys:
-                invalidation_time = await self.cache_manager.invalidate_cascade(key)
-                self.metrics.record_cascade(invalidation_time)
+        for key in worker_keys:
+        invalidation_time = await self.cache_manager.invalidate_cascade(key)
+        self.metrics.record_cascade(invalidation_time)
                 
-                consistency_check = await self.cache_manager.check_consistency(key)
-                self.metrics.record_consistency_check(consistency_check)
+        consistency_check = await self.cache_manager.check_consistency(key)
+        self.metrics.record_consistency_check(consistency_check)
         
         batch_size = 10
         worker_tasks = []
         for i in range(0, len(concurrent_keys), batch_size):
-            batch = concurrent_keys[i:i + batch_size]
-            worker_tasks.append(concurrent_invalidation_worker(batch))
+        batch = concurrent_keys[i:i + batch_size]
+        worker_tasks.append(concurrent_invalidation_worker(batch))
         
         await asyncio.gather(*worker_tasks, return_exceptions=True)
         
@@ -218,8 +218,8 @@ class TestCacheRedisInvalidation:
         
         logger.info(f"Concurrent Redis invalidation passed: {consistency_rate}% consistency, {avg_cascade_time:.2f}ms avg")
     
-    @pytest.mark.asyncio
-    async def test_redis_connection_resilience(self):
+        @pytest.mark.asyncio
+        async def test_redis_connection_resilience(self):
         """Test Redis invalidation with connection issues."""
         logger.info("Testing Redis connection resilience")
         
@@ -231,21 +231,21 @@ class TestCacheRedisInvalidation:
         original_client = self.cache_manager.redis_client
         
         try:
-            # Simulate Redis connection issue
-            self.cache_manager.redis_client = None
+        # Simulate Redis connection issue
+        self.cache_manager.redis_client = None
             
-            # Should still work with local cache layers
-            invalidation_time = await self.cache_manager.invalidate_single_layer("l1_cache", test_key)
-            assert invalidation_time >= 0
+        # Should still work with local cache layers
+        invalidation_time = await self.cache_manager.invalidate_single_layer("l1_cache", test_key)
+        assert invalidation_time >= 0
             
-            # Restore connection
-            self.cache_manager.redis_client = original_client
+        # Restore connection
+        self.cache_manager.redis_client = original_client
             
-            # Test full cascade after restoration
-            cascade_time = await self.cache_manager.invalidate_cascade(test_key)
-            assert cascade_time < CACHE_TEST_CONFIG["performance_targets"]["cascade_propagation_ms"] * 2
+        # Test full cascade after restoration
+        cascade_time = await self.cache_manager.invalidate_cascade(test_key)
+        assert cascade_time < CACHE_TEST_CONFIG["performance_targets"]["cascade_propagation_ms"] * 2
             
-            logger.info("Redis resilience test passed")
+        logger.info("Redis resilience test passed")
             
         finally:
-            self.cache_manager.redis_client = original_client
+        self.cache_manager.redis_client = original_client

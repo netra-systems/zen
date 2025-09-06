@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Database connection and infrastructure tests
 Tests ClickHouse connection pooling, migration safety, and health checks
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -62,7 +64,7 @@ class TestClickHouseConnectionPool:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = AsyncNone  # TODO: Use real service instance
+            mock_client = AsyncMock()  # TODO: Use real service instance
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
             

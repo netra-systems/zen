@@ -1,12 +1,14 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Test multi-agent dependency chain execution and context propagation.
 
 CRITICAL: This test validates that:
-1. Agent dependencies are properly validated
+    1. Agent dependencies are properly validated
 2. Context and WebSocket manager propagate through the hierarchy
 3. Results are passed correctly between dependent agents
 4. Retry logic works for recoverable errors
 5. Graceful degradation for optional dependencies
-"""
+""""
 
 import asyncio
 import pytest
@@ -88,47 +90,47 @@ class TestDependencyChainExecution:
         
         # Create supervisor
         supervisor = SupervisorAgent(
-            llm_manager=llm_manager,
-            websocket_bridge=websocket_bridge
+        llm_manager=llm_manager,
+        websocket_bridge=websocket_bridge
         )
         
         # Create mock agents
         agents = {
-            "triage": MockAgent("triage"),
-            "data": MockAgent("data"),
-            "optimization": MockAgent("optimization"),
-            "actions": MockAgent("actions"),
-            "reporting": MockAgent("reporting")
+        "triage": MockAgent("triage"),
+        "data": MockAgent("data"),
+        "optimization": MockAgent("optimization"),
+        "actions": MockAgent("actions"),
+        "reporting": MockAgent("reporting")
         }
         
         return {
-            "supervisor": supervisor,
-            "agents": agents,
-            "websocket_bridge": websocket_bridge,
-            "llm_manager": llm_manager
+        "supervisor": supervisor,
+        "agents": agents,
+        "websocket_bridge": websocket_bridge,
+        "llm_manager": llm_manager
         }
     
-    @pytest.mark.asyncio
-    async def test_successful_dependency_chain(self, setup):
+        @pytest.mark.asyncio
+        async def test_successful_dependency_chain(self, setup):
         """Test successful execution through complete dependency chain."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
         
         # Create execution context
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test dependency chain"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test dependency chain"}
         )
         
         # Mock agent instance creation
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            # Execute workflow
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        # Execute workflow
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify all agents executed
         assert "triage" in results
@@ -147,8 +149,8 @@ class TestDependencyChainExecution:
         assert results["triage"]["websocket_set"] == True
         assert results["data"]["websocket_set"] == True
     
-    @pytest.mark.asyncio
-    async def test_missing_dependency_handling(self, setup):
+        @pytest.mark.asyncio
+        async def test_missing_dependency_handling(self, setup):
         """Test handling of missing dependencies."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
@@ -157,17 +159,17 @@ class TestDependencyChainExecution:
         del agents["triage"]
         
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test missing dependency"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test missing dependency"}
         )
         
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify data agent was skipped due to missing triage
         assert "data" in results
@@ -175,8 +177,8 @@ class TestDependencyChainExecution:
         assert "missing_deps" in results["data"]
         assert any("triage" in dep for dep in results["data"]["missing_deps"])
     
-    @pytest.mark.asyncio
-    async def test_retry_logic_on_failure(self, setup):
+        @pytest.mark.asyncio
+        async def test_retry_logic_on_failure(self, setup):
         """Test retry logic with exponential backoff."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
@@ -185,17 +187,17 @@ class TestDependencyChainExecution:
         agents["data"] = MockAgent("data", should_fail=True, fail_count=2)
         
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test retry logic"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test retry logic"}
         )
         
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify data agent eventually succeeded after retries
         assert "data" in results
@@ -203,24 +205,24 @@ class TestDependencyChainExecution:
         # Should have been executed 3 times (2 failures + 1 success)
         assert agents["data"].execution_count == 3
     
-    @pytest.mark.asyncio
-    async def test_context_propagation(self, setup):
+        @pytest.mark.asyncio
+        async def test_context_propagation(self, setup):
         """Test context propagation through agent hierarchy."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
         
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test context propagation"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test context propagation"}
         )
         
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify context metadata was updated with results
         assert "triage_result" in context.metadata
@@ -228,8 +230,8 @@ class TestDependencyChainExecution:
         assert "optimizations_result" in context.metadata
         assert "action_plan_result" in context.metadata
     
-    @pytest.mark.asyncio
-    async def test_graceful_degradation_optional_deps(self, setup):
+        @pytest.mark.asyncio
+        async def test_graceful_degradation_optional_deps(self, setup):
         """Test graceful degradation when optional dependencies are missing."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
@@ -238,17 +240,17 @@ class TestDependencyChainExecution:
         del agents["optimization"]
         
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test graceful degradation"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test graceful degradation"}
         )
         
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify reporting still executed despite missing optional dependency
         assert "reporting" in results
@@ -256,8 +258,8 @@ class TestDependencyChainExecution:
         # Optimization should be marked as skipped
         assert "optimization" not in results  # Not in agent_instances
     
-    @pytest.mark.asyncio
-    async def test_critical_agent_failure_stops_workflow(self, setup):
+        @pytest.mark.asyncio
+        async def test_critical_agent_failure_stops_workflow(self, setup):
         """Test that critical agent failure stops the workflow."""
         supervisor = setup["supervisor"]
         agents = setup["agents"]
@@ -266,17 +268,17 @@ class TestDependencyChainExecution:
         agents["triage"] = MockAgent("triage", should_fail=True, fail_count=10)
         
         context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id=str(uuid4()),
-            websocket_connection_id="test_ws",
-            metadata={"user_request": "Test critical failure"}
+        user_id="test_user",
+        thread_id="test_thread",
+        run_id=str(uuid4()),
+        websocket_connection_id="test_ws",
+        metadata={"user_request": "Test critical failure"}
         )
         
         with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents):
-            results = await supervisor._execute_workflow_with_isolated_agents(
-                agents, context, None, "test_flow"
-            )
+        results = await supervisor._execute_workflow_with_isolated_agents(
+        agents, context, None, "test_flow"
+        )
         
         # Verify workflow stopped after triage failure
         assert "triage" in results
@@ -284,53 +286,53 @@ class TestDependencyChainExecution:
         
         # Data should be skipped due to missing triage dependency
         if "data" in results:
-            assert results["data"]["status"] == "skipped"
+        assert results["data"]["status"] == "skipped"
     
-    @pytest.mark.asyncio
-    async def test_concurrent_workflow_isolation(self, setup):
+        @pytest.mark.asyncio
+        async def test_concurrent_workflow_isolation(self, setup):
         """Test that concurrent workflows maintain isolation."""
         supervisor = setup["supervisor"]
         
         # Create two different contexts for concurrent execution
         context1 = UserExecutionContext(
-            user_id="user1",
-            thread_id="thread1",
-            run_id=str(uuid4()),
-            websocket_connection_id="ws1",
-            metadata={"user_request": "User 1 request"}
+        user_id="user1",
+        thread_id="thread1",
+        run_id=str(uuid4()),
+        websocket_connection_id="ws1",
+        metadata={"user_request": "User 1 request"}
         )
         
         context2 = UserExecutionContext(
-            user_id="user2",
-            thread_id="thread2",
-            run_id=str(uuid4()),
-            websocket_connection_id="ws2",
-            metadata={"user_request": "User 2 request"}
+        user_id="user2",
+        thread_id="thread2",
+        run_id=str(uuid4()),
+        websocket_connection_id="ws2",
+        metadata={"user_request": "User 2 request"}
         )
         
         # Create separate agent sets for each user
         agents1 = {
-            "triage": MockAgent("triage"),
-            "data": MockAgent("data")
+        "triage": MockAgent("triage"),
+        "data": MockAgent("data")
         }
         
         agents2 = {
-            "triage": MockAgent("triage"),
-            "data": MockAgent("data")
+        "triage": MockAgent("triage"),
+        "data": MockAgent("data")
         }
         
         # Execute workflows concurrently
         async def workflow1():
-            with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents1):
-                return await supervisor._execute_workflow_with_isolated_agents(
-                    agents1, context1, None, "flow1"
-                )
+        with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents1):
+        return await supervisor._execute_workflow_with_isolated_agents(
+        agents1, context1, None, "flow1"
+        )
         
         async def workflow2():
-            with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents2):
-                return await supervisor._execute_workflow_with_isolated_agents(
-                    agents2, context2, None, "flow2"
-                )
+        with patch.object(supervisor, '_create_isolated_agent_instances', return_value=agents2):
+        return await supervisor._execute_workflow_with_isolated_agents(
+        agents2, context2, None, "flow2"
+        )
         
         # Run concurrently
         results1, results2 = await asyncio.gather(workflow1(), workflow2())

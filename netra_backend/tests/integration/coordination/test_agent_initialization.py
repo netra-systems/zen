@@ -2,17 +2,17 @@
 Agent Initialization Integration Tests
 
 BVJ:
-- Segment: Platform/Internal (foundation for ALL customer segments)
+    - Segment: Platform/Internal (foundation for ALL customer segments)
 - Business Goal: Platform Stability - Prevent $35K MRR loss from coordination failures
 - Value Impact: Validates agent initialization and startup coordination
 - Revenue Impact: Prevents customer requests from failing due to broken agent coordination
 
 REQUIREMENTS:
-- Start multiple agents simultaneously
+    - Start multiple agents simultaneously
 - Agent registration in coordination system
 - Coordination setup within 15 seconds
 - Initialization order validation
-"""
+""""
 
 import sys
 from pathlib import Path

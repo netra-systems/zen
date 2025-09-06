@@ -1,13 +1,15 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Redis Connection Warning Staging Regression Tests
 
 Tests to replicate Redis connection issues found in GCP staging audit:
-- Warning about Redis connection on localhost
+    - Warning about Redis connection on localhost
 - Should use proper connection configuration for staging environment
 - Redis connection configuration not environment-aware
 
@@ -15,12 +17,12 @@ Business Value: Prevents cache and session management failures costing $30K+ MRR
 Critical for session persistence and caching performance.
 
 Root Cause from Staging Audit:
-- Redis connections attempting to connect to localhost instead of proper staging Redis
+    - Redis connections attempting to connect to localhost instead of proper staging Redis
 - Connection configuration not environment-specific
 - Warnings appearing in staging logs about incorrect Redis host
 
 These tests will FAIL initially to confirm the issues exist, then PASS after fixes.
-"""
+""""
 
 import os
 import pytest
@@ -44,7 +46,7 @@ class TestRedisConnectionWarningsRegression:
         Root cause: Redis configuration using localhost in staging environment.
         
         Expected failure: Redis attempting to connect to localhost
-        """
+        """"
         # Arrange - Mock staging environment
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -80,7 +82,7 @@ class TestRedisConnectionWarningsRegression:
         Root cause: Same Redis config used across all environments.
         
         Expected failure: Redis config doesn't change based on environment
-        """
+        """"
         # Arrange - Test different environments should use different Redis configs
         environment_configs = [
             {
@@ -144,7 +146,7 @@ class TestRedisConnectionWarningsRegression:
         Root cause: Connection pool settings not optimized for staging environment.
         
         Expected failure: Suboptimal connection pool configuration
-        """
+        """"
         # Arrange - Check Redis connection pool configuration
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             
@@ -192,7 +194,7 @@ class TestRedisConnectionWarningsRegression:
         Root cause: Health check configuration separate from main Redis config.
         
         Expected failure: Health check using localhost connection
-        """
+        """"
         # Arrange - Mock staging environment with Redis health check
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -201,7 +203,7 @@ class TestRedisConnectionWarningsRegression:
             
             # Mock Redis client to capture connection attempts
             with patch('redis.Redis') as mock_redis:
-                mock_instance = MagicNone  # TODO: Use real service instance
+                mock_instance = MagicMock()  # TODO: Use real service instance
                 mock_redis.return_value = mock_instance
                 
                 # Act - Perform Redis health check
@@ -233,7 +235,7 @@ class TestRedisConnectionWarningsRegression:
         Root cause: Connection string format not compatible with staging environment.
         
         Expected failure: Redis connection string parsing errors
-        """
+        """"
         # Arrange - Test various Redis connection string formats that might cause issues
         connection_string_scenarios = [
             {
@@ -302,7 +304,7 @@ class TestRedisEnvironmentConfigurationRegression:
         Root cause: Single Redis instance without failover in staging.
         
         Expected failure: Redis failover/sentinel configuration missing
-        """
+        """"
         # Arrange - Check for Redis failover configuration in staging
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             
@@ -332,7 +334,7 @@ class TestRedisEnvironmentConfigurationRegression:
         Root cause: Insecure Redis connections in staging environment.
         
         Expected failure: Redis SSL/TLS configuration missing or incorrect
-        """
+        """"
         # Arrange - Check Redis SSL/TLS configuration for staging
         with patch.dict(os.environ, {
             'ENVIRONMENT': 'staging',
@@ -376,7 +378,7 @@ class TestRedisEnvironmentConfigurationRegression:
         Root cause: No Redis metrics or monitoring in staging environment.
         
         Expected failure: Redis monitoring configuration missing
-        """
+        """"
         # Arrange - Check Redis monitoring configuration
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             

@@ -1,3 +1,5 @@
+import asyncio
+
 """
 Agent initialization failure cascade tests.
 
@@ -12,7 +14,7 @@ constructor patterns assumed by these tests.
 
 These tests need to be redesigned to work with the current agent architectures or
 replaced with integration-level tests that properly mock/provide the required dependencies.
-"""
+""""
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
 

@@ -5,7 +5,7 @@ Test Redis Lifecycle
 
 Validates Redis connectivity, persistence, and failover
 in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path

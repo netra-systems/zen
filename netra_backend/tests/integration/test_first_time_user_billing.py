@@ -1,17 +1,19 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 First-time user billing and usage limit integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Free → Early → Mid (Revenue conversion funnel)
+    1. Segment: Free → Early → Mid (Revenue conversion funnel)
 2. Business Goal: Protect $140K MRR by ensuring billing flow reliability
 3. Value Impact: Validates usage limits and smooth upgrade experience
 4. Strategic Impact: Core revenue protection and expansion mechanism
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 

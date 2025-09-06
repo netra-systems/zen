@@ -28,10 +28,9 @@ class TestDatabaseSessionEfficiency:
 
     @pytest.fixture(autouse=True)
     def setup_test(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
         """Setup test environment."""
-    pass
+        # TODO: Initialize real service
+        pass
         # Force postgres initialization for tests
         from shared.isolated_environment import IsolatedEnvironment
         with IsolatedEnvironment() as env:

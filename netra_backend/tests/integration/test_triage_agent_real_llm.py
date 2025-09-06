@@ -4,7 +4,7 @@ These tests validate actual triage and intent classification using real LLM,
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures accurate user intent classification for proper routing.
-"""
+""""
 
 import asyncio
 import json
@@ -47,9 +47,9 @@ async def real_tool_dispatcher():
 async def real_triage_agent(real_llm_manager, real_tool_dispatcher):
     """Create real TriageSubAgent instance."""
     agent = TriageSubAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=None  # Real websocket in production
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=None  # Real websocket in production
     )
     yield agent
     # Cleanup not needed for tests
@@ -103,7 +103,7 @@ class TestTriageSubAgentRealLLM:
         assert "confidence_score" in result
         assert 0 <= result["confidence_score"] <= 1.0
         
-        logger.info(f"Classified query into category: {result['category']}")
+        logger.info(f"Classified query into category: {result['category']]")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -151,7 +151,7 @@ class TestTriageSubAgentRealLLM:
         assert "user_intent" in result
         assert result["user_intent"]["primary_intent"] is not None
         
-        logger.info(f"Handled ambiguous query with confidence: {result['confidence_score']}")
+        logger.info(f"Handled ambiguous query with confidence: {result['confidence_score']]")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -197,7 +197,7 @@ class TestTriageSubAgentRealLLM:
         # Should have reasonable confidence for technical query
         assert result["confidence_score"] >= 0.5
         
-        logger.info(f"Understood technical query with category: {result['category']}")
+        logger.info(f"Understood technical query with category: {result['category']]")
     
     @pytest.mark.integration
     @pytest.mark.real_llm

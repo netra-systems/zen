@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 ClickHouse Performance Tests
 Tests for ClickHouse performance and optimization features
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -125,7 +128,7 @@ class TestClickHousePerformance:
         from netra_backend.app.db.clickhouse import MockClickHouseDatabase
         if isinstance(client, MockClickHouseDatabase):
             # For mock clients, just verify the method worked (no actual data to verify)
-            logger.info(f"[MOCK ClickHouse] Batch insertion test completed with {expected_count} events")
+            logger.info(f"[MOCK ClickHouse] Batch insertion test completed with {expected_count] events")
             return
         
         # For real clients, verify the data was actually inserted
@@ -164,7 +167,7 @@ class TestClickHousePerformance:
         WHERE workload_type IN ('simple_chat', 'rag_pipeline')
             AND timestamp >= now() - INTERVAL 1 DAY
         GROUP BY workload_type
-        """
+        """"
 
     async def _test_full_scan_performance(self, client):
         """Test performance of full scan queries"""
@@ -184,7 +187,7 @@ class TestClickHousePerformance:
             count() as cnt
         FROM workload_events
         WHERE input_text LIKE '%test%'
-        """
+        """"
 
     @pytest.mark.asyncio
     async def test_query_interceptor_statistics(self):

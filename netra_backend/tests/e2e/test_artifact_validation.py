@@ -1,8 +1,8 @@
 """
 E2E tests for agent interim artifact validation between handoffs.
 Tests validate artifacts at agent boundaries with real state transitions.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import asyncio
 import uuid
@@ -37,46 +37,46 @@ from netra_backend.app.agents.triage.unified_triage_agent import (
 def sample_triage_result():
     """Create valid triage result for testing."""
     return TriageResult(
-        category="cost_optimization",
-        confidence_score=0.85,
-        priority=Priority.HIGH,
-        complexity=Complexity.MODERATE,
-        key_parameters=KeyParameters(workload_type="batch_processing"),
-        user_intent=UserIntent(primary_intent="optimize_costs"),
-        suggested_workflow=SuggestedWorkflow(next_agent="DataSubAgent")
+    category="cost_optimization",
+    confidence_score=0.85,
+    priority=Priority.HIGH,
+    complexity=Complexity.MODERATE,
+    key_parameters=KeyParameters(workload_type="batch_processing"),
+    user_intent=UserIntent(primary_intent="optimize_costs"),
+    suggested_workflow=SuggestedWorkflow(next_agent="DataSubAgent")
     )
 
 @pytest.fixture  
 def sample_data_result():
     """Create valid data analysis result for testing."""
     return DataAnalysisResponse(
-        query="SELECT cost_metrics FROM workload_data",
-        results=[{"total_cost": 1000, "cpu_usage": 75}],
-        insights={"cost_trend": "increasing", "peak_hours": [14, 15, 16]},
-        recommendations=["Scale down during off-peak", "Use spot instances"],
-        execution_time_ms=1500.0,
-        affected_rows=150
+    query="SELECT cost_metrics FROM workload_data",
+    results=[{"total_cost": 1000, "cpu_usage": 75}],
+    insights={"cost_trend": "increasing", "peak_hours": [14, 15, 16}],
+    recommendations=["Scale down during off-peak", "Use spot instances"],
+    execution_time_ms=1500.0,
+    affected_rows=150
     )
 
 @pytest.fixture
 def sample_optimization_result():
     """Create valid optimization result for testing."""
     return OptimizationsResult(
-        optimization_type="cost_reduction",
-        recommendations=["Use reserved instances", "Implement auto-scaling"],
-        cost_savings=250.0,
-        performance_improvement=15.0,
-        confidence_score=0.8
+    optimization_type="cost_reduction",
+    recommendations=["Use reserved instances", "Implement auto-scaling"],
+    cost_savings=250.0,
+    performance_improvement=15.0,
+    confidence_score=0.8
     )
 
 @pytest.fixture
 def validation_context():
     """Create validation context for testing."""
     return ValidationContext(
-        agent_name="TestAgent",
-        run_id=str(uuid.uuid4()),
-        artifact_type="test_artifact",
-        user_request="Test optimization request"
+    agent_name="TestAgent",
+    run_id=str(uuid.uuid4()),
+    artifact_type="test_artifact",
+    user_request="Test optimization request"
     )
 
 class TestArtifactValidation:

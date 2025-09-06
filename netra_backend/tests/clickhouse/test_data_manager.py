@@ -1,7 +1,9 @@
+import asyncio
+
 """
 ClickHouse Test Data Manager
 Handles test data insertion and management for ClickHouse
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -113,7 +115,7 @@ class ClickHouseTestData:
                 WHERE timestamp >= now() - INTERVAL 1 DAY
                 GROUP BY model
                 ORDER BY total_cost DESC
-            """,
+            ""","
             "workload_anomalies": """
                 WITH baseline AS (
                     SELECT avg(arrayElement(metrics.value, 
@@ -125,7 +127,7 @@ class ClickHouseTestData:
                 WHERE arrayElement(metrics.value, 
                     arrayFirstIndex(x -> x = 'latency_ms', metrics.name)) > 
                     (SELECT avg_latency * 2 FROM baseline)
-            """,
+            ""","
             "error_patterns": """
                 SELECT 
                     component,
@@ -135,5 +137,5 @@ class ClickHouseTestData:
                 WHERE level = 'ERROR'
                 GROUP BY component
                 ORDER BY error_count DESC
-            """
+            """"
         }

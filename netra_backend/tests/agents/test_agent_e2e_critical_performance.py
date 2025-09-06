@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Performance and concurrency critical end-to-end tests.
 Tests 9-10: Concurrent request handling, performance and timeout handling.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -31,8 +33,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         - Test multiple simultaneous user requests
         - Test resource isolation between requests
         - Test performance under concurrent load
-        """
-    pass
+        """"
         infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
@@ -53,7 +54,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         
         # Mock the agent service to always succeed for concurrent testing
         async def mock_concurrent_start(user_id=None, thread_id=None, request=None):
-    pass
             if user_id and thread_id:
                 await asyncio.sleep(0)
     return str(uuid.uuid4())
@@ -62,7 +62,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         agent_service.start_agent_run = mock_concurrent_start
         
         async def execute_request(req):
-    pass
             try:
                 run_id = await agent_service.start_agent_run(**req)
                 await asyncio.sleep(0)
@@ -108,15 +107,12 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _test_timeout_scenario(self, supervisor, run_id):
         """Test timeout handling for long-running operations"""
-    pass
         async def slow_execute(state, rid, stream):
-    pass
             await asyncio.sleep(10)  # Simulate long-running task
             await asyncio.sleep(0)
     return state
         
         async def mock_entry_conditions(state, rid):
-    pass
             await asyncio.sleep(0)
     return True
         
@@ -143,7 +139,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
             sub_agents[1].check_entry_conditions = mock_entry_conditions
         
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations
@@ -156,9 +152,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _create_monitored_execute(self, performance_metrics, agent_name):
         """Create monitored execution function for performance tracking"""
-    pass
         async def monitored_execute(state, rid, stream):
-    pass
             start = datetime.now()
             await asyncio.sleep(0.1)  # Simulate work
             end = datetime.now()
@@ -181,7 +175,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _simulate_monitored_execution(self, performance_metrics, agent_name):
         """Simulate monitored execution for testing"""
-    pass
         start = datetime.now()
         await asyncio.sleep(0.1)
         end = datetime.now()
@@ -192,7 +185,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
     async def _run_performance_test(self, supervisor, run_id, performance_metrics):
         """Execute performance test with monitoring"""
         # Mock: Generic component isolation for controlled unit testing
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()  # TODO: Use real service instance):
             # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock: Async component isolation for testing without real async operations
@@ -203,7 +196,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     def _verify_performance_metrics(self, performance_metrics):
         """Verify collected performance metrics"""
-    pass
         assert len(performance_metrics["execution_times"]) >= 0
         total_time = (performance_metrics["end_time"] - performance_metrics["start_time"]).total_seconds()
         assert total_time < 5.0  # Should complete within 5 seconds
@@ -214,8 +206,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         - Test timeout handling for long-running agents
         - Test performance monitoring and metrics
         - Test graceful degradation under load
-        """
-    pass
+        """"
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         run_id = str(uuid.uuid4())
@@ -224,7 +215,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         await self._test_with_timeout_patches(supervisor, run_id, timeout_seconds=2)
         
         # Test performance monitoring
-        performance_metrics = {"start_time": None, "end_time": None, "memory_usage": [], "execution_times": {}}
+        performance_metrics = {"start_time": None, "end_time": None, "memory_usage": [}, "execution_times": {}]
         self._setup_performance_monitoring(supervisor, performance_metrics)
         await self._run_performance_test(supervisor, run_id, performance_metrics)
         self._verify_performance_metrics(performance_metrics)
@@ -247,7 +238,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
             # Simulate load with state persistence mocking
             async def run_with_mocks(request, rid):
                 # Mock: Generic component isolation for controlled unit testing
-                with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
+                with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()  # TODO: Use real service instance):
                     # Mock: Async component isolation for testing without real async operations
                     with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                         # Mock: Async component isolation for testing without real async operations

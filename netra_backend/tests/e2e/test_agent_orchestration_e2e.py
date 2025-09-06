@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Comprehensive Agent Orchestration End-to-End Test Suite
 Tests complete user flow with real database and WebSocket connections.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import asyncio
 import time
@@ -10,7 +12,7 @@ import uuid
 from typing import Dict, List, TYPE_CHECKING
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -60,16 +62,16 @@ def _create_websocket_mock():
     websocket_mock = AsyncMock(spec=UnifiedWebSocketManager)
 
     # Mock: Generic component isolation for controlled unit testing
-    websocket_mock.send_message = AsyncNone  # TODO: Use real service instance
+    websocket_mock.send_message = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Agent service isolation for testing without LLM agent execution
-    websocket_mock.send_agent_update = AsyncNone  # TODO: Use real service instance
+    websocket_mock.send_agent_update = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Agent service isolation for testing without LLM agent execution
-    websocket_mock.send_agent_log = AsyncNone  # TODO: Use real service instance
+    websocket_mock.send_agent_log = AsyncMock()  # TODO: Use real service instance
 
     # Mock: Generic component isolation for controlled unit testing
-    websocket_mock.send_error = AsyncNone  # TODO: Use real service instance
+    websocket_mock.send_error = AsyncMock()  # TODO: Use real service instance
 
     return websocket_mock
 
@@ -83,7 +85,7 @@ def _build_mock_dependency_dict(websocket_mock):
         'llm': AsyncMock(spec=LLMManager), 'websocket': websocket_mock,
 
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        'dispatcher': AsyncNone  # TODO: Use real service instance, 'redis': AsyncNone  # TODO: Use real service instance
+        'dispatcher': AsyncMock()  # TODO: Use real service instance, 'redis': AsyncMock()  # TODO: Use real service instance
 
     }
 
@@ -93,7 +95,7 @@ def _create_test_agents(mocks):
 
     return {
 
-        'triage': UnifiedTriageAgent(mocks['llm'], mocks['dispatcher']),
+        'triage': UnifiedTriageAgent(mocks['llm'}, mocks['dispatcher']),
 
         'data': DataSubAgent(mocks['llm'], mocks['dispatcher']),
 
@@ -107,9 +109,9 @@ def _build_setup_dict(agents, mocks):
 
     """Build setup dictionary."""
 
-    return {'agents': agents, 'llm': mocks['llm'], 'websocket': mocks['websocket'], 
+    return {'agents': agents, 'llm': mocks['llm'}, 'websocket': mocks['websocket'], 
 
-            'dispatcher': mocks['dispatcher'], 'run_id': str(uuid.uuid4()), 'user_id': 'test-user-001'}
+            'dispatcher': mocks['dispatcher'], 'run_id': str(uuid.uuid4()), 'user_id': 'test-user-1']
 
 class TestCompleteUserFlow:
 
@@ -165,7 +167,7 @@ class TestCompleteUserFlow:
 
                            workflow_state) -> Dict:
 
-        """Create result for workflow step."""
+                               """Create result for workflow step."""
 
         return {
 
@@ -185,9 +187,9 @@ class TestCompleteUserFlow:
         
         for result in results:
 
-            assert result['state_valid'], f"State should be valid for {result['agent']}"
+            assert result['state_valid'], f"State should be valid for {result['agent'}]"
 
-            assert result['execution_complete'], f"Agent {result['agent']} should complete"
+            assert result['execution_complete'], f"Agent {result['agent'}] should complete"
 
 class TestAgentHandoffs:
 
@@ -196,7 +198,7 @@ class TestAgentHandoffs:
     @pytest.mark.asyncio
     async def test_triage_to_data_handoff(self, orchestration_setup):
 
-        """Test User Request → Triage → Data Analysis handoff with 5 assertions."""
+        """Test User Request -> Triage -> Data Analysis handoff with 5 assertions."""
         from netra_backend.app.agents.state import DeepAgentState
 
         setup = orchestration_setup
@@ -241,7 +243,7 @@ class TestAgentHandoffs:
 
                                    triage_result: Dict):
 
-        """Validate data handoff with 5 assertions."""
+                                       """Validate data handoff with 5 assertions."""
 
         assert data_result['agent_state'] == SubAgentLifecycle.COMPLETED  # Assertion 1
 
@@ -491,7 +493,7 @@ class TestWorkflowValidation:
 
         execution_time = time.time() - start_time
 
-        metrics['total_duration'] += max(execution_time, 0.001)  # Ensure minimum duration
+        metrics['total_duration'] += max(execution_time, 0.1)  # Ensure minimum duration
 
         if agent_state == SubAgentLifecycle.COMPLETED:
 

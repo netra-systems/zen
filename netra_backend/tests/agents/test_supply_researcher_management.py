@@ -1,7 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Scheduling and management tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -180,8 +183,8 @@ class TestSupplyResearcherManagement:
         """Test notification system behavior (≤8 lines)"""
         with patch.object(agent, '_send_notifications', 
                          new_callable=AsyncMock, create=True) as mock_notify:
-            if hasattr(agent, '_check_and_notify_changes'):
-                await agent._check_and_notify_changes(mock_supply_service)
+                             if hasattr(agent, '_check_and_notify_changes'):
+                                 await agent._check_and_notify_changes(mock_supply_service)
             _verify_notifications_sent(mock_notify)
 
     def _verify_notifications_sent(self, mock_notify):
@@ -230,10 +233,10 @@ class TestSupplyResearcherManagement:
     def _create_notification_configs(self):
         """Create notification configuration test cases (≤8 lines)"""
         return [
-            {"type": "critical", "channels": ["email", "slack", "webhook"]},
-            {"type": "warning", "channels": ["slack", "webhook"]},
-            {"type": "info", "channels": ["webhook"]},
-            {"type": "debug", "channels": []}
+            {"type": "critical", "channels": ["email", "slack", "webhook"]],
+            {"type": "warning", "channels": ["slack", "webhook"]],
+            {"type": "info", "channels": ["webhook"]],
+            {"type": "debug", "channels": []]
         ]
 
     def _route_notification(self, config):

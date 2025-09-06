@@ -1,14 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 SSO/SAML Error Scenarios Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise ($200K+ MRR protection) 
+    - Segment: Enterprise ($200K+ MRR protection) 
 - Business Goal: Error handling for enterprise authentication failures
 - Value Impact: Prevents revenue loss from SSO/SAML edge cases
 - Strategic Impact: Comprehensive error scenario coverage
 
 Architecture Requirements: File ≤300 lines, Functions ≤8 lines
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -50,15 +52,15 @@ async def enterprise_tenant_id():
 async def valid_saml_assertion():
     """Valid SAML assertion for testing"""
     assertion_data = {
-        "issuer": "https://enterprise-idp.example.com",
-        "subject": "admin@enterprise.com",
-        "issued_at": datetime.now(timezone.utc).isoformat(),
-        "attributes": {
-            "enterprise_id": "ent_12345",
-            "email": "admin@enterprise.com",
-            "permissions": ["admin", "user"],
-            "mfa_verified": True
-        }
+    "issuer": "https://enterprise-idp.example.com",
+    "subject": "admin@enterprise.com",
+    "issued_at": datetime.now(timezone.utc).isoformat(),
+    "attributes": {
+    "enterprise_id": "ent_12345",
+    "email": "admin@enterprise.com",
+    "permissions": ["admin", "user"],
+    "mfa_verified": True
+    }
     }
     yield base64.b64encode(json.dumps(assertion_data).encode()).decode()
 
@@ -130,7 +132,7 @@ class TestSSLSAMLErrorScenarios:
     async def _store_expired_token(self, token_manager, enterprise_tenant_id, expired_token_id, expired_payload):
         """Store expired token for testing"""
         if enterprise_tenant_id not in token_manager.tenant_tokens:
-            token_manager.tenant_tokens[enterprise_tenant_id] = {}
+            token_manager.tenant_tokens[enterprise_tenant_id] = {]
         
         token_manager.tenant_tokens[enterprise_tenant_id][expired_token_id] = expired_payload
 
@@ -139,7 +141,7 @@ class TestSSLSAMLErrorScenarios:
         """Test tenant isolation under concurrent access"""
         import asyncio
         
-        tenants = [f"tenant_{i}" for i in range(5)]
+        tenants = [f"tenant_{i]" for i in range(5)]
         
         assertion = await saml_validator.validate_saml_assertion(valid_saml_assertion)
         claims = await saml_validator.extract_enterprise_claims(assertion)

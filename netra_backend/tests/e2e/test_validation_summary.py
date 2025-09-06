@@ -5,14 +5,14 @@ This module provides a comprehensive validation summary for the hook and middlew
 integration tests implemented in Phase 2 Task 2.3.
 
 Validates:
-- Hook system functionality (pre/post/error hooks)
+    - Hook system functionality (pre/post/error hooks)
 - Mixin composition and functionality
 - Middleware chain integration
 - Error propagation through layers
 - Real request and agent workflow integration
 
 All functions ≤8 lines per CLAUDE.md requirements.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -32,13 +32,13 @@ class ValidationSummaryReporter:
     """Reports validation summary for hook and middleware integration."""
     
     def __init__(self):
-        self.validation_results: Dict[str, Dict[str, Any]] = {}
+        self.validation_results: Dict[str, Dict[str, Any]] = {]
         self.start_time = datetime.now(UTC)
     
     def add_validation_result(self, category: str, test_name: str, result: bool, details: str = ""):
         """Add a validation result to the summary."""
         if category not in self.validation_results:
-            self.validation_results[category] = {'passed': 0, 'failed': 0, 'tests': []}
+            self.validation_results[category] = {'passed': 0, 'failed': 0, 'tests': []]
         
         self.validation_results[category]['tests'].append({
             'name': test_name, 'passed': result, 'details': details
@@ -293,25 +293,25 @@ class ValidationSummaryReporter:
         print("\n" + "="*80)
         print("E2E HOOK AND MIDDLEWARE INTEGRATION VALIDATION SUMMARY")
         print("="*80)
-        print(f"Timestamp: {report['timestamp']}")
-        print(f"Duration: {report['duration_seconds']:.2f} seconds")
-        print(f"Status: {report['validation_status']}")
+        print(f"Timestamp: {report['timestamp']]")
+        print(f"Duration: {report['duration_seconds']:.2f] seconds")
+        print(f"Status: {report['validation_status']]")
         print()
         
         summary = report['summary']
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Passed: {summary['passed']}")
-        print(f"Failed: {summary['failed']}")
-        print(f"Pass Rate: {summary['pass_rate']:.1%}")
+        print(f"Total Tests: {summary['total_tests']]")
+        print(f"Passed: {summary['passed']]")
+        print(f"Failed: {summary['failed']]")
+        print(f"Pass Rate: {summary['pass_rate']:.1%]")
         print()
         
         for category, results in report['categories'].items():
             print(f"{category.upper()} Tests:")
-            print(f"  Passed: {results['passed']}")
-            print(f"  Failed: {results['failed']}")
+            print(f"  Passed: {results['passed']]")
+            print(f"  Failed: {results['failed']]")
             for test in results['tests']:
                 status = "PASS" if test['passed'] else "FAIL"
-                print(f"    [{status}] {test['name']}: {test['details']}")
+                print(f"    [{status]] {test['name']]: {test['details']]")
             print()
 
 async def run_comprehensive_validation():

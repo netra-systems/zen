@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Integration Tests for Monitoring Integration - Phase 3 Implementation
 
 Tests the complete integration flow between ChatEventMonitor and AgentWebSocketBridge,
@@ -7,7 +9,7 @@ component independence.
 
 Business Value: Provides 100% silent failure detection coverage through integrated
 monitoring without tight coupling. Critical for $500K+ ARR chat functionality protection.
-"""
+""""
 
 import asyncio
 import pytest
@@ -37,99 +39,99 @@ class TestMonitoringIntegrationStartup:
         """Create mock AgentWebSocketBridge for testing."""
         bridge = Mock(spec=AgentWebSocketBridge)
         bridge.get_health_status = AsyncMock(return_value={
-            "healthy": True,
-            "state": "active",
-            "timestamp": time.time(),
-            "websocket_manager_healthy": True,
-            "registry_healthy": True,
-            "consecutive_failures": 0,
-            "uptime_seconds": 120.0,
-            "error_message": None
+        "healthy": True,
+        "state": "active",
+        "timestamp": time.time(),
+        "websocket_manager_healthy": True,
+        "registry_healthy": True,
+        "consecutive_failures": 0,
+        "uptime_seconds": 120.0,
+        "error_message": None
         })
         bridge.get_metrics = AsyncMock(return_value={
-            "total_initializations": 1,
-            "successful_initializations": 1,
-            "success_rate": 1.0,
-            "registered_observers": 0,
-            "health_broadcast_interval": 30
+        "total_initializations": 1,
+        "successful_initializations": 1,
+        "success_rate": 1.0,
+        "registered_observers": 0,
+        "health_broadcast_interval": 30
         })
         bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         return bridge
     
-    @pytest.fixture
-    async def real_monitor(self):
+        @pytest.fixture
+        async def real_monitor(self):
         """Create real ChatEventMonitor for testing."""
         monitor = ChatEventMonitor()
         yield monitor
         await monitor.stop_monitoring()
     
-    @pytest.mark.asyncio
-    async def test_startup_integration_success(self, mock_bridge, real_monitor):
+        @pytest.mark.asyncio
+        async def test_startup_integration_success(self, mock_bridge, real_monitor):
         """Test successful monitoring integration during startup."""
         with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor', real_monitor):
-            with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
-                      return_value=mock_bridge):
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
+        return_value=mock_bridge):
                 
-                # Test integration initialization
-                success = await initialize_monitoring_integration()
+        # Test integration initialization
+        success = await initialize_monitoring_integration()
                 
-                # Verify integration was successful
-                assert success is True, "Integration should succeed with healthy components"
+        # Verify integration was successful
+        assert success is True, "Integration should succeed with healthy components"
                 
-                # Verify monitor registered the bridge
-                assert "agent_websocket_bridge" in real_monitor.monitored_components
+        # Verify monitor registered the bridge
+        assert "agent_websocket_bridge" in real_monitor.monitored_components
                 
-                # Verify bridge registered the monitor as observer
-                mock_bridge.register_monitor_observer.assert_called_once()
+        # Verify bridge registered the monitor as observer
+        mock_bridge.register_monitor_observer.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_startup_integration_bridge_unavailable(self, real_monitor):
+        @pytest.mark.asyncio
+        async def test_startup_integration_bridge_unavailable(self, real_monitor):
         """Test integration handles bridge unavailability gracefully."""
         with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor', real_monitor):
-            with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
-                      return_value=None):
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
+        return_value=None):
                 
-                # Test integration with unavailable bridge
-                success = await initialize_monitoring_integration()
+        # Test integration with unavailable bridge
+        success = await initialize_monitoring_integration()
                 
-                # Verify graceful handling
-                assert success is False, "Integration should return False when bridge unavailable"
+        # Verify graceful handling
+        assert success is False, "Integration should return False when bridge unavailable"
                 
-                # Verify monitor still works independently
-                assert len(real_monitor.monitored_components) == 0
-                assert real_monitor._monitor_task is not None, "Monitor should still be running"
+        # Verify monitor still works independently
+        assert len(real_monitor.monitored_components) == 0
+        assert real_monitor._monitor_task is not None, "Monitor should still be running"
     
-    @pytest.mark.asyncio
-    async def test_startup_integration_bridge_error(self, real_monitor):
+        @pytest.mark.asyncio
+        async def test_startup_integration_bridge_error(self, real_monitor):
         """Test integration handles bridge errors gracefully."""
         with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor', real_monitor):
-            with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
-                      side_effect=Exception("Bridge initialization failed")):
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
+        side_effect=Exception("Bridge initialization failed")):
                 
-                # Test integration with bridge error
-                success = await initialize_monitoring_integration()
+        # Test integration with bridge error
+        success = await initialize_monitoring_integration()
                 
-                # Verify graceful handling
-                assert success is False, "Integration should return False on bridge error"
+        # Verify graceful handling
+        assert success is False, "Integration should return False on bridge error"
                 
-                # Verify monitor continues operating
-                assert real_monitor._monitor_task is not None, "Monitor should still be running"
+        # Verify monitor continues operating
+        assert real_monitor._monitor_task is not None, "Monitor should still be running"
     
-    @pytest.mark.asyncio
-    async def test_startup_integration_monitor_error(self, mock_bridge):
+        @pytest.mark.asyncio
+        async def test_startup_integration_monitor_error(self, mock_bridge):
         """Test integration handles monitor errors gracefully."""
         mock_monitor = Mock(spec=ChatEventMonitor)
         mock_monitor.start_monitoring = AsyncMock(side_effect=Exception("Monitor start failed"))
         
         with patch('netra_backend.app.websocket_core.event_monitor.chat_event_monitor', mock_monitor):
-            with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
-                      return_value=mock_bridge):
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_agent_websocket_bridge', 
+        return_value=mock_bridge):
                 
-                # Test integration with monitor error
-                success = await initialize_monitoring_integration()
+        # Test integration with monitor error
+        success = await initialize_monitoring_integration()
                 
-                # Verify graceful handling
-                assert success is False, "Integration should return False on monitor error"
+        # Verify graceful handling
+        assert success is False, "Integration should return False on monitor error"
 
 
 class TestCrossSystemValidation:
@@ -142,8 +144,8 @@ class TestCrossSystemValidation:
         
         # Create mock bridge with realistic behavior
         bridge = Mock(spec=AgentWebSocketBridge)
-        bridge.get_health_status = AsyncNone  # TODO: Use real service instance
-        bridge.get_metrics = AsyncNone  # TODO: Use real service instance
+        bridge.get_health_status = AsyncMock()  # TODO: Use real service instance
+        bridge.get_metrics = AsyncMock()  # TODO: Use real service instance
         bridge.register_monitor_observer = register_monitor_observer_instance  # Initialize appropriate service
         
         # Register bridge with monitor
@@ -153,27 +155,27 @@ class TestCrossSystemValidation:
         
         await monitor.stop_monitoring()
     
-    @pytest.mark.asyncio
-    async def test_bridge_health_audit(self, integrated_system):
+        @pytest.mark.asyncio
+        async def test_bridge_health_audit(self, integrated_system):
         """Test monitor can audit bridge health comprehensively."""
         monitor, bridge = integrated_system
         
         # Setup bridge responses
         bridge.get_health_status.return_value = {
-            "healthy": True,
-            "state": "active",
-            "timestamp": time.time(),
-            "websocket_manager_healthy": True,
-            "registry_healthy": True,
-            "consecutive_failures": 0,
-            "uptime_seconds": 300.0
+        "healthy": True,
+        "state": "active",
+        "timestamp": time.time(),
+        "websocket_manager_healthy": True,
+        "registry_healthy": True,
+        "consecutive_failures": 0,
+        "uptime_seconds": 300.0
         }
         bridge.get_metrics.return_value = {
-            "total_initializations": 5,
-            "successful_initializations": 5,
-            "success_rate": 1.0,
-            "recovery_attempts": 0,
-            "health_checks_performed": 50
+        "total_initializations": 5,
+        "successful_initializations": 5,
+        "success_rate": 1.0,
+        "recovery_attempts": 0,
+        "health_checks_performed": 50
         }
         
         # Perform bridge audit
@@ -198,37 +200,37 @@ class TestCrossSystemValidation:
         assert "overall_status" in overall
         assert "component_scores" in overall
     
-    @pytest.mark.asyncio
-    async def test_cross_validation_detects_discrepancies(self, integrated_system):
+        @pytest.mark.asyncio
+        async def test_cross_validation_detects_discrepancies(self, integrated_system):
         """Test cross-validation detects discrepancies between bridge claims and event data."""
         monitor, bridge = integrated_system
         
         # Bridge claims to be healthy but monitor has detected silent failures
         bridge.get_health_status.return_value = {
-            "healthy": True,
-            "state": "active",
-            "timestamp": time.time(),
-            "websocket_manager_healthy": True,
-            "registry_healthy": True,
-            "consecutive_failures": 0,
-            "uptime_seconds": 100.0
+        "healthy": True,
+        "state": "active",
+        "timestamp": time.time(),
+        "websocket_manager_healthy": True,
+        "registry_healthy": True,
+        "consecutive_failures": 0,
+        "uptime_seconds": 100.0
         }
         bridge.get_metrics.return_value = {
-            "total_initializations": 1,
-            "successful_initializations": 1,
-            "success_rate": 1.0
+        "total_initializations": 1,
+        "successful_initializations": 1,
+        "success_rate": 1.0
         }
         
         # Add silent failures to monitor
         await monitor._record_silent_failure(
-            "test_thread", 
-            "Tool completed without executing", 
-            {"tool_name": "missing_tool"}
+        "test_thread", 
+        "Tool completed without executing", 
+        {"tool_name": "missing_tool"}
         )
         await monitor._record_silent_failure(
-            "test_thread2", 
-            "Unexpected event sequence", 
-            {"expected": "thinking", "received": "completed"}
+        "test_thread2", 
+        "Unexpected event sequence", 
+        {"expected": "thinking", "received": "completed"}
         )
         
         # Perform audit - should detect discrepancy
@@ -244,15 +246,15 @@ class TestCrossSystemValidation:
         # Health claim should be weighted against validation data
         assert overall["overall_status"] != "healthy" or overall["overall_score"] < 100
     
-    @pytest.mark.asyncio
-    async def test_integration_health_assessment(self, integrated_system):
+        @pytest.mark.asyncio
+        async def test_integration_health_assessment(self, integrated_system):
         """Test integration quality assessment."""
         monitor, bridge = integrated_system
         
         bridge.get_health_status.return_value = {
-            "healthy": True,
-            "state": "active", 
-            "timestamp": time.time()
+        "healthy": True,
+        "state": "active", 
+        "timestamp": time.time()
         }
         bridge.get_metrics.return_value = {"success_rate": 0.95}
         

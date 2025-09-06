@@ -2,11 +2,13 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """WebSocket Authentication Cold Start Agent Integration Tests (L3)
 
 env = get_env()
@@ -14,7 +16,7 @@ Tests the authentication and cold start behavior of agents when initiated throug
 These are L3 tests using real services (containerized) for high confidence validation.
 
 Business Value Justification (BVJ):
-1. Segment: ALL (Free, Early, Mid, Enterprise)
+    1. Segment: ALL (Free, Early, Mid, Enterprise)
 2. Business Goal: Ensure reliable authentication and fast agent startup for user retention
 3. Value Impact: Prevents authentication failures and slow startup that cause user abandonment
 4. Revenue Impact: Fast, reliable auth and startup reduces abandonment by 30% - $100K+ ARR protection
@@ -24,7 +26,7 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real authentication service (containerized)
 - Real database connections (containerized PostgreSQL/Redis)
 - Real agent initialization
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -53,25 +55,23 @@ from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 
 @pytest.fixture
- def real_postgres():
+def real_postgres():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock PostgreSQL for testing."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
-    mock_db = MagicNone  # TODO: Use real service instance
+    mock_db = MagicMock()  # TODO: Use real service instance
     # Mock: PostgreSQL database isolation for testing without real database connections
     mock_db.get_connection_url = MagicMock(return_value="postgresql://test_user:test_password@localhost/test_db")
     return mock_db
 
 @pytest.fixture
- def real_redis():
+def real_redis():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock Redis for testing."""
-    pass
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
-    mock_redis = MagicNone  # TODO: Use real service instance
+    mock_redis = MagicMock()  # TODO: Use real service instance
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_container_host_ip = MagicMock(return_value="localhost")
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
@@ -83,22 +83,20 @@ async def auth_service_config(mock_postgres, mock_redis):
     """Provide mock Auth Service configuration for testing."""
     # Auth service uses mocked dependencies for faster tests
     auth_config = {
-        "postgres_url": "postgresql://test_user:test_password@localhost/test_db",
-        "redis_url": "redis://localhost:6379",
-        "jwt_secret": "test_jwt_secret_key"
+    "postgres_url": "postgresql://test_user:test_password@localhost/test_db",
+    "redis_url": "redis://localhost:6379",
+    "jwt_secret": "test_jwt_secret_key"
     }
     yield auth_config
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_jwt_token(auth_service_config):
     """Generate a valid JWT token for testing."""
-    pass
     payload = {
-        "user_id": "test_user_123",
-        "email": "test@example.com",
-        "tier": "early",
-        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    "user_id": "test_user_123",
+    "email": "test@example.com",
+    "tier": "early",
+    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
     }
     secret = auth_service_config["jwt_secret"]
     await asyncio.sleep(0)
@@ -108,10 +106,10 @@ async def test_jwt_token(auth_service_config):
 async def expired_jwt_token(auth_service_config):
     """Generate an expired JWT token for testing."""
     payload = {
-        "user_id": "test_user_456",
-        "email": "expired@example.com",
-        "tier": "free",
-        "exp": datetime.now(timezone.utc) - timedelta(hours=1)
+    "user_id": "test_user_456",
+    "email": "expired@example.com",
+    "tier": "free",
+    "exp": datetime.now(timezone.utc) - timedelta(hours=1)
     }
     secret = auth_service_config["jwt_secret"]
     yield jwt.encode(payload, secret, algorithm="HS256")
@@ -261,7 +259,6 @@ class TestWebSocketAuthColdStartL3:
         
         # Connect multiple clients concurrently
         async def connect_client(token, user_index):
-    pass
             headers = {"Authorization": f"Bearer {token}"}
             async with websockets.connect(ws_url, extra_headers=headers) as ws:
                 await ws.send(json.dumps({
@@ -271,7 +268,7 @@ class TestWebSocketAuthColdStartL3:
                 response = await ws.recv()
                 data = json.loads(response)
                 assert data["type"] == "auth_success"
-                assert data["user_id"] == f"concurrent_user_{user_index}"
+                assert data["user_id"] == f"concurrent_user_{user_index]"
         
         # Execute concurrent connections
         tasks = [connect_client(token, i) for i, token in enumerate(tokens)]
@@ -596,7 +593,6 @@ class TestWebSocketAuthColdStartL3:
         with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             # Simulate slow response from auth service
             async def slow_validation(*args, **kwargs):
-    pass
                 await asyncio.sleep(5)
                 await asyncio.sleep(0)
     return {"valid": True, "user_id": "test_user_123"}

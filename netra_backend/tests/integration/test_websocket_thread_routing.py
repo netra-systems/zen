@@ -1,11 +1,13 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration test for WebSocket thread routing and message delivery.
 
 This test verifies that:
-1. Thread IDs are properly extracted from run_ids
+    1. Thread IDs are properly extracted from run_ids
 2. WebSocket connections are correctly associated with thread_ids
 3. Messages from agents reach the correct user connections
-"""
+""""
 
 import asyncio
 import pytest
@@ -26,117 +28,112 @@ class TestWebSocketThreadRouting:
     
     @pytest.fixture
     def websocket_manager(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create a mock WebSocket manager with proper thread support."""
-    pass
         manager = Mock(spec=WebSocketManager)
         manager.send_to_thread = AsyncMock(return_value=True)
         manager.send_to_user = AsyncMock(return_value=True)
         manager.connections = {}
         return manager
     
-    @pytest.fixture
-    def thread_registry(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def thread_registry(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create a mock thread registry."""
-    pass
         registry = registry_instance  # Initialize appropriate service
         registry.get_thread = AsyncMock(return_value=None)
         registry.register = AsyncMock(return_value=True)
         return registry
     
-    @pytest.fixture
-    def bridge(self, websocket_manager, thread_registry):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def bridge(self, websocket_manager, thread_registry):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create an AgentWebSocketBridge with mocked dependencies."""
-    pass
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager', return_value=websocket_manager):
-            with patch('netra_backend.app.services.agent_websocket_bridge.get_thread_run_registry', return_value=thread_registry):
-                bridge = AgentWebSocketBridge()
-                bridge._websocket_manager = websocket_manager
-                bridge._thread_registry = thread_registry
-                return bridge
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_thread_run_registry', return_value=thread_registry):
+        bridge = AgentWebSocketBridge()
+        bridge._websocket_manager = websocket_manager
+        bridge._thread_registry = thread_registry
+        return bridge
     
-    def test_thread_id_extraction_from_run_id_generator_format(self):
+        def test_thread_id_extraction_from_run_id_generator_format(self):
         """Test extraction of thread_id from run_id_generator format."""
         # Test cases with run_id_generator format (must have 8 hex char UUID suffix)
         test_cases = [
-            ("thread_13679e4dcc38403a_run_1756919162904_9adf1f09", "13679e4dcc38403a"),
-            ("thread_user_123_run_1693430400000_a1b2c3d4", "user_123"),
-            ("thread_session_456_run_1693430400000_12345678", "session_456"),  # Fixed: proper 8 hex chars
+        ("thread_13679e4dcc38403a_run_1756919162904_9adf1f09", "13679e4dcc38403a"),
+        ("thread_user_123_run_1693430400000_a1b2c3d4", "user_123"),
+        ("thread_session_456_run_1693430400000_12345678", "session_456"),  # Fixed: proper 8 hex chars
         ]
         
         bridge = AgentWebSocketBridge()
         
         for run_id, expected_raw in test_cases:
-            # Test standard extraction
-            extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
-            assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
+        # Test standard extraction
+        extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
+        assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
             
-            # Test bridge extraction (should add "thread_" prefix)
-            extracted_bridge = bridge._extract_thread_from_standardized_run_id(run_id)
-            expected_full = f"thread_{expected_raw}"
-            assert extracted_bridge == expected_full, f"Failed to extract full thread_id from {run_id}"
+        # Test bridge extraction (should add "thread_" prefix)
+        extracted_bridge = bridge._extract_thread_from_standardized_run_id(run_id)
+        expected_full = f"thread_{expected_raw}"
+        assert extracted_bridge == expected_full, f"Failed to extract full thread_id from {run_id}"
     
-    def test_thread_id_extraction_from_unified_id_manager_format(self):
+        def test_thread_id_extraction_from_unified_id_manager_format(self):
         """Test extraction of thread_id from UnifiedIDManager format."""
-    pass
         # Test cases with UnifiedIDManager format (requires 8 hex chars at end)
         test_cases = [
-            ("run_user_123_abc12345", "user_123"),
-            ("run_session_456_def67890", "session_456"),
-            ("run_thread_789_a1b2c3d4", "thread_789"),  # Fixed: 8 hex chars
+        ("run_user_123_abc12345", "user_123"),
+        ("run_session_456_def67890", "session_456"),
+        ("run_thread_789_a1b2c3d4", "thread_789"),  # Fixed: 8 hex chars
         ]
         
         bridge = AgentWebSocketBridge()
         
         for run_id, expected_raw in test_cases:
-            # Test UnifiedIDManager extraction
-            extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
-            assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
+        # Test UnifiedIDManager extraction
+        extracted_raw = UnifiedIDManager.extract_thread_id(run_id)
+        assert extracted_raw == expected_raw, f"Failed to extract raw thread_id from {run_id}"
             
-            # Test bridge extraction with UnifiedIDManager format
-            extracted_bridge = bridge._extract_thread_from_standardized_run_id(run_id)
-            # Should add "thread_" prefix if not present
-            if not expected_raw.startswith("thread_"):
-                expected_full = f"thread_{expected_raw}"
-            else:
-                expected_full = expected_raw
-            assert extracted_bridge == expected_full, f"Failed to extract full thread_id from {run_id}"
+        # Test bridge extraction with UnifiedIDManager format
+        extracted_bridge = bridge._extract_thread_from_standardized_run_id(run_id)
+        # Should add "thread_" prefix if not present
+        if not expected_raw.startswith("thread_"):
+        expected_full = f"thread_{expected_raw}"
+        else:
+        expected_full = expected_raw
+        assert extracted_bridge == expected_full, f"Failed to extract full thread_id from {run_id}"
     
-    def test_round_trip_generation_and_extraction(self):
+        def test_round_trip_generation_and_extraction(self):
         """Test that we can generate a run_id and extract the thread_id back."""
         thread_ids = [
-            "13679e4dcc38403a",
-            "user_123_session",
-            "chat_conversation_456",
-            "thread_already_prefixed",
+        "13679e4dcc38403a",
+        "user_123_session",
+        "chat_conversation_456",
+        "thread_already_prefixed",
         ]
         
         bridge = AgentWebSocketBridge()
         
         for original_thread in thread_ids:
-            # Generate run_id (UnifiedIDManager only takes thread_id parameter)
-            run_id = UnifiedIDManager.generate_run_id(original_thread)
+        # Generate run_id (UnifiedIDManager only takes thread_id parameter)
+        run_id = UnifiedIDManager.generate_run_id(original_thread)
             
-            # Extract thread_id back
-            extracted = bridge._extract_thread_from_standardized_run_id(run_id)
+        # Extract thread_id back
+        extracted = bridge._extract_thread_from_standardized_run_id(run_id)
             
-            # The extracted version should have "thread_" prefix
-            if not original_thread.startswith("thread_"):
-                expected = f"thread_{original_thread}"
-            else:
-                expected = original_thread
+        # The extracted version should have "thread_" prefix
+        if not original_thread.startswith("thread_"):
+        expected = f"thread_{original_thread}"
+        else:
+        expected = original_thread
             
-            assert extracted == expected, f"Round trip failed for {original_thread}"
+        assert extracted == expected, f"Round trip failed for {original_thread}"
     
-    @pytest.mark.asyncio
-    async def test_websocket_notification_with_correct_thread_id(self, bridge, websocket_manager):
+        @pytest.mark.asyncio
+        async def test_websocket_notification_with_correct_thread_id(self, bridge, websocket_manager):
         """Test that WebSocket notifications use the correct thread_id."""
-    pass
         # Test run_id with expected thread extraction (8 hex chars for UUID)
         run_id = "thread_user123_run_1756919162904_abc12345"
         agent_name = "TestAgent"
@@ -159,8 +156,8 @@ class TestWebSocketThreadRouting:
         assert notification["run_id"] == run_id
         assert notification["agent_name"] == agent_name
     
-    @pytest.mark.asyncio  
-    async def test_thread_resolution_priority_chain(self, bridge, websocket_manager, thread_registry):
+        @pytest.mark.asyncio  
+        async def test_thread_resolution_priority_chain(self, bridge, websocket_manager, thread_registry):
         """Test the 5-priority resolution chain for thread_id."""
         run_id = "thread_test_priority_run_123456_12345678"  # Fixed: 8 hex chars
         
@@ -179,10 +176,9 @@ class TestWebSocketThreadRouting:
         # Should successfully extract via pattern
         assert thread_id == "thread_test_priority"
     
-    @pytest.mark.asyncio
-    async def test_thread_resolution_with_registry_hit(self, bridge, thread_registry):
+        @pytest.mark.asyncio
+        async def test_thread_resolution_with_registry_hit(self, bridge, thread_registry):
         """Test that thread registry is checked first."""
-    pass
         run_id = "custom_run_format_12345"
         expected_thread = "thread_from_registry"
         
@@ -195,34 +191,33 @@ class TestWebSocketThreadRouting:
         assert thread_id == expected_thread
         thread_registry.get_thread.assert_called_once_with(run_id)
     
-    @pytest.mark.skip(reason="Error handling behavior needs refinement")
-    @pytest.mark.asyncio
-    async def test_invalid_run_id_raises_error(self, bridge):
+        @pytest.mark.skip(reason="Error handling behavior needs refinement")
+        @pytest.mark.asyncio
+        async def test_invalid_run_id_raises_error(self, bridge):
         """Test that invalid run_id formats raise appropriate errors."""
         invalid_run_ids = [
-            "invalid_format",
-            "no_thread_or_run",
+        "invalid_format",
+        "no_thread_or_run",
         ]
         
         for invalid_id in invalid_run_ids:
-            with pytest.raises(ValueError) as exc_info:
-                await bridge._resolve_thread_id_from_run_id(invalid_id)
-            assert "Thread resolution failed" in str(exc_info.value)
+        with pytest.raises(ValueError) as exc_info:
+        await bridge._resolve_thread_id_from_run_id(invalid_id)
+        assert "Thread resolution failed" in str(exc_info.value)
         
         # Test empty string separately
         with pytest.raises(ValueError) as exc_info:
-            await bridge._resolve_thread_id_from_run_id("")
+        await bridge._resolve_thread_id_from_run_id("")
         assert "Invalid run_id" in str(exc_info.value) or "Thread resolution failed" in str(exc_info.value)
         
         # Test None separately  
         with pytest.raises(ValueError) as exc_info:
-            await bridge._resolve_thread_id_from_run_id(None)
+        await bridge._resolve_thread_id_from_run_id(None)
         assert "Invalid run_id" in str(exc_info.value) or "Thread resolution failed" in str(exc_info.value)
     
-    @pytest.mark.asyncio
-    async def test_all_notification_types_use_correct_thread(self, bridge, websocket_manager):
+        @pytest.mark.asyncio
+        async def test_all_notification_types_use_correct_thread(self, bridge, websocket_manager):
         """Test that all notification types properly route to thread_id."""
-    pass
         run_id = "thread_notification_test_run_123_abc12345"  # Fixed: 8 hex chars
         expected_thread = "thread_notification_test"
         
@@ -245,10 +240,10 @@ class TestWebSocketThreadRouting:
         assert websocket_manager.send_to_thread.call_count == 5
         
         for call in websocket_manager.send_to_thread.call_args_list:
-            thread_id_used = call[0][0]
-            assert thread_id_used == expected_thread
+        thread_id_used = call[0][0]
+        assert thread_id_used == expected_thread
     
-    def test_both_id_formats_supported(self):
+        def test_both_id_formats_supported(self):
         """Test that both run_id_generator and UnifiedIDManager formats are supported."""
         bridge = AgentWebSocketBridge()
         
@@ -261,4 +256,4 @@ class TestWebSocketThreadRouting:
         run_id_mgr = "run_user456_a1b2c3d4"  # Proper UnifiedIDManager format
         extracted_mgr = bridge._extract_thread_from_standardized_run_id(run_id_mgr)
         assert extracted_mgr == "thread_user456"  # Should add thread_ prefix
-    pass
+        pass

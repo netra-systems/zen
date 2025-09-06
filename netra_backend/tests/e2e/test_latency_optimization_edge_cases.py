@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Latency Optimization Edge Cases and Integration Tests
 Tests edge cases and integration scenarios for latency optimization workflows.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+""""
 
 import sys
 from pathlib import Path

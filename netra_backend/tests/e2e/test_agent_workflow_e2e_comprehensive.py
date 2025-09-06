@@ -1,9 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 End-to-End Agent Workflow Tests (Iterations 26-30).
 
 Tests complete agent workflows from request initiation through 
 task completion, including multi-agent collaboration and WebSocket communication.
-"""
+""""
 
 import asyncio
 import pytest
@@ -12,7 +14,7 @@ import json
 import time
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -32,19 +34,19 @@ class TestCompleteAgentWorkflow:
         """Test complete data analysis workflow from request to response."""
         # Mock WebSocket manager for real-time updates
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
         mock_websocket_manager.get_active_connections.return_value = ["conn_1", "conn_2"]
         
         # Mock database operations
         mock_db_manager = TestDatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         # Mock ClickHouse for analytics
         mock_clickhouse_result = [
-            {"timestamp": "2024-01-01T00:00:00Z", "metric": "latency", "value": 150},
-            {"timestamp": "2024-01-01T01:00:00Z", "metric": "latency", "value": 200},
-            {"timestamp": "2024-01-01T02:00:00Z", "metric": "latency", "value": 120}
+            {"timestamp": "2024-1-1T00:0:0Z", "metric": "latency", "value": 150},
+            {"timestamp": "2024-1-1T01:0:0Z", "metric": "latency", "value": 200},
+            {"timestamp": "2024-1-1T02:0:0Z", "metric": "latency", "value": 120}
         ]
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
@@ -64,7 +66,7 @@ class TestCompleteAgentWorkflow:
                         "parameters": {
                             "analysis_type": "latency_trends",
                             "time_range": "24h",
-                            "metrics": ["latency", "throughput"],
+                            "metrics": ["latency", "throughput"},
                             "filters": {"service": "api_gateway"}
                         }
                     }
@@ -75,7 +77,7 @@ class TestCompleteAgentWorkflow:
                         session_id=workflow_request["session_id"],
                         thread_id=workflow_request["thread_id"],
                         context={
-                            "user_id": workflow_request["user_id"],
+                            "user_id": workflow_request["user_id"},
                             "task_type": workflow_request["task_type"],
                             "parameters": workflow_request["parameters"]
                         }
@@ -128,12 +130,12 @@ class TestCompleteAgentWorkflow:
         mock_llm_agent = AgentRegistry().get_agent("supervisor")
         mock_llm_agent.execute_task = AsyncMock(return_value={
             "status": "completed", 
-            "insights": ["Latency increased by 15% compared to yesterday", "Peak usage at 2-3 PM"],
+            "insights": ["Latency increased by 15% compared to yesterday", "Peak usage at 2-3 PM"},
             "recommendations": ["Scale up during peak hours", "Optimize slow queries"]
         })
         
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
             with patch('netra_backend.app.agents.data_sub_agent.data_agent.DataAgent', return_value=mock_data_agent):
@@ -145,7 +147,7 @@ class TestCompleteAgentWorkflow:
                         "session_id": "session012",
                         "task_type": "comprehensive_analysis",
                         "parameters": {
-                            "data_sources": ["clickhouse", "prometheus"],
+                            "data_sources": ["clickhouse", "prometheus"},
                             "analysis_depth": "comprehensive",
                             "include_recommendations": True,
                             "collaboration_mode": True
@@ -193,7 +195,7 @@ class TestCompleteAgentWorkflow:
     async def test_error_recovery_in_workflow(self):
         """Test workflow error recovery and graceful degradation."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
         
         # Simulate partial failures in workflow steps
         step_results = [
@@ -210,7 +212,7 @@ class TestCompleteAgentWorkflow:
                 agent_id="error_recovery_agent",
                 session_id="recovery_session",
                 thread_id="recovery_thread", 
-                context={"error_recovery_enabled": True, "fallback_strategies": ["postgres_fallback"]}
+                context={"error_recovery_enabled": True, "fallback_strategies": ["postgres_fallback"}]
             )
             
             agent = SupervisorAgent(
@@ -265,7 +267,7 @@ class TestAgentWebSocketIntegration:
     async def test_real_time_progress_updates(self):
         """Test agent sends real-time progress updates via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
         mock_websocket_manager.get_thread_connections.return_value = ["conn1", "conn2"]
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
@@ -318,8 +320,8 @@ class TestAgentWebSocketIntegration:
     async def test_websocket_error_notifications(self):
         """Test agent sends error notifications via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
-        mock_websocket_manager.send_error_notification = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
+        mock_websocket_manager.send_error_notification = AsyncMock()  # TODO: Use real service instance
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
             
@@ -338,7 +340,7 @@ class TestAgentWebSocketIntegration:
             # Execute task that will encounter errors
             task_config = {
                 "task_type": "failing_operation",
-                "simulate_errors": ["connection_error", "timeout_error", "validation_error"],
+                "simulate_errors": ["connection_error", "timeout_error", "validation_error"},
                 "max_error_retries": 2
             }
             
@@ -370,8 +372,8 @@ class TestAgentWebSocketIntegration:
     async def test_websocket_bidirectional_communication(self):
         """Test bidirectional communication between client and agent via WebSocket."""
         mock_websocket_manager = Mock(spec=WebSocketManager)
-        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
-        mock_websocket_manager.send_to_connection = AsyncNone  # TODO: Use real service instance
+        mock_websocket_manager.broadcast_to_thread = AsyncMock()  # TODO: Use real service instance
+        mock_websocket_manager.send_to_connection = AsyncMock()  # TODO: Use real service instance
         
         # Simulate incoming messages from client
         incoming_messages = [
@@ -437,14 +439,14 @@ class TestAgentSystemIntegration:
         mock_auth_service.validate_token = AsyncMock(return_value={
             "valid": True,
             "user_id": "authenticated_user",
-            "permissions": ["read:analytics", "write:reports"],
+            "permissions": ["read:analytics", "write:reports"},
             "expires_at": "2024-12-31T23:59:59Z"
         })
         mock_auth_service.check_permission = AsyncMock(return_value=True)
         
         # Mock database with user context
         mock_db_manager = TestDatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         with patch('netra_backend.app.auth.auth_service_client.auth_service', mock_auth_service):
@@ -458,7 +460,7 @@ class TestAgentSystemIntegration:
                     "task_type": "sensitive_analysis",
                     "parameters": {
                         "data_access_level": "restricted",
-                        "required_permissions": ["read:analytics"]
+                        "required_permissions": ["read:analytics"}
                     }
                 }
                 
@@ -467,7 +469,7 @@ class TestAgentSystemIntegration:
                     session_id=workflow_request["session_id"],
                     thread_id=workflow_request["thread_id"],
                     context={
-                        "user_id": workflow_request["user_id"],
+                        "user_id": workflow_request["user_id"},
                         "auth_token": workflow_request["auth_token"],
                         "security_context": "authenticated"
                     }
@@ -511,7 +513,7 @@ class TestAgentSystemIntegration:
             "retry_attempts": 3,
             "batch_size": 50,
             "memory_limit_mb": 512,
-            "features": ["real_time_updates", "error_recovery", "performance_monitoring"]
+            "features": ["real_time_updates", "error_recovery", "performance_monitoring"}
         }
         mock_config_manager.get_feature_flags.return_value = {
             "enable_llm_integration": True,
@@ -568,7 +570,7 @@ class TestAgentSystemIntegration:
         mock_health_checker.get_overall_health = AsyncMock(return_value={
             "status": "degraded",
             "health_score": 0.75,
-            "degraded_services": ["redis"]
+            "degraded_services": ["redis"}
         })
         
         with patch('netra_backend.app.core.health_checkers.HealthChecker', return_value=mock_health_checker):

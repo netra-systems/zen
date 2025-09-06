@@ -9,7 +9,7 @@ import pytest
 import asyncio
 from datetime import datetime, timezone, timedelta
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.clickhouse import (
@@ -34,21 +34,19 @@ class TestClickHouseClientComprehensive:
 
     @pytest.fixture
     def client(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
         """Create ClickHouse client for testing."""
-    pass
+        # TODO: Initialize real service
         # Force mock for testing
         return ClickHouseService(force_mock=True)
 
     @pytest.fixture
- def real_clickhouse_database():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_clickhouse_database(self):
         """Mock ClickHouse database for testing."""
-        mock_client = AsyncNone  # TODO: Use real service instance
-    pass
-        mock_client.test_connection = AsyncMock(return_value=True)
+        # TODO: Initialize real service
+        mock_client = None  # TODO: Use real service instance
+        if mock_client:
+            mock_client.test_connection = AsyncMock(return_value=True)
+        return mock_client
         mock_client.execute = AsyncMock(return_value=[])
         mock_client.disconnect = AsyncNone  # TODO: Use real service instance
         return mock_client

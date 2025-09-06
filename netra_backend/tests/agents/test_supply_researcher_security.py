@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Security and validation tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
-"""
+""""
 
 import sys
 from pathlib import Path

@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for ClickHouse Configuration Corruption Issues
 Critical staging issue: ClickHouse host contains newline at position 34
@@ -7,11 +9,11 @@ found in GCP staging logs. The tests are intentionally designed to fail to expos
 the specific problems that need fixing.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability - prevent staging deployment failures
 - Value Impact: Prevents service outages from corrupt configuration values
 - Strategic Impact: Critical for reliable staging environment operations
-"""
+""""
 
 import pytest
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
@@ -28,11 +30,11 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Demonstrates ClickHouse host configuration corruption with newline character.
         
         This test reproduces the exact error from GCP staging logs:
-        "ClickHouse host contains newline at position 34"
+            "ClickHouse host contains newline at position 34"
         
         Expected behavior: Should reject configuration with newline characters
         Current behavior: May not validate or may accept invalid configurations
-        """
+        """"
         # Simulate the corrupted configuration value that appeared in staging
         corrupted_host = "clickhouse.netra-staging.internal\n"
         port = 8123
@@ -57,7 +59,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Edge case - ClickHouse host with carriage return character.
         
         Tests similar control character corruption that could occur in configuration.
-        """
+        """"
         corrupted_host = "clickhouse.netra-staging.internal\r"
         port = 8123
         database = "netra_staging"
@@ -80,7 +82,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Edge case - ClickHouse host with tab character.
         
         Tests tab character corruption that could occur during configuration parsing.
-        """
+        """"
         corrupted_host = "clickhouse.netra-staging.internal\t"
         port = 8123
         database = "netra_staging"
@@ -103,7 +105,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Database name corruption with control character.
         
         Tests corruption in database name parameter, not just host.
-        """
+        """"
         host = "clickhouse.netra-staging.internal"
         port = 8123
         corrupted_database = "netra_staging\x00"  # NULL character
@@ -126,7 +128,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: User parameter corruption with newline.
         
         Tests corruption in user parameter.
-        """
+        """"
         host = "clickhouse.netra-staging.internal"
         port = 8123
         database = "netra_staging"
@@ -149,7 +151,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Password parameter corruption with control character.
         
         Tests corruption in password parameter.
-        """
+        """"
         host = "clickhouse.netra-staging.internal"
         port = 8123
         database = "netra_staging"
@@ -172,7 +174,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Empty host parameter validation.
         
         Tests validation of empty host configuration.
-        """
+        """"
         empty_host = ""
         port = 8123
         database = "netra_staging"
@@ -195,7 +197,7 @@ class TestClickHouseConfigCorruption:
         FAILING TEST: Invalid port range validation.
         
         Tests port validation for out-of-range values.
-        """
+        """"
         host = "clickhouse.netra-staging.internal"
         invalid_port = 70000  # Above valid port range
         database = "netra_staging"
@@ -219,11 +221,11 @@ class TestClickHouseConfigCorruption:
         
         Tests scenario where environment variables get corrupted during parsing
         or loading from GCP Secret Manager, leading to newlines in configuration.
-        """
+        """"
         # Simulate what might happen if environment variable parsing adds newlines
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            mock_config.return_value = MagicNone  # TODO: Use real service instance
-            mock_config.return_value.clickhouse = MagicNone  # TODO: Use real service instance
+            mock_config.return_value = MagicMock()  # TODO: Use real service instance
+            mock_config.return_value.clickhouse = MagicMock()  # TODO: Use real service instance
             mock_config.return_value.clickhouse.host = "clickhouse.netra-staging.internal\n"
             mock_config.return_value.clickhouse.port = 8123
             mock_config.return_value.clickhouse.database = "netra_staging"

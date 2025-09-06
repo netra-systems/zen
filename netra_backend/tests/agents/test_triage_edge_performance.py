@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 Tests for TriageSubAgent edge cases, performance, and Pydantic model validation
 Refactored to comply with 25-line function limit and 450-line file limit
-"""
+""""
 
 import sys
 from pathlib import Path

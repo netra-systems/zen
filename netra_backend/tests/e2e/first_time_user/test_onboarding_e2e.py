@@ -1,3 +1,5 @@
+import asyncio
+
 """
 Onboarding & Demo E2E Tests - First-time user onboarding journey
 
@@ -9,7 +11,7 @@ Onboarding & Demo E2E Tests - First-time user onboarding journey
 5. **Growth Engine**: First 5 minutes determine 80% of conversion probability
 
 These tests validate Tests 1, 2, and 5 from the critical conversion paths.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -36,7 +38,7 @@ class TestOnboardingE2E:
         
         BVJ: This is THE most important test - validates the entire revenue funnel.
         Optimizing this journey can increase conversion rates by 400-600%.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Landing page → signup initiation
@@ -60,7 +62,7 @@ class TestOnboardingE2E:
         
         BVJ: Demo users convert 3x higher than organic signups. Perfect demo
         experience can achieve 25-35% conversion rates vs 2-5% baseline.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Demo session with realistic scenarios
@@ -81,7 +83,7 @@ class TestOnboardingE2E:
         
         BVJ: Personalized onboarding increases completion rates by 150%.
         Industry-specific setup reduces time-to-value by 70%.
-        """
+        """"
         env = conversion_environment
         
         # Phase 1: Welcome screen with value proposition
@@ -136,7 +138,7 @@ class TestOnboardingE2E:
 
     async def _calculate_demo_savings(self, env, demo_result, calculator):
         """Calculate concrete savings from demo scenarios"""
-        demo_data = {"current_spend": 5000, "inefficiencies": ["model_selection", "request_routing"]}
+        demo_data = {"current_spend": 5000, "inefficiencies": ["model_selection", "request_routing"]]
         savings_calculation = calculator.preview_optimization_value(demo_data)
         return {"demo_data": demo_data, "savings": savings_calculation}
 
@@ -174,5 +176,5 @@ class TestOnboardingE2E:
             "healthcare": ["patient_data_analysis", "diagnosis_accuracy"],
             "e-commerce": ["recommendation_optimization", "search_efficiency"]
         }
-        workspace_setup = {"industry": industry, "templates": templates.get(industry, [])}
+        workspace_setup = {"industry": industry, "templates": templates.get(industry, [])]
         return workspace_setup

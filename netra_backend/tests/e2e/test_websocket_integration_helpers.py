@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core import (
 from netra_backend.app.websocket_core.handlers import (
     UserMessageHandler,
     UserMessageHandler,
-    HeartbeatHandler
+    HeartbeatHandler,
 )
 
 # Removed TestSyntaxFix class as it was broken and had __init__ method that prevented pytest collection

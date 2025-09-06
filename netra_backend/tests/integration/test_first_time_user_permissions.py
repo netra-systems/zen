@@ -1,12 +1,14 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 First-time user provider connections and permissions integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Early → Mid (Integration and optimization capabilities)  
+    1. Segment: Early → Mid (Integration and optimization capabilities)  
 2. Business Goal: Protect $85K MRR by enabling AI provider integrations
 3. Value Impact: Validates provider connection flows and optimization workflows
 4. Strategic Impact: Foundation for advanced optimization features
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -230,7 +232,7 @@ async def test_google_oauth_provider_flow(
         
         response = await async_client.get(
             "/api/providers/google/oauth/callback",
-            params={"code": "test-auth-code", "state": oauth_data["state"]},
+            params={"code": "test-auth-code", "state": oauth_data["state"]],
             headers=headers
         )
         assert response.status_code == status.HTTP_200_OK

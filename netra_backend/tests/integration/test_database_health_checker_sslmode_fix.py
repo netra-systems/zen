@@ -1,16 +1,18 @@
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.database.test_database_manager import TestDatabaseManager
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Test to reproduce and fix the database health checker sslmode issue.
 
 This test recreates the exact issue seen in GCP staging where the health checker
 fails with "connect() got an unexpected keyword argument 'sslmode'" error.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Database reliability and zero-downtime deployments
 - Value Impact: Prevents production outages from SSL parameter misconfigurations
 - Strategic Impact: Ensures consistent database connectivity across all environments
-"""
+""""
 
 import asyncio
 import os
@@ -53,12 +55,12 @@ class TestDatabaseHealthCheckerSSLMode:
         """Test that health checker fails when engine has unconverted URL."""
         # Mock the engine with an unconverted URL
         # Mock: Generic component isolation for controlled unit testing
-        mock_engine = AsyncNone  # TODO: Use real service instance
+        mock_engine = AsyncMock()  # TODO: Use real service instance
         mock_engine.url = "postgresql+asyncpg://user:pass@host:5432/dbname?sslmode=require"
         
         # Create a mock that simulates the exact error we see in staging
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn_context = AsyncNone  # TODO: Use real service instance
+        mock_conn_context = AsyncMock()  # TODO: Use real service instance
         mock_conn_context.__aenter__.side_effect = TypeError("connect() got an unexpected keyword argument 'sslmode'")
         mock_conn_context.__aexit__.return_value = None
         mock_engine.connect.return_value = mock_conn_context
@@ -115,14 +117,14 @@ class TestDatabaseHealthCheckerSSLMode:
         
         # Create a mock engine that simulates successful connection
         # Mock: Generic component isolation for controlled unit testing
-        mock_engine = AsyncNone  # TODO: Use real service instance
+        mock_engine = AsyncMock()  # TODO: Use real service instance
         mock_engine.url = converted_url
         
         # Mock successful connection and query
         # Mock: Generic component isolation for controlled unit testing
-        mock_conn = AsyncNone  # TODO: Use real service instance
+        mock_conn = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncNone  # TODO: Use real service instance
+        mock_result = AsyncMock()  # TODO: Use real service instance
         mock_result.fetchone.return_value = (1,)
         mock_conn.execute.return_value = mock_result
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn

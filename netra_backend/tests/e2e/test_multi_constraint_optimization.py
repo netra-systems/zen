@@ -1,8 +1,10 @@
+import asyncio
+
 """
 Multi-Constraint Optimization Test Module
 Tests complex multi-objective optimization scenarios.
 Maximum 300 lines, functions ≤8 lines.
-"""
+""""
 
 import sys
 from pathlib import Path

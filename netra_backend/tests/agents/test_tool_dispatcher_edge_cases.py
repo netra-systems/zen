@@ -1,3 +1,6 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """Unit tests for ToolDispatcher edge cases and error scenarios."""
 
 import sys

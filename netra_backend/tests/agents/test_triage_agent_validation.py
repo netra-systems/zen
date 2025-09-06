@@ -1,13 +1,15 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Triage agent validation and tools tests
 Tests tool recommendation, fallback categorization, JSON extraction, and entry conditions
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -28,34 +30,31 @@ from netra_backend.app.redis_manager import RedisManager
 import asyncio
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock LLM manager."""
-    pass
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock = Mock(spec=LLMManager)
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock.ask_llm = AsyncNone  # TODO: Use real service instance
+    mock.ask_llm = AsyncMock()  # TODO: Use real service instance
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock tool dispatcher."""
-    pass
     # Mock: Tool dispatcher isolation for agent testing without real tool execution
     return Mock(spec=ToolDispatcher)
 
 @pytest.fixture
- def real_redis_manager():
+def real_redis_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock Redis manager."""
-    pass
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = Mock(spec=RedisManager)
     # Mock: Async component isolation for testing without real async operations
@@ -69,7 +68,6 @@ def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a TriageSubAgent instance with mocked dependencies."""
-    pass
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
 class TestToolRecommendation:
@@ -86,7 +84,6 @@ class TestToolRecommendation:
     
     def test_recommend_tools_for_performance(self, triage_agent):
         """Test tool recommendations for performance optimization."""
-    pass
         entities = ExtractedEntities(metrics_mentioned=["latency", "throughput"])
         tools = triage_agent._recommend_tools("Performance Optimization", entities)
         
@@ -106,7 +103,6 @@ class TestFallbackCategorization:
     
     def test_fallback_with_unknown_request(self, triage_agent):
         """Test fallback with request that doesn't match any keywords."""
-    pass
         result = triage_agent._fallback_categorization("random text without keywords")
         
         assert result.category == "General Inquiry"
@@ -126,7 +122,6 @@ class TestJSONExtraction:
     
     def test_extract_json_with_text(self, triage_agent):
         """Test extraction of JSON embedded in text."""
-    pass
         response = 'Here is the result: {"category": "Test"} and some more text'
         result = triage_agent._extract_and_validate_json(response)
         
@@ -144,7 +139,6 @@ class TestJSONExtraction:
     
     def test_extract_json_with_single_quotes(self, triage_agent):
         """Test extraction of JSON-like structure with single quotes."""
-    pass
         response = "{'category': 'Test', 'priority': 'high'}"
         result = triage_agent._extract_and_validate_json(response)
         
@@ -164,7 +158,6 @@ class TestEntryConditions:
     @pytest.mark.asyncio
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
-    pass
         empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
         assert result == False

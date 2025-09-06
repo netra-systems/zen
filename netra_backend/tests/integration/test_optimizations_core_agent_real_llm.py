@@ -4,7 +4,7 @@ These tests validate actual optimization recommendation generation using real LL
 real services, and actual system components - NO MOCKS.
 
 Business Value: Ensures optimization recommendations deliver promised cost savings.
-"""
+""""
 
 import asyncio
 import json
@@ -31,8 +31,8 @@ env = IsolatedEnvironment()
 async def db_session():
     """Get real database session."""
     async for session in get_db():
-        yield session
-        await session.rollback()
+    yield session
+    await session.rollback()
 
 @pytest.fixture
 async def real_llm_manager():
@@ -54,9 +54,9 @@ async def real_tool_dispatcher():
 async def real_optimization_agent(real_llm_manager, real_tool_dispatcher):
     """Create real OptimizationsCoreSubAgent instance."""
     agent = OptimizationsCoreSubAgent(
-        llm_manager=real_llm_manager,
-        tool_dispatcher=real_tool_dispatcher,
-        websocket_manager=None  # Real websocket in production
+    llm_manager=real_llm_manager,
+    tool_dispatcher=real_tool_dispatcher,
+    websocket_manager=None  # Real websocket in production
     )
     yield agent
     # Cleanup not needed for tests
@@ -128,7 +128,7 @@ class TestOptimizationsCoreAgentRealLLM:
         assert "projected_savings" in result
         assert result["projected_savings"]["percentage"] >= 10.0
         
-        logger.info(f"Generated {len(result['recommendations'])} optimization recommendations")
+        logger.info(f"Generated {len(result['recommendations'])] optimization recommendations")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -236,7 +236,7 @@ class TestOptimizationsCoreAgentRealLLM:
         ]
         assert any(tech in optimization_content for tech in optimization_techniques)
         
-        logger.info(f"Prompt optimization achieved {result['token_reduction_percentage']:.1f}% reduction")
+        logger.info(f"Prompt optimization achieved {result['token_reduction_percentage']:.1f]% reduction")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -297,7 +297,7 @@ class TestOptimizationsCoreAgentRealLLM:
         improvements = result["expected_improvements"]
         assert improvements["throughput_increase_percentage"] >= 30.0
         
-        logger.info(f"Batching optimization: {strategy['optimal_batch_size']} batch size")
+        logger.info(f"Batching optimization: {strategy['optimal_batch_size']] batch size")
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -363,7 +363,7 @@ class TestOptimizationsCoreAgentRealLLM:
         assert "cost_impact" in result["trade_off_analysis"]
         assert "latency_improvement" in result["trade_off_analysis"]
         
-        logger.info(f"Regional optimization: {len(strategy['recommended_regions'])} regions recommended")
+        logger.info(f"Regional optimization: {len(strategy['recommended_regions'])] regions recommended")
 
 
 if __name__ == "__main__":

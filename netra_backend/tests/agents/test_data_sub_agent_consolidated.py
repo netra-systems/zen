@@ -1,17 +1,19 @@
-"""Tests for Consolidated DataSubAgent
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
+"""Tests for Consolidated DataSubAgent"""
 
 Comprehensive tests for the unified DataSubAgent implementation.
 Validates all critical functionality for reliable data insights.
 
 Business Value: Ensures 15-30% cost savings identification works reliably.
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -47,126 +49,122 @@ class TestDataSubAgentConsolidated:
     """Test suite for consolidated DataSubAgent implementation."""
     
     @pytest.fixture
- def real_llm_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+    def real_llm_manager():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Mock LLM manager for testing."""
-    pass
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate_response = AsyncMock(return_value={
-            "content": "Test AI insights: Optimize model selection for 20% cost reduction"
+        "content": "Test AI insights: Optimize model selection for 20% cost reduction"
         })
         return llm_manager
     
-    @pytest.fixture
- def real_tool_dispatcher():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_tool_dispatcher():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Mock tool dispatcher for testing."""
-    pass
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         return Mock(spec=ToolDispatcher)
     
-    @pytest.fixture
- def real_websocket_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def real_websocket_manager():
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Mock WebSocket manager for testing."""
-    pass
         # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = UnifiedWebSocketManager()
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instance
+        websocket_manager.send_agent_update = AsyncMock()  # TODO: Use real service instance
         return websocket_manager
     
-    @pytest.fixture
-    def sample_workload_data(self) -> List[Dict[str, Any]]:
+        @pytest.fixture
+        def sample_workload_data(self) -> List[Dict[str, Any]]:
         """Sample workload data for testing."""
         return [
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=1),
-                "user_id": "test_user_1",
-                "workload_id": "workload_1",
-                "workload_type": "chat_completion",
-                "latency_ms": 150.5,
-                "cost_cents": 2.3,
-                "throughput": 100.0
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(minutes=30),
-                "user_id": "test_user_1",
-                "workload_id": "workload_2",
-                "workload_type": "embedding",
-                "latency_ms": 75.2,
-                "cost_cents": 1.1,
-                "throughput": 200.0
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(minutes=15),
-                "user_id": "test_user_2",
-                "workload_id": "workload_3", 
-                "workload_type": "chat_completion",
-                "latency_ms": 3200.0,  # High latency
-                "cost_cents": 8.7,     # High cost
-                "throughput": 25.0
-            }
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=1),
+        "user_id": "test_user_1",
+        "workload_id": "workload_1",
+        "workload_type": "chat_completion",
+        "latency_ms": 150.5,
+        "cost_cents": 2.3,
+        "throughput": 100.0
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(minutes=30),
+        "user_id": "test_user_1",
+        "workload_id": "workload_2",
+        "workload_type": "embedding",
+        "latency_ms": 75.2,
+        "cost_cents": 1.1,
+        "throughput": 200.0
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(minutes=15),
+        "user_id": "test_user_2",
+        "workload_id": "workload_3", 
+        "workload_type": "chat_completion",
+        "latency_ms": 3200.0,  # High latency
+        "cost_cents": 8.7,     # High cost
+        "throughput": 25.0
+        }
         ]
     
-    @pytest.fixture
-    def sample_cost_breakdown(self) -> List[Dict[str, Any]]:
+        @pytest.fixture
+        def sample_cost_breakdown(self) -> List[Dict[str, Any]]:
         """Sample cost breakdown data for testing."""
         return [
-            {
-                "user_id": "test_user_1",
-                "workload_type": "chat_completion",
-                "request_count": 150,
-                "avg_cost_cents": 2.5,
-                "total_cost_cents": 375.0
-            },
-            {
-                "user_id": "test_user_1",
-                "workload_type": "embedding",
-                "request_count": 300,
-                "avg_cost_cents": 1.2,
-                "total_cost_cents": 360.0
-            },
-            {
-                "user_id": "test_user_2",
-                "workload_type": "chat_completion",
-                "request_count": 50,
-                "avg_cost_cents": 8.5,  # High cost workload
-                "total_cost_cents": 425.0
-            }
+        {
+        "user_id": "test_user_1",
+        "workload_type": "chat_completion",
+        "request_count": 150,
+        "avg_cost_cents": 2.5,
+        "total_cost_cents": 375.0
+        },
+        {
+        "user_id": "test_user_1",
+        "workload_type": "embedding",
+        "request_count": 300,
+        "avg_cost_cents": 1.2,
+        "total_cost_cents": 360.0
+        },
+        {
+        "user_id": "test_user_2",
+        "workload_type": "chat_completion",
+        "request_count": 50,
+        "avg_cost_cents": 8.5,  # High cost workload
+        "total_cost_cents": 425.0
+        }
         ]
     
-    @pytest.fixture
-    async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
+        @pytest.fixture
+        async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.get_clickhouse_service') as mock_ch, \
-             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
-             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
-             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
-             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
+        patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
+        patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
+        patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
+        patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
             
-            agent = DataSubAgent(
-                llm_manager=mock_llm_manager,
-                tool_dispatcher=mock_tool_dispatcher,
-                websocket_manager=mock_websocket_manager
-            )
+        agent = DataSubAgent(
+        llm_manager=mock_llm_manager,
+        tool_dispatcher=mock_tool_dispatcher,
+        websocket_manager=mock_websocket_manager
+        )
             
-            # Setup mock responses
-            agent.clickhouse_client.is_healthy.return_value = True
-            agent.schema_cache.is_available.return_value = True
+        # Setup mock responses
+        agent.clickhouse_client.is_healthy.return_value = True
+        agent.schema_cache.is_available.return_value = True
             
-            yield agent
+        yield agent
     
-    @pytest.mark.asyncio
-    async def test_data_sub_agent_initialization(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_data_sub_agent_initialization(self, data_sub_agent):
         """Test DataSubAgent initializes correctly."""
-    pass
         assert data_sub_agent is not None
         assert data_sub_agent.name == "DataSubAgent"
         assert "Advanced data analysis for AI cost optimization" in data_sub_agent.description
@@ -176,30 +174,30 @@ class TestDataSubAgentConsolidated:
         assert hasattr(data_sub_agent, 'cost_optimizer')
         assert hasattr(data_sub_agent, 'data_validator')
     
-    @pytest.mark.asyncio
-    async def test_performance_analysis_execution(self, data_sub_agent, sample_workload_data):
+        @pytest.mark.asyncio
+        async def test_performance_analysis_execution(self, data_sub_agent, sample_workload_data):
         """Test performance analysis execution workflow."""
         # Setup mock data
         # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(return_value={
-            "summary": "Performance analysis completed",
-            "data_points": 3,
-            "findings": ["High latency detected in 33% of requests"],
-            "recommendations": ["Consider request optimization"],
-            "metrics": {
-                "latency": {"avg_latency_ms": 1141.9, "p95_latency_ms": 3200.0}
-            },
-            "cost_savings": {"percentage": 15.0, "amount_cents": 50.0}
+        "summary": "Performance analysis completed",
+        "data_points": 3,
+        "findings": ["High latency detected in 33% of requests"},
+        "recommendations": ["Consider request optimization"],
+        "metrics": {
+        "latency": {"avg_latency_ms": 1141.9, "p95_latency_ms": 3200.0}
+        },
+        "cost_savings": {"percentage": 15.0, "amount_cents": 50.0}
         })
         
         # Create test state
         state = DeepAgentState(
-            agent_input={
-                "analysis_type": "performance",
-                "timeframe": "24h",
-                "metrics": ["latency_ms", "cost_cents"]
-            },
-            user_id="test_user_1"
+        agent_input={
+        "analysis_type": "performance",
+        "timeframe": "24h",
+        "metrics": ["latency_ms", "cost_cents"}
+        },
+        user_id="test_user_1"
         )
         
         # Execute analysis
@@ -218,31 +216,30 @@ class TestDataSubAgentConsolidated:
         # Verify performance analyzer was called
         data_sub_agent.performance_analyzer.analyze_performance.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_cost_optimization_execution(self, data_sub_agent, sample_cost_breakdown):
+        @pytest.mark.asyncio
+        async def test_cost_optimization_execution(self, data_sub_agent, sample_cost_breakdown):
         """Test cost optimization analysis execution."""
-    pass
         # Setup mock data
         # Mock: Async component isolation for testing without real async operations
         data_sub_agent.cost_optimizer.analyze_costs = AsyncMock(return_value={
-            "summary": "Cost optimization analysis completed",
-            "data_points": 500,
-            "findings": ["High-cost workload identified: chat_completion averages 8.50 cents"],
-            "recommendations": ["Switch to more efficient model for high-cost workloads"],
-            "savings_potential": {
-                "total_savings_cents": 200.0,
-                "savings_percentage": 25.0,
-                "monthly_projection_cents": 6000.0
-            }
+        "summary": "Cost optimization analysis completed",
+        "data_points": 500,
+        "findings": ["High-cost workload identified: chat_completion averages 8.50 cents"},
+        "recommendations": ["Switch to more efficient model for high-cost workloads"],
+        "savings_potential": {
+        "total_savings_cents": 200.0,
+        "savings_percentage": 25.0,
+        "monthly_projection_cents": 6000.0
+        }
         })
         
         # Create test state
         state = DeepAgentState(
-            agent_input={
-                "analysis_type": "cost_optimization",
-                "timeframe": "7d",
-                "user_id": "test_user_1"
-            }
+        agent_input={
+        "analysis_type": "cost_optimization",
+        "timeframe": "7d",
+        "user_id": "test_user_1"
+        }
         )
         
         # Execute analysis
@@ -256,21 +253,21 @@ class TestDataSubAgentConsolidated:
         # Verify cost optimizer was called
         data_sub_agent.cost_optimizer.analyze_costs.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_llm_insights_generation(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_llm_insights_generation(self, data_sub_agent):
         """Test LLM-powered insights generation."""
         # Setup performance analysis with raw data
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(return_value={
-            "summary": "Analysis with raw data",
-            "findings": ["Performance degradation detected"],
-            "recommendations": ["Optimize queries"],
-            "raw_data": [{"latency_ms": 2000, "cost_cents": 5.0}]
+        "summary": "Analysis with raw data",
+        "findings": ["Performance degradation detected"},
+        "recommendations": ["Optimize queries"],
+        "raw_data": [{"latency_ms": 2000, "cost_cents": 5.0}]
         })
         
         # Create test state
         state = DeepAgentState(
-            agent_input={"analysis_type": "performance"},
-            user_id="test_user"
+        agent_input={"analysis_type": "performance"},
+        user_id="test_user"
         )
         
         # Execute analysis
@@ -284,29 +281,28 @@ class TestDataSubAgentConsolidated:
         # Verify LLM manager was called
         data_sub_agent.llm_manager.generate_response.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_execution_context_interface(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_execution_context_interface(self, data_sub_agent):
         """Test standardized execution interface implementation."""
-    pass
         # Create execution context
         state = DeepAgentState(
-            agent_input={"analysis_type": "performance"},
-            user_id="test_user"
+        agent_input={"analysis_type": "performance"},
+        user_id="test_user"
         )
         
         context = ExecutionContext(
-            run_id="test_run_123",
-            agent_name="DataSubAgent",
-            state=state,
-            stream_updates=False
+        run_id="test_run_123",
+        agent_name="DataSubAgent",
+        state=state,
+        stream_updates=False
         )
         
         # Mock performance analysis
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(return_value={
-            "summary": "Test analysis",
-            "findings": [],
-            "recommendations": [],
-            "metrics": {}
+        "summary": "Test analysis",
+        "findings": [},
+        "recommendations": [],
+        "metrics": {}
         })
         
         # Execute via standardized execution interface
@@ -317,14 +313,14 @@ class TestDataSubAgentConsolidated:
         assert result.success is True
         assert result.status == ExecutionStatus.COMPLETED
     
-    @pytest.mark.asyncio
-    async def test_preconditions_validation(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_preconditions_validation(self, data_sub_agent):
         """Test preconditions validation."""
         state = DeepAgentState(agent_input={"analysis_type": "performance"})
         context = ExecutionContext(
-            run_id="test_run",
-            agent_name="DataSubAgent",
-            state=state
+        run_id="test_run",
+        agent_name="DataSubAgent",
+        state=state
         )
         
         # Test with healthy dependencies
@@ -336,19 +332,18 @@ class TestDataSubAgentConsolidated:
         valid = await data_sub_agent.validate_preconditions(context)
         assert valid is False
     
-    @pytest.mark.asyncio
-    async def test_error_handling(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_error_handling(self, data_sub_agent):
         """Test error handling in execution workflow."""
-    pass
         # Setup analyzer to raise exception
         # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(
-            side_effect=Exception("ClickHouse connection failed")
+        side_effect=Exception("ClickHouse connection failed")
         )
         
         state = DeepAgentState(
-            agent_input={"analysis_type": "performance"},
-            user_id="test_user"
+        agent_input={"analysis_type": "performance"},
+        user_id="test_user"
         )
         
         # Execute analysis
@@ -359,12 +354,12 @@ class TestDataSubAgentConsolidated:
         assert "ClickHouse connection failed" in result.result["error"]
         assert result.execution_time_ms >= 0  # Allow 0 for mocked operations
     
-    @pytest.mark.asyncio
-    async def test_invalid_execution_state(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_invalid_execution_state(self, data_sub_agent):
         """Test handling of invalid execution state."""
         # Test with None state - this should fail at type validator level
         with pytest.raises(Exception) as exc_info:
-            await data_sub_agent.execute(None, "test-run-id")
+        await data_sub_agent.execute(None, "test-run-id")
         assert "State missing essential attributes" in str(exc_info.value)
         
         # Test with state missing agent_input - this should fail at DataSubAgent validation level
@@ -373,20 +368,19 @@ class TestDataSubAgentConsolidated:
         assert result.success is False
         assert "Invalid execution state" in result.result["error"]
     
-    @pytest.mark.asyncio
-    async def test_health_status(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_health_status(self, data_sub_agent):
         """Test health status reporting."""
-    pass
         # Setup mock health statuses
         data_sub_agent.clickhouse_client.get_health_status.return_value = {
-            "healthy": True,
-            "last_check": datetime.now(UTC).isoformat()
+        "healthy": True,
+        "last_check": datetime.now(UTC).isoformat()
         }
         
         data_sub_agent.schema_cache.get_health_status.return_value = {
-            "available": True,
-            "cached_tables": ["workload_events"],
-            "cache_size": 1
+        "available": True,
+        "cached_tables": ["workload_events"},
+        "cache_size": 1
         }
         
         # Get health status
@@ -403,14 +397,14 @@ class TestDataSubAgentConsolidated:
         assert health["components"]["data_validator"] == "active"
         assert "timestamp" in health
     
-    @pytest.mark.asyncio
-    async def test_cleanup_resources(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_cleanup_resources(self, data_sub_agent):
         """Test resource cleanup."""
         # Setup cleanup mocks
         # Mock: ClickHouse external database isolation for unit testing performance
-        data_sub_agent.clickhouse_client.close = AsyncNone  # TODO: Use real service instance
+        data_sub_agent.clickhouse_client.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        data_sub_agent.schema_cache.cleanup = AsyncNone  # TODO: Use real service instance
+        data_sub_agent.schema_cache.cleanup = AsyncMock()  # TODO: Use real service instance
         
         # Perform cleanup
         await data_sub_agent.cleanup()
@@ -419,20 +413,19 @@ class TestDataSubAgentConsolidated:
         data_sub_agent.clickhouse_client.close.assert_called_once()
         data_sub_agent.schema_cache.cleanup.assert_called_once()
     
-    def test_analysis_request_extraction(self, data_sub_agent):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    pass
+        def test_analysis_request_extraction(self, data_sub_agent):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Test analysis request parameter extraction."""
         # Test with complete parameters
         state = DeepAgentState(
-            agent_input={
-                "analysis_type": "cost_optimization",
-                "timeframe": "7d",
-                "metrics": ["cost_cents", "throughput"],
-                "filters": {"workload_type": "chat_completion"}
-            },
-            user_id="test_user_123"
+        agent_input={
+        "analysis_type": "cost_optimization",
+        "timeframe": "7d",
+        "metrics": ["cost_cents", "throughput"},
+        "filters": {"workload_type": "chat_completion"}
+        },
+        user_id="test_user_123"
         )
         
         request = data_sub_agent._extract_analysis_request(state)
@@ -443,12 +436,12 @@ class TestDataSubAgentConsolidated:
         assert request["filters"] == {"workload_type": "chat_completion"}
         assert request["user_id"] == "test_user_123"
     
-    def test_analysis_request_defaults(self, data_sub_agent):
+        def test_analysis_request_defaults(self, data_sub_agent):
         """Test analysis request with default parameters."""
         # Test with minimal parameters
         state = DeepAgentState(
-            agent_input={},
-            user_id=None
+        agent_input={},
+        user_id=None
         )
         
         request = data_sub_agent._extract_analysis_request(state)
@@ -461,25 +454,24 @@ class TestDataSubAgentConsolidated:
         assert request["filters"] == {}         # Default
         assert request["user_id"] is None
     
-    @pytest.mark.asyncio
-    async def test_trend_analysis_workflow(self, data_sub_agent):
+        @pytest.mark.asyncio
+        async def test_trend_analysis_workflow(self, data_sub_agent):
         """Test trend analysis workflow execution."""
-    pass
         # Setup mock trend analysis
         # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_trends = AsyncMock(return_value={
-            "summary": "Trend analysis over 7d with 150 data points",
-            "trends": {
-                "latency_trend": {"trend": "improving", "change_percentage": -10.5},
-                "cost_trend": {"trend": "stable", "change_percentage": 2.1}
-            },
-            "data_points": 150,
-            "findings": ["Latency trend improving by 10.5%"]
+        "summary": "Trend analysis over 7d with 150 data points",
+        "trends": {
+        "latency_trend": {"trend": "improving", "change_percentage": -10.5},
+        "cost_trend": {"trend": "stable", "change_percentage": 2.1}
+        },
+        "data_points": 150,
+        "findings": ["Latency trend improving by 10.5%"]
         })
         
         state = DeepAgentState(
-            agent_input={"analysis_type": "trend_analysis", "timeframe": "7d"},
-            user_id="test_user"
+        agent_input={"analysis_type": "trend_analysis", "timeframe": "7d"},
+        user_id="test_user"
         )
         
         result = await data_sub_agent.execute(state, "test-run-id")
@@ -496,71 +488,69 @@ class TestClickHouseService:
     
     @pytest.fixture
     def clickhouse_client(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         await asyncio.sleep(0)
-    return get_clickhouse_service()
+        return get_clickhouse_service()
     
-    @pytest.fixture
-    def sample_workload_data(self) -> List[Dict[str, Any]]:
+        @pytest.fixture
+        def sample_workload_data(self) -> List[Dict[str, Any]]:
         """Sample workload data for testing."""
-    pass
         return [
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=1),
-                "user_id": "test_user_1",
-                "workload_id": "workload_1",
-                "workload_type": "chat_completion",
-                "latency_ms": 150.5,
-                "cost_cents": 2.3,
-                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
-                "tokens": 1000,
-                "status": "completed"
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=2),
-                "user_id": "test_user_2",
-                "workload_id": "workload_2",
-                "workload_type": "text_generation",
-                "latency_ms": 220.3,
-                "cost_cents": 4.1,
-                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
-                "tokens": 1500,
-                "status": "completed"
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=3),
-                "user_id": "test_user_3",
-                "workload_id": "workload_3",
-                "workload_type": "code_completion",
-                "latency_ms": 95.2,
-                "cost_cents": 1.8,
-                "model_name": "claude-2",
-                "tokens": 800,
-                "status": "completed"
-            }
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=1),
+        "user_id": "test_user_1",
+        "workload_id": "workload_1",
+        "workload_type": "chat_completion",
+        "latency_ms": 150.5,
+        "cost_cents": 2.3,
+        "model_name": LLMModel.GEMINI_2_5_FLASH.value,
+        "tokens": 1000,
+        "status": "completed"
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=2),
+        "user_id": "test_user_2",
+        "workload_id": "workload_2",
+        "workload_type": "text_generation",
+        "latency_ms": 220.3,
+        "cost_cents": 4.1,
+        "model_name": LLMModel.GEMINI_2_5_FLASH.value,
+        "tokens": 1500,
+        "status": "completed"
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=3),
+        "user_id": "test_user_3",
+        "workload_id": "workload_3",
+        "workload_type": "code_completion",
+        "latency_ms": 95.2,
+        "cost_cents": 1.8,
+        "model_name": "claude-2",
+        "tokens": 800,
+        "status": "completed"
+        }
         ]
     
-    @pytest.mark.asyncio
-    async def test_connection_establishment(self, clickhouse_client):
+        @pytest.mark.asyncio
+        async def test_connection_establishment(self, clickhouse_client):
         """Test ClickHouse connection establishment."""
         # Test connection with mock
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
-            # Create a mock client that succeeds on test_connection
-            mock_client = AsyncNone  # TODO: Use real service instance
-            mock_client.test_connection = AsyncNone  # TODO: Use real service instance
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=None)
-            mock_get_client.return_value = mock_client
+        # Create a mock client that succeeds on test_connection
+        mock_client = AsyncMock()  # TODO: Use real service instance
+        mock_client.test_connection = AsyncMock()  # TODO: Use real service instance
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=None)
+        mock_get_client.return_value = mock_client
             
-            result = await clickhouse_client.connect()
-            assert result is True  # Should succeed in mock mode
+        result = await clickhouse_client.connect()
+        assert result is True  # Should succeed in mock mode
     
-    @pytest.mark.asyncio
-    async def test_workload_metrics_query(self, clickhouse_client, sample_workload_data):
+        @pytest.mark.asyncio
+        async def test_workload_metrics_query(self, clickhouse_client, sample_workload_data):
         """Test workload metrics query execution."""
-    pass
         # Mock query execution
         # Mock: ClickHouse external database isolation for unit testing performance
         clickhouse_client.execute_query = AsyncMock(return_value=sample_workload_data)
@@ -574,18 +564,17 @@ class TestClickHouseService:
         # Verify query was called with correct parameters
         clickhouse_client.execute_query.assert_called_once()
     
-    def test_health_status_check(self, clickhouse_client):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        def test_health_status_check(self, clickhouse_client):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Test health status checking."""
-    pass
         # Initially unhealthy (no connection)
         assert clickhouse_client.is_healthy() is False
         
         # Set health status
         clickhouse_client._health_status = {
-            "healthy": True,
-            "last_check": datetime.now(UTC)
+        "healthy": True,
+        "last_check": datetime.now(UTC)
         }
         
         assert clickhouse_client.is_healthy() is True
@@ -599,61 +588,59 @@ class TestDataValidator:
     
     @pytest.fixture
     def data_validator(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         await asyncio.sleep(0)
-    return DataValidator()
+        return DataValidator()
     
-    @pytest.fixture
-    def sample_workload_data(self) -> List[Dict[str, Any]]:
+        @pytest.fixture
+        def sample_workload_data(self) -> List[Dict[str, Any]]:
         """Sample workload data for testing."""
-    pass
         return [
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=1),
-                "user_id": "test_user_1",
-                "workload_id": "workload_1",
-                "workload_type": "chat_completion",
-                "latency_ms": 150.5,
-                "cost_cents": 2.3,
-                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
-                "tokens": 1000,
-                "status": "completed"
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=2),
-                "user_id": "test_user_2",
-                "workload_id": "workload_2",
-                "workload_type": "text_generation",
-                "latency_ms": 220.3,
-                "cost_cents": 4.1,
-                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
-                "tokens": 1500,
-                "status": "completed"
-            },
-            {
-                "timestamp": datetime.now(UTC) - timedelta(hours=3),
-                "user_id": "test_user_3",
-                "workload_id": "workload_3",
-                "workload_type": "code_completion",
-                "latency_ms": 95.2,
-                "cost_cents": 1.8,
-                "model_name": "claude-2",
-                "tokens": 800,
-                "status": "completed"
-            }
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=1),
+        "user_id": "test_user_1",
+        "workload_id": "workload_1",
+        "workload_type": "chat_completion",
+        "latency_ms": 150.5,
+        "cost_cents": 2.3,
+        "model_name": LLMModel.GEMINI_2_5_FLASH.value,
+        "tokens": 1000,
+        "status": "completed"
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=2),
+        "user_id": "test_user_2",
+        "workload_id": "workload_2",
+        "workload_type": "text_generation",
+        "latency_ms": 220.3,
+        "cost_cents": 4.1,
+        "model_name": LLMModel.GEMINI_2_5_FLASH.value,
+        "tokens": 1500,
+        "status": "completed"
+        },
+        {
+        "timestamp": datetime.now(UTC) - timedelta(hours=3),
+        "user_id": "test_user_3",
+        "workload_id": "workload_3",
+        "workload_type": "code_completion",
+        "latency_ms": 95.2,
+        "cost_cents": 1.8,
+        "model_name": "claude-2",
+        "tokens": 800,
+        "status": "completed"
+        }
         ]
     
-    def test_analysis_request_validation(self, data_validator):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        def test_analysis_request_validation(self, data_validator):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Test analysis request validation."""
-    pass
         # Valid request
         valid_request = {
-            "type": "performance",
-            "timeframe": "24h",
-            "metrics": ["latency_ms", "cost_cents"]
+        "type": "performance",
+        "timeframe": "24h",
+        "metrics": ["latency_ms", "cost_cents"}
         }
         
         is_valid, errors = data_validator.validate_analysis_request(valid_request)
@@ -662,20 +649,20 @@ class TestDataValidator:
         
         # Invalid request
         invalid_request = {
-            "type": "invalid_type",
-            "timeframe": "invalid_format",
-            "metrics": ["invalid_metric"]
+        "type": "invalid_type",
+        "timeframe": "invalid_format",
+        "metrics": ["invalid_metric"}
         }
         
         is_valid, errors = data_validator.validate_analysis_request(invalid_request)
         assert is_valid is False
         assert len(errors) > 0
     
-    def test_raw_data_validation(self, data_validator, sample_workload_data):
+        def test_raw_data_validation(self, data_validator, sample_workload_data):
         """Test raw data quality validation."""
         is_valid, validation_result = data_validator.validate_raw_data(
-            sample_workload_data, 
-            ["latency_ms", "cost_cents"]
+        sample_workload_data, 
+        ["latency_ms", "cost_cents"]
         )
         
         assert is_valid is True
@@ -683,18 +670,17 @@ class TestDataValidator:
         assert validation_result["quality_score"] > 0.8
         assert "quality_metrics" in validation_result
     
-    def test_analysis_result_validation(self, data_validator):
+        def test_analysis_result_validation(self, data_validator):
         """Test analysis result validation."""
-    pass
         # Valid result
         valid_result = {
-            "summary": "Analysis completed",
-            "findings": ["High latency detected"],
-            "recommendations": ["Optimize queries"],
-            "cost_savings": {
-                "savings_percentage": 20.0,
-                "total_potential_savings_cents": 100.0
-            }
+        "summary": "Analysis completed",
+        "findings": ["High latency detected"},
+        "recommendations": ["Optimize queries"],
+        "cost_savings": {
+        "savings_percentage": 20.0,
+        "total_potential_savings_cents": 100.0
+        }
         }
         
         is_valid, errors = data_validator.validate_analysis_result(valid_result)
@@ -703,8 +689,8 @@ class TestDataValidator:
         
         # Invalid result (missing required fields)
         invalid_result = {
-            "summary": "Analysis completed"
-            # Missing findings and recommendations
+        "summary": "Analysis completed"
+        # Missing findings and recommendations
         }
         
         is_valid, errors = data_validator.validate_analysis_result(invalid_result)

@@ -2,20 +2,20 @@
 Multi-Service Startup Orchestration Integration Test.
 
 BVJ (Business Value Justification):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability, Development Velocity
 - Value Impact: Ensures correct service startup order prevents cascading failures
 - Strategic Impact: Enables zero-downtime deployments and reliable scaling
 
 This test validates service startup orchestration using real Docker containers (L3 realism)
 to ensure proper dependency resolution and graceful failure handling.
-"""
+""""
 
 import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -39,62 +39,58 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.integration
 class TestMultiServiceStartupOrchestration:
     """Integration tests for multi-service startup orchestration."""
-    pass
 
     @pytest.fixture(scope="function")
     def service_containers(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create multi-service environment with Docker Compose."""
-    pass
         test_id = f"test_{os.getpid()}_{id(self)}"
         compose_file = self._create_compose_config(test_id)
         
         try:
-            # Start services with Docker Compose
-            subprocess.run([
-                "docker-compose", "-f", compose_file, "-p", test_id, "up", "-d"
-            ], check=True, capture_output=True)
+        # Start services with Docker Compose
+        subprocess.run([
+        "docker-compose", "-f", compose_file, "-p", test_id, "up", "-d"
+        ], check=True, capture_output=True)
             
-            # Wait for services to be ready
-            self._wait_for_services_ready(test_id)
+        # Wait for services to be ready
+        self._wait_for_services_ready(test_id)
             
-            yield {
-                "project_name": test_id,
-                "compose_file": compose_file
-            }
+        yield {
+        "project_name": test_id,
+        "compose_file": compose_file
+        }
             
         finally:
-            # Cleanup services
-            subprocess.run([
-                "docker-compose", "-f", compose_file, "-p", test_id, "down", "-v"
-            ], capture_output=True)
+        # Cleanup services
+        subprocess.run([
+        "docker-compose", "-f", compose_file, "-p", test_id, "down", "-v"
+        ], capture_output=True)
             
-            # Remove compose file
-            try:
-                os.unlink(compose_file)
-            except FileNotFoundError:
-                pass
+        # Remove compose file
+        try:
+        os.unlink(compose_file)
+        except FileNotFoundError:
 
-    @pytest.fixture
-    def orchestration_config(self, service_containers):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def orchestration_config(self, service_containers):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Configuration for service orchestration testing."""
-    pass
         return {
-            "startup_timeout": 60,
-            "health_check_interval": 2,
-            "max_startup_retries": 5,
-            "service_dependencies": {
-                "auth_service": [],
-                "backend": ["auth_service", "postgres", "redis"],
-                "frontend": ["backend"]
-            }
+        "startup_timeout": 60,
+        "health_check_interval": 2,
+        "max_startup_retries": 5,
+        "service_dependencies": {
+        "auth_service": [],
+        "backend": ["auth_service", "postgres", "redis"],
+        "frontend": ["backend"]
+        }
         }
 
-    @pytest.mark.asyncio
-    async def test_services_start_in_correct_dependency_order(self, orchestration_config):
+        @pytest.mark.asyncio
+        async def test_services_start_in_correct_dependency_order(self, orchestration_config):
         """
         Test that services start in correct dependency order.
         
@@ -103,13 +99,12 @@ class TestMultiServiceStartupOrchestration:
         - Backend waits for auth service and databases
         - Frontend waits for backend
         - Dependency violations cause startup failure
-        """
-    pass
+        """"
         startup_order = []
         
         # Start services with dependency tracking
         orchestration_result = await self._orchestrate_startup_with_tracking(
-            orchestration_config, startup_order
+        orchestration_config, startup_order
         )
         
         # Verify startup order matches dependencies
@@ -120,8 +115,8 @@ class TestMultiServiceStartupOrchestration:
         all_healthy = await self._verify_all_services_healthy(orchestration_config)
         assert all_healthy, "Not all services reached healthy state"
 
-    @pytest.mark.asyncio
-    async def test_backend_waits_for_auth_service_availability(self, orchestration_config):
+        @pytest.mark.asyncio
+        async def test_backend_waits_for_auth_service_availability(self, orchestration_config):
         """Test backend service waits for auth service to be available."""
         # Start auth service first
         auth_started = await self._start_auth_service_only(orchestration_config)
@@ -135,10 +130,9 @@ class TestMultiServiceStartupOrchestration:
         backend_connected = await self._start_backend_with_auth_dependency(orchestration_config)
         assert backend_connected, "Backend failed to connect to auth service"
 
-    @pytest.mark.asyncio
-    async def test_graceful_shutdown_on_dependency_failure(self, orchestration_config):
+        @pytest.mark.asyncio
+        async def test_graceful_shutdown_on_dependency_failure(self, orchestration_config):
         """Test graceful shutdown when dependency service fails."""
-    pass
         # Start all services
         all_started = await self._start_all_services(orchestration_config)
         assert all_started, "Failed to start all services"
@@ -151,14 +145,14 @@ class TestMultiServiceStartupOrchestration:
         graceful_shutdown = await self._verify_graceful_dependent_shutdown(orchestration_config)
         assert graceful_shutdown, "Dependent services did not shutdown gracefully"
 
-    @pytest.mark.asyncio
-    async def test_startup_retry_mechanism_on_transient_failures(self, orchestration_config):
+        @pytest.mark.asyncio
+        async def test_startup_retry_mechanism_on_transient_failures(self, orchestration_config):
         """Test startup retry mechanism handles transient failures."""
         # Configure transient failure simulation
         retry_config = {
-            **orchestration_config,
-            "simulate_transient_failures": True,
-            "failure_rate": 0.3  # 30% failure rate
+        **orchestration_config,
+        "simulate_transient_failures": True,
+        "failure_rate": 0.3  # 30% failure rate
         }
         
         # Attempt startup with transient failures
@@ -169,13 +163,12 @@ class TestMultiServiceStartupOrchestration:
         final_state_healthy = await self._verify_final_state_healthy()
         assert final_state_healthy, "Final state not healthy after retries"
 
-    @pytest.mark.asyncio
-    async def test_health_check_cascading_during_startup(self, orchestration_config):
+        @pytest.mark.asyncio
+        async def test_health_check_cascading_during_startup(self, orchestration_config):
         """Test health checks cascade properly during startup sequence."""
-    pass
         health_cascade_config = {
-            **orchestration_config,
-            "enable_health_cascading": True
+        **orchestration_config,
+        "enable_health_cascading": True
         }
         
         # Start services with health check cascading
@@ -186,89 +179,89 @@ class TestMultiServiceStartupOrchestration:
         cascade_stops = await self._verify_cascade_stops_on_unhealthy_dependency(health_cascade_config)
         assert cascade_stops, "Health cascading did not stop on unhealthy dependency"
 
-    # Helper methods (each under 25 lines)
+        # Helper methods (each under 25 lines)
 
-    def _create_compose_config(self, test_id: str) -> str:
+        def _create_compose_config(self, test_id: str) -> str:
         """Create Docker Compose configuration for testing."""
         compose_content = {
-            "version": "3.8",
-            "services": self._get_compose_services()
+        "version": "3.8",
+        "services": self._get_compose_services()
         }
         
         # Write compose file with unique name
         compose_file = f"test-compose-{test_id}.yml"
         with open(compose_file, "w") as f:
-            yaml.dump(compose_content, f)
+        yaml.dump(compose_content, f)
         await asyncio.sleep(0)
-    return compose_file
+        return compose_file
 
-    def _get_compose_services(self) -> Dict[str, Any]:
+        def _get_compose_services(self) -> Dict[str, Any]:
         """Get compose service definitions."""
         return {
-            "postgres": self._get_postgres_service_config(),
-            "redis": self._get_redis_service_config(),
-            "auth_service": self._get_auth_service_config()
+        "postgres": self._get_postgres_service_config(),
+        "redis": self._get_redis_service_config(),
+        "auth_service": self._get_auth_service_config()
         }
 
-    def _get_postgres_service_config(self) -> Dict[str, Any]:
+        def _get_postgres_service_config(self) -> Dict[str, Any]:
         """Get PostgreSQL service configuration."""
         return {
-            "image": "postgres:15",
-            "environment": {
-                "POSTGRES_DB": "netra_test",
-                "POSTGRES_USER": "test", 
-                "POSTGRES_PASSWORD": "test"
-            },
-            "ports": ["0:5432"],
-            "healthcheck": {
-                "test": ["CMD-SHELL", "pg_isready -U test"],
-                "interval": "5s", "timeout": "3s", "retries": 3
-            }
+        "image": "postgres:15",
+        "environment": {
+        "POSTGRES_DB": "netra_test",
+        "POSTGRES_USER": "test", 
+        "POSTGRES_PASSWORD": "test"
+        },
+        "ports": ["0:5432"],
+        "healthcheck": {
+        "test": ["CMD-SHELL", "pg_isready -U test"],
+        "interval": "5s", "timeout": "3s", "retries": 3
+        }
         }
 
-    def _get_redis_service_config(self) -> Dict[str, Any]:
+        def _get_redis_service_config(self) -> Dict[str, Any]:
         """Get Redis service configuration."""
         return {
-            "image": "redis:7-alpine",
-            "ports": ["0:6379"],
-            "healthcheck": {
-                "test": ["CMD", "redis-cli", "ping"],
-                "interval": "5s", "timeout": "3s", "retries": 3
-            }
+        "image": "redis:7-alpine",
+        "ports": ["0:6379"],
+        "healthcheck": {
+        "test": ["CMD", "redis-cli", "ping"],
+        "interval": "5s", "timeout": "3s", "retries": 3
+        }
         }
 
-    def _get_auth_service_config(self) -> Dict[str, Any]:
+        def _get_auth_service_config(self) -> Dict[str, Any]:
         """Get auth service configuration."""
         return {
-            "image": "nginx:alpine",
-            "ports": ["0:80"],
-            "healthcheck": {
-                "test": ["CMD", "curl", "-f", "http://localhost/"],
-                "interval": "5s", "timeout": "3s", "retries": 3
-            }
+        "image": "nginx:alpine",
+        "ports": ["0:80"],
+        "healthcheck": {
+        "test": ["CMD", "curl", "-f", "http://localhost/"],
+        "interval": "5s", "timeout": "3s", "retries": 3
+        }
         }
 
-    def _wait_for_services_ready(self, project_name: str) -> None:
+        def _wait_for_services_ready(self, project_name: str) -> None:
         """Wait for all services to be ready."""
         max_wait = 60
         start_time = time.time()
         
         while time.time() - start_time < max_wait:
-            if self._check_all_services_healthy(project_name):
-                return
-            time.sleep(2)
+        if self._check_all_services_healthy(project_name):
+        return
+        time.sleep(2)
         
         raise TimeoutError("Services did not become ready within timeout")
 
-    def _check_all_services_healthy(self, project_name: str) -> bool:
+        def _check_all_services_healthy(self, project_name: str) -> bool:
         """Check if all services are healthy."""
         try:
-            # Check if all containers are running and healthy
-            result = subprocess.run([
-                "docker-compose", "-p", project_name, "ps", "-q"
-            ], capture_output=True, text=True, check=True)
+        # Check if all containers are running and healthy
+        result = subprocess.run([
+        "docker-compose", "-p", project_name, "ps", "-q"
+        ], capture_output=True, text=True, check=True)
             
-            container_ids = result.stdout.strip().split('
+        container_ids = result.stdout.strip().split('
 ')
             if not container_ids or container_ids == ['']:
                 return False

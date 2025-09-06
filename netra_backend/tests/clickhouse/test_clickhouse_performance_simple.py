@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 ClickHouse Performance Tests - Simplified Version
 Tests for ClickHouse performance without complex configuration loading
-"""
+""""
 
 import json
 import random
@@ -85,16 +88,16 @@ class TestClickHousePerformanceSimple:
 
     async def _log_performance_metrics(self, batch_size, insert_duration):
         """Log performance metrics from batch insert"""
-        logger.info(f"[SIMPLE TEST] Inserted {batch_size} events in {insert_duration:.3f} seconds")
+        logger.info(f"[SIMPLE TEST] Inserted {batch_size] events in {insert_duration:.3f] seconds")
         rate = batch_size / insert_duration if insert_duration > 0 else float('inf')
-        logger.info(f"[SIMPLE TEST] Insert rate: {rate:.0f} events/second")
+        logger.info(f"[SIMPLE TEST] Insert rate: {rate:.0f] events/second")
 
     async def _verify_batch_insertion(self, client, expected_count):
         """Verify batch insertion was successful"""
         from netra_backend.app.db.clickhouse import MockClickHouseDatabase
         
         if isinstance(client, MockClickHouseDatabase):
-            logger.info(f"[SIMPLE TEST] Mock batch insertion test completed with {expected_count} events")
+            logger.info(f"[SIMPLE TEST] Mock batch insertion test completed with {expected_count] events")
             return
         
         # For real clients (not expected in this simplified test)
@@ -126,7 +129,7 @@ class TestClickHousePerformanceSimple:
         await client.insert_data("test_table", [[1, 2, 3]], column_names=['a', 'b', 'c'])
         
         # Batch insert
-        await client.batch_insert("test_table", [{"a": 1, "b": 2}])
+        await client.batch_insert("test_table", [{"a": 1, "b": 2]])
         
         # Cleanup
         await client.cleanup()

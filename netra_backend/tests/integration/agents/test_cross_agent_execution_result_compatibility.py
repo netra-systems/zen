@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration tests for cross-agent ExecutionResult compatibility.
 
@@ -6,21 +8,21 @@ shared, processed, and handled across different agent types after the
 ExecutionStatus consolidation regression (commit e32a97b31).
 
 Tests cover:
-1. ExecutionResult sharing between triage and other agents
+    1. ExecutionResult sharing between triage and other agents
 2. Status consistency across agent boundaries  
 3. Compatibility property usage in multi-agent workflows
 4. Serialization/deserialization across agent communications
 5. WebSocket message handling with ExecutionResult
 
 Prevents regressions where ExecutionResult changes break cross-agent communication.
-"""
+""""
 
 import pytest
 import json
 import asyncio
 from typing import Dict, Any, List
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -38,32 +40,29 @@ from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock LLM manager for cross-agent testing."""
-    pass
     mock = Mock(spec=LLMManager)
-    mock.ask_llm = AsyncNone  # TODO: Use real service instance
+    mock.ask_llm = AsyncMock()  # TODO: Use real service instance
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Use regular LLM"))
     return mock
 
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock tool dispatcher."""
-    pass
     return Mock(spec=ToolDispatcher)
 
 
 @pytest.fixture
- def real_redis_manager():
+def real_redis_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock Redis manager."""
-    pass
     mock = Mock(spec=RedisManager)
     mock.get = AsyncMock(return_value=None)
     mock.set = AsyncMock(return_value=True)
@@ -75,7 +74,6 @@ def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a TriageSubAgent instance."""
-    pass
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
 
@@ -84,7 +82,6 @@ def reporting_agent(mock_llm_manager, mock_tool_dispatcher):
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a ReportingSubAgent instance."""
-    pass
     return ReportingSubAgent(mock_llm_manager, mock_tool_dispatcher)
 
 
@@ -93,18 +90,17 @@ def agent_state_with_triage():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a state that has been processed by triage agent."""
-    pass
     state = DeepAgentState(
-        user_request="Analyze my AI infrastructure costs and provide optimization recommendations"
+    user_request="Analyze my AI infrastructure costs and provide optimization recommendations"
     )
     
     # Simulate triage result
     state.triage_result = TriageResult(
-        category="Cost Optimization",
-        sub_category="Infrastructure Analysis",
-        priority=Priority.HIGH,
-        complexity=Complexity.MEDIUM,
-        confidence_score=0.88
+    category="Cost Optimization",
+    sub_category="Infrastructure Analysis",
+    priority=Priority.HIGH,
+    complexity=Complexity.MEDIUM,
+    confidence_score=0.88
     )
     
     return state
@@ -195,7 +191,6 @@ class TestCrossAgentExecutionResultSharing:
     
     def test_execution_result_compatibility_properties_across_agents(self):
         """Test compatibility properties work consistently across agent types."""
-    pass
         # Test data and error scenarios
         success_data = {"analysis": "complete", "score": 0.95}
         error_message = "Agent processing failed"
@@ -295,7 +290,6 @@ class TestExecutionResultSerialization:
     
     def test_execution_result_websocket_message_compatibility(self):
         """Test ExecutionResult compatibility with WebSocket message formats."""
-    pass
         # Create ExecutionResult as triage agent would
         triage_result = ExecutionResult(
             status=ExecutionStatus.COMPLETED,
@@ -418,7 +412,6 @@ class TestMultiAgentWorkflowCompatibility:
         # Simulate workflow coordinator handling error
         def handle_agent_error(result: ExecutionResult) -> Dict[str, Any]:
             """Simulate error handling in multi-agent workflow."""
-    pass
             return {
                 "agent_failed": True,
                 "error_details": {
@@ -527,7 +520,6 @@ class TestExecutionResultBackwardCompatibility:
         # Simulate legacy code patterns that might exist
         def legacy_result_processor(agent_result):
             """Simulate legacy code that processes agent results."""
-    pass
             # Legacy pattern 1: Check success by status value
             is_successful = str(agent_result.status) == "completed"
             

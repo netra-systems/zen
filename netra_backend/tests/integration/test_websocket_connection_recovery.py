@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 WebSocket Connection Recovery Integration Tests
 
@@ -12,7 +14,7 @@ and multi-client recovery coordination. Core connectivity tests for business con
 
 COVERAGE TARGET: 100% for basic reconnection functionality
 All functions ≤8 lines per CLAUDE.md requirements.
-"""
+""""
 
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
@@ -47,23 +49,21 @@ class TestWebSocketBasicReconnection:
     """Basic WebSocket reconnection functionality tests."""
     
     @pytest.fixture
-
     async def recovery_setup(self):
 
         """Setup for basic reconnection tests."""
 
         return await setup_test_manager_with_helper()
     
-    @pytest.fixture
-
-    async def reconnection_config(self):
+        @pytest.fixture
+        async def reconnection_config(self):
 
         """Setup reconnection configuration for testing."""
 
         return create_standard_reconnection_config()
     
-    @pytest.mark.asyncio
-    async def test_basic_reconnection_cycle(self, recovery_setup):
+        @pytest.mark.asyncio
+        async def test_basic_reconnection_cycle(self, recovery_setup):
 
         """Test basic WebSocket reconnection cycle with telemetry tracking."""
 
@@ -85,7 +85,7 @@ class TestWebSocketBasicReconnection:
 
         await self._test_successful_reconnection(manager, user_id)
     
-    async def _establish_initial_connection(self, manager: WebSocketManager, user_id: str) -> MockWebSocket:
+        async def _establish_initial_connection(self, manager: WebSocketManager, user_id: str) -> MockWebSocket:
 
         """Establish initial WebSocket connection."""
 
@@ -97,9 +97,9 @@ class TestWebSocketBasicReconnection:
 
         return websocket
     
-    async def _simulate_and_verify_disconnection(self, manager: WebSocketManager, 
+        async def _simulate_and_verify_disconnection(self, manager: WebSocketManager, 
 
-                                               websocket: MockWebSocket, user_id: str) -> None:
+        websocket: MockWebSocket, user_id: str) -> None:
 
         """Simulate disconnection and verify tracking."""
 
@@ -109,7 +109,7 @@ class TestWebSocketBasicReconnection:
 
         assert manager.telemetry["connections_closed"] > 0, "Disconnection should be tracked"
     
-    async def _test_successful_reconnection(self, manager: WebSocketManager, user_id: str) -> None:
+        async def _test_successful_reconnection(self, manager: WebSocketManager, user_id: str) -> None:
 
         """Test successful reconnection and verify tracking."""
 
@@ -123,8 +123,8 @@ class TestWebSocketBasicReconnection:
 
         assert manager.telemetry["connections_opened"] >= 2, "Reconnection should be tracked"
     
-    @pytest.mark.asyncio
-    async def test_connection_state_preservation(self, recovery_setup):
+        @pytest.mark.asyncio
+        async def test_connection_state_preservation(self, recovery_setup):
 
         """Test WebSocket connection state preservation during reconnection."""
 
@@ -146,9 +146,9 @@ class TestWebSocketBasicReconnection:
 
         self._assert_state_preservation_metrics(initial_state, preserved_state)
     
-    async def _establish_connection_with_state(self, manager: WebSocketManager, 
+        async def _establish_connection_with_state(self, manager: WebSocketManager, 
 
-                                             helper: StateRecoveryTestHelper, user_id: str) -> dict:
+        helper: StateRecoveryTestHelper, user_id: str) -> dict:
 
         """Establish connection and build session state."""
 
@@ -162,13 +162,13 @@ class TestWebSocketBasicReconnection:
 
         for message in state_messages:
 
-            await manager.send_message_to_user(user_id, message)
+        await manager.send_message_to_user(user_id, message)
         
         return {"conn_info": conn_info, "websocket": websocket, "telemetry": manager.telemetry.copy()}
     
-    async def _disconnect_and_verify_preservation(self, manager: WebSocketManager,
+        async def _disconnect_and_verify_preservation(self, manager: WebSocketManager,
 
-                                                user_id: str, initial_state: dict) -> dict:
+        user_id: str, initial_state: dict) -> dict:
 
         """Simulate disconnection and verify state preservation."""
 
@@ -180,7 +180,7 @@ class TestWebSocketBasicReconnection:
 
         return {"telemetry": manager.telemetry.copy(), "pending_msgs": len(manager.pending_messages)}
     
-    def _assert_state_preservation_metrics(self, initial: dict, preserved: dict) -> None:
+        def _assert_state_preservation_metrics(self, initial: dict, preserved: dict) -> None:
 
         """Assert that critical state preservation metrics are valid."""
 
@@ -199,7 +199,7 @@ class TestWebSocketMultiClientRecovery:
 
         manager = WebSocketManager()
 
-        client_ids = [f"multi_client_{i}" for i in range(3)]
+        client_ids = [f"multi_client_{i]" for i in range(3)]
         
         # Establish multiple connections
 
@@ -217,7 +217,7 @@ class TestWebSocketMultiClientRecovery:
 
                                            client_ids: list) -> dict:
 
-        """Establish multiple client connections."""
+                                               """Establish multiple client connections."""
 
         websockets = {}
 
@@ -235,7 +235,7 @@ class TestWebSocketMultiClientRecovery:
 
                                          websockets: dict, client_ids: list) -> None:
 
-        """Simulate disconnection of all clients."""
+                                             """Simulate disconnection of all clients."""
 
         for client_id, websocket in websockets.items():
 
@@ -341,7 +341,7 @@ class TestWebSocketReconnectionWithStateSync:
 
                                                      user_id: str) -> dict:
 
-        """Establish connection with comprehensive session state."""
+                                                         """Establish connection with comprehensive session state."""
 
         websocket = MockWebSocket(user_id)
 
@@ -365,7 +365,7 @@ class TestWebSocketReconnectionWithStateSync:
 
                                                   user_id: str, initial_state: dict) -> None:
 
-        """Simulate disconnection for state sync testing."""
+                                                      """Simulate disconnection for state sync testing."""
 
         websocket = initial_state["websocket"]
 

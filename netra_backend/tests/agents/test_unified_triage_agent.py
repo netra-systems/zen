@@ -1,19 +1,21 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Comprehensive tests for UnifiedTriageAgent - SSOT Implementation
 
 Tests verify:
-1. Correct execution order (MUST RUN FIRST)
+    1. Correct execution order (MUST RUN FIRST)
 2. Factory pattern for user isolation
 3. WebSocket event emissions
 4. Metadata SSOT methods
 5. All critical triage logic preserved
-"""
+""""
 
 import asyncio
 import json
 import pytest
 from typing import Dict, Any
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -40,42 +42,39 @@ logger = central_logger.get_logger(__name__)
 # ============================================================================
 
 @pytest.fixture
- def real_llm_manager():
+def real_llm_manager():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock LLM manager"""
-    pass
     manager = manager_instance  # Initialize appropriate service
-    manager.generate_structured_response = AsyncNone  # TODO: Use real service instance
-    manager.generate_response = AsyncNone  # TODO: Use real service instance
+    manager.generate_structured_response = AsyncMock()  # TODO: Use real service instance
+    manager.generate_response = AsyncMock()  # TODO: Use real service instance
     return manager
 
 
 @pytest.fixture
- def real_tool_dispatcher():
+def real_tool_dispatcher():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock tool dispatcher"""
-    pass
     dispatcher = dispatcher_instance  # Initialize appropriate service
-    dispatcher.execute_tool = AsyncNone  # TODO: Use real service instance
+    dispatcher.execute_tool = AsyncMock()  # TODO: Use real service instance
     dispatcher.has_websocket_support = True
     return dispatcher
 
 
 @pytest.fixture
- def real_websocket_bridge():
+def real_websocket_bridge():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock WebSocket bridge"""
-    pass
     bridge = bridge_instance  # Initialize appropriate service
-    bridge.notify_agent_started = AsyncNone  # TODO: Use real service instance
-    bridge.notify_agent_completed = AsyncNone  # TODO: Use real service instance
-    bridge.notify_agent_thinking = AsyncNone  # TODO: Use real service instance
-    bridge.notify_agent_error = AsyncNone  # TODO: Use real service instance
-    bridge.notify_tool_executing = AsyncNone  # TODO: Use real service instance
-    bridge.notify_tool_completed = AsyncNone  # TODO: Use real service instance
+    bridge.notify_agent_started = AsyncMock()  # TODO: Use real service instance
+    bridge.notify_agent_completed = AsyncMock()  # TODO: Use real service instance
+    bridge.notify_agent_thinking = AsyncMock()  # TODO: Use real service instance
+    bridge.notify_agent_error = AsyncMock()  # TODO: Use real service instance
+    bridge.notify_tool_executing = AsyncMock()  # TODO: Use real service instance
+    bridge.notify_tool_completed = AsyncMock()  # TODO: Use real service instance
     return bridge
 
 
@@ -84,13 +83,12 @@ def user_context():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create test user execution context"""
-    pass
     return UserExecutionContext(
-        user_id="test_user_123",
-        thread_id="thread_789",
-        run_id="run_abc",
-        request_id="req_456",
-        websocket_connection_id="ws_conn_123"
+    user_id="test_user_123",
+    thread_id="thread_789",
+    run_id="run_abc",
+    request_id="req_456",
+    websocket_connection_id="ws_conn_123"
     )
 
 
@@ -99,13 +97,11 @@ def test_state():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create test execution state"""
-    pass
     class TestState:
-        def __init__(self):
-    pass
-            self.original_request = "Optimize my GPT-4 costs for the last 30 days"
-            self.context = {}
-            self.metadata = {}
+    def __init__(self):
+    self.original_request = "Optimize my GPT-4 costs for the last 30 days"
+    self.context = {}
+    self.metadata = {}
     return TestState()
 
 
@@ -141,8 +137,7 @@ class TestUnifiedTriageAgentFactory:
         
     def test_factory_sets_websocket_bridge(self, mock_llm_manager, mock_tool_dispatcher, 
                                           mock_websocket_bridge, user_context):
-        """Test that factory properly sets WebSocket bridge"""
-    pass
+                                              """Test that factory properly sets WebSocket bridge"""
         agent = UnifiedTriageAgentFactory.create_for_context(
             user_context, mock_llm_manager, mock_tool_dispatcher, mock_websocket_bridge
         )
@@ -170,8 +165,7 @@ class TestExecutionOrder:
     @pytest.mark.asyncio
     async def test_triage_determines_next_agents(self, mock_llm_manager, mock_tool_dispatcher, 
                                                  user_context, test_state):
-        """Test that triage correctly determines which agents run next"""
-    pass
+                                                     """Test that triage correctly determines which agents run next"""
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         
         # Mock LLM to await asyncio.sleep(0)
@@ -206,7 +200,7 @@ class TestWebSocketEvents:
     @pytest.mark.asyncio
     async def test_websocket_events_emitted(self, mock_llm_manager, mock_tool_dispatcher,
                                            mock_websocket_bridge, user_context, test_state):
-        """Test that all critical WebSocket events are emitted during execution"""
+                                               """Test that all critical WebSocket events are emitted during execution"""
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         agent.set_websocket_bridge(mock_websocket_bridge)
         
@@ -241,7 +235,7 @@ class TestWebSocketEvents:
     @pytest.mark.asyncio
     async def test_websocket_error_event(self, mock_llm_manager, mock_tool_dispatcher,
                                         mock_websocket_bridge, user_context):
-        """Test that error events are emitted on failure"""
+                                            """Test that error events are emitted on failure"""
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         agent.set_websocket_bridge(mock_websocket_bridge)
         
@@ -266,7 +260,7 @@ class TestMetadataSSoT:
     @pytest.mark.asyncio
     async def test_metadata_uses_ssot_methods(self, mock_llm_manager, mock_tool_dispatcher,
                                              user_context, test_state):
-        """Test that metadata is stored using BaseAgent SSOT methods"""
+                                                 """Test that metadata is stored using BaseAgent SSOT methods"""
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         
         # Mock LLM response
@@ -337,7 +331,6 @@ class TestTriageLogicPreservation:
     
     def test_entity_extraction(self, mock_llm_manager, mock_tool_dispatcher, user_context):
         """Test entity extraction logic is preserved"""
-    pass
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         
         text = "Optimize GPT-4 costs for the last 30 days with 95% accuracy threshold"
@@ -372,7 +365,6 @@ class TestTriageLogicPreservation:
     
     def test_fallback_categorization(self, mock_llm_manager, mock_tool_dispatcher, user_context):
         """Test fallback categorization when LLM fails"""
-    pass
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         
         # Test fallback categories
@@ -432,7 +424,7 @@ class TestMultiUserIsolation:
     @pytest.mark.asyncio
     async def test_concurrent_user_isolation(self, mock_llm_manager, mock_tool_dispatcher,
                                             mock_websocket_bridge):
-        """Test that concurrent users don't interfere with each other"""
+                                                """Test that concurrent users don't interfere with each other"""
         # Create multiple user contexts
         users = [
             UserExecutionContext(f"user_{i}", f"req_{i}", f"thread_{i}")
@@ -451,7 +443,7 @@ class TestMultiUserIsolation:
         states = []
         for i in range(5):
             state = state_instance  # Initialize appropriate service
-            state.original_request = f"User {i} request about {['costs', 'performance', 'models'][i % 3]}"
+            state.original_request = f"User {i] request about {['costs', 'performance', 'models'][i % 3]]"
             states.append(state)
         
         # Mock LLM to await asyncio.sleep(0)
@@ -468,7 +460,7 @@ class TestMultiUserIsolation:
         
         # Verify each got their own result
         for i, result in enumerate(results):
-            assert result["category"] == f"Category_{i}"
+            assert result["category"] == f"Category_{i]"
             assert result["confidence_score"] == 0.5 + i * 0.1
         
         # Verify no cross-contamination of contexts
@@ -486,12 +478,11 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_execution_timeout(self, mock_llm_manager, mock_tool_dispatcher, 
                                     user_context, test_state):
-        """Test that triage respects timeout configuration"""
+                                        """Test that triage respects timeout configuration"""
         agent = UnifiedTriageAgent(mock_llm_manager, mock_tool_dispatcher, user_context)
         
         # Mock LLM to take too long
         async def slow_response(*args, **kwargs):
-    pass
             await asyncio.sleep(100)  # Simulate slow response
             await asyncio.sleep(0)
     return TriageResult()
@@ -542,7 +533,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_full_execution_flow(self, mock_llm_manager, mock_tool_dispatcher,
                                       mock_websocket_bridge, user_context):
-        """Test complete execution flow from request to result"""
+                                          """Test complete execution flow from request to result"""
         # Setup
         agent = UnifiedTriageAgentFactory.create_for_context(
             user_context, mock_llm_manager, mock_tool_dispatcher, mock_websocket_bridge

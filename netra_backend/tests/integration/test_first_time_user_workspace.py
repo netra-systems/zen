@@ -1,12 +1,14 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 First-time user workspace and profile management integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Early → Mid (User engagement and personalization)
+    1. Segment: Early → Mid (User engagement and personalization)
 2. Business Goal: Protect $35K MRR by enabling API access and personalization
 3. Value Impact: Validates profile setup and programmatic access capabilities
 4. Strategic Impact: Foundation for premium feature adoption
-"""
+""""
 
 import sys
 from pathlib import Path

@@ -2,17 +2,17 @@
 Authentication Audit Integration Tests
 
 BVJ:
-- Segment: Enterprise ($200K+ MRR)
+    - Segment: Enterprise ($200K+ MRR)
 - Business Goal: Compliance reporting protecting $200K+ MRR
 - Value Impact: Critical SOC2 compliance - tracks all authentication attempts
 - Revenue Impact: Protects and enables $200K+ enterprise revenue stream
 
 REQUIREMENTS:
-- Authentication event capture for all login attempts
+    - Authentication event capture for all login attempts
 - Comprehensive audit logging with metadata
 - Tamper-proof storage validation
 - Authentication event completeness verification
-"""
+""""
 
 import sys
 from pathlib import Path

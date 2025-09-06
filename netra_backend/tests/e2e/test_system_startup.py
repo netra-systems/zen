@@ -1,31 +1,33 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 System Startup E2E Tests - Complete Multi-Service Validation
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-- Segment: All customer tiers (Free → Enterprise)
+    - Segment: All customer tiers (Free → Enterprise)
 - Business Goal: System reliability and availability
 - Value Impact: Prevents service downtime that could cost $30K+ MRR
 - Strategic Impact: Platform stability is core competitive advantage
 
 Tests the complete startup sequence of all microservices:
-1. Main Backend (/app) - Core application logic  
+    1. Main Backend (/app) - Core application logic  
 2. Auth Service (/auth_service) - Authentication microservice
 3. Frontend (/frontend) - User interface
 
 COVERAGE:
-- Service startup orchestration
+    - Service startup orchestration
 - Health endpoint validation
 - Database connectivity verification
 - Service discovery and port allocation
 - Error handling and recovery
-"""
+""""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -121,83 +123,82 @@ class TestSystemStartup:
     def launcher_config(self) -> LauncherConfig:
         """Create test launcher configuration."""
         return LauncherConfig(
-            dynamic_ports=True,
-            parallel_startup=True,
-            load_secrets=False,
-            no_browser=True,
-            non_interactive=True,
-            startup_mode="minimal"
+        dynamic_ports=True,
+        parallel_startup=True,
+        load_secrets=False,
+        no_browser=True,
+        non_interactive=True,
+        startup_mode="minimal"
         )
     
-    @pytest.fixture
-    def expected_services(self) -> List[ServiceInfo]:
+        @pytest.fixture
+        def expected_services(self) -> List[ServiceInfo]:
         """Define expected services for startup validation."""
         return [
-            ServiceInfo("backend", 8000, "/health"),
-            ServiceInfo("auth_service", 8001, "/health"),  
-            ServiceInfo("frontend", 3000, "/api/health")
+        ServiceInfo("backend", 8000, "/health"),
+        ServiceInfo("auth_service", 8001, "/health"),  
+        ServiceInfo("frontend", 3000, "/api/health")
         ]
     
-    @dev_and_staging  # E2E test requiring real services
-    @env_requires(services=["postgres", "redis"], features=["service_discovery"])
-    @pytest.mark.asyncio
-    async def test_dev_launcher_starts_all_services(self, launcher_config):
+        @dev_and_staging  # E2E test requiring real services
+        @env_requires(services=["postgres", "redis"], features=["service_discovery"])
+        @pytest.mark.asyncio
+        async def test_dev_launcher_starts_all_services(self, launcher_config):
         """Test that dev launcher starts all required services."""
         start_time = time.time()
         launcher = None
         
         try:
-            launcher = DevLauncher(launcher_config)
-            await launcher.start()
+        launcher = DevLauncher(launcher_config)
+        await launcher.start()
             
-            # Verify launcher started successfully
-            assert launcher is not None
-            assert not launcher._shutting_down
+        # Verify launcher started successfully
+        assert launcher is not None
+        assert not launcher._shutting_down
             
-            # Check startup time is reasonable
-            startup_duration = time.time() - start_time
-            assert startup_duration < 60  # Max 60 seconds
+        # Check startup time is reasonable
+        startup_duration = time.time() - start_time
+        assert startup_duration < 60  # Max 60 seconds
             
         finally:
-            if launcher:
-                await launcher.shutdown()
+        if launcher:
+        await launcher.shutdown()
     
-    @pytest.mark.asyncio
-    async def test_service_health_endpoints_respond(self, expected_services):
+        @pytest.mark.asyncio
+        async def test_service_health_endpoints_respond(self, expected_services):
         """Test all service health endpoints are accessible."""
         timeout = 30
         start_time = time.time()
         
         for service in expected_services:
-            await self._wait_for_service_health(service, timeout)
+        await self._wait_for_service_health(service, timeout)
             
-            # Verify elapsed time is reasonable
-            elapsed = time.time() - start_time
-            assert elapsed < timeout
+        # Verify elapsed time is reasonable
+        elapsed = time.time() - start_time
+        assert elapsed < timeout
     
-    async def _wait_for_service_health(self, service: ServiceInfo, timeout: int):
+        async def _wait_for_service_health(self, service: ServiceInfo, timeout: int):
         """Wait for service health endpoint to be ready."""
         end_time = time.time() + timeout
         
         while time.time() < end_time:
-            try:
-                async with httpx.AsyncClient() as client:
-                    response = await client.get(service.health_url, timeout=5)
-                    if response.status_code == 200:
-                        return
-            except Exception:
-                pass
+        try:
+        async with httpx.AsyncClient() as client:
+        response = await client.get(service.health_url, timeout=5)
+        if response.status_code == 200:
+        return
+        except Exception:
             
-            await asyncio.sleep(1)
+        await asyncio.sleep(1)
         
         pytest.fail(f"Service {service.name} health check failed after {timeout}s")
     
-    @pytest.mark.asyncio  
-    async def test_database_connections_established(self):
+        @pytest.mark.asyncio  
+        async def test_database_connections_established(self):
         """Test database connections are properly established."""
         from netra_backend.app.db.client import (
-            get_clickhouse_client,
-            get_db_client,
+        get_clickhouse_client,
+        get_db_client,
         )
         
         # Test PostgreSQL connection
@@ -208,8 +209,8 @@ class TestSystemStartup:
         clickhouse_client = await get_clickhouse_client()
         assert clickhouse_client is not None
     
-    @pytest.mark.asyncio
-    async def test_service_discovery_works(self, launcher_config):
+        @pytest.mark.asyncio
+        async def test_service_discovery_works(self, launcher_config):
         """Test service discovery properly detects running services."""
         project_root = Path.cwd()
         discovery = ServiceDiscovery(project_root)
@@ -222,111 +223,111 @@ class TestSystemStartup:
         assert "auth_service" in service_names
         assert "frontend" in service_names
     
-    @pytest.mark.asyncio
-    async def test_health_monitoring_active(self):
+        @pytest.mark.asyncio
+        async def test_health_monitoring_active(self):
         """Test health monitoring system is properly active."""
         health_monitor = HealthMonitor(check_interval=5)
         health_monitor.start()  # This is not async
         
         try:
-            # Verify health monitor is running
-            assert health_monitor.running
+        # Verify health monitor is running
+        assert health_monitor.running
             
-            # Wait for at least one health check cycle
-            await asyncio.sleep(6)
+        # Wait for at least one health check cycle
+        await asyncio.sleep(6)
             
-            # Verify health status is available
-            health_status = health_monitor.get_cross_service_health_status()
-            assert health_status is not None
+        # Verify health status is available
+        health_status = health_monitor.get_cross_service_health_status()
+        assert health_status is not None
             
         finally:
-            health_monitor.stop()
+        health_monitor.stop()
     
-    @pytest.mark.asyncio
-    async def test_port_allocation_succeeds(self, launcher_config):
+        @pytest.mark.asyncio
+        async def test_port_allocation_succeeds(self, launcher_config):
         """Test dynamic port allocation works correctly."""
         if not launcher_config.dynamic_ports:
-            pytest.skip("Dynamic ports disabled")
+        pytest.skip("Dynamic ports disabled")
         
         # Start launcher and verify ports are allocated
         launcher = DevLauncher(launcher_config)
         
         try:
-            await launcher.start()
+        await launcher.start()
             
-            # Verify ports were allocated and services started
-            allocated_ports = launcher.process_manager.get_allocated_ports()
-            assert len(allocated_ports) >= 3  # Backend, auth, frontend
+        # Verify ports were allocated and services started
+        allocated_ports = launcher.process_manager.get_allocated_ports()
+        assert len(allocated_ports) >= 3  # Backend, auth, frontend
             
-            # Verify ports are actually in use
-            for port in allocated_ports.values():
-                assert self._is_port_in_use(port)
+        # Verify ports are actually in use
+        for port in allocated_ports.values():
+        assert self._is_port_in_use(port)
                 
         finally:
-            await launcher.shutdown()
+        await launcher.shutdown()
     
-    def _is_port_in_use(self, port: int) -> bool:
+        def _is_port_in_use(self, port: int) -> bool:
         """Check if a port is currently in use."""
         for conn in psutil.net_connections():
-            if conn.laddr.port == port and conn.status == "LISTEN":
-                return True
+        if conn.laddr.port == port and conn.status == "LISTEN":
+        return True
         return False
     
-    @pytest.mark.asyncio
-    async def test_startup_error_handling(self, launcher_config):
+        @pytest.mark.asyncio
+        async def test_startup_error_handling(self, launcher_config):
         """Test startup error handling and recovery."""
         launcher_config.backend_port = 1  # Invalid port to trigger error
         
         launcher = DevLauncher(launcher_config)
         
         try:
-            # Should handle error gracefully
-            await launcher.start()
+        # Should handle error gracefully
+        await launcher.start()
             
-            # Verify error was handled
-            assert launcher.startup_errors is not None
-            assert len(launcher.startup_errors) > 0
+        # Verify error was handled
+        assert launcher.startup_errors is not None
+        assert len(launcher.startup_errors) > 0
             
         finally:
-            await launcher.shutdown()
+        await launcher.shutdown()
     
-    @pytest.mark.asyncio
-    async def test_service_startup_order(self, launcher_config):
+        @pytest.mark.asyncio
+        async def test_service_startup_order(self, launcher_config):
         """Test services start in correct dependency order."""
         start_times = {}
         
         # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator') as mock_coordinator:
-            # Mock: Async component isolation for testing without real async operations
-            mock_coordinator.return_value.start_service = AsyncMock(
-                side_effect=lambda name: start_times.update({name: time.time()})
-            )
+        # Mock: Async component isolation for testing without real async operations
+        mock_coordinator.return_value.start_service = AsyncMock(
+        side_effect=lambda name: start_times.update({name: time.time()})
+        )
             
-            launcher = DevLauncher(launcher_config)
-            await launcher.start()
+        launcher = DevLauncher(launcher_config)
+        await launcher.start()
             
-            # Verify backend starts before frontend (dependency)
-            assert "backend" in start_times
-            assert "frontend" in start_times
-            assert start_times["backend"] <= start_times["frontend"]
+        # Verify backend starts before frontend (dependency)
+        assert "backend" in start_times
+        assert "frontend" in start_times
+        assert start_times["backend"] <= start_times["frontend"]
     
-    @pytest.mark.asyncio
-    async def test_graceful_shutdown(self, launcher_config):
+        @pytest.mark.asyncio
+        async def test_graceful_shutdown(self, launcher_config):
         """Test system shuts down gracefully."""
         launcher = DevLauncher(launcher_config)
         
         try:
-            await launcher.start()
-            assert not launcher._shutting_down
+        await launcher.start()
+        assert not launcher._shutting_down
             
         finally:
-            # Test graceful shutdown
-            await launcher.shutdown()
-            assert launcher._shutting_down
+        # Test graceful shutdown
+        await launcher.shutdown()
+        assert launcher._shutting_down
             
-            # Verify processes are cleaned up
-            remaining_processes = launcher.process_manager.get_running_processes()
-            assert len(remaining_processes) == 0
+        # Verify processes are cleaned up
+        remaining_processes = launcher.process_manager.get_running_processes()
+        assert len(remaining_processes) == 0
 
 class TestStartupPerformance:
     """Startup performance validation tests."""
@@ -379,13 +380,13 @@ class TestStartupRecovery:
             if retry_count < 3:  # Fail first 2 attempts
                 raise Exception("Simulated startup failure")
             # Mock: Generic component isolation for controlled unit testing
-            return AsyncNone  # TODO: Use real service instance
+            return AsyncMock()  # TODO: Use real service instance
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.tests.e2e.test_system_startup.ServiceStartupCoordinator.start_service', 
                   side_effect=mock_start_service):
             
-            launcher = DevLauncher(launcher_config)
+                      launcher = DevLauncher(launcher_config)
             
             try:
                 await launcher.start()
@@ -441,7 +442,7 @@ class TestStartupEnvironment:
         tables_query = """
         SELECT table_name FROM information_schema.tables 
         WHERE table_schema = 'public'
-        """
+        """"
         
         result = await client.fetch(tables_query)
         table_names = [row['table_name'] for row in result]

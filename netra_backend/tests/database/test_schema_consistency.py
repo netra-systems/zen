@@ -2,7 +2,7 @@
 
 Tests to ensure SQLAlchemy models match database migrations.
 Prevents type mismatches and schema drift.
-"""
+""""
 
 import sys
 from pathlib import Path

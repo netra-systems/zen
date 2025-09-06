@@ -1,18 +1,20 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Metric Storage Integration Tests
 
 BVJ:
-- Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
+    - Segment: ALL (Free, Early, Mid, Enterprise) - Core observability functionality
 - Business Goal: Platform Stability - Prevent $35K MRR loss from monitoring blind spots
 - Value Impact: Validates metrics storage ensures data persistence
 - Revenue Impact: Ensures metrics data is reliably stored for analytics and monitoring
 
 REQUIREMENTS:
-- Storage verification ensures data persistence
+    - Storage verification ensures data persistence
 - Storage operations complete within 1 second
 - Data integrity maintained across store/retrieve cycles
 - Storage metadata tracking for operations
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -193,7 +195,7 @@ class TestMetricStorage:
             newest_time = stats["newest_entry"]
             assert before_storage <= newest_time <= after_storage, "Storage timestamp not accurate"
 
-        logger.info(f"Storage verification completed: {stats['total_entries']} entries, {stats['total_size_bytes']} bytes")
+        logger.info(f"Storage verification completed: {stats['total_entries']] entries, {stats['total_size_bytes']] bytes")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Critical Tests for WebSocket Batch Message Reliability.
 
 Tests the mandatory patterns from SPEC/websocket_reliability.xml to ensure
 zero message loss under all failure scenarios.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -41,7 +43,7 @@ class TestNetworkFailureZeroMessageLoss:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
+        self.mock_connection.websocket = AsyncMock()  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
@@ -53,7 +55,7 @@ class TestNetworkFailureZeroMessageLoss:
     async def test_network_failure_during_batch_send_zero_loss(self):
         """Test scenario from websocket_reliability.xml: 100 messages, network failure, zero loss."""
         message_count = 100
-        test_messages = [{"id": i, "data": f"critical_message_{i}"} for i in range(message_count)]
+        test_messages = [{"id": i, "data": f"critical_message_{i]"] for i in range(message_count)]
         
         # Queue all messages
         for msg in test_messages:
@@ -72,7 +74,7 @@ class TestNetworkFailureZeroMessageLoss:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock, side_effect=ConnectionError("Network timeout")):
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # CRITICAL: Verify zero message loss
         remaining_messages = self.batcher._pending_messages["conn1"]
@@ -83,7 +85,7 @@ class TestNetworkFailureZeroMessageLoss:
         assert pending_count == message_count, "Messages not properly reverted to PENDING state"
         
         # Verify message content integrity
-        remaining_ids = {msg.content["id"] for msg in remaining_messages}
+        remaining_ids = {msg.content["id"] for msg in remaining_messages]
         expected_ids = set(range(message_count))
         assert remaining_ids == expected_ids, "Message content corrupted during failure"
     
@@ -100,7 +102,7 @@ class TestNetworkFailureZeroMessageLoss:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                        new_callable=AsyncMock, side_effect=ConnectionResetError("Connection closed")):
-                await self.batcher._flush_batch("conn1")
+                           await self.batcher._flush_batch("conn1")
         
         # Message should still be in queue
         messages = self.batcher._pending_messages["conn1"]
@@ -118,7 +120,7 @@ class TestNetworkFailureZeroMessageLoss:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                        new_callable=AsyncMock, side_effect=Exception(f"Failure {failure_cycle}")):
-                await self.batcher._flush_batch("conn1")
+                           await self.batcher._flush_batch("conn1")
             
             # Message should persist through each failure
             messages = self.batcher._pending_messages["conn1"]
@@ -135,7 +137,7 @@ class TestNetworkFailureZeroMessageLoss:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock, side_effect=Exception("First failure")):
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # Verify message persists
         messages = self.batcher._pending_messages["conn1"]
@@ -146,7 +148,7 @@ class TestNetworkFailureZeroMessageLoss:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock) as mock_send:
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # Message should be removed after successful send
         messages = self.batcher._pending_messages.get("conn1", [])
@@ -167,7 +169,7 @@ class TestTransactionalStateManagement:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
+        self.mock_connection.websocket = AsyncMock()  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
@@ -188,7 +190,7 @@ class TestTransactionalStateManagement:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock, side_effect=Exception("Atomic failure")):
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # All messages should revert to PENDING atomically
         final_messages = self.batcher._pending_messages["conn1"]
@@ -212,7 +214,7 @@ class TestTransactionalStateManagement:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock, side_effect=Exception("Consistency test")):
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # After failed send attempt
         messages_after = self.batcher._pending_messages["conn1"]
@@ -261,7 +263,7 @@ class TestRetryMechanism:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
+        self.mock_connection.websocket = AsyncMock()  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
@@ -278,7 +280,7 @@ class TestRetryMechanism:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.websocket.batch_message_operations.send_batch_to_connection',
                    new_callable=AsyncMock, side_effect=Exception("Retry test 1")):
-            await self.batcher._flush_batch("conn1")
+                       await self.batcher._flush_batch("conn1")
         
         # Check retry count
         msg = self.batcher._pending_messages["conn1"][0]

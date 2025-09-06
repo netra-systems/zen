@@ -1,7 +1,9 @@
+import asyncio
+
 """
 Real ClickHouse Error Handling Tests
 Test error handling and recovery for real ClickHouse connections
-"""
+""""
 
 import sys
 from pathlib import Path

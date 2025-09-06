@@ -1,7 +1,7 @@
 """
 Performance Metrics Extraction Tests
 Test performance metrics extraction from ClickHouse
-"""
+""""
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
@@ -74,7 +74,7 @@ class TestPerformanceMetricsWithClickHouse:
 
         ORDER BY minute DESC
 
-        """
+        """"
         
         # Fix any array syntax issues
 
@@ -154,7 +154,7 @@ class TestPerformanceMetricsWithClickHouse:
 
         ORDER BY avg_cpu DESC
 
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(resource_query)
 
@@ -252,7 +252,7 @@ class TestPerformanceMetricsWithClickHouse:
 
         ORDER BY violation_count DESC
 
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(threshold_query)
 
@@ -314,7 +314,7 @@ class TestPerformanceMetricsWithClickHouse:
 
         WHERE avg_latency > 0 AND avg_cpu > 0 AND avg_memory > 0 AND avg_throughput > 0
 
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(correlation_query)
 
@@ -394,7 +394,7 @@ class TestPerformanceMetricsWithClickHouse:
 
         ORDER BY workload_id
 
-        """
+        """"
         
         is_valid, error = validate_clickhouse_query(baseline_query)
 

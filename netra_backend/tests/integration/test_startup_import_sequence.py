@@ -1,14 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """Integration test for startup import sequence
 
 This test validates that all critical imports work correctly during
 application startup, preventing runtime AttributeError issues.
 
 Root Cause Addressed (from Five Whys):
-- Tests the actual import sequence used during startup
+    - Tests the actual import sequence used during startup
 - No mocks - uses real imports
 - Validates async initialization order
 - Ensures all methods are available when needed
-"""
+""""
 
 import asyncio
 import pytest
@@ -61,8 +63,8 @@ class TestStartupImportSequence:
         await engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_index_optimizer_imports(self):
-        """Test that index optimizers import with all methods available"""
+            async def test_index_optimizer_imports(self):
+                """Test that index optimizers import with all methods available"""
         from netra_backend.app.db.postgres_index_optimizer import PostgreSQLIndexOptimizer
         from netra_backend.app.db.clickhouse_index_optimizer import ClickHouseIndexOptimizer
         
@@ -156,8 +158,8 @@ class TestStartupErrorScenarios:
         await engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_index_optimizer_handles_database_errors(self):
-        """Test that index optimizer handles database errors gracefully"""
+            async def test_index_optimizer_handles_database_errors(self):
+                """Test that index optimizer handles database errors gracefully"""
         from netra_backend.app.db.index_optimizer import DatabaseIndexManager
         
         manager = DatabaseIndexManager()
@@ -222,4 +224,4 @@ async def test_production_like_startup_sequence():
         assert len(startup_steps) == 6
         
     except Exception as e:
-        pytest.fail(f"Startup sequence failed at step {startup_steps[-1] if startup_steps else 'unknown'}: {e}")
+        pytest.fail(f"Startup sequence failed at step {startup_steps[-1] if startup_steps else 'unknown']: {e]")

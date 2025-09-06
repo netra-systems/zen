@@ -6,11 +6,11 @@ Follows CLAUDE.md standards: Real Everything (LLM, Services) E2E > E2E > Integra
 MOCKS ARE FORBIDDEN - Uses real PostgreSQL, ClickHouse, and Redis services.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Stability and Development Velocity 
 - Value Impact: Ensures database integration patterns work end-to-end
 - Strategic Impact: Prevents database-related production failures
-"""
+""""
 
 import asyncio
 import pytest
@@ -242,18 +242,18 @@ class TestDatabaseConnectivityPatterns:
                         test_data TEXT,
                         created_at TIMESTAMP DEFAULT NOW()
                     )
-                """)
+                """)""""
                 
                 # Insert test data
                 await conn.execute("""
                     INSERT INTO test_integration (test_data) 
                     VALUES ('agent_integration_test')
-                """)
+                """)""""
                 
                 # Verify data was inserted
                 result = await conn.fetchval("""
                     SELECT COUNT(*) FROM test_integration
-                """)
+                """)""""
                 assert result == 1
                 
                 # Transaction commits automatically when context exits

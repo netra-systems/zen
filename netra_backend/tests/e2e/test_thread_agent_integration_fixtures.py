@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Thread-Agent Integration Fixtures and Tests"""
 
 import sys
@@ -31,11 +33,10 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.services.thread_service import ThreadService
 
 @pytest.fixture
- def real_supervisor_agent():
+def real_supervisor_agent():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock supervisor agent for testing."""
-    pass
     # Mock: Agent service isolation for testing without LLM agent execution
     agent = Mock(spec=SupervisorAgent)
     # Mock: Async component isolation for testing without real async operations
@@ -50,19 +51,18 @@ from netra_backend.app.services.thread_service import ThreadService
     return agent
 
 @pytest.fixture
- def real_data_sub_agent():
+def real_data_sub_agent():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock data sub-agent for testing."""
-    pass
     # Mock: Agent service isolation for testing without LLM agent execution
     agent = Mock(spec=DataSubAgent)
     # Mock: Async component isolation for testing without real async operations
     agent.analyze_data = AsyncMock(return_value={"analysis": "complete"})
     # Mock: Async component isolation for testing without real async operations
-    agent.generate_insights = AsyncMock(return_value={"insights": ["insight1", "insight2"]})
+    agent.generate_insights = AsyncMock(return_value={"insights": ["insight1", "insight2"]])
     # Mock: Async component isolation for testing without real async operations
-    agent.create_recommendations = AsyncMock(return_value={"recommendations": ["rec1", "rec2"]})
+    agent.create_recommendations = AsyncMock(return_value={"recommendations": ["rec1", "rec2"]])
     # Mock: Generic component isolation for controlled unit testing
     agent.state = state_instance  # Initialize appropriate service
     agent.user_id = "test_user_123"
@@ -73,21 +73,20 @@ def thread_service():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create thread service for testing."""
-    pass
     # Mock: Async component isolation for testing without real async operations
     service = AsyncMock(spec=ThreadService)
     # Mock: Async component isolation for testing without real async operations
     service.create_thread = AsyncMock(return_value={
-        "id": str(uuid.uuid4()),
-        "title": "Test Thread",
-        "created_at": "2025-01-20T10:00:00Z",
-        "status": "active"
+    "id": str(uuid.uuid4()),
+    "title": "Test Thread",
+    "created_at": "2025-01-20T10:00:00Z",
+    "status": "active"
     })
     # Mock: Async component isolation for testing without real async operations
     service.send_message = AsyncMock(return_value={
-        "id": str(uuid.uuid4()),
-        "content": "Test message",
-        "timestamp": "2025-01-20T10:01:00Z"
+    "id": str(uuid.uuid4()),
+    "content": "Test message",
+    "timestamp": "2025-01-20T10:01:00Z"
     })
     # Mock: Async component isolation for testing without real async operations
     service.get_thread_history = AsyncMock(return_value=[])
@@ -102,7 +101,6 @@ def agent_service():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create agent service for testing."""
-    pass
     # Mock: Agent service isolation for testing without LLM agent execution
     service = AsyncMock(spec=AgentService)
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -116,11 +114,10 @@ def agent_service():
     return service
 
 @pytest.fixture
- def real_thread():
+def real_thread():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock thread object for testing."""
-    pass
     # Mock: Component isolation for controlled unit testing
     thread = Mock(spec=Thread)
     thread.id = str(uuid.uuid4())
@@ -132,11 +129,10 @@ def agent_service():
     return thread
 
 @pytest.fixture
- def real_message():
+def real_message():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock message object for testing."""
-    pass
     # Mock: Component isolation for controlled unit testing
     message = Mock(spec=Message)
     message.id = str(uuid.uuid4())
@@ -147,11 +143,10 @@ def agent_service():
     return message
 
 @pytest.fixture
- def real_run():
+def real_run():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock run object for testing."""
-    pass
     # Mock: Component isolation for controlled unit testing
     run = Mock(spec=Run)
     run.id = str(uuid.uuid4())
@@ -162,31 +157,30 @@ def agent_service():
     return run
 
 @pytest.fixture
-@pytest.mark.asyncio
 async def test_session():
     """Create test database session."""
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncNone  # TODO: Use real service instance
+    session.begin = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncNone  # TODO: Use real service instance
+    session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.flush = AsyncNone  # TODO: Use real service instance
+    session.flush = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.refresh = AsyncNone  # TODO: Use real service instance
+    session.refresh = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.close = AsyncNone  # TODO: Use real service instance
+    session.close = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.execute = AsyncNone  # TODO: Use real service instance
+    session.execute = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.scalar = AsyncNone  # TODO: Use real service instance
+    session.scalar = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.add = AsyncNone  # TODO: Use real service instance
+    session.add = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.delete = AsyncNone  # TODO: Use real service instance
+    session.delete = AsyncMock()  # TODO: Use real service instance
     await asyncio.sleep(0)
     return session
 
@@ -212,7 +206,6 @@ class TestThreadAgentIntegrationFixtures:
     @pytest.mark.asyncio
     async def test_mock_data_sub_agent_fixture(self, mock_data_sub_agent):
         """Test mock data sub-agent fixture."""
-    pass
         assert mock_data_sub_agent is not None
         assert hasattr(mock_data_sub_agent, 'analyze_data')
         assert hasattr(mock_data_sub_agent, 'generate_insights')
@@ -238,7 +231,6 @@ class TestThreadAgentIntegrationFixtures:
     @pytest.mark.asyncio
     async def test_agent_service_fixture(self, agent_service):
         """Test agent service fixture."""
-    pass
         assert agent_service is not None
         assert hasattr(agent_service, 'create_agent')
         assert hasattr(agent_service, 'execute_agent')
@@ -271,7 +263,6 @@ class TestThreadAgentIntegrationFixtures:
     @pytest.mark.asyncio
     async def test_test_session_fixture(self, test_session):
         """Test database session fixture."""
-    pass
         assert test_session is not None
         assert hasattr(test_session, 'commit')
         assert hasattr(test_session, 'rollback')
@@ -301,7 +292,6 @@ class TestThreadAgentIntegration:
     @pytest.mark.asyncio
     async def test_agent_delegation_workflow(self, mock_supervisor_agent, mock_data_sub_agent):
         """Test agent delegation workflow."""
-    pass
         # Supervisor processes initial request
         initial_result = await mock_supervisor_agent.process_request("Analyze data")
         assert initial_result["status"] == "success"

@@ -2,7 +2,7 @@
 Comprehensive Redis Manager Resilience Test Suite
 
 This test suite validates all recovery behaviors for Redis Manager including:
-1. Automatic recovery from Redis disconnection
+    1. Automatic recovery from Redis disconnection
 2. Exponential backoff with jitter (1s -> 2s -> 4s -> 8s -> 16s max)
 3. Circuit breaker integration (trips after 5 failures, recovers after 10s)
 4. Graceful degradation during failures
@@ -11,14 +11,14 @@ This test suite validates all recovery behaviors for Redis Manager including:
 7. Edge cases like network partitions, Redis restart, connection timeout
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Stability & Development Velocity
 - Value Impact: Ensures reliable Redis operations with comprehensive failure recovery
 - Strategic Impact: Foundation for resilient caching and session management under all failure conditions
 
 Tests are designed to be difficult and comprehensive, validating all recovery behaviors
 under real failure scenarios.
-"""
+""""
 
 import asyncio
 import pytest
@@ -45,7 +45,7 @@ class MockRedisClient:
     
     def __init__(self, fail_count: int = 0, should_fail: bool = False, 
                  connection_delay: float = 0.0, intermittent_failure: bool = False):
-        self.fail_count = fail_count
+                     self.fail_count = fail_count
         self.should_fail = should_fail
         self.connection_delay = connection_delay
         self.intermittent_failure = intermittent_failure
@@ -267,7 +267,7 @@ def redis_manager():
     yield manager
     # Cleanup
     if hasattr(manager, '_shutdown_event'):
-        manager._shutdown_event.set()
+    manager._shutdown_event.set()
 
 
 @pytest.fixture
@@ -452,7 +452,7 @@ class TestRedisManagerCircuitBreakerIntegration:
             
             # Either circuit is open or we have accumulated significant failures
             failure_count = status["metrics"]["failure_count"]
-            assert circuit_is_open or failure_count >= 5, f"Expected circuit to be open or have 5+ failures, got state: {status['state']}, failures: {failure_count}"
+            assert circuit_is_open or failure_count >= 5, f"Expected circuit to be open or have 5+ failures, got state: {status['state']], failures: {failure_count]"
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_recovery_after_timeout(self, redis_manager, mock_redis_client):

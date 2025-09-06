@@ -1,21 +1,21 @@
-"""API and Database Integration Tests - CLAUDE.md Compliant
+"""API and Database Integration Tests - CLAUDE.md Compliant"""
 
 Real API endpoints with actual database persistence testing.
 No mocks - uses real PostgreSQL, Redis, TestClient with FastAPI.
 
 Business Value Justification (BVJ):
-- Segment: All segments (Core infrastructure) 
+    - Segment: All segments (Core infrastructure) 
 - Business Goal: Data Integrity - Ensure API operations persist correctly
 - Value Impact: Prevents data corruption and API-DB sync issues
 - Strategic Impact: Protects customer data integrity, critical for trust
 
 Real Everything Approach:
-- Real FastAPI TestClient making HTTP requests
+    - Real FastAPI TestClient making HTTP requests
 - Real PostgreSQL database connections
 - Real database transactions and rollbacks
 - Real API error handling and constraint enforcement
 - No mocks or simulated responses
-"""
+""""
 
 import asyncio
 import json
@@ -65,7 +65,7 @@ class RealDatabaseHelper:
                     email = EXCLUDED.email,
                     full_name = EXCLUDED.full_name,
                     is_active = EXCLUDED.is_active
-            """), user_data)
+            """), user_data)""""
     
     async def get_user_by_id(self, user_id: str) -> dict:
         """Get user by ID from database."""
@@ -73,11 +73,11 @@ class RealDatabaseHelper:
             result = await conn.execute(text("""
                 SELECT id, email, full_name, picture, is_active
                 FROM users WHERE id = :user_id
-            """), {"user_id": user_id})
+            """), {"user_id": user_id})""""
             row = result.fetchone()
             if row:
                 return {
-                    "id": row[0],
+                    "id": row[0},
                     "email": row[1], 
                     "full_name": row[2],
                     "picture": row[3],
@@ -116,8 +116,8 @@ class TestApiDatabaseIntegration:
         yield helper
         await helper.cleanup()
     
-    @pytest.fixture
-    def api_client(self):
+        @pytest.fixture
+        def api_client(self):
         """Real FastAPI TestClient for API requests."""
         # Configure environment for real services
         env = get_env()
@@ -125,20 +125,20 @@ class TestApiDatabaseIntegration:
         env.set("USE_REAL_SERVICES", "true", source="test_api_db_integration")
         return TestClient(app)
     
-    @pytest.mark.asyncio
-    async def test_basic_api_to_database_connection(self, api_client, database_helper):
-        """Test basic API to database connectivity without authentication.
+        @pytest.mark.asyncio
+        async def test_basic_api_to_database_connection(self, api_client, database_helper):
+        """Test basic API to database connectivity without authentication."""
         
         Tests that API endpoints can connect to and query the database.
         This is a foundational test for API-database integration.
-        """
+        """"
         # Step 1: Create test user directly in database
         test_user_id = "test-basic-api-db-user"
         await database_helper.create_test_user({
-            "id": test_user_id,
-            "email": "basic-test@example.com",
-            "full_name": "Basic Test User",
-            "is_active": True
+        "id": test_user_id,
+        "email": "basic-test@example.com",
+        "full_name": "Basic Test User",
+        "is_active": True
         })
         
         # Step 2: Verify user exists in database
@@ -156,26 +156,26 @@ class TestApiDatabaseIntegration:
         
         # Step 5: Verify database operations work independently
         await database_helper.update_user_direct(test_user_id, {
-            "full_name": "Updated Basic User"
+        "full_name": "Updated Basic User"
         })
         
         updated_user = await database_helper.get_user_by_id(test_user_id)
         assert updated_user["full_name"] == "Updated Basic User", "Direct database update should work"
 
-    @pytest.mark.asyncio
-    async def test_api_error_handling_with_database_state(self, api_client, database_helper):
-        """Test API error handling maintains database consistency.
+        @pytest.mark.asyncio
+        async def test_api_error_handling_with_database_state(self, api_client, database_helper):
+        """Test API error handling maintains database consistency."""
         
         Tests that when API endpoints encounter errors,
         database state remains consistent and operations are atomic.
-        """
+        """"
         # Step 1: Create test user in database
         test_user_id = "test-error-handling-user"
         await database_helper.create_test_user({
-            "id": test_user_id,
-            "email": "error-test@example.com", 
-            "full_name": "Error Test User",
-            "is_active": True
+        "id": test_user_id,
+        "email": "error-test@example.com", 
+        "full_name": "Error Test User",
+        "is_active": True
         })
         
         # Step 2: Test API endpoint that doesn't exist (should return 404)
@@ -193,51 +193,51 @@ class TestApiDatabaseIntegration:
         
         print(f"API error responses: 404={response.status_code}, POST={invalid_response.status_code}")
 
-    @pytest.mark.asyncio 
-    async def test_concurrent_database_operations_via_api(self, api_client, database_helper):
-        """Test concurrent API requests don't corrupt database state.
+        @pytest.mark.asyncio 
+        async def test_concurrent_database_operations_via_api(self, api_client, database_helper):
+        """Test concurrent API requests don't corrupt database state."""
         
         Tests that multiple simultaneous API requests properly handle
         database connection pooling and maintain data consistency.
-        """
+        """"
         # Step 1: Create multiple test users for concurrent testing
         user_ids = []
         for i in range(3):
-            user_id = f"test-concurrent-user-{i}"
-            user_ids.append(user_id)
-            await database_helper.create_test_user({
-                "id": user_id,
-                "email": f"concurrent-{i}@example.com",
-                "full_name": f"Concurrent User {i}",
-                "is_active": True
-            })
+        user_id = f"test-concurrent-user-{i}"
+        user_ids.append(user_id)
+        await database_helper.create_test_user({
+        "id": user_id,
+        "email": f"concurrent-{i}@example.com",
+        "full_name": f"Concurrent User {i}",
+        "is_active": True
+        })
         
         # Step 2: Define concurrent API operation
         def make_concurrent_request(user_index: int):
-            """Make concurrent API request."""
-            # Test any existing API endpoint that might query database
-            try:
-                health_response = api_client.get("/health")
-                root_response = api_client.get("/")
-                return {
-                    "user_index": user_index,
-                    "health_status": health_response.status_code,
-                    "root_status": root_response.status_code,
-                    "success": True
-                }
-            except Exception as e:
-                return {
-                    "user_index": user_index,
-                    "success": False,
-                    "error": str(e)
-                }
+        """Make concurrent API request."""
+        # Test any existing API endpoint that might query database
+        try:
+        health_response = api_client.get("/health")
+        root_response = api_client.get("/")
+        return {
+        "user_index": user_index,
+        "health_status": health_response.status_code,
+        "root_status": root_response.status_code,
+        "success": True
+        }
+        except Exception as e:
+        return {
+        "user_index": user_index,
+        "success": False,
+        "error": str(e)
+        }
         
         # Step 3: Execute concurrent API requests (synchronous with TestClient)
         import concurrent.futures
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            futures = [executor.submit(make_concurrent_request, i) for i in range(3)]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+        futures = [executor.submit(make_concurrent_request, i) for i in range(3)]
+        results = [future.result() for future in concurrent.futures.as_completed(futures)]
         
         # Step 4: Verify all concurrent requests completed
         assert len(results) == 3, "All concurrent requests should complete"
@@ -246,26 +246,26 @@ class TestApiDatabaseIntegration:
         
         # Step 5: Verify database state remains consistent after concurrent access
         for user_id in user_ids:
-            db_user = await database_helper.get_user_by_id(user_id)
-            assert db_user is not None, f"User {user_id} should still exist after concurrent operations"
-            assert db_user["is_active"] is True, "Users should remain active"
+        db_user = await database_helper.get_user_by_id(user_id)
+        assert db_user is not None, f"User {user_id} should still exist after concurrent operations"
+        assert db_user["is_active"] is True, "Users should remain active"
         
         print(f"Concurrent test: {len(successful_results)}/3 requests successful")
 
-    @pytest.mark.asyncio
-    async def test_database_transaction_consistency_with_api_calls(self, api_client, database_helper):
-        """Test database transaction consistency when accessed through API.
+        @pytest.mark.asyncio
+        async def test_database_transaction_consistency_with_api_calls(self, api_client, database_helper):
+        """Test database transaction consistency when accessed through API."""
         
         Tests that database transactions remain consistent when API calls
         interact with the database, and that isolation is maintained.
-        """
+        """"
         # Step 1: Create test user for transaction testing
         test_user_id = "test-transaction-user"
         await database_helper.create_test_user({
-            "id": test_user_id,
-            "email": "transaction-test@example.com",
-            "full_name": "Transaction Test User", 
-            "is_active": True
+        "id": test_user_id,
+        "email": "transaction-test@example.com",
+        "full_name": "Transaction Test User", 
+        "is_active": True
         })
         
         # Step 2: Verify initial state
@@ -274,7 +274,7 @@ class TestApiDatabaseIntegration:
         
         # Step 3: Update database directly (simulating background process)
         await database_helper.update_user_direct(test_user_id, {
-            "full_name": "Background Updated User"
+        "full_name": "Background Updated User"
         })
         
         # Step 4: Make API call that might query database
@@ -287,7 +287,7 @@ class TestApiDatabaseIntegration:
         
         # Step 6: Test another database operation to ensure connection pool works
         await database_helper.update_user_direct(test_user_id, {
-            "full_name": "Final Transaction User"
+        "full_name": "Final Transaction User"
         })
         
         consistency_user = await database_helper.get_user_by_id(test_user_id)

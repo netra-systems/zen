@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Integration E2E LLM Agent Tests
 State transitions, WebSocket messaging, tool integration, and persistence tests
 Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
 BVJ:
-1. Segment: Growth & Enterprise
+    1. Segment: Growth & Enterprise
 2. Business Goal: Ensure seamless agent integration and state management  
 3. Value Impact: Prevents integration failures that could lose optimization data
 4. Revenue Impact: Maintains data integrity for optimization value capture
-"""
+""""
 
 import sys
 from pathlib import Path

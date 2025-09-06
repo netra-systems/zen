@@ -15,7 +15,7 @@ import asyncio
 import pytest
 from datetime import datetime
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.factories.redis_factory import (
@@ -34,10 +34,8 @@ class TestUserRedisClient:
 
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
         """Create test user execution context."""
-    pass
+        # TODO: Initialize real service
         return UserExecutionContext(
             user_id="test_user_123",
             thread_id="thread_456",

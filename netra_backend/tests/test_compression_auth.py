@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 # Add the parent directory to sys.path to access test_framework
 parent_dir = Path(__file__).parent.parent.parent
@@ -16,7 +17,7 @@ from test_framework.fixtures.compression import CompressionAuthTestHelper
 async def test_authentication_expiry_during_connection():
     """Test authentication expiry during active WebSocket connection."""
     # This is a placeholder test function
-    helper = CompressionAuthTestHelper()
+    helper == CompressionAuthTestHelper()
     result = await helper.test_auth_expiry()
     assert result is not None
 

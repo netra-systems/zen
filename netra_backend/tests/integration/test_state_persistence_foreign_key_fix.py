@@ -1,8 +1,10 @@
+import asyncio
+
 """Integration test for state persistence foreign key fix.
 
 This test verifies that the state persistence service properly auto-creates
 dev users to prevent foreign key violations when saving agent state.
-"""
+""""
 
 import uuid
 from datetime import datetime, timezone
@@ -27,7 +29,7 @@ from test_framework.fixtures.database_fixtures import test_db_session
 async def test_state_persistence_auto_creates_dev_user(test_db_session):
     """Test that dev-temp users are auto-created when saving state."""
     # Create a unique dev user ID
-    dev_user_id = f"dev-temp-{uuid.uuid4().hex[:8]}"
+    dev_user_id = f"dev-temp-{uuid.uuid4().hex[:8]]"
     
     # Create persistence request with dev user
     request = StatePersistenceRequest(
@@ -87,7 +89,7 @@ async def test_state_persistence_handles_existing_user(test_db_session):
     """Test that existing users are not recreated."""
     # Create a user first
     existing_user = User(
-        id=f"existing-dev-{uuid.uuid4().hex[:8]}",
+        id=f"existing-dev-{uuid.uuid4().hex[:8]]",
         email="existing@test.com",
         full_name="Existing User",
         is_active=True,
@@ -131,7 +133,7 @@ async def test_state_persistence_handles_existing_user(test_db_session):
 async def test_state_persistence_auto_creates_test_user(test_db_session):
     """Test that test- prefixed users are also auto-created."""
     # Create a unique test user ID
-    test_user_id = f"test-user-{uuid.uuid4().hex[:8]}"
+    test_user_id = f"test-user-{uuid.uuid4().hex[:8]]"
     
     # Create persistence request with test user
     request = StatePersistenceRequest(
@@ -173,7 +175,7 @@ async def test_state_persistence_auto_creates_test_user(test_db_session):
 async def test_state_persistence_skips_regular_user_creation(test_db_session):
     """Test that regular (non-dev/test) users are NOT auto-created."""
     # Create a regular user ID (doesn't match dev/test pattern)
-    regular_user_id = f"user-{uuid.uuid4().hex[:8]}"
+    regular_user_id = f"user-{uuid.uuid4().hex[:8]]"
     
     # Create persistence request with regular user
     request = StatePersistenceRequest(

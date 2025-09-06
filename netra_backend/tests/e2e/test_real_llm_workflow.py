@@ -3,7 +3,7 @@ Real LLM Agent Workflow Test Suite
 Tests complete agent workflow with real LLM calls, multi-agent coordination,
 quality gate validation, and performance measurement.
 Maximum 300 lines, functions ≤8 lines per CLAUDE.md requirements.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -38,11 +38,11 @@ async def real_llm_workflow_setup(real_agent_setup):
     """Setup real LLM workflow components with performance tracking."""
     setup = real_agent_setup.copy()
     setup.update({
-        'llm_manager': LLMTestManager(),
-        'quality_gate': QualityGateService(),
-        'performance_tracker': _create_performance_tracker(),
-        'user_id': 'test-user-001',
-        'run_id': f'real-llm-run-{int(time.time())}'
+    'llm_manager': LLMTestManager(),
+    'quality_gate': QualityGateService(),
+    'performance_tracker': _create_performance_tracker(),
+    'user_id': 'test-user-001',
+    'run_id': f'real-llm-run-{int(time.time())}'
     })
     yield setup
 
@@ -219,8 +219,8 @@ class TestRealLLMConcurrentWorkflow:
         assert len(successful_results) >= 2, "At least 2/3 tasks should succeed"
         
         for result in successful_results:
-            assert result['success'], f"Task {result['task_id']} should succeed"
-            assert result['duration'] < 30, f"Task {result['task_id']} too slow: {result['duration']}s"
+            assert result['success'], f"Task {result['task_id']] should succeed"
+            assert result['duration'] < 30, f"Task {result['task_id']] too slow: {result['duration']]s"
 
 @pytest.mark.real_llm  
 class TestRealLLMErrorHandling:

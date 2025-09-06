@@ -1,10 +1,12 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Critical regression tests for WebSocket metrics collection.
 
 These tests ensure the WebSocket metrics collection handles edge cases properly, 
 especially when connection stats are missing or malformed.
 
 Business Value: Prevents metrics collection failures from impacting monitoring.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -33,12 +35,12 @@ class TestWebSocketMetricsRegression:
         
         Regression test for: WebSocket metrics failing with KeyError: 'connection_stats'
         This occurred when orchestrator returns success but result lacks the expected key.
-        """
+        """"
         collector = MetricsCollector()
         
         # Mock connection manager that returns result without connection_stats
-        mock_manager = MagicNone  # TODO: Use real service instance
-        mock_orchestrator = AsyncNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
+        mock_orchestrator = AsyncMock()  # TODO: Use real service instance
         
         # Simulate successful result but missing connection_stats key
         mock_result = ExecutionResult(
@@ -53,7 +55,7 @@ class TestWebSocketMetricsRegression:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.monitoring.metrics_collector.get_connection_monitor', 
                   return_value=mock_manager):
-            metrics = await collector._gather_websocket_metrics()
+                      metrics = await collector._gather_websocket_metrics()
             
             # Should return empty metrics, not raise KeyError
             assert isinstance(metrics, WebSocketMetrics)
@@ -65,13 +67,13 @@ class TestWebSocketMetricsRegression:
         """Test that metrics collection handles None result from orchestrator.
         
         Ensures robustness when orchestrator returns success but result is None.
-        """
+        """"
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncNone  # TODO: Use real service instance
+        mock_orchestrator = AsyncMock()  # TODO: Use real service instance
         
         # Simulate successful status but None result
         mock_result = ExecutionResult(
@@ -86,7 +88,7 @@ class TestWebSocketMetricsRegression:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
-            metrics = await collector._gather_websocket_metrics()
+                      metrics = await collector._gather_websocket_metrics()
             
             # Should handle None gracefully
             assert isinstance(metrics, WebSocketMetrics)
@@ -98,13 +100,13 @@ class TestWebSocketMetricsRegression:
         """Test that metrics collection handles failed orchestrator results.
         
         Ensures the system continues to work when orchestrator reports failure.
-        """
+        """"
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncNone  # TODO: Use real service instance
+        mock_orchestrator = AsyncMock()  # TODO: Use real service instance
         
         # Simulate failed result
         mock_result = ExecutionResult(
@@ -119,7 +121,7 @@ class TestWebSocketMetricsRegression:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
-            metrics = await collector._gather_websocket_metrics()
+                      metrics = await collector._gather_websocket_metrics()
             
             # Should return empty metrics on failure
             assert isinstance(metrics, WebSocketMetrics)
@@ -131,13 +133,13 @@ class TestWebSocketMetricsRegression:
         """Test that metrics collection works correctly with valid data.
         
         Positive test case ensuring normal operation continues to work.
-        """
+        """"
         collector = MetricsCollector()
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_orchestrator = AsyncNone  # TODO: Use real service instance
+        mock_orchestrator = AsyncMock()  # TODO: Use real service instance
         
         # Simulate successful result with proper connection_stats
         expected_stats = {
@@ -163,7 +165,7 @@ class TestWebSocketMetricsRegression:
         # Mock: Component isolation for testing without external dependencies
         with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
-            metrics = await collector._gather_websocket_metrics()
+                      metrics = await collector._gather_websocket_metrics()
             
             # Should use the valid stats
             assert isinstance(metrics, WebSocketMetrics)
@@ -174,7 +176,7 @@ class TestWebSocketMetricsRegression:
         """Test that connection manager's _extract_modern_stats is defensive.
         
         Direct test of the fixed method to ensure it handles all edge cases.
-        """
+        """"
         from netra_backend.app.websocket_core import (
     WebSocketManager as ConnectionManager,
         )
@@ -183,7 +185,7 @@ class TestWebSocketMetricsRegression:
         
         # Test with None result
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.success = True
         mock_result.result = None
         stats = manager._extract_modern_stats(mock_result)

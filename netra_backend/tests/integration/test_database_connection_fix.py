@@ -1,7 +1,7 @@
 """
 Test and fix database connection issues.
 This test identifies and fixes database authentication problems.
-"""
+""""
 import pytest
 import os
 from netra_backend.app.config import get_config

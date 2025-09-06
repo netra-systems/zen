@@ -1,6 +1,8 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Thread Context Management E2E Testing
 Tests context preservation, message history, and state isolation.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -48,7 +50,6 @@ class ContextPreservationTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test context preservation across multiple messages."""
-    pass
         messages_data = [
             ("user", "What is optimization?"),
             ("assistant", "Optimization improves performance"),
@@ -90,7 +91,6 @@ class ContextPreservationTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test context state maintains integrity."""
-    pass
         # Create message with metadata
         metadata = {"context_step": 1, "user_intent": "query"}
         msg = await service.create_message(
@@ -117,7 +117,6 @@ class MessageHistoryTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test messages are retrieved in chronological order."""
-    pass
         # Create messages with artificial timestamps
         messages_data = [
             ("user", "First message", 1000),
@@ -157,7 +156,6 @@ class MessageHistoryTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test message history pagination."""
-    pass
         # Create multiple messages
         for i in range(10):
             await service.create_message(
@@ -188,10 +186,9 @@ class StateIsolationTests:
         thread2: Thread, db_session: AsyncSession
     ) -> None:
         """Test isolated state management between threads."""
-    pass
         # Create different state data for each thread
-        state1_data = {"current_step": "analysis", "data_points": [1, 2, 3]}
-        state2_data = {"current_step": "optimization", "data_points": [4, 5, 6]}
+        state1_data = {"current_step": "analysis", "data_points": [1, 2, 3]]
+        state2_data = {"current_step": "optimization", "data_points": [4, 5, 6]]
         
         # Persist states
         await self._persist_thread_states(thread1, thread2, state1_data, state2_data, db_session)
@@ -246,7 +243,6 @@ class ThreadResumeTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test interruption and successful resume."""
-    pass
         # Create initial state
         run_id = f"run_{thread.id}"
         initial_state = {
@@ -322,7 +318,6 @@ class ContextLimitsTests:
         self, service: ThreadService, thread: Thread, db_session: AsyncSession
     ) -> None:
         """Test context size limits are enforced."""
-    pass
         # Create messages that exceed typical limits
         large_messages = []
         for i in range(100):  # Large number of messages
@@ -362,48 +357,46 @@ async def db_session():
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncNone  # TODO: Use real service instance
+    session.begin = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncNone  # TODO: Use real service instance
+    session.commit = AsyncMock()  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncNone  # TODO: Use real service instance
+    session.rollback = AsyncMock()  # TODO: Use real service instance
     try:
-        yield session
+    yield session
     finally:
-        if hasattr(session, "close"):
-            await session.close()
+    if hasattr(session, "close"):
+    await session.close()
 
 @pytest.fixture
- def real_agent_service():
+def real_agent_service():
     """Use real service instance."""
     # TODO: Initialize real service
-    pass
     """Mock agent service for testing."""
     # Mock: Agent service isolation for testing without LLM agent execution
     service = Mock(spec=AgentService)
     # Mock: Generic component isolation for controlled unit testing
-    service.handle_websocket_message = AsyncNone  # TODO: Use real service instance
+    service.handle_websocket_message = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.create_thread = AsyncNone  # TODO: Use real service instance
+    service.create_thread = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.switch_thread = AsyncNone  # TODO: Use real service instance
+    service.switch_thread = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    service.delete_thread = AsyncNone  # TODO: Use real service instance
+    service.delete_thread = AsyncMock()  # TODO: Use real service instance
     await asyncio.sleep(0)
     return service
 
 @pytest.fixture
- def real_state_persistence():
+def real_state_persistence():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock state persistence service."""
-    pass
     # Mock: Generic component isolation for controlled unit testing
     service = service_instance  # Initialize appropriate service
     # Mock: Async component isolation for testing without real async operations
     service.save_agent_state = AsyncMock(return_value=(True, "snapshot_id"))
     # Mock: Generic component isolation for controlled unit testing
-    service.load_agent_state = AsyncNone  # TODO: Use real service instance
+    service.load_agent_state = AsyncMock()  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     service.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return service

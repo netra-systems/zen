@@ -1,14 +1,16 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 E2E Tests for Pre and Post Execution Hooks
 
 Tests pre-execution and post-execution hook functionality:
-- Pre-execution hooks (validation, setup)
+    - Pre-execution hooks (validation, setup)
 - Post-execution hooks (cleanup, logging)
 - Hook execution sequence and state management
 
-All functions ≤8 lines per CLAUDE.md requirements.
-Module ≤300 lines per CLAUDE.md requirements.
-"""
+All functions <=8 lines per CLAUDE.md requirements.
+Module <=300 lines per CLAUDE.md requirements.
+""""
 
 import sys
 from pathlib import Path
@@ -184,7 +186,7 @@ class TestPostExecutionHooks:
         # Mock: Generic component isolation for controlled unit testing
         monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
+        monitoring.record_quality_event = AsyncMock()  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_test_context(self) -> AgentExecutionContext:
@@ -273,7 +275,7 @@ class TestHookExecutionSequence:
         # Mock: Generic component isolation for controlled unit testing
         monitoring = monitoring_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        monitoring.record_quality_event = AsyncNone  # TODO: Use real service instance
+        monitoring.record_quality_event = AsyncMock()  # TODO: Use real service instance
         return QualityHooksManager(quality_gate, monitoring)
     
     def _create_test_context(self) -> AgentExecutionContext:

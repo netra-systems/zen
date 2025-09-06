@@ -1,7 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Tests for TriageSubAgent entity extraction and intent determination
 Refactored to comply with 25-line function limit and 450-line file limit
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -179,7 +181,7 @@ class TestAdvancedToolRecommendation:
         return ExtractedEntities(
             models_mentioned=[LLMModel.GEMINI_2_5_FLASH.value],
             metrics_mentioned=["cost", "latency"],
-            thresholds=[{"type": "cost", "value": 1000, "unit": "USD"}]
+            thresholds=[{"type": "cost", "value": 1000, "unit": "USD"]]
         )
     
     def _assert_tools_properly_ranked(self, tools):

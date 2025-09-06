@@ -1,3 +1,6 @@
+from typing import Dict, List, Optional, Any, Tuple
+from unittest.mock import Mock, patch, MagicMock
+
 """Utilities Tests - Split from test_unified_message_flow.py"""
 
 import sys
@@ -44,7 +47,7 @@ class MessageFlowTestHelper:
     
     def __init__(self):
         self.flow_log: List[Dict[str, Any]] = []
-        self.performance_metrics: Dict[str, float] = {}
+        self.performance_metrics: Dict[str, float] = {]
         self.error_count = 0
 
     def log_step(self, step: str, data: Dict[str, Any]) -> None:
@@ -53,15 +56,15 @@ class MessageFlowTestHelper:
             "step": step,
             "timestamp": time.time(),
             "data": data,
-            "step_id": str(uuid.uuid4())
-        }
+            "step_id": str(uuid.uuid4()),
+}
         self.flow_log.append(entry)
-        logger.info(f"[FLOW TRACKER] {step}: {data}")
+        logger.info(f"[FLOW TRACKER] {step]: {data]")
 
     def start_timer(self, operation: str) -> str:
         """Start performance timer."""
-        timer_id = f"{operation}_{uuid.uuid4().hex[:8]}"
-        self.performance_metrics[f"{timer_id}_start"] = time.time()
+        timer_id = f"{operation]_{uuid.uuid4().hex[:8]]"
+        self.performance_metrics[f"{timer_id]_start"] = time.time()
         return timer_id
 
     def end_timer(self, timer_id: str) -> float:
@@ -84,8 +87,8 @@ class MessageFlowTestHelper:
             "websocket_auth_completed", 
             "message_routed_to_agent_service",
             "agent_processing_completed",
-            "response_delivered_to_frontend"
-        ]
+            "response_delivered_to_frontend",
+]
         
         actual_steps = [entry["step"] for entry in tracker.flow_log]
         for step in expected_steps:
@@ -94,7 +97,7 @@ class MessageFlowTestHelper:
 class TestWebSocketMock(Mock):
     """Extended mock WebSocket for testing."""
     
-    def __init__(self, user_id=None):
+    def __init__(self, user_id = None):
         super().__init__()
         self.user_id = user_id or self._generate_user_id()
         self.sent_messages = []

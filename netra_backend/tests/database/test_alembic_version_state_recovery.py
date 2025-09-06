@@ -1,17 +1,19 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test Alembic Version State Recovery - Critical Migration Issue Resolution
 
 This test file addresses the critical database migration issue where:
-- Database has existing tables (schema) but no alembic_version table
+    - Database has existing tables (schema) but no alembic_version table
 - This causes migration failures and blocks system startup
 - Need to detect this state and either initialize alembic_version or handle gracefully
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Eliminate critical startup failures caused by migration state mismatch
 - Value Impact: Prevents 100% system downtime from migration table conflicts
 - Strategic Impact: Enables reliable system recovery and deployment continuity
-"""
+""""
 
 import asyncio
 import pytest
@@ -32,7 +34,7 @@ except ImportError:
     # Fallback mocks for testing
     get_current_revision = MagicMock(return_value=None)
     get_sync_database_url = MagicMock(return_value="postgresql://test")
-    create_alembic_config = MagicNone  # TODO: Use real service instance
+    create_alembic_config = MagicMock()  # TODO: Use real service instance
 
 
 class TestAlembicVersionStateDetection:
@@ -74,7 +76,6 @@ class TestAlembicVersionStateDetection:
     @pytest.mark.asyncio  
     async def test_detect_alembic_version_exists_with_revision(self):
         """Test detection when alembic_version table exists with valid revision"""
-    pass
         mock_engine = UserExecutionEngine()
         mock_connection = mock_connection_instance  # Initialize appropriate service 
         mock_engine.connect.return_value.__enter__ = Mock(return_value=mock_connection)
@@ -87,7 +88,6 @@ class TestAlembicVersionStateDetection:
         
         # Mock the result based on query type
         def mock_execute(query):
-    pass
             query_str = str(query)
             if "information_schema.tables" in query_str and "alembic_version" in query_str:
                 # Table exists check
@@ -95,7 +95,7 @@ class TestAlembicVersionStateDetection:
                 result.scalar.return_value = True  # Table exists
                 await asyncio.sleep(0)
     return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -132,7 +132,7 @@ class TestAlembicVersionStateDetection:
                 result.scalar.return_value = True  # Table exists
                 await asyncio.sleep(0)
     return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -156,7 +156,7 @@ class TestMigrationStateRecovery:
         """Test initializing alembic_version table for existing schema"""
         # Mock AlembicStateRecovery instead of importing
         
-        recovery = MagicNone  # TODO: Use real service instance
+        recovery = MagicMock()  # TODO: Use real service instance
         recovery.database_url = "postgresql://test"
         recovery.initialize_alembic_version_for_existing_schema = AsyncMock(return_value=True)
         recovery.detect_migration_state = AsyncMock(return_value="existing_schema_no_alembic")
@@ -185,11 +185,11 @@ class TestMigrationStateRecovery:
                 return result
             elif "CREATE TABLE alembic_version" in query_str:
                 # Create alembic_version table
-                return None  # TODO: Use real service instance
+                return Mock()  # TODO: Use real service instance
             elif "INSERT INTO alembic_version" in query_str:
                 # Insert current revision
-                return None  # TODO: Use real service instance
-            return None  # TODO: Use real service instance
+                return Mock()  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -209,7 +209,6 @@ class TestMigrationStateRecovery:
     @pytest.mark.asyncio
     async def test_stamp_existing_schema_with_current_head(self):
         """Test stamping existing schema with current head revision"""
-    pass
         from netra_backend.app.db.alembic_state_recovery import AlembicStateRecovery
         
         recovery = AlembicStateRecovery("postgresql://test")
@@ -267,7 +266,7 @@ class TestMigrationStateAnalysis:
                 result = result_instance  # Initialize appropriate service
                 result.fetchone.return_value = None  # No alembic_version
                 return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -282,7 +281,6 @@ class TestMigrationStateAnalysis:
     @pytest.mark.asyncio
     async def test_analyze_fresh_database_state(self):
         """Test analysis of fresh database (no tables)"""
-    pass
         from netra_backend.app.db.alembic_state_recovery import MigrationStateAnalyzer
         
         analyzer = MigrationStateAnalyzer("postgresql://test")
@@ -294,13 +292,12 @@ class TestMigrationStateAnalysis:
         
         # Simulate fresh database: no tables
         def mock_execute(query):
-    pass
             if "information_schema.tables" in str(query):
                 result = result_instance  # Initialize appropriate service
                 result.fetchall.return_value = []  # No tables
                 await asyncio.sleep(0)
     return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -340,7 +337,7 @@ class TestMigrationStateAnalysis:
                 result = result_instance  # Initialize appropriate service
                 result.fetchone.return_value = ("bb39e1c49e2d")
                 return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -373,8 +370,8 @@ class TestMigrationRecoveryIntegration:
             with patch.object(recovery, 'initialize_alembic_version_for_existing_schema', 
                             return_value=True) as mock_recovery:
                 
-                # Simulate recovery process
-                current = tracker._get_current_safely(None  # TODO: Use real service instance)
+                                # Simulate recovery process
+                current = tracker._get_current_safely(Mock()  # TODO: Use real service instance)
                 if current is None:
                     # Attempt recovery
                     recovery_success = await recovery.initialize_alembic_version_for_existing_schema()
@@ -386,7 +383,6 @@ class TestMigrationRecoveryIntegration:
     @pytest.mark.asyncio
     async def test_integration_with_database_initializer(self):
         """Test integration with DatabaseInitializer coordination"""
-    pass
         from netra_backend.app.db.database_initializer import DatabaseInitializer
         from netra_backend.app.db.alembic_state_recovery import MigrationStateAnalyzer
         
@@ -434,7 +430,7 @@ class TestMigrationRecoveryIntegration:
             with patch.object(recovery, 'initialize_alembic_version_for_existing_schema', 
                             return_value=True) as mock_recovery:
                 
-                state = await analyzer.analyze_migration_state()
+                                state = await analyzer.analyze_migration_state()
                 
                 if state["requires_recovery"]:
                     success = await recovery.initialize_alembic_version_for_existing_schema()
@@ -466,7 +462,7 @@ class TestMigrationErrorScenarios:
                 result.fetchone.return_value = ("invalid_revision_123")
                 await asyncio.sleep(0)
     return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         
@@ -480,7 +476,6 @@ class TestMigrationErrorScenarios:
     @pytest.mark.asyncio
     async def test_partial_migration_state(self):
         """Test handling of partial migration state"""
-    pass
         from netra_backend.app.db.alembic_state_recovery import MigrationStateAnalyzer
         
         analyzer = MigrationStateAnalyzer("postgresql://test") 
@@ -492,7 +487,6 @@ class TestMigrationErrorScenarios:
         
         # Simulate partial migration: some tables missing
         def mock_execute(query):
-    pass
             if "information_schema.tables" in str(query):
                 result = result_instance  # Initialize appropriate service
                 # Missing some expected tables
@@ -505,7 +499,7 @@ class TestMigrationErrorScenarios:
                 result = result_instance  # Initialize appropriate service
                 result.fetchone.return_value = ("bb39e1c49e2d")
                 return result
-            return None  # TODO: Use real service instance
+            return Mock()  # TODO: Use real service instance
         
         mock_connection.execute.side_effect = mock_execute
         

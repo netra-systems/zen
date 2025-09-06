@@ -5,7 +5,7 @@ Test Observability Pipeline
 
 Validates logging, metrics, and distributed tracing
 in the staging environment.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -126,7 +126,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
                     f"{self.staging_url}/api/chat/completions",
                     json={
                         'model': 'gemini-pro',
-                        'messages': [{'role': 'user', 'content': f'Test {i}'}]
+                        'messages': [{'role': 'user', 'content': f'Test {i]']]
                     },
                     headers={'Authorization': 'Bearer test_token'},
                     timeout=10.0

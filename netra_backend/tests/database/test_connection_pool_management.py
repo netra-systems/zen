@@ -57,7 +57,7 @@ class TestConnectionPoolManagement:
         """ITERATION 21: Prevent data corruption from transaction isolation failures.
         
         Business Value: Prevents financial data corruption worth $10K+ per incident.
-        """
+        """"
         engine = DatabaseManager.create_application_engine()
         
         # Simulate concurrent transactions that could corrupt data
@@ -69,7 +69,7 @@ class TestConnectionPoolManagement:
                 
                 # Validate isolation level prevents dirty reads
                 pool_status = DatabaseManager.get_pool_status(engine)
-                assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id}"
+                assert pool_status["pool_type"] is not None, f"Pool corrupted for tx {tx_id]"
                 return expected_result
             except Exception as e:
                 pytest.fail(f"Transaction isolation failed: {e}")

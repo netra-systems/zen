@@ -2,14 +2,14 @@
 Security-Focused Auth Validators Tests - Input Sanitization & Injection Prevention
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - INPUT SECURITY CRITICAL
+    - Segment: ALL (Free → Enterprise) - INPUT SECURITY CRITICAL
 - Business Goal: Prevent injection attacks and input-based security vulnerabilities
 - Value Impact: Prevent data breaches, XSS, SQL injection, and other input attacks
 - Revenue Impact: Critical - Input vulnerabilities = potential data breaches
 - ESTIMATED RISK: -$1M+ potential impact from input security failures
 
 SECURITY FOCUS AREAS:
-- SQL injection prevention
+    - SQL injection prevention
 - XSS (Cross-Site Scripting) prevention
 - Command injection prevention
 - Path traversal prevention  
@@ -21,11 +21,11 @@ SECURITY FOCUS AREAS:
 - Header injection prevention
 
 COMPLIANCE:
-- 90%+ test coverage for all validation functions
+    - 90%+ test coverage for all validation functions
 - Zero tolerance for input validation bypasses
 - Comprehensive attack vector testing
 - Edge case validation for all input types
-"""
+""""
 
 import re
 from datetime import datetime, timedelta, timezone
@@ -76,7 +76,7 @@ class TestEmailValidationSecurity:
             "admin@example.com'; DROP TABLE users; --",
             "user@domain.com'; INSERT INTO admin (user) VALUES ('hacker'); --",
             "test@evil.com' UNION SELECT password FROM users WHERE '1'='1",
-            "malicious@site.com\"; DROP DATABASE auth; --",
+            "malicious@site.com\"; DROP DATABASE auth; --","
         ]
         
         for email in sql_injection_emails:
@@ -462,7 +462,7 @@ class TestInputSanitizationSecurity:
             # Should remove dangerous characters
             assert "<" not in result
             assert ">" not in result
-            assert '"' not in result
+            assert '"' not in result"
             assert "'" not in result
             assert ";" not in result
 
@@ -470,7 +470,7 @@ class TestInputSanitizationSecurity:
         """SECURITY: Test injection prevention in user input sanitization"""
         injection_inputs = [
             "'; DROP TABLE users; --",
-            '"; DELETE FROM sessions; --',
+            '"; DELETE FROM sessions; --',"
             "admin'; UPDATE users SET role='admin' WHERE id=1; --",
             "\\'; EXEC xp_cmdshell('dir'); --",
         ]
@@ -480,7 +480,7 @@ class TestInputSanitizationSecurity:
             
             # Should remove dangerous characters
             assert "'" not in result
-            assert '"' not in result
+            assert '"' not in result"
             assert ";" not in result
             assert "--" not in result
 

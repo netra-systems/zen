@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from datetime import datetime
 """Helper functions for quality monitoring tests"""
 
 import asyncio
@@ -23,7 +25,7 @@ def assert_service_collections_initialized(service):
     assert service.metrics_collector is not None
     assert service.trend_analyzer is not None
 
-def assert_service_monitoring_state(service, active=False):
+def assert_service_monitoring_state(service, active = False):
     """Assert service monitoring state"""
     assert service.monitoring_active == active
     if not active:
@@ -41,7 +43,7 @@ def assert_quality_alert_values(alert, expected_current, expected_threshold):
     assert alert.current_value == expected_current
     assert alert.threshold == expected_threshold
 
-def assert_quality_alert_status(alert, acknowledged=False, resolved=False):
+def assert_quality_alert_status(alert, acknowledged = False, resolved = False):
     """Assert quality alert status"""
     assert alert.acknowledged == acknowledged
     assert alert.resolved == resolved
@@ -52,7 +54,7 @@ def assert_metrics_response_properties(metrics, expected_confidence):
     assert metrics["confidence"] == expected_confidence
     assert "timestamp" in metrics
 
-def assert_metrics_additional_properties(metrics, latency=None, tokens=None):
+def assert_metrics_additional_properties(metrics, latency = None, tokens = None):
     """Assert additional metrics properties"""
     if latency:
         assert metrics["latency"] == latency
@@ -108,7 +110,7 @@ def assert_report_structure(report):
 def assert_dashboard_data_structure(dashboard_data):
     """Assert dashboard data structure"""
     required_keys = ["overall_stats", "agent_profiles", "recent_alerts", 
-                     "quality_distribution", "timestamp"]
+                        "quality_distribution", "timestamp"]
     for key in required_keys:
         assert key in dashboard_data
 
@@ -119,44 +121,44 @@ def assert_sla_compliance_structure(report):
     for metric in required_metrics:
         assert report[metric]["status"] == "met"
 
-def create_test_alert(alert_id, severity=AlertSeverity.WARNING, agent="test_agent"):
+def create_test_alert(alert_id, severity = AlertSeverity.WARNING, agent = "test_agent"):
     """Create test alert with common defaults"""
     return QualityAlert(
-        id=alert_id,
-        timestamp=datetime.now(UTC),
-        severity=severity,
-        metric_type=MetricType.QUALITY_SCORE,
-        agent=agent,
-        message="Test alert",
-        current_value=0.4,
-        threshold=0.5
-    )
+        id = alert_id,
+        timestamp = datetime.now(UTC),
+        severity = severity,
+        metric_type = MetricType.QUALITY_SCORE,
+        agent = agent,
+        message = "Test alert",
+        current_value = 0.4,
+        threshold = 0.5,
+)
 
-async def record_test_quality_event(service, agent_name="test_agent", metrics=None):
+async def record_test_quality_event(service, agent_name = "test_agent", metrics = None):
     """Record a test quality event"""
     if metrics is None:
         from netra_backend.app.services.quality_gate_service import (
             QualityLevel,
             QualityMetrics,
         )
-        metrics = QualityMetrics(overall_score=0.75, quality_level=QualityLevel.GOOD)
+        metrics == QualityMetrics(overall_score = 0.75, quality_level = QualityLevel.GOOD)
     
     await service.record_quality_event(
-        agent_name=agent_name,
-        content_type=ContentType.OPTIMIZATION,
-        metrics=metrics,
-        user_id="user123",
-        thread_id="thread456",
-        run_id="run789"
-    )
+        agent_name = agent_name,
+        content_type = ContentType.OPTIMIZATION,
+        metrics = metrics,
+        user_id = "user123",
+        thread_id = "thread456",
+        run_id = "run789",
+)
 
-def assert_event_in_buffer(service, agent_name, expected_count=1):
+def assert_event_in_buffer(service, agent_name, expected_count = 1):
     """Assert event was added to service buffer"""
     buffer = service.metrics_collector.get_buffer()
     assert agent_name in buffer
     assert len(buffer[agent_name]) == expected_count
 
-def assert_event_properties(event, agent_name, quality_score, user_id="user123"):
+def assert_event_properties(event, agent_name, quality_score, user_id = "user123"):
     """Assert event properties"""
     assert event["agent"] == agent_name
     assert event["quality_score"] == quality_score
@@ -165,15 +167,15 @@ def assert_event_properties(event, agent_name, quality_score, user_id="user123")
 async def setup_monitoring_mocks(service):
     """Setup monitoring method mocks"""
     service._collect_metrics = AsyncMock()
-    service._analyze_trends = AsyncMock(return_value=[])
-    service._check_thresholds = AsyncMock(return_value=[])
+    service._analyze_trends = AsyncMock(return_value = [])
+    service._check_thresholds = AsyncMock(return_value = [])
     service._update_agent_profiles = AsyncMock()
     service._broadcast_updates = AsyncMock()
     service._persist_metrics = AsyncMock()
 
-async def start_and_stop_monitoring(service, interval=0.001, sleep_duration=0.005):
+async def start_and_stop_monitoring(service, interval = 0.001, sleep_duration = 0.005):
     """Start monitoring, wait briefly, then stop"""
-    await service.start_monitoring(interval_seconds=interval)
+    await service.start_monitoring(interval_seconds = interval)
     await asyncio.sleep(sleep_duration)
     await service.stop_monitoring()
 
@@ -182,22 +184,22 @@ def assert_monitoring_methods_called(service):
     assert service._collect_metrics.called
     assert service._analyze_trends.called
 
-def create_buffer_overflow_events(service, agent_name, count=1050):
+def create_buffer_overflow_events(service, agent_name, count = 1050):
     """Create events that exceed buffer capacity"""
     for i in range(count):
         event = {"quality_score": 0.5, "timestamp": datetime.now(UTC).isoformat()}
         service.metrics_collector.metrics_buffer[agent_name].append(event)
 
-def create_alert_history_overflow(service, count=550):
+def create_alert_history_overflow(service, count = 550):
     """Create alerts that exceed history capacity"""
     for i in range(count):
         alert = create_test_alert(f"alert_{i}")
         service.alert_manager.alert_history.append(alert)
 
-def assert_buffer_max_length(service, agent_name, max_length=1000):
+def assert_buffer_max_length(service, agent_name, max_length = 1000):
     """Assert buffer respects max length"""
     assert len(service.metrics_collector.metrics_buffer[agent_name]) == max_length
 
-def assert_alert_history_max_length(service, max_length=500):
+def assert_alert_history_max_length(service, max_length = 500):
     """Assert alert history respects max length"""
     assert len(service.alert_manager.alert_history) == max_length

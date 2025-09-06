@@ -1,10 +1,13 @@
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.database.test_database_manager import TestDatabaseManager
 from auth_service.core.auth_manager import AuthManager
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Test JWT secret consistency for backend service.
 Ensures backend service correctly loads and uses JWT secret for token validation.
-"""
+""""
 
 import os
 
@@ -216,7 +219,7 @@ class TestJWTSecretIntegration:
         """ITERATION 24: Prevent JWT token hijacking attacks that compromise user accounts.
         
         Business Value: Prevents account takeover attacks worth $100K+ per security breach.
-        """
+        """"
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
         
         test_secret = "hijack-prevention-test-secret-32"
@@ -261,7 +264,7 @@ class TestJWTSecretIntegration:
         """ITERATION 26: Test backend session security handling.
         
         Business Value: Prevents session-based attacks worth $75K+ per security incident.
-        """
+        """"
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
         
         # Test backend's session validation via auth client

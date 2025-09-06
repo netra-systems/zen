@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for ClickHouse Connection Validation Issues
 Critical dev launcher issue: ClickHouse connection validation fails despite healthy container
@@ -10,11 +12,11 @@ Root Cause: ClickHouse validation logic returns False on authentication issues e
 when the ClickHouse container is healthy and reachable, creating false negatives.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Development Velocity & System Reliability
 - Value Impact: Ensures ClickHouse services are properly detected when healthy
 - Strategic Impact: Reduces false failures and improves developer experience
-"""
+""""
 
 import pytest
 import asyncio
@@ -39,13 +41,13 @@ class TestClickHouseValidationFailures:
         FAILING TEST: Demonstrates ClickHouse validation returning False for healthy container with auth issues.
         
         This test reproduces the exact scenario from dev launcher logs:
-        - ClickHouse container is running and healthy (responds to ping)
+            - ClickHouse container is running and healthy (responds to ping)
         - Authentication configuration is incorrect (401 response)
         - Validation incorrectly returns False instead of handling gracefully
         
         Expected behavior: Should distinguish between container health and auth configuration
         Current behavior: Returns False for healthy containers with auth issues
-        """
+        """"
         connector = DatabaseConnector()
         
         # Create a ClickHouse connection
@@ -56,9 +58,9 @@ class TestClickHouseValidationFailures:
         )
         
         # Mock aiohttp response to simulate healthy container with auth failure
-        mock_response = MagicNone  # TODO: Use real service instance
+        mock_response = MagicMock()  # TODO: Use real service instance
         mock_response.status = 401  # Auth failure but container is responding
-        mock_session = MagicNone  # TODO: Use real service instance
+        mock_session = MagicMock()  # TODO: Use real service instance
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
@@ -81,12 +83,12 @@ class TestClickHouseValidationFailures:
         FAILING TEST: Demonstrates ClickHouse validation false negative due to auth configuration.
         
         This test shows that the validation logic fails to distinguish between:
-        1. ClickHouse service being unavailable (real failure)
+            1. ClickHouse service being unavailable (real failure)
         2. ClickHouse service being healthy but auth misconfigured (config issue)
         
         Expected behavior: Should provide different validation results for these scenarios
         Current behavior: Both scenarios return False, creating false negatives
-        """
+        """"
         connector = DatabaseConnector()
         
         # Create connection with authentication error scenario
@@ -100,7 +102,7 @@ class TestClickHouseValidationFailures:
         auth_error = ClientError("Authentication failed - code 194")
         
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicNone  # TODO: Use real service instance
+            mock_session = MagicMock()  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = auth_error
@@ -129,7 +131,7 @@ class TestClickHouseValidationFailures:
         
         Expected behavior: Should attempt multiple common ClickHouse ports or provide better diagnostics
         Current behavior: Fails immediately if configured port doesn't respond
-        """
+        """"
         connector = DatabaseConnector()
         
         # Create connection pointing to wrong port (service runs on 8123, config has 9000)
@@ -143,7 +145,7 @@ class TestClickHouseValidationFailures:
         connection_error = ClientError("Connection refused on port 9000")
         
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicNone  # TODO: Use real service instance
+            mock_session = MagicMock()  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = connection_error
@@ -166,7 +168,7 @@ class TestClickHouseValidationFailures:
         
         Expected behavior: Should differentiate between service health and configuration correctness
         Current behavior: Returns same result (False) for both scenarios
-        """
+        """"
         connector = DatabaseConnector()
         
         # Check if the error handling method distinguishes error types
@@ -200,7 +202,7 @@ class TestClickHouseValidationFailures:
         
         Expected behavior: Should clearly indicate when falling back to mock/local mode
         Current behavior: Validation fails but fallback behavior is not clearly communicated
-        """
+        """"
         connector = DatabaseConnector()
         
         # Mock a scenario where validation fails but should fall back gracefully
@@ -212,7 +214,7 @@ class TestClickHouseValidationFailures:
         
         # Mock auth failure that should trigger fallback
         with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_session = MagicNone  # TODO: Use real service instance
+            mock_session = MagicMock()  # TODO: Use real service instance
             mock_session_class.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session_class.return_value.__aexit__ = AsyncMock(return_value=None)
             mock_session.get.side_effect = ClientError("Authentication failed - code 194")

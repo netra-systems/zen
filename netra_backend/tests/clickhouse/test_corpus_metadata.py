@@ -1,8 +1,11 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import asyncio
+
 """
 Corpus metadata and error recovery tests
 Tests metadata tracking throughout corpus lifecycle and error recovery mechanisms
 COMPLIANCE: 450-line max file, 25-line max functions
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -31,7 +34,7 @@ class TestMetadataTracking:
         service = CorpusService()
         
         # Mock: Generic component isolation for controlled unit testing
-        db = MagicNone  # TODO: Use real service instance
+        db = MagicMock()  # TODO: Use real service instance
         corpus_data = _create_metadata_test_corpus()
         
         corpus = await service.create_corpus(
@@ -49,7 +52,7 @@ class TestMetadataTracking:
         service = CorpusService()
         
         # Mock: Generic component isolation for controlled unit testing
-        db = MagicNone  # TODO: Use real service instance
+        db = MagicMock()  # TODO: Use real service instance
         corpus = _create_mock_corpus_with_metadata()
         
         db.query().filter().first.return_value = corpus
@@ -73,14 +76,14 @@ class TestErrorRecovery:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate table creation failure
             mock_instance.execute.side_effect = Exception("Cannot create table")
             
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicNone  # TODO: Use real service instance
+            db = MagicMock()  # TODO: Use real service instance
             
             await service._create_clickhouse_table("corpus_id", "table_name", db)
             
@@ -97,14 +100,14 @@ class TestErrorRecovery:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate insert failure
             mock_instance.execute.side_effect = Exception("Insert failed")
             
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicNone  # TODO: Use real service instance
+            db = MagicMock()  # TODO: Use real service instance
             corpus = _create_available_corpus()
             db.query().filter().first.return_value = corpus
             
@@ -125,14 +128,14 @@ class TestErrorRecovery:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncNone  # TODO: Use real service instance
+            mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate drop table failure
             mock_instance.execute.side_effect = Exception("Cannot drop table")
             
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicNone  # TODO: Use real service instance
+            db = MagicMock()  # TODO: Use real service instance
             corpus = _create_deletable_corpus()
             db.query().filter().first.return_value = corpus
             
@@ -155,14 +158,14 @@ def _create_metadata_test_corpus():
 def _create_mock_corpus_with_metadata():
     """Create mock corpus with metadata."""
     # Mock: Generic component isolation for controlled unit testing
-    corpus = MagicNone  # TODO: Use real service instance
+    corpus = MagicMock()  # TODO: Use real service instance
     corpus.metadata_ = json.dumps({"version": 1})
     return corpus
 
 def _create_available_corpus():
     """Create available corpus for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    corpus = MagicNone  # TODO: Use real service instance
+    corpus = MagicMock()  # TODO: Use real service instance
     corpus.status = "available"
     corpus.table_name = "test_table"
     return corpus
@@ -170,7 +173,7 @@ def _create_available_corpus():
 def _create_deletable_corpus():
     """Create corpus for deletion testing."""
     # Mock: Generic component isolation for controlled unit testing
-    corpus = MagicNone  # TODO: Use real service instance
+    corpus = MagicMock()  # TODO: Use real service instance
     corpus.status = "available"
     corpus.table_name = "test_table"
     return corpus

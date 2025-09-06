@@ -2,17 +2,17 @@
 Data Access Audit Integration Tests
 
 BVJ:
-- Segment: Enterprise ($200K+ MRR)
+    - Segment: Enterprise ($200K+ MRR)
 - Business Goal: Compliance reporting protecting $200K+ MRR
 - Value Impact: Essential for GDPR Article 30 compliance - detailed access logs
 - Revenue Impact: Protects and enables $200K+ enterprise revenue stream
 
 REQUIREMENTS:
-- Data access logging with tamper-proof storage
+    - Data access logging with tamper-proof storage
 - Comprehensive metadata capture for forensic analysis
 - Resource-level access tracking
 - Performance metrics and compliance flags
-"""
+""""
 
 import sys
 from pathlib import Path

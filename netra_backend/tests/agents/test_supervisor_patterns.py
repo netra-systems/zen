@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Supervisor Agent Orchestration Tests - Workflow Patterns
 Tests for advanced workflow patterns, resource management, and coordination strategies.
 Compliance: <300 lines, 25-line max functions, modular design.
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -54,7 +56,7 @@ class TestWorkflowPatterns:
         supervisor = create_supervisor_agent(mocks)
         setup_triage_agent_mock(supervisor, {
             'user_request': "Fan out test",
-            'triage_result': {"parallel_tasks": ["data_analysis", "optimization", "validation"]}
+            'triage_result': {"parallel_tasks": ["data_analysis", "optimization", "validation"]]
         })
         return supervisor
 
@@ -78,7 +80,7 @@ class TestWorkflowPatterns:
         """Mock validation processor for fan-out test"""
         await asyncio.sleep(0.01)
         if hasattr(state, 'data_result') and state.data_result:
-            state.data_result["validation"] = {"processor": "validation", "status": "valid"}
+            state.data_result["validation"] = {"processor": "validation", "status": "valid"]
         else:
             state.data_result = {"validation": {"processor": "validation", "status": "valid"}}
         return state
@@ -88,7 +90,7 @@ class TestWorkflowPatterns:
         supervisor.agents["data"].execute = self._mock_data_processor
         supervisor.agents["optimization"].execute = self._mock_opt_processor
         # Mock: Generic component isolation for controlled unit testing
-        validation_agent = AsyncNone  # TODO: Use real service instance
+        validation_agent = AsyncMock()  # TODO: Use real service instance
         validation_agent.execute = self._mock_validation_processor
         supervisor.agents["validation"] = validation_agent
 

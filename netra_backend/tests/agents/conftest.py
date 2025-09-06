@@ -14,10 +14,10 @@ env.set("TEST_DISABLE_CLICKHOUSE", "true", "test")
 env.set("SKIP_SERVICE_HEALTH_CHECK", "true", "test")
 env.set("USE_REAL_SERVICES", "false", "test")
 
-# Mock clickhouse_connect module BEFORE it's imported
+# Mock clickhouse_connect module BEFORE it's imported'
 mock_clickhouse_client = MagicMock()
-mock_clickhouse_client.ping = MagicMock(return_value=True)
-mock_clickhouse_client.execute = MagicMock(return_value=[])
+mock_clickhouse_client.ping = MagicMock(return_value = True)
+mock_clickhouse_client.execute = MagicMock(return_value = [])
 mock_clickhouse_client.disconnect = MagicMock()
 
 # Create a mock Client class
@@ -34,7 +34,7 @@ mock_driver.client = mock_driver_client
 
 # Create mock clickhouse_connect package with proper structure
 mock_clickhouse_connect = MagicMock()
-mock_clickhouse_connect.get_client = MagicMock(return_value=mock_clickhouse_client)
+mock_clickhouse_connect.get_client = MagicMock(return_value = mock_clickhouse_client)
 mock_clickhouse_connect.driver = mock_driver
 
 # Register all the modules

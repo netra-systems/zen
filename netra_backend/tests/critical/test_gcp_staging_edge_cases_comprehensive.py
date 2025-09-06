@@ -1,7 +1,9 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Test-Driven Correction (TDC) Tests for Comprehensive Edge Cases of GCP Staging Issues
 Critical staging issues: Additional edge cases and combinations
@@ -11,11 +13,11 @@ The tests are intentionally designed to fail to expose complex scenarios and int
 between different failure modes that could occur in production environments.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Platform Stability - comprehensive error scenario coverage
 - Value Impact: Prevents complex failure cascades that could cause major outages
 - Strategic Impact: Critical for production-ready stability and fault tolerance
-"""
+""""
 
 import pytest
 import asyncio
@@ -38,7 +40,7 @@ class TestGCPStagingEdgeCases:
         
         Tests scenario where multiple configuration values are corrupted simultaneously,
         causing a cascade of failures across different services.
-        """
+        """"
         # Mock environment variables with multiple corrupted values
         corrupted_env = {
             'CLICKHOUSE_HOST': 'clickhouse.staging.internal\n',  # Newline corruption
@@ -66,7 +68,7 @@ class TestGCPStagingEdgeCases:
             # Test Redis corruption
             try:
                 with patch('redis.asyncio.Redis') as mock_redis:
-                    mock_redis.return_value = AsyncNone  # TODO: Use real service instance
+                    mock_redis.return_value = AsyncMock()  # TODO: Use real service instance
                     mock_redis.return_value.ping.side_effect = ConnectionError("Invalid host with control characters")
                     redis_manager = RedisManager()
                     await redis_manager.connect()
@@ -90,7 +92,7 @@ class TestGCPStagingEdgeCases:
         FAILING TEST: Startup sequence partial failure and recovery attempts.
         
         Tests scenario where startup partially fails and recovery mechanisms are tested.
-        """
+        """"
         startup_attempts = []
         
         async def mock_startup_step(step_name, should_fail=False):
@@ -125,7 +127,7 @@ class TestGCPStagingEdgeCases:
         
         Tests protection against malicious environment variable injection that could
         cause control character corruption in configuration.
-        """
+        """"
         malicious_env_vars = {
             # Simulate injection attacks with control characters
             'DATABASE_URL': 'postgresql://user:pass@localhost:5432/db\x00; DROP TABLE users; --',
@@ -167,7 +169,7 @@ class TestGCPStagingEdgeCases:
         
         Tests scenario where multiple services initialize concurrently, causing 
         resource contention and timing-dependent failures.
-        """
+        """"
         initialization_order = []
         resource_lock = asyncio.Lock()
         
@@ -208,7 +210,7 @@ class TestGCPStagingEdgeCases:
         
         Tests various boundary conditions in configuration parsing that could
         lead to the control character corruption issues.
-        """
+        """"
         boundary_test_cases = [
             # Edge cases that might bypass validation
             ('clickhouse_host_edge1', 'host.com\x20'),  # Space (ASCII 32) - boundary
@@ -253,7 +255,7 @@ class TestGCPStagingEdgeCases:
         FAILING TEST: Memory pressure during startup causing additional failures.
         
         Tests scenario where memory pressure during startup exacerbates the existing issues.
-        """
+        """"
         memory_allocations = []
         
         async def memory_intensive_startup():
@@ -291,7 +293,7 @@ class TestGCPStagingEdgeCases:
         
         Tests scenario where network issues during startup cause multiple service
         initialization failures simultaneously.
-        """
+        """"
         network_calls = []
         
         async def simulate_network_call(service, operation):
@@ -328,7 +330,7 @@ class TestGCPStagingEdgeCases:
         
         Tests scenario where configuration hot reload introduces control character
         corruption into running system.
-        """
+        """"
         original_config = {
             'clickhouse_host': 'clean.host.com',
             'redis_host': 'clean.redis.com',

@@ -1,23 +1,25 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """
 Critical Authentication Integration Core Tests
 
 Business Value Justification (BVJ):
-- Segment: All paid tiers (Early, Mid, Enterprise)
+    - Segment: All paid tiers (Early, Mid, Enterprise)
 - Business Goal: Protect customer authentication and billing accuracy
 - Value Impact: Prevents authentication failures that could cause 100% service unavailability
 - Revenue Impact: Critical - Auth failures = immediate customer churn. Estimated -$50K+ MRR risk
 
 Tests the core authentication integration module that handles:
-- Token validation with external auth service
+    - Token validation with external auth service
 - User lookup and database operations
 - Error handling for auth failures
 - Security boundary enforcement
 
 COMPLIANCE:
-- Module ≤300 lines ✓
+    - Module ≤300 lines ✓
 - Functions ≤8 lines ✓ 
 - Strong typing with Pydantic ✓
-"""
+""""
 
 import sys
 from pathlib import Path
@@ -42,22 +44,20 @@ from netra_backend.app.db.models_postgres import User
 
 # Global fixtures for all test classes
 @pytest.fixture
- def real_credentials():
+def real_credentials():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock HTTP Bearer credentials"""
-    pass
     return HTTPAuthorizationCredentials(
-        scheme="Bearer",
-        credentials="valid_token_123"
+    scheme="Bearer",
+    credentials="valid_token_123"
     )
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock async database session"""
-    pass
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Configure async context manager behavior
@@ -66,11 +66,10 @@ from netra_backend.app.db.models_postgres import User
     return session
 
 @pytest.fixture
- def real_user():
+def real_user():
     """Use real service instance."""
     # TODO: Initialize real service
     """Mock user object"""
-    pass
     # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "user_123"
@@ -80,7 +79,6 @@ from netra_backend.app.db.models_postgres import User
 
 class TestAuthenticationCore:
     """Core authentication functionality tests"""
-    pass
 
     @pytest.mark.asyncio
     async def test_get_current_user_success(
@@ -161,7 +159,7 @@ class TestAuthenticationCore:
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
              patch('netra_backend.app.config.get_config') as mock_get_config:
             
-            mock_auth.validate_token_jwt = AsyncMock(return_value={
+                 mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "nonexistent_user"
             })
@@ -203,7 +201,6 @@ class TestAuthenticationCore:
 
 class TestOptionalAuthentication:
     """Optional authentication functionality tests"""
-    pass
 
     @pytest.mark.asyncio
     async def test_get_current_user_optional_no_credentials(
@@ -273,7 +270,6 @@ class TestOptionalAuthentication:
 
 class TestAuthenticationBoundaries:
     """Test authentication security boundary conditions"""
-    pass
 
     @pytest.mark.asyncio
     async def test_token_format_validation(self, mock_db_session):
@@ -305,7 +301,6 @@ class TestAuthenticationBoundaries:
         mock_user
     ):
         """Test proper database session context management"""
-    pass
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
@@ -315,7 +310,7 @@ class TestAuthenticationBoundaries:
             })
             
             # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_session = AsyncMock()  # TODO: Use real service instance
             # Configure async context manager behavior
             mock_session.__aenter__ = AsyncMock(return_value=mock_session)
             mock_session.__aexit__ = AsyncMock(return_value=None)
@@ -334,7 +329,6 @@ class TestAuthenticationBoundaries:
 
 class TestAuthenticationPerformance:
     """Performance and scalability tests for authentication"""
-    pass
 
     @pytest.mark.asyncio
     async def test_concurrent_authentication_requests(
