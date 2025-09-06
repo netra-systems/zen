@@ -36,41 +36,11 @@ from scripts.gcp_auth_config import GCPAuthConfig
 from shared.isolated_environment import get_env
 # Import centralized secrets configuration
 from deployment.secrets_config import SecretConfig
+# Import Windows encoding SSOT
+from shared.windows_encoding import setup_windows_encoding
 
-# Fix Unicode encoding issues on Windows - MUST be done early
-if sys.platform == "win32":
-    import io
-    # Set UTF-8 for subprocess and all Python I/O
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
-    os.environ['PYTHONUTF8'] = '1'
-    
-    # Force Windows console to use UTF-8
-    try:
-        import ctypes
-        kernel32 = ctypes.windll.kernel32
-        # Set console code page to UTF-8
-        kernel32.SetConsoleCP(65001)
-        kernel32.SetConsoleOutputCP(65001)
-    except:
-        pass
-    
-    # Reconfigure stdout/stderr to use UTF-8
-    try:
-        if hasattr(sys.stdout, 'reconfigure'):
-            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-        if hasattr(sys.stderr, 'reconfigure'):
-            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
-    except:
-        # Fallback for older Python versions
-        try:
-            # Only wrap if not already wrapped
-            if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
-                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
-            if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
-                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
-        except:
-            # If wrapping fails, continue with default encoding
-            pass
+# Fix Unicode encoding issues on Windows - using SSOT
+setup_windows_encoding()
 
 
 @dataclass
