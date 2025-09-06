@@ -1,13 +1,16 @@
+from unittest.mock import Mock, patch, MagicMock
+import asyncio
+
 """
 Tests for AgentClassRegistry: Infrastructure-only agent class registration.
 
 CRITICAL: These tests verify that the AgentClassRegistry meets all requirements:
-1. Stores only agent classes (not instances)
+    1. Stores only agent classes (not instances)
 2. Is immutable after startup
 3. Has no per-user state 
 4. Is thread-safe for concurrent reads
 5. Provides methods to get agent classes by name
-"""
+""""
 
 import pytest
 import threading
@@ -412,9 +415,9 @@ class TestAgentClassRegistryIntegration:
         
         # Phase 1: Registration (startup)
         registry.register("triage", MockAgent, "Triage agent", 
-                         dependencies=[], metadata={"priority": "high"})
+                         dependencies=[], metadata={"priority": "high"])
         registry.register("data", AnotherMockAgent, "Data agent",
-                         dependencies=["triage"], metadata={"priority": "medium"})
+                         dependencies=["triage"], metadata={"priority": "medium"])
         
         assert not registry.is_frozen()
         assert len(registry) == 2
