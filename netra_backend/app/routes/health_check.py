@@ -1,7 +1,19 @@
 """
-Health check endpoints for system monitoring and E2E testing.
+Enhanced Database Health Check Endpoints
+========================================
 
-Provides readiness, liveness, and startup probes for Kubernetes and monitoring systems.
+CRITICAL MISSION: Comprehensive database connectivity monitoring for staging.
+Provides detailed health checks for PostgreSQL, Redis, ClickHouse with 
+real-time connection validation, performance metrics, and error detection.
+
+This module replaces basic health checks with comprehensive database
+monitoring suitable for production staging environments.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: Stability - Database connectivity monitoring
+- Value Impact: Early detection of database issues prevents service outages
+- Strategic Impact: Foundation for monitoring and alerting systems
 """
 
 import asyncio
@@ -10,11 +22,18 @@ import time
 from typing import Any, Dict, Optional
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 
 from netra_backend.app.auth_integration import get_current_user_optional
 from netra_backend.app.logging_config import central_logger
+
+# Import our comprehensive health check system
+from netra_backend.app.api.health_checks import (
+    health_manager,
+    DatabaseHealthStatus,
+    SystemHealthStatus
+)
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
@@ -25,11 +44,12 @@ STARTUP_COMPLETE = False
 
 
 class HealthStatus(BaseModel):
-    """Health check response model."""
+    """Enhanced health check response model."""
     status: str = Field(..., description="Health status (healthy, degraded, unhealthy)")
     timestamp: str = Field(..., description="Check timestamp")
     uptime_seconds: float = Field(..., description="Service uptime in seconds")
     checks: Dict[str, Dict[str, Any]] = Field(..., description="Individual check results")
+    database_details: Optional[Dict[str, Any]] = Field(None, description="Detailed database health information")
     version: Optional[str] = Field(None, description="Service version")
     environment: Optional[str] = Field(None, description="Environment name")
 
@@ -38,228 +58,346 @@ class HealthStatus(BaseModel):
 @router.head("/ready", response_model=HealthStatus)
 @router.options("/ready")
 async def readiness_probe(
-    user: Optional[Dict] = Depends(get_current_user_optional)
+    user: Optional[Dict] = Depends(get_current_user_optional),
+    force: bool = Query(False, description="Force fresh health checks")
 ) -> HealthStatus:
     """
-    Readiness probe - checks if service can handle requests.
+    Enhanced readiness probe with comprehensive database health checks.
     
-    Returns 200 if ready, 503 if not ready.
+    Returns 200 if ready, 503 if critical services are failing.
+    CRITICAL MISSION: Detect staging database connectivity issues.
     """
-    checks = {}
-    overall_status = "healthy"
-    
-    # Check database connectivity
     try:
-        from netra_backend.app.database import get_db_session
-        async with get_db_session() as session:
-            await session.execute("SELECT 1")
-        checks["database"] = {"status": "healthy", "latency_ms": 5}
-    except Exception as e:
-        logger.warning(f"Database check failed: {e}")
-        checks["database"] = {"status": "unhealthy", "error": str(e)}
-        overall_status = "unhealthy"
-    
-    # Check agent service
-    try:
-        from netra_backend.app.services.agent_service import get_agent_service
-        agent_service = get_agent_service()
-        if agent_service:
-            checks["agent_service"] = {"status": "healthy", "agents_available": True}
-        else:
-            checks["agent_service"] = {"status": "degraded", "agents_available": False}
-            if overall_status == "healthy":
-                overall_status = "degraded"
-    except Exception as e:
-        logger.warning(f"Agent service check failed: {e}")
-        checks["agent_service"] = {"status": "unhealthy", "error": str(e)}
-        overall_status = "unhealthy"
-    
-    # Check circuit breakers
-    try:
-        from netra_backend.app.core.circuit_breaker import circuit_registry
-        open_circuits = []
-        for name, cb in circuit_registry._circuit_breakers.items():
-            if cb.state.name == "OPEN":
-                open_circuits.append(name)
+        # Get comprehensive system health
+        system_health = await health_manager.check_overall_health(force_check=force)
         
-        if open_circuits:
-            checks["circuit_breakers"] = {
-                "status": "degraded",
-                "open_circuits": open_circuits
+        # Convert to legacy format for compatibility
+        checks = {}
+        database_details = {}
+        
+        for service_name, health_status in system_health.services.items():
+            checks[service_name] = {
+                "status": health_status.status,
+                "connected": health_status.connected,
+                "response_time_ms": health_status.response_time_ms,
+                "error": health_status.error
             }
-            if overall_status == "healthy":
-                overall_status = "degraded"
+            
+            # Add detailed information for databases
+            database_details[service_name] = {
+                "status": health_status.status,
+                "details": health_status.details,
+                "checked_at": health_status.checked_at.isoformat()
+            }
+        
+        # Determine overall status and HTTP status code
+        if system_health.overall_status == "failed":
+            # Critical services failed - service not ready
+            http_status = 503
+            overall_status = "unhealthy"
+        elif system_health.overall_status == "degraded":
+            # Some services degraded but still functional
+            http_status = 200
+            overall_status = "degraded"
         else:
-            checks["circuit_breakers"] = {"status": "healthy", "open_circuits": []}
+            # All services healthy
+            http_status = 200
+            overall_status = "healthy"
+        
+        uptime = time.time() - STARTUP_TIME
+        
+        health_response = HealthStatus(
+            status=overall_status,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            uptime_seconds=uptime,
+            checks=checks,
+            database_details=database_details,
+            version="1.0.0",
+            environment=health_manager.environment
+        )
+        
+        if http_status == 503:
+            raise HTTPException(status_code=503, detail=health_response.dict())
+        
+        return health_response
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.warning(f"Circuit breaker check failed: {e}")
-        checks["circuit_breakers"] = {"status": "unknown", "error": str(e)}
-    
-    response = HealthStatus(
-        status=overall_status,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        uptime_seconds=time.time() - STARTUP_TIME,
-        checks=checks,
-        version=get_env().get("SERVICE_VERSION", "unknown"),
-        environment=get_env().get("ENVIRONMENT", "development")
-    )
-    
-    if overall_status == "unhealthy":
-        raise HTTPException(status_code=503, detail=response.dict())
-    
-    return response
+        logger.error(f"Readiness probe failed: {e}")
+        # Return unhealthy status
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": f"Health check system failed: {str(e)}",
+                "uptime_seconds": time.time() - STARTUP_TIME
+            }
+        )
 
 
 @router.get("/live", response_model=HealthStatus)
-@router.head("/live", response_model=HealthStatus)
+@router.head("/live", response_model=HealthStatus) 
 @router.options("/live")
 async def liveness_probe(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:
     """
-    Liveness probe - checks if service is alive and not deadlocked.
+    Liveness probe - basic application health check.
     
-    Returns 200 if alive, 503 if dead.
+    Returns 200 if application is running, regardless of external dependencies.
+    This endpoint should always return 200 unless the application is crashed.
     """
-    checks = {}
+    uptime = time.time() - STARTUP_TIME
     
-    # Check event loop responsiveness
-    try:
-        start = time.time()
-        await asyncio.sleep(0.001)
-        latency = (time.time() - start) * 1000
-        
-        if latency > 100:  # If event loop is slow
-            checks["event_loop"] = {
-                "status": "degraded",
-                "latency_ms": latency
-            }
-            overall_status = "degraded"
-        else:
-            checks["event_loop"] = {
-                "status": "healthy",
-                "latency_ms": latency
-            }
-            overall_status = "healthy"
-    except Exception as e:
-        logger.error(f"Event loop check failed: {e}")
-        checks["event_loop"] = {"status": "unhealthy", "error": str(e)}
-        overall_status = "unhealthy"
-    
-    # Check memory usage
-    try:
-        import psutil
-        process = psutil.Process()
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        
-        if memory_mb > 1024:  # Over 1GB
-            checks["memory"] = {
-                "status": "degraded",
-                "usage_mb": memory_mb
-            }
-            if overall_status == "healthy":
-                overall_status = "degraded"
-        else:
-            checks["memory"] = {
-                "status": "healthy",
-                "usage_mb": memory_mb
-            }
-    except Exception:
-        # psutil might not be available
-        checks["memory"] = {"status": "unknown"}
-    
-    response = HealthStatus(
-        status=overall_status,
+    return HealthStatus(
+        status="healthy",
         timestamp=datetime.now(timezone.utc).isoformat(),
-        uptime_seconds=time.time() - STARTUP_TIME,
-        checks=checks,
-        version=get_env().get("SERVICE_VERSION", "unknown"),
-        environment=get_env().get("ENVIRONMENT", "development")
+        uptime_seconds=uptime,
+        checks={
+            "application": {
+                "status": "healthy",
+                "connected": True,
+                "response_time_ms": 0,
+                "error": None
+            }
+        },
+        database_details={
+            "liveness_check": {
+                "status": "healthy", 
+                "details": {"message": "Application is running"},
+                "checked_at": datetime.now(timezone.utc).isoformat()
+            }
+        },
+        version="1.0.0",
+        environment=health_manager.environment
     )
-    
-    if overall_status == "unhealthy":
-        raise HTTPException(status_code=503, detail=response.dict())
-    
-    return response
 
 
 @router.get("/startup", response_model=HealthStatus)
 @router.head("/startup", response_model=HealthStatus)
-@router.options("/startup")
+@router.options("/startup") 
 async def startup_probe(
-    user: Optional[Dict] = Depends(get_current_user_optional)
+    user: Optional[Dict] = Depends(get_current_user_optional),
+    force: bool = Query(True, description="Force fresh checks for startup validation")
 ) -> HealthStatus:
     """
-    Startup probe - checks if service has completed initialization.
+    Startup probe - comprehensive startup validation.
     
-    Returns 200 if started, 503 if still starting.
+    Returns 200 when startup is complete and all critical systems are ready.
+    Returns 503 if startup is still in progress or failed.
+    CRITICAL MISSION: Validate staging database connectivity during startup.
     """
-    global STARTUP_COMPLETE
-    
-    checks = {}
-    
-    # Check if all required services are initialized
-    initialization_checks = {
-        "database": False,
-        "agent_service": False,
-        "auth_service": False,
-        "configuration": False
-    }
-    
-    # Check database
     try:
-        from netra_backend.app.database import get_db_session
-        async with get_db_session() as session:
-            await session.execute("SELECT 1")
-        initialization_checks["database"] = True
-    except Exception:
-        pass
-    
-    # Check agent service
-    try:
-        from netra_backend.app.services.agent_service import get_agent_service
-        if get_agent_service():
-            initialization_checks["agent_service"] = True
-    except Exception:
-        pass
-    
-    # Check auth
-    try:
-        from netra_backend.app.auth_integration import get_current_user_optional
-        initialization_checks["auth_service"] = True
-    except Exception:
-        pass
-    
-    # Check configuration
-    try:
-        from shared.isolated_environment import IsolatedEnvironment
-        env = IsolatedEnvironment()
-        if env.get("DATABASE_URL"):
-            initialization_checks["configuration"] = True
-    except Exception:
-        pass
-    
-    all_initialized = all(initialization_checks.values())
-    STARTUP_COMPLETE = all_initialized
-    
-    for service, initialized in initialization_checks.items():
-        checks[service] = {
-            "status": "ready" if initialized else "initializing",
-            "initialized": initialized
+        # Force comprehensive health checks for startup validation
+        system_health = await health_manager.check_overall_health(force_check=force)
+        
+        # For startup, we're more strict about what's considered "ready"
+        startup_ready = True
+        startup_issues = []
+        
+        # Check each service
+        for service_name, health_status in system_health.services.items():
+            if health_status.status == "failed":
+                # Determine if this service is critical for startup
+                if service_name == "postgresql":
+                    startup_ready = False
+                    startup_issues.append(f"Critical service {service_name} failed: {health_status.error}")
+                elif service_name == "redis" and health_manager.env.get("REDIS_REQUIRED", "false").lower() == "true":
+                    startup_ready = False
+                    startup_issues.append(f"Required service {service_name} failed: {health_status.error}")
+                elif service_name == "clickhouse" and health_manager.env.get("CLICKHOUSE_REQUIRED", "false").lower() == "true":
+                    startup_ready = False
+                    startup_issues.append(f"Required service {service_name} failed: {health_status.error}")
+        
+        # Build response
+        checks = {}
+        database_details = {}
+        
+        for service_name, health_status in system_health.services.items():
+            checks[service_name] = {
+                "status": health_status.status,
+                "connected": health_status.connected,
+                "response_time_ms": health_status.response_time_ms,
+                "error": health_status.error
+            }
+            
+            database_details[service_name] = {
+                "status": health_status.status,
+                "details": health_status.details,
+                "checked_at": health_status.checked_at.isoformat()
+            }
+        
+        # Add startup-specific information
+        checks["startup"] = {
+            "status": "healthy" if startup_ready else "failed",
+            "connected": startup_ready,
+            "response_time_ms": None,
+            "error": "; ".join(startup_issues) if startup_issues else None
         }
+        
+        database_details["startup_validation"] = {
+            "status": "ready" if startup_ready else "not_ready",
+            "details": {
+                "startup_complete": startup_ready,
+                "startup_issues": startup_issues,
+                "critical_services_checked": ["postgresql", "redis", "clickhouse"]
+            },
+            "checked_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        uptime = time.time() - STARTUP_TIME
+        overall_status = "healthy" if startup_ready else "unhealthy"
+        
+        health_response = HealthStatus(
+            status=overall_status,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            uptime_seconds=uptime,
+            checks=checks,
+            database_details=database_details,
+            version="1.0.0",
+            environment=health_manager.environment
+        )
+        
+        if not startup_ready:
+            # Mark global startup as incomplete
+            global STARTUP_COMPLETE
+            STARTUP_COMPLETE = False
+            raise HTTPException(status_code=503, detail=health_response.dict())
+        else:
+            # Mark global startup as complete
+            STARTUP_COMPLETE = True
+        
+        return health_response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Startup probe failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy", 
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": f"Startup validation failed: {str(e)}",
+                "uptime_seconds": time.time() - STARTUP_TIME
+            }
+        )
+
+
+# Additional endpoints for comprehensive database monitoring
+@router.get("/database", response_model=Dict[str, Any])
+async def database_health_detailed(
+    force: bool = Query(False, description="Force fresh health checks"),
+    user: Optional[Dict] = Depends(get_current_user_optional)
+) -> Dict[str, Any]:
+    """
+    Detailed database health information.
     
-    overall_status = "healthy" if all_initialized else "starting"
+    CRITICAL MISSION: Comprehensive database connectivity monitoring for staging.
+    Returns detailed information about all database services.
+    """
+    try:
+        # Get individual database health checks
+        postgresql_health = await health_manager.check_postgresql_health(force_check=force)
+        redis_health = await health_manager.check_redis_health(force_check=force)  
+        clickhouse_health = await health_manager.check_clickhouse_health(force_check=force)
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "environment": health_manager.environment,
+            "databases": {
+                "postgresql": postgresql_health.dict(),
+                "redis": redis_health.dict(),
+                "clickhouse": clickhouse_health.dict()
+            },
+            "summary": {
+                "total_databases": 3,
+                "healthy_count": sum(1 for health in [postgresql_health, redis_health, clickhouse_health] 
+                                   if health.status == "healthy"),
+                "degraded_count": sum(1 for health in [postgresql_health, redis_health, clickhouse_health] 
+                                    if health.status == "degraded"), 
+                "failed_count": sum(1 for health in [postgresql_health, redis_health, clickhouse_health] 
+                                  if health.status == "failed"),
+                "not_configured_count": sum(1 for health in [postgresql_health, redis_health, clickhouse_health] 
+                                          if health.status == "not_configured")
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database health check failed: {str(e)}"
+        )
+
+
+@router.get("/config", response_model=Dict[str, Any])
+async def health_configuration(
+    user: Optional[Dict] = Depends(get_current_user_optional)
+) -> Dict[str, Any]:
+    """
+    Health check system configuration and diagnostics.
     
-    response = HealthStatus(
-        status=overall_status,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        uptime_seconds=time.time() - STARTUP_TIME,
-        checks=checks,
-        version=get_env().get("SERVICE_VERSION", "unknown"),
-        environment=get_env().get("ENVIRONMENT", "development")
-    )
-    
-    if not all_initialized:
-        raise HTTPException(status_code=503, detail=response.dict())
-    
-    return response
+    Returns information about health check configuration,
+    environment setup, and system diagnostics.
+    """
+    try:
+        # Get basic configuration info
+        config_info = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "environment": health_manager.environment,
+            "health_system": {
+                "cache_ttl_seconds": health_manager._cache_ttl,
+                "max_response_samples": health_manager._max_samples,
+                "startup_time": STARTUP_TIME,
+                "startup_complete": STARTUP_COMPLETE,
+                "uptime_seconds": time.time() - STARTUP_TIME
+            },
+            "services_configured": {},
+            "environment_variables": {},
+            "endpoints": [
+                "/ready - Readiness probe with database health",
+                "/live - Liveness probe (basic)",
+                "/startup - Startup validation",
+                "/database - Detailed database health",
+                "/config - This configuration endpoint"
+            ]
+        }
+        
+        # Check which services are configured
+        env_dict = health_manager.env.as_dict()
+        config_info["services_configured"] = {
+            "postgresql": bool(env_dict.get("POSTGRES_HOST") or env_dict.get("DATABASE_URL")),
+            "redis": bool(env_dict.get("REDIS_HOST") or env_dict.get("REDIS_URL")),
+            "clickhouse": bool(env_dict.get("CLICKHOUSE_HOST") or env_dict.get("CLICKHOUSE_URL"))
+        }
+        
+        # Add relevant (non-sensitive) environment variables
+        config_info["environment_variables"] = {
+            "ENVIRONMENT": env_dict.get("ENVIRONMENT", "unknown"),
+            "REDIS_REQUIRED": env_dict.get("REDIS_REQUIRED", "false"),
+            "CLICKHOUSE_REQUIRED": env_dict.get("CLICKHOUSE_REQUIRED", "false"),
+            "POSTGRES_PORT": env_dict.get("POSTGRES_PORT", "5432"),
+            "REDIS_PORT": env_dict.get("REDIS_PORT", "6379"),
+            "CLICKHOUSE_PORT": env_dict.get("CLICKHOUSE_PORT", "8123")
+        }
+        
+        return config_info
+        
+    except Exception as e:
+        logger.error(f"Health configuration failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Health configuration failed: {str(e)}"
+        )
+
+
+# Legacy compatibility endpoints
+@router.get("/", response_model=HealthStatus)
+async def health_root(
+    user: Optional[Dict] = Depends(get_current_user_optional)
+) -> HealthStatus:
+    """Root health endpoint - redirects to readiness probe."""
+    return await readiness_probe(user=user, force=False)

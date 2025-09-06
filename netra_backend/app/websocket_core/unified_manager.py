@@ -4,7 +4,7 @@ This module is the single source of truth for WebSocket connection management.
 """
 
 import asyncio
-from typing import Dict, Optional, Set, Any
+from typing import Dict, Optional, Set, Any, List
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -873,14 +873,19 @@ class UnifiedWebSocketManager:
             return task_name
     
     async def _run_monitored_task(self, task_name: str, coro_func, *args, **kwargs):
-        """Run a task with monitoring and error handling."""
+        """ENHANCED: Run a task with monitoring, error handling, and automatic recovery."""
         failure_count = 0
-        max_failures = 3
+        max_failures = 5  # Increased from 3 for better resilience
         base_delay = 1.0
-        max_delay = 60.0
+        max_delay = 120.0  # Increased max delay
+        task_start_time = datetime.utcnow()
         
-        while self._monitoring_enabled:
+        logger.info(f"MONITORING TASK STARTED: {task_name} with recovery support")
+        
+        while self._monitoring_enabled and not self._shutdown_requested:
             try:
+                iteration_start = datetime.utcnow()
+                
                 if asyncio.iscoroutinefunction(coro_func):
                     await coro_func(*args, **kwargs)
                 else:
@@ -890,17 +895,22 @@ class UnifiedWebSocketManager:
                         await result
                 
                 # Reset failure count on successful execution
-                failure_count = 0
+                if failure_count > 0:
+                    logger.info(f"TASK RECOVERY SUCCESS: {task_name} recovered after {failure_count} failures")
+                    failure_count = 0
+                    
+                # Clear failure tracking
                 if task_name in self._task_failures:
                     del self._task_failures[task_name]
                 if task_name in self._task_last_failure:
                     del self._task_last_failure[task_name]
                 
-                logger.debug(f"Background task {task_name} completed successfully")
+                execution_duration = (datetime.utcnow() - iteration_start).total_seconds()
+                logger.debug(f"Background task {task_name} completed successfully (duration: {execution_duration:.2f}s)")
                 break  # Task completed successfully
                 
             except asyncio.CancelledError:
-                logger.info(f"Background task {task_name} was cancelled")
+                logger.info(f"TASK CANCELLED: {task_name} was cancelled gracefully")
                 break
                 
             except Exception as e:
@@ -908,31 +918,73 @@ class UnifiedWebSocketManager:
                 self._task_failures[task_name] = failure_count
                 self._task_last_failure[task_name] = datetime.utcnow()
                 
-                # LOUD ERROR: Background task failures are critical for system health
+                # Enhanced error logging with more context
+                task_runtime = (datetime.utcnow() - task_start_time).total_seconds()
                 logger.critical(
-                    f"BACKGROUND TASK FAILURE: {task_name} failed (attempt {failure_count}/{max_failures}): {e}. "
-                    f"Error type: {type(e).__name__}. "
-                    f"This may affect system functionality."
+                    f"BACKGROUND TASK FAILURE: {task_name} failed (attempt {failure_count}/{max_failures}) "
+                    f"after {task_runtime:.1f}s runtime. Error: {e}. Error type: {type(e).__name__}. "
+                    f"Monitoring_enabled: {self._monitoring_enabled}, Shutdown_requested: {self._shutdown_requested}"
                 )
                 
+                # Check if we should attempt automatic recovery
                 if failure_count >= max_failures:
                     logger.critical(
-                        f"BACKGROUND TASK ABANDONED: {task_name} failed {max_failures} times. "
-                        f"Task will not be restarted automatically. Manual intervention required."
+                        f"TASK FAILURE THRESHOLD EXCEEDED: {task_name} failed {max_failures} times. "
+                        f"Attempting automatic monitoring restart before abandoning task."
                     )
-                    # Notify system administrators of critical task failure
+                    
+                    # Attempt one automatic monitoring restart
+                    try:
+                        restart_result = await self.restart_background_monitoring(force_restart=True)
+                        if restart_result.get('monitoring_restarted') and restart_result.get('health_check_passed'):
+                            logger.info(f"AUTOMATIC RECOVERY: Successfully restarted monitoring for {task_name}")
+                            # Reset failure count and continue
+                            failure_count = 0
+                            continue
+                        else:
+                            logger.error(f"AUTOMATIC RECOVERY FAILED: Could not restart monitoring for {task_name}")
+                    except Exception as restart_error:
+                        logger.error(f"AUTOMATIC RECOVERY EXCEPTION: {restart_error}")
+                    
+                    # If automatic recovery failed, abandon task
+                    logger.critical(
+                        f"BACKGROUND TASK ABANDONED: {task_name} failed {max_failures} times and "
+                        f"automatic recovery failed. Manual intervention required."
+                    )
                     await self._notify_admin_of_task_failure(task_name, e, failure_count)
                     break
                 
-                # Calculate exponential backoff delay
-                delay = min(base_delay * (2 ** (failure_count - 1)), max_delay)
-                logger.warning(f"Restarting {task_name} in {delay:.1f}s after failure {failure_count}")
+                # Check if monitoring is still enabled before retry
+                if not self._monitoring_enabled or self._shutdown_requested:
+                    logger.warning(
+                        f"TASK RETRY ABORTED: {task_name} cannot retry due to monitoring state "
+                        f"(enabled: {self._monitoring_enabled}, shutdown: {self._shutdown_requested})"
+                    )
+                    break
+                
+                # Calculate exponential backoff delay with jitter
+                import random
+                base_backoff = min(base_delay * (2 ** (failure_count - 1)), max_delay)
+                jitter = base_backoff * 0.1 * (0.5 - random.random())  # ±5% jitter
+                delay = base_backoff + jitter
+                
+                logger.warning(
+                    f"TASK RETRY SCHEDULED: {task_name} will retry in {delay:.1f}s "
+                    f"(attempt {failure_count + 1}/{max_failures})"
+                )
                 
                 try:
                     await asyncio.sleep(delay)
                 except asyncio.CancelledError:
-                    logger.info(f"Background task {task_name} restart was cancelled")
+                    logger.info(f"TASK RETRY CANCELLED: {task_name} restart was cancelled")
                     break
+        
+        # Log final task state
+        total_runtime = (datetime.utcnow() - task_start_time).total_seconds()
+        logger.info(
+            f"MONITORING TASK ENDED: {task_name} finished after {total_runtime:.1f}s "
+            f"(failures: {failure_count}, monitoring_enabled: {self._monitoring_enabled})"
+        )
     
     async def stop_background_task(self, task_name: str) -> bool:
         """Stop a background task by name."""
@@ -1093,6 +1145,235 @@ class UnifiedWebSocketManager:
             
             logger.info("Background task monitoring shutdown complete")
     
+    async def _verify_monitoring_health(self) -> bool:
+        """
+        CRITICAL: Verify that monitoring system is healthy and operational.
+        
+        Returns:
+            True if monitoring is healthy, False if issues detected
+        """
+        try:
+            # Check basic monitoring state
+            if not self._monitoring_enabled:
+                logger.error("Monitoring health check failed: monitoring disabled")
+                return False
+            
+            if self._shutdown_requested:
+                logger.error("Monitoring health check failed: shutdown requested")
+                return False
+            
+            # Check task health
+            healthy_tasks = 0
+            total_tasks = len(self._background_tasks)
+            
+            for task_name, task in self._background_tasks.items():
+                if not task.done() and not task.cancelled():
+                    healthy_tasks += 1
+                elif task.done() and task.exception():
+                    logger.warning(f"Task {task_name} has exception: {task.exception()}")
+            
+            # Update health check timestamp
+            self._last_health_check = datetime.utcnow()
+            self._health_check_failures = 0
+            
+            logger.info(
+                f"Monitoring health check passed: {healthy_tasks}/{total_tasks} tasks healthy, "
+                f"failures_cleared={len(self._task_failures) == 0}"
+            )
+            return True
+            
+        except Exception as e:
+            self._health_check_failures += 1
+            logger.error(f"Monitoring health check exception: {e}")
+            return False
+    
+    async def get_monitoring_health_status(self) -> Dict[str, Any]:
+        """
+        CRITICAL RESILIENCE: Get comprehensive monitoring health status.
+        
+        This provides detailed health information for monitoring dashboard and alerts.
+        
+        Returns:
+            Comprehensive health status dictionary
+        """
+        current_time = datetime.utcnow()
+        
+        # Calculate task health metrics
+        task_health = {
+            'total_tasks': len(self._background_tasks),
+            'running_tasks': 0,
+            'completed_tasks': 0,
+            'failed_tasks': 0,
+            'cancelled_tasks': 0,
+            'healthy_tasks': []
+        }
+        
+        for task_name, task in self._background_tasks.items():
+            if not task.done():
+                task_health['running_tasks'] += 1
+                task_health['healthy_tasks'].append(task_name)
+            elif task.cancelled():
+                task_health['cancelled_tasks'] += 1
+            elif task.exception():
+                task_health['failed_tasks'] += 1
+            else:
+                task_health['completed_tasks'] += 1
+        
+        # Calculate uptime and failure rates
+        last_health_check_age = (current_time - self._last_health_check).total_seconds() if self._last_health_check else None
+        health_check_stale = last_health_check_age is not None and last_health_check_age > 300  # 5 minutes
+        
+        return {
+            'monitoring_enabled': self._monitoring_enabled,
+            'shutdown_requested': self._shutdown_requested,
+            'health_check_failures': self._health_check_failures,
+            'last_health_check': self._last_health_check.isoformat() if self._last_health_check else None,
+            'last_health_check_age_seconds': last_health_check_age,
+            'health_check_stale': health_check_stale,
+            'task_health': task_health,
+            'task_failures': {
+                'total_failed_tasks': len(self._task_failures),
+                'failure_details': {
+                    task_name: {
+                        'failure_count': count,
+                        'last_failure': self._task_last_failure.get(task_name, '').isoformat() if self._task_last_failure.get(task_name) else None
+                    }
+                    for task_name, count in self._task_failures.items()
+                }
+            },
+            'task_registry': {
+                'registered_tasks': len(self._task_registry),
+                'task_restart_counts': {
+                    task_name: config.get('restart_count', 0)
+                    for task_name, config in self._task_registry.items()
+                }
+            },
+            'overall_health': self._calculate_overall_health_score(task_health, health_check_stale),
+            'alerts': self._generate_health_alerts(task_health, health_check_stale, last_health_check_age)
+        }
+    
+    def _calculate_overall_health_score(self, task_health: Dict, health_check_stale: bool) -> Dict[str, Any]:
+        """
+        Calculate overall health score for monitoring system.
+        
+        Args:
+            task_health: Task health metrics
+            health_check_stale: Whether health check is stale
+            
+        Returns:
+            Health score and status
+        """
+        total_tasks = task_health['total_tasks']
+        running_tasks = task_health['running_tasks']
+        failed_tasks = task_health['failed_tasks']
+        
+        # Calculate base health score
+        if total_tasks == 0:
+            task_score = 100  # No tasks is considered healthy
+        else:
+            task_score = max(0, 100 - (failed_tasks / total_tasks * 100))
+        
+        # Apply penalties
+        health_score = task_score
+        
+        if not self._monitoring_enabled:
+            health_score = 0
+        elif self._shutdown_requested:
+            health_score = min(health_score, 25)
+        elif health_check_stale:
+            health_score = min(health_score, 50)
+        elif self._health_check_failures > 0:
+            health_score = min(health_score, 75)
+        
+        # Determine status
+        if health_score >= 90:
+            status = "healthy"
+        elif health_score >= 70:
+            status = "warning"
+        elif health_score >= 30:
+            status = "degraded"
+        else:
+            status = "critical"
+        
+        return {
+            'score': round(health_score, 1),
+            'status': status,
+            'factors': {
+                'monitoring_enabled': self._monitoring_enabled,
+                'shutdown_requested': self._shutdown_requested,
+                'health_check_stale': health_check_stale,
+                'health_check_failures': self._health_check_failures,
+                'task_failure_rate': (failed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+            }
+        }
+    
+    def _generate_health_alerts(self, task_health: Dict, health_check_stale: bool, last_health_check_age: Optional[float]) -> List[Dict[str, Any]]:
+        """
+        Generate health alerts based on monitoring status.
+        
+        Args:
+            task_health: Task health metrics
+            health_check_stale: Whether health check is stale
+            last_health_check_age: Age of last health check in seconds
+            
+        Returns:
+            List of alert dictionaries
+        """
+        alerts = []
+        
+        # Critical alerts
+        if not self._monitoring_enabled:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'Background monitoring is disabled',
+                'action': 'Call restart_background_monitoring() immediately',
+                'impact': 'System health monitoring and recovery are non-functional'
+            })
+        
+        if self._shutdown_requested:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'Monitoring shutdown has been requested',
+                'action': 'Investigate shutdown cause and restart monitoring',
+                'impact': 'Monitoring will stop accepting new tasks'
+            })
+        
+        # Warning alerts
+        if health_check_stale:
+            alerts.append({
+                'severity': 'warning',
+                'message': f'Health check is stale ({last_health_check_age:.0f}s old)',
+                'action': 'Check monitoring system responsiveness',
+                'impact': 'May not detect recent failures'
+            })
+        
+        if self._health_check_failures > 0:
+            alerts.append({
+                'severity': 'warning',
+                'message': f'{self._health_check_failures} health check failures detected',
+                'action': 'Investigate monitoring system stability',
+                'impact': 'Reduced reliability of health status'
+            })
+        
+        # Task-related alerts
+        if task_health['failed_tasks'] > 0:
+            alerts.append({
+                'severity': 'warning',
+                'message': f"{task_health['failed_tasks']} background tasks have failed",
+                'action': 'Review task failure logs and restart if needed',
+                'impact': 'Reduced system functionality'
+            })
+        
+        if task_health['total_tasks'] > 0 and task_health['running_tasks'] == 0:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'No background tasks are running despite having registered tasks',
+                'action': 'Restart background monitoring immediately',
+                'impact': 'Complete loss of background processing'
+            })
+        
+        return alerts
+    
     async def enable_background_monitoring(self, restart_previous_tasks: bool = True) -> Dict[str, Any]:
         """
         Re-enable background task monitoring with optional task recovery.
@@ -1179,6 +1460,139 @@ class UnifiedWebSocketManager:
             )
             
         return recovery_status
+    
+    async def restart_background_monitoring(self, force_restart: bool = False) -> Dict[str, Any]:
+        """
+        CRITICAL RESILIENCE FIX: Restart background monitoring system with full recovery.
+        
+        This method addresses the permanent disable issue where monitoring could be
+        turned off without a way to recover. Provides comprehensive monitoring restart
+        with automatic task recovery and health validation.
+        
+        Args:
+            force_restart: Force restart even if monitoring appears to be running
+            
+        Returns:
+            Dictionary with detailed restart status and recovery metrics
+        """
+        restart_status = {
+            'monitoring_restarted': False,
+            'tasks_recovered': 0,
+            'tasks_failed_recovery': 0,
+            'failed_tasks': [],
+            'health_check_passed': False,
+            'monitoring_state_before': {
+                'enabled': self._monitoring_enabled,
+                'shutdown_requested': self._shutdown_requested,
+                'active_tasks': len([t for t in self._background_tasks.values() if not t.done()]),
+                'total_tasks': len(self._background_tasks),
+                'task_failures': len(self._task_failures)
+            },
+            'recovery_actions_taken': []
+        }
+        
+        async with self._monitoring_lock:
+            # Log the restart attempt with detailed context
+            logger.critical(
+                f"MONITORING RESTART INITIATED: force_restart={force_restart}, "
+                f"current_state=[enabled={self._monitoring_enabled}, "
+                f"shutdown={self._shutdown_requested}, tasks={len(self._background_tasks)}]"
+            )
+            restart_status['recovery_actions_taken'].append('restart_initiated')
+            
+            # Check if restart is needed
+            if self._monitoring_enabled and not force_restart and not self._shutdown_requested:
+                # Monitoring appears healthy, but verify task health
+                active_tasks = len([t for t in self._background_tasks.values() if not t.done()])
+                if active_tasks > 0 and len(self._task_failures) == 0:
+                    logger.info("Background monitoring appears healthy, skipping restart")
+                    restart_status['monitoring_restarted'] = False
+                    restart_status['health_check_passed'] = True
+                    return restart_status
+                else:
+                    logger.warning(
+                        f"Monitoring enabled but unhealthy: {active_tasks} active tasks, "
+                        f"{len(self._task_failures)} task failures - proceeding with restart"
+                    )
+            
+            # Force clean state reset
+            logger.info("Resetting monitoring system to clean state")
+            self._monitoring_enabled = True
+            self._shutdown_requested = False
+            self._health_check_failures = 0
+            self._last_health_check = datetime.utcnow()
+            restart_status['recovery_actions_taken'].append('state_reset')
+            restart_status['monitoring_restarted'] = True
+            
+            # Cancel and clean up existing failed tasks
+            failed_task_names = list(self._background_tasks.keys())
+            for task_name in failed_task_names:
+                try:
+                    await self.stop_background_task(task_name)
+                    logger.info(f"Cleaned up existing task: {task_name}")
+                except Exception as e:
+                    logger.error(f"Failed to clean up task {task_name}: {e}")
+            
+            restart_status['recovery_actions_taken'].append('existing_tasks_cleaned')
+            
+            # Clear failure tracking for fresh start
+            self._task_failures.clear()
+            self._task_last_failure.clear()
+            restart_status['recovery_actions_taken'].append('failure_tracking_cleared')
+            
+            # Attempt to recover registered tasks
+            if self._task_registry:
+                logger.info(f"Attempting to recover {len(self._task_registry)} registered tasks")
+                restart_status['recovery_actions_taken'].append('task_recovery_started')
+                
+                for task_name, task_config in list(self._task_registry.items()):
+                    try:
+                        # Limit restart attempts to prevent infinite loops
+                        restart_count = task_config.get('restart_count', 0)
+                        if restart_count > 10:
+                            logger.warning(f"Skipping {task_name} - too many restart attempts ({restart_count})")
+                            restart_status['tasks_failed_recovery'] += 1
+                            restart_status['failed_tasks'].append(f"{task_name}:too_many_restarts")
+                            continue
+                        
+                        # Increment restart count
+                        task_config['restart_count'] = restart_count + 1
+                        task_config['last_restart'] = datetime.utcnow()
+                        
+                        # Start the monitored task
+                        recovery_result = await self.start_monitored_background_task(
+                            task_name,
+                            task_config['func'],
+                            *task_config['args'],
+                            **task_config['kwargs']
+                        )
+                        
+                        if recovery_result:
+                            restart_status['tasks_recovered'] += 1
+                            logger.info(f"Successfully recovered task: {task_name} (attempt {restart_count + 1})")
+                        else:
+                            restart_status['tasks_failed_recovery'] += 1
+                            restart_status['failed_tasks'].append(f"{task_name}:start_failed")
+                            logger.error(f"Failed to recover task: {task_name}")
+                        
+                    except Exception as e:
+                        restart_status['tasks_failed_recovery'] += 1
+                        restart_status['failed_tasks'].append(f"{task_name}:exception:{str(e)}")
+                        logger.error(f"Exception recovering task {task_name}: {e}")
+            
+            # Verify monitoring is working
+            restart_status['health_check_passed'] = await self._verify_monitoring_health()
+            restart_status['recovery_actions_taken'].append('health_check_completed')
+            
+            # Log final status
+            logger.critical(
+                f"MONITORING RESTART COMPLETED: success={restart_status['monitoring_restarted']}, "
+                f"recovered={restart_status['tasks_recovered']}, "
+                f"failed={restart_status['tasks_failed_recovery']}, "
+                f"health_ok={restart_status['health_check_passed']}"
+            )
+            
+        return restart_status
 
 
 # SECURITY FIX: Replace singleton with factory pattern

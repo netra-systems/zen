@@ -11,8 +11,9 @@ from netra_backend.app.schemas.tool_permission import ToolExecutionContext
 logger = central_logger
 
 
-# Import general RateLimiter from canonical location - CONSOLIDATED  
-from netra_backend.app.websocket_core import RateLimiter as CoreRateLimiter
+# Import general RateLimiter from canonical location - CIRCULAR IMPORT FIX
+# Use service-level RateLimiter to avoid circular import with websocket_core
+from netra_backend.app.services.rate_limiter import RateLimiter as CoreRateLimiter
 
 
 class ToolPermissionRateLimiter:

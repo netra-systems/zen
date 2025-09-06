@@ -4,6 +4,7 @@ Main service for connecting to external MCP servers and executing tools/resource
 Implements IMCPClientService interface with modular architecture compliance.
 """
 
+import asyncio
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions_service import ServiceError
@@ -46,24 +47,35 @@ class MCPClientService(IMCPClientService):
             raise ServiceError(f"Server registration failed: {str(e)}")
     
     async def connect_to_server(self, server_name: str) -> Dict[str, Any]:
-        """Connect to a specific MCP server."""
+        """Connect to a specific MCP server with timeout protection."""
         try:
-            async with get_db_session() as db:
-                server = await self.server_repo.get_server_by_name(db, server_name)
-                if not server:
-                    raise ServiceError(f"Server '{server_name}' not found")
-                
-                connection = await self.connection_manager.establish_connection(server)
-                self.connection_manager.store_connection(server_name, connection)
-                
-                await self.server_repo.update_server_status(
-                    db, server.id, MCPServerStatus.CONNECTED
-                )
-                
-                return connection
+            # CRITICAL FIX: Add 30-second timeout to prevent hanging connections
+            return await asyncio.wait_for(
+                self._connect_to_server_internal(server_name),
+                timeout=30.0
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"Connection to server {server_name} timed out after 30 seconds")
+            raise ServiceError(f"Connection timeout: {server_name} failed to connect within 30 seconds")
         except Exception as e:
             logger.error(f"Failed to connect to server {server_name}: {e}")
             raise ServiceError(f"Connection failed: {str(e)}")
+    
+    async def _connect_to_server_internal(self, server_name: str) -> Dict[str, Any]:
+        """Internal connection method with database operations."""
+        async with get_db_session() as db:
+            server = await self.server_repo.get_server_by_name(db, server_name)
+            if not server:
+                raise ServiceError(f"Server '{server_name}' not found")
+            
+            connection = await self.connection_manager.establish_connection(server)
+            self.connection_manager.store_connection(server_name, connection)
+            
+            await self.server_repo.update_server_status(
+                db, server.id, MCPServerStatus.CONNECTED
+            )
+            
+            return connection
     
     async def list_servers(self) -> List[Dict[str, Any]]:
         """List all registered MCP servers."""
@@ -96,7 +108,19 @@ class MCPClientService(IMCPClientService):
     
     async def execute_tool(self, server_name: str, tool_name: str, 
                           arguments: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a tool on an MCP server."""
+        """Execute a tool on an MCP server with timeout protection."""
+        try:
+            # CRITICAL FIX: Add 30-second timeout to prevent hanging tool executions
+            return await asyncio.wait_for(
+                self._execute_tool_internal(server_name, tool_name, arguments),
+                timeout=30.0
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"Tool execution timed out: {tool_name} on {server_name} after 30 seconds")
+            raise ServiceError(f"Tool execution timeout: {tool_name} on {server_name}")
+    
+    async def _execute_tool_internal(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """Internal tool execution method."""
         async with get_db_session() as db:
             return await self.tool_executor.execute_tool(
                 db, server_name, tool_name, arguments
