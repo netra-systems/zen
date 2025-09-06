@@ -22,6 +22,7 @@ from tests.utils.asyncio_test_utils import (
     create_mock_async_function_proper,
     run_in_thread_with_loop
 )
+from unittest.mock import patch
 
 
 class TestAsyncioSafetyChecks:

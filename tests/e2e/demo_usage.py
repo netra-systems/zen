@@ -1,152 +1,152 @@
 #!/usr/bin/env python3
-"""Demo usage of Unified Test Configuration
+# REMOVED_SYNTAX_ERROR: '''Demo usage of Unified Test Configuration
 
-This demonstrates how to use the unified test configuration 
-system for consistent testing across all customer tiers.
-"""
+# REMOVED_SYNTAX_ERROR: This demonstrates how to use the unified test configuration
+# REMOVED_SYNTAX_ERROR: system for consistent testing across all customer tiers.
+# REMOVED_SYNTAX_ERROR: '''
 
-from tests.e2e.config import (
-    TEST_CONFIG,
-    TEST_ENDPOINTS,
-    TEST_SECRETS,
-    TEST_USERS,
-    TestDatabaseManager,
-    TestDataFactory,
-    CustomerTier,
-    TestTokenManager,
-    create_unified_config,
-    get_test_user,
-)
-
-
-def demo_basic_config():
-    """Demonstrate basic configuration usage"""
-    print("=== Basic Configuration ===")
-    print(f"WebSocket URL: {TEST_ENDPOINTS.ws_url}")
-    print(f"API Base URL: {TEST_ENDPOINTS.api_base}")
-    print(f"Auth Base URL: {TEST_ENDPOINTS.auth_base}")
-    print(f"JWT Secret: {TEST_SECRETS.jwt_secret[:20]}...")
-    print()
+# REMOVED_SYNTAX_ERROR: from tests.e2e.config import ( )
+TEST_CONFIG,
+TEST_ENDPOINTS,
+TEST_SECRETS,
+TEST_USERS,
+TestDatabaseManager,
+TestDataFactory,
+CustomerTier,
+TestTokenManager,
+create_unified_config,
+get_test_user,
 
 
-def demo_tier_users():
-    """Demonstrate tier-based user testing"""
-    print("=== Test Users by Tier ===")
-    for tier in CustomerTier:
-        user = TEST_USERS[tier.value]
-        print(f"{tier.value.upper()}: {user.email}")
-        print(f"  ID: {user.id}")
-        print(f"  Plan: {user.plan_tier}")
-        print(f"  Active: {user.is_active}")
-    print()
+
+# REMOVED_SYNTAX_ERROR: def demo_basic_config():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate basic configuration usage"""
+    # REMOVED_SYNTAX_ERROR: print("=== Basic Configuration ===")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print()
 
 
-def demo_test_data_factory():
-    """Demonstrate test data factory usage"""
-    print("=== Test Data Factory ===")
-    
+# REMOVED_SYNTAX_ERROR: def demo_tier_users():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate tier-based user testing"""
+    # REMOVED_SYNTAX_ERROR: print("=== Test Users by Tier ===")
+    # REMOVED_SYNTAX_ERROR: for tier in CustomerTier:
+        # REMOVED_SYNTAX_ERROR: user = TEST_USERS[tier.value]
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: print()
+
+
+# REMOVED_SYNTAX_ERROR: def demo_test_data_factory():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate test data factory usage"""
+    # REMOVED_SYNTAX_ERROR: print("=== Test Data Factory ===")
+
     # Create message data
-    free_user = TEST_USERS["free"]
-    message_data = TestDataFactory.create_message_data(
-        free_user.id, "Hello from free user!"
-    )
-    print(f"Message Data: {message_data}")
+    # REMOVED_SYNTAX_ERROR: free_user = TEST_USERS["free"]
+    # REMOVED_SYNTAX_ERROR: message_data = TestDataFactory.create_message_data( )
+    # REMOVED_SYNTAX_ERROR: free_user.id, "Hello from free user!"
     
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # Create auth headers
-    auth_headers = TestDataFactory.create_websocket_auth("test-token-123")
-    print(f"WebSocket Auth: {auth_headers}")
-    
+    # REMOVED_SYNTAX_ERROR: auth_headers = TestDataFactory.create_websocket_auth("test-token-123")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # Create plan data
-    plan_data = TestDataFactory.create_plan_data("enterprise")
-    print(f"Plan Data: {plan_data}")
-    print()
+    # REMOVED_SYNTAX_ERROR: plan_data = TestDataFactory.create_plan_data("enterprise")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print()
 
 
-def demo_token_manager():
-    """Demonstrate token manager usage"""
-    print("=== Token Manager ===")
-    token_manager = TestTokenManager(TEST_SECRETS)
-    
+# REMOVED_SYNTAX_ERROR: def demo_token_manager():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate token manager usage"""
+    # REMOVED_SYNTAX_ERROR: print("=== Token Manager ===")
+    # REMOVED_SYNTAX_ERROR: token_manager = TestTokenManager(TEST_SECRETS)
+
     # Create tokens for different tiers
-    for tier in ["free", "enterprise"]:
-        user = TEST_USERS[tier]
-        token = token_manager.create_user_token(user)
-        print(f"{tier.upper()} token: {token[:30]}...")
-    print()
+    # REMOVED_SYNTAX_ERROR: for tier in ["free", "enterprise"]:
+        # REMOVED_SYNTAX_ERROR: user = TEST_USERS[tier]
+        # REMOVED_SYNTAX_ERROR: token = token_manager.create_user_token(user)
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: print()
 
 
-def demo_database_config():
-    """Demonstrate database configuration"""
-    print("=== Database Configuration ===")
-    db_url = TestDatabaseManager.get_memory_db_url()
-    print(f"Memory DB URL: {db_url}")
-    
-    db_config = TestDatabaseManager.get_test_db_config()
-    print(f"DB Config: {db_config}")
-    
-    session_config = TestDatabaseManager.create_test_session_config()
-    print(f"Session Config: {session_config}")
-    print()
+# REMOVED_SYNTAX_ERROR: def demo_database_config():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate database configuration"""
+    # REMOVED_SYNTAX_ERROR: print("=== Database Configuration ===")
+    # REMOVED_SYNTAX_ERROR: db_url = TestDatabaseManager.get_memory_db_url()
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+    # REMOVED_SYNTAX_ERROR: db_config = TestDatabaseManager.get_test_db_config()
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+    # REMOVED_SYNTAX_ERROR: session_config = TestDatabaseManager.create_test_session_config()
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print()
 
 
-def demo_helper_functions():
-    """Demonstrate helper function usage"""
-    print("=== Helper Functions ===")
-    
+# REMOVED_SYNTAX_ERROR: def demo_helper_functions():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate helper function usage"""
+    # REMOVED_SYNTAX_ERROR: print("=== Helper Functions ===")
+
     # Get specific user
-    enterprise_user = get_test_user("enterprise")
-    print(f"Enterprise User: {enterprise_user.email}")
-    
+    # REMOVED_SYNTAX_ERROR: enterprise_user = get_test_user("enterprise")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # Create custom config
-    custom_config = create_unified_config()
-    print(f"Custom Config WebSocket: {custom_config.endpoints.ws_url}")
-    print()
+    # REMOVED_SYNTAX_ERROR: custom_config = create_unified_config()
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print()
 
 
-def demo_typical_test_usage():
-    """Demonstrate typical test usage pattern"""
-    print("=== Typical Test Usage Pattern ===")
-    
+# REMOVED_SYNTAX_ERROR: def demo_typical_test_usage():
+    # REMOVED_SYNTAX_ERROR: """Demonstrate typical test usage pattern"""
+    # REMOVED_SYNTAX_ERROR: print("=== Typical Test Usage Pattern ===")
+
     # 1. Get test user for specific tier
-    free_user = get_test_user("free")
-    print(f"1. Selected test user: {free_user.email}")
-    
+    # REMOVED_SYNTAX_ERROR: free_user = get_test_user("free")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # 2. Create auth token
-    token_manager = TestTokenManager(TEST_SECRETS)
-    token = token_manager.create_user_token(free_user)
-    print(f"2. Generated token: {token[:20]}...")
-    
+    # REMOVED_SYNTAX_ERROR: token_manager = TestTokenManager(TEST_SECRETS)
+    # REMOVED_SYNTAX_ERROR: token = token_manager.create_user_token(free_user)
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # 3. Create test message
-    message_data = TestDataFactory.create_message_data(
-        free_user.id, "Test message for free tier"
-    )
-    print(f"3. Test message: {message_data['content']}")
+    # REMOVED_SYNTAX_ERROR: message_data = TestDataFactory.create_message_data( )
+    # REMOVED_SYNTAX_ERROR: free_user.id, "Test message for free tier"
     
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # 4. Create headers for API call
-    api_headers = TestDataFactory.create_api_headers(token)
-    print(f"4. API headers ready: {list(api_headers.keys())}")
-    
+    # REMOVED_SYNTAX_ERROR: api_headers = TestDataFactory.create_api_headers(token)
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
     # 5. WebSocket URL ready
-    print(f"5. WebSocket URL: {TEST_ENDPOINTS.ws_url}")
-    
-    print("Ready for unified testing!")
-    print()
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+    # REMOVED_SYNTAX_ERROR: print("Ready for unified testing!")
+    # REMOVED_SYNTAX_ERROR: print()
 
 
-if __name__ == "__main__":
-    print("Unified Test Configuration Demo")
-    print("===============================
-")
-    
-    demo_basic_config()
-    demo_tier_users()
-    demo_test_data_factory()
-    demo_token_manager()
-    demo_database_config()
-    demo_helper_functions()
-    demo_typical_test_usage()
-    
-    print("Demo completed successfully!")
-    print("
-To use in your tests:")
-    print("from tests.e2e.config import TEST_USERS, get_test_user, TestDataFactory")
+    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+        # REMOVED_SYNTAX_ERROR: print("Unified Test Configuration Demo")
+        # REMOVED_SYNTAX_ERROR: print("=============================== )
+        # REMOVED_SYNTAX_ERROR: ")
+
+        # REMOVED_SYNTAX_ERROR: demo_basic_config()
+        # REMOVED_SYNTAX_ERROR: demo_tier_users()
+        # REMOVED_SYNTAX_ERROR: demo_test_data_factory()
+        # REMOVED_SYNTAX_ERROR: demo_token_manager()
+        # REMOVED_SYNTAX_ERROR: demo_database_config()
+        # REMOVED_SYNTAX_ERROR: demo_helper_functions()
+        # REMOVED_SYNTAX_ERROR: demo_typical_test_usage()
+
+        # REMOVED_SYNTAX_ERROR: print("Demo completed successfully!")
+        # REMOVED_SYNTAX_ERROR: print(" )
+        # REMOVED_SYNTAX_ERROR: To use in your tests:")
+        # REMOVED_SYNTAX_ERROR: print("from tests.e2e.config import TEST_USERS, get_test_user, TestDataFactory")

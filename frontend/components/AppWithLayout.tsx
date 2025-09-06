@@ -1,16 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { StatsigProvider, useClientAsyncInit } from '@statsig/react-bindings';
+import { StatsigAutoCapturePlugin } from '@statsig/web-analytics';
+import { StatsigSessionReplayPlugin } from '@statsig/session-replay';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { Header } from '@/components/Header';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store';
+import { useAuth } from '@/auth/context';
 
 interface AppWithLayoutProps {
   children: React.ReactNode;
 }
 
-export function AppWithLayout({ children }: AppWithLayoutProps) {
+function AppWithLayoutContent({ children }: AppWithLayoutProps) {
   const { isSidebarCollapsed, toggleSidebar } = useAppStore();
   // Initialize hydration state immediately to prevent flicker
   const [isHydrated, setIsHydrated] = useState(true);
@@ -34,4 +38,24 @@ export function AppWithLayout({ children }: AppWithLayoutProps) {
       </div>
     </div>
   );
+}
+
+function AppWithStatsig({ children }: AppWithLayoutProps) {
+  const { user } = useAuth();
+  const id = user?.id || 'a-user';
+  const { client } = useClientAsyncInit(
+    'client-d2wo3z15FpMFpF3UWspyfq3XDRZ3cOvETBtm9RJHeo5',
+    { userID: id },
+    { plugins: [new StatsigAutoCapturePlugin(), new StatsigSessionReplayPlugin()] }
+  );
+
+  return (
+    <StatsigProvider client={client} loadingComponent={<div>Loading...</div>}>
+      <AppWithLayoutContent>{children}</AppWithLayoutContent>
+    </StatsigProvider>
+  );
+}
+
+export function AppWithLayout({ children }: AppWithLayoutProps) {
+  return <AppWithStatsig>{children}</AppWithStatsig>;
 }

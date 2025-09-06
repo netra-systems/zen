@@ -29,7 +29,7 @@ from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
@@ -2403,7 +2403,7 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     Example:
         # Create isolated bridge for a specific user
         bridge = create_agent_websocket_bridge(user_context)
-        emitter = bridge.create_user_emitter(user_context)
+        emitter = await bridge.create_user_emitter(user_context)
         await emitter.notify_agent_started(agent_name, metadata)
     """
     from netra_backend.app.logging_config import central_logger
@@ -2412,13 +2412,12 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     logger.info("Creating isolated AgentWebSocketBridge instance")
     bridge = AgentWebSocketBridge()
     
-    # Pre-create user emitter if context is provided
+    # Note: User emitters are created on-demand via await bridge.create_user_emitter(user_context)
+    # when actually needed to avoid sync/async complexity in factory function
     if user_context:
-        try:
-            _ = bridge.create_user_emitter(user_context)
-            logger.info(f"Pre-created user emitter for user {user_context.user_id[:8]}...")
-        except Exception as e:
-            logger.warning(f"Failed to pre-create user emitter: {e}")
+        logger.info(f"Bridge created for user {user_context.user_id[:8]}... (emitter will be created on-demand)")
+    else:
+        logger.info("Bridge created without user context (emitter creation requires explicit user context)")
     
     return bridge
 

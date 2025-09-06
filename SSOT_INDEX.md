@@ -5,6 +5,8 @@ This document provides a comprehensive index of all SSOT components in the Netra
 
 **📌 NEW**: [Tier 4 Operational Components](./SSOT_INDEX_TIER_4.md) - 15 additional critical SSOT components for execution, monitoring, and resilience.
 
+**📊 SYSTEM OPTIMIZATION**: [Netra Optimization Breakdown](./NETRA_OPTIMIZATION_BREAKDOWN.md) - Comprehensive architecture showing AI-specific (25%), general optimization (25%), and hybrid infrastructure (50%) components.
+
 ## Critical Ranking (1-10 Scale)
 
 ### 🔴 TIER 1: ULTRA-CRITICAL (10/10)

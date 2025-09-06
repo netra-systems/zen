@@ -2,7 +2,7 @@
 # 78% smaller, 3x faster startup, production-optimized Next.js build
 # CRITICAL: Uses standalone output for minimal runtime
 
-FROM node:20-alpine3.19 as builder
+FROM node:23-alpine as builder
 
 # Build arguments for staging environment
 ARG BUILD_ENV=staging
@@ -29,37 +29,51 @@ WORKDIR /build
 # CRITICAL: Copy package files FIRST for maximum layer cache hits
 COPY frontend/package*.json ./
 
-# Install dependencies with BuildKit cache mount for speed
+# Install ALL dependencies (including dev) for build
+# Use npm install instead of npm ci to ensure all deps are installed
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --only=production --silent && \
-    npm rebuild --update-binary && \
+    npm install --silent && \
     npm cache clean --force
 
 # Copy Next.js config files before source for better caching
-COPY frontend/next.config.js ./
+COPY frontend/next.config.ts ./
 COPY frontend/tsconfig.json ./
-COPY frontend/.eslintrc.json ./
+COPY frontend/eslint.config.mjs ./
+COPY frontend/tailwind.config.ts ./
+COPY frontend/postcss.config.mjs ./
+COPY frontend/components.json ./
 
 # Copy public assets (changes less frequently)
 COPY frontend/public ./public
 
 # Copy source code LAST (changes most frequently)
-COPY frontend/src ./src
 COPY frontend/app ./app
+COPY frontend/components ./components
+COPY frontend/lib ./lib
+COPY frontend/services ./services
+COPY frontend/hooks ./hooks
+COPY frontend/styles ./styles
+COPY frontend/types ./types
+COPY frontend/utils ./utils
 
 # Build Next.js with production optimizations and standalone output
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# Enable standalone build for minimal runtime
-RUN echo '/** @type {import("next").NextConfig} */' > next.config.standalone.js && \
-    echo 'const config = require("./next.config.js");' >> next.config.standalone.js && \
-    echo 'module.exports = { ...config, output: "standalone" };' >> next.config.standalone.js && \
-    npm run build -- --config next.config.standalone.js
+ENV NEXT_PUBLIC_ENVIRONMENT=staging
+ENV NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai
+ENV NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_WEBSOCKET_URL=wss://api.staging.netrasystems.ai
+
+# Build with standalone output enabled directly
+# Set memory limit directly instead of using cross-env
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npx next build
 
 # ============================================
 # Production Stage - Minimal Alpine Runtime
 # ============================================
-FROM node:20-alpine3.19
+FROM node:23-alpine
 
 # Build and environment arguments
 ARG BUILD_ENV=staging

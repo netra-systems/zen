@@ -15,5 +15,5 @@ __all__ = [
     'MockLanguageDetector',
     'MockJargonExtractor',
     'MockCodeDetector',
-    'MockSemanticVectorizer'
+    'MockSemanticVectorizer',
 ]

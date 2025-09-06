@@ -133,7 +133,7 @@ class DevLauncher:
     def _setup_managers(self):
         """Setup manager instances."""
         self.health_monitor = HealthMonitor(check_interval=30)
-        self.process_manager = ProcessManager(health_monitor=self.health_monitor)
+        self.process_manager = ProcessManager()
         self.log_manager = LogManager()
         self.service_discovery = ServiceDiscovery(self.config.project_root)
         

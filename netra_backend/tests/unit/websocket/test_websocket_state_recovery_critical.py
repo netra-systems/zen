@@ -4,8 +4,8 @@ WebSocket state recovery critical tests.
 Tests WebSocket connection recovery scenarios that prevent revenue loss 
 from real-time feature failures causing user abandonment.
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 IMPLEMENTATION STATUS: These tests were written for a stateful WebSocket interface

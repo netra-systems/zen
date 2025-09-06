@@ -13,10 +13,9 @@ class TestDatetimeUtils:
     
     @pytest.fixture
     def instance(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test instance"""
-    pass
         return DatetimeUtils()
     
     def test_initialization(self, instance):
@@ -26,7 +25,6 @@ class TestDatetimeUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
-    pass
         # Test happy path - get UTC time
         result = instance.now_utc()
         assert result is not None
@@ -40,7 +38,6 @@ class TestDatetimeUtils:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
-    pass
         # Test with None, empty, extreme values
         pass
     

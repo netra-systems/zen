@@ -3,8 +3,8 @@
 import uuid
 from datetime import datetime, timezone
 from test_framework.database.test_database_manager import TestDatabaseManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -19,7 +19,7 @@ import asyncio
 
 
 @pytest.fixture
- def real_db_session():
+def real_db_session():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock database session."""
@@ -42,12 +42,12 @@ def sample_state():
     """Create sample agent state for testing."""
     pass
     return DeepAgentState(
-        user_request="Test request",
-        chat_thread_id="thread_dev-temp-test123",
-        user_id="dev-temp-test123",
-        status="pending",
-        step_count=0
-    )
+user_request="Test request",
+chat_thread_id="thread_dev-temp-test123",
+user_id="dev-temp-test123",
+status="pending",
+step_count=0
+)
 
 
 @pytest.fixture
@@ -57,14 +57,14 @@ def persistence_request(sample_state):
     """Create sample persistence request."""
     pass
     return StatePersistenceRequest(
-        run_id=f"run_{uuid.uuid4()}",
-        thread_id="thread_dev-temp-test123", 
-        user_id="dev-temp-test123",
-        state_data=sample_state.model_dump(),
-        checkpoint_type=CheckpointType.AUTO,
-        is_recovery_point=True,
-        execution_context={"step_count": 0}
-    )
+run_id=f"run_{uuid.uuid4()}",
+thread_id="thread_dev-temp-test123", 
+user_id="dev-temp-test123",
+state_data=sample_state.model_dump(),
+checkpoint_type=CheckpointType.AUTO,
+is_recovery_point=True,
+execution_context={"step_count": 0}
+)
 
 
 @pytest.mark.asyncio
@@ -77,17 +77,17 @@ async def test_state_persistence_creates_missing_dev_user(mock_db_session, persi
         mock_user_service.get = AsyncMock(return_value=None)
         # Create should succeed
         mock_user_service.create = AsyncMock(return_value=User(
-            id="dev-temp-test123",
-            email="dev-temp-test123@dev.local",
-            full_name="Dev User dev-temp-test123",
-            is_active=True,
-            is_developer=True,
-            role="developer"
+        id="dev-temp-test123",
+        email="dev-temp-test123@dev.local",
+        full_name="Dev User dev-temp-test123",
+        is_active=True,
+        is_developer=True,
+        role="developer"
         ))
         
         # Execute save operation
         success, snapshot_id = await state_persistence_service.save_agent_state(
-            persistence_request, mock_db_session
+        persistence_request, mock_db_session
         )
         
         # Verify user lookup was called
@@ -105,111 +105,111 @@ async def test_state_persistence_creates_missing_dev_user(mock_db_session, persi
         assert user_create_obj.is_developer is True
 
 
-@pytest.mark.asyncio
-async def test_state_persistence_handles_existing_user(mock_db_session, persistence_request):
-    """Test that existing users are not recreated."""
+        @pytest.mark.asyncio
+        async def test_state_persistence_handles_existing_user(mock_db_session, persistence_request):
+            """Test that existing users are not recreated."""
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+            with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
         # User already exists
-        existing_user = User(
-            id="dev-temp-test123",
-            email="existing@dev.local",
-            full_name="Existing User",
-            is_active=True
-        )
-        mock_user_service.get = AsyncMock(return_value=existing_user)
-        mock_user_service.create = AsyncNone  # TODO: Use real service instance
+                existing_user = User(
+                id="dev-temp-test123",
+                email="existing@dev.local",
+                full_name="Existing User",
+                is_active=True
+                )
+                mock_user_service.get = AsyncMock(return_value=existing_user)
+                mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
         # Execute save operation  
-        await state_persistence_service.save_agent_state(
-            persistence_request, mock_db_session
-        )
+                await state_persistence_service.save_agent_state(
+                persistence_request, mock_db_session
+                )
         
         # Verify user was checked
-        mock_user_service.get.assert_called_once()
+                mock_user_service.get.assert_called_once()
         # Verify no attempt to create user
-        mock_user_service.create.assert_not_called()
+                mock_user_service.create.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_state_persistence_handles_test_prefix_users(mock_db_session, sample_state):
-    """Test that test- prefixed users are also auto-created."""
+                @pytest.mark.asyncio
+                async def test_state_persistence_handles_test_prefix_users(mock_db_session, sample_state):
+                    """Test that test- prefixed users are also auto-created."""
     
-    test_request = StatePersistenceRequest(
-        run_id=f"run_{uuid.uuid4()}",
-        thread_id="thread_test-user456",
-        user_id="test-user456",
-        state_data=sample_state.model_dump(),
-        checkpoint_type=CheckpointType.AUTO,
-        is_recovery_point=True,
-        execution_context={"step_count": 0}
-    )
+                    test_request = StatePersistenceRequest(
+                    run_id=f"run_{uuid.uuid4()}",
+                    thread_id="thread_test-user456",
+                    user_id="test-user456",
+                    state_data=sample_state.model_dump(),
+                    checkpoint_type=CheckpointType.AUTO,
+                    is_recovery_point=True,
+                    execution_context={"step_count": 0}
+                    )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
-        mock_user_service.get = AsyncMock(return_value=None)
-        mock_user_service.create = AsyncMock(return_value=User(
-            id="test-user456",
-            email="test-user456@dev.local",
-            full_name="Dev User test-user456"
-        ))
+                    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+                        mock_user_service.get = AsyncMock(return_value=None)
+                        mock_user_service.create = AsyncMock(return_value=User(
+                        id="test-user456",
+                        email="test-user456@dev.local",
+                        full_name="Dev User test-user456"
+                        ))
         
-        await state_persistence_service.save_agent_state(test_request, mock_db_session)
+                        await state_persistence_service.save_agent_state(test_request, mock_db_session)
         
         # Verify test user was created
-        mock_user_service.create.assert_called_once()
-        create_args = mock_user_service.create.call_args[1]['obj_in']
-        assert create_args.id == "test-user456"
-        assert create_args.email == "test-user456@dev.local"
+                        mock_user_service.create.assert_called_once()
+                        create_args = mock_user_service.create.call_args[1]['obj_in']
+                        assert create_args.id == "test-user456"
+                        assert create_args.email == "test-user456@dev.local"
 
 
-@pytest.mark.asyncio
-async def test_state_persistence_skips_creation_for_regular_users(mock_db_session, sample_state):
-    """Test that regular (non-dev) users are not auto-created if missing."""
+                        @pytest.mark.asyncio
+                        async def test_state_persistence_skips_creation_for_regular_users(mock_db_session, sample_state):
+                            """Test that regular (non-dev) users are not auto-created if missing."""
     
-    regular_request = StatePersistenceRequest(
-        run_id=f"run_{uuid.uuid4()}",
-        thread_id="thread_regular-user789",
-        user_id="regular-user789",
-        state_data=sample_state.model_dump(),
-        checkpoint_type=CheckpointType.AUTO,
-        is_recovery_point=True,
-        execution_context={"step_count": 0}
-    )
+                            regular_request = StatePersistenceRequest(
+                            run_id=f"run_{uuid.uuid4()}",
+                            thread_id="thread_regular-user789",
+                            user_id="regular-user789",
+                            state_data=sample_state.model_dump(),
+                            checkpoint_type=CheckpointType.AUTO,
+                            is_recovery_point=True,
+                            execution_context={"step_count": 0}
+                            )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
-        mock_user_service.get = AsyncMock(return_value=None)
-        mock_user_service.create = AsyncNone  # TODO: Use real service instance
+                            with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+                                mock_user_service.get = AsyncMock(return_value=None)
+                                mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
         # Should still try to save, but without creating user
         # This will likely fail with FK violation, but that's expected for regular users
-        await state_persistence_service.save_agent_state(regular_request, mock_db_session)
+                                await state_persistence_service.save_agent_state(regular_request, mock_db_session)
         
         # Verify user was checked but NOT created (since it's not a dev user)
-        mock_user_service.get.assert_called_once()
-        mock_user_service.create.assert_not_called()
+                                mock_user_service.get.assert_called_once()
+                                mock_user_service.create.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_state_persistence_handles_empty_user_id(mock_db_session, sample_state):
-    """Test that empty/None user_id is handled gracefully."""
+                                @pytest.mark.asyncio
+                                async def test_state_persistence_handles_empty_user_id(mock_db_session, sample_state):
+                                    """Test that empty/None user_id is handled gracefully."""
     
-    no_user_request = StatePersistenceRequest(
-        run_id=f"run_{uuid.uuid4()}",
-        thread_id="thread_anonymous",
-        user_id=None,  # No user_id
-        state_data=sample_state.model_dump(),
-        checkpoint_type=CheckpointType.AUTO,
-        is_recovery_point=True,
-        execution_context={"step_count": 0}
-    )
+                                    no_user_request = StatePersistenceRequest(
+                                    run_id=f"run_{uuid.uuid4()}",
+                                    thread_id="thread_anonymous",
+                                    user_id=None,  # No user_id
+                                    state_data=sample_state.model_dump(),
+                                    checkpoint_type=CheckpointType.AUTO,
+                                    is_recovery_point=True,
+                                    execution_context={"step_count": 0}
+                                    )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
-        mock_user_service.get = AsyncNone  # TODO: Use real service instance
-        mock_user_service.create = AsyncNone  # TODO: Use real service instance
+                                    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+                                        mock_user_service.get = AsyncNone  # TODO: Use real service instance
+                                        mock_user_service.create = AsyncNone  # TODO: Use real service instance
         
-        await state_persistence_service.save_agent_state(no_user_request, mock_db_session)
+                                        await state_persistence_service.save_agent_state(no_user_request, mock_db_session)
         
         # Should not attempt to look up or create user when user_id is None
-        mock_user_service.get.assert_not_called()
-        mock_user_service.create.assert_not_called()
-    pass
+                                        mock_user_service.get.assert_not_called()
+                                        mock_user_service.create.assert_not_called()
+                                        pass

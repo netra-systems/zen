@@ -8,11 +8,16 @@ to comply with the 450-line file limit and 25-line function limit.
 """
 
 import sys
+import os
 from pathlib import Path
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import Windows encoding SSOT and set up encoding
+from shared.windows_encoding import setup_windows_encoding
+setup_windows_encoding()
 
 from scripts.compliance import ArchitectureEnforcer, CLIHandler, OutputHandler
 from scripts.compliance.mro_auditor import MROAuditor

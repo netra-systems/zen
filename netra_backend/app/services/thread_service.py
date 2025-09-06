@@ -20,8 +20,8 @@ from netra_backend.app.services.database.unit_of_work import (
     get_unit_of_work,
 )
 from netra_backend.app.services.service_interfaces import IThreadService
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -41,7 +41,15 @@ class ThreadService(IThreadService):
     
     async def _send_thread_created_event(self, user_id: str, thread_id: str) -> None:
         """Send thread created WebSocket event with actual thread ID"""
-        await manager.send_to_user(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
+        # Create user context for isolated WebSocket manager
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=f"thread_creation_{uuid.uuid4()}"
+        )
+        manager = create_websocket_manager(user_context)
+        if manager:
+            await manager.send_to_user(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
     
     async def _execute_with_uow(self, operation, db: Optional[AsyncSession] = None, *args, **kwargs):
         """Execute operation with unit of work pattern"""
@@ -129,7 +137,15 @@ class ThreadService(IThreadService):
         if thread and thread.metadata_:
             user_id = thread.metadata_.get("user_id")
             if user_id:
-                await manager.send_to_user(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
+                # Create user context for isolated WebSocket manager
+                user_context = UserExecutionContext(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                manager = create_websocket_manager(user_context)
+                if manager:
+                    await manager.send_to_user(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
     
     async def _create_run_with_uow(self, uow, run_data: Dict[str, Any], thread_id: str, assistant_id: str, run_id: str) -> Run:
         """Create run using unit of work"""
@@ -192,10 +208,18 @@ class ThreadService(IThreadService):
         # Validate that the thread exists and belongs to the user
         thread = await self.get_thread(thread_id, user_id, db)
         if thread:
-            await manager.send_to_user(user_id, {
-                "type": "thread_switched", 
-                "payload": {"thread_id": thread_id}
-            })
+            # Create user context for isolated WebSocket manager
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=f"thread_switch_{uuid.uuid4()}"
+            )
+            manager = create_websocket_manager(user_context)
+            if manager:
+                await manager.send_to_user(user_id, {
+                    "type": "thread_switched", 
+                    "payload": {"thread_id": thread_id}
+                })
             return thread
         return None
 
@@ -206,10 +230,18 @@ class ThreadService(IThreadService):
             async with get_unit_of_work(db) as uow:
                 success = await uow.threads.delete(uow.session, thread_id)
                 if success:
-                    await manager.send_to_user(user_id, {
-                        "type": "thread_deleted", 
-                        "payload": {"thread_id": thread_id}
-                    })
+                    # Create user context for isolated WebSocket manager
+                    user_context = UserExecutionContext(
+                        user_id=user_id,
+                        thread_id=thread_id,
+                        run_id=f"thread_delete_{uuid.uuid4()}"
+                    )
+                    manager = create_websocket_manager(user_context)
+                    if manager:
+                        await manager.send_to_user(user_id, {
+                            "type": "thread_deleted", 
+                            "payload": {"thread_id": thread_id}
+                        })
                 return success
         except Exception as e:
             logger.error(f"Failed to delete thread {thread_id}: {e}")

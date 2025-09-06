@@ -45,8 +45,8 @@ class ContainerHelper:
             "url": self.redis_url,
             "host": "localhost",
             "port": 6379,
-            "db": 0
-        }
+            "db": 0,
+}
     
     def get_postgres_config(self) -> Dict[str, Any]:
         """Get PostgreSQL configuration."""
@@ -56,8 +56,8 @@ class ContainerHelper:
             "port": 5432,
             "database": "netra_test",
             "user": "postgres",
-            "password": "postgres"
-        }
+            "password": "postgres",
+}
     
     def get_clickhouse_config(self) -> Dict[str, Any]:
         """Get ClickHouse configuration."""
@@ -65,5 +65,5 @@ class ContainerHelper:
             "url": self.clickhouse_url,
             "host": "localhost",
             "port": 9000,
-            "database": "default"
-        }
+            "database": "default",
+}

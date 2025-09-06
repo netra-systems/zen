@@ -12,7 +12,7 @@ Business Value Justification:
 import pytest
 import os
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.configuration.base import get_unified_config, config_manager
@@ -28,10 +28,9 @@ class TestConfigurationManagement:
     
     @pytest.fixture(autouse=True)
     def setup_isolated_env(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Setup isolated environment for testing."""
-    pass
         env = get_env()
         # Store original values
         original_test_var = env.get('TEST_CONFIG_VAR')
@@ -58,7 +57,6 @@ class TestConfigurationManagement:
 
     def test_config_manager_exists(self):
         """Test that config manager exists."""
-    pass
         assert config_manager is not None
         # Should have configuration methods
         if hasattr(config_manager, 'get'):
@@ -71,7 +69,6 @@ class TestConfigurationManagement:
 
     def test_isolated_environment_function_exists(self):
         """Test that isolated environment access exists."""
-    pass
         assert get_env is not None
         assert callable(get_env)
 
@@ -95,7 +92,6 @@ class TestConfigurationManagement:
 
     def test_isolated_environment_access(self):
         """Test isolated environment variable access."""
-    pass
         try:
             # Test accessing a common environment variable
             env = get_env()
@@ -130,7 +126,6 @@ class TestConfigurationManagement:
 
     def test_environment_variable_isolation(self):
         """Test that environment variable isolation works."""
-    pass
         try:
             # Setup test environment variable using IsolatedEnvironment
             env = get_env()
@@ -164,7 +159,6 @@ class TestConfigurationManagement:
 
     def test_config_environment_specific_values(self):
         """Test that configuration provides environment-specific values."""
-    pass
         try:
             config = get_unified_config()
             
@@ -204,7 +198,6 @@ class TestConfigurationManagement:
 
     def test_environment_detection_consistency(self):
         """Test that environment detection is consistent."""
-    pass
         try:
             # Get environment multiple times
             env1 = get_current_environment()
@@ -239,7 +232,6 @@ class TestConfigurationManagement:
 
     def test_config_error_handling(self):
         """Test configuration error handling."""
-    pass
         try:
             # Test accessing non-existent configuration
             config = get_unified_config()
@@ -272,4 +264,3 @@ class TestConfigurationManagement:
                 
         except Exception as e:
             print(f"Configuration types test failed: {e}")
-    pass

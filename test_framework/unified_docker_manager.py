@@ -327,11 +327,8 @@ class UnifiedDockerManager:
         self.pull_policy = pull_policy  # Control Docker Hub access
         self.no_cache_app_code = no_cache_app_code  # Smart caching strategy
         
-        # Windows Podman support: Auto-detect and use Podman builds on Windows
+        # Windows support
         self.is_windows = platform.system() == 'Windows'
-        self.use_podman_build = self.is_windows and shutil.which('podman') is not None
-        if self.use_podman_build:
-            logger.info("🐧 Windows detected with Podman available - will use Podman build helper")
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -2128,40 +2125,20 @@ class UnifiedDockerManager:
                 # Build backend services
                 services_to_build = [s for s in service_names if s in backend_services]
                 if services_to_build:
-                    if self.use_podman_build:
-                        # Use Windows Podman build helper
-                        build_success = await self._build_with_podman(services_to_build)
-                        if not build_success:
-                            logger.warning("⚠️ Podman build failed, falling back to docker-compose")
-                            build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
-                            result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
-                            if result.returncode != 0:
-                                logger.warning(f"⚠️ Failed to build services: {result.stderr}")
-                    else:
-                        build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
-                        logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
-                        
-                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
-                        if result.returncode != 0:
-                            logger.warning(f"⚠️ Failed to build services: {result.stderr}")
-            elif not self.rebuild_backend_only:
-                # Build all requested services
-                if self.use_podman_build:
-                    # Use Windows Podman build helper
-                    build_success = await self._build_with_podman(service_names)
-                    if not build_success:
-                        logger.warning("⚠️ Podman build failed, falling back to docker-compose")
-                        build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
-                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
-                        if result.returncode != 0:
-                            logger.warning(f"⚠️ Failed to build services: {result.stderr}")
-                else:
-                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
-                    logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
+                    logger.info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
                     
                     result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
                     if result.returncode != 0:
                         logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+            elif not self.rebuild_backend_only:
+                # Build all requested services
+                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
+                logger.info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
+                
+                result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                if result.returncode != 0:
+                    logger.warning(f"⚠️ Failed to build services: {result.stderr}")
         
         cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
         logger.info(f"🚀 Executing: {' '.join(cmd)}")
@@ -2326,46 +2303,6 @@ class UnifiedDockerManager:
         except Exception:
             return False
 
-    async def _build_with_podman(self, services: List[str]) -> bool:
-        """Build services using Podman on Windows for better context handling.
-        
-        Args:
-            services: List of service names to build
-            
-        Returns:
-            True if all builds succeeded
-        """
-        try:
-            # Import the Podman builder
-            sys.path.insert(0, str(Path(__file__).parent.parent))
-            from scripts.podman_windows_build import PodmanWindowsBuilder
-            
-            logger.info(f"🐧 Using Podman Windows builder for services: {services}")
-            builder = PodmanWindowsBuilder()
-            
-            success = True
-            for service in services:
-                # Map service names to appropriate image names
-                if self.use_alpine:
-                    image_name = f"netra-alpine-test-{service}:latest"
-                else:
-                    image_name = f"netra-test-{service}:latest"
-                
-                logger.info(f"🔨 Building {service} with Podman as {image_name}")
-                if not builder.build_service(
-                    service_name=f"test-{service}",
-                    image_name=image_name,
-                    no_cache=self.no_cache_app_code
-                ):
-                    logger.error(f"❌ Failed to build {service} with Podman")
-                    success = False
-            
-            builder.cleanup()
-            return success
-            
-        except Exception as e:
-            logger.warning(f"⚠️ Podman build helper failed: {e}")
-            return False
     
     async def _check_http_health(self, url: str, timeout: float) -> bool:
         """Check HTTP health endpoint."""
@@ -3769,6 +3706,230 @@ class UnifiedDockerManager:
                     
         except Exception as e:
             logger.warning(f"Error in post-cleanup handler: {e}")
+    
+    # =====================================
+    # WINDOWS EVENT VIEWER INTEGRATION
+    # =====================================
+    
+    def analyze_docker_crash(self, 
+                            container_name: Optional[str] = None,
+                            save_report: bool = True,
+                            include_event_viewer: bool = True) -> Dict[str, Any]:
+        """
+        Analyze Docker crashes with Windows Event Viewer integration.
+        
+        Args:
+            container_name: Specific container to analyze (optional)
+            save_report: Whether to save the crash report to file
+            include_event_viewer: Include Windows Event Viewer logs (Windows only)
+            
+        Returns:
+            Dictionary containing comprehensive crash analysis
+            
+        Business Value Justification (BVJ):
+        1. Segment: Platform/Internal - Development Velocity, Risk Reduction
+        2. Business Goal: Rapid Docker crash diagnosis and recovery
+        3. Value Impact: Reduces debugging time from hours to minutes
+        4. Revenue Impact: Prevents developer downtime worth $500K+ annually
+        """
+        logger.info(f"🔍 Analyzing Docker crash for: {container_name or 'all containers'}")
+        
+        analysis = {
+            "timestamp": datetime.now().isoformat(),
+            "platform": platform.system(),
+            "container": container_name,
+            "docker_manager_state": self._get_manager_state()
+        }
+        
+        # Platform-specific analysis
+        if platform.system() == "Windows" and include_event_viewer:
+            try:
+                from test_framework.windows_event_viewer import DockerCrashAnalyzer
+                analyzer = DockerCrashAnalyzer()
+                crash_data = analyzer.analyze_docker_crash(
+                    container_name=container_name,
+                    save_report=False  # We'll save combined report
+                )
+                analysis["windows_event_viewer"] = crash_data.get("windows_events", {})
+                analysis["docker_info"] = crash_data.get("docker_info", {})
+            except ImportError:
+                logger.warning("Windows Event Viewer module not available")
+            except Exception as e:
+                logger.error(f"Error accessing Windows Event Viewer: {e}")
+                analysis["windows_event_viewer_error"] = str(e)
+        
+        # Get container-specific information
+        if container_name:
+            analysis["container_details"] = self._get_container_details(container_name)
+            analysis["container_logs"] = self._get_container_logs_tail(container_name, lines=200)
+        
+        # Get Docker daemon status
+        analysis["docker_status"] = self._get_docker_daemon_status()
+        
+        # Get recent restart history
+        analysis["restart_history"] = dict(self._restart_history)
+        
+        # Check resource usage
+        if hasattr(self, 'resource_monitor') and self.resource_monitor:
+            try:
+                snapshot = self.resource_monitor.get_snapshot()
+                analysis["resource_snapshot"] = {
+                    "memory_usage_mb": snapshot.memory_usage_mb,
+                    "cpu_percent": snapshot.cpu_percent,
+                    "disk_usage_percent": snapshot.disk_usage_percent,
+                    "container_count": snapshot.container_count
+                }
+            except:
+                pass
+        
+        # Save comprehensive report if requested
+        if save_report:
+            report_path = self._save_crash_report(analysis)
+            analysis["report_path"] = str(report_path)
+            logger.info(f"📄 Crash report saved to: {report_path}")
+        
+        return analysis
+    
+    def get_windows_event_logs(self, 
+                              hours_back: int = 24,
+                              limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Get Docker-related Windows Event Viewer logs.
+        
+        Args:
+            hours_back: Number of hours to look back
+            limit: Maximum number of events to retrieve
+            
+        Returns:
+            List of event log entries (empty list on non-Windows platforms)
+        """
+        if platform.system() != "Windows":
+            logger.debug("Windows Event Viewer only available on Windows platform")
+            return []
+        
+        try:
+            from test_framework.windows_event_viewer import WindowsDockerEventViewer
+            viewer = WindowsDockerEventViewer(hours_back=hours_back)
+            events = viewer.get_docker_crash_logs(limit=limit)
+            return [e.to_dict() for e in events]
+        except ImportError:
+            logger.error("Windows Event Viewer module not available")
+            return []
+        except Exception as e:
+            logger.error(f"Error retrieving Windows Event Logs: {e}")
+            return []
+    
+    def get_docker_service_status_windows(self) -> Dict[str, Any]:
+        """
+        Get Docker Windows service status.
+        
+        Returns:
+            Dictionary with Docker service status (Windows only)
+        """
+        if platform.system() != "Windows":
+            return {"error": "Only available on Windows"}
+        
+        try:
+            from test_framework.windows_event_viewer import WindowsDockerEventViewer
+            viewer = WindowsDockerEventViewer()
+            return viewer.get_docker_service_status()
+        except Exception as e:
+            logger.error(f"Error getting Docker service status: {e}")
+            return {"error": str(e)}
+    
+    def _get_manager_state(self) -> Dict[str, Any]:
+        """Get current state of the Docker manager."""
+        return {
+            "environment_type": self.environment_type.value,
+            "use_alpine": self.use_alpine,
+            "allocated_ports": dict(self.allocated_ports) if self.allocated_ports else {},
+            "active_services": list(self._active_services) if hasattr(self, '_active_services') else [],
+            "project_name": self._project_name if self._project_name else None
+        }
+    
+    def _get_container_details(self, container_name: str) -> Dict[str, Any]:
+        """Get detailed information about a specific container."""
+        try:
+            result = subprocess.run(
+                ["docker", "inspect", container_name],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                import json
+                data = json.loads(result.stdout)
+                if data:
+                    container = data[0]
+                    return {
+                        "id": container.get("Id", "")[:12],
+                        "created": container.get("Created"),
+                        "state": container.get("State", {}),
+                        "config": {
+                            "image": container.get("Config", {}).get("Image"),
+                            "cmd": container.get("Config", {}).get("Cmd"),
+                            "env": container.get("Config", {}).get("Env", [])[:10]  # Limit env vars
+                        },
+                        "host_config": {
+                            "memory": container.get("HostConfig", {}).get("Memory"),
+                            "cpu_shares": container.get("HostConfig", {}).get("CpuShares"),
+                            "restart_policy": container.get("HostConfig", {}).get("RestartPolicy")
+                        }
+                    }
+        except Exception as e:
+            logger.debug(f"Error getting container details: {e}")
+        return {}
+    
+    def _get_container_logs_tail(self, container_name: str, lines: int = 100) -> List[str]:
+        """Get recent logs from a container."""
+        try:
+            result = subprocess.run(
+                ["docker", "logs", "--tail", str(lines), container_name],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                return result.stdout.split('\n')[-lines:]
+        except Exception as e:
+            logger.debug(f"Error getting container logs: {e}")
+        return []
+    
+    def _get_docker_daemon_status(self) -> Dict[str, Any]:
+        """Get Docker daemon status information."""
+        status = {}
+        try:
+            # Check if Docker is running
+            result = subprocess.run(
+                ["docker", "version", "--format", "json"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                import json
+                status["version"] = json.loads(result.stdout)
+                status["running"] = True
+            else:
+                status["running"] = False
+                status["error"] = result.stderr
+        except Exception as e:
+            status["running"] = False
+            status["error"] = str(e)
+        return status
+    
+    def _save_crash_report(self, analysis: Dict[str, Any]) -> Path:
+        """Save crash analysis report to file."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_dir = Path.cwd() / "docker_diagnostics"
+        report_dir.mkdir(exist_ok=True)
+        report_path = report_dir / f"docker_crash_report_{timestamp}.json"
+        
+        import json
+        with open(report_path, 'w', encoding='utf-8') as f:
+            json.dump(analysis, f, indent=2, default=str, ensure_ascii=False)
+        
+        return report_path
     
     def refresh_dev(self, services: Optional[List[str]] = None, clean: bool = False) -> bool:
         """

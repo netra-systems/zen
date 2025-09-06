@@ -1,3 +1,5 @@
+import asyncio
+
 """
 ClickHouse Array Operations Tests
 Test proper array operations and the query fixer

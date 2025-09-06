@@ -6,8 +6,8 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any
 from test_framework.database.test_database_manager import TestDatabaseManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -16,10 +16,9 @@ class TestDisasterRecoveryBackupValidation:
     
     @pytest.fixture
     def recovery_objectives(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Define Recovery Time Objective (RTO) and Recovery Point Objective (RPO)."""
-    pass
         return {
             "rto_minutes": 60,  # System should be restored within 1 hour
             "rpo_minutes": 15,  # Maximum acceptable data loss: 15 minutes
@@ -68,7 +67,6 @@ class TestDisasterRecoveryBackupValidation:
     
     def test_restoration_time_objectives(self, recovery_objectives):
         """Validates restoration meets Recovery Time Objective (RTO)."""
-    pass
         restoration_service = restoration_service_instance  # Initialize appropriate service
         
         def restore_from_backup(backup_id: str) -> Dict[str, Any]:

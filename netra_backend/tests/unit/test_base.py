@@ -15,10 +15,9 @@ class TestBase:
     
     @pytest.fixture
     def instance(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create test instance"""
-    pass
         return Base()
     
     def test_initialization(self, instance):
@@ -28,7 +27,6 @@ class TestBase:
     
     def test_core_functionality(self, instance):
         """Test Base class is SQLAlchemy DeclarativeBase"""
-    pass
         from sqlalchemy.orm import DeclarativeBase
         # Verify it's a SQLAlchemy base class
         assert Base.__bases__[0] == DeclarativeBase
@@ -46,7 +44,6 @@ class TestBase:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
-    pass
         # Test with None, empty, extreme values
         pass
     

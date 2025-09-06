@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Run all NACIS tests and verify system integrity.
+# REMOVED_SYNTAX_ERROR: '''Run all NACIS tests and verify system integrity.
 
-Date Created: 2025-01-22
-Last Updated: 2025-01-22
+# REMOVED_SYNTAX_ERROR: Date Created: 2025-01-22
+# REMOVED_SYNTAX_ERROR: Last Updated: 2025-01-22
 
-Business Value: Ensures NACIS system is working correctly.
-"""
+# REMOVED_SYNTAX_ERROR: Business Value: Ensures NACIS system is working correctly.
+# REMOVED_SYNTAX_ERROR: '''
 
 import subprocess
 import sys
@@ -14,91 +14,89 @@ from pathlib import Path
 # Add project root to path
 
 
-def run_command(cmd: str, description: str) -> bool:
-    """Run a command and return success status."""
-    print(f"
-{'='*60}")
-    print(f"Running: {description}")
-    print(f"Command: {cmd}")
-    print('='*60)
-    
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    
-    if result.returncode == 0:
-        print(f"✅ {description} - PASSED")
-        if result.stdout:
-            print(result.stdout)
-        return True
-    else:
-        print(f"❌ {description} - FAILED")
-        if result.stderr:
-            print("Error:", result.stderr)
-        if result.stdout:
-            print("Output:", result.stdout)
-        return False
+# REMOVED_SYNTAX_ERROR: def run_command(cmd: str, description: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Run a command and return success status."""
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print('='*60)
+
+    # REMOVED_SYNTAX_ERROR: result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+    # REMOVED_SYNTAX_ERROR: if result.returncode == 0:
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: if result.stdout:
+            # REMOVED_SYNTAX_ERROR: print(result.stdout)
+            # REMOVED_SYNTAX_ERROR: return True
+            # REMOVED_SYNTAX_ERROR: else:
+                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                # REMOVED_SYNTAX_ERROR: if result.stderr:
+                    # REMOVED_SYNTAX_ERROR: print("Error:", result.stderr)
+                    # REMOVED_SYNTAX_ERROR: if result.stdout:
+                        # REMOVED_SYNTAX_ERROR: print("Output:", result.stdout)
+                        # REMOVED_SYNTAX_ERROR: return False
 
 
-def main():
-    """Run all NACIS tests."""
-    print("🚀 NACIS Test Suite Runner")
-    print("="*60)
+# REMOVED_SYNTAX_ERROR: def main():
+    # REMOVED_SYNTAX_ERROR: """Run all NACIS tests."""
+    # REMOVED_SYNTAX_ERROR: print("🚀 NACIS Test Suite Runner")
+    # REMOVED_SYNTAX_ERROR: print("="*60)
+
+    # REMOVED_SYNTAX_ERROR: tests = [ )
+    # REMOVED_SYNTAX_ERROR: ("python3 tests/chat_system/test_imports.py 2>/dev/null",
+    # REMOVED_SYNTAX_ERROR: "Import Tests"),
+
+    # REMOVED_SYNTAX_ERROR: ("python3 -m pytest tests/chat_system/unit/test_chat_orchestrator.py -q",
+    # REMOVED_SYNTAX_ERROR: "Chat Orchestrator Unit Tests"),
+
+    # REMOVED_SYNTAX_ERROR: ("python3 -m pytest tests/chat_system/unit/test_reliability_scorer.py -q",
+    # REMOVED_SYNTAX_ERROR: "Reliability Scorer Unit Tests"),
+
+    # REMOVED_SYNTAX_ERROR: ("python3 -m pytest tests/chat_system/integration/test_orchestration_flow.py -q",
+    # REMOVED_SYNTAX_ERROR: "Integration Tests"),
+
+    # REMOVED_SYNTAX_ERROR: ("python3 -m pytest tests/chat_system/e2e/test_tco_analysis.py -q",
+    # REMOVED_SYNTAX_ERROR: "E2E TCO Analysis Tests"),
+
+    # REMOVED_SYNTAX_ERROR: ("python3 -m pytest tests/chat_system/security/test_guardrails.py -q",
+    # REMOVED_SYNTAX_ERROR: "Security Guardrails Tests"),
     
-    tests = [
-        ("python3 tests/chat_system/test_imports.py 2>/dev/null", 
-         "Import Tests"),
-        
-        ("python3 -m pytest tests/chat_system/unit/test_chat_orchestrator.py -q",
-         "Chat Orchestrator Unit Tests"),
-        
-        ("python3 -m pytest tests/chat_system/unit/test_reliability_scorer.py -q",
-         "Reliability Scorer Unit Tests"),
-        
-        ("python3 -m pytest tests/chat_system/integration/test_orchestration_flow.py -q",
-         "Integration Tests"),
-        
-        ("python3 -m pytest tests/chat_system/e2e/test_tco_analysis.py -q",
-         "E2E TCO Analysis Tests"),
-        
-        ("python3 -m pytest tests/chat_system/security/test_guardrails.py -q",
-         "Security Guardrails Tests"),
-    ]
-    
-    results = []
-    for cmd, description in tests:
-        success = run_command(cmd, description)
-        results.append((description, success))
-    
-    # Summary
-    print("
-" + "="*60)
-    print("📊 TEST SUMMARY")
-    print("="*60)
-    
-    passed = 0
-    failed = 0
-    
-    for test_name, success in results:
-        status = "✅ PASSED" if success else "❌ FAILED"
-        print(f"{test_name:<40} {status}")
-        if success:
-            passed += 1
-        else:
-            failed += 1
-    
-    print("="*60)
-    print(f"Total: {len(results)} tests")
-    print(f"Passed: {passed}")
-    print(f"Failed: {failed}")
-    
-    if failed == 0:
-        print("
-🎉 All tests passed! NACIS system is ready.")
-        return 0
-    else:
-        print(f"
-⚠️  {failed} test(s) failed. Please review the errors above.")
-        return 1
+
+    # REMOVED_SYNTAX_ERROR: results = []
+    # REMOVED_SYNTAX_ERROR: for cmd, description in tests:
+        # REMOVED_SYNTAX_ERROR: success = run_command(cmd, description)
+        # REMOVED_SYNTAX_ERROR: results.append((description, success))
+
+        # Summary
+        # REMOVED_SYNTAX_ERROR: print(" )
+        # REMOVED_SYNTAX_ERROR: " + "="*60)
+        # REMOVED_SYNTAX_ERROR: print("📊 TEST SUMMARY")
+        # REMOVED_SYNTAX_ERROR: print("="*60)
+
+        # REMOVED_SYNTAX_ERROR: passed = 0
+        # REMOVED_SYNTAX_ERROR: failed = 0
+
+        # REMOVED_SYNTAX_ERROR: for test_name, success in results:
+            # REMOVED_SYNTAX_ERROR: status = "✅ PASSED" if success else "❌ FAILED"
+            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+            # REMOVED_SYNTAX_ERROR: if success:
+                # REMOVED_SYNTAX_ERROR: passed += 1
+                # REMOVED_SYNTAX_ERROR: else:
+                    # REMOVED_SYNTAX_ERROR: failed += 1
+
+                    # REMOVED_SYNTAX_ERROR: print("="*60)
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                    # REMOVED_SYNTAX_ERROR: if failed == 0:
+                        # REMOVED_SYNTAX_ERROR: print(" )
+                        # REMOVED_SYNTAX_ERROR: 🎉 All tests passed! NACIS system is ready.")
+                        # REMOVED_SYNTAX_ERROR: return 0
+                        # REMOVED_SYNTAX_ERROR: else:
+                            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: return 1
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+                            # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+                                # REMOVED_SYNTAX_ERROR: sys.exit(main())

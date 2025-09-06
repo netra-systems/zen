@@ -900,32 +900,153 @@ class ConfigDependencyMap:
         }
     
     @classmethod
-    def check_config_consistency(cls, configs: Dict[str, Any]) -> List[str]:
-        """
-        Check for configuration inconsistencies and missing paired configs.
+    def _validate_with_central_validator(cls, environment: Optional[str] = None) -> Tuple[bool, List[str]]:
+        """Validate configuration using the central SSOT validator.
         
+        This delegates to the central configuration validator which is the
+        Single Source of Truth for all configuration validation.
+        
+        Args:
+            environment: Optional environment override for testing
+            
         Returns:
-            List of warning/error messages
+            Tuple of (is_valid, list_of_issues)
         """
+        from shared.configuration.central_config_validator import (
+            CentralConfigurationValidator,
+            LegacyConfigMarker
+        )
+        from shared.isolated_environment import get_env
+        
         issues = []
         
-        # Check for missing critical configs
-        for key, deps in cls.CRITICAL_DEPENDENCIES.items():
-            if not deps.get("fallback_allowed", False) and key not in configs:
-                issues.append(f"CRITICAL: Missing required config {key}")
+        try:
+            # Use central validator - the SSOT for configuration validation
+            env = get_env()
+            validator = CentralConfigurationValidator(env_getter=lambda key, default=None: env.get(key, default))
+            
+            # Attempt validation
+            validator.validate_all_requirements()
+            
+            # Check for legacy configurations
+            env_dict = env.as_dict() if hasattr(env, 'as_dict') else dict(env)
+            legacy_warnings = LegacyConfigMarker.check_legacy_usage(env_dict)
+            issues.extend(legacy_warnings)
+            
+            return (True, issues)
+            
+        except ValueError as e:
+            # Parse validation errors from the central validator
+            error_msg = str(e)
+            if "Configuration validation failed" in error_msg:
+                # Extract individual errors
+                error_lines = error_msg.split('\n')
+                for line in error_lines:
+                    if line.strip().startswith('- '):
+                        issues.append(f"Config dependency: {line.strip()[2:]}")
+            else:
+                issues.append(f"Config dependency: {error_msg}")
+            
+            return (False, issues)
+        except Exception as e:
+            logger.warning(f"Central validator unavailable, using fallback: {e}")
+            # If central validator fails, fall back to basic dependency checking
+            return cls._fallback_validation()
+    
+    @classmethod
+    def _fallback_validation(cls) -> Tuple[bool, List[str]]:
+        """Fallback validation when central validator is unavailable.
         
-        # Check for paired configs
-        for key, deps in {**cls.SERVICE_SPECIFIC_DEPENDENCIES}.items():
-            if key in configs and "paired_with" in deps:
-                for paired_key in deps["paired_with"]:
-                    if paired_key not in configs:
-                        issues.append(f"WARNING: {key} is present but paired config {paired_key} is missing")
+        This provides basic dependency checking based on our dependency map.
+        It should only be used when the central validator cannot be accessed.
         
-        # Validate existing configs
-        for key, value in configs.items():
-            is_valid, message = cls.validate_config_value(key, value)
-            if not is_valid:
-                issues.append(f"VALIDATION ERROR: {key} - {message}")
+        Returns:
+            Tuple of (is_valid, list_of_issues)
+        """
+        from shared.isolated_environment import get_env
+        
+        issues = []
+        env = get_env()
+        
+        # Check critical dependencies using our map
+        for env_key, deps in cls.CRITICAL_DEPENDENCIES.items():
+            if not deps.get("fallback_allowed", False):
+                value = env.get(env_key)
+                if not value:
+                    # Check if this can be auto-constructed from components
+                    if deps.get("auto_construct") and env_key == "DATABASE_URL":
+                        # Check if components are present
+                        components_present = all(
+                            env.get(comp) for comp in deps.get("replacement", [])
+                        )
+                        if not components_present:
+                            issues.append(f"CRITICAL: Missing required config {env_key}")
+                    else:
+                        issues.append(f"CRITICAL: Missing required config {env_key}")
+        
+        return (len(issues) == 0, issues)
+    
+    @classmethod
+    def check_config_consistency(cls, configs: Any) -> List[str]:
+        """
+        Check for configuration inconsistencies using the central SSOT validator.
+        
+        This method delegates to the CentralConfigurationValidator which is the
+        Single Source of Truth for all configuration validation in the platform.
+        
+        The ConfigDependencyMap focuses on dependency impact analysis (what breaks
+        if a config is removed), while actual validation is handled by the central
+        validator.
+        
+        Args:
+            configs: Config object or dict (ignored - we check environment directly)
+        
+        Returns:
+            List of warning/error messages from the central validator
+        """
+        # Always use the central validator for SSOT compliance
+        is_valid, issues = cls._validate_with_central_validator()
+        
+        # For backward compatibility, also check our dependency-specific concerns
+        # This focuses on impact analysis rather than validation
+        if hasattr(configs, '__dict__') or isinstance(configs, dict):
+            # Check for paired configurations that might cause issues
+            paired_issues = cls._check_paired_dependencies(configs)
+            issues.extend(paired_issues)
+        
+        return issues
+    
+    @classmethod
+    def _check_paired_dependencies(cls, configs: Any) -> List[str]:
+        """Check for paired configuration dependencies.
+        
+        This is specific to dependency impact analysis - checking if removing
+        one config would break another that depends on it.
+        
+        Args:
+            configs: Config object or dict
+            
+        Returns:
+            List of warnings about missing paired configurations
+        """
+        from shared.isolated_environment import get_env
+        
+        issues = []
+        env = get_env()
+        
+        # Check service-specific paired dependencies
+        for key, deps in cls.SERVICE_SPECIFIC_DEPENDENCIES.items():
+            if "paired_with" in deps:
+                # Check if primary config exists
+                primary_value = env.get(key)
+                if primary_value:
+                    # Check if paired configs are present
+                    for paired_key in deps["paired_with"]:
+                        if not env.get(paired_key):
+                            issues.append(
+                                f"WARNING: {key} is configured but paired config {paired_key} is missing. "
+                                f"This may cause {', '.join(deps.get('required_by', []))} to fail."
+                            )
         
         return issues
     

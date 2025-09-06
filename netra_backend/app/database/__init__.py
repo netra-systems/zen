@@ -93,6 +93,36 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
             logger.debug("Closed database session")
 
+@asynccontextmanager
+async def get_system_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Get system database session that bypasses authentication.
+    
+    CRITICAL: This session is for internal system operations only.
+    It should NEVER be exposed to user requests or external APIs.
+    
+    Use cases:
+    - Background tasks
+    - Health checks
+    - System initialization
+    - Internal service operations
+    
+    Yields:
+        AsyncSession: System database session
+    """
+    sessionmaker = get_sessionmaker()
+    async with sessionmaker() as session:
+        try:
+            logger.debug("Created new SYSTEM database session (auth bypass)")
+            yield session
+        except Exception as e:
+            logger.error(f"SYSTEM database session error: {e}")
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+            logger.debug("Closed SYSTEM database session")
+
 class DatabaseManager:
     """
     Database Manager class for backward compatibility.
@@ -131,13 +161,18 @@ database_manager = DatabaseManager()
 # Import ClickHouse utilities from db module
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
+# Re-export get_env for backward compatibility
+from shared.isolated_environment import get_env
+
 # Export main functions and classes
 __all__ = [
     "get_db",
+    "get_system_db",
     "get_database_url", 
     "get_engine",
     "get_sessionmaker",
     "DatabaseManager",
     "database_manager",
-    "get_clickhouse_client"
+    "get_clickhouse_client",
+    "get_env"  # Added for backward compatibility
 ]

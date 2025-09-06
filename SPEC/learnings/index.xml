@@ -2955,4 +2955,54 @@
             <learning-ref>unified_environment_management.xml - Environment configuration</learning-ref>
         </related-learnings>
     </learning>
+    
+    <learning id="first-message-experience-testing-2025-01-06">
+        <title>First Message Experience E2E Testing - User Activation Critical Path</title>
+        <category>Testing/E2E/UserExperience/MissionCritical/BusinessValue</category>
+        <keywords>first-message, user-activation, conversion, e2e-testing, websocket-events, user-isolation, substantive-value</keywords>
+        <path>../first_message_experience.xml</path>
+        <critical-takeaway>
+            First message is THE critical user touchpoint determining activation/conversion/churn.
+            Requires complete E2E validation: substantive AI response within 45s, all WebSocket events 
+            in correct order, complete user isolation via factory patterns, concurrent user support.
+            Test suite validates business value delivery not just technical function. 90% of platform 
+            value delivered through chat - first message MUST work perfectly.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$500K+ ARR - User activation drives entire business model</business-impact>
+        <prevention>
+            Run test_first_message_experience.py before EVERY deployment. Monitor P99 response times.
+            Validate all 7 WebSocket events sent. Test with 50+ concurrent users. Use REAL services only.
+            Check response contains substantive content (>50 chars). Ensure graceful degradation.
+        </prevention>
+        <implementation-patterns>
+            <pattern>FirstMessageEventValidator class for comprehensive validation</pattern>
+            <pattern>Real WebSocket connections to actual backend services</pattern>
+            <pattern>UserExecutionContext factory for complete isolation</pattern>
+            <pattern>WebSocketNotifier integration for all event types</pattern>
+            <pattern>Load testing with 50+ concurrent first-time users</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Happy path: Single user first message E2E</strategy>
+            <strategy>Concurrency: 5-50 simultaneous first messages</strategy>
+            <strategy>Degradation: Slow services with thinking updates</strategy>
+            <strategy>Edge cases: Malformed, rapid, connection drops</strategy>
+            <strategy>Performance: P99 < 45s, 99.9% success rate</strategy>
+        </testing-strategies>
+        <websocket-events-required>
+            <event order="1">message_received (&lt;100ms)</event>
+            <event order="2">agent_started (&lt;500ms)</event>
+            <event order="3">agent_thinking (2-5s intervals)</event>
+            <event order="4">tool_executing (as needed)</event>
+            <event order="5">tool_completed (after execution)</event>
+            <event order="6">agent_completed (&lt;45s)</event>
+            <event order="7">response_complete (final)</event>
+        </websocket-events-required>
+        <related-learnings>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+            <learning-ref>agent_execution_order_fix_20250904.xml</learning-ref>
+            <learning-ref>../USER_CONTEXT_ARCHITECTURE.md</learning-ref>
+            <learning-ref>../../docs/GOLDEN_AGENT_INDEX.md</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>

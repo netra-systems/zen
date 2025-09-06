@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -11,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from netra_backend.app.main import app
+import json
 
 class TestConfigEndpoint:
     
@@ -39,16 +40,16 @@ class TestConfigEndpoint:
             "features": {
                 "chat": True,
                 "analytics": True,
-                "realtime": True
-            },
+                "realtime": True,
+},
             "ui_settings": {
                 "theme": "light",
-                "max_message_length": 5000
-            }
-        }
+                "max_message_length": 5000,
+},
+}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.config._build_public_config', return_value=expected_config):
+        with patch('app.routes.config._build_public_config', return_value = expected_config):
             response = client.get("/api/config/public")
             
             assert response.status_code == 200
@@ -66,9 +67,9 @@ class TestConfigEndpoint:
         
         update_data = {
             "features": {
-                "experimental_mode": True
-            }
-        }
+                "experimental_mode": True,
+},
+}
         
         # Mock the User object that would be returned from require_admin
         # Mock: Generic component isolation for controlled unit testing
@@ -87,9 +88,9 @@ class TestConfigEndpoint:
             client = TestClient(app)
             response = client.post(
                 "/api/config/update",
-                json=update_data,
-                headers={"Authorization": "Bearer admin-token"}
-            )
+                json = update_data,
+                headers = {"Authorization": "Bearer admin-token"},
+)
             
             assert response.status_code == 200
             assert response.json()["success"] == True
@@ -105,16 +106,16 @@ class TestConfigEndpoint:
         
         update_data = {
             "features": {
-                "experimental_mode": True
-            }
-        }
+                "experimental_mode": True,
+},
+}
         
         # Mock require_admin to raise an HTTPException for unauthorized access
         def mock_require_admin():
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token"
-            )
+                status_code = status.HTTP_401_UNAUTHORIZED,
+                detail = "Invalid or expired token",
+)
         
         app.dependency_overrides[require_admin] = mock_require_admin
         
@@ -122,9 +123,9 @@ class TestConfigEndpoint:
             client = TestClient(app)
             response = client.post(
                 "/api/config/update",
-                json=update_data,
-                headers={"Authorization": "Bearer invalid-token"}
-            )
+                json = update_data,
+                headers = {"Authorization": "Bearer invalid-token"},
+)
             
             assert response.status_code == 401
         finally:

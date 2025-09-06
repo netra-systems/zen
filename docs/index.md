@@ -45,8 +45,6 @@
 
 #### Testing Infrastructure
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
-- **[Podman User Guide](./PODMAN_USER_GUIDE.md)** 🆕 - Complete guide for using Podman with dynamic ports
-- [Podman Testing Guide](./PODMAN_TESTING_GUIDE.md) - Podman installation and configuration
 - [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
 - [Unified Test Runner](../tests/unified_test_runner.py) - Central test execution
 
@@ -71,6 +69,7 @@
 
 ### 🚀 Performance & Optimization
 
+- **[Netra Optimization Breakdown](../NETRA_OPTIMIZATION_BREAKDOWN.md)** 🎯 - **CRITICAL**: System optimization architecture breakdown (AI-specific vs general optimization)
 - **[Performance Metrics User Guide](./PERFORMANCE_METRICS_USER_GUIDE.md)** 📊 - **NEW**: Comprehensive guide to performance timing and metrics collection
 - [Agent Performance Dependencies](./AGENT_PERFORMANCE_DEPENDENCIES_EXPLAINED.md)
 - [Agent Performance Real Issues](./AGENT_PERFORMANCE_REAL_ISSUES.md)

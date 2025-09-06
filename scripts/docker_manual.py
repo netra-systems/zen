@@ -19,6 +19,7 @@ Usage:
 
 import sys
 import os
+
 import subprocess
 import time
 import logging
@@ -31,6 +32,10 @@ import argparse
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+# Import Windows encoding SSOT and set up encoding
+from shared.windows_encoding import setup_windows_encoding
+setup_windows_encoding()
 
 from test_framework.unified_docker_manager import (
     UnifiedDockerManager,

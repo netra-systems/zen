@@ -16,5 +16,5 @@ TEST_CONFIG = {
         ServiceTier.FREE: {"requests_per_minute": 10, "burst": 5},
         ServiceTier.PRO: {"requests_per_minute": 100, "burst": 20},
         ServiceTier.ENTERPRISE: {"requests_per_minute": 1000, "burst": 100},
-    }
+    },
 }

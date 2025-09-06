@@ -179,7 +179,11 @@ class ServiceAvailabilityChecker:
     async def _test_async_postgres_connection(self, url: str) -> None:
         """Test asynchronous PostgreSQL connection."""
         try:
-            conn = await asyncpg.connect(url, timeout=self.timeout)
+            # Normalize URL for asyncpg compatibility (remove SQLAlchemy driver prefixes)
+            from shared.database_url_builder import DatabaseURLBuilder
+            normalized_url = DatabaseURLBuilder.format_for_asyncpg_driver(url)
+            
+            conn = await asyncpg.connect(normalized_url, timeout=self.timeout)
             try:
                 await conn.fetchval("SELECT 1")
             finally:

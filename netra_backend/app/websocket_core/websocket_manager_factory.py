@@ -36,7 +36,7 @@ import weakref
 from threading import RLock
 import logging
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.logging_config import central_logger
 
@@ -451,6 +451,44 @@ class IsolatedWebSocketManager:
         """
         self._validate_active()
         return self._connection_ids.copy()
+    
+    def is_connection_active(self, user_id: str) -> bool:
+        """
+        Check if user has active WebSocket connections.
+        CRITICAL for authentication event validation.
+        
+        Args:
+            user_id: User ID to check (must match this manager's user)
+            
+        Returns:
+            True if user has at least one active connection, False otherwise
+            
+        Raises:
+            ValueError: If user_id doesn't match this manager's user
+        """
+        self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        if user_id != self.user_context.user_id:
+            logger.warning(
+                f"SECURITY WARNING: Requested connection status for user {user_id} "
+                f"from isolated manager for user {self.user_context.user_id}. "
+                f"This violates user isolation."
+            )
+            return False
+        
+        # Check if we have any connections
+        if not self._connection_ids:
+            return False
+        
+        # Check if at least one connection is still valid
+        for conn_id in self._connection_ids:
+            connection = self.get_connection(conn_id)
+            if connection and connection.websocket:
+                # TODO: Add more sophisticated health check if websocket has state
+                return True
+        
+        return False
     
     async def send_to_user(self, message: Dict[str, Any]) -> None:
         """

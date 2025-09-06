@@ -20,13 +20,7 @@ jest.mock('next/navigation', () => ({
 
 // Mock GTM hooks
 jest.mock('@/hooks/useGTMEvent', () => ({
-  useGTMEvent: () => ({
-    trackError: jest.fn(),
-    trackPageView: jest.fn(),
-    trackLogin: jest.fn(),
-    trackLogout: jest.fn(),
-    trackOAuthComplete: jest.fn(),
-  }),
+  useGTMEvent: jest.fn(),
 }));
 
 // Mock logger
@@ -42,6 +36,24 @@ jest.mock('@/lib/logger', () => ({
 describe('Auth Flow Stability Regression Tests', () => {
   let mockPush: jest.Mock;
   let mockReplace: jest.Mock;
+  let originalLocalStorage: Storage;
+  let mockTrackError: jest.Mock;
+  let mockTrackPageView: jest.Mock;
+  let mockTrackLogin: jest.Mock;
+  let mockTrackLogout: jest.Mock;
+  let mockTrackOAuthComplete: jest.Mock;
+  
+  beforeAll(() => {
+    // Store the original localStorage
+    originalLocalStorage = global.localStorage;
+    
+    // Create stable GTM mock functions
+    mockTrackError = jest.fn();
+    mockTrackPageView = jest.fn();
+    mockTrackLogin = jest.fn();
+    mockTrackLogout = jest.fn();
+    mockTrackOAuthComplete = jest.fn();
+  });
   
   beforeEach(() => {
     mockPush = jest.fn();
@@ -52,8 +64,41 @@ describe('Auth Flow Stability Regression Tests', () => {
       pathname: '/protected',
     });
     
-    // Clear localStorage and ensure clean state
-    localStorage.clear();
+    // Clear global mock auth state to ensure clean test state
+    global.mockAuthState = undefined;
+    
+    // Mock GTM with stable functions
+    (require('@/hooks/useGTMEvent').useGTMEvent as jest.Mock).mockReturnValue({
+      trackError: mockTrackError,
+      trackPageView: mockTrackPageView,
+      trackLogin: mockTrackLogin,
+      trackLogout: mockTrackLogout,
+      trackOAuthComplete: mockTrackOAuthComplete,
+    });
+    
+    // Create a fresh localStorage mock for each test
+    const localStorageMock = {
+      getItem: jest.fn().mockReturnValue(null),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+      length: 0,
+      key: jest.fn().mockReturnValue(null),
+    };
+    
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+      configurable: true
+    });
+    
+    // Also ensure window.localStorage is mocked consistently
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+      configurable: true
+    });
+    
     jest.clearAllMocks();
     
     // Mock window.location.pathname for AuthGuard (delete first to avoid redefinition error)
@@ -63,6 +108,34 @@ describe('Auth Flow Stability Regression Tests', () => {
       href: 'http://localhost:3000/protected',
     };
   });
+  
+  afterAll(() => {
+    // Restore original localStorage
+    Object.defineProperty(global, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true,
+      configurable: true
+    });
+  });
+  
+  // Helper to set localStorage value and ensure it's properly mocked
+  const setLocalStorageToken = (token: string | null) => {
+    const mockReturnValue = token;
+    (localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'jwt_token') return mockReturnValue;
+      return null;
+    });
+    (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'jwt_token') return mockReturnValue;
+      return null;
+    });
+  };
+  
+  // Helper to ensure localStorage is completely empty
+  const ensureLocalStorageEmpty = () => {
+    (localStorage.getItem as jest.Mock).mockImplementation(() => null);
+    (window.localStorage.getItem as jest.Mock).mockImplementation(() => null);
+  };
   
   const createAuthContext = (overrides?: Partial<AuthContextType>): AuthContextType => ({
     user: null,
@@ -79,6 +152,9 @@ describe('Auth Flow Stability Regression Tests', () => {
     children: React.ReactNode,
     authValue: AuthContextType
   ) => {
+    // Set global mock auth state to override the jest mock
+    global.mockAuthState = authValue;
+    
     return render(
       <AuthContext.Provider value={authValue}>
         {children}
@@ -88,8 +164,8 @@ describe('Auth Flow Stability Regression Tests', () => {
   
   describe('Prevent Redirect Loops', () => {
     it('should not create redirect loop when token exists but user not loaded', async () => {
-      // Set token in localStorage
-      localStorage.setItem('jwt_token', 'test-token');
+      // Set token in localStorage mock
+      setLocalStorageToken('test-token');
       
       const authValue = createAuthContext({
         user: null,
@@ -112,8 +188,12 @@ describe('Auth Flow Stability Regression Tests', () => {
     });
     
     it('should perform auth check only once per mount', async () => {
-      // Ensure no token in localStorage
-      localStorage.clear();
+      // Ensure localStorage is completely empty
+      ensureLocalStorageEmpty();
+      
+      // Debug: Check that localStorage is properly mocked
+      expect(localStorage.getItem('jwt_token')).toBeNull();
+      expect(window.localStorage.getItem('jwt_token')).toBeNull();
       
       const authValue = createAuthContext({
         user: null,
@@ -121,41 +201,51 @@ describe('Auth Flow Stability Regression Tests', () => {
         initialized: true,
       });
       
+      // Use a key to force component remount
       const { rerender } = renderWithAuth(
-        <AuthGuard>
+        <AuthGuard key="test-1">
           <div>Protected Content</div>
         </AuthGuard>,
         authValue
       );
       
-      // Initial redirect - wait longer and provide more specific expectations
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login');
-      }, { timeout: 3000 });
+      // Wait for auth check to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Debug: Check if the localStorage call was made during rendering
+      expect(localStorage.getItem).toHaveBeenCalled();
+      
+      // Debug: Check if trackError was called (this happens right before redirect)
+      expect(mockTrackError).toHaveBeenCalled();
+      
+      // Should redirect once
+      expect(mockPush).toHaveBeenCalledWith('/login');
+      expect(mockPush).toHaveBeenCalledTimes(1);
       
       // Clear mock to track new calls
       mockPush.mockClear();
       
-      // Trigger multiple re-renders with the same auth state
+      // Trigger multiple re-renders with the same auth state (same key - no remount)
       for (let i = 0; i < 5; i++) {
         rerender(
           <AuthContext.Provider value={authValue}>
-            <AuthGuard>
+            <AuthGuard key="test-1">
               <div>Protected Content</div>
             </AuthGuard>
           </AuthContext.Provider>
         );
       }
       
-      // Wait a bit to ensure no additional calls
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait to ensure no additional calls
+      await new Promise(resolve => setTimeout(resolve, 50));
       
-      // Should not redirect again
+      // Should not redirect again (hasPerformedAuthCheck prevents multiple calls)
       expect(mockPush).not.toHaveBeenCalled();
     });
     
     it('should not reset hasPerformedAuthCheck when token exists', async () => {
-      localStorage.setItem('jwt_token', 'test-token');
+      // Set token in localStorage mock
+      setLocalStorageToken('test-token');
       
       // Start with no user
       const authValue = createAuthContext({
@@ -181,6 +271,9 @@ describe('Auth Flow Stability Regression Tests', () => {
         initialized: true,
       });
       
+      // Set global mock auth state for rerender
+      global.mockAuthState = updatedAuthValue;
+      
       rerender(
         <AuthContext.Provider value={updatedAuthValue}>
           <AuthGuard>
@@ -199,8 +292,8 @@ describe('Auth Flow Stability Regression Tests', () => {
   
   describe('Auth Check Race Conditions', () => {
     it('should wait for initialization before checking auth', async () => {
-      // Ensure no token in localStorage
-      localStorage.clear();
+      // Ensure localStorage is completely empty
+      ensureLocalStorageEmpty();
       
       // Start uninitialized
       const authValue = createAuthContext({
@@ -210,7 +303,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       });
       
       const { rerender } = renderWithAuth(
-        <AuthGuard>
+        <AuthGuard key="test-2">
           <div>Protected Content</div>
         </AuthGuard>,
         authValue
@@ -226,18 +319,22 @@ describe('Auth Flow Stability Regression Tests', () => {
         initialized: true,
       });
       
+      // Set global mock auth state for rerender
+      global.mockAuthState = initializedAuthValue;
+      
       rerender(
         <AuthContext.Provider value={initializedAuthValue}>
-          <AuthGuard>
+          <AuthGuard key="test-2">
             <div>Protected Content</div>
           </AuthGuard>
         </AuthContext.Provider>
       );
       
+      // Wait for auth check to complete after initialization
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       // Now should redirect
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login');
-      }, { timeout: 3000 });
+      expect(mockPush).toHaveBeenCalledWith('/login');
     });
     
     it('should handle rapid auth state changes', async () => {
@@ -262,6 +359,9 @@ describe('Auth Flow Stability Regression Tests', () => {
       
       // Rapidly change states
       for (const state of states.slice(1)) {
+        // Set global mock auth state for each rerender
+        global.mockAuthState = state;
+        
         rerender(
           <AuthContext.Provider value={state}>
             <AuthGuard>
@@ -283,7 +383,8 @@ describe('Auth Flow Stability Regression Tests', () => {
   
   describe('Token Handling Edge Cases', () => {
     it('should handle token removal during session', async () => {
-      localStorage.setItem('jwt_token', 'test-token');
+      // Start with token in localStorage
+      setLocalStorageToken('test-token');
       
       const authValue = createAuthContext({
         user: { id: '1', email: 'test@example.com', full_name: 'Test User' },
@@ -293,7 +394,7 @@ describe('Auth Flow Stability Regression Tests', () => {
       });
       
       const { rerender } = renderWithAuth(
-        <AuthGuard>
+        <AuthGuard key="test-3-authenticated">
           <div>Protected Content</div>
         </AuthGuard>,
         authValue
@@ -302,8 +403,8 @@ describe('Auth Flow Stability Regression Tests', () => {
       // Should show protected content
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
       
-      // Remove token and create a new component instance to trigger fresh auth check
-      localStorage.removeItem('jwt_token');
+      // Remove token and clear localStorage
+      ensureLocalStorageEmpty();
       const noTokenAuthValue = createAuthContext({
         user: null,
         loading: false,
@@ -311,25 +412,28 @@ describe('Auth Flow Stability Regression Tests', () => {
         token: null,
       });
       
-      // Unmount and remount to trigger fresh auth check
-      rerender(<div />);
+      // Use a different key to force fresh component mount with fresh hasPerformedAuthCheck
+      // Set global mock auth state for rerender
+      global.mockAuthState = noTokenAuthValue;
+      
       rerender(
         <AuthContext.Provider value={noTokenAuthValue}>
-          <AuthGuard>
+          <AuthGuard key="test-3-unauthenticated">
             <div>Protected Content</div>
           </AuthGuard>
         </AuthContext.Provider>
       );
       
-      // Should redirect to login
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login');
-      }, { timeout: 3000 });
+      // Wait for auth check to complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Should redirect to login since token was removed
+      expect(mockPush).toHaveBeenCalledWith('/login');
     });
     
     it('should handle expired token gracefully', async () => {
-      // Set an "expired" token
-      localStorage.setItem('jwt_token', 'expired-token');
+      // Set an "expired" token in localStorage mock
+      setLocalStorageToken('expired-token');
       
       const authValue = createAuthContext({
         user: null,
@@ -354,8 +458,8 @@ describe('Auth Flow Stability Regression Tests', () => {
     });
     
     it('should handle custom redirect paths', async () => {
-      // Ensure no token in localStorage
-      localStorage.clear();
+      // Ensure localStorage is completely empty
+      ensureLocalStorageEmpty();
       
       const authValue = createAuthContext({
         user: null,
@@ -364,16 +468,17 @@ describe('Auth Flow Stability Regression Tests', () => {
       });
       
       renderWithAuth(
-        <AuthGuard redirectTo="/custom-login">
+        <AuthGuard key="test-4" redirectTo="/custom-login">
           <div>Protected Content</div>
         </AuthGuard>,
         authValue
       );
       
+      // Wait for auth check to complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       // Should redirect to custom path
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/custom-login');
-      }, { timeout: 3000 });
+      expect(mockPush).toHaveBeenCalledWith('/custom-login');
     });
   });
   

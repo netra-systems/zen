@@ -33,7 +33,7 @@ import asyncio
 from typing import Dict, Any
 import json
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml

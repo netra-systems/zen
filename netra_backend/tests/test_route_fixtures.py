@@ -18,8 +18,8 @@ TEST_USER_DATA = {
         "role": "admin",
         "is_active": True,
         "created_at": "2024-01-01T00:00:00Z",
-        "permissions": ["admin:read", "admin:write", "admin:delete", "user:read", "user:write"]
-    },
+        "permissions": ["admin:read", "admin:write", "admin:delete", "user:read", "user:write"],
+},
     "regular": {
         "user_id": "regular_user_456",
         "email": "user@example.com", 
@@ -29,8 +29,8 @@ TEST_USER_DATA = {
         "role": "user",
         "is_active": True,
         "created_at": "2024-01-01T00:00:00Z",
-        "permissions": ["user:read", "user:update"]
-    }
+        "permissions": ["user:read", "user:update"],
+},
 }
 
 # Create basic_test_client as a proper pytest fixture

@@ -124,5 +124,5 @@ __all__ = [
     'setup_optimization_strategy_content',
     'setup_optimization_outcomes_content',
     'setup_optimization_workflow_context',
-    'combine_optimization_content'
+    'combine_optimization_content',
 ]

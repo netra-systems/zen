@@ -1,3 +1,4 @@
+from unittest.mock import Mock, AsyncMock, patch, MagicMock
 """
 Pytest fixtures for agent orchestration tests.
 
@@ -6,8 +7,8 @@ Contains pytest fixture definitions for agent service testing.
 
 import sys
 from pathlib import Path
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -19,11 +20,11 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.tests.test_agent_orchestration_fixtures import (
-    AgentOrchestrator,
-    MockSupervisorAgent)
+AgentOrchestrator,
+MockSupervisorAgent)
 
 @pytest.fixture
- def real_supervisor():
+def real_supervisor():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock supervisor agent."""
@@ -31,7 +32,7 @@ from netra_backend.tests.test_agent_orchestration_fixtures import (
     return MockSupervisorAgent()
 
 @pytest.fixture
- def real_thread_service():
+def real_thread_service():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock thread service."""
@@ -49,7 +50,7 @@ from netra_backend.tests.test_agent_orchestration_fixtures import (
     return service
 
 @pytest.fixture
- def real_message_handler():
+def real_message_handler():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create mock message handler service."""

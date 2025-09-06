@@ -858,7 +858,7 @@ jest.mock('@/providers/WebSocketProvider', () => {
   const mockWebSocketContextValue = {
     sendMessage: jest.fn(),
     addOptimisticMessage: jest.fn(),
-    status: 'OPEN',
+    status: 'CLOSED', // Fixed: Default to CLOSED for tests
     messages: [],
     sendOptimisticMessage: jest.fn(() => ({
       id: 'mock-optimistic-id',

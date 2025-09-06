@@ -45,7 +45,7 @@ class TestDatabaseEnvironmentValidator:
         
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.services.database_env_service.settings', mock_settings):
-            with pytest.raises(ValueError, match="Production environment cannot use database with 'test'"):
+            with pytest.raises(ValueError, match = "Production environment cannot use database with 'test'"):
                 DatabaseEnvironmentValidator.validate_database_environment()
     
     def test_validate_production_database_failure_with_dev_keyword(self):
@@ -57,7 +57,7 @@ class TestDatabaseEnvironmentValidator:
         
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.services.database_env_service.settings', mock_settings):
-            with pytest.raises(ValueError, match="Production environment cannot use database with 'dev'"):
+            with pytest.raises(ValueError, match = "Production environment cannot use database with 'dev'"):
                 DatabaseEnvironmentValidator.validate_database_environment()
     
     def test_validate_testing_database_success(self):
@@ -81,7 +81,7 @@ class TestDatabaseEnvironmentValidator:
         
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.services.database_env_service.settings', mock_settings):
-            with pytest.raises(ValueError, match="Testing environment cannot use production database"):
+            with pytest.raises(ValueError, match = "Testing environment cannot use production database"):
                 DatabaseEnvironmentValidator.validate_database_environment()
     
     def test_validate_development_database_success(self):

@@ -631,29 +631,28 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
     
     # Check if ClickHouse container is running (for better error reporting)
     try:
-        # Try podman first, then docker
-        for cmd in ['podman', 'docker']:
-            try:
-                result_cmd = subprocess.run(
-                    [cmd, 'ps', '--format', '{{.Names}}'],
-                    capture_output=True,
-                    text=True,
-                    timeout=2
-                )
-                if result_cmd.returncode == 0:
-                    running_containers = result_cmd.stdout.strip().split('\n')
-                    clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
-                    if not clickhouse_running:
-                        logger.warning("=" * 80)
-                        logger.warning("CLICKHOUSE CONTAINER NOT RUNNING")
-                        logger.warning("=" * 80)
-                        logger.warning(f"No ClickHouse container found. To start:")
-                        logger.warning(f"  {cmd} start <clickhouse-container-name>")
-                        logger.warning(f"Or use: python scripts/docker_manual.py start")
-                        logger.warning("=" * 80)
-                    break
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                continue
+        # Use docker only
+        cmd = 'docker'
+        try:
+            result_cmd = subprocess.run(
+                [cmd, 'ps', '--format', '{{.Names}}'],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result_cmd.returncode == 0:
+                running_containers = result_cmd.stdout.strip().split('\n')
+                clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
+                if not clickhouse_running:
+                    logger.warning("=" * 80)
+                    logger.warning("CLICKHOUSE CONTAINER NOT RUNNING")
+                    logger.warning("=" * 80)
+                    logger.warning(f"No ClickHouse container found. To start:")
+                    logger.warning(f"  {cmd} start <clickhouse-container-name>")
+                    logger.warning(f"Or use: python scripts/docker_manual.py start")
+                    logger.warning("=" * 80)
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            logger.warning("Docker not available - cannot check ClickHouse container status")
     except Exception:
         pass  # Ignore container check errors
     
@@ -970,7 +969,9 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
     app.state.thread_service = ThreadService()
-    app.state.corpus_service = CorpusService()
+    # NOTE: CorpusService now requires user context for WebSocket notifications
+    # This will be created per-request with user context instead of singleton
+    app.state.corpus_service = CorpusService()  # Default without user context for backward compatibility
 
 
 async def initialize_websocket_components(logger: logging.Logger) -> None:

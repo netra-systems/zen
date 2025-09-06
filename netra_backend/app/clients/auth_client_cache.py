@@ -393,16 +393,16 @@ class AuthCircuitBreakerManager:
             # This fixes the bug where MockCircuitBreaker would open permanently on any error
             config = UnifiedCircuitConfig(
                 name=name,
-                failure_threshold=5,  # Allow 5 failures before opening (was instant with Mock)
-                success_threshold=2,  # Need 2 successes to close from half-open
-                recovery_timeout=30,  # Attempt recovery after 30 seconds (Mock never recovered)
-                timeout_seconds=10.0,  # Individual request timeout
-                slow_call_threshold=5.0,  # Mark calls over 5s as slow
+                failure_threshold=3,  # Allow 3 failures before opening (reduced from 5 for faster detection)
+                success_threshold=1,  # Only need 1 success to close from half-open (faster recovery)
+                recovery_timeout=10,  # Attempt recovery after 10 seconds (reduced from 30 for faster recovery)
+                timeout_seconds=5.0,  # Individual request timeout (reduced for faster failure detection)
+                slow_call_threshold=3.0,  # Mark calls over 3s as slow (reduced threshold)
                 adaptive_threshold=False,  # Use fixed thresholds for predictability
-                exponential_backoff=True  # Use exponential backoff for recovery attempts
+                exponential_backoff=False  # Disable exponential backoff for faster recovery in database operations
             )
             self._breakers[name] = UnifiedCircuitBreaker(config)
-            logger.info(f"Created UnifiedCircuitBreaker for '{name}' with recovery_timeout=30s, failure_threshold=5")
+            logger.info(f"Created UnifiedCircuitBreaker for '{name}' with recovery_timeout=10s, failure_threshold=3 - OPTIMIZED FOR DATABASE OPERATIONS")
         return self._breakers[name]
     
     async def reset_all(self) -> None:

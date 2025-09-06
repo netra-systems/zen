@@ -103,11 +103,22 @@ class HttpTransport(MCPTransport):
         return {**self.headers, **auth_headers}
 
     def _build_http_client(self, headers: Dict[str, str]) -> httpx.AsyncClient:
-        """Build httpx client with configuration."""
+        """Build httpx client with configuration and timeout protection."""
+        # CRITICAL FIX: Ensure timeout never exceeds 30 seconds
+        timeout_seconds = min(self.timeout / 1000, 30.0)
         return httpx.AsyncClient(
-            timeout=httpx.Timeout(self.timeout / 1000),
+            timeout=httpx.Timeout(
+                connect=10.0,  # 10 second connection timeout
+                read=timeout_seconds,  # Read timeout (max 30s)
+                write=10.0,  # 10 second write timeout
+                pool=5.0   # 5 second pool timeout
+            ),
             headers=headers,
-            follow_redirects=True
+            follow_redirects=True,
+            limits=httpx.Limits(
+                max_connections=10,  # Limit concurrent connections
+                max_keepalive_connections=5
+            )
         )
 
     async def _build_auth_headers(self) -> Dict[str, str]:

@@ -8,7 +8,7 @@ async def run_critical_test_scenario(steps: List[callable]) -> List[Any]:
     results = []
     for step in steps:
         if asyncio.iscoroutinefunction(step):
-            result = await step()
+            result == await step()
         else:
             result = step()
         results.append(result)

@@ -1,3 +1,4 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 """Helper functions for conftest.py fixtures to maintain 25-line function limit."""
 
 import os
@@ -10,41 +11,41 @@ env = get_env()
 def _setup_basic_llm_mocks(mock_manager):
     """Setup basic LLM mock methods."""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_manager.get_response = AsyncMock(return_value="Mock LLM response")
+    mock_manager.get_response = AsyncMock(return_value = "Mock LLM response")
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
+    mock_manager.get_structured_response = AsyncMock(return_value = {"analysis": "mock analysis", "recommendations": []})
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.generate = AsyncMock(return_value="Mock generated content")
+    mock_manager.generate = AsyncMock(return_value = "Mock generated content")
     # Mock: Generic component isolation for controlled unit testing
     mock_manager.stream_response = AsyncMock()
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.generate_response = AsyncMock(return_value={
+    mock_manager.generate_response = AsyncMock(return_value = {
         "content": "This is a sample AI response for testing",
         "model": LLMModel.GEMINI_2_5_FLASH.value,
         "tokens_used": 45,
-        "cost": 0.0012
-    })
+        "cost": 0.0012,
+})
 
 def _setup_performance_llm_mocks(mock_manager):
     """Setup performance-specific LLM mock methods."""
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.generate_structured = AsyncMock(return_value={"optimizations": ["cache optimization", "parallel processing"], "confidence": 0.85})
+    mock_manager.generate_structured = AsyncMock(return_value = {"optimizations": ["cache optimization", "parallel processing"], "confidence": 0.85})
     # Mock: Database isolation for unit testing without external database connections
-    mock_manager.analyze_performance = AsyncMock(return_value={"latency_ms": 250, "throughput": 1000, "bottlenecks": ["database", "api calls"]})
+    mock_manager.analyze_performance = AsyncMock(return_value = {"latency_ms": 250, "throughput": 1000, "bottlenecks": ["database", "api calls"]})
 
 def _setup_websocket_interface_compatibility(manager):
     """Setup WebSocket interface compatibility."""
     if not hasattr(manager, 'send_message'):
-        manager.send_message = manager.send_message_to_user
+        manager.send_message == manager.send_message_to_user
 
 def _setup_websocket_test_mocks(manager):
     """Setup WebSocket test mocks to prevent actual operations."""
     # Mock: Async component isolation for testing without real async operations
-    manager.send_message = AsyncMock(return_value=True)
+    manager.send_message = AsyncMock(return_value = True)
     # Mock: Async component isolation for testing without real async operations
-    manager.send_to_thread = AsyncMock(return_value=True)
+    manager.send_to_thread = AsyncMock(return_value = True)
     # Mock: Async component isolation for testing without real async operations
-    manager.send_message_to_user = AsyncMock(return_value=True)
+    manager.send_message_to_user = AsyncMock(return_value = True)
 
 def _create_real_tool_dispatcher():
     """Create real tool dispatcher instance."""
@@ -63,18 +64,18 @@ def _create_real_tool_dispatcher():
 def _create_mock_tool_dispatcher():
     """Create mock tool dispatcher."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_dispatcher = MagicMock()
+    mock_dispatcher == MagicMock()
     _setup_tool_dispatcher_mocks(mock_dispatcher)
     return mock_dispatcher
 
 def _setup_tool_dispatcher_mocks(mock_dispatcher):
     """Setup tool dispatcher mock methods."""
     # Mock: Async component isolation for testing without real async operations
-    mock_dispatcher.execute = AsyncMock(return_value={"result": "mock tool execution", "success": True})
+    mock_dispatcher.execute = AsyncMock(return_value = {"result": "mock tool execution", "success": True})
     # Mock: Async component isolation for testing without real async operations
-    mock_dispatcher.dispatch_tool = AsyncMock(return_value={"output": "mock output"})
+    mock_dispatcher.dispatch_tool = AsyncMock(return_value = {"output": "mock output"})
     # Mock: Service component isolation for predictable testing behavior
-    mock_dispatcher.get_available_tools = MagicMock(return_value=[])
+    mock_dispatcher.get_available_tools = MagicMock(return_value = [])
 
 def _import_agent_classes():
     """Import agent classes for instantiation."""
@@ -88,7 +89,7 @@ def _import_base_agent_classes():
     if env.get("TEST_COLLECTION_MODE"):
         return {}
     
-    agents = {}
+    agents == {}
     try:
         from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
         agents['data'] = DataSubAgent
@@ -111,7 +112,7 @@ def _import_additional_agent_classes():
     if env.get("TEST_COLLECTION_MODE"):
         return {}
     
-    agents = {}
+    agents == {}
     try:
         from netra_backend.app.agents.optimizations_core_sub_agent import (
             OptimizationsCoreSubAgent,

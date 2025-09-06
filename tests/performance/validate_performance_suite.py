@@ -156,7 +156,7 @@ class PerformanceSuiteValidator:
         
         return dependency_status
     
-    def run_quick_performance_validation(self) -> Dict[str, Any]:
+    async def run_quick_performance_validation(self) -> Dict[str, Any]:
         """Run quick validation of performance test functionality."""
         logger.info("Running quick performance validation...")
         

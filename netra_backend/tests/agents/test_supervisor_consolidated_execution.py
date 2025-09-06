@@ -1,11 +1,13 @@
+from unittest.mock import AsyncMock, Mock, patch, MagicMock
+
 """Execution tests for SupervisorAgent - execution methods and hook management."""
 
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
@@ -39,8 +41,8 @@ class TestSupervisorAgentExecution:
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
-        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
+        supervisor.reliability_manager.execute_with_reliability = AsyncMock()  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncMock()  # TODO: Use real service instance
         
         # Mock the execution result
         mock_result = mock_result_instance  # Initialize appropriate service
@@ -80,8 +82,8 @@ class TestSupervisorAgentExecution:
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
-        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
+        supervisor.reliability_manager.execute_with_reliability = AsyncMock()  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncMock()  # TODO: Use real service instance
         
         # Mock the execution result
         mock_result = mock_result_instance  # Initialize appropriate service
@@ -194,8 +196,8 @@ class TestSupervisorAgentExecution:
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
-        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
+        supervisor.reliability_manager.execute_with_reliability = AsyncMock()  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncMock()  # TODO: Use real service instance
         
         # Mock successful result
         mock_result = mock_result_instance  # Initialize appropriate service
@@ -230,9 +232,9 @@ class TestSupervisorAgentExecution:
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock modern execution infrastructure
-        supervisor.reliability_manager.execute_with_reliability = AsyncNone  # TODO: Use real service instance
-        supervisor.execution_engine.execute = AsyncNone  # TODO: Use real service instance
-        supervisor.error_handler.handle_execution_error = AsyncNone  # TODO: Use real service instance
+        supervisor.reliability_manager.execute_with_reliability = AsyncMock()  # TODO: Use real service instance
+        supervisor.execution_engine.execute = AsyncMock()  # TODO: Use real service instance
+        supervisor.error_handler.handle_execution_error = AsyncMock()  # TODO: Use real service instance
         
         # Create updated state from execution result
         updated_state = DeepAgentState(
@@ -313,9 +315,9 @@ class TestSupervisorAgentHooks:
         
         # Create mock handlers
         # Mock: Generic component isolation for controlled unit testing
-        handler1 = AsyncNone  # TODO: Use real service instance
+        handler1 = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        handler2 = AsyncNone  # TODO: Use real service instance
+        handler2 = AsyncMock()  # TODO: Use real service instance
         
         # Register handlers
         supervisor.hooks["before_agent"] = [handler1, handler2]
@@ -346,7 +348,7 @@ class TestSupervisorAgentHooks:
         
         # Create handlers - one fails
         # Mock: Generic component isolation for controlled unit testing
-        handler1 = AsyncNone  # TODO: Use real service instance
+        handler1 = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         handler2 = AsyncMock(side_effect=Exception("Handler failed"))
         

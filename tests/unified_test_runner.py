@@ -77,6 +77,10 @@ PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 # Add project root to path for absolute imports
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import Windows encoding SSOT and set up encoding
+from shared.windows_encoding import setup_windows_encoding
+setup_windows_encoding()
+
 # Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
 try:
     from dotenv import load_dotenv
@@ -501,8 +505,7 @@ class UnifiedTestRunner:
             return
             
         # First, try to use the simple Docker manager for automatic startup
-        print("
-" + "="*60)
+        print("\n" + "="*60)
         print("DOCKER SERVICE INITIALIZATION")
         print("="*60)
         
@@ -528,14 +531,11 @@ class UnifiedTestRunner:
             
             if not can_proceed:
                 print("\n" + "="*60)
-                print("
-" + "="*60)
+                print("\n" + "="*60)
                 print("="*60)
-                print(f"
-{details["message"]}")
+                print(f"\n{details['message']}")
                 print(f"\\nProfile: {profile.value}")
-                print(f"
-Profile: {profile.value}")
+                print(f"\nProfile: {profile.value}")
                 print(f"Available: {details['system_available_mb']:,} MB")
                 
                 if details.get('alternatives'):
@@ -543,8 +543,7 @@ Profile: {profile.value}")
                     for alt in details['alternatives']:
                         print(f"  - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
                 
-                print("
-Alternative profiles that could work:")
+                print("\nAlternative profiles that could work:")
                 print("="*60 + "\n")
                 
                 # Check if we should skip the check
@@ -632,13 +631,11 @@ Alternative profiles that could work:")
                         print("  1. python scripts/docker.py health       # Check service health")
                         print("  2. python scripts/docker.py restart      # Restart all services")
                         print("  3. python scripts/docker.py logs backend # Check logs for errors")
-                        print("
-" + "="*60)
+                        print("\n" + "="*60)
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print("
-Some services failed health checks. To fix:")
+            print("\nSome services failed health checks. To fix:")
             print("\nTo manually manage Docker services:")
             print("  python scripts/docker.py start     # Start services")
             print("  python scripts/docker.py status    # Check status")
@@ -1392,8 +1389,7 @@ Some services failed health checks. To fix:")
                     priority = category.priority.name
                     print(f"  - {category_name} ({priority}, ~{duration})")
         
-        print(f"\1{'='*60}
-")
+        print(f"\n{'='*60}\n")
     
     def _execute_categories_by_phases(self, execution_plan: ExecutionPlan, args: argparse.Namespace) -> Dict:
         """Execute categories according to the execution plan."""
@@ -1498,10 +1494,8 @@ Some services failed health checks. To fix:")
             
             # Combine results
             overall_success = all(r["success"] for r in all_results.values())
-            combined_output = "
-".join(r.get("output", "") for r in all_results.values())
-            combined_errors = "
-".join(r.get("errors", "") for r in all_results.values())
+            combined_output = "\n".join(r.get("output", "") for r in all_results.values())
+            combined_errors = "\n".join(r.get("errors", "") for r in all_results.values())
             total_duration = sum(r.get("duration", 0) for r in all_results.values())
             
             return {
@@ -1721,11 +1715,9 @@ Some services failed health checks. To fix:")
         if not docker_available and not (local_postgres and local_redis):
             raise RuntimeError(
                 "HARD FAIL: Cannot run E2E tests - Docker Desktop not running and "
-                "required local services not available.
-"
+                "required local services not available.\n"
                 f"Either start Docker Desktop or run local PostgreSQL (port {postgres_port}) "
-                f"and Redis (port {redis_port}) services.
-"
+                f"and Redis (port {redis_port}) services.\n"
                 "Quick fix: python scripts/docker.py start"
             )
         
@@ -2190,8 +2182,7 @@ Some services failed health checks. To fix:")
             self._safe_print_unicode(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
         
         overall_status = "✅ PASSED" if report_data['overall_success'] else "❌ FAILED"
-        self._safe_print_unicode(f"
-Overall: {overall_status}")
+        self._safe_print_unicode(f"\nOverall: {overall_status}")
         print(f"Report: {json_report}")
 
 

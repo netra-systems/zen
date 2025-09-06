@@ -3,13 +3,13 @@
 import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 @pytest.fixture
- def real_database():
+def real_database():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock database."""
@@ -21,7 +21,7 @@ import pytest
     return db
 
 @pytest.fixture
- def real_cache():
+def real_cache():
     """Use real service instance."""
     # TODO: Initialize real service
     """Create a mock cache."""

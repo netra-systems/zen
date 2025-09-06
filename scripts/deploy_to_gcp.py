@@ -9,6 +9,10 @@ Use this script with appropriate flags for all GCP staging deployments.
 Quick Start:
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
+IMPORTANT for Claude Code users:
+    If running from Claude Code, use the wrapper script to avoid 2-minute timeout:
+    python scripts/deploy_gcp_with_timeout.py --project netra-staging --build-local
+
 See SPEC/gcp_deployment.xml for comprehensive deployment guidelines.
 """
 
@@ -32,19 +36,11 @@ from scripts.gcp_auth_config import GCPAuthConfig
 from shared.isolated_environment import get_env
 # Import centralized secrets configuration
 from deployment.secrets_config import SecretConfig
+# Import Windows encoding SSOT
+from shared.windows_encoding import setup_windows_encoding
 
-# Fix Unicode encoding issues on Windows
-if sys.platform == "win32":
-    import io
-    try:
-        # Only wrap if not already wrapped
-        if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
-        if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
-    except:
-        # If wrapping fails, continue with default encoding
-        pass
+# Fix Unicode encoding issues on Windows - using SSOT
+setup_windows_encoding()
 
 
 @dataclass
@@ -60,7 +56,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 600
+    timeout: int = 1800  # Increased to 30 minutes for staging deployments
 
 
 class GCPDeployer:
@@ -191,6 +187,8 @@ class GCPDeployer:
                 ["docker", "--version"],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 check=False,
                 shell=sys.platform == "win32"
             )

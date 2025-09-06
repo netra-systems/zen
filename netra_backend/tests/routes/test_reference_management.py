@@ -10,6 +10,8 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.database import get_db
 from netra_backend.app.main import app
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+import json
 
 class TestReferenceManagement:
     
@@ -21,8 +23,8 @@ class TestReferenceManagement:
             "type": "document",
             "value": "Optimization strategies for AI workloads",
             "description": "Guide for AI performance optimization",
-            "version": "1.0"
-        }
+            "version": "1.0",
+}
         
         # Mock the created reference with all required fields
         from datetime import datetime, timezone
@@ -36,14 +38,14 @@ class TestReferenceManagement:
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncNone  # TODO: Use real service instance
         
-        # The refresh method should set the auto-generated fields
+        # The refresh method should set(the auto-generated fields)
         async def mock_refresh(ref):
             ref.id = 'ref-new'
             ref.created_at = current_time
             ref.updated_at = current_time
         
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.refresh = AsyncMock(side_effect=mock_refresh)
+        mock_session.refresh = AsyncMock(side_effect = mock_refresh)
         
         # Create generator for session (not async since TestClient is sync)
         def mock_get_db_session():
@@ -54,7 +56,7 @@ class TestReferenceManagement:
         
         try:
             client = TestClient(app)
-            response = client.post("/api/references", json=reference_data)
+            response = client.post("/api/references", json = reference_data)
             
             # Due to mocking complexities with SQLAlchemy models, we accept both success and expected error codes
             # The actual functionality works but mocking SQLAlchemy model creation is complex
@@ -92,13 +94,13 @@ class TestReferenceManagement:
         
         # Mock execute as an async method that returns the result
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.execute = AsyncMock(return_value = mock_result)
         
         # Setup mock context manager - session should be a context manager itself
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+        mock_session.__aenter__ = AsyncMock(return_value = mock_session)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.__aexit__ = AsyncMock(return_value=None)
+        mock_session.__aexit__ = AsyncMock(return_value = None)
         
         async def mock_get_db_session():
             yield mock_session
@@ -126,8 +128,8 @@ class TestReferenceManagement:
                 "type": "document",
                 "value": "AI content",
                 "description": "AI guide description",
-                "version": "1.0"
-            },
+                "version": "1.0",
+},
             {
                 "id": "ref-2", 
                 "name": "ml_optimization", 
@@ -135,9 +137,9 @@ class TestReferenceManagement:
                 "type": "document",
                 "value": "ML content",
                 "description": "ML optimization description",
-                "version": "1.0"
-            }
-        ]
+                "version": "1.0",
+},
+]
         
         # Setup mock session with proper async context manager
         # Mock: Database session isolation for transaction testing without real database dependency
@@ -146,7 +148,7 @@ class TestReferenceManagement:
         mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalars.return_value.all.return_value = mock_references
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.execute = AsyncMock(return_value = mock_result)
         
         # Create generator for session (not async since TestClient is sync)
         def mock_get_db_session():
@@ -157,7 +159,7 @@ class TestReferenceManagement:
         
         try:
             client = TestClient(app)
-            response = client.get("/api/references/search?query=optimization")
+            response = client.get("/api/references/search?query = optimization")
             
             assert response.status_code == 200
             assert len(response.json()) == 2
@@ -169,8 +171,8 @@ class TestReferenceManagement:
         """Test updating an existing reference"""
         update_data = {
             "friendly_name": "Updated Reference Name",
-            "value": "Updated content"
-        }
+            "value": "Updated content",
+}
         
         # Setup mock session
         # Mock: Database session isolation for transaction testing without real database dependency
@@ -187,7 +189,7 @@ class TestReferenceManagement:
         mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = mock_reference
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.execute = AsyncMock(return_value = mock_result)
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
@@ -203,7 +205,7 @@ class TestReferenceManagement:
         try:
             client = TestClient(app)
             # Mock: Component isolation for testing without external dependencies
-            response = client.patch("/api/references/ref-123", json=update_data)
+            response = client.patch("/api/references/ref-123", json = update_data)
             
             assert response.status_code == 200
             assert mock_reference.friendly_name == update_data["friendly_name"]
@@ -222,7 +224,7 @@ class TestReferenceManagement:
         mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = mock_reference
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.execute = AsyncMock(return_value = mock_result)
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.delete = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
@@ -230,9 +232,9 @@ class TestReferenceManagement:
         
         # Setup mock context manager - session should be a context manager itself
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+        mock_session.__aenter__ = AsyncMock(return_value = mock_session)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.__aexit__ = AsyncMock(return_value=None)
+        mock_session.__aexit__ = AsyncMock(return_value = None)
         
         async def mock_get_db_session():
             yield mock_session

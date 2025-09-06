@@ -206,6 +206,37 @@ class DatabaseURLBuilder:
             )
         
         @property
+        def async_url_sqlalchemy(self) -> Optional[str]:
+            """Async URL for Cloud SQL Unix socket connection - for SQLAlchemy with asyncpg driver."""
+            if not self.is_cloud_sql:
+                return None
+            
+            # Try to get components from individual env vars first
+            user = self.parent.postgres_user
+            password = self.parent.postgres_password
+            database = self.parent.postgres_db
+            host = self.parent.postgres_host
+            
+            # If individual components aren't available, parse from DATABASE_URL
+            if not user or not host or not database:
+                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
+                if parsed_user is not None:
+                    user = user or parsed_user
+                    password = password or parsed_password
+                    host = host or parsed_host
+                    database = database or parsed_database
+            
+            # URL encode user and password for safety
+            user = quote(user, safe='') if user else ""
+            password_part = f":{quote(password, safe='')}" if password else ""
+            return (
+                f"postgresql+asyncpg://"
+                f"{user}{password_part}"
+                f"@/{database}"
+                f"?host={host}"
+            )
+        
+        @property
         def sync_url(self) -> Optional[str]:
             """Sync URL for Cloud SQL Unix socket connection (for Alembic)."""
             if not self.is_cloud_sql:
@@ -265,7 +296,7 @@ class DatabaseURLBuilder:
         
         @property
         def async_url(self) -> Optional[str]:
-            """Async URL for TCP connection without SSL."""
+            """Async URL for TCP connection without SSL - for SQLAlchemy with asyncpg."""
             if not self.has_config:
                 return None
             
@@ -324,6 +355,26 @@ class DatabaseURLBuilder:
             return f"{base_url}{separator}sslmode=require"
         
         @property
+        def async_url_sqlalchemy(self) -> Optional[str]:
+            """Async URL for SQLAlchemy using asyncpg driver."""
+            if not self.has_config:
+                return None
+            
+            # Apply Docker hostname resolution
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+            
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or 'postgres', safe='')
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
+            return (
+                f"postgresql+asyncpg://"
+                f"{user}{password_part}"
+                f"@{resolved_host}"
+                f":{self.parent.postgres_port}"
+                f"/{self.parent.postgres_db or 'netra_dev'}"
+            )
+
+        @property
         def async_url_psycopg(self) -> Optional[str]:
             """Async URL using psycopg driver."""
             if not self.has_config:
@@ -361,11 +412,11 @@ class DatabaseURLBuilder:
         
         @property
         def auto_url(self) -> str:
-            """Auto-select best URL for development - always returns async format."""
+            """Auto-select best URL for development - returns SQLAlchemy async format."""
             # DATABASE_URL takes priority if set
             if self.parent.database_url:
-                # Ensure async format for asyncpg
-                if not self.parent.database_url.startswith("postgresql+asyncpg://"):
+                # Ensure correct format for SQLAlchemy async usage
+                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
                     return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
                 return self.parent.database_url
             # Try TCP config if no DATABASE_URL
@@ -424,6 +475,9 @@ class DatabaseURLBuilder:
             """Auto-select best URL for test."""
             # PRIORITY 1: Explicit DATABASE_URL takes precedence for tests
             if self.parent.database_url:
+                # Ensure correct format for SQLAlchemy async usage
+                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
+                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
                 return self.parent.database_url
             # PRIORITY 2: Use memory if explicitly requested
             if self.parent.env.get("USE_MEMORY_DB") == "true":

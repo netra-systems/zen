@@ -25,7 +25,7 @@ class TestLogClusteringAlgorithms:
                 -- Extract template by replacing numbers and UUIDs
                 replaceRegexpAll(
                     replaceRegexpAll(message, '[0-9]+', 'NUM'),
-                    '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', 'UUID'
+                    '[a-f0-9]{8]-[a-f0-9]{4]-[a-f0-9]{4]-[a-f0-9]{4]-[a-f0-9]{12]', 'UUID'
                 ) as template,
                 count() as occurrence_count,
                 min(timestamp) as first_seen,

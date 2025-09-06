@@ -4,7 +4,7 @@ Split into focused test modules to comply with 450-line file limit and 25-line f
 
 This file serves as the main entry point that imports all the split test modules.
 Each module focuses on a specific aspect of testing with functions ≤8 lines.
-"""
+"""""
 
 import sys
 from pathlib import Path
@@ -28,5 +28,5 @@ def test_architectural_compliance():
     # Individual test modules handle specific functionality
     assert True  # Placeholder for architectural validation
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short", "--durations=10"])
+    if __name__ == "__main__":
+        pytest.main([__file__, "-v", "--tb=short", "--durations=10"])

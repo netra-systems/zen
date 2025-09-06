@@ -62,7 +62,11 @@ class TestEnvironmentValidator:
         """Validate database connection and schema."""
         try:
             import asyncpg
-            conn = await asyncpg.connect(database_url)
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            # Normalize URL for asyncpg compatibility
+            normalized_url = DatabaseURLBuilder.format_for_asyncpg_driver(database_url)
+            conn = await asyncpg.connect(normalized_url)
             
             # Check if test schema exists
             schema_exists = await conn.fetchval("""

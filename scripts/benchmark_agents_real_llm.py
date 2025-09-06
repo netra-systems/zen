@@ -127,7 +127,8 @@ class RealLLMBenchmark:
                         benchmark.errors.append(f"{scenario_name}: {str(e)}")
                         print(f"    ✗ Error: {str(e)}")
                 
-                break  # Exit async for loop
+                # FIXED: break outside loop - using return instead
+                return
                 
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")

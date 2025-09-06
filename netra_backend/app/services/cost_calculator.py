@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 
-from app.schemas.llm_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_types import LLMProvider, TokenUsage
 
 logger = logging.getLogger(__name__)
 

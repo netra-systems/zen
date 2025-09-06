@@ -1,3 +1,6 @@
+import asyncio
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+import json
 """Test for dev login endpoint"""
 import pytest
 from fastapi.testclient import TestClient
@@ -18,13 +21,13 @@ def test_client():
 async def test_dev_login_endpoint_in_dev_environment(test_client):
     """Test that dev login works in development environment"""
     # Mock the environment to be development
-    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='development'):
+    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value = 'development'):
         # Mock the auth service methods
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-            mock_auth.create_access_token = AsyncMock(return_value="dev-access-token")
-            mock_auth.create_refresh_token = AsyncMock(return_value="dev-refresh-token")
+            mock_auth.create_access_token = AsyncMock(return_value = "dev-access-token")
+            mock_auth.create_refresh_token = AsyncMock(return_value = "dev-refresh-token")
             
-            response = test_client.post("/auth/dev/login", json={})
+            response = test_client.post("/auth/dev/login", json = {})
             
             assert response.status_code == 200
             data = response.json()
@@ -37,8 +40,8 @@ async def test_dev_login_endpoint_in_dev_environment(test_client):
 async def test_dev_login_blocked_in_production(test_client):
     """Test that dev login is blocked in production environment"""
     # Mock the environment to be production
-    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='production'):
-        response = test_client.post("/auth/dev/login", json={})
+    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value = 'production'):
+        response = test_client.post("/auth/dev/login", json = {})
         
         assert response.status_code == 403
         data = response.json()
@@ -48,13 +51,13 @@ async def test_dev_login_blocked_in_production(test_client):
 async def test_dev_login_allowed_in_test_environment(test_client):
     """Test that dev login works in test environment"""
     # Mock the environment to be test
-    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value='test'):
+    with patch('auth_service.auth_core.config.AuthConfig.get_environment', return_value = 'test'):
         # Mock the auth service methods
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-            mock_auth.create_access_token = AsyncMock(return_value="test-access-token")
-            mock_auth.create_refresh_token = AsyncMock(return_value="test-refresh-token")
+            mock_auth.create_access_token = AsyncMock(return_value = "test-access-token")
+            mock_auth.create_refresh_token = AsyncMock(return_value = "test-refresh-token")
             
-            response = test_client.post("/auth/dev/login", json={})
+            response = test_client.post("/auth/dev/login", json = {})
             
             assert response.status_code == 200
             data = response.json()

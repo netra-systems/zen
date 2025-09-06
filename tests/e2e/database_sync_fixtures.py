@@ -1,243 +1,243 @@
-class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
-    
-    def __init__(self):
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-        
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
-            raise RuntimeError("WebSocket is closed")
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-        self._closed = True
-        self.is_connected = False
-        
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        return self.messages_sent.copy()
+# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
+    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
-"""Database Sync Test Fixtures - Supporting Mocks and Validators
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
+    # REMOVED_SYNTAX_ERROR: self.is_connected = True
+    # REMOVED_SYNTAX_ERROR: self._closed = False
 
-Business Value Justification (BVJ):
-1. Segment: All customer segments (Free, Early, Mid, Enterprise)
-2. Business Goal: Provide reusable test infrastructure for database sync testing
-3. Value Impact: Reduces test development time by 60% through shared fixtures
-4. Revenue Impact: Faster testing enables more reliable releases
+# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
+    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
+    # REMOVED_SYNTAX_ERROR: if self._closed:
+        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
+        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
 
-Module Architecture Compliance: Under 300 lines, functions under 8 lines
-"""
+# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
+    # REMOVED_SYNTAX_ERROR: self._closed = True
+    # REMOVED_SYNTAX_ERROR: self.is_connected = False
 
-import json
-import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import get_env
+# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
+    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
+    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
+    # REMOVED_SYNTAX_ERROR: '''Database Sync Test Fixtures - Supporting Mocks and Validators
 
-class AuthServiceMock:
-    """Mock Auth Service for testing user sync."""
-    
-    def __init__(self):
-        self.users = {}
-        self.user_updates = {}
-    
-    async def create_user(self, user_data: Dict) -> str:
-        """Create user in Auth service."""
-        user_id = user_data.get('id', str(uuid.uuid4()))
-        self.users[user_id] = user_data.copy()
-        return user_id
-    
-    async def update_user(self, user_id: str, updates: Dict) -> bool:
-        """Update user in Auth service."""
-        if user_id not in self.users:
-            return False
-        self.users[user_id].update(updates)
-        self.user_updates[user_id] = datetime.now(timezone.utc)
-        return True
-    
-    async def get_user(self, user_id: str) -> Optional[Dict]:
-        """Get user from Auth service."""
-        return self.users.get(user_id)
+    # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
+        # REMOVED_SYNTAX_ERROR: 1. Segment: All customer segments (Free, Early, Mid, Enterprise)
+        # REMOVED_SYNTAX_ERROR: 2. Business Goal: Provide reusable test infrastructure for database sync testing
+        # REMOVED_SYNTAX_ERROR: 3. Value Impact: Reduces test development time by 60% through shared fixtures
+        # REMOVED_SYNTAX_ERROR: 4. Revenue Impact: Faster testing enables more reliable releases
+
+        # REMOVED_SYNTAX_ERROR: Module Architecture Compliance: Under 300 lines, functions under 8 lines
+        # REMOVED_SYNTAX_ERROR: '''
+
+        # REMOVED_SYNTAX_ERROR: import json
+        # REMOVED_SYNTAX_ERROR: import uuid
+        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta, timezone
+        # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Optional
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
 
-class BackendServiceMock:
-    """Mock Backend Service for testing user sync."""
-    
-    def __init__(self):
-        self.users = {}
-        self.sync_log = []
-    
-    async def sync_user_from_auth(self, auth_user: Dict) -> bool:
-        """Sync user from Auth to Backend."""
-        user_id = auth_user['id']
-        self.users[user_id] = auth_user.copy()
-        self._log_sync_action(user_id)
-        return True
-    
-    def _log_sync_action(self, user_id: str):
-        """Log sync action with timestamp."""
-        self.sync_log.append({
-            'user_id': user_id,
-            'action': 'sync',
-            'timestamp': datetime.now(timezone.utc)
-        })
-    
-    async def get_user(self, user_id: str) -> Optional[Dict]:
-        """Get user from Backend service."""
-        return self.users.get(user_id)
+# REMOVED_SYNTAX_ERROR: class AuthServiceMock:
+    # REMOVED_SYNTAX_ERROR: """Mock Auth Service for testing user sync."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.users = {}
+    # REMOVED_SYNTAX_ERROR: self.user_updates = {}
+
+# REMOVED_SYNTAX_ERROR: async def create_user(self, user_data: Dict) -> str:
+    # REMOVED_SYNTAX_ERROR: """Create user in Auth service."""
+    # REMOVED_SYNTAX_ERROR: user_id = user_data.get('id', str(uuid.uuid4()))
+    # REMOVED_SYNTAX_ERROR: self.users[user_id] = user_data.copy()
+    # REMOVED_SYNTAX_ERROR: return user_id
+
+# REMOVED_SYNTAX_ERROR: async def update_user(self, user_id: str, updates: Dict) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Update user in Auth service."""
+    # REMOVED_SYNTAX_ERROR: if user_id not in self.users:
+        # REMOVED_SYNTAX_ERROR: return False
+        # REMOVED_SYNTAX_ERROR: self.users[user_id].update(updates)
+        # REMOVED_SYNTAX_ERROR: self.user_updates[user_id] = datetime.now(timezone.utc)
+        # REMOVED_SYNTAX_ERROR: return True
+
+# REMOVED_SYNTAX_ERROR: async def get_user(self, user_id: str) -> Optional[Dict]:
+    # REMOVED_SYNTAX_ERROR: """Get user from Auth service."""
+    # REMOVED_SYNTAX_ERROR: return self.users.get(user_id)
 
 
-class ClickHouseMock:
-    """Mock ClickHouse for testing metrics sync."""
+# REMOVED_SYNTAX_ERROR: class BackendServiceMock:
+    # REMOVED_SYNTAX_ERROR: """Mock Backend Service for testing user sync."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.users = {}
+    # REMOVED_SYNTAX_ERROR: self.sync_log = []
+
+# REMOVED_SYNTAX_ERROR: async def sync_user_from_auth(self, auth_user: Dict) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Sync user from Auth to Backend."""
+    # REMOVED_SYNTAX_ERROR: user_id = auth_user['id']
+    # REMOVED_SYNTAX_ERROR: self.users[user_id] = auth_user.copy()
+    # REMOVED_SYNTAX_ERROR: self._log_sync_action(user_id)
+    # REMOVED_SYNTAX_ERROR: return True
+
+# REMOVED_SYNTAX_ERROR: def _log_sync_action(self, user_id: str):
+    # REMOVED_SYNTAX_ERROR: """Log sync action with timestamp."""
+    # REMOVED_SYNTAX_ERROR: self.sync_log.append({ ))
+    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
+    # REMOVED_SYNTAX_ERROR: 'action': 'sync',
+    # REMOVED_SYNTAX_ERROR: 'timestamp': datetime.now(timezone.utc)
     
-    def __init__(self):
-        self.events = []
-        self.metrics = {}
-    
-    async def insert_user_event(self, user_id: str, event_data: Dict) -> bool:
-        """Insert user event into ClickHouse."""
-        event = self._create_event_record(user_id, event_data)
-        self.events.append(event)
-        return True
-    
-    def _create_event_record(self, user_id: str, event_data: Dict) -> Dict:
-        """Create event record with metadata."""
-        return {
-            'user_id': user_id,
-            'event_type': event_data.get('event_type', 'unknown'),
-            'timestamp': datetime.now(timezone.utc),
-            'data': event_data
-        }
-    
-    async def get_user_metrics(self, user_id: str) -> List[Dict]:
-        """Get user metrics from ClickHouse."""
-        return [e for e in self.events if e['user_id'] == user_id]
+
+# REMOVED_SYNTAX_ERROR: async def get_user(self, user_id: str) -> Optional[Dict]:
+    # REMOVED_SYNTAX_ERROR: """Get user from Backend service."""
+    # REMOVED_SYNTAX_ERROR: return self.users.get(user_id)
 
 
-class RedisMock:
-    """Mock Redis for testing cache sync."""
+# REMOVED_SYNTAX_ERROR: class ClickHouseMock:
+    # REMOVED_SYNTAX_ERROR: """Mock ClickHouse for testing metrics sync."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.events = []
+    # REMOVED_SYNTAX_ERROR: self.metrics = {}
+
+# REMOVED_SYNTAX_ERROR: async def insert_user_event(self, user_id: str, event_data: Dict) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Insert user event into ClickHouse."""
+    # REMOVED_SYNTAX_ERROR: event = self._create_event_record(user_id, event_data)
+    # REMOVED_SYNTAX_ERROR: self.events.append(event)
+    # REMOVED_SYNTAX_ERROR: return True
+
+# REMOVED_SYNTAX_ERROR: def _create_event_record(self, user_id: str, event_data: Dict) -> Dict:
+    # REMOVED_SYNTAX_ERROR: """Create event record with metadata."""
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
+    # REMOVED_SYNTAX_ERROR: 'event_type': event_data.get('event_type', 'unknown'),
+    # REMOVED_SYNTAX_ERROR: 'timestamp': datetime.now(timezone.utc),
+    # REMOVED_SYNTAX_ERROR: 'data': event_data
     
-    def __init__(self):
-        self.cache = {}
-        self.ttl_data = {}
-    
-    async def set(self, key: str, value: str, ex: int = None) -> bool:
-        """Set cache value with optional expiration."""
-        self.cache[key] = value
-        if ex:
-            self._set_expiry(key, ex)
-        return True
-    
-    def _set_expiry(self, key: str, seconds: int):
-        """Set key expiry time."""
-        self.ttl_data[key] = datetime.now(timezone.utc) + timedelta(seconds=seconds)
-    
-    async def get(self, key: str) -> Optional[str]:
-        """Get cache value."""
-        if key not in self.cache:
-            return None
-        if self._is_expired(key):
-            self._cleanup_expired_key(key)
-            return None
-        return self.cache[key]
-    
-    def _is_expired(self, key: str) -> bool:
-        """Check if key has expired."""
-        return (key in self.ttl_data and 
-                datetime.now(timezone.utc) > self.ttl_data[key])
-    
-    def _cleanup_expired_key(self, key: str):
-        """Remove expired key from cache."""
-        del self.cache[key]
-        del self.ttl_data[key]
-    
-    async def delete(self, key: str) -> bool:
-        """Delete cache key."""
-        if key not in self.cache:
-            return False
-        del self.cache[key]
-        if key in self.ttl_data:
-            del self.ttl_data[key]
-        return True
+
+# REMOVED_SYNTAX_ERROR: async def get_user_metrics(self, user_id: str) -> List[Dict]:
+    # REMOVED_SYNTAX_ERROR: """Get user metrics from ClickHouse."""
+    # REMOVED_SYNTAX_ERROR: return [item for item in []] == user_id]
 
 
-class DatabaseSyncValidator:
-    """Helper for validating database synchronization."""
+# REMOVED_SYNTAX_ERROR: class RedisMock:
+    # REMOVED_SYNTAX_ERROR: """Mock Redis for testing cache sync."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.cache = {}
+    # REMOVED_SYNTAX_ERROR: self.ttl_data = {}
+
+# REMOVED_SYNTAX_ERROR: async def set(self, key: str, value: str, ex: int = None) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Set cache value with optional expiration."""
+    # REMOVED_SYNTAX_ERROR: self.cache[key] = value
+    # REMOVED_SYNTAX_ERROR: if ex:
+        # REMOVED_SYNTAX_ERROR: self._set_expiry(key, ex)
+        # REMOVED_SYNTAX_ERROR: return True
+
+# REMOVED_SYNTAX_ERROR: def _set_expiry(self, key: str, seconds: int):
+    # REMOVED_SYNTAX_ERROR: """Set key expiry time."""
+    # REMOVED_SYNTAX_ERROR: self.ttl_data[key] = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+
+# REMOVED_SYNTAX_ERROR: async def get(self, key: str) -> Optional[str]:
+    # REMOVED_SYNTAX_ERROR: """Get cache value."""
+    # REMOVED_SYNTAX_ERROR: if key not in self.cache:
+        # REMOVED_SYNTAX_ERROR: return None
+        # REMOVED_SYNTAX_ERROR: if self._is_expired(key):
+            # REMOVED_SYNTAX_ERROR: self._cleanup_expired_key(key)
+            # REMOVED_SYNTAX_ERROR: return None
+            # REMOVED_SYNTAX_ERROR: return self.cache[key]
+
+# REMOVED_SYNTAX_ERROR: def _is_expired(self, key: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Check if key has expired."""
+    # REMOVED_SYNTAX_ERROR: return (key in self.ttl_data and )
+    # REMOVED_SYNTAX_ERROR: datetime.now(timezone.utc) > self.ttl_data[key])
+
+# REMOVED_SYNTAX_ERROR: def _cleanup_expired_key(self, key: str):
+    # REMOVED_SYNTAX_ERROR: """Remove expired key from cache."""
+    # REMOVED_SYNTAX_ERROR: del self.cache[key]
+    # REMOVED_SYNTAX_ERROR: del self.ttl_data[key]
+
+# REMOVED_SYNTAX_ERROR: async def delete(self, key: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Delete cache key."""
+    # REMOVED_SYNTAX_ERROR: if key not in self.cache:
+        # REMOVED_SYNTAX_ERROR: return False
+        # REMOVED_SYNTAX_ERROR: del self.cache[key]
+        # REMOVED_SYNTAX_ERROR: if key in self.ttl_data:
+            # REMOVED_SYNTAX_ERROR: del self.ttl_data[key]
+            # REMOVED_SYNTAX_ERROR: return True
+
+
+# REMOVED_SYNTAX_ERROR: class DatabaseSyncValidator:
+    # REMOVED_SYNTAX_ERROR: """Helper for validating database synchronization."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: self.auth_service = AuthService        self.backend_service = BackendService        self.clickhouse = ClickHouse        self.redis = Redis
+# REMOVED_SYNTAX_ERROR: async def verify_auth_backend_sync(self, user_id: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Verify user sync between Auth and Backend."""
+    # REMOVED_SYNTAX_ERROR: auth_user = await self.auth_service.get_user(user_id)
+    # REMOVED_SYNTAX_ERROR: backend_user = await self.backend_service.get_user(user_id)
+    # REMOVED_SYNTAX_ERROR: return self._check_user_sync_consistency(auth_user, backend_user)
+
+# REMOVED_SYNTAX_ERROR: def _check_user_sync_consistency(self, auth_user: Optional[Dict],
+# REMOVED_SYNTAX_ERROR: backend_user: Optional[Dict]) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Check consistency between auth and backend users."""
+    # REMOVED_SYNTAX_ERROR: if not auth_user or not backend_user:
+        # REMOVED_SYNTAX_ERROR: return False
+        # REMOVED_SYNTAX_ERROR: return auth_user['email'] == backend_user['email']
+
+# REMOVED_SYNTAX_ERROR: async def verify_clickhouse_accuracy(self, user_id: str, expected_events: int) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Verify ClickHouse metrics accuracy."""
+    # REMOVED_SYNTAX_ERROR: metrics = await self.clickhouse.get_user_metrics(user_id)
+    # REMOVED_SYNTAX_ERROR: return len(metrics) == expected_events
+
+# REMOVED_SYNTAX_ERROR: async def verify_cache_consistency(self, cache_key: str, expected_value: str) -> bool:
+    # REMOVED_SYNTAX_ERROR: """Verify cache consistency."""
+    # REMOVED_SYNTAX_ERROR: cached_value = await self.redis.get(cache_key)
+    # REMOVED_SYNTAX_ERROR: return cached_value == expected_value
+
+
+# REMOVED_SYNTAX_ERROR: def create_test_user_data(identifier: str = None) -> Dict:
+    # REMOVED_SYNTAX_ERROR: """Create standardized test user data."""
+    # REMOVED_SYNTAX_ERROR: test_id = identifier or uuid.uuid4().hex[:8]
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'id': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'email': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'full_name': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'plan_tier': 'mid',
+    # REMOVED_SYNTAX_ERROR: 'is_active': True
     
-    def __init__(self):
-        self.auth_service = AuthService        self.backend_service = BackendService        self.clickhouse = ClickHouse        self.redis = Redis    
-    async def verify_auth_backend_sync(self, user_id: str) -> bool:
-        """Verify user sync between Auth and Backend."""
-        auth_user = await self.auth_service.get_user(user_id)
-        backend_user = await self.backend_service.get_user(user_id)
-        return self._check_user_sync_consistency(auth_user, backend_user)
+
+
+# REMOVED_SYNTAX_ERROR: def create_performance_user_data(index: int) -> Dict:
+    # REMOVED_SYNTAX_ERROR: """Create performance test user data."""
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'id': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'email': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'full_name': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'plan_tier': 'early',
+    # REMOVED_SYNTAX_ERROR: 'is_active': True
     
-    def _check_user_sync_consistency(self, auth_user: Optional[Dict], 
-                                     backend_user: Optional[Dict]) -> bool:
-        """Check consistency between auth and backend users."""
-        if not auth_user or not backend_user:
-            return False
-        return auth_user['email'] == backend_user['email']
+
+
+# REMOVED_SYNTAX_ERROR: def create_migration_user_data(index: int) -> Dict:
+    # REMOVED_SYNTAX_ERROR: """Create migration test user data."""
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'id': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'email': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'full_name': "formatted_string",
+    # REMOVED_SYNTAX_ERROR: 'plan_tier': 'free',
+    # REMOVED_SYNTAX_ERROR: 'is_active': True
     
-    async def verify_clickhouse_accuracy(self, user_id: str, expected_events: int) -> bool:
-        """Verify ClickHouse metrics accuracy."""
-        metrics = await self.clickhouse.get_user_metrics(user_id)
-        return len(metrics) == expected_events
+
+
+# REMOVED_SYNTAX_ERROR: def create_eventual_consistency_user() -> Dict:
+    # REMOVED_SYNTAX_ERROR: """Create eventual consistency test user data."""
+    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: 'id': "eventual-consistency-test",
+    # REMOVED_SYNTAX_ERROR: 'email': "eventual@example.com",
+    # REMOVED_SYNTAX_ERROR: 'full_name': "Eventual Consistency User",
+    # REMOVED_SYNTAX_ERROR: 'plan_tier': 'enterprise',
+    # REMOVED_SYNTAX_ERROR: 'is_active': True
     
-    async def verify_cache_consistency(self, cache_key: str, expected_value: str) -> bool:
-        """Verify cache consistency."""
-        cached_value = await self.redis.get(cache_key)
-        return cached_value == expected_value
-
-
-def create_test_user_data(identifier: str = None) -> Dict:
-    """Create standardized test user data."""
-    test_id = identifier or uuid.uuid4().hex[:8]
-    return {
-        'id': f"sync-test-{test_id}",
-        'email': f"sync-test-{test_id}@example.com",
-        'full_name': f"Database Sync Test User {test_id}",
-        'plan_tier': 'mid',
-        'is_active': True
-    }
-
-
-def create_performance_user_data(index: int) -> Dict:
-    """Create performance test user data."""
-    return {
-        'id': f"perf-sync-{index}",
-        'email': f"perf-{index}@example.com",
-        'full_name': f"Performance User {index}",
-        'plan_tier': 'early',
-        'is_active': True
-    }
-
-
-def create_migration_user_data(index: int) -> Dict:
-    """Create migration test user data."""
-    return {
-        'id': f"migration-test-{index}",
-        'email': f"migration-{index}@example.com",
-        'full_name': f"Migration User {index}",
-        'plan_tier': 'free',
-        'is_active': True
-    }
-
-
-def create_eventual_consistency_user() -> Dict:
-    """Create eventual consistency test user data."""
-    return {
-        'id': "eventual-consistency-test",
-        'email': "eventual@example.com",
-        'full_name': "Eventual Consistency User",
-        'plan_tier': 'enterprise',
-        'is_active': True
-    }

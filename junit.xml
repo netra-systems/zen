@@ -1,1 +1,141 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="1" tests="8" time="4.559" timestamp="2025-09-05T14:53:32.836888-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 49, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_valid_token_in_body" time="0.230" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_camelcase_field" time="0.016" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_token_field" time="0.014" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_missing_token_field" time="0.014" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_invalid_json" time="0.014" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_invalid_token" time="0.016" /><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_service_error" time="0.017" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="16" failures="0" skipped="1" tests="17" time="2.854" timestamp="2025-09-06T00:22:33.175207-07:00" hostname="Anthony"><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/critical/test_oauth_configuration_missing_staging_regression.py)</error></testcase><testcase classname="tests.helpers.test_repository_factory" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/helpers/test_repository_factory.py)</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="" name="tests.test_auth_session_persistence_edge_cases" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_session_persistence_edge_cases.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\test_auth_session_persistence_edge_cases.py:11: in &lt;module&gt;
+    from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+E   ModuleNotFoundError: No module named 'test_framework.redis_test_utils_test_utils'</error></testcase><testcase classname="tests.test_critical_bugs_simple" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_critical_bugs_simple.py)</error></testcase><testcase classname="tests.test_oauth_redirect_regression" name="TestOAuthRedirectURIRegression" time="0.000"><error message="collection failure">invalid method signature
+
+During handling of the above exception, another exception occurred:
+Could not determine arguments of &lt;bound method TestOAuthRedirectURIRegression.real_auth_env of &lt;auth_service.tests.test_oauth_redirect_regression.TestOAuthRedirectURIRegression object at 0x000001606B391A60&gt;&gt;: invalid method signature</error></testcase><testcase classname="tests.test_oauth_security_vulnerabilities" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_oauth_security_vulnerabilities.py)</error></testcase><testcase classname="tests.test_oauth_state_validation" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_oauth_state_validation.py)</error></testcase><testcase classname="tests.test_refresh_endpoint_integration" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_refresh_endpoint_integration.py)</error></testcase><testcase classname="tests.test_refresh_token_fix" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_refresh_token_fix.py)</error></testcase><testcase classname="tests.test_signup_flow_comprehensive" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/test_signup_flow_comprehensive.py)</error></testcase><testcase classname="" name="tests.unit.test_auth_config_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_auth_config_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\unit\test_auth_config_comprehensive.py:11: in &lt;module&gt;
+    from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+E   ModuleNotFoundError: No module named 'test_framework.redis_test_utils_test_utils'</error></testcase><testcase classname="tests.unit.test_docker_hostname_resolution" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/unit/test_docker_hostname_resolution.py)</error></testcase><testcase classname="" name="tests.unit.test_oauth_redirect_uri_regression" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_oauth_redirect_uri_regression.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\unit\test_oauth_redirect_uri_regression.py:12: in &lt;module&gt;
+    from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+E   ModuleNotFoundError: No module named 'test_framework.redis_test_utils_test_utils'</error></testcase><testcase classname="tests.unit.test_refresh_endpoint" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/unit/test_refresh_endpoint.py)</error></testcase><testcase classname="tests.unit.test_refresh_endpoint" name="TestRefreshEndpointUnit" time="0.000"><error message="collection failure">invalid method signature
+
+During handling of the above exception, another exception occurred:
+Could not determine arguments of &lt;bound method TestRefreshEndpointUnit.real_auth_service of &lt;test_refresh_endpoint.TestRefreshEndpointUnit object at 0x000001606B75B1D0&gt;&gt;: invalid method signature</error></testcase><testcase classname="tests.unit.test_registration_regression" name="TestDatabaseManager" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
+    result: TResult | None = func()
+                             ^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
+    return list(collector.collect())
+                ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
+    self.warn(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
+    warnings.warn_explicit(
+E   pytest.PytestCollectionWarning: cannot collect test class 'TestDatabaseManager' because it has a __init__ constructor (from: tests/unit/test_registration_regression.py)</error></testcase></testsuite></testsuites>

@@ -59,6 +59,9 @@ Often the face value error message is masking other errors, sometimes the real r
 Look for the "error behind the error" up to 10 times until true true root cause.
 Especially when dealing with apparent regression issues.
 10. The point of the system is to provide business value. Keep the scope as small as reasonable for startup team.
+11. NEVER ADD "extra" things. bad: [fallback, 'reliability', etc.] without express direction. ALL "mixin" type features or "enterprise" type must be requested directly, be SSOT compliant. 
+12. On Windows use UTF-8 encoding for encoding issues.
+13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)

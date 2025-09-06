@@ -1,3 +1,4 @@
+import json
 """Test JSON fragment parsing improvements."""
 
 import pytest
@@ -29,29 +30,29 @@ class TestJSONFragmentParsing:
         """Test that JSON fragments are handled without warnings."""
         # Single key-value pair fragment
         fragment1 = '"model_name": "chatbot"'
-        result1 = llm_parser.safe_json_parse(fragment1, fallback={})
+        result1 = llm_parser.safe_json_parse(fragment1, fallback = {})
         assert result1 == {"model_name": "chatbot"}
         
         # Multiple key-value pairs fragment
         fragment2 = '"target_metric": "response_time", "constraint": "cost"'
-        result2 = llm_parser.safe_json_parse(fragment2, fallback={})
+        result2 = llm_parser.safe_json_parse(fragment2, fallback = {})
         assert result2 == {"target_metric": "response_time", "constraint": "cost"}
     
     def test_json_fragment_wrapping(self):
         """Test the JSON fragment wrapping functionality."""
         # Single key-value pair
         fragment1 = '"model_name": "chatbot"'
-        result1 = llm_parser._handle_json_fragment(fragment1, fallback={})
+        result1 = llm_parser._handle_json_fragment(fragment1, fallback = {})
         assert result1 == {"model_name": "chatbot"}
         
         # Multiple key-value pairs
         fragment2 = '"target_metric": "response_time", "constraint": "cost"'
-        result2 = llm_parser._handle_json_fragment(fragment2, fallback={})
+        result2 = llm_parser._handle_json_fragment(fragment2, fallback = {})
         assert result2 == {"target_metric": "response_time", "constraint": "cost"}
         
-        # Invalid fragment that can't be wrapped
+        # Invalid fragment that can't be wrapped'
         invalid = '"incomplete": '
-        result3 = llm_parser._handle_json_fragment(invalid, fallback={"default": True})
+        result3 = llm_parser._handle_json_fragment(invalid, fallback = {"default": True})
         assert result3 == {"default": True}
     
     def test_preserves_valid_json(self):
@@ -68,16 +69,16 @@ class TestJSONFragmentParsing:
         """Test fallback behavior for unparseable strings."""
         # Completely invalid JSON
         invalid = "not json at all"
-        result = llm_parser.safe_json_parse(invalid, fallback={"error": "invalid"})
+        result = llm_parser.safe_json_parse(invalid, fallback = {"error": "invalid"})
         assert result == {"error": "invalid"}
         
         # Empty string with explicit None fallback returns empty string
-        # (because fallback=None means "use default behavior")
+        # (because fallback = None means "use default behavior")
         empty = ""
-        result = llm_parser.safe_json_parse(empty, fallback=None)
+        result = llm_parser.safe_json_parse(empty, fallback = None)
         assert result == ""
         
-        # Empty string with dict fallback
+        # Empty string with dict(fallback)
         empty = ""
-        result = llm_parser.safe_json_parse(empty, fallback={})
+        result = llm_parser.safe_json_parse(empty, fallback = {})
         assert result == {}

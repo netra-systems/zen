@@ -1,8 +1,8 @@
 """
 KV Cache Audit E2E Test Suite
 Tests KV cache auditing and optimization using real LLM agents.
-Maximum 300 lines, functions ≤8 lines.
-"""
+Maximum 300 lines, functions <=8 lines.
+"""""
 
 import asyncio
 import uuid
@@ -24,70 +24,73 @@ from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.quality_gate_service import (
 
-    ContentType,
+ContentType,
 
-    QualityGateService,
+QualityGateService,
 
-    QualityLevel,
+QualityLevel,
 
 )
 
 @pytest.fixture
-
 def kv_cache_audit_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
+    pass
 
     """Setup real agent environment for KV cache audit testing."""
     # Import additional agents to avoid circular dependencies
     from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
 
-        ActionsToMeetGoalsSubAgent,
+    ActionsToMeetGoalsSubAgent,
 
     )
     from netra_backend.app.agents.optimizations_core_sub_agent import (
 
-        OptimizationsCoreSubAgent,
+    OptimizationsCoreSubAgent,
 
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-    
+
     agents = {
 
-        'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
+    'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'data': DataSubAgent(real_llm_manager, real_tool_dispatcher),
+    'data': DataSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'optimization': OptimizationsCoreSubAgent(real_llm_manager, real_tool_dispatcher),
+    'optimization': OptimizationsCoreSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'actions': ActionsToMeetGoalsSubAgent(real_llm_manager, real_tool_dispatcher),
+    'actions': ActionsToMeetGoalsSubAgent(real_llm_manager, real_tool_dispatcher),
 
-        'reporting': ReportingSubAgent(real_llm_manager, real_tool_dispatcher)
+    'reporting': ReportingSubAgent(real_llm_manager, real_tool_dispatcher)
 
     }
 
     return _build_kv_cache_setup(agents, real_llm_manager, real_websocket_manager)
 
 def _build_kv_cache_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Dict:
+    pass
 
     """Build complete setup dictionary for KV cache testing."""
 
     return {
 
-        'agents': agents, 'llm': llm, 'websocket': ws,
+'agents': agents, 'llm': llm, 'websocket': ws,
 
-        'run_id': str(uuid.uuid4()), 'user_id': 'kv-cache-test-user'
+'run_id': str(uuid.uuid4()), 'user_id': 'kv-cache-test-user'
 
-    }
+}
 
 @pytest.mark.real_llm
 
 class TestKVCacheAuditWorkflow:
+    pass
 
     """Test KV cache audit and optimization workflows."""
-    
+
     @pytest.mark.asyncio
     async def test_ep_006_kv_cache_audit_real_llm(self, kv_cache_audit_setup):
+        pass
 
-        """Test EP-006: KV cache audit for optimization opportunities using real LLM."""
+        """Test EP-6: KV cache audit for optimization opportunities using real LLM."""
 
         setup = kv_cache_audit_setup
 
@@ -96,349 +99,382 @@ class TestKVCacheAuditWorkflow:
         results = await _execute_kv_cache_audit_workflow(setup, state)
 
         await _validate_ep_006_results(results, state, setup)
-    
-    @pytest.mark.asyncio
-    async def test_kv_cache_usage_analysis(self, kv_cache_audit_setup):
 
-        """Test KV cache usage pattern analysis."""
+        @pytest.mark.asyncio
+        async def test_kv_cache_usage_analysis(self, kv_cache_audit_setup):
+            pass
 
-        setup = kv_cache_audit_setup
+            """Test KV cache usage pattern analysis."""
 
-        state = _create_usage_analysis_state()
+            setup = kv_cache_audit_setup
 
-        results = await _execute_kv_cache_audit_workflow(setup, state)
+            state = _create_usage_analysis_state()
 
-        _validate_usage_analysis_results(results, state)
-    
-    @pytest.mark.asyncio
-    async def test_kv_cache_optimization_recommendations(self, kv_cache_audit_setup):
+            results = await _execute_kv_cache_audit_workflow(setup, state)
 
-        """Test KV cache optimization recommendation generation."""
+            _validate_usage_analysis_results(results, state)
 
-        setup = kv_cache_audit_setup
+            @pytest.mark.asyncio
+            async def test_kv_cache_optimization_recommendations(self, kv_cache_audit_setup):
+                pass
 
-        state = _create_optimization_recommendations_state()
+                """Test KV cache optimization recommendation generation."""
 
-        results = await _execute_kv_cache_audit_workflow(setup, state)
+                setup = kv_cache_audit_setup
 
-        _validate_optimization_recommendations_results(results, state)
+                state = _create_optimization_recommendations_state()
 
-def _create_ep_006_state() -> DeepAgentState:
+                results = await _execute_kv_cache_audit_workflow(setup, state)
 
-    """Create state for EP-006 example prompt test."""
+                _validate_optimization_recommendations_results(results, state)
 
-    return DeepAgentState(
+                def _create_ep_006_state() -> DeepAgentState:
+                    pass
 
-        user_request="I want to audit all uses of KV caching in my system to find optimization opportunities.",
+                    """Create state for EP-6 example prompt test."""
 
-        metadata={'test_type': 'ep_006', 'prompt_id': 'EP-006', 'audit_type': 'kv_cache', 'scope': 'system_wide'}
+                    return DeepAgentState(
 
-    )
+                user_request="I want to audit all uses of KV caching in my system to find optimization opportunities.",
 
-def _create_usage_analysis_state() -> DeepAgentState:
+                metadata={'test_type': 'ep_006', 'prompt_id': 'EP-6', 'audit_type': 'kv_cache', 'scope': 'system_wide'}
 
-    """Create state for KV cache usage analysis test."""
+                )
 
-    return DeepAgentState(
+                def _create_usage_analysis_state() -> DeepAgentState:
+                    pass
 
-        user_request="Analyze current KV cache usage patterns and identify inefficiencies.",
+                    """Create state for KV cache usage analysis test."""
 
-        metadata={'test_type': 'usage_analysis', 'cache_type': 'kv', 'analysis_scope': 'patterns'}
+                    return DeepAgentState(
 
-    )
+                user_request="Analyze current KV cache usage patterns and identify inefficiencies.",
 
-def _create_optimization_recommendations_state() -> DeepAgentState:
+                metadata={'test_type': 'usage_analysis', 'cache_type': 'kv', 'analysis_scope': 'patterns'}
 
-    """Create state for KV cache optimization recommendations test."""
+                )
 
-    return DeepAgentState(
+                def _create_optimization_recommendations_state() -> DeepAgentState:
+                    pass
 
-        user_request="Provide specific recommendations for optimizing KV cache performance and utilization.",
+                    """Create state for KV cache optimization recommendations test."""
 
-        metadata={'test_type': 'optimization_recommendations', 'focus': 'performance_utilization'}
+                    return DeepAgentState(
 
-    )
+                user_request="Provide specific recommendations for optimizing KV cache performance and utilization.",
 
-async def _execute_kv_cache_audit_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
+                metadata={'test_type': 'optimization_recommendations', 'focus': 'performance_utilization'}
 
-    """Execute complete KV cache audit workflow with all 5 agents."""
+                )
 
-    results = []
+                async def _execute_kv_cache_audit_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
+                    pass
 
-    workflow_steps = ['triage', 'data', 'optimization', 'actions', 'reporting']
+                    """Execute complete KV cache audit workflow with all 5 agents."""
 
-    for step_name in workflow_steps:
+                    results = []
 
-        step_result = await _execute_audit_workflow_step(setup, step_name, state)
+                    workflow_steps = ['triage', 'data', 'optimization', 'actions', 'reporting']
 
-        results.append(step_result)
+                    for step_name in workflow_steps:
+                        pass
 
-    return results
+                        step_result = await _execute_audit_workflow_step(setup, step_name, state)
 
-async def _execute_audit_workflow_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
+                        results.append(step_result)
 
-    """Execute single audit workflow step with real agent."""
+                        return results
 
-    agent = setup['agents'][step_name]
+                    async def _execute_audit_workflow_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
+                        pass
+
+                        """Execute single audit workflow step with real agent."""
+
+                        agent = setup['agents'][step_name]
     # Fix WebSocket interface compatibility
 
-    _ensure_websocket_compatibility(setup['websocket'])
-    
-    agent.websocket_manager = setup['websocket']
+                        _ensure_websocket_compatibility(setup['websocket'])
 
-    agent.user_id = setup['user_id']
-    
-    execution_result = await agent.run(state, setup['run_id'], True)
+                        agent.websocket_manager = setup['websocket']
 
-    return _create_audit_execution_result(step_name, agent, state, execution_result)
+                        agent.user_id = setup['user_id']
 
-def _ensure_websocket_compatibility(websocket_manager):
+                        execution_result = await agent.run(state, setup['run_id'], True)
 
-    """Ensure WebSocket manager has compatible interface methods."""
+                        return _create_audit_execution_result(step_name, agent, state, execution_result)
 
-    if hasattr(websocket_manager, 'send_message') and not hasattr(websocket_manager, 'send_to_thread'):
+                    def _ensure_websocket_compatibility(websocket_manager):
+                        pass
 
-        websocket_manager.send_to_thread = websocket_manager.send_message
+                        """Ensure WebSocket manager has compatible interface methods."""
 
-    elif hasattr(websocket_manager, 'send_to_thread') and not hasattr(websocket_manager, 'send_message'):
+                        if hasattr(websocket_manager, 'send_message') and not hasattr(websocket_manager, 'send_to_thread'):
+                            pass
 
-        websocket_manager.send_message = websocket_manager.send_to_thread
+                            websocket_manager.send_to_thread = websocket_manager.send_message
 
-def _create_audit_execution_result(step_name: str, agent, state: DeepAgentState, result) -> Dict:
+                        elif hasattr(websocket_manager, 'send_to_thread') and not hasattr(websocket_manager, 'send_message'):
+                            pass
 
-    """Create audit execution result dictionary."""
+                            websocket_manager.send_message = websocket_manager.send_to_thread
 
-    return {
+                            def _create_audit_execution_result(step_name: str, agent, state: DeepAgentState, result) -> Dict:
+                                pass
 
-        'step': step_name, 'agent_state': agent.state, 'workflow_state': state,
+                                """Create audit execution result dictionary."""
 
-        'execution_result': result, 'state_updated': state is not None
+                                return {
 
-    }
+                            'step': step_name, 'agent_state': agent.state, 'workflow_state': state,
 
-async def _validate_ep_006_results(results: List[Dict], state: DeepAgentState, setup: Dict):
+                            'execution_result': result, 'state_updated': state is not None
 
-    """Validate EP-006 results with enhanced quality checks."""
+                            }
 
-    assert len(results) == 5, "All 5 workflow steps must execute"
+                            async def _validate_ep_006_results(results: List[Dict], state: DeepAgentState, setup: Dict):
+                                pass
 
-    _validate_kv_cache_audit_results(results, state)
+                                """Validate EP-6 results with enhanced quality checks."""
 
-    await _validate_response_quality_ep_006(results, setup)
+                                assert len(results) == 5, "All 5 workflow steps must execute"
 
-def _validate_kv_cache_audit_results(results: List[Dict], state: DeepAgentState):
+                                _validate_kv_cache_audit_results(results, state)
 
-    """Validate KV cache audit workflow results."""
+                                await _validate_response_quality_ep_006(results, setup)
 
-    _validate_triage_identifies_kv_cache_scope(results[0], state)
+                                def _validate_kv_cache_audit_results(results: List[Dict], state: DeepAgentState):
+                                    pass
 
-    _validate_data_analysis_captures_cache_metrics(results[1], state)
+                                    """Validate KV cache audit workflow results."""
 
-    _validate_optimization_proposes_cache_solutions(results[2], state)
+                                    _validate_triage_identifies_kv_cache_scope(results[0], state)
 
-    _validate_actions_provides_cache_implementation(results[3], state)
+                                    _validate_data_analysis_captures_cache_metrics(results[1], state)
 
-    _validate_reporting_summarizes_cache_audit(results[4], state)
+                                    _validate_optimization_proposes_cache_solutions(results[2], state)
 
-def _validate_triage_identifies_kv_cache_scope(result: Dict, state: DeepAgentState):
+                                    _validate_actions_provides_cache_implementation(results[3], state)
 
-    """Validate triage identifies KV cache audit scope."""
+                                    _validate_reporting_summarizes_cache_audit(results[4], state)
 
-    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+                                    def _validate_triage_identifies_kv_cache_scope(result: Dict, state: DeepAgentState):
+                                        pass
 
-    assert hasattr(state, 'user_request')
+                                        """Validate triage identifies KV cache audit scope."""
 
-    assert 'kv caching' in state.user_request.lower() or 'kv cache' in state.user_request.lower()
+                                        assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
-def _validate_data_analysis_captures_cache_metrics(result: Dict, state: DeepAgentState):
+                                        assert hasattr(state, 'user_request')
 
-    """Validate data analysis captures relevant cache metrics."""
+                                        assert 'kv caching' in state.user_request.lower() or 'kv cache' in state.user_request.lower()
 
-    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+                                        def _validate_data_analysis_captures_cache_metrics(result: Dict, state: DeepAgentState):
+                                            pass
 
-    assert result['state_updated']
+                                            """Validate data analysis captures relevant cache metrics."""
 
-    assert hasattr(state, 'messages') or hasattr(state, 'analysis_data')
+                                            assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
-def _validate_optimization_proposes_cache_solutions(result: Dict, state: DeepAgentState):
+                                            assert result['state_updated']
 
-    """Validate optimization agent proposes cache optimization solutions."""
+                                            assert hasattr(state, 'messages') or hasattr(state, 'analysis_data')
 
-    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+                                            def _validate_optimization_proposes_cache_solutions(result: Dict, state: DeepAgentState):
+                                                pass
 
-    assert result['state_updated']
+                                                """Validate optimization agent proposes cache optimization solutions."""
+
+                                                assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+
+                                                assert result['state_updated']
     # Optimization agent may return None but should update state
 
-    assert hasattr(state, 'optimizations_result') or result['execution_result'] is not None
+                                                assert hasattr(state, 'optimizations_result') or result['execution_result'] is not None
 
-def _validate_actions_provides_cache_implementation(result: Dict, state: DeepAgentState):
+                                                def _validate_actions_provides_cache_implementation(result: Dict, state: DeepAgentState):
+                                                    pass
 
-    """Validate actions agent provides cache optimization implementation steps."""
+                                                    """Validate actions agent provides cache optimization implementation steps."""
 
-    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+                                                    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
-    assert result['state_updated']
+                                                    assert result['state_updated']
     # Actions agent should either return result or update state
 
-    assert hasattr(state, 'action_plan_result') or result['execution_result'] is not None
+                                                    assert hasattr(state, 'action_plan_result') or result['execution_result'] is not None
 
-def _validate_reporting_summarizes_cache_audit(result: Dict, state: DeepAgentState):
+                                                    def _validate_reporting_summarizes_cache_audit(result: Dict, state: DeepAgentState):
+                                                        pass
 
-    """Validate reporting agent summarizes cache audit results."""
+                                                        """Validate reporting agent summarizes cache audit results."""
 
-    assert result['agent_state'] == SubAgentLifecycle.COMPLETED
+                                                        assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
-    assert result['state_updated']
+                                                        assert result['state_updated']
 
-    assert hasattr(state, 'user_request') or hasattr(state, 'messages')
+                                                        assert hasattr(state, 'user_request') or hasattr(state, 'messages')
 
-def _validate_usage_analysis_results(results: List[Dict], state: DeepAgentState):
+                                                        def _validate_usage_analysis_results(results: List[Dict], state: DeepAgentState):
+                                                            pass
 
-    """Validate KV cache usage analysis results."""
+                                                            """Validate KV cache usage analysis results."""
 
-    assert len(results) > 0, "No results returned from workflow"
+                                                            assert len(results) > 0, "No results returned from workflow"
 
-    assert any('cache' in str(result).lower() for result in results)
+                                                            assert any('cache' in str(result).lower() for result in results)
 
-    assert 'usage patterns' in state.user_request.lower()
+                                                            assert 'usage patterns' in state.user_request.lower()
 
-def _validate_optimization_recommendations_results(results: List[Dict], state: DeepAgentState):
+                                                            def _validate_optimization_recommendations_results(results: List[Dict], state: DeepAgentState):
+                                                                pass
 
-    """Validate KV cache optimization recommendations results."""
+                                                                """Validate KV cache optimization recommendations results."""
 
-    assert len(results) > 0, "No results returned from workflow"
+                                                                assert len(results) > 0, "No results returned from workflow"
 
-    assert any('optimization' in str(result).lower() for result in results)
+                                                                assert any('optimization' in str(result).lower() for result in results)
 
-    assert 'recommendations' in state.user_request.lower()
+                                                                assert 'recommendations' in state.user_request.lower()
 
-async def _validate_response_quality_ep_006(results: List[Dict], setup: Dict):
+                                                                async def _validate_response_quality_ep_006(results: List[Dict], setup: Dict):
+                                                                    pass
 
-    """Validate response quality for EP-006 using quality gate service."""
+                                                                    """Validate response quality for EP-6 using quality gate service."""
 
-    quality_service = QualityGateService()
+                                                                    quality_service = QualityGateService()
 
-    final_result = results[-1]  # Reporting result
-    
-    if hasattr(final_result.get('workflow_state', {}), 'final_response'):
+                                                                    final_result = results[-1]  # Reporting result
 
-        response_text = str(final_result['workflow_state'].final_response)
+                                                                    if hasattr(final_result.get('workflow_state', {}), 'final_response'):
+                                                                        pass
 
-        is_valid, score, feedback = await quality_service.validate_content(
+                                                                        response_text = str(final_result['workflow_state'].final_response)
 
-            content=response_text, content_type=ContentType.AUDIT_REPORT, quality_level=QualityLevel.MEDIUM
+                                                                        is_valid, score, feedback = await quality_service.validate_content(
 
-        )
+                                                                        content=response_text, content_type=ContentType.AUDIT_REPORT, quality_level=QualityLevel.MEDIUM
 
-        assert is_valid, f"EP-006 response quality validation failed: {feedback}"
+                                                                        )
 
-        assert score >= 70, f"EP-006 quality score too low: {score}"
+                                                                        assert is_valid, f"EP-6 response quality validation failed: {feedback}"
 
-@pytest.mark.real_llm
+                                                                        assert score >= 70, f"EP-6 quality score too low: {score}"
 
-class TestKVCacheAuditEdgeCases:
+                                                                        @pytest.mark.real_llm
 
-    """Test edge cases in KV cache audit workflows."""
-    
-    @pytest.mark.asyncio
-    async def test_empty_cache_system_audit(self, kv_cache_audit_setup):
+                                                                        class TestKVCacheAuditEdgeCases:
+                                                                            pass
 
-        """Test audit behavior with systems that have no KV cache usage."""
+                                                                            """Test edge cases in KV cache audit workflows."""
 
-        setup = kv_cache_audit_setup
+                                                                            @pytest.mark.asyncio
+                                                                            async def test_empty_cache_system_audit(self, kv_cache_audit_setup):
+                                                                                pass
 
-        state = _create_empty_cache_state()
+                                                                                """Test audit behavior with systems that have no KV cache usage."""
 
-        results = await _execute_kv_cache_audit_workflow(setup, state)
+                                                                                setup = kv_cache_audit_setup
 
-        _validate_empty_cache_handling(results, state)
-    
-    @pytest.mark.asyncio
-    async def test_high_cache_utilization_audit(self, kv_cache_audit_setup):
+                                                                                state = _create_empty_cache_state()
 
-        """Test audit behavior with high cache utilization systems."""
+                                                                                results = await _execute_kv_cache_audit_workflow(setup, state)
 
-        setup = kv_cache_audit_setup
+                                                                                _validate_empty_cache_handling(results, state)
 
-        state = _create_high_utilization_state()
+                                                                                @pytest.mark.asyncio
+                                                                                async def test_high_cache_utilization_audit(self, kv_cache_audit_setup):
+                                                                                    pass
 
-        results = await _execute_kv_cache_audit_workflow(setup, state)
+                                                                                    """Test audit behavior with high cache utilization systems."""
 
-        _validate_high_utilization_analysis(results, state)
+                                                                                    setup = kv_cache_audit_setup
 
-def _create_empty_cache_state() -> DeepAgentState:
+                                                                                    state = _create_high_utilization_state()
 
-    """Create state for empty cache system audit."""
+                                                                                    results = await _execute_kv_cache_audit_workflow(setup, state)
 
-    return DeepAgentState(
+                                                                                    _validate_high_utilization_analysis(results, state)
 
-        user_request="Audit KV cache usage in a system with minimal cache implementation.",
+                                                                                    def _create_empty_cache_state() -> DeepAgentState:
+                                                                                        pass
 
-        metadata={'test_type': 'empty_cache', 'cache_usage': 'minimal'}
+                                                                                        """Create state for empty cache system audit."""
 
-    )
+                                                                                        return DeepAgentState(
 
-def _create_high_utilization_state() -> DeepAgentState:
+                                                                                    user_request="Audit KV cache usage in a system with minimal cache implementation.",
 
-    """Create state for high utilization cache audit."""
+                                                                                    metadata={'test_type': 'empty_cache', 'cache_usage': 'minimal'}
 
-    return DeepAgentState(
+                                                                                    )
 
-        user_request="Audit KV cache usage in a system with very high cache utilization rates.",
+                                                                                    def _create_high_utilization_state() -> DeepAgentState:
+                                                                                        pass
 
-        metadata={'test_type': 'high_utilization', 'cache_usage': 'high'}
+                                                                                        """Create state for high utilization cache audit."""
 
-    )
+                                                                                        return DeepAgentState(
 
-def _validate_empty_cache_handling(results: List[Dict], state: DeepAgentState):
+                                                                                    user_request="Audit KV cache usage in a system with very high cache utilization rates.",
 
-    """Validate handling of systems with minimal cache usage."""
+                                                                                    metadata={'test_type': 'high_utilization', 'cache_usage': 'high'}
 
-    assert len(results) >= 1, "At least triage should execute"
+                                                                                    )
 
-    assert any(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results)
+                                                                                    def _validate_empty_cache_handling(results: List[Dict], state: DeepAgentState):
+                                                                                        pass
 
-    assert 'minimal' in state.metadata.get('cache_usage', '')
+                                                                                        """Validate handling of systems with minimal cache usage."""
 
-def _validate_high_utilization_analysis(results: List[Dict], state: DeepAgentState):
+                                                                                        assert len(results) >= 1, "At least triage should execute"
 
-    """Validate analysis of high cache utilization systems."""
+                                                                                        assert any(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results)
 
-    assert len(results) >= 3, "Core workflow should execute"
+                                                                                        assert 'minimal' in state.metadata.get('cache_usage', '')
 
-    assert any(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results[:3])
+                                                                                        def _validate_high_utilization_analysis(results: List[Dict], state: DeepAgentState):
+                                                                                            pass
 
-    assert 'high' in state.metadata.get('cache_usage', '')
+                                                                                            """Validate analysis of high cache utilization systems."""
 
-@pytest.mark.real_llm
+                                                                                            assert len(results) >= 3, "Core workflow should execute"
 
-class TestKVCacheWorkflowIntegrity:
+                                                                                            assert any(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results[:3])
 
-    """Test overall workflow integrity for KV cache audit."""
-    
-    @pytest.mark.asyncio
-    async def test_complete_audit_workflow_validation(self, kv_cache_audit_setup):
+                                                                                            assert 'high' in state.metadata.get('cache_usage', '')
 
-        """Test complete audit workflow validation."""
+                                                                                            @pytest.mark.real_llm
 
-        setup = kv_cache_audit_setup
+                                                                                            class TestKVCacheWorkflowIntegrity:
+                                                                                                pass
 
-        state = _create_ep_006_state()
+                                                                                                """Test overall workflow integrity for KV cache audit."""
 
-        results = await _execute_kv_cache_audit_workflow(setup, state)
+                                                                                                @pytest.mark.asyncio
+                                                                                                async def test_complete_audit_workflow_validation(self, kv_cache_audit_setup):
+                                                                                                    pass
 
-        _validate_complete_audit_workflow(results, state)
+                                                                                                    """Test complete audit workflow validation."""
 
-def _validate_complete_audit_workflow(results: List[Dict], state: DeepAgentState):
+                                                                                                    setup = kv_cache_audit_setup
 
-    """Validate complete audit workflow execution."""
+                                                                                                    state = _create_ep_006_state()
 
-    assert len(results) == 5, "All 5 workflow steps should execute"
+                                                                                                    results = await _execute_kv_cache_audit_workflow(setup, state)
 
-    assert all(r['workflow_state'] is state for r in results)
+                                                                                                    _validate_complete_audit_workflow(results, state)
 
-    assert state.user_request is not None
+                                                                                                    def _validate_complete_audit_workflow(results: List[Dict], state: DeepAgentState):
+                                                                                                        pass
 
-    assert hasattr(state, 'metadata')
+                                                                                                        """Validate complete audit workflow execution."""
 
-    assert any('kv' in str(result).lower() for result in results)
+                                                                                                        assert len(results) == 5, "All 5 workflow steps should execute"
+
+                                                                                                        assert all(r['workflow_state'] is state for r in results)
+
+                                                                                                        assert state.user_request is not None
+
+                                                                                                        assert hasattr(state, 'metadata')
+
+                                                                                                        assert any('kv' in str(result).lower() for result in results)

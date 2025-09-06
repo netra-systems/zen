@@ -10,7 +10,7 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import from SINGLE SOURCE OF TRUTH
-from netra_backend.app.database import get_db
+from netra_backend.app.database import get_db, get_system_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
 
@@ -89,3 +89,19 @@ async def get_security_service(
 ) -> SecurityService:
     """Get security service instance."""
     return SecurityService(db)
+
+
+async def get_system_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """System database session that bypasses authentication.
+    
+    CRITICAL: For internal system operations only.
+    Never expose this to user-facing endpoints.
+    
+    Use cases:
+    - Health checks
+    - Background tasks
+    - System initialization
+    """
+    async with get_system_db() as session:
+        _validate_session_type(session)
+        yield session

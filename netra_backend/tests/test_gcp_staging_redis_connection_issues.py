@@ -24,7 +24,7 @@ from typing import Dict, Any, Optional
 import redis.asyncio as redis
 from redis.exceptions import ConnectionError, AuthenticationError, TimeoutError
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 
 from netra_backend.app.config import get_config

@@ -17,8 +17,8 @@ from netra_backend.app.services.corpus.core_unified import (
     CorpusService as ModularCorpusService,
 )
 
-# Initialize the modular corpus service
-corpus_service = ModularCorpusService()
+# NOTE: Singleton corpus_service removed to support user context isolation.
+# Create ModularCorpusService instances with user_context for WebSocket notifications
 from netra_backend.app.services.corpus_service_helpers import (
     apply_modular_search_filters,
     calculate_relevance_score,
@@ -57,11 +57,18 @@ __all__ = [
 class CorpusService:
     """Main corpus service class - thin wrapper for backward compatibility"""
     
-    def __init__(self):
-        """Initialize with modular service delegation"""
-        self._modular_service = ModularCorpusService()
+    def __init__(self, user_context=None):
+        """Initialize with modular service delegation
+        
+        Args:
+            user_context: Optional UserExecutionContext for WebSocket isolation.
+                         If provided, enables WebSocket notifications.
+                         If None, notifications are logged only.
+        """
+        self._modular_service = ModularCorpusService(user_context=user_context)
         self.query_expansion = None  # Mock attribute for tests
         self._active_filters = {}  # Store active search filters
+        self.user_context = user_context
     
     async def create_corpus(self, db: AsyncSession, corpus_data: schemas.CorpusCreate, user_id: str):
         """Create corpus with proper type safety and validation"""

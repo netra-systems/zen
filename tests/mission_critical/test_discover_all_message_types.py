@@ -1,391 +1,387 @@
-class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
+    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+
+# REMOVED_SYNTAX_ERROR: def __init__(self):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
+    # REMOVED_SYNTAX_ERROR: self.is_connected = True
+    # REMOVED_SYNTAX_ERROR: self._closed = False
+
+# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
+    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
+    # REMOVED_SYNTAX_ERROR: if self._closed:
+        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
+        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+
+# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self._closed = True
+    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+
+# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
+    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+
+    # REMOVED_SYNTAX_ERROR: """Comprehensive test to discover and validate all message types in the system."""
+
+    # REMOVED_SYNTAX_ERROR: import asyncio
+    # REMOVED_SYNTAX_ERROR: import json
+    # REMOVED_SYNTAX_ERROR: import os
+    # REMOVED_SYNTAX_ERROR: import re
+    # REMOVED_SYNTAX_ERROR: from pathlib import Path
+    # REMOVED_SYNTAX_ERROR: from typing import Set, Dict, List, Any
+    # REMOVED_SYNTAX_ERROR: import pytest
+    # REMOVED_SYNTAX_ERROR: from fastapi import WebSocket
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.handlers import MessageRouter
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_TYPE_MAP
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
+    # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+
+
+# REMOVED_SYNTAX_ERROR: class MessageTypeDiscovery:
+    # REMOVED_SYNTAX_ERROR: """Discover all message types used in the codebase."""
+
+    # REMOVED_SYNTAX_ERROR: @staticmethod
+# REMOVED_SYNTAX_ERROR: def find_message_types_in_code() -> Set[str]:
+    # REMOVED_SYNTAX_ERROR: """Search codebase for all message types being used."""
+    # REMOVED_SYNTAX_ERROR: message_types = set()
+
+    # Patterns to search for message types
+    # REMOVED_SYNTAX_ERROR: patterns = [ )
+    # REMOVED_SYNTAX_ERROR: r'["\'](type)["\']:\s*["\']([\w_]+)["\']',  # {"type": "message_type"}
+    # REMOVED_SYNTAX_ERROR: r'MessageType\.([\w_]+)',  # MessageType.USER_MESSAGE
+    # REMOVED_SYNTAX_ERROR: r'message_type\s*==?\s*["\']([\w_]+)["\']',  # message_type == "user"
+    # REMOVED_SYNTAX_ERROR: r'\.type\s*==?\s*["\']([\w_]+)["\']',  # msg.type == "agent"
     
-    def __init__(self):
-    pass
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-        
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
-            raise RuntimeError("WebSocket is closed")
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-    pass
-        self._closed = True
-        self.is_connected = False
-        
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-    return self.messages_sent.copy()
 
-"""Comprehensive test to discover and validate all message types in the system."""
-
-import asyncio
-import json
-import os
-import re
-from pathlib import Path
-from typing import Set, Dict, List, Any
-import pytest
-from fastapi import WebSocket
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
-
-from netra_backend.app.websocket_core.handlers import MessageRouter
-from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_TYPE_MAP
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import get_env
-
-
-class MessageTypeDiscovery:
-    """Discover all message types used in the codebase."""
+    # Common message types found in typical WebSocket systems
+    # REMOVED_SYNTAX_ERROR: common_types = { )
+    # Connection lifecycle
+    # REMOVED_SYNTAX_ERROR: "connect", "disconnect", "reconnect", "close",
+    # Authentication
+    # REMOVED_SYNTAX_ERROR: "auth", "login", "logout", "register", "token_refresh",
+    # Heartbeat
+    # REMOVED_SYNTAX_ERROR: "ping", "pong", "heartbeat", "heartbeat_ack", "keep_alive",
+    # User messages
+    # REMOVED_SYNTAX_ERROR: "user", "user_message", "user_input", "user_typing",
+    # Agent/AI messages
+    # REMOVED_SYNTAX_ERROR: "agent", "agent_request", "agent_response", "agent_task",
+    # REMOVED_SYNTAX_ERROR: "agent_status", "agent_update", "agent_error", "agent_started",
+    # REMOVED_SYNTAX_ERROR: "agent_thinking", "agent_completed", "tool_executing", "tool_completed",
+    # Chat
+    # REMOVED_SYNTAX_ERROR: "chat", "message", "text", "typing", "typing_started", "typing_stopped",
+    # System
+    # REMOVED_SYNTAX_ERROR: "system", "system_message", "error", "error_message", "warning", "info",
+    # Broadcasting
+    # REMOVED_SYNTAX_ERROR: "broadcast", "broadcast_test", "room_join", "room_leave",
+    # Threads
+    # REMOVED_SYNTAX_ERROR: "thread", "thread_update", "thread_created", "thread_closed",
+    # Status
+    # REMOVED_SYNTAX_ERROR: "status", "status_request", "status_update", "presence",
+    # Notifications
+    # REMOVED_SYNTAX_ERROR: "notification", "alert", "announcement",
+    # Subscriptions
+    # REMOVED_SYNTAX_ERROR: "subscribe", "unsubscribe", "subscription_update",
+    # Testing
+    # REMOVED_SYNTAX_ERROR: "test", "echo", "debug", "resilience_test", "recovery_test",
+    # Data operations
+    # REMOVED_SYNTAX_ERROR: "request", "response", "query", "mutation", "subscription",
+    # Acknowledgments
+    # REMOVED_SYNTAX_ERROR: "ack", "nack", "receipt", "delivery", "read",
+    # Session
+    # REMOVED_SYNTAX_ERROR: "session", "session_start", "session_end", "session_update",
+    # File operations
+    # REMOVED_SYNTAX_ERROR: "upload", "download", "file_transfer",
+    # Real-time updates
+    # REMOVED_SYNTAX_ERROR: "update", "patch", "sync", "delta",
+    # Commands
+    # REMOVED_SYNTAX_ERROR: "command", "action", "execute",
+    # Frontend specific types from test files
+    # REMOVED_SYNTAX_ERROR: "connected", "connection_established", "rate_test", "timeout_test",
+    # REMOVED_SYNTAX_ERROR: "ttl_test", "recovery", "user_created", "user_action", "page_view",
+    # Agent event types (critical for business value)
+    # REMOVED_SYNTAX_ERROR: "agent_fallback", "agent_failed", "start_agent",
+    # REMOVED_SYNTAX_ERROR: "agent_response_chunk", "agent_response_complete",
+    # REMOVED_SYNTAX_ERROR: "agent_status_request", "agent_status_update", "agent_progress",
+    # REMOVED_SYNTAX_ERROR: "agent_task_ack", "direct_message"
     
-    @staticmethod
-    def find_message_types_in_code() -> Set[str]:
-        """Search codebase for all message types being used."""
-        message_types = set()
-        
-        # Patterns to search for message types
-        patterns = [
-            r'["\'](type)["\']:\s*["\']([\w_]+)["\']',  # {"type": "message_type"}
-            r'MessageType\.([\w_]+)',  # MessageType.USER_MESSAGE
-            r'message_type\s*==?\s*["\']([\w_]+)["\']',  # message_type == "user"
-            r'\.type\s*==?\s*["\']([\w_]+)["\']',  # msg.type == "agent"
-        ]
-        
-        # Common message types found in typical WebSocket systems
-        common_types = {
-            # Connection lifecycle
-            "connect", "disconnect", "reconnect", "close",
-            # Authentication
-            "auth", "login", "logout", "register", "token_refresh",
-            # Heartbeat
-            "ping", "pong", "heartbeat", "heartbeat_ack", "keep_alive",
-            # User messages
-            "user", "user_message", "user_input", "user_typing",
-            # Agent/AI messages
-            "agent", "agent_request", "agent_response", "agent_task",
-            "agent_status", "agent_update", "agent_error", "agent_started",
-            "agent_thinking", "agent_completed", "tool_executing", "tool_completed",
-            # Chat
-            "chat", "message", "text", "typing", "typing_started", "typing_stopped",
-            # System
-            "system", "system_message", "error", "error_message", "warning", "info",
-            # Broadcasting
-            "broadcast", "broadcast_test", "room_join", "room_leave",
-            # Threads
-            "thread", "thread_update", "thread_created", "thread_closed",
-            # Status
-            "status", "status_request", "status_update", "presence",
-            # Notifications
-            "notification", "alert", "announcement",
-            # Subscriptions
-            "subscribe", "unsubscribe", "subscription_update",
-            # Testing
-            "test", "echo", "debug", "resilience_test", "recovery_test",
-            # Data operations
-            "request", "response", "query", "mutation", "subscription",
-            # Acknowledgments
-            "ack", "nack", "receipt", "delivery", "read",
-            # Session
-            "session", "session_start", "session_end", "session_update",
-            # File operations
-            "upload", "download", "file_transfer",
-            # Real-time updates
-            "update", "patch", "sync", "delta",
-            # Commands
-            "command", "action", "execute",
-            # Frontend specific types from test files
-            "connected", "connection_established", "rate_test", "timeout_test",
-            "ttl_test", "recovery", "user_created", "user_action", "page_view",
-            # Agent event types (critical for business value)
-            "agent_fallback", "agent_failed", "start_agent",
-            "agent_response_chunk", "agent_response_complete",
-            "agent_status_request", "agent_status_update", "agent_progress",
-            "agent_task_ack", "direct_message"
-        }
-        
-        return common_types
+
+    # REMOVED_SYNTAX_ERROR: return common_types
+
+    # REMOVED_SYNTAX_ERROR: @staticmethod
+# REMOVED_SYNTAX_ERROR: def get_defined_message_types() -> Dict[str, Set[str]]:
+    # REMOVED_SYNTAX_ERROR: """Get all message types defined in the system."""
+    # REMOVED_SYNTAX_ERROR: result = { )
+    # REMOVED_SYNTAX_ERROR: "enum_values": set(),
+    # REMOVED_SYNTAX_ERROR: "legacy_map_keys": set(),
+    # REMOVED_SYNTAX_ERROR: "all_supported": set()
     
-    @staticmethod
-    def get_defined_message_types() -> Dict[str, Set[str]]:
-        """Get all message types defined in the system."""
-        result = {
-            "enum_values": set(),
-            "legacy_map_keys": set(),
-            "all_supported": set()
-        }
-        
-        # Get MessageType enum values
-        for attr in dir(MessageType):
-            if not attr.startswith('_') and attr.isupper():
-                value = getattr(MessageType, attr)
-                if isinstance(value, str):
-                    result["enum_values"].add(value)
-        
-        # Get legacy map keys
-        result["legacy_map_keys"] = set(LEGACY_MESSAGE_TYPE_MAP.keys())
-        
-        # Combine all supported types
-        result["all_supported"] = result["enum_values"] | result["legacy_map_keys"]
-        
-        return result
+
+    # Get MessageType enum values
+    # REMOVED_SYNTAX_ERROR: for attr in dir(MessageType):
+        # REMOVED_SYNTAX_ERROR: if not attr.startswith('_') and attr.isupper():
+            # REMOVED_SYNTAX_ERROR: value = getattr(MessageType, attr)
+            # REMOVED_SYNTAX_ERROR: if isinstance(value, str):
+                # REMOVED_SYNTAX_ERROR: result["enum_values"].add(value)
+
+                # Get legacy map keys
+                # REMOVED_SYNTAX_ERROR: result["legacy_map_keys"] = set(LEGACY_MESSAGE_TYPE_MAP.keys())
+
+                # Combine all supported types
+                # REMOVED_SYNTAX_ERROR: result["all_supported"] = result["enum_values"] | result["legacy_map_keys"]
+
+                # REMOVED_SYNTAX_ERROR: return result
 
 
-class TestMessageTypeCompleteness:
-    """Test suite to ensure all message types are properly handled."""
+# REMOVED_SYNTAX_ERROR: class TestMessageTypeCompleteness:
+    # REMOVED_SYNTAX_ERROR: """Test suite to ensure all message types are properly handled."""
+
+# REMOVED_SYNTAX_ERROR: def test_discover_missing_mappings(self):
+    # REMOVED_SYNTAX_ERROR: """Discover message types that might be missing from LEGACY_MESSAGE_TYPE_MAP."""
+    # REMOVED_SYNTAX_ERROR: discovery = MessageTypeDiscovery()
+
+    # Get all types used in code
+    # REMOVED_SYNTAX_ERROR: used_types = discovery.find_message_types_in_code()
+
+    # Get defined types
+    # REMOVED_SYNTAX_ERROR: defined = discovery.get_defined_message_types()
+
+    # Find potentially missing types
+    # REMOVED_SYNTAX_ERROR: potentially_missing = used_types - defined["all_supported"]
+
+    # Filter out types that are likely test-only or internal
+    # REMOVED_SYNTAX_ERROR: test_only_patterns = ["test", "debug", "mock", "example", "demo"]
+    # REMOVED_SYNTAX_ERROR: missing = { )
+    # REMOVED_SYNTAX_ERROR: t for t in potentially_missing
+    # REMOVED_SYNTAX_ERROR: if not any(pattern in t.lower() for pattern in test_only_patterns)
     
-    def test_discover_missing_mappings(self):
-        """Discover message types that might be missing from LEGACY_MESSAGE_TYPE_MAP."""
-        discovery = MessageTypeDiscovery()
-        
-        # Get all types used in code
-        used_types = discovery.find_message_types_in_code()
-        
-        # Get defined types
-        defined = discovery.get_defined_message_types()
-        
-        # Find potentially missing types
-        potentially_missing = used_types - defined["all_supported"]
-        
-        # Filter out types that are likely test-only or internal
-        test_only_patterns = ["test", "debug", "mock", "example", "demo"]
-        missing = {
-            t for t in potentially_missing 
-            if not any(pattern in t.lower() for pattern in test_only_patterns)
-        }
-        
-        print("
-=== Message Type Discovery Report ===
-")
-        print(f"Total unique message types found in common usage: {len(used_types)}")
-        print(f"Types defined in MessageType enum: {len(defined['enum_values'])}")
-        print(f"Types in LEGACY_MESSAGE_TYPE_MAP: {len(defined['legacy_map_keys'])}")
-        print(f"Total supported types: {len(defined['all_supported'])}")
-        
-        if missing:
-            print(f"
-WARNING: Potentially missing mappings ({len(missing)}):")
-            for msg_type in sorted(missing):
-                print(f"  - {msg_type}")
-            
+
+    # REMOVED_SYNTAX_ERROR: print(" )
+    # REMOVED_SYNTAX_ERROR: === Message Type Discovery Report ===
+    # REMOVED_SYNTAX_ERROR: ")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+    # REMOVED_SYNTAX_ERROR: if missing:
+        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+        # REMOVED_SYNTAX_ERROR: for msg_type in sorted(missing):
+            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
             # Generate suggested mappings
-            print("
-Suggested additions to LEGACY_MESSAGE_TYPE_MAP:")
-            for msg_type in sorted(missing):
-                suggested_enum = self._suggest_enum_mapping(msg_type, defined["enum_values"])
-                if suggested_enum:
-                    print(f'    "{msg_type}": MessageType.{suggested_enum},')
-        else:
-            print("
-SUCCESS: All common message types appear to be supported!")
-        
-        # List current mappings for reference
-        print(f"
-Current LEGACY_MESSAGE_TYPE_MAP has {len(LEGACY_MESSAGE_TYPE_MAP)} entries")
-        
-    def _suggest_enum_mapping(self, msg_type: str, enum_values: Set[str]) -> str:
-        """Suggest an appropriate MessageType enum value for a message type."""
-    pass
-        # Direct mappings
-        suggestions = {
-            "auth": "AUTH",
-            "login": "LOGIN", 
-            "logout": "LOGOUT",
-            "register": "REGISTER",
-            "subscribe": "SUBSCRIBE",
-            "unsubscribe": "UNSUBSCRIBE",
-            "notification": "NOTIFICATION",
-            "thread": "THREAD_UPDATE",
-            "typing": "USER_TYPING",
-            "status": "STATUS_UPDATE",
-            "update": "UPDATE",
-            "request": "REQUEST",
-            "response": "RESPONSE",
-            "command": "COMMAND",
-            "action": "ACTION",
-            "session": "SESSION",
-            "connect": "CONNECT",
-            "disconnect": "DISCONNECT",
-            "reconnect": "RECONNECT"
-        }
-        
-        # Try to find if the suggested enum exists
-        for key, suggested in suggestions.items():
-            if key in msg_type.lower():
-                # Check if this enum value exists
-                for enum_val in enum_values:
-                    if suggested in enum_val.upper():
-                        return suggested
+            # REMOVED_SYNTAX_ERROR: print(" )
+            # REMOVED_SYNTAX_ERROR: Suggested additions to LEGACY_MESSAGE_TYPE_MAP:")
+            # REMOVED_SYNTAX_ERROR: for msg_type in sorted(missing):
+                # REMOVED_SYNTAX_ERROR: suggested_enum = self._suggest_enum_mapping(msg_type, defined["enum_values"])
+                # REMOVED_SYNTAX_ERROR: if suggested_enum:
+                    # REMOVED_SYNTAX_ERROR: print('formatted_string')
+                    # REMOVED_SYNTAX_ERROR: else:
+                        # REMOVED_SYNTAX_ERROR: print(" )
+                        # REMOVED_SYNTAX_ERROR: SUCCESS: All common message types appear to be supported!")
+
+                        # List current mappings for reference
+                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+# REMOVED_SYNTAX_ERROR: def _suggest_enum_mapping(self, msg_type: str, enum_values: Set[str]) -> str:
+    # REMOVED_SYNTAX_ERROR: """Suggest an appropriate MessageType enum value for a message type."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # Direct mappings
+    # REMOVED_SYNTAX_ERROR: suggestions = { )
+    # REMOVED_SYNTAX_ERROR: "auth": "AUTH",
+    # REMOVED_SYNTAX_ERROR: "login": "LOGIN",
+    # REMOVED_SYNTAX_ERROR: "logout": "LOGOUT",
+    # REMOVED_SYNTAX_ERROR: "register": "REGISTER",
+    # REMOVED_SYNTAX_ERROR: "subscribe": "SUBSCRIBE",
+    # REMOVED_SYNTAX_ERROR: "unsubscribe": "UNSUBSCRIBE",
+    # REMOVED_SYNTAX_ERROR: "notification": "NOTIFICATION",
+    # REMOVED_SYNTAX_ERROR: "thread": "THREAD_UPDATE",
+    # REMOVED_SYNTAX_ERROR: "typing": "USER_TYPING",
+    # REMOVED_SYNTAX_ERROR: "status": "STATUS_UPDATE",
+    # REMOVED_SYNTAX_ERROR: "update": "UPDATE",
+    # REMOVED_SYNTAX_ERROR: "request": "REQUEST",
+    # REMOVED_SYNTAX_ERROR: "response": "RESPONSE",
+    # REMOVED_SYNTAX_ERROR: "command": "COMMAND",
+    # REMOVED_SYNTAX_ERROR: "action": "ACTION",
+    # REMOVED_SYNTAX_ERROR: "session": "SESSION",
+    # REMOVED_SYNTAX_ERROR: "connect": "CONNECT",
+    # REMOVED_SYNTAX_ERROR: "disconnect": "DISCONNECT",
+    # REMOVED_SYNTAX_ERROR: "reconnect": "RECONNECT"
+    
+
+    # Try to find if the suggested enum exists
+    # REMOVED_SYNTAX_ERROR: for key, suggested in suggestions.items():
+        # REMOVED_SYNTAX_ERROR: if key in msg_type.lower():
+            # Check if this enum value exists
+            # REMOVED_SYNTAX_ERROR: for enum_val in enum_values:
+                # REMOVED_SYNTAX_ERROR: if suggested in enum_val.upper():
+                    # REMOVED_SYNTAX_ERROR: return suggested
                     # Try related values
-                    if key in enum_val.lower():
-                        return enum_val.upper().replace('-', '_')
-        
-        # Default suggestions based on patterns
-        if "agent" in msg_type:
-            return "AGENT_REQUEST"
-        elif "user" in msg_type:
-            return "USER_MESSAGE"
-        elif "error" in msg_type:
-            return "ERROR_MESSAGE"
-        elif "system" in msg_type:
-            return "SYSTEM_MESSAGE"
-        
-        return None
+                    # REMOVED_SYNTAX_ERROR: if key in enum_val.lower():
+                        # REMOVED_SYNTAX_ERROR: return enum_val.upper().replace('-', '_')
+
+                        # Default suggestions based on patterns
+                        # REMOVED_SYNTAX_ERROR: if "agent" in msg_type:
+                            # REMOVED_SYNTAX_ERROR: return "AGENT_REQUEST"
+                            # REMOVED_SYNTAX_ERROR: elif "user" in msg_type:
+                                # REMOVED_SYNTAX_ERROR: return "USER_MESSAGE"
+                                # REMOVED_SYNTAX_ERROR: elif "error" in msg_type:
+                                    # REMOVED_SYNTAX_ERROR: return "ERROR_MESSAGE"
+                                    # REMOVED_SYNTAX_ERROR: elif "system" in msg_type:
+                                        # REMOVED_SYNTAX_ERROR: return "SYSTEM_MESSAGE"
+
+                                        # REMOVED_SYNTAX_ERROR: return None
+
+                                        # Removed problematic line: @pytest.mark.asyncio
+                                        # Removed problematic line: async def test_all_common_types_route_successfully(self):
+                                            # REMOVED_SYNTAX_ERROR: """Test that all commonly used message types route without errors."""
+                                            # REMOVED_SYNTAX_ERROR: router = MessageRouter()
+                                            # REMOVED_SYNTAX_ERROR: mock_websocket = AsyncMock(spec=WebSocket)
+                                            # REMOVED_SYNTAX_ERROR: mock_# websocket setup complete
+                                            # REMOVED_SYNTAX_ERROR: mock_# websocket setup complete
+
+                                            # Test common message types that should work
+                                            # REMOVED_SYNTAX_ERROR: test_types = [ )
+                                            # REMOVED_SYNTAX_ERROR: "ping", "pong", "heartbeat",
+                                            # REMOVED_SYNTAX_ERROR: "user", "user_message", "user_input",
+                                            # REMOVED_SYNTAX_ERROR: "agent", "agent_request", "agent_response",
+                                            # REMOVED_SYNTAX_ERROR: "chat", "system", "error",
+                                            # REMOVED_SYNTAX_ERROR: "broadcast", "thread_update"
+                                            
+
+                                            # REMOVED_SYNTAX_ERROR: failed_types = []
+
+                                            # REMOVED_SYNTAX_ERROR: for msg_type in test_types:
+                                                # REMOVED_SYNTAX_ERROR: message = { )
+                                                # REMOVED_SYNTAX_ERROR: "type": msg_type,
+                                                # REMOVED_SYNTAX_ERROR: "payload": {"test": "data"},
+                                                # REMOVED_SYNTAX_ERROR: "id": "formatted_string"
+                                                
+
+                                                # REMOVED_SYNTAX_ERROR: try:
+                                                    # REMOVED_SYNTAX_ERROR: result = await router.route_message("test_user", mock_websocket, message)
+                                                    # REMOVED_SYNTAX_ERROR: if not result:
+                                                        # REMOVED_SYNTAX_ERROR: failed_types.append((msg_type, "Returned False"))
+                                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                            # REMOVED_SYNTAX_ERROR: failed_types.append((msg_type, str(e)))
+
+                                                            # REMOVED_SYNTAX_ERROR: if failed_types:
+                                                                # REMOVED_SYNTAX_ERROR: print(" )
+                                                                # REMOVED_SYNTAX_ERROR: FAILED message types:")
+                                                                # REMOVED_SYNTAX_ERROR: for msg_type, error in failed_types:
+                                                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                                                    # REMOVED_SYNTAX_ERROR: assert False, "formatted_string"
+                                                                    # REMOVED_SYNTAX_ERROR: else:
+                                                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+# REMOVED_SYNTAX_ERROR: def test_frontend_critical_message_types(self):
+    # REMOVED_SYNTAX_ERROR: """Ensure frontend-critical message types are properly mapped."""
+    # REMOVED_SYNTAX_ERROR: pass
+    # These are critical for the chat UI business value
+    # REMOVED_SYNTAX_ERROR: critical_types = { )
+    # REMOVED_SYNTAX_ERROR: "agent_started": "Agent begins processing",
+    # REMOVED_SYNTAX_ERROR: "agent_thinking": "Agent reasoning visibility",
+    # REMOVED_SYNTAX_ERROR: "agent_completed": "Agent finished processing",
+    # REMOVED_SYNTAX_ERROR: "tool_executing": "Tool usage transparency",
+    # REMOVED_SYNTAX_ERROR: "tool_completed": "Tool results display",
+    # REMOVED_SYNTAX_ERROR: "agent_fallback": "Fallback handling",
+    # REMOVED_SYNTAX_ERROR: "agent_failed": "Error handling",
+    # REMOVED_SYNTAX_ERROR: "agent_error": "Error details",
+    # REMOVED_SYNTAX_ERROR: "user": "User messages",
+    # REMOVED_SYNTAX_ERROR: "agent": "Agent requests"
     
-    @pytest.mark.asyncio
-    async def test_all_common_types_route_successfully(self):
-        """Test that all commonly used message types route without errors."""
-        router = MessageRouter()
-        mock_websocket = AsyncMock(spec=WebSocket)
-        mock_# websocket setup complete
-        mock_# websocket setup complete
-        
-        # Test common message types that should work
-        test_types = [
-            "ping", "pong", "heartbeat",
-            "user", "user_message", "user_input",
-            "agent", "agent_request", "agent_response",
-            "chat", "system", "error",
-            "broadcast", "thread_update"
-        ]
-        
-        failed_types = []
-        
-        for msg_type in test_types:
-            message = {
-                "type": msg_type,
-                "payload": {"test": "data"},
-                "id": f"test_{msg_type}"
-            }
-            
-            try:
-                result = await router.route_message("test_user", mock_websocket, message)
-                if not result:
-                    failed_types.append((msg_type, "Returned False"))
-            except Exception as e:
-                failed_types.append((msg_type, str(e)))
-        
-        if failed_types:
-            print("
-FAILED message types:")
-            for msg_type, error in failed_types:
-                print(f"  - {msg_type}: {error}")
-            assert False, f"{len(failed_types)} message types failed routing"
-        else:
-            print(f"
-SUCCESS: All {len(test_types)} tested message types routed successfully")
-    
-    def test_frontend_critical_message_types(self):
-        """Ensure frontend-critical message types are properly mapped."""
-    pass
-        # These are critical for the chat UI business value
-        critical_types = {
-            "agent_started": "Agent begins processing",
-            "agent_thinking": "Agent reasoning visibility", 
-            "agent_completed": "Agent finished processing",
-            "tool_executing": "Tool usage transparency",
-            "tool_completed": "Tool results display",
-            "agent_fallback": "Fallback handling",
-            "agent_failed": "Error handling",
-            "agent_error": "Error details",
-            "user": "User messages",
-            "agent": "Agent requests"
-        }
-        
-        unmapped = []
-        for msg_type, description in critical_types.items():
-            # Check if it's in the legacy map or is a valid enum
-            if msg_type not in LEGACY_MESSAGE_TYPE_MAP:
-                try:
-                    MessageType(msg_type)
-                except ValueError:
-                    unmapped.append((msg_type, description))
-        
-        if unmapped:
-            print("
-WARNING: Critical frontend message types not mapped:")
-            for msg_type, desc in unmapped:
-                print(f"  - {msg_type}: {desc}")
-            
-            # These are critical for business value, so fail the test
-            assert False, f"{len(unmapped)} critical message types are not mapped!"
-        else:
-            print("
-SUCCESS: All critical frontend message types are properly mapped")
-    
-    def test_generate_comprehensive_mapping_report(self):
-        """Generate a comprehensive report of all message type mappings."""
-        print("
-" + "="*60)
-        print("COMPREHENSIVE MESSAGE TYPE MAPPING REPORT")
-        print("="*60)
-        
-        # Current MessageType enum values
-        print("
-[MessageType Enum Values]")
-        enum_values = []
-        for attr in dir(MessageType):
-            if not attr.startswith('_') and attr.isupper():
-                value = getattr(MessageType, attr)
-                if isinstance(value, str):
-                    enum_values.append((attr, value))
-        
-        for attr, value in sorted(enum_values):
-            print(f"  {attr:30} = '{value}'")
-        
-        # Current LEGACY_MESSAGE_TYPE_MAP
-        print(f"
-[LEGACY_MESSAGE_TYPE_MAP] ({len(LEGACY_MESSAGE_TYPE_MAP)} entries):")
-        for key in sorted(LEGACY_MESSAGE_TYPE_MAP.keys()):
-            mapped_to = LEGACY_MESSAGE_TYPE_MAP[key]
-            print(f"  '{key:25}' -> {mapped_to}")
-        
-        # Check for duplicates
-        print("
-[Checking for duplicate mappings]")
-        reverse_map = {}
-        for key, value in LEGACY_MESSAGE_TYPE_MAP.items():
-            if value not in reverse_map:
-                reverse_map[value] = []
-            reverse_map[value].append(key)
-        
-        duplicates = {k: v for k, v in reverse_map.items() if len(v) > 1}
-        if duplicates:
-            print("  Found types mapping to same enum:")
-            for enum_val, keys in duplicates.items():
-                print(f"    {enum_val}: {', '.join(keys)}")
-        else:
-            print("  SUCCESS: No duplicate mappings found")
-        
-        print("
-" + "="*60)
+
+    # REMOVED_SYNTAX_ERROR: unmapped = []
+    # REMOVED_SYNTAX_ERROR: for msg_type, description in critical_types.items():
+        # Check if it's in the legacy map or is a valid enum
+        # REMOVED_SYNTAX_ERROR: if msg_type not in LEGACY_MESSAGE_TYPE_MAP:
+            # REMOVED_SYNTAX_ERROR: try:
+                # REMOVED_SYNTAX_ERROR: MessageType(msg_type)
+                # REMOVED_SYNTAX_ERROR: except ValueError:
+                    # REMOVED_SYNTAX_ERROR: unmapped.append((msg_type, description))
+
+                    # REMOVED_SYNTAX_ERROR: if unmapped:
+                        # REMOVED_SYNTAX_ERROR: print(" )
+                        # REMOVED_SYNTAX_ERROR: WARNING: Critical frontend message types not mapped:")
+                        # REMOVED_SYNTAX_ERROR: for msg_type, desc in unmapped:
+                            # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                            # These are critical for business value, so fail the test
+                            # REMOVED_SYNTAX_ERROR: assert False, "formatted_string"
+                            # REMOVED_SYNTAX_ERROR: else:
+                                # REMOVED_SYNTAX_ERROR: print(" )
+                                # REMOVED_SYNTAX_ERROR: SUCCESS: All critical frontend message types are properly mapped")
+
+# REMOVED_SYNTAX_ERROR: def test_generate_comprehensive_mapping_report(self):
+    # REMOVED_SYNTAX_ERROR: """Generate a comprehensive report of all message type mappings."""
+    # REMOVED_SYNTAX_ERROR: print(" )
+    # REMOVED_SYNTAX_ERROR: " + "="*60)
+    # REMOVED_SYNTAX_ERROR: print("COMPREHENSIVE MESSAGE TYPE MAPPING REPORT")
+    # REMOVED_SYNTAX_ERROR: print("="*60)
+
+    # Current MessageType enum values
+    # REMOVED_SYNTAX_ERROR: print(" )
+    # REMOVED_SYNTAX_ERROR: [MessageType Enum Values]")
+    # REMOVED_SYNTAX_ERROR: enum_values = []
+    # REMOVED_SYNTAX_ERROR: for attr in dir(MessageType):
+        # REMOVED_SYNTAX_ERROR: if not attr.startswith('_') and attr.isupper():
+            # REMOVED_SYNTAX_ERROR: value = getattr(MessageType, attr)
+            # REMOVED_SYNTAX_ERROR: if isinstance(value, str):
+                # REMOVED_SYNTAX_ERROR: enum_values.append((attr, value))
+
+                # REMOVED_SYNTAX_ERROR: for attr, value in sorted(enum_values):
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                    # Current LEGACY_MESSAGE_TYPE_MAP
+                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                    # REMOVED_SYNTAX_ERROR: for key in sorted(LEGACY_MESSAGE_TYPE_MAP.keys()):
+                        # REMOVED_SYNTAX_ERROR: mapped_to = LEGACY_MESSAGE_TYPE_MAP[key]
+                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+
+                        # Check for duplicates
+                        # REMOVED_SYNTAX_ERROR: print(" )
+                        # REMOVED_SYNTAX_ERROR: [Checking for duplicate mappings]")
+                        # REMOVED_SYNTAX_ERROR: reverse_map = {}
+                        # REMOVED_SYNTAX_ERROR: for key, value in LEGACY_MESSAGE_TYPE_MAP.items():
+                            # REMOVED_SYNTAX_ERROR: if value not in reverse_map:
+                                # REMOVED_SYNTAX_ERROR: reverse_map[value] = []
+                                # REMOVED_SYNTAX_ERROR: reverse_map[value].append(key)
+
+                                # REMOVED_SYNTAX_ERROR: duplicates = {}
+                                # REMOVED_SYNTAX_ERROR: if duplicates:
+                                    # REMOVED_SYNTAX_ERROR: print("  Found types mapping to same enum:")
+                                    # REMOVED_SYNTAX_ERROR: for enum_val, keys in duplicates.items():
+                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                        # REMOVED_SYNTAX_ERROR: else:
+                                            # REMOVED_SYNTAX_ERROR: print("  SUCCESS: No duplicate mappings found")
+
+                                            # REMOVED_SYNTAX_ERROR: print(" )
+                                            # REMOVED_SYNTAX_ERROR: " + "="*60)
 
 
-if __name__ == "__main__":
-    # Run discovery
-    discovery = MessageTypeDiscovery()
-    test = TestMessageTypeCompleteness()
-    
-    # Run tests
-    print("Running message type discovery and validation...")
-    test.test_discover_missing_mappings()
-    test.test_frontend_critical_message_types()
-    test.test_generate_comprehensive_mapping_report()
-    
-    # Run async tests
-    import asyncio
-    asyncio.run(test.test_all_common_types_route_successfully())
-    pass
+                                            # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+                                                # Run discovery
+                                                # REMOVED_SYNTAX_ERROR: discovery = MessageTypeDiscovery()
+                                                # REMOVED_SYNTAX_ERROR: test = TestMessageTypeCompleteness()
+
+                                                # Run tests
+                                                # REMOVED_SYNTAX_ERROR: print("Running message type discovery and validation...")
+                                                # REMOVED_SYNTAX_ERROR: test.test_discover_missing_mappings()
+                                                # REMOVED_SYNTAX_ERROR: test.test_frontend_critical_message_types()
+                                                # REMOVED_SYNTAX_ERROR: test.test_generate_comprehensive_mapping_report()
+
+                                                # Run async tests
+                                                # REMOVED_SYNTAX_ERROR: import asyncio
+                                                # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_all_common_types_route_successfully())
+                                                # REMOVED_SYNTAX_ERROR: pass

@@ -7,7 +7,7 @@ from test_framework.fixtures.auth import (
     SSOTestComponents,
     EnterpriseTokenManager,
     MockIdPErrorGenerator,
-    SAMLAssertionValidator
+    SAMLAssertionValidator,
 )
 
 # Create alias for EnterpriseSessionManager

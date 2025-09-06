@@ -39,6 +39,7 @@ The platform implements **adaptive workflows** based on data completeness:
 3. **Insufficient Data (<40%)**: Focus on education, data collection, and value demonstration
 
 See [Orchestration Data Handling Patterns](./ORCHESTRATION_DATA_HANDLING_PATTERNS.md) for comprehensive patterns and examples.
+See [Netra Optimization Breakdown](./NETRA_OPTIMIZATION_BREAKDOWN.md) for detailed system optimization architecture (AI-specific vs general).
 
 ### Key Business Metrics
 

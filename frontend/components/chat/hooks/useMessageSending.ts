@@ -9,6 +9,7 @@ import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../t
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { useAnalytics } from '@/services/analyticsService';
 import { getUnifiedApiConfig, shouldUseV2AgentApi } from '@/lib/unified-api-config';
 import { WebSocketMessageType } from '@/types/shared/enums';
 import { AgentServiceV2, type AgentExecutionResult } from '@/services/agentServiceV2';
@@ -40,6 +41,7 @@ export const useMessageSending = () => {
   } = useUnifiedChatStore();
   const { setCurrentThread, addThread } = useThreadStore();
   const { trackChatStarted, trackMessageSent, trackThreadCreated, trackError, trackAgentActivated } = useGTMEvent();
+  const analytics = useAnalytics();
 
   const validateMessage = (params: MessageSendingParams): boolean => {
     const { message, isAuthenticated } = params;
@@ -100,9 +102,17 @@ export const useMessageSending = () => {
     addThread(newThread);
     setCurrentThread(newThread.id);
     setActiveThread(newThread.id);
-    // Track thread creation
+    // Track thread creation with both GTM and Statsig
     trackThreadCreated(newThread.id);
     trackChatStarted(newThread.id);
+    
+    // Track with unified analytics
+    analytics.trackFeatureUsage('chat', 'thread_created', {
+      thread_id: newThread.id,
+      title_length: title.length,
+      timestamp: new Date().toISOString()
+    });
+    
     return newThread.id;
   };
 
@@ -241,6 +251,15 @@ export const useMessageSending = () => {
         if (isFirstMessage) {
           // Track agent activation for first message
           trackAgentActivated('supervisor_agent', threadId);
+          
+          // Track with unified analytics
+          analytics.trackFeatureUsage('agent', 'activated', {
+            agent_type: 'supervisor_agent',
+            thread_id: threadId,
+            is_first_message: true,
+            message_length: message.length
+          });
+          
           // Use start_agent for initial message - properly initializes agent context
           sendMessage({ 
             type: WebSocketMessageType.START_AGENT, 
@@ -267,6 +286,15 @@ export const useMessageSending = () => {
         
         // Track message sent event
         trackMessageSent(threadId, message.length);
+        
+        // Track with unified analytics
+        analytics.trackInteraction('send_message', 'chat', {
+          thread_id: threadId,
+          message_content: message,
+          message_length: message.length,
+          is_first_message: isFirstMessage,
+          timestamp: new Date().toISOString()
+        });
         
         // Clear timeout and resolve
         clearTimeout(timeoutId);
@@ -328,6 +356,15 @@ export const useMessageSending = () => {
           // Final failure - trigger circuit breaker and error handling
           handleCircuitBreakerFailure();
           trackError('message_send_failed', error instanceof Error ? error.message : 'Failed to send message', 'useMessageSending', false);
+          
+          // Track with unified analytics
+          analytics.trackError('message_send_failed', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            attempts: attempt,
+            thread_id: params.activeThreadId || params.currentThreadId,
+            message_length: trimmedMessage.length
+          });
+          
           await handleSendFailure(error);
           break;
         } else {

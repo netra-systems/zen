@@ -298,11 +298,9 @@ class AuthService:
     
     async def create_service_token(self, service_id: str) -> str:
         """Create a service-to-service authentication token."""
-        return self.jwt_handler.create_access_token(
-            user_id=service_id,
-            email=f"{service_id}@service.internal",
-            permissions=["service:all"]
-        )
+        # Get service name for JWT creation
+        service_name = await self._get_service_name(service_id)
+        return self.jwt_handler.create_service_token(service_id, service_name)
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
@@ -621,33 +619,6 @@ class AuthService:
             "is_verified": auth_user.is_verified
         }
     
-    async def create_service_token(self, 
-                                  request: ServiceTokenRequest) -> ServiceTokenResponse:
-        """Create token for service-to-service auth"""
-        # Validate service credentials
-        if not await self._validate_service(
-            request.service_id, 
-            request.service_secret
-        ):
-            raise AuthException(
-                error="invalid_service",
-                error_code="AUTH003",
-                message="Invalid service credentials"
-            )
-        
-        # Get service name from config/database
-        service_name = await self._get_service_name(request.service_id)
-        
-        token = self.jwt_handler.create_service_token(
-            service_id=request.service_id,
-            service_name=service_name
-        )
-        
-        return ServiceTokenResponse(
-            token=token,
-            expires_in=5 * 60,  # 5 minutes
-            service_name=service_name
-        )
     
     async def _validate_credentials(self, 
                                    request: LoginRequest) -> Optional[Dict]:

@@ -64,7 +64,7 @@ from datetime import datetime, timedelta
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 
 # Add project root to path

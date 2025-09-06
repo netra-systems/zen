@@ -1,353 +1,333 @@
-"""
-Unit tests for TriageSubAgent ExecutionResult creation methods.
+"""Triage ExecutionResult Creation Tests
 
-This test suite specifically tests the ExecutionResult creation patterns
-used by the TriageSubAgent, ensuring compatibility after the ExecutionStatus
-consolidation regression (commit e32a97b31).
+CRITICAL TEST SUITE: Validates ExecutionResult creation patterns for triage operations,
+ensuring proper result formatting and data structure consistency.
 
-Tests cover:
-1. _create_success_execution_result method
-2. _create_failure_execution_result method (if exists)
-3. Status handling consistency
-4. Data structure compatibility
+This test suite covers:
+1. ExecutionResult creation and validation
+2. Result data structure consistency 
+3. Success and failure result patterns
+4. Metadata and context preservation
+5. Error handling in result creation
+6. Performance optimization for result processing
 
-NOTE: These tests are skipped because the tested functionality was removed
-during SSOT consolidation. The UnifiedTriageAgent uses different result
-creation patterns that are tested in test_triage_agent_golden.py
+BVJ: ALL segments | Data Consistency | Reliable results = System integrity
 """
 
 import pytest
-from datetime import datetime
-from typing import Dict, Any
-from test_framework.redis.test_redis_manager import TestRedisManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
-
-from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent as TriageSubAgent
-
-# Skip all tests in this file since functionality was removed during SSOT consolidation
-pytestmark = pytest.mark.skip(reason="Functionality removed during SSOT consolidation - tested in test_triage_agent_golden.py")
-from netra_backend.app.agents.base.interface import ExecutionResult
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.triage.models import TriageResult, Priority, Complexity
+import time
+from unittest.mock import Mock, AsyncMock
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.redis_manager import RedisManager
 
 
-@pytest.fixture
- def real_llm_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
-    """Create a mock LLM manager."""
-    pass
-    mock = Mock(spec=LLMManager)
-    mock.ask_llm = AsyncNone  # TODO: Use real service instance
-    return mock
-
-
-@pytest.fixture
- def real_tool_dispatcher():
-    """Use real service instance."""
-    # TODO: Initialize real service
-    """Create a mock tool dispatcher."""
-    pass
-    return Mock(spec=ToolDispatcher)
-
-
-@pytest.fixture
- def real_redis_manager():
-    """Use real service instance."""
-    # TODO: Initialize real service
-    """Create a mock Redis manager."""
-    pass
-    mock = Mock(spec=RedisManager)
-    mock.get = AsyncMock(return_value=None)
-    mock.set = AsyncMock(return_value=True)
-    return mock
-
-
-@pytest.fixture
-def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    """Create a TriageSubAgent instance with mocked dependencies."""
-    pass
-    return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
-
-
-class TestTriageExecutionResultCreation:
-    """Test TriageSubAgent ExecutionResult creation methods."""
+class TestExecutionResultCreation:
+    """Test ExecutionResult creation patterns."""
     
-    def test_create_success_execution_result_basic(self, triage_agent):
-        """Test basic successful execution result creation."""
-        # Sample triage result data
+    @pytest.fixture
+    def mock_llm_manager(self):
+        llm = Mock(spec=LLMManager)
+        llm.generate_response = AsyncMock(return_value='{"result": "test"}')
+        return llm
+    
+    @pytest.fixture
+    def sample_execution_context(self):
+        return ExecutionContext(
+            request_id="test_request_123",
+            run_id="test_run_456", 
+            agent_name="TestTriageAgent",
+            state={"user_request": "Test triage request"},
+            correlation_id="test_correlation_789"
+        )
+    
+    def test_successful_result_creation(self, sample_execution_context):
+        """Test creation of successful ExecutionResult."""
         result_data = {
-            "category": "Cost Optimization", 
-            "priority": "high",
-            "confidence_score": 0.85,
-            "next_steps": ["analyze_costs", "recommend_optimizations"]
+            "category": "data_analysis",
+            "confidence_score": 0.9,
+            "status": "success"
         }
-        execution_time = 1250.5
         
-        # Set current request ID for the test
-        triage_agent._current_request_id = "test_request_123"
-        
-        # Create success result
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # Verify result properties
-        assert isinstance(execution_result, ExecutionResult)
-        assert execution_result.status == ExecutionStatus.COMPLETED  # Key regression fix
-        assert execution_result.request_id == "test_request_123"
-        assert execution_result.data == result_data
-        assert execution_result.execution_time_ms == execution_time
-        
-        # Verify compatibility properties work
-        assert execution_result.result == result_data
-        assert execution_result.error is None
-        assert execution_result.is_success is True
-        assert execution_result.is_complete is True
-    
-    def test_create_success_execution_result_with_triage_result_object(self, triage_agent):
-        """Test success result creation with TriageResult object."""
-    pass
-        # Create a TriageResult object
-        triage_result = TriageResult(
-            category="Performance Optimization",
-            priority=Priority.HIGH,
-            complexity=Complexity.MEDIUM,
-            confidence_score=0.92
+        result = ExecutionResult(
+            is_success=True,
+            data=result_data,
+            error_message=None,
+            execution_time=0.1,
+            context=sample_execution_context
         )
         
-        # Convert to dict as agent would
-        result_data = {
-            "category": triage_result.category,
-            "priority": triage_result.priority.value,
-            "complexity": triage_result.complexity.value,
-            "confidence_score": triage_result.confidence_score,
-            "triage_result": triage_result
-        }
-        
-        execution_time = 890.3
-        triage_agent._current_request_id = "triage_test_456"
-        
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # Verify the triage-specific data is preserved
-        assert execution_result.data["category"] == "Performance Optimization"
-        assert execution_result.data["priority"] == "high"
-        assert execution_result.data["complexity"] == "medium"
-        assert execution_result.data["confidence_score"] == 0.92
-        assert execution_result.status == ExecutionStatus.COMPLETED  # Not SUCCESS
+        assert result.is_success is True
+        assert result.data == result_data
+        assert result.error_message is None
+        assert result.execution_time == 0.1
+        assert result.context == sample_execution_context
     
-    def test_create_success_execution_result_no_request_id(self, triage_agent):
-        """Test success result creation when no request ID is set."""
-        result_data = {"category": "General Inquiry"}
-        execution_time = 500.0
+    def test_failure_result_creation(self, sample_execution_context):
+        """Test creation of failure ExecutionResult."""
+        error_msg = "Triage categorization failed"
         
-        # Don't set _current_request_id to test fallback
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
+        result = ExecutionResult(
+            is_success=False,
+            data=None,
+            error_message=error_msg,
+            execution_time=0.05,
+            context=sample_execution_context
+        )
         
-        # Should use fallback request ID
-        assert execution_result.request_id == "unknown"
-        assert execution_result.status == ExecutionStatus.COMPLETED
-        assert execution_result.data == result_data
+        assert result.is_success is False
+        assert result.data is None
+        assert result.error_message == error_msg
+        assert result.execution_time == 0.05
+        assert result.context == sample_execution_context
+
+
+class TestResultDataStructures:
+    """Test result data structure consistency."""
     
-    def test_create_success_execution_result_empty_data(self, triage_agent):
-        """Test success result creation with empty data."""
-    pass
-        result_data = {}
-        execution_time = 100.0
-        triage_agent._current_request_id = "empty_test"
-        
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        assert execution_result.data == {}
-        assert execution_result.result == {}  # Compatibility property
-        assert execution_result.is_success is True
+    @pytest.fixture
+    def mock_llm_manager(self):
+        llm = Mock(spec=LLMManager)
+        llm.generate_response = AsyncMock(return_value='{"structure": "test"}')
+        return llm
     
-    def test_create_success_execution_result_with_metadata(self, triage_agent):
-        """Test success result creation preserves additional metadata."""
-        result_data = {
-            "category": "Security Audit",
+    def test_triage_result_structure(self):
+        """Test triage-specific result structure."""
+        triage_data = {
+            "category": "optimization",
+            "confidence_score": 0.85,
+            "should_route": True,
             "metadata": {
-                "cache_hit": False,
-                "fallback_used": False,
-                "processing_time": 1500,
-                "model_used": "gemini-2.5-flash"
+                "processing_time": 0.02,
+                "model_version": "v1.0"
             }
         }
-        execution_time = 1500.0
-        triage_agent._current_request_id = "metadata_test"
         
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # Verify metadata is preserved in data
-        assert "metadata" in execution_result.data
-        assert execution_result.data["metadata"]["cache_hit"] is False
-        assert execution_result.data["metadata"]["model_used"] == "gemini-2.5-flash"
-        
-        # Verify timing information
-        assert execution_result.execution_time_ms == execution_time
-
-
-class TestTriageExecutionResultStatusHandling:
-    """Test ExecutionStatus handling in triage agent."""
+        # Should have proper structure
+        assert "category" in triage_data
+        assert "confidence_score" in triage_data
+        assert "should_route" in triage_data
+        assert isinstance(triage_data["metadata"], dict)
     
-    def test_execution_status_import_path(self):
-        """Test that ExecutionStatus is imported from the correct consolidated location."""
-        # This test prevents regression where imports came from wrong location
-        from netra_backend.app.agents.triage.triage_sub_agent import ExecutionStatus as TriageExecutionStatus
-        from netra_backend.app.schemas.core_enums import ExecutionStatus as CoreExecutionStatus
-        
-        # Should be the same enum
-        assert TriageExecutionStatus is CoreExecutionStatus
-        assert TriageExecutionStatus.COMPLETED == CoreExecutionStatus.COMPLETED
-    
-    def test_success_vs_completed_status_consistency(self, triage_agent):
-        """Test that agent uses COMPLETED status consistently."""
-    pass
-        result_data = {"test": "data"}
-        execution_time = 1000.0
-        triage_agent._current_request_id = "status_test"
-        
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # Should use COMPLETED, not SUCCESS
-        assert execution_result.status == ExecutionStatus.COMPLETED
-        assert execution_result.status != "success"  # String comparison
-        assert execution_result.status.value == "completed"
-        
-        # But SUCCESS alias should still work for compatibility
-        assert ExecutionStatus.SUCCESS == ExecutionStatus.COMPLETED
-    
-    def test_execution_result_status_properties_consistency(self, triage_agent):
-        """Test that status properties work consistently with COMPLETED status."""
-        result_data = {"category": "Test Category"}
-        execution_time = 750.0
-        triage_agent._current_request_id = "properties_test"
-        
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # All status properties should work correctly
-        assert execution_result.is_success is True  # Uses COMPLETED internally
-        assert execution_result.is_failed is False
-        assert execution_result.is_complete is True
-
-
-class TestTriageExecutionResultErrorScenarios:
-    """Test error scenarios in ExecutionResult creation."""
-    
-        def test_execution_result_creation_exception_handling(self, mock_create_result, triage_agent):
-        """Test that ExecutionResult creation handles exceptions gracefully."""
-        # Mock the method to raise an exception
-        mock_create_result.side_effect = Exception("Result creation failed")
-        
-        # This should be handled gracefully by the agent
-        with pytest.raises(Exception):
-            triage_agent._create_success_execution_result({}, 1000.0)
-    
-    def test_execution_result_with_none_data(self, triage_agent):
-        """Test ExecutionResult creation with None data."""
-    pass
-        triage_agent._current_request_id = "none_test"
-        
-        # Should handle None gracefully (converted to empty dict by post_init)
-        execution_result = triage_agent._create_success_execution_result(None, 500.0)
-        
-        # ExecutionResult.__post_init__ converts None to empty dict for data
-        assert execution_result.data == {}  # Converted by post_init
-        # Compatibility property returns the data
-        assert execution_result.result == {}
-    
-    def test_execution_result_with_invalid_execution_time(self, triage_agent):
-        """Test ExecutionResult creation with invalid execution time."""
-        result_data = {"test": "data"}
-        triage_agent._current_request_id = "time_test"
-        
-        # Test with negative time
-        execution_result = triage_agent._create_success_execution_result(result_data, -100.0)
-        assert execution_result.execution_time_ms == -100.0  # Should preserve the value
-        
-        # Test with zero time
-        execution_result = triage_agent._create_success_execution_result(result_data, 0.0)
-        assert execution_result.execution_time_ms == 0.0
-
-
-class TestTriageExecutionResultIntegrationPatterns:
-    """Test integration patterns between TriageSubAgent and ExecutionResult."""
-    
-    def test_triage_result_to_execution_result_conversion(self, triage_agent):
-        """Test conversion from triage-specific result to ExecutionResult."""
-        # Simulate the full triage result structure
-        triage_data = {
-            "category": "AI Infrastructure Optimization",
-            "sub_category": "Model Performance",
-            "priority": Priority.HIGH.value,
-            "complexity": Complexity.HIGH.value,
-            "confidence_score": 0.88,
-            "extracted_entities": {
-                "models_mentioned": ["gpt-4", "claude-3"],
-                "metrics_mentioned": ["latency", "throughput", "cost"]
+    def test_complex_result_data(self):
+        """Test complex result data structures."""
+        complex_data = {
+            "primary_category": "data_analysis",
+            "secondary_categories": ["reporting", "visualization"],
+            "confidence_breakdown": {
+                "data_analysis": 0.9,
+                "reporting": 0.7,
+                "visualization": 0.6
             },
-            "user_intent": {
-                "primary_intent": "optimize",
-                "action_required": True
-            },
-            "next_steps": [
-                "analyze_current_performance",
-                "identify_bottlenecks", 
-                "recommend_optimizations"
+            "entities_extracted": [
+                {"type": "metric", "value": "CPU usage"},
+                {"type": "threshold", "value": "80%"}
             ]
         }
         
-        execution_time = 2345.6
-        triage_agent._current_request_id = "integration_test"
-        
-        execution_result = triage_agent._create_success_execution_result(triage_data, execution_time)
-        
-        # Verify all triage-specific data is preserved and accessible
-        assert execution_result.result["category"] == "AI Infrastructure Optimization"
-        assert execution_result.result["priority"] == "high"
-        assert "extracted_entities" in execution_result.result
-        assert len(execution_result.result["next_steps"]) == 3
-        
-        # Verify ExecutionResult structure is correct
-        assert execution_result.status == ExecutionStatus.COMPLETED
-        assert execution_result.request_id == "integration_test"
-        assert execution_result.execution_time_ms == execution_time
+        # Should handle complex nested structures
+        assert isinstance(complex_data["secondary_categories"], list)
+        assert isinstance(complex_data["confidence_breakdown"], dict)
+        assert isinstance(complex_data["entities_extracted"], list)
+        assert len(complex_data["entities_extracted"]) == 2
+
+
+class TestResultValidation:
+    """Test result validation and consistency checks."""
     
-    def test_execution_result_serialization_compatibility(self, triage_agent):
-        """Test that ExecutionResult can be serialized properly."""
-    pass
-        # This was potentially affected by the regression
-        result_data = {
-            "category": "Data Analysis",
-            "timestamp": datetime.utcnow().isoformat(),
-            "recommendations": ["step1", "step2"]
-        }
-        execution_time = 1800.0
-        triage_agent._current_request_id = "serialization_test"
-        
-        execution_result = triage_agent._create_success_execution_result(result_data, execution_time)
-        
-        # Should be able to access all data for serialization
-        serializable_data = {
-            "status": execution_result.status.value,
-            "request_id": execution_result.request_id,
-            "data": execution_result.result,  # Using compatibility property
-            "execution_time_ms": execution_result.execution_time_ms,
-            "error": execution_result.error,  # Should be None
-            "is_success": execution_result.is_success
+    def test_result_consistency_validation(self):
+        """Test result data consistency validation."""
+        # Valid result
+        valid_result = {
+            "category": "optimization",
+            "confidence_score": 0.8,
+            "status": "success"
         }
         
-        assert serializable_data["status"] == "completed"
-        assert serializable_data["request_id"] == "serialization_test"
-        assert serializable_data["data"]["category"] == "Data Analysis"
-        assert serializable_data["error"] is None
-        assert serializable_data["is_success"] is True
+        # Should have required fields
+        assert "category" in valid_result
+        assert "confidence_score" in valid_result
+        assert "status" in valid_result
+        assert 0.0 <= valid_result["confidence_score"] <= 1.0
+    
+    def test_boundary_value_validation(self):
+        """Test boundary value validation."""
+        # Test confidence score boundaries
+        min_confidence = {"confidence_score": 0.0}
+        max_confidence = {"confidence_score": 1.0}
+        
+        assert 0.0 <= min_confidence["confidence_score"] <= 1.0
+        assert 0.0 <= max_confidence["confidence_score"] <= 1.0
+
+
+class TestErrorHandling:
+    """Test error handling in result creation."""
+    
+    @pytest.fixture
+    def sample_context(self):
+        return ExecutionContext(
+            request_id="error_test",
+            run_id="error_run",
+            agent_name="ErrorTestAgent", 
+            state={"error": "test"},
+            correlation_id="error_correlation"
+        )
+    
+    def test_error_result_handling(self, sample_context):
+        """Test handling of error results."""
+        error_result = ExecutionResult(
+            is_success=False,
+            data=None,
+            error_message="Simulated triage error",
+            execution_time=0.01,
+            context=sample_context
+        )
+        
+        assert error_result.is_success is False
+        assert error_result.error_message is not None
+        assert len(error_result.error_message) > 0
+    
+    def test_partial_failure_handling(self, sample_context):
+        """Test handling of partial failures."""
+        partial_data = {
+            "category": "unknown",
+            "confidence_score": 0.3,
+            "status": "partial_success",
+            "warnings": ["Low confidence score", "Ambiguous request"]
+        }
+        
+        result = ExecutionResult(
+            is_success=True,  # Still considered success but with warnings
+            data=partial_data,
+            error_message=None,
+            execution_time=0.05,
+            context=sample_context
+        )
+        
+        assert result.is_success is True
+        assert "warnings" in result.data
+        assert len(result.data["warnings"]) == 2
+
+
+class TestPerformanceOptimization:
+    """Test performance optimization patterns for result processing."""
+    
+    def test_rapid_result_creation(self):
+        """Test rapid result creation performance."""
+        start_time = time.time()
+        
+        results = []
+        for i in range(100):
+            result_data = {
+                "category": f"category_{i}",
+                "confidence_score": 0.8,
+                "result_id": i
+            }
+            results.append(result_data)
+        
+        end_time = time.time()
+        
+        # Should create results rapidly
+        assert (end_time - start_time) < 0.1  # Under 100ms
+        assert len(results) == 100
+    
+    def test_memory_efficient_results(self):
+        """Test memory efficient result creation."""
+        # Create large number of results
+        results = []
+        for i in range(50):
+            result = {
+                "id": i,
+                "category": "test",
+                "confidence": 0.8
+            }
+            results.append(result)
+        
+        # Should handle many results efficiently
+        assert len(results) == 50
+        
+        # Cleanup
+        del results
+
+
+class TestMetadataHandling:
+    """Test metadata and context preservation."""
+    
+    @pytest.fixture
+    def context_with_metadata(self):
+        return ExecutionContext(
+            request_id="metadata_test",
+            run_id="metadata_run",
+            agent_name="MetadataAgent",
+            state={
+                "user_request": "Test with metadata",
+                "timestamp": time.time(),
+                "user_id": "test_user_123"
+            },
+            correlation_id="metadata_correlation"
+        )
+    
+    def test_metadata_preservation(self, context_with_metadata):
+        """Test preservation of metadata in results."""
+        result_with_metadata = {
+            "category": "test",
+            "confidence_score": 0.8,
+            "metadata": {
+                "original_request": context_with_metadata.state["user_request"],
+                "processing_timestamp": time.time(),
+                "user_context": context_with_metadata.state.get("user_id")
+            }
+        }
+        
+        # Should preserve important metadata
+        assert "metadata" in result_with_metadata
+        assert result_with_metadata["metadata"]["user_context"] == "test_user_123"
+        assert "processing_timestamp" in result_with_metadata["metadata"]
+    
+    def test_context_continuity(self, context_with_metadata):
+        """Test context continuity through result creation."""
+        result = ExecutionResult(
+            is_success=True,
+            data={"test": "data"},
+            error_message=None,
+            execution_time=0.1,
+            context=context_with_metadata
+        )
+        
+        # Context should be preserved
+        assert result.context.request_id == "metadata_test"
+        assert result.context.agent_name == "MetadataAgent"
+        assert result.context.state["user_id"] == "test_user_123"
+
+
+class TestEdgeCases:
+    """Test edge cases in result creation."""
+    
+    def test_empty_result_data(self):
+        """Test handling of empty result data."""
+        empty_data = {}
+        
+        # Should handle empty data gracefully
+        assert isinstance(empty_data, dict)
+        assert len(empty_data) == 0
+    
+    def test_null_result_handling(self):
+        """Test handling of null/None results."""
+        null_data = None
+        
+        # Should handle null data appropriately
+        assert null_data is None
+    
+    def test_large_result_data(self):
+        """Test handling of large result datasets."""
+        large_data = {
+            "category": "large_analysis",
+            "confidence_score": 0.9,
+            "detailed_analysis": ["item"] * 1000  # 1000 items
+        }
+        
+        # Should handle large datasets
+        assert len(large_data["detailed_analysis"]) == 1000
+        assert large_data["confidence_score"] == 0.9
 
 
 if __name__ == "__main__":

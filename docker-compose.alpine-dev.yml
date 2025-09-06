@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  dev-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: local_dev_password
+      POSTGRES_DB: netra_apex
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netra"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  dev-redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  dev-clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    environment:
+      CLICKHOUSE_DB: netra_analytics
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: local_dev_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1'"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  dev-backend:
+    build:
+      context: .
+      dockerfile: docker/backend.alpine.Dockerfile
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://netra:local_dev_password@dev-postgres:5432/netra_apex
+      REDIS_URL: redis://dev-redis:6379/0
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: local_dev_password
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+    volumes:
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+    ports:
+      - "8000:8000"
+    depends_on:
+      - dev-postgres
+      - dev-redis
+      - dev-clickhouse
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dev-auth:
+    build:
+      context: .
+      dockerfile: docker/auth.alpine.Dockerfile
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://netra:local_dev_password@dev-postgres:5432/netra_apex
+      REDIS_URL: redis://dev-redis:6379/1
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+    volumes:
+      - ./auth_service:/app/auth_service
+      - ./shared:/app/shared
+    ports:
+      - "8081:8081"
+    depends_on:
+      - dev-postgres
+      - dev-redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dev-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.alpine.Dockerfile
+    environment:
+      NEXT_PUBLIC_ENVIRONMENT: development
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      NEXT_PUBLIC_AUTH_SERVICE_URL: http://localhost:8081
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - dev-backend
+      - dev-auth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+  clickhouse-data:
