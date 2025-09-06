@@ -168,8 +168,9 @@ class OrchestrationConfig:
 
 class EnvironmentType(Enum):
     """Test environment types"""
-    SHARED = "shared"  # Shared test environment (default)
-    DEDICATED = "dedicated"  # Dedicated per test run
+    DEDICATED = "dedicated"  # Dedicated per test run (DEFAULT)
+    TEST = "test"  # Test environment
+    STAGING = "staging"  # Staging environment
     PRODUCTION = "production"  # Production-like images
     DEVELOPMENT = "development"  # Development images
 
@@ -266,10 +267,15 @@ class UnifiedDockerManager:
             "password": "netra123", 
             "database": "netra_dev"
         },
-        EnvironmentType.SHARED: {
+        EnvironmentType.TEST: {
             "user": "test_user",
             "password": "test_pass",
             "database": "netra_test"
+        },
+        EnvironmentType.STAGING: {
+            "user": "staging_user",
+            "password": "staging_pass",
+            "database": "netra_staging"
         },
         EnvironmentType.DEDICATED: {
             "user": "test_user", 
@@ -292,7 +298,7 @@ class UnifiedDockerManager:
     
     def __init__(self, 
                  config: Optional[OrchestrationConfig] = None,
-                 environment_type: EnvironmentType = EnvironmentType.DEVELOPMENT,
+                 environment_type: EnvironmentType = EnvironmentType.DEDICATED,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
                  mode: ServiceMode = ServiceMode.DOCKER,
@@ -416,8 +422,8 @@ class UnifiedDockerManager:
         # Use environment-specific credentials
         credentials = self.ENVIRONMENT_CREDENTIALS.get(self.environment_type)
         if not credentials:
-            logger.warning(f"No credentials found for environment {self.environment_type}, falling back to SHARED")
-            credentials = self.ENVIRONMENT_CREDENTIALS[EnvironmentType.SHARED]
+            logger.warning(f"No credentials found for environment {self.environment_type}, falling back to TEST")
+            credentials = self.ENVIRONMENT_CREDENTIALS[EnvironmentType.TEST]
             
         return credentials.copy()
     
@@ -441,7 +447,7 @@ class UnifiedDockerManager:
                 
                 # Check for Alpine test containers
                 if any('alpine' in name.lower() for name in container_names):
-                    return EnvironmentType.SHARED  # Alpine containers use SHARED environment type
+                    return EnvironmentType.TEST  # Alpine containers use TEST environment type
                 
                 # Check for development containers (dev- prefix)
                 if any(name.startswith('dev-') for name in container_names):
@@ -449,7 +455,7 @@ class UnifiedDockerManager:
                     
                 # Check for test containers (test- prefix)  
                 if any(name.startswith('test-') for name in container_names):
-                    return EnvironmentType.SHARED
+                    return EnvironmentType.TEST
                     
         except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
             logger.debug(f"Could not detect environment from containers: {e}")
@@ -462,13 +468,14 @@ class UnifiedDockerManager:
         """Initialize the dynamic port allocator based on environment type."""
         # Map environment types to port ranges
         port_range_map = {
-            EnvironmentType.SHARED: PortRange.SHARED_TEST,
+            EnvironmentType.TEST: PortRange.SHARED_TEST,  # Legacy name, but refers to test ports
             EnvironmentType.DEDICATED: PortRange.DEDICATED_TEST,
-            EnvironmentType.PRODUCTION: PortRange.STAGING,
+            EnvironmentType.STAGING: PortRange.STAGING,
+            EnvironmentType.PRODUCTION: PortRange.STAGING,  # Production uses staging ports
             EnvironmentType.DEVELOPMENT: PortRange.DEVELOPMENT
         }
         
-        port_range = port_range_map.get(self.environment_type, PortRange.SHARED_TEST)
+        port_range = port_range_map.get(self.environment_type, PortRange.DEDICATED_TEST)
         
         return DynamicPortAllocator(
             port_range=port_range,
@@ -545,12 +552,12 @@ class UnifiedDockerManager:
                 return f"netra_alpine_test_{self.test_id}"
             else:
                 return f"netra_test_{self.test_id}"
-        # For shared environments
-        elif self.environment_type == EnvironmentType.SHARED:
+        # For test environments
+        elif self.environment_type == EnvironmentType.TEST:
             if self.use_alpine:
-                return "netra_alpine_test_shared"
+                return "netra_alpine_test"
             else:
-                return "netra_test_shared"
+                return "netra_test"
         # Other environment types
         else:
             prefix = "netra_alpine" if self.use_alpine else "netra"
@@ -1338,7 +1345,7 @@ class UnifiedDockerManager:
             "netra-dev-",
             "netra-apex-test-",
             "netra-test-",
-            "netra_test_shared_"
+            "netra_test_"
         ]
         
         for attempt in range(max_retries):
@@ -1415,7 +1422,7 @@ class UnifiedDockerManager:
                     # Last attempt - try alternative approach
                     logger.warning("Using alternative docker detection method")
                     try:
-                        patterns = ["netra-dev-", "netra-apex-test-", "netra-test-", "netra_test_shared_"]
+                        patterns = ["netra-dev-", "netra-apex-test-", "netra-test-"]
                         for pattern in patterns:
                             cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
                             result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
@@ -1429,8 +1436,6 @@ class UnifiedDockerManager:
                                             service = service[:-2]  # Remove '-1' suffix properly
                                     elif 'netra-dev-' in container_name:
                                         service = container_name.replace('netra-dev-', '')
-                                    elif 'netra_test_shared_' in container_name:
-                                        service = container_name.replace('netra_test_shared_', '')
                                         if service.endswith('_1'):
                                             service = service[:-2]  # Remove '_1' suffix properly
                                     else:
@@ -1504,7 +1509,7 @@ class UnifiedDockerManager:
             "legacy_dev": "netra-dev-{service}",
             "legacy_apex_test": "netra-apex-test-{service}-1",
             "legacy_test": "netra-test-{service}-1",
-            "legacy_shared": "netra_test_shared_{service}_1"
+            "legacy_test": "netra_test_{service}_1"
         }
         
         logger.debug(f"🏷️ Container name patterns for project '{project_dir}': {list(patterns.keys())}")
@@ -1562,8 +1567,6 @@ class UnifiedDockerManager:
             if service.endswith('-1'):
                 service = service[:-2]
             return service
-        elif container_name.startswith('netra_test_shared_'):
-            service = container_name.replace('netra_test_shared_', '')
             if service.endswith('_1'):
                 service = service[:-2]
             return service
@@ -1758,7 +1761,7 @@ class UnifiedDockerManager:
             f"netra-apex-test-{service_name}-1",
             f"netra-dev-{service_name}",
             f"netra-test-{service_name}-1",
-            f"netra_test_shared_{service_name}_1"
+            f"netra_test_{service_name}_1"
         ]
         
         # Method 1: Try exact name matches
@@ -1953,7 +1956,7 @@ class UnifiedDockerManager:
             if success:
                 logger.info(f"✅ Successfully restarted {service_name}")
             else:
-                logger.error(f"❌ Failed to restart {service_name}: {result.stderr}")
+                logger.error(f"❌ Failed to restart {service_name} - all restart attempts failed")
             
             return success
     
@@ -2944,7 +2947,7 @@ class UnifiedDockerManager:
             
             for env_name, env_data in state["environments"].items():
                 # Skip shared environment
-                if env_data["type"] == EnvironmentType.SHARED.value:
+                if env_data["type"] == EnvironmentType.TEST.value:
                     continue
                 
                 # Check age
@@ -4614,7 +4617,7 @@ def refresh_dev(services: Optional[List[str]] = None, clean: bool = False) -> bo
 async def orchestrate_e2e_services(
     required_services: Optional[List[str]] = None,
     timeout: float = 60.0,
-    environment_type: EnvironmentType = EnvironmentType.SHARED,
+    environment_type: EnvironmentType = EnvironmentType.DEDICATED,
     use_production_images: bool = True
 ) -> Tuple[bool, UnifiedDockerManager]:
     """
@@ -4677,7 +4680,7 @@ class ServiceOrchestrator(UnifiedDockerManager):
             rebuild_backend_only: Only rebuild backend services
             pull_policy: Docker pull policy - 'always', 'never', or 'missing' (default)
         """
-        super().__init__(config=config, environment_type=EnvironmentType.SHARED, 
+        super().__init__(config=config, environment_type=EnvironmentType.DEDICATED, 
                         use_production_images=True, use_alpine=use_alpine,
                         rebuild_images=rebuild_images, rebuild_backend_only=rebuild_backend_only,
                         pull_policy=pull_policy)

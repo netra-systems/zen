@@ -559,15 +559,9 @@ class UnifiedTestRunner:
         except Exception as e:
             print(f"[WARNING] Memory check failed with error: {e}")
         
-        # Determine environment type - default to DEDICATED for unique names
-        # E2E tests should always use dedicated environments
-        if (args.categories and 'e2e' in args.categories) or (hasattr(args, 'docker_dedicated') and args.docker_dedicated):
-            env_type = EnvironmentType.DEDICATED
-        else:
-            # For unit/integration tests, still default to DEDICATED for isolation
-            # Can be overridden with TEST_USE_SHARED_DOCKER=true
-            use_shared = env.get('TEST_USE_SHARED_DOCKER', 'false').lower() == 'true'
-            env_type = EnvironmentType.SHARED if use_shared else EnvironmentType.DEDICATED
+        # Determine environment type - always default to DEDICATED for isolation
+        # DEDICATED is now the default for all test types
+        env_type = EnvironmentType.DEDICATED
         
         # Check if we should use production images
         use_production = env.get('TEST_USE_PRODUCTION_IMAGES', 'true').lower() == 'true'
@@ -3025,8 +3019,7 @@ def main():
     
     # Set Docker environment variables from args
     env = get_env()
-    if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
-        env.set('TEST_USE_SHARED_DOCKER', 'false', 'docker_args')
+    # DEDICATED is now the default, no need for TEST_USE_SHARED_DOCKER
     if hasattr(args, 'docker_production') and args.docker_production:
         env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
     
