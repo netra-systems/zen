@@ -279,28 +279,31 @@ Auth Service startup ABORTED.
     # Initialize auth database (uses the same DATABASE_URL as main app)
     try:
         await auth_db.initialize()
-        logger.info("Auth database initialized successfully")
+        logger.info("🔌 AUTH DATABASE: Connection initialized")
         
         # Verify database connectivity immediately
         db_ready = await auth_db.is_ready()
         if not db_ready:
             raise RuntimeError("Database initialization succeeded but connectivity test failed")
         
-        logger.info("Auth database connectivity verified successfully")
+        logger.info("✅ AUTH DATABASE: Connected and verified - User data persistence ENABLED")
         
     except Exception as e:
         error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
-        logger.error(f"Auth database initialization failed: {error_msg}")
+        logger.error(f"❌ AUTH DATABASE: Connection FAILED - {error_msg}")
         
         # FAIL FAST: Do not start service if database is unavailable
         # This prevents misleading "healthy" status when critical dependencies are down
         if env in ["staging", "production"]:
+            logger.critical(f"🚨 FATAL: Database required in {env.upper()} - Service cannot start!")
             raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
         elif env == "development":
             # Development can continue without database for basic testing
-            logger.warning(f"Development mode: continuing without database - {error_msg}")
+            logger.warning(f"⚠️ AUTH DATABASE: Running in STATELESS mode (JWT validation only) - {error_msg}")
+            logger.warning(f"⚠️ AUTH DATABASE: User persistence DISABLED - OAuth login will not persist users")
         else:
             # Unknown environment - be conservative and fail
+            logger.critical(f"🚨 FATAL: Database required in {env.upper()} - Service cannot start!")
             raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
     
     logger.info("Auth Service startup completed")

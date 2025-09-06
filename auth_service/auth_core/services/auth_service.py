@@ -72,9 +72,10 @@ class AuthService:
         try:
             from auth_service.auth_core.database.connection import auth_db
             self._db_connection = auth_db
-            logger.info("Auth service database connection initialized")
+            logger.debug("AuthService: Database connection object acquired")
         except Exception as e:
-            logger.error(f"Failed to initialize database connection: {e}")
+            logger.warning(f"AuthService: Running without database - {e}")
+            logger.info("AuthService: Operating in STATELESS mode - JWT validation only, no user persistence")
             self._db_connection = None
     
     async def _get_db_session(self):
