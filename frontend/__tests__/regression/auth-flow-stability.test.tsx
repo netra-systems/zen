@@ -64,6 +64,9 @@ describe('Auth Flow Stability Regression Tests', () => {
       pathname: '/protected',
     });
     
+    // Clear global mock auth state to ensure clean test state
+    global.mockAuthState = undefined;
+    
     // Mock GTM with stable functions
     (require('@/hooks/useGTMEvent').useGTMEvent as jest.Mock).mockReturnValue({
       trackError: mockTrackError,
@@ -149,6 +152,9 @@ describe('Auth Flow Stability Regression Tests', () => {
     children: React.ReactNode,
     authValue: AuthContextType
   ) => {
+    // Set global mock auth state to override the jest mock
+    global.mockAuthState = authValue;
+    
     return render(
       <AuthContext.Provider value={authValue}>
         {children}
@@ -265,6 +271,9 @@ describe('Auth Flow Stability Regression Tests', () => {
         initialized: true,
       });
       
+      // Set global mock auth state for rerender
+      global.mockAuthState = updatedAuthValue;
+      
       rerender(
         <AuthContext.Provider value={updatedAuthValue}>
           <AuthGuard>
@@ -310,6 +319,9 @@ describe('Auth Flow Stability Regression Tests', () => {
         initialized: true,
       });
       
+      // Set global mock auth state for rerender
+      global.mockAuthState = initializedAuthValue;
+      
       rerender(
         <AuthContext.Provider value={initializedAuthValue}>
           <AuthGuard key="test-2">
@@ -347,6 +359,9 @@ describe('Auth Flow Stability Regression Tests', () => {
       
       // Rapidly change states
       for (const state of states.slice(1)) {
+        // Set global mock auth state for each rerender
+        global.mockAuthState = state;
+        
         rerender(
           <AuthContext.Provider value={state}>
             <AuthGuard>
@@ -398,6 +413,9 @@ describe('Auth Flow Stability Regression Tests', () => {
       });
       
       // Use a different key to force fresh component mount with fresh hasPerformedAuthCheck
+      // Set global mock auth state for rerender
+      global.mockAuthState = noTokenAuthValue;
+      
       rerender(
         <AuthContext.Provider value={noTokenAuthValue}>
           <AuthGuard key="test-3-unauthenticated">
