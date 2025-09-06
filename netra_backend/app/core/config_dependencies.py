@@ -923,7 +923,7 @@ class ConfigDependencyMap:
         try:
             # Use central validator - the SSOT for configuration validation
             env = get_env()
-            validator = CentralConfigurationValidator(env_getter=lambda key, default=None: env.get(key, default))
+            validator = CentralConfigurationValidator(env_getter_func=lambda key, default=None: env.get(key, default))
             
             # Attempt validation
             validator.validate_all_requirements()

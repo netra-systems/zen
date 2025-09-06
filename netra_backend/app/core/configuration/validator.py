@@ -277,11 +277,16 @@ class ConfigurationValidator:
             return []
     
     def _collect_config_dependency_errors(self, config: AppConfig) -> List[str]:
-        """Collect configuration dependency errors using ConfigDependencyMap."""
+        """Collect configuration dependency errors using ConfigDependencyMap.
+        
+        This delegates to ConfigDependencyMap which now uses the central
+        SSOT validator for actual validation, while providing dependency
+        impact analysis.
+        """
         try:
             from netra_backend.app.core.config_dependencies import ConfigDependencyMap
             
-            # Check configuration consistency using the dependency map
+            # Check configuration consistency - delegates to central SSOT validator
             config_dict = config.__dict__ if hasattr(config, '__dict__') else {}
             consistency_issues = ConfigDependencyMap.check_config_consistency(config_dict)
             
