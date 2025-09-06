@@ -106,7 +106,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME="0.0.0.0" \
-    BUILD_ENV=${BUILD_ENV} \
+    BUILD_ENV=staging \
     ENVIRONMENT=${ENVIRONMENT} \
     RUNNING_IN_DOCKER=true \
     # Node.js memory optimization for 512MB limit
