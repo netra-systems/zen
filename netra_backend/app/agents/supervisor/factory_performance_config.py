@@ -13,7 +13,7 @@ enabling toggling of performance optimizations while maintaining backward compat
 
 from dataclasses import dataclass, field
 from typing import Optional
-import os
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -27,95 +27,95 @@ class FactoryPerformanceConfig:
     
     # WebSocket Emitter Pooling Configuration
     enable_emitter_pooling: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_POOLING', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_POOLING', 'true').lower() == 'true'
     )
     pool_initial_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_INITIAL_SIZE', '20'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_INITIAL_SIZE', '20'))
     )
     pool_max_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_MAX_SIZE', '200'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_MAX_SIZE', '200'))
     )
     pool_cleanup_interval: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_POOL_CLEANUP_INTERVAL', '300'))
+        default_factory=lambda: int(get_env().get('FACTORY_POOL_CLEANUP_INTERVAL', '300'))
     )
     pool_reuse_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_POOL_REUSE_TIMEOUT', '60.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_POOL_REUSE_TIMEOUT', '60.0'))
     )
     
     # Agent Class Caching Configuration
     enable_class_caching: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_CACHING', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_CACHING', 'true').lower() == 'true'
     )
     cache_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_CACHE_SIZE', '128'))
+        default_factory=lambda: int(get_env().get('FACTORY_CACHE_SIZE', '128'))
     )
     cache_ttl: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_CACHE_TTL', '3600'))
+        default_factory=lambda: int(get_env().get('FACTORY_CACHE_TTL', '3600'))
     )
     
     # Metrics Collection Configuration
     enable_metrics: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_METRICS', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_METRICS', 'true').lower() == 'true'
     )
     metrics_sample_rate: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_METRICS_SAMPLE_RATE', '0.1'))
+        default_factory=lambda: float(get_env().get('FACTORY_METRICS_SAMPLE_RATE', '0.1'))
     )
     metrics_buffer_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_METRICS_BUFFER_SIZE', '100'))
+        default_factory=lambda: int(get_env().get('FACTORY_METRICS_BUFFER_SIZE', '100'))
     )
     
     # Object Reuse Configuration
     enable_object_reuse: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_OBJECT_REUSE', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_OBJECT_REUSE', 'true').lower() == 'true'
     )
     reuse_pool_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_REUSE_POOL_SIZE', '50'))
+        default_factory=lambda: int(get_env().get('FACTORY_REUSE_POOL_SIZE', '50'))
     )
     
     # Lazy Initialization Configuration
     enable_lazy_init: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_LAZY_INIT', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_LAZY_INIT', 'true').lower() == 'true'
     )
     
     # Performance Targets
     target_context_creation_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_CONTEXT_MS', '5.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_CONTEXT_MS', '5.0'))
     )
     target_agent_creation_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_AGENT_MS', '10.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_AGENT_MS', '10.0'))
     )
     target_cleanup_ms: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_TARGET_CLEANUP_MS', '2.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_TARGET_CLEANUP_MS', '2.0'))
     )
     
     # Concurrency Configuration
     max_concurrent_per_user: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_MAX_CONCURRENT_PER_USER', '10'))
+        default_factory=lambda: int(get_env().get('FACTORY_MAX_CONCURRENT_PER_USER', '10'))
     )
     execution_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_EXECUTION_TIMEOUT', '30.0'))
+        default_factory=lambda: float(get_env().get('FACTORY_EXECUTION_TIMEOUT', '30.0'))
     )
     
     # Memory Management
     max_history_per_user: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_MAX_HISTORY_PER_USER', '50'))
+        default_factory=lambda: int(get_env().get('FACTORY_MAX_HISTORY_PER_USER', '50'))
     )
     enable_weak_references: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_WEAK_REFS', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_WEAK_REFS', 'true').lower() == 'true'
     )
     
     # Feature Flags
     use_optimized_constructor: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_USE_OPTIMIZED_CONSTRUCTOR', 'true').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_USE_OPTIMIZED_CONSTRUCTOR', 'true').lower() == 'true'
     )
     enable_event_batching: bool = field(
-        default_factory=lambda: os.getenv('FACTORY_ENABLE_EVENT_BATCHING', 'false').lower() == 'true'
+        default_factory=lambda: get_env().get('FACTORY_ENABLE_EVENT_BATCHING', 'false').lower() == 'true'
     )
     event_batch_size: int = field(
-        default_factory=lambda: int(os.getenv('FACTORY_EVENT_BATCH_SIZE', '10'))
+        default_factory=lambda: int(get_env().get('FACTORY_EVENT_BATCH_SIZE', '10'))
     )
     event_batch_timeout: float = field(
-        default_factory=lambda: float(os.getenv('FACTORY_EVENT_BATCH_TIMEOUT', '0.1'))
+        default_factory=lambda: float(get_env().get('FACTORY_EVENT_BATCH_TIMEOUT', '0.1'))
     )
     
     def to_dict(self) -> dict:

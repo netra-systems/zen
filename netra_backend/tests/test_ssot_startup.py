@@ -13,8 +13,13 @@ Business Value Justification (BVJ):
 
 import asyncio
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from typing import Any, Dict
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test imports to verify they work
 from netra_backend.app.database import (
@@ -73,8 +78,8 @@ class TestAgentRegistrySSOT:
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         
         # AgentRegistry now requires llm_manager and tool_dispatcher
-        mock_llm = Mock()
-        mock_dispatcher = Mock()
+        mock_llm = mock_llm_instance  # Initialize appropriate service
+        mock_dispatcher = mock_dispatcher_instance  # Initialize appropriate service
         
         # Multiple calls with same args should work
         registry1 = AgentRegistry(mock_llm, mock_dispatcher)
@@ -163,7 +168,7 @@ class TestStatePersistenceSSOT:
         
         # Test recovery log
         result = await state_recovery_manager.complete_recovery_log(
-            "recovery_1", True, Mock(), ""
+            "recovery_1", True, None  # TODO: Use real service instance, ""
         )
         assert result is True
 
@@ -310,8 +315,8 @@ async def test_critical_startup_path():
     assert index_manager is not None
     
     # Verify agent registry initializes with required dependencies
-    mock_llm = Mock()
-    mock_dispatcher = Mock()
+    mock_llm = mock_llm_instance  # Initialize appropriate service
+    mock_dispatcher = mock_dispatcher_instance  # Initialize appropriate service
     registry = AgentRegistry(mock_llm, mock_dispatcher)
     assert registry is not None
     

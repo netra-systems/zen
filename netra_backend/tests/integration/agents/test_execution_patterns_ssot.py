@@ -21,10 +21,12 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List, Optional, Callable, Awaitable
-from unittest.mock import Mock, patch, AsyncMock
 import sys
 from pathlib import Path
 from dataclasses import dataclass
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))

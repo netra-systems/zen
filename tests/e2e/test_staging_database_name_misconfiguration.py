@@ -13,7 +13,6 @@ Business Value Justification (BVJ):
 
 import os
 import pytest
-from unittest import mock
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -28,6 +27,7 @@ class TestStagingDatabaseMisconfiguration:
         This test FAILS because .env.staging incorrectly sets POSTGRES_DB=netra_dev
         when it should be using a staging-specific database name.
         """
+    pass
         # Load the staging environment file
         staging_env_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -128,7 +128,8 @@ if __name__ == "__main__":
         test.test_staging_should_not_use_dev_database_name()
         print("❌ Test unexpectedly passed - staging configuration may have been fixed")
     except AssertionError as e:
-        print(f"✅ Test correctly failed, proving the issue exists:\n{e}")
+        print(f"✅ Test correctly failed, proving the issue exists:
+{e}")
     
     print("-" * 60)
     
@@ -136,4 +137,5 @@ if __name__ == "__main__":
         test.test_staging_database_url_should_not_contain_netra_dev()
         print("❌ Test unexpectedly passed - staging configuration may have been fixed")
     except AssertionError as e:
-        print(f"✅ Test correctly failed, proving the issue exists:\n{e}")
+        print(f"✅ Test correctly failed, proving the issue exists:
+{e}")

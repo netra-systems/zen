@@ -22,7 +22,9 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import FastAPI, Request
@@ -53,7 +55,7 @@ class TestBasicHealthEndpoint:
         from netra_backend.app.routes.health import health
         
         # Mock Request object with completed startup state
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(startup_complete=True)
         
         # Mock the health interface to return a basic healthy status
@@ -76,7 +78,7 @@ class TestBasicHealthEndpoint:
             })
             
             # Create mock Response object
-            mock_response = MagicMock()
+            mock_response = MagicNone  # TODO: Use real service instance
             mock_response.headers = {}
             
             # Call the health endpoint
@@ -102,7 +104,7 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with startup in progress
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(
             startup_complete=False, 
             startup_in_progress=True,
@@ -112,7 +114,7 @@ class TestBasicHealthEndpoint:
         mock_request.app.state.startup_progress = 75
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint
@@ -140,7 +142,7 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with startup failed
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(
             startup_complete=False, 
             startup_in_progress=False,
@@ -149,7 +151,7 @@ class TestBasicHealthEndpoint:
         mock_request.app.state.startup_error = "Database connection failed"
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint
@@ -174,11 +176,11 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with no startup state
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(startup_complete=None)
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint
@@ -203,7 +205,7 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with startup timeout
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(
             startup_complete=False,
             startup_in_progress=True,
@@ -213,7 +215,7 @@ class TestBasicHealthEndpoint:
         mock_request.app.state.startup_start_time = time.time() - 360
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint
@@ -240,16 +242,16 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with MagicMock objects (simulating test environment)
-        mock_request = MagicMock()
-        mock_request.app.state = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
+        mock_request.app.state = MagicNone  # TODO: Use real service instance
         
         # Make startup_complete a MagicMock to test the MagicMock handling logic
-        mock_startup_complete = MagicMock()
+        mock_startup_complete = MagicNone  # TODO: Use real service instance
         mock_startup_complete._mock_name = "startup_complete"
         mock_request.app.state.startup_complete = mock_startup_complete
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint
@@ -317,7 +319,7 @@ class TestBasicHealthEndpoint:
         from starlette.responses import Response
         
         # Mock Request object with startup failed to trigger error response
-        mock_request = MagicMock()
+        mock_request = MagicNone  # TODO: Use real service instance
         mock_request.app.state = MockAppState(
             startup_complete=False,
             startup_failed=True
@@ -325,7 +327,7 @@ class TestBasicHealthEndpoint:
         mock_request.app.state.startup_error = "Test error"
         
         # Create mock Response object
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.headers = {}
         
         # Call the health endpoint

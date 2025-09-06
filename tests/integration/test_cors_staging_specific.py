@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Staging-Specific CORS Tests
 
@@ -19,7 +20,6 @@ Test Coverage:
 import os
 import pytest
 from typing import Dict, List
-from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from shared.cors_config_builder import (
@@ -27,6 +27,9 @@ from shared.cors_config_builder import (
     get_cors_origins, get_cors_config, is_origin_allowed
 )
 from test_framework.fixtures import create_test_app
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.staging

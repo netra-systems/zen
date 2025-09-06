@@ -5,6 +5,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

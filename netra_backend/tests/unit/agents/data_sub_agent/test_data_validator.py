@@ -13,12 +13,14 @@ Business Value Justification (BVJ):
 
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import patch
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
-from test_framework.decorators import mock_justified
 
 # Test markers for unified test runner
 pytestmark = [
@@ -61,7 +63,10 @@ class TestAnalysisRequestValidation:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     def test_validate_valid_analysis_request(self, validator):
@@ -79,6 +84,7 @@ class TestAnalysisRequestValidation:
     
     def test_validate_request_missing_type(self, validator):
         """Test validation fails when type is missing."""
+    pass
         request = {
             "timeframe": "24h"
         }
@@ -101,6 +107,7 @@ class TestAnalysisRequestValidation:
     
     def test_validate_request_invalid_type(self, validator):
         """Test validation fails with invalid analysis type."""
+    pass
         request = {
             "type": "invalid_type",
             "timeframe": "24h"
@@ -130,6 +137,7 @@ class TestAnalysisRequestValidation:
     
     def test_validate_request_invalid_metrics(self, validator):
         """Test validation fails with invalid metrics."""
+    pass
         request = {
             "type": "performance",
             "timeframe": "24h",
@@ -160,12 +168,18 @@ class TestRawDataValidation:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     @pytest.fixture
     def sample_valid_data(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample valid data for testing."""
+    pass
         base_time = datetime.now()
         return [
             {
@@ -193,6 +207,7 @@ class TestRawDataValidation:
     
     def test_validate_empty_data(self, validator):
         """Test validation fails with empty data."""
+    pass
         valid, result = validator.validate_raw_data([], [])
         
         assert valid is False
@@ -219,6 +234,7 @@ class TestRawDataValidation:
     
     def test_validate_data_with_missing_required_fields(self, validator):
         """Test validation identifies missing required fields."""
+    pass
         data_missing_fields = [
             {"latency_ms": 100.0},  # Missing timestamp
             {"user_id": "user_1"},  # Missing timestamp
@@ -257,6 +273,7 @@ class TestRawDataValidation:
     
     def test_validate_metric_values_out_of_range(self, validator):
         """Test validation identifies out-of-range metric values."""
+    pass
         data_with_outliers = [
             {
                 "timestamp": datetime.now().isoformat(),
@@ -301,6 +318,7 @@ class TestRawDataValidation:
     
     def test_validate_time_span_too_short(self, validator):
         """Test validation identifies short time spans as errors."""
+    pass
         now = datetime.now()
         short_span_data = [
             {
@@ -326,12 +344,18 @@ class TestAnalysisResultValidation:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     @pytest.fixture
     def valid_analysis_result(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create valid analysis result for testing."""
+    pass
         return {
             "type": "performance",
             "summary": "Performance analysis completed",
@@ -358,6 +382,7 @@ class TestAnalysisResultValidation:
     
     def test_validate_result_missing_required_fields(self, validator):
         """Test validation fails when required fields are missing."""
+    pass
         incomplete_result = {
             "summary": "Analysis completed"
             # Missing findings and recommendations
@@ -386,6 +411,7 @@ class TestAnalysisResultValidation:
     
     def test_validate_result_empty_findings(self, validator):
         """Test validation fails with empty findings."""
+    pass
         result_empty_findings = {
             "type": "performance",
             "summary": "Analysis completed",
@@ -414,6 +440,7 @@ class TestAnalysisResultValidation:
     
     def test_validate_cost_savings_invalid_percentage(self, validator):
         """Test validation fails with invalid savings percentage."""
+    pass
         result_invalid_savings = {
             "type": "cost_optimization",
             "summary": "Analysis completed",
@@ -454,7 +481,10 @@ class TestQualityScoring:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     def test_calculate_quality_score_perfect_data(self, validator):
@@ -472,6 +502,7 @@ class TestQualityScoring:
     
     def test_calculate_quality_score_with_errors(self, validator):
         """Test quality score calculation with errors."""
+    pass
         validation_result = {
             "errors": ["Error 1", "Error 2"],
             "warnings": [],
@@ -498,6 +529,7 @@ class TestQualityScoring:
     
     def test_calculate_quality_score_bonus_for_large_dataset(self, validator):
         """Test quality score gets bonus for large dataset."""
+    pass
         validation_result = {
             "errors": [],
             "warnings": [],
@@ -515,7 +547,10 @@ class TestValidMetricsConfiguration:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     def test_all_valid_metrics_have_required_config(self, validator):
@@ -531,6 +566,7 @@ class TestValidMetricsConfiguration:
     
     def test_metric_validation_respects_type_constraints(self, validator):
         """Test metric validation respects type constraints."""
+    pass
         # Test float metric
         float_data = [{"latency_ms": 150.5}]
         errors = validator._validate_metric_values(float_data)
@@ -566,7 +602,10 @@ class TestTimeSpanValidation:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance for testing."""
+    pass
         return DataValidator()
     
     def test_validate_time_span_sufficient_duration(self, validator):
@@ -584,6 +623,7 @@ class TestTimeSpanValidation:
     
     def test_validate_time_span_insufficient_duration(self, validator):
         """Test time span validation with insufficient duration."""
+    pass
         now = datetime.now()
         data = [
             {"timestamp": (now - timedelta(minutes=30)).isoformat()},
@@ -608,6 +648,7 @@ class TestTimeSpanValidation:
     
     def test_validate_time_span_mixed_timestamp_formats(self, validator):
         """Test time span validation handles mixed timestamp formats."""
+    pass
         now = datetime.now()
         data = [
             {"timestamp": (now - timedelta(hours=1)).isoformat()},  # ISO string
@@ -628,7 +669,10 @@ class TestDataValidatorEdgeCases:
     
     @pytest.fixture
     def validator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DataValidator instance."""
+    pass
         return DataValidator()
     
     def test_validate_extremely_large_dataset(self, validator):
@@ -654,6 +698,7 @@ class TestDataValidatorEdgeCases:
         
     def test_validate_unicode_and_special_characters(self, validator):
         """Test validation with unicode and special characters."""
+    pass
         now = datetime.now()
         data = []
         
@@ -710,3 +755,4 @@ class TestDataValidatorEdgeCases:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

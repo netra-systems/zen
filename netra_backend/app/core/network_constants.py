@@ -240,7 +240,7 @@ class URLConstants:
     
     # GCP Staging Service URLs - SSOT for all staging services
     STAGING_BACKEND_URL: Final[str] = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-    STAGING_AUTH_URL: Final[str] = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    STAGING_AUTH_URL: Final[str] = "https://auth.staging.netrasystems.ai"
     STAGING_FRONTEND_URL: Final[str] = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
     STAGING_WEBSOCKET_URL: Final[str] = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
     

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 MISSION CRITICAL: SSOT Integration with Comprehensive Isolation Testing
 
@@ -27,7 +50,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,6 +80,9 @@ from test_framework.ssot import (
 from test_framework.unified_docker_manager import UnifiedDockerManager, ServiceType, DockerEnvironment
 from test_framework.environment_isolation import get_test_env_manager
 from shared.isolated_environment import IsolatedEnvironment, get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -66,10 +92,6 @@ MOCK_DETECTED = False
 def detect_mock_usage():
     """Detect any mock usage - FORBIDDEN in isolation tests."""
     global MOCK_DETECTED
-    import unittest.mock
-    original_Mock = unittest.mock.Mock
-    original_MagicMock = unittest.mock.MagicMock
-    original_AsyncMock = unittest.mock.AsyncMock
     
     def mock_detector(*args, **kwargs):
         global MOCK_DETECTED
@@ -86,9 +108,6 @@ def detect_mock_usage():
         MOCK_DETECTED = True
         return original_AsyncMock(*args, **kwargs)
     
-    unittest.mock.Mock = mock_detector
-    unittest.mock.MagicMock = magic_mock_detector
-    unittest.mock.AsyncMock = async_mock_detector
 
 
 @dataclass

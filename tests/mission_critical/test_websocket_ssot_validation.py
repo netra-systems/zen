@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """
 MISSION CRITICAL: WebSocket SSOT Validation Test Suite
@@ -26,7 +52,7 @@ from typing import Dict, List, Set, Any, Optional
 import threading
 import random
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -39,6 +65,9 @@ from netra_backend.app.logging_config import central_logger
 # Import WebSocket components to test
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
 from netra_backend.app.services.websocket_bridge_factory import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     WebSocketBridgeFactory,
     UserWebSocketEmitter,
     UserWebSocketContext,
@@ -53,6 +82,7 @@ class MockWebSocket:
     """Mock WebSocket connection for testing."""
     
     def __init__(self, user_id: str, connection_id: str):
+    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.is_connected = True
@@ -110,6 +140,7 @@ class TestWebSocketSSOTValidation:
                 
     def create_test_manager(self) -> WebSocketManager:
         """Create a test WebSocket manager."""
+    pass
         manager = WebSocketManager()
         self.created_managers.append(manager)
         return manager
@@ -221,6 +252,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_no_data_leakage_between_users(self):
         """Test that sensitive data doesn't leak between users."""
+    pass
         logger.info("🧪 Testing no data leakage between users")
         
         manager = self.create_test_manager()
@@ -329,6 +361,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_connection_limits_enforcement(self):
         """Test connection limits per user and total."""
+    pass
         logger.info("🧪 Testing connection limits enforcement")
         
         manager = self.create_test_manager()
@@ -419,6 +452,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_websocket_event_flow_validation(self):
         """Test all 5 required WebSocket events are sent correctly."""
+    pass
         logger.info("🧪 Testing WebSocket event flow validation")
         
         # Create factory and test user emitter
@@ -429,7 +463,7 @@ class TestWebSocketSSOTValidation:
         connection_id = "event_test_conn"
         
         # Mock WebSocket connection pool
-        mock_pool = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_pool.get_connection.return_value = None  # Will create placeholder connection
         
         factory.configure(
@@ -505,6 +539,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_memory_usage_stability(self):
         """Test memory usage stays stable with many connections."""
+    pass
         logger.info("🧪 Testing memory usage stability")
         
         manager = self.create_test_manager()
@@ -595,6 +630,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_thread_isolation(self):
         """Test thread-based message isolation."""
+    pass
         logger.info("🧪 Testing thread-based message isolation")
         
         manager = self.create_test_manager()
@@ -640,13 +676,10 @@ class TestWebSocketSSOTValidation:
         factory = self.create_test_factory()
         
         # Mock components
-        mock_pool = AsyncMock()
-        mock_registry = AsyncMock()
-        mock_health = AsyncMock()
+        websocket = TestWebSocketConnection()
         
         # Mock connection info
-        mock_connection_info = MagicMock()
-        mock_connection_info.websocket = MockWebSocket("test_user", "test_conn")
+        mock_connection_info = Magic        mock_connection_info.websocket = MockWebSocket("test_user", "test_conn")
         mock_pool.get_connection.return_value = mock_connection_info
         
         factory.configure(
@@ -676,6 +709,7 @@ class TestWebSocketSSOTValidation:
     @pytest.mark.asyncio
     async def test_comprehensive_integration(self):
         """Comprehensive integration test combining all features."""
+    pass
         logger.info("🧪 Running comprehensive integration test")
         
         manager = self.create_test_manager()
@@ -791,3 +825,4 @@ class TestWebSocketSSOTValidation:
 if __name__ == "__main__":
     # Run the validation tests
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

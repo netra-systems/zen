@@ -15,7 +15,8 @@ sys.path.insert(0, str(project_root))
 
 def validate_test_structure():
     """Validate the test file structure and components."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("🔍 VALIDATING TEST STRUCTURE")
     print("="*60)
     
@@ -46,7 +47,8 @@ def validate_test_structure():
         "ComprehensiveOrchestrationValidator"
     ]
     
-    print("\n📦 Validating Helper Classes:")
+    print("
+📦 Validating Helper Classes:")
     for helper in helpers:
         if hasattr(test_module, helper):
             print(f"  ✅ {helper} found")
@@ -62,7 +64,8 @@ def validate_test_structure():
         "TestPerformanceBenchmarks"
     ]
     
-    print("\n🧪 Validating Test Classes:")
+    print("
+🧪 Validating Test Classes:")
     for test_class in test_classes:
         if hasattr(test_module, test_class):
             cls = getattr(test_module, test_class)
@@ -79,7 +82,8 @@ def validate_test_structure():
 
 def validate_test_scenarios():
     """Validate specific test scenarios are implemented."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("📋 VALIDATING TEST SCENARIOS")
     print("="*60)
     
@@ -117,7 +121,8 @@ def validate_test_scenarios():
     }
     
     for scenario_name, keywords in scenarios.items():
-        print(f"\n🎯 {scenario_name}:")
+        print(f"
+🎯 {scenario_name}:")
         found_all = True
         for keyword in keywords:
             if keyword in content:
@@ -135,7 +140,8 @@ def validate_test_scenarios():
 
 def validate_real_services_integration():
     """Validate that tests use real services, not mocks."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("🔌 VALIDATING REAL SERVICES INTEGRATION")
     print("="*60)
     
@@ -161,7 +167,8 @@ def validate_real_services_integration():
     
     # Check for mock usage (should be minimal)
     mock_count = content.count("Mock") + content.count("mock")
-    print(f"\n📊 Mock usage count: {mock_count}")
+    print(f"
+📊 Mock usage count: {mock_count}")
     if mock_count > 10:
         print("⚠️  High mock usage detected - review for compliance with NO MOCKS policy")
     else:
@@ -171,7 +178,8 @@ def validate_real_services_integration():
 
 def generate_test_report():
     """Generate a comprehensive test report."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("📊 TEST SUITE METRICS")
     print("="*60)
     
@@ -219,7 +227,8 @@ def generate_test_report():
 
 def main():
     """Main validation function."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("🚀 COMPREHENSIVE E2E TEST VALIDATION")
     print("="*60)
     print(f"Testing: test_agent_orchestration_e2e_comprehensive.py")
@@ -233,7 +242,8 @@ def main():
     results.append(("Test Report", generate_test_report()))
     
     # Final summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("📋 VALIDATION SUMMARY")
     print("="*60)
     
@@ -244,18 +254,22 @@ def main():
         if not result:
             all_passed = False
     
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     if all_passed:
         print("✅ ALL VALIDATIONS PASSED!")
-        print("\nThe comprehensive E2E test suite is properly structured and ready for execution.")
-        print("\nKey achievements:")
+        print("
+The comprehensive E2E test suite is properly structured and ready for execution.")
+        print("
+Key achievements:")
         print("• Comprehensive test coverage for agent orchestration")
         print("• Real service integration (NO MOCKS)")
         print("• WebSocket event validation")
         print("• Multi-agent workflow testing")
         print("• Error recovery scenarios")
         print("• Performance benchmarking")
-        print("\n🎉 Test suite successfully validated and ready for production use!")
+        print("
+🎉 Test suite successfully validated and ready for production use!")
     else:
         print("❌ SOME VALIDATIONS FAILED")
         print("Please review the failures above and fix the test suite.")

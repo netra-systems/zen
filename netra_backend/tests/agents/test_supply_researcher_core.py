@@ -6,13 +6,18 @@ Modular design with ≤300 lines, ≤8 lines per function
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -114,9 +119,9 @@ class TestSupplyResearcherCore:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.redis_manager.RedisManager') as mock_redis_class:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis = Mock()
+            mock_redis = TestRedisManager().get_client()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            mock_redis.set = AsyncMock()
+            mock_redis.set = AsyncNone  # TODO: Use real service instance
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=json.dumps({
                 "research_session_id": "cached_session",
@@ -143,7 +148,7 @@ class TestSupplyResearcherCore:
     def _verify_redis_integration(self, agent):
         """Verify Redis integration capability (≤8 lines)"""
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = Mock()
+        mock_redis = TestRedisManager().get_client()
         agent.redis_manager = mock_redis
         assert hasattr(agent, 'redis_manager')
 

@@ -9,6 +9,7 @@ import asyncio
 import requests
 import time
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.config import get_config
 

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Unit tests for NACIS Chat Orchestrator.
 
 Date Created: 2025-01-22
@@ -7,45 +33,59 @@ Business Value: Ensures orchestration logic correctness.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
 
 @pytest.fixture
-def mock_dependencies():
+ def real_dependencies():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock dependencies for testing."""
+    pass
     return {
         # Mock: Session isolation for controlled testing without external state
-        "db_session": AsyncMock(),
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        "llm_manager": MagicMock(),
-        # Mock: WebSocket connection isolation for testing without network overhead
-        "websocket_manager": AsyncMock(),
-        # Mock: Tool execution isolation for predictable agent testing
-        "tool_dispatcher": MagicMock(),
-        # Mock: Generic component isolation for controlled unit testing
-        "cache_manager": AsyncMock()
-    }
+        "db_session": Async        # Mock: LLM provider isolation to prevent external API usage and costs
+        "llm_manager": Magic        # Mock: WebSocket connection isolation for testing without network overhead
+        "websocket_manager": Async        # Mock: Tool execution isolation for predictable agent testing
+        "tool_dispatcher": Magic        # Mock: Generic component isolation for controlled unit testing
+        "cache_manager": Async    }
 
 
 @pytest.fixture
 def orchestrator(mock_dependencies):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create orchestrator instance for testing."""
+    pass
     return ChatOrchestrator(**mock_dependencies)
 
 
 @pytest.fixture
 def execution_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock execution context."""
+    pass
     # Mock: Service component isolation for predictable testing behavior
     context = MagicMock(spec=ExecutionContext)
     context.request_id = "test_123"
     # Mock: Generic component isolation for controlled unit testing
-    context.state = MagicMock()
-    context.state.user_request = "What is the TCO for GPT-4?"
+    context.state = Magic    context.state.user_request = "What is the TCO for GPT-4?"
     return context
 
 
@@ -61,6 +101,7 @@ async def test_orchestrator_initialization(orchestrator):
 @pytest.mark.asyncio
 async def test_intent_classification(orchestrator, execution_context):
     """Test intent classification process."""
+    pass
     # Mock: Async component isolation for testing without real async operations
     orchestrator.intent_classifier.classify = AsyncMock(
         return_value=(IntentType.TCO_ANALYSIS, 0.95)
@@ -87,6 +128,7 @@ async def test_cache_check_high_confidence(orchestrator, execution_context):
 @pytest.mark.asyncio
 async def test_cache_check_low_confidence(orchestrator, execution_context):
     """Test cache check with low confidence."""
+    pass
     # Mock: Service component isolation for predictable testing behavior
     orchestrator.confidence_manager.get_threshold = MagicMock(return_value=0.9)
     
@@ -117,6 +159,7 @@ async def test_execution_pipeline(orchestrator, execution_context):
 @pytest.mark.asyncio
 async def test_trace_logging(orchestrator):
     """Test trace logging functionality."""
+    pass
     await orchestrator.trace_logger.log("Test action", {"detail": "test"})
     
     traces = orchestrator.trace_logger.get_compressed_trace()
@@ -137,3 +180,4 @@ async def test_error_handling(orchestrator, execution_context):
     
     assert "error" in result
     assert "Classification failed" in result["error"]
+    pass

@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """Staging Test Helpers and Utilities
 from shared.isolated_environment import get_env
 
@@ -39,6 +62,9 @@ from tests.e2e.unified_e2e_harness import (
 )
 from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.config import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     TestEnvironmentConfig,
     TestEnvironmentType,
     get_test_environment_config,
@@ -387,8 +413,7 @@ async def create_mock_gcp_environment():
 
 async def mock_static_asset_404_error():
     """Mock static asset 404 error for testing."""
-    from unittest.mock import AsyncMock
-    mock_response = AsyncMock()
+    websocket = TestWebSocketConnection()
     mock_response.status_code = 404
     mock_response.text = "Not Found"
     return mock_response

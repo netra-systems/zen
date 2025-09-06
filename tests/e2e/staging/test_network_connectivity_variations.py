@@ -10,6 +10,7 @@ import socket
 import time
 from typing import List, Dict
 from test_framework.environment_markers import staging_only, env_requires
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestNetworkConnectivityVariations:

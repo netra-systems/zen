@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the parent directory to sys.path to access test_framework
 parent_dir = Path(__file__).parent.parent.parent

@@ -37,7 +37,7 @@
     </approach>
     
     <implementation>
-      <location>auth_service/auth_core/config.py::get_database_url()</location>
+      <location>shared/database_url_builder.py::DatabaseURLBuilder</location>
       <detection_methods>
         <method>Check RUNNING_IN_DOCKER environment variable</method>
         <method>Check IS_DOCKER environment variable</method>
@@ -55,41 +55,83 @@
         5. DATABASE_URL takes precedence if set
         6. Production/staging environments use explicit configuration only
       </logic>
+      
+      <methods_added>
+        <method>is_docker_environment() -> bool: Detects Docker using multiple indicators</method>
+        <method>apply_docker_hostname_resolution(host: str) -> str: Applies hostname resolution with environment and host checks</method>
+      </methods_added>
+      
+      <integration_points>
+        <point>TCPBuilder.async_url: Applies Docker hostname resolution to TCP connections</point>
+        <point>TCPBuilder.sync_url: Applies Docker hostname resolution to sync TCP connections</point>
+        <point>TCPBuilder.async_url_psycopg: Applies Docker hostname resolution to psycopg connections</point>
+        <point>TestBuilder.postgres_url: Applies Docker hostname resolution to test PostgreSQL connections</point>
+      </integration_points>
     </implementation>
     
     <code_example><![CDATA[
-# Only apply Docker hostname resolution in dev/test environments
-current_env = AuthConfig.get_environment()
-if current_env in ["development", "test"]:
-    # Detect if running in Docker container
-    is_docker = (
-        env_manager.get("RUNNING_IN_DOCKER") == "true" or
-        env_manager.get("IS_DOCKER") == "true" or
-        env_manager.get("DOCKER_CONTAINER") == "true" or
-        os.path.exists("/.dockerenv") or
-        (os.path.exists("/proc/self/cgroup") and 
-         any("docker" in line for line in open("/proc/self/cgroup").readlines()))
-    )
+# Implementation in DatabaseURLBuilder class
+def is_docker_environment(self) -> bool:
+    """Detect if running in Docker container using multiple indicators."""
+    # Method 1: Check environment variables
+    docker_env_vars = ["RUNNING_IN_DOCKER", "IS_DOCKER", "DOCKER_CONTAINER"]
+    for var in docker_env_vars:
+        if self.env.get(var) == "true":
+            return True
     
-    # Override host for Docker context if needed
-    if is_docker and postgres_host in ["localhost", "127.0.0.1"]:
-        postgres_host = "postgres"  # Use Docker service name
-        logger.info(f"Detected Docker environment in {current_env}, using 'postgres' as database host")
+    # Method 2: Check for .dockerenv file
+    if os.path.exists("/.dockerenv"):
+        return True
+    
+    # Method 3: Check /proc/self/cgroup for docker references
+    try:
+        if os.path.exists("/proc/self/cgroup"):
+            with open("/proc/self/cgroup", "r") as f:
+                content = f.read()
+                if "docker" in content.lower():
+                    return True
+    except (OSError, IOError):
+        pass
+    
+    return False
+
+def apply_docker_hostname_resolution(self, host: str) -> str:
+    """Apply Docker hostname resolution if conditions are met."""
+    # Only apply in development/test environments
+    if self.environment not in ["development", "test"]:
+        return host
+    
+    # Only override localhost/127.0.0.1 
+    if host not in ["localhost", "127.0.0.1"]:
+        return host
+    
+    # Check if running in Docker
+    if self.is_docker_environment():
+        logger.info(f"Detected Docker environment in {self.environment}, using 'postgres' as database host")
+        return "postgres"
+    
+    return host
+
+# Usage in TCPBuilder.async_url:
+resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.postgres_host)
+return f"postgresql+asyncpg://{user}{password_part}@{resolved_host}:{port}/{db}"
     ]]></code_example>
   </solution>
 
   <testing>
     <test_file>auth_service/tests/unit/test_docker_hostname_resolution.py</test_file>
+    <test_approach>Tests use DatabaseURLBuilder directly with mocked environment variables to verify Docker hostname resolution logic without interference from AuthEnvironment's test-specific SQLite behavior.</test_approach>
     <test_cases>
-      <case>Docker detection via environment variables</case>
-      <case>Docker detection via .dockerenv file</case>
-      <case>Docker detection via /proc/self/cgroup</case>
+      <case>Docker detection via environment variables - RUNNING_IN_DOCKER=true</case>
+      <case>Docker detection via .dockerenv file existence</case>
+      <case>Docker detection via /proc/self/cgroup docker references</case>
       <case>Non-Docker environment keeps original hostname</case>
       <case>Custom hostnames not overridden in Docker</case>
       <case>DATABASE_URL precedence when set</case>
       <case>Docker hostname NOT applied in production environment</case>
       <case>Docker hostname NOT applied in staging environment</case>
     </test_cases>
+    <test_status>All 8 tests passing</test_status>
   </testing>
 
   <best_practices>

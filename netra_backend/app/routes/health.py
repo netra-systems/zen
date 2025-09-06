@@ -204,10 +204,17 @@ async def live(request: Request) -> Dict[str, Any]:
 async def _check_postgres_connection(db: AsyncSession) -> None:
     """Check Postgres database connection."""
     config = unified_config_manager.get_config()
-    database_url = getattr(config, 'database_url', '')
-    if "mock" not in database_url.lower():
+    database_url = getattr(config, 'database_url', None)
+    # Critical fix: Handle None database_url to prevent AttributeError
+    if database_url and "mock" not in database_url.lower():
         result = await db.execute(text("SELECT 1"))
         result.scalar_one_or_none()
+    elif database_url is None:
+        # Database URL not configured - this is a critical error in non-test environments
+        from shared.isolated_environment import get_env
+        env_name = get_env().get("ENVIRONMENT", "development")
+        if env_name not in ["testing", "development"]:
+            raise ValueError("DATABASE_URL is not configured")
 
 async def _check_clickhouse_connection() -> None:
     """Check ClickHouse database connection (non-blocking for readiness)."""
@@ -448,11 +455,11 @@ async def ready(request: Request) -> Dict[str, Any]:
         
         # Only try to get database dependency after startup state check passes
         try:
-            # CRITICAL FIX: Use direct database context manager from DatabaseManager
-            # This bypasses the dependency injection layer to avoid async generator issues
-            from netra_backend.app.db.database_manager import DatabaseManager
+            # CRITICAL FIX: Use canonical database access pattern from database module SSOT
+            # This provides proper session lifecycle management with context manager
+            from netra_backend.app.database import get_db
             
-            async with DatabaseManager.get_async_session() as db:
+            async with get_db() as db:
                 try:
                     # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
                     result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)

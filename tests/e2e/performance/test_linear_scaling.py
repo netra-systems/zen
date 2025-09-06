@@ -14,6 +14,7 @@ import asyncio
 import logging
 import statistics
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

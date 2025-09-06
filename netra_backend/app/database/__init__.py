@@ -28,12 +28,18 @@ _sessionmaker = None
 
 def get_database_url() -> str:
     """Get database URL from environment."""
-    env = get_env()
-    database_url = env.get("DATABASE_URL")
+    from netra_backend.app.core.backend_environment import get_backend_env
+    
+    # Use backend_environment which now uses DatabaseURLBuilder internally
+    database_url = get_backend_env().get_database_url(sync=False)  # async for SQLAlchemy
+    
     if not database_url:
-        # Fallback for development
-        database_url = "postgresql+asyncpg://netra:netra123@localhost:5433/netra_dev"
-        logger.warning(f"DATABASE_URL not set, using fallback: {database_url}")
+        raise RuntimeError(
+            "Database configuration not found. Please provide either: "
+            "1) Individual POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD environment variables, or "
+            "2) A complete DATABASE_URL environment variable (deprecated, use individual variables instead)"
+        )
+    
     return database_url
 
 def get_engine():

@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 import random
 import string
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework import setup_test_path
 

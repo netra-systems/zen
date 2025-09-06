@@ -24,12 +24,16 @@ import time
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import Mock, patch, MagicMock
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # CLAUDE.md compliance: Absolute imports only
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType, OrchestrationConfig
 from test_framework.docker_port_discovery import DockerPortDiscovery
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestAlpineParameterAcceptance:
@@ -46,6 +50,7 @@ class TestAlpineParameterAcceptance:
     
     def test_use_alpine_parameter_stored_correctly(self):
         """Test that use_alpine parameter is stored as instance attribute."""
+    pass
         # This will FAIL until implemented
         try:
             manager = UnifiedDockerManager(
@@ -69,6 +74,7 @@ class TestAlpineParameterAcceptance:
     
     def test_use_alpine_parameter_types(self):
         """Test that use_alpine parameter handles different input types correctly."""
+    pass
         # This will FAIL until implemented
         test_cases = [
             (True, True),
@@ -115,6 +121,7 @@ class TestComposeFileSelection:
     
     def _create_mock_compose_content(self, test=False, alpine=False):
         """Create mock docker-compose content."""
+    pass
         prefix = "test-" if test else "dev-"
         if alpine:
             prefix = f"alpine-{prefix}"
@@ -140,6 +147,7 @@ services:
     
     def test_alpine_true_selects_alpine_test_compose(self, temp_project_dir):
         """Test that use_alpine=True selects docker-compose.alpine-test.yml for test environment."""
+    pass
         # This will FAIL until implemented
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
@@ -169,6 +177,7 @@ services:
     
     def test_alpine_false_selects_regular_compose(self, temp_project_dir):
         """Test that use_alpine=False selects regular compose files."""
+    pass
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
                 manager = UnifiedDockerManager(
@@ -201,6 +210,7 @@ services:
     
     def test_missing_alpine_compose_fallback(self, temp_project_dir):
         """Test fallback behavior when Alpine compose files don't exist."""
+    pass
         # Remove Alpine compose files
         for alpine_file in ["docker-compose.alpine.yml", "docker-compose.alpine-test.yml"]:
             (temp_project_dir / alpine_file).unlink()
@@ -233,6 +243,7 @@ class TestAlpineIntegration:
     @pytest.fixture(scope="class")  
     def compose_available(self):
         """Check if docker-compose is available."""
+    pass
         try:
             result = subprocess.run(["docker-compose", "version"], capture_output=True, timeout=10)
             return result.returncode == 0
@@ -272,6 +283,7 @@ class TestAlpineIntegration:
     @pytest.mark.slow
     def test_alpine_vs_regular_memory_usage(self, docker_available, compose_available):
         """Test memory usage comparison between Alpine and regular containers."""
+    pass
         if not (docker_available and compose_available):
             pytest.skip("Docker or docker-compose not available")
         
@@ -339,7 +351,8 @@ class TestAlpineIntegration:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
                 
                 if result.returncode == 0 and result.stdout.strip():
-                    container_name = result.stdout.strip().split('\n')[0]
+                    container_name = result.stdout.strip().split('
+')[0]
                     
                     # Get memory stats
                     stats_cmd = ["docker", "stats", "--no-stream", "--format", 
@@ -430,6 +443,7 @@ class TestAlpineEdgeCases:
     
     def test_parallel_alpine_and_regular_containers(self):
         """Test running Alpine and regular containers in parallel."""
+    pass
         try:
             manager_regular = UnifiedDockerManager(
                 environment_type=EnvironmentType.SHARED,
@@ -492,6 +506,7 @@ class TestAlpineEdgeCases:
     
     def test_alpine_with_invalid_compose_file(self):
         """Test error handling when Alpine compose files are invalid."""
+    pass
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             
@@ -556,7 +571,8 @@ class TestAlpinePerformanceBenchmarks:
             assert alpine_time <= regular_time * 1.5, \
                 f"Alpine startup ({alpine_time:.1f}s) should not be >50% slower than regular ({regular_time:.1f}s)"
             
-            print(f"\n[BENCHMARK] Startup Time Comparison:")
+            print(f"
+[BENCHMARK] Startup Time Comparison:")
             print(f"Regular containers: {regular_time:.1f}s")
             print(f"Alpine containers: {alpine_time:.1f}s")
             print(f"Performance ratio: {alpine_time/regular_time:.2f}x")
@@ -567,6 +583,7 @@ class TestAlpinePerformanceBenchmarks:
     @pytest.mark.benchmark
     def test_container_image_size_comparison(self):
         """Compare Alpine vs regular container image sizes."""
+    pass
         try:
             # This test validates that Alpine images are actually smaller
             manager_regular = UnifiedDockerManager(
@@ -601,7 +618,8 @@ class TestAlpinePerformanceBenchmarks:
                         f"Alpine {image_base} ({alpine_size}MB) should be smaller than regular ({regular_size}MB)"
                     
                     savings = (regular_size - alpine_size) / regular_size * 100
-                    print(f"\n[BENCHMARK] Image Size Comparison for {image_base}:")
+                    print(f"
+[BENCHMARK] Image Size Comparison for {image_base}:")
                     print(f"Regular: {regular_size}MB")
                     print(f"Alpine: {alpine_size}MB") 
                     print(f"Size reduction: {savings:.1f}%")
@@ -655,6 +673,7 @@ class TestAlpineEnvironmentIntegration:
     
     def test_alpine_with_dedicated_environment(self):
         """Test Alpine containers in DEDICATED environment.""" 
+    pass
         try:
             manager = UnifiedDockerManager(
                 environment_type=EnvironmentType.DEDICATED,
@@ -737,6 +756,7 @@ class TestAlpineFullIntegration:
     
     def _smoke_test_service(self, manager: UnifiedDockerManager, service: str):
         """Run basic smoke test on a service."""
+    pass
         health = manager.service_health.get(service)
         assert health is not None, f"No health data for {service}"
         assert health.is_healthy, f"Service {service} failed smoke test"

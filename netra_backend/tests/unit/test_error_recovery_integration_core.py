@@ -2,10 +2,14 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -17,18 +21,19 @@ from netra_backend.app.core.error_recovery import OperationType
 class EnhancedErrorRecoverySystem:
     """Mock class for testing."""
     def __init__(self):
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        self.circuit_breaker_registry = Mock()
+        self.circuit_breaker_registry = circuit_breaker_registry_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        self.degradation_manager = Mock()
+        self.degradation_manager = degradation_manager_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        self.memory_monitor = Mock()
+        self.memory_monitor = memory_monitor_instance  # Initialize appropriate service
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager = Mock()
+        self.websocket_manager = UnifiedWebSocketManager()
         # Mock: Database access isolation for fast, reliable unit testing
-        self.database_registry = Mock()
+        self.database_registry = TestDatabaseManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
-        self.error_aggregation = Mock()
+        self.error_aggregation = error_aggregation_instance  # Initialize appropriate service
 
     def _determine_severity(self, error):
         """Mock severity determination."""
@@ -41,6 +46,7 @@ class EnhancedErrorRecoverySystem:
 
     def _determine_severity_from_status(self, status):
         """Mock severity determination from status."""
+    pass
         if status in [500, 502]:
             return ErrorSeverity.HIGH
         elif status in [404, 429]:
@@ -64,6 +70,7 @@ class EnhancedErrorRecoverySystem:
 
     def _prepare_error_data(self, agent_name, function_name, error, context, user_id):
         """Mock error data preparation."""
+    pass
         return {
             'error_type': type(error).__name__,
             'module': f'agent_{agent_name}',
@@ -85,15 +92,22 @@ class EnhancedErrorRecoverySystem:
 
 @pytest.fixture
 def recovery_system():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
     """Create recovery system instance for testing."""
     return EnhancedErrorRecoverySystem()
 
 @pytest.fixture
-def mock_error():
+ def real_error():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create mock error for testing."""
+    pass
     return ConnectionError("Test connection error")
 
 class TestErrorRecoveryIntegration:
+    pass
 
     def test_determine_severity(self, recovery_system):
         """Test error severity determination."""
@@ -105,6 +119,7 @@ class TestErrorRecoveryIntegration:
 
     def test_determine_severity_from_status(self, recovery_system):
         """Test severity determination from HTTP status codes."""
+    pass
         assert recovery_system._determine_severity_from_status(500) == ErrorSeverity.HIGH
         assert recovery_system._determine_severity_from_status(502) == ErrorSeverity.HIGH
         assert recovery_system._determine_severity_from_status(404) == ErrorSeverity.MEDIUM
@@ -141,6 +156,7 @@ class TestErrorRecoveryIntegration:
 
     def test_prepare_error_data(self, recovery_system):
         """Test error data preparation."""
+    pass
         error = ValueError("Test error")
         
         result = recovery_system._prepare_error_data(
@@ -162,3 +178,4 @@ class TestErrorRecoveryIntegration:
         assert recovery_system._get_agent_type_enum('triage') == AgentType.TRIAGE
         assert recovery_system._get_agent_type_enum('data_analysis') == AgentType.DATA_ANALYSIS
         assert recovery_system._get_agent_type_enum('unknown') is None
+    pass

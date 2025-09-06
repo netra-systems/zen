@@ -26,6 +26,7 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.data_crud_helpers import (
     DataCRUDManager, GDPRComplianceValidator, CrossServiceDataValidator, create_test_user_data, create_user_preferences_data,

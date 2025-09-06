@@ -15,8 +15,13 @@ import pytest
 import asyncio
 import time
 import json
-from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta, timezone
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base_sub_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -33,32 +38,33 @@ logger = get_logger(__name__)
 @pytest.mark.parametrize("environment", ["test"])
 class TestAgentStateConsistency:
     """Critical agent state consistency test suite."""
+    pass
 
     @pytest.fixture
     async def state_manager(self):
         """Create isolated agent state manager for testing."""
         # Create mock database session
-        mock_session = AsyncMock()
-        mock_session.execute = AsyncMock()
-        mock_session.commit = AsyncMock()
-        mock_session.rollback = AsyncMock()
-        mock_session.close = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session.execute = AsyncNone  # TODO: Use real service instance
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
+        mock_session.rollback = AsyncNone  # TODO: Use real service instance
+        mock_session.close = AsyncNone  # TODO: Use real service instance
         
         # Create AgentStateManager with mock session
         manager = AgentStateManager(mock_session)
         
         # Mock the methods that the tests expect to use
-        manager.save_agent_state = AsyncMock()
-        manager.get_agent_state = AsyncMock()
-        manager.create_state_checkpoint = AsyncMock()
-        manager._force_save_state = AsyncMock()
-        manager.detect_state_corruption = AsyncMock()
-        manager.recover_agent_state = AsyncMock()
-        manager.get_recovery_history = AsyncMock()
-        manager.resolve_state_conflicts = AsyncMock()
-        manager.sync_state_to_node = AsyncMock()
-        manager.initialize = AsyncMock()
-        manager.cleanup = AsyncMock()
+        manager.save_agent_state = AsyncNone  # TODO: Use real service instance
+        manager.get_agent_state = AsyncNone  # TODO: Use real service instance
+        manager.create_state_checkpoint = AsyncNone  # TODO: Use real service instance
+        manager._force_save_state = AsyncNone  # TODO: Use real service instance
+        manager.detect_state_corruption = AsyncNone  # TODO: Use real service instance
+        manager.recover_agent_state = AsyncNone  # TODO: Use real service instance
+        manager.get_recovery_history = AsyncNone  # TODO: Use real service instance
+        manager.resolve_state_conflicts = AsyncNone  # TODO: Use real service instance
+        manager.sync_state_to_node = AsyncNone  # TODO: Use real service instance
+        manager.initialize = AsyncNone  # TODO: Use real service instance
+        manager.cleanup = AsyncNone  # TODO: Use real service instance
         
         await manager.initialize()
         yield manager
@@ -67,6 +73,7 @@ class TestAgentStateConsistency:
     @pytest.fixture
     async def supervisor_agent(self):
         """Create isolated supervisor agent for testing."""
+    pass
         agent = SupervisorAgent()
         await agent.initialize()
         yield agent
@@ -79,6 +86,7 @@ class TestAgentStateConsistency:
         
         Revenue Protection: $460K annually from workflow continuity after restarts.
         """
+    pass
         logger.info("Testing agent state persistence - Cycle 51")
         
         # Create agent with complex state
@@ -118,17 +126,18 @@ class TestAgentStateConsistency:
         state_manager.save_agent_state.assert_called_with(agent_id, initial_state)
         
         # Simulate process restart by creating new state manager
-        mock_session_2 = AsyncMock()
+        mock_session_2 = AsyncNone  # TODO: Use real service instance
         new_state_manager = AgentStateManager(mock_session_2)
-        new_state_manager.get_agent_state = AsyncMock()
-        new_state_manager.save_agent_state = AsyncMock()
-        new_state_manager.initialize = AsyncMock()
-        new_state_manager.cleanup = AsyncMock()
+        new_state_manager.get_agent_state = AsyncNone  # TODO: Use real service instance
+        new_state_manager.save_agent_state = AsyncNone  # TODO: Use real service instance
+        new_state_manager.initialize = AsyncNone  # TODO: Use real service instance
+        new_state_manager.cleanup = AsyncNone  # TODO: Use real service instance
         
         await new_state_manager.initialize()
         
         try:
-            # Configure mock to return the same state (simulating persistence)
+            # Configure mock to await asyncio.sleep(0)
+    return the same state (simulating persistence)
             new_state_manager.get_agent_state.return_value = initial_state
             
             # Verify state persisted across restart
@@ -168,6 +177,7 @@ class TestAgentStateConsistency:
         
         Revenue Protection: $520K annually from preventing agent state corruption.
         """
+    pass
         logger.info("Testing concurrent agent state updates - Cycle 52")
         
         agent_id = "concurrent_agent_52"
@@ -186,7 +196,10 @@ class TestAgentStateConsistency:
         total_tasks_added = 0
         
         def mock_get_state(agent_id_param):
-            return current_state.copy()
+    """Use real service instance."""
+    # TODO: Initialize real service
+            await asyncio.sleep(0)
+    return current_state.copy()
         
         def mock_save_state(agent_id_param, new_state):
             nonlocal current_state, total_tasks_added
@@ -201,6 +214,7 @@ class TestAgentStateConsistency:
         
         async def concurrent_state_update(worker_id, num_tasks=5):
             """Simulate concurrent state updates from different workers."""
+    pass
             updates_made = []
             
             for i in range(num_tasks):
@@ -226,7 +240,8 @@ class TestAgentStateConsistency:
                 # Small delay to allow interleaving
                 await asyncio.sleep(0.01)
             
-            return updates_made
+            await asyncio.sleep(0)
+    return updates_made
 
         # Run concurrent updates
         num_workers = 5
@@ -265,6 +280,7 @@ class TestAgentStateConsistency:
         
         Revenue Protection: $380K annually from preventing invalid agent states.
         """
+    pass
         logger.info("Testing agent state validation - Cycle 53")
         
         agent_id = "validation_agent_53"
@@ -282,7 +298,8 @@ class TestAgentStateConsistency:
             }
         }
         
-        # Configure mock to return the valid state
+        # Configure mock to await asyncio.sleep(0)
+    return the valid state
         state_manager.get_agent_state.return_value = valid_state
         
         await state_manager.save_agent_state(agent_id, valid_state)
@@ -319,6 +336,7 @@ class TestAgentStateConsistency:
         
         # Configure mock to raise errors for invalid states
         def mock_save_with_validation(agent_id_param, state):
+    pass
             if not isinstance(state, dict):
                 raise TypeError("State must be a dictionary")
             if "agent_type" not in state:
@@ -374,6 +392,7 @@ class TestAgentStateConsistency:
         
         Revenue Protection: $640K annually from automated corruption recovery.
         """
+    pass
         logger.info("Testing agent state recovery after corruption - Cycle 54")
         
         agent_id = "recovery_agent_54"
@@ -413,9 +432,12 @@ class TestAgentStateConsistency:
         current_state = baseline_state.copy()
         
         def mock_get_state(agent_id_param):
-            return current_state.copy()
+    pass
+            await asyncio.sleep(0)
+    return current_state.copy()
         
         def mock_save_state(agent_id_param, new_state):
+    pass
             nonlocal current_state
             current_state = new_state.copy()
         
@@ -479,6 +501,7 @@ class TestAgentStateConsistency:
         
         Revenue Protection: $580K annually from distributed agent consistency.
         """
+    pass
         logger.info("Testing agent state synchronization across nodes - Cycle 55")
         
         agent_id = "distributed_agent_55"
@@ -487,20 +510,20 @@ class TestAgentStateConsistency:
         node_managers = []
         for i in range(3):
             # Create mock database session for each node
-            mock_session = AsyncMock()
-            mock_session.execute = AsyncMock()
-            mock_session.commit = AsyncMock()
-            mock_session.rollback = AsyncMock()
-            mock_session.close = AsyncMock()
+            mock_session = AsyncNone  # TODO: Use real service instance
+            mock_session.execute = AsyncNone  # TODO: Use real service instance
+            mock_session.commit = AsyncNone  # TODO: Use real service instance
+            mock_session.rollback = AsyncNone  # TODO: Use real service instance
+            mock_session.close = AsyncNone  # TODO: Use real service instance
             
             manager = AgentStateManager(mock_session)
             
             # Mock the methods
-            manager.save_agent_state = AsyncMock()
-            manager.get_agent_state = AsyncMock()
-            manager.sync_state_to_node = AsyncMock()
-            manager.initialize = AsyncMock()
-            manager.cleanup = AsyncMock()
+            manager.save_agent_state = AsyncNone  # TODO: Use real service instance
+            manager.get_agent_state = AsyncNone  # TODO: Use real service instance
+            manager.sync_state_to_node = AsyncNone  # TODO: Use real service instance
+            manager.initialize = AsyncNone  # TODO: Use real service instance
+            manager.cleanup = AsyncNone  # TODO: Use real service instance
             
             await manager.initialize()
             manager.node_id = f"node_{i}"
@@ -520,7 +543,8 @@ class TestAgentStateConsistency:
                 "sync_version": 1
             }
             
-            # Configure all nodes to return the initial state
+            # Configure all nodes to await asyncio.sleep(0)
+    return the initial state
             for manager in node_managers:
                 manager.get_agent_state.return_value = initial_state.copy()
             

@@ -22,6 +22,7 @@ import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

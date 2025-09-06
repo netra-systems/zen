@@ -5,6 +5,7 @@ import asyncio
 import websockets
 import json
 import uuid
+from shared.isolated_environment import IsolatedEnvironment
 
 async def test_agent_creation():
     """Test WebSocket connection and agent creation."""

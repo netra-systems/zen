@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 CRITICAL FAILING TEST: Redis Configuration Inconsistency Across Services and Environments
@@ -38,7 +39,6 @@ THIS TEST MUST FAIL because current implementation has:
 import os
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 
 # Import current scattered Redis implementations

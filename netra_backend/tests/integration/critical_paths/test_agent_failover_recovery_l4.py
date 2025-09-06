@@ -18,6 +18,7 @@ This test validates the complete agent failover and recovery system.
 import asyncio
 import json
 import random
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import time

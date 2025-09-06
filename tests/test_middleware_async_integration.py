@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Test that async context manager fixes work correctly with middleware.
 
 This test verifies that the SecurityResponseMiddleware and other middleware
@@ -5,14 +31,21 @@ work correctly with our fixed async context manager patterns.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.security_response_middleware import SecurityResponseMiddleware
 from netra_backend.app.database import get_db
 from netra_backend.app.dependencies import get_request_scoped_db_session
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
@@ -31,8 +64,7 @@ class TestMiddlewareAsyncIntegration:
         # Create a mock request
         request = MagicMock(spec=Request)
         request.url.path = "/api/test"
-        request.state = MagicMock()
-        request.state.authenticated = False
+        request.state = Magic        request.state.authenticated = False
         
         # Create a mock call_next that simulates a database operation
         async def mock_call_next(request):
@@ -47,9 +79,9 @@ class TestMiddlewareAsyncIntegration:
                     raise
             
             # Return a 404 response
-            response = MagicMock()
-            response.status_code = 404
-            return response
+            response = Magic            response.status_code = 404
+            await asyncio.sleep(0)
+    return response
         
         # Test the middleware
         response = await middleware.dispatch(request, mock_call_next)
@@ -69,6 +101,7 @@ class TestMiddlewareAsyncIntegration:
         
         # Create a call_next that raises an exception
         async def mock_call_next_with_error(request):
+    pass
             # Simulate an error in async context manager
             raise ValueError("Test error")
         
@@ -88,11 +121,11 @@ class TestMiddlewareAsyncIntegration:
         request.url.path = "/health"
         
         # Create a simple mock response
-        mock_response = MagicMock()
-        mock_response.status_code = 200
+        mock_response = Magic        mock_response.status_code = 200
         
         async def mock_call_next(request):
-            return mock_response
+            await asyncio.sleep(0)
+    return mock_response
         
         # Test the middleware
         response = await middleware.dispatch(request, mock_call_next)
@@ -111,6 +144,7 @@ class TestMiddlewareAsyncIntegration:
         
         @app.middleware("http")
         async def test_middleware(request: Request, call_next):
+    pass
             try:
                 # Use our fixed async context manager
                 async with get_request_scoped_db_session() as session:
@@ -123,7 +157,8 @@ class TestMiddlewareAsyncIntegration:
                     raise  # This would indicate our fix didn't work
             
             response = await call_next(request)
-            return response
+            await asyncio.sleep(0)
+    return response
         
         # Add security middleware
         app.add_middleware(SecurityResponseMiddleware)
@@ -131,11 +166,12 @@ class TestMiddlewareAsyncIntegration:
         # Create test request
         request = MagicMock(spec=Request)
         request.url.path = "/api/test"
-        request.state = MagicMock()
-        
+        request.state = Magic        
         # Mock call_next
         async def mock_call_next(request):
-            return JSONResponse({"status": "ok"})
+    pass
+            await asyncio.sleep(0)
+    return JSONResponse({"status": "ok"})
         
         # Execute through middleware chain
         # This would fail with _AsyncGeneratorContextManager error if our fix didn't work
@@ -153,8 +189,7 @@ class TestMiddlewareAsyncIntegration:
         async def process_request(request_id: int):
             request = MagicMock(spec=Request)
             request.url.path = f"/api/test/{request_id}"
-            request.state = MagicMock()
-            request.state.authenticated = True  # Authenticated, so won't convert
+            request.state = Magic            request.state.authenticated = True  # Authenticated, so won't convert
             
             async def mock_call_next(request):
                 # Simulate database operation
@@ -164,9 +199,9 @@ class TestMiddlewareAsyncIntegration:
                 except Exception:
                     pass  # Ignore database errors
                 
-                response = MagicMock()
-                response.status_code = 200
-                return response
+                response = Magic                response.status_code = 200
+                await asyncio.sleep(0)
+    return response
             
             return await middleware.dispatch(request, mock_call_next)
         
@@ -183,3 +218,4 @@ class TestMiddlewareAsyncIntegration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+    pass

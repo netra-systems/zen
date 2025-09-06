@@ -13,8 +13,10 @@ Each function ≤8 lines, file ≤300 lines.
 import logging
 from typing import Dict, Optional, Any
 from urllib.parse import urlencode
+import requests
 
 from auth_service.auth_core.secret_loader import AuthSecretLoader
+from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,7 @@ class GoogleOAuthProvider:
     
     def __init__(self):
         """Initialize Google OAuth provider with environment configuration."""
+        self.auth_env = get_auth_env()
         self.env = get_env().get("ENVIRONMENT", "development").lower()
         self._client_id = None
         self._client_secret = None
@@ -73,18 +76,21 @@ class GoogleOAuthProvider:
         return self._client_secret
     
     def get_redirect_uri(self) -> Optional[str]:
-        """Get OAuth redirect URI for current environment."""
+        """Get OAuth redirect URI for current environment.
+        
+        CRITICAL: This is the SINGLE SOURCE OF TRUTH for OAuth redirect URIs.
+        All services, tests, and configurations MUST use this method.
+        
+        Standardized path: /auth/callback (not /auth/oauth/callback)
+        """
         if self._redirect_uri:
             return self._redirect_uri
             
-        # Construct environment-specific redirect URI
-        if self.env == "staging":
-            self._redirect_uri = "https://netra-auth-service-staging.run.app/auth/oauth/callback"
-        elif self.env == "production":
-            self._redirect_uri = "https://netra-auth-service.run.app/auth/oauth/callback"
-        else:
-            # Development environment
-            self._redirect_uri = "http://localhost:8081/auth/oauth/callback"
+        # Get the proper auth service URL from configuration
+        base_url = self.auth_env.get_auth_service_url()
+        
+        # SSOT: Standardized path is /auth/callback
+        self._redirect_uri = f"{base_url}/auth/callback"
             
         return self._redirect_uri
     
@@ -136,12 +142,7 @@ class GoogleOAuthProvider:
         if not self._client_secret:
             raise GoogleOAuthError("Cannot exchange code without client secret")
             
-        # In a real implementation, this would:
-        # 1. Exchange code for access token
-        # 2. Use access token to get user info from Google API
-        # 3. Return user information
-        
-        # For regression testing, we simulate the process
+        # For testing purposes only
         if self.env == "testing" or code == "test-authorization-code":
             return {
                 "email": "test@example.com",
@@ -149,15 +150,47 @@ class GoogleOAuthProvider:
                 "sub": "test-user-id",
                 "verified_email": True
             }
-            
-        # Real implementation would make actual HTTP requests to Google APIs
-        logger.info(f"OAuth code exchange simulated for environment: {self.env}")
-        return {
-            "email": "staging@example.com", 
-            "name": "Staging User",
-            "sub": "staging-user-id",
-            "verified_email": True
+        
+        # Exchange authorization code for access token
+        token_url = "https://oauth2.googleapis.com/token"
+        token_params = {
+            "code": code,
+            "client_id": self._client_id,
+            "client_secret": self._client_secret,
+            "redirect_uri": self.get_redirect_uri(),  # Use method to ensure URI is set
+            "grant_type": "authorization_code"
         }
+        
+        try:
+            # Exchange code for token
+            token_response = requests.post(token_url, data=token_params)
+            token_response.raise_for_status()
+            token_data = token_response.json()
+            
+            # Get user info using access token
+            access_token = token_data.get("access_token")
+            if not access_token:
+                raise GoogleOAuthError("No access token in response")
+            
+            user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+            headers = {"Authorization": f"Bearer {access_token}"}
+            user_response = requests.get(user_info_url, headers=headers)
+            user_response.raise_for_status()
+            
+            user_data = user_response.json()
+            logger.info(f"Successfully retrieved user info for: {user_data.get('email')}")
+            
+            return {
+                "email": user_data.get("email"),
+                "name": user_data.get("name"),
+                "sub": user_data.get("id"),
+                "verified_email": user_data.get("verified_email", False),
+                "picture": user_data.get("picture")
+            }
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"OAuth exchange failed: {str(e)}")
+            raise GoogleOAuthError(f"Failed to exchange code: {str(e)}")
     
     def is_configured(self) -> bool:
         """Check if OAuth provider is properly configured."""

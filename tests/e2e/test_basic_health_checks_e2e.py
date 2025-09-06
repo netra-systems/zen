@@ -16,6 +16,7 @@ import json
 import os
 import time
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import pytest
@@ -48,6 +49,7 @@ class TestBasicHealthChecker:
     """Simple, reliable health check tester for E2E validation."""
     
     def __init__(self, config: Dict[str, Any]):
+    pass
         self.config = config
         self.results = {}
         
@@ -190,6 +192,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_service_connectivity_attempt(self, health_check_config):
         """Test service connectivity - passes regardless of service status."""
+    pass
         tester = TestBasicHealthChecker(health_check_config)
         
         # Run connectivity checks
@@ -201,7 +204,8 @@ class TestBasicHealthChecksE2E:
         
         # Log results for debugging
         summary = tester.get_service_summary(results)
-        print(f"\nService Connectivity Summary:")
+        print(f"
+Service Connectivity Summary:")
         print(f"  Total services: {summary['total_services']}")
         print(f"  Accessible services: {summary['accessible_services']}")
         print(f"  Healthy services: {summary['healthy_services']}")
@@ -210,7 +214,8 @@ class TestBasicHealthChecksE2E:
         
         # Detailed results
         for service_name, result in results.items():
-            print(f"\nService: {service_name}")
+            print(f"
+Service: {service_name}")
             print(f"  URL: {result['url']}")
             print(f"  Accessible: {result['accessible']}")
             print(f"  Healthy: {result['healthy']}")
@@ -246,12 +251,14 @@ class TestBasicHealthChecksE2E:
             # Status should be healthy
             assert health_data.get("status") in ["healthy", "ok"], f"Service should be healthy, got: {health_data.get('status')}"
             
-            print(f"\n[SUCCESS] Auth service is running and healthy:")
+            print(f"
+[SUCCESS] Auth service is running and healthy:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Service: {health_data.get('service')}")
             print(f"   Response time: {result['response_time']:.3f}s")
         else:
-            print(f"\n[WARNING] Auth service not accessible: {result.get('error', 'Unknown error')}")
+            print(f"
+[WARNING] Auth service not accessible: {result.get('error', 'Unknown error')}")
             # This is OK - service might not be running
     
     @pytest.mark.asyncio
@@ -261,6 +268,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_backend_service_health_if_running(self, health_check_config):
         """Test backend service health if it's running."""
+    pass
         tester = TestBasicHealthChecker(health_check_config)
         
         # Check only backend service
@@ -279,13 +287,15 @@ class TestBasicHealthChecksE2E:
             for field in expected_fields:
                 assert field in health_data, f"Health response should include {field}"
             
-            print(f"\n[SUCCESS] Backend service is running and healthy:")
+            print(f"
+[SUCCESS] Backend service is running and healthy:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Response time: {result['response_time']:.3f}s")
             if "version" in health_data:
                 print(f"   Version: {health_data.get('version')}")
         else:
-            print(f"\n[WARNING] Backend service not accessible: {result.get('error', 'Unknown error')}")
+            print(f"
+[WARNING] Backend service not accessible: {result.get('error', 'Unknown error')}")
             # This is OK - service might not be running
     
     @pytest.mark.asyncio
@@ -317,7 +327,8 @@ class TestBasicHealthChecksE2E:
         
         assert all(test_result.values()), "All framework components should be working"
         
-        print("\n[SUCCESS] E2E test framework basic functionality verified:")
+        print("
+[SUCCESS] E2E test framework basic functionality verified:")
         for key, value in test_result.items():
             print(f"   {key}: {value}")
 
@@ -325,6 +336,7 @@ class TestBasicHealthChecksE2E:
 # Integration point for external test runners
 async def run_basic_health_checks():
     """Standalone function to run basic health checks."""
+    pass
     config = {
         "services": {
             "backend": {
@@ -346,6 +358,7 @@ async def run_basic_health_checks():
     results = await tester.check_all_services()
     summary = tester.get_service_summary(results)
     
+    await asyncio.sleep(0)
     return {
         "results": results,
         "summary": summary,
@@ -358,6 +371,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def main():
+    pass
         result = await run_basic_health_checks()
         print(f"Health check results: {json.dumps(result, indent=2)}")
     

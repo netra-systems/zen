@@ -356,9 +356,53 @@ class UnifiedTestRunner:
             e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
             running_e2e = bool(set(categories_to_run) & e2e_categories)
             
-            # Skip local service checks for staging - use remote staging services
+            # CRITICAL: Setup E2E Docker environment if running E2E tests
+            if running_e2e and args.env != 'staging':
+                try:
+                    print(f"[INFO] Detected E2E tests in categories: {set(categories_to_run) & e2e_categories}")
+                    print("[INFO] Setting up E2E Docker environment...")
+                    
+                    # Import E2E Docker helper
+                    from test_framework.e2e_docker_helper import E2EDockerHelper
+                    import asyncio
+                    
+                    # Setup E2E environment
+                    test_id = f"unified-runner-{int(time.time())}"
+                    self.e2e_docker_helper = E2EDockerHelper(test_id=test_id)
+                    
+                    # Run async setup
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        service_urls = loop.run_until_complete(
+                            self.e2e_docker_helper.setup_e2e_environment(timeout=180)
+                        )
+                        print(f"[SUCCESS] E2E Docker environment ready!")
+                        print(f"   Backend: {service_urls['backend']}")
+                        print(f"   Auth: {service_urls['auth']}")
+                        print(f"   WebSocket: {service_urls['websocket']}")
+                        
+                        # Set environment variables for tests
+                        env = get_env()
+                        env.set('E2E_BACKEND_URL', service_urls['backend'], 'e2e_setup')
+                        env.set('E2E_AUTH_URL', service_urls['auth'], 'e2e_setup') 
+                        env.set('E2E_WEBSOCKET_URL', service_urls['websocket'], 'e2e_setup')
+                        env.set('E2E_POSTGRES_URL', service_urls['postgres'], 'e2e_setup')
+                        env.set('E2E_REDIS_URL', service_urls['redis'], 'e2e_setup')
+                        
+                    finally:
+                        loop.close()
+                        
+                except Exception as e:
+                    print(f"[ERROR] Failed to setup E2E Docker environment: {e}")
+                    print("[ERROR] E2E tests require Docker. Please ensure Docker is running and try again.")
+                    return 1
+            
+            # Skip local service checks for staging - use remote staging services  
             if args.env != 'staging' and (args.real_services or args.real_llm or args.env in ['dev'] or running_e2e):
-                self._check_service_availability(args)
+                # Only check services if we haven't already set up E2E Docker
+                if not (running_e2e and hasattr(self, 'e2e_docker_helper')):
+                    self._check_service_availability(args)
             
             # Start test tracking session
             if self.test_tracker:
@@ -416,7 +460,7 @@ class UnifiedTestRunner:
                     "args": vars(args),
                     "execution_plan": self.execution_plan.to_dict() if self.execution_plan and hasattr(self.execution_plan, 'to_dict') else None
                 })
-                print(f"\nSession Summary: {session_summary['total_tests']} tests, "
+                print(f"Session Summary: {session_summary['total_tests']} tests, "
                       f"{session_summary['passed']} passed, {session_summary['failed']} failed, "
                       f"Pass rate: {session_summary['pass_rate']:.1f}%")
                 
@@ -457,7 +501,8 @@ class UnifiedTestRunner:
             return
             
         # First, try to use the simple Docker manager for automatic startup
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("DOCKER SERVICE INITIALIZATION")
         print("="*60)
         
@@ -483,11 +528,14 @@ class UnifiedTestRunner:
             
             if not can_proceed:
                 print("\n" + "="*60)
-                print("⚠️  MEMORY CHECK FAILED")
+                print("
+" + "="*60)
                 print("="*60)
-                print(f"\n{details['message']}")
-                print(f"\nProfile: {profile.value}")
-                print(f"Required: {details['required_mb']:,} MB")
+                print(f"
+{details["message"]}")
+                print(f"\\nProfile: {profile.value}")
+                print(f"
+Profile: {profile.value}")
                 print(f"Available: {details['system_available_mb']:,} MB")
                 
                 if details.get('alternatives'):
@@ -495,7 +543,8 @@ class UnifiedTestRunner:
                     for alt in details['alternatives']:
                         print(f"  - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
                 
-                print("\nTo proceed anyway, set: TEST_SKIP_MEMORY_CHECK=true")
+                print("
+Alternative profiles that could work:")
                 print("="*60 + "\n")
                 
                 # Check if we should skip the check
@@ -583,11 +632,13 @@ class UnifiedTestRunner:
                         print("  1. python scripts/docker.py health       # Check service health")
                         print("  2. python scripts/docker.py restart      # Restart all services")
                         print("  3. python scripts/docker.py logs backend # Check logs for errors")
-                        print("="*60 + "\n")
+                        print("
+" + "="*60)
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print(f"\n[ERROR] Docker environment setup failed: {e}")
+            print("
+Some services failed health checks. To fix:")
             print("\nTo manually manage Docker services:")
             print("  python scripts/docker.py start     # Start services")
             print("  python scripts/docker.py status    # Check status")
@@ -623,7 +674,7 @@ class UnifiedTestRunner:
         try:
             # 1. Docker Compose cleanup with volumes and orphans
             compose_files = [
-                self.project_root / "docker-compose.test.yml",
+                self.project_root / "docker-compose.alpine-test.yml",
                 self.project_root / "docker-compose.yml"
             ]
             
@@ -742,6 +793,27 @@ class UnifiedTestRunner:
         """Clean up Docker environment (legacy method - calls comprehensive cleanup)."""
         # First do the comprehensive cleanup
         self.cleanup_test_environment()
+        
+        # Clean up E2E Docker environment if it was set up
+        if hasattr(self, 'e2e_docker_helper') and self.e2e_docker_helper:
+            try:
+                print("[INFO] Cleaning up E2E Docker environment...")
+                import asyncio
+                
+                # Run async cleanup
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(self.e2e_docker_helper.teardown_e2e_environment())
+                    print("[SUCCESS] E2E Docker environment cleaned up")
+                finally:
+                    loop.close()
+                    
+            except Exception as e:
+                print(f"[WARNING] Error cleaning up E2E Docker environment: {e}")
+            finally:
+                # Clean up reference
+                self.e2e_docker_helper = None
         
         # Then do the original manager-specific cleanup
         if self.docker_manager and self.docker_environment:
@@ -1160,7 +1232,7 @@ class UnifiedTestRunner:
             print(str(e))
             print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
             print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py")
-            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine.yml up -d\n")
+            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine-test.yml up -d\n")
             
             # Exit immediately - don't waste time on tests that will fail
             import sys
@@ -1304,7 +1376,7 @@ class UnifiedTestRunner:
         if not execution_plan or not execution_plan.phases:
             return
         
-        print(f"\n{'='*60}")
+        print(f"\1{'='*60}")
         print("EXECUTION PLAN")
         print(f"{'='*60}")
         print(f"Total Categories: {len(execution_plan.execution_order)}")
@@ -1312,7 +1384,7 @@ class UnifiedTestRunner:
         print(f"Estimated Duration: {execution_plan.total_estimated_duration}")
         
         for phase_num, phase_categories in enumerate(execution_plan.phases):
-            print(f"\nPhase {phase_num + 1}: {len(phase_categories)} categories")
+            print(f"\1Phase {phase_num + 1}: {len(phase_categories)} categories")
             for category_name in phase_categories:
                 category = self.category_system.get_category(category_name)
                 if category:
@@ -1320,14 +1392,15 @@ class UnifiedTestRunner:
                     priority = category.priority.name
                     print(f"  - {category_name} ({priority}, ~{duration})")
         
-        print(f"\n{'='*60}\n")
+        print(f"\1{'='*60}
+")
     
     def _execute_categories_by_phases(self, execution_plan: ExecutionPlan, args: argparse.Namespace) -> Dict:
         """Execute categories according to the execution plan."""
         results = {}
         
         for phase_num, phase_categories in enumerate(execution_plan.phases):
-            print(f"\n{'='*40}")
+            print(f"\1{'='*40}")
             print(f"PHASE {phase_num + 1}: {len(phase_categories)} categories")
             print(f"{'='*40}")
             
@@ -1352,7 +1425,7 @@ class UnifiedTestRunner:
                         current_stats=self.progress_tracker.get_current_progress() if self.progress_tracker else None
                     )
                     if should_stop and decision:
-                        print(f"\nStopping execution: {decision.reason}")
+                        print(f"\1Stopping execution: {decision.reason}")
                         # Mark remaining categories as skipped
                         for remaining_phase in execution_plan.phases[phase_num + 1:]:
                             for category_name in remaining_phase:
@@ -1372,7 +1445,7 @@ class UnifiedTestRunner:
         results = {}
         
         for category_name in category_names:
-            print(f"\nExecuting category: {category_name}")
+            print(f"\1Executing category: {category_name}")
             
             # Start category tracking
             if self.progress_tracker:
@@ -1425,8 +1498,10 @@ class UnifiedTestRunner:
             
             # Combine results
             overall_success = all(r["success"] for r in all_results.values())
-            combined_output = "\n".join(r.get("output", "") for r in all_results.values())
-            combined_errors = "\n".join(r.get("errors", "") for r in all_results.values())
+            combined_output = "
+".join(r.get("output", "") for r in all_results.values())
+            combined_errors = "
+".join(r.get("errors", "") for r in all_results.values())
             total_duration = sum(r.get("duration", 0) for r in all_results.values())
             
             return {
@@ -1646,9 +1721,11 @@ class UnifiedTestRunner:
         if not docker_available and not (local_postgres and local_redis):
             raise RuntimeError(
                 "HARD FAIL: Cannot run E2E tests - Docker Desktop not running and "
-                "required local services not available.\n"
+                "required local services not available.
+"
                 f"Either start Docker Desktop or run local PostgreSQL (port {postgres_port}) "
-                f"and Redis (port {redis_port}) services.\n"
+                f"and Redis (port {redis_port}) services.
+"
                 "Quick fix: python scripts/docker.py start"
             )
         
@@ -1781,7 +1858,7 @@ class UnifiedTestRunner:
                 "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
                 "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
                 "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
-                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
+                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/clickhouse"],
                 "post_deployment": ["tests/post_deployment"],
                 "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
                 "agent": ["netra_backend/tests/agents"],
@@ -2098,14 +2175,14 @@ class UnifiedTestRunner:
             json.dump(report_data, f, indent=2, default=str)
         
         # Print summary
-        print(f"\n{'='*60}")
+        print(f"\1{'='*60}")
         print("TEST EXECUTION SUMMARY")
         print(f"{'='*60}")
         print(f"Environment: {args.env}")
         print(f"Total Duration: {report_data['total_duration']:.2f}s")
         print(f"Categories Executed: {len(results)}")
         
-        print(f"\nCategory Results:")
+        print(f"\1Category Results:")
         for category_name, result in results.items():
             status = "✅ PASSED" if result["success"] else "❌ FAILED"
             if result.get("skipped"):
@@ -2113,7 +2190,8 @@ class UnifiedTestRunner:
             self._safe_print_unicode(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
         
         overall_status = "✅ PASSED" if report_data['overall_success'] else "❌ FAILED"
-        self._safe_print_unicode(f"\nOverall: {overall_status}")
+        self._safe_print_unicode(f"
+Overall: {overall_status}")
         print(f"Report: {json_report}")
 
 
@@ -2726,14 +2804,14 @@ def main():
         config_loader = CategoryConfigLoader(PROJECT_ROOT)
         category_system = config_loader.create_category_system()
         
-        print(f"\n{'='*60}")
+        print(f"\1{'='*60}")
         print("AVAILABLE TEST CATEGORIES")
         print(f"{'='*60}")
         
         for priority in CategoryPriority:
             categories = category_system.get_categories_by_priority(priority)
             if categories:
-                print(f"\n{priority.name} Priority:")
+                print(f"\1{priority.name} Priority:")
                 for category in sorted(categories, key=lambda x: x.name):
                     print(f"  {category.name:15} - {category.description}")
                     if category.dependencies:
@@ -2742,7 +2820,7 @@ def main():
                         print(f"                    Conflicts: {', '.join(category.conflicts)}")
                     print(f"                    Est. Duration: {category.estimated_duration}")
         
-        print(f"\nTotal Categories: {len(category_system.categories)}")
+        print(f"\1Total Categories: {len(category_system.categories)}")
         return 0
     
     if args.show_category_stats:
@@ -2750,7 +2828,7 @@ def main():
         category_system = config_loader.create_category_system()
         stats = category_system.get_category_statistics()
         
-        print(f"\n{'='*60}")
+        print(f"\1{'='*60}")
         print("CATEGORY STATISTICS")
         print(f"{'='*60}")
         print(f"Total Categories: {stats['total_categories']}")
@@ -2764,11 +2842,11 @@ def main():
         print(f"Categories with History: {stats['categories_with_history']}")
         print(f"Average Success Rate: {stats['average_success_rate']:.2%}")
         
-        print(f"\nBy Priority:")
+        print(f"\1By Priority:")
         for priority, count in stats['by_priority'].items():
             print(f"  {priority:10}: {count}")
         
-        print(f"\nBy Type:")
+        print(f"\1By Type:")
         for cat_type, count in stats['by_type'].items():
             print(f"  {cat_type:12}: {count}")
         

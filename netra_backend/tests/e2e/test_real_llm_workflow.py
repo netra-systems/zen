@@ -7,13 +7,16 @@ Maximum 300 lines, functions ≤8 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -44,6 +47,8 @@ async def real_llm_workflow_setup(real_agent_setup):
     yield setup
 
 def _create_performance_tracker():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create performance tracking utilities."""
     return {
         'start_time': None,

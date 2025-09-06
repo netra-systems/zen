@@ -20,12 +20,16 @@ import hashlib
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action
 from tests.e2e.audit_trail_factories import AuditTestDataFactory
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e

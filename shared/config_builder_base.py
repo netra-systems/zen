@@ -80,10 +80,13 @@ class ConfigBuilderBase(ABC):
         # Start with IsolatedEnvironment as base, then overlay with provided env_vars
         result = dict(env_manager.get_all())
         
-        # Filter out None values and overlay non-None values
+        # Process provided env_vars
         for key, value in env_vars.items():
             if value is not None:
                 result[key] = str(value)
+            else:
+                # None value means explicitly remove the environment variable for testing
+                result.pop(key, None)
         
         return result
     

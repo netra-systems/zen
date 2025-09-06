@@ -27,6 +27,7 @@ import os
 import time
 import uuid
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
@@ -45,7 +46,7 @@ class GCPStagingAuthTester:
         """Initialize GCP staging auth tester with proper service URLs"""
         self.auth_helper = StagingAuthHelper()
         # Use GCP staging service URLs from task requirements
-        self.staging_auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+        self.staging_auth_url = "https://auth.staging.netrasystems.ai"
         self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
         self.staging_frontend_url = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
         self.auth_helper.staging_auth_url = self.staging_auth_url

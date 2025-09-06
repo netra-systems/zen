@@ -25,7 +25,7 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the new execution tracking system
 from netra_backend.app.core.agent_execution_tracker import (
@@ -37,12 +37,17 @@ from netra_backend.app.agents.execution_tracking.tracker import (
 from netra_backend.app.agents.execution_tracking.registry import ExecutionRegistry, ExecutionState as NewExecutionState
 from netra_backend.app.agents.execution_tracking.heartbeat import HeartbeatMonitor
 from netra_backend.app.agents.execution_tracking.timeout import TimeoutManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class DeathDetectionVerifier:
     """Verifies that the new death detection system works correctly"""
     
     def __init__(self):
+    pass
         self.events: List[Dict[str, Any]] = []
         self.death_detected_events = []
         self.heartbeat_failures = []
@@ -65,6 +70,7 @@ class DeathDetectionVerifier:
     
     def get_verification_report(self) -> Dict[str, Any]:
         """Generate verification report"""
+    pass
         return {
             'death_detection_working': len(self.death_detected_events) > 0,
             'heartbeat_monitoring_working': len(self.heartbeat_failures) > 0 or self._has_heartbeat_status(),
@@ -92,6 +98,7 @@ class TestAgentDeathAfterTriageFixed:
         
         This test MUST PASS to prove the bug is FIXED!
         """
+    pass
         verifier = DeathDetectionVerifier()
         
         # Create execution tracker with fast detection for testing
@@ -109,7 +116,8 @@ class TestAgentDeathAfterTriageFixed:
             user_id="test-user"
         )
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("TESTING: ExecutionTracker Death Detection")
         print("="*80)
         
@@ -158,7 +166,8 @@ class TestAgentDeathAfterTriageFixed:
         print(f"💓 Heartbeat alive: {status.heartbeat_status.is_alive if status.heartbeat_status else 'N/A'}")
         
         # Now simulate AGENT DEATH - no more heartbeats or progress updates!
-        print("\n💀 SIMULATING AGENT DEATH - No more heartbeats...")
+        print("
+💀 SIMULATING AGENT DEATH - No more heartbeats...")
         
         # The old system would miss this completely
         # The new system SHOULD detect this via heartbeat monitoring
@@ -205,7 +214,8 @@ class TestAgentDeathAfterTriageFixed:
         final_status = await tracker.get_execution_status(execution_id)
         report = verifier.get_verification_report()
         
-        print("\n" + "="*80)
+        print("
+" + "="*80)
         print("EXECUTION TRACKER DEATH DETECTION RESULTS")
         print("="*80)
         print(f"Death detected via heartbeat: {death_detected}")
@@ -234,11 +244,13 @@ if __name__ == "__main__":
     # Run the comprehensive test suite
     import sys
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("COMPREHENSIVE AGENT DEATH DETECTION TEST SUITE")
     print("="*80)
     print("Testing the FIX for critical agent death after triage bug")
     print("All tests MUST PASS to confirm bug is fixed")
-    print("="*80 + "\n")
+    print("="*80 + "
+")
     
     pytest.main([__file__, "-v", "--tb=short", "-s"])

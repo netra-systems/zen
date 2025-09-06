@@ -10,8 +10,11 @@ CRITICAL: This test validates that:
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext

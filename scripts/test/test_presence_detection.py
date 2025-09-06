@@ -5,6 +5,7 @@ Simple test runner for presence detection tests
 import sys
 import os
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

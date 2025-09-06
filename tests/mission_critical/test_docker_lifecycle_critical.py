@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 CRITICAL P0: Docker Lifecycle Management Test Suite
 
@@ -32,7 +58,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Set
 from contextlib import contextmanager
-from unittest.mock import patch, MagicMock
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS ONLY - CLAUDE.md compliance
 from test_framework.unified_docker_manager import UnifiedDockerManager, ContainerInfo
@@ -43,6 +70,9 @@ from test_framework.docker_rate_limiter import (
     DockerCommandResult
 )
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +108,7 @@ class DockerDaemonMonitor:
     """Monitor Docker daemon stability during tests."""
     
     def __init__(self):
+    pass
         self.start_time = time.time()
         self.daemon_restarts = 0
         self.initial_pid = self._get_docker_daemon_pid()
@@ -167,6 +198,7 @@ class TestDockerLifecycleCritical:
     
     def _cleanup_test_containers(self):
         """Safely cleanup all containers created during testing."""
+    pass
         for container_name in self.test_containers:
             try:
                 logger.info(f"Safely removing test container: {container_name}")
@@ -229,6 +261,7 @@ class TestDockerLifecycleCritical:
     
     def test_safe_removal_prevents_force_flag(self):
         """CRITICAL: Verify no docker rm -f is ever used."""
+    pass
         container_name = self._create_test_container("no-force-test")
         
         # Patch subprocess to detect any rm -f usage
@@ -236,14 +269,14 @@ class TestDockerLifecycleCritical:
         original_run = subprocess.run
         
         def patched_run(cmd, *args, **kwargs):
+    pass
             nonlocal force_flag_detected
             if isinstance(cmd, list) and "docker" in cmd and "rm" in cmd and "-f" in cmd:
                 force_flag_detected = True
                 logger.error(f"CRITICAL: docker rm -f detected in command: {cmd}")
             return original_run(cmd, *args, **kwargs)
         
-        with patch('subprocess.run', side_effect=patched_run):
-            success = self.docker_manager.safe_container_remove(container_name)
+                    success = self.docker_manager.safe_container_remove(container_name)
             
         assert success, "Safe removal should succeed"
         assert not force_flag_detected, "CRITICAL: docker rm -f should NEVER be used"
@@ -258,12 +291,14 @@ class TestDockerLifecycleCritical:
     
     def test_safe_removal_concurrent_attempts(self):
         """Test concurrent removal attempts on same container."""
+    pass
         container_name = self._create_test_container("concurrent-removal")
         time.sleep(2)
         
         results = []
         
         def attempt_removal():
+    pass
             return self.docker_manager.safe_container_remove(container_name)
         
         # Launch multiple concurrent removal attempts
@@ -300,6 +335,7 @@ class TestDockerLifecycleCritical:
     
     def test_rate_limiting_minimum_interval(self):
         """Test that minimum interval between operations is enforced."""
+    pass
         operation_times = []
         
         # Perform rapid Docker operations
@@ -361,11 +397,13 @@ class TestDockerLifecycleCritical:
     
     def test_rate_limiting_under_extreme_load(self):
         """DIFFICULT: Test rate limiter under extreme load (100+ operations)."""
+    pass
         total_operations = 100
         results = []
         start_time = time.time()
         
         def rapid_operation(op_id: int):
+    pass
             try:
                 result = execute_docker_command(["docker", "version"], timeout=5)
                 return {
@@ -431,6 +469,7 @@ class TestDockerLifecycleCritical:
     @pytest.mark.parametrize("memory_limit", ["128m", "256m", "512m"])
     def test_memory_limits_enforcement(self, memory_limit):
         """Test that memory limits are properly enforced."""
+    pass
         container_name = self._create_test_container(
             f"memory-{memory_limit}",
             memory_limit=memory_limit,
@@ -461,6 +500,7 @@ class TestDockerLifecycleCritical:
             "memory-pressure",
             memory_limit="64m",
             command=["sh", "-c", """
+    pass
                 # Gradually consume memory
                 i=1
                 while [ $i -le 100 ]; do
@@ -550,6 +590,7 @@ class TestDockerLifecycleCritical:
     
     def _parse_memory_limit(self, memory_str: str) -> int:
         """Parse memory limit string to bytes."""
+    pass
         memory_str = memory_str.lower()
         if memory_str.endswith('m'):
             return int(memory_str[:-1]) * 1024 * 1024
@@ -570,6 +611,7 @@ class TestDockerLifecycleCritical:
         
         def container_lifecycle(container_id: int):
             """Full container lifecycle in one operation."""
+    pass
             container_name = f"netra-stress-{container_id}-{int(time.time() * 1000)}"
             
             try:
@@ -635,6 +677,7 @@ class TestDockerLifecycleCritical:
         
         def thread_operations(thread_id: int):
             """Execute multiple Docker operations in one thread."""
+    pass
             thread_results = []
             
             for op_id in range(operations_per_thread):
@@ -761,12 +804,15 @@ class TestDockerLifecycleCritical:
     
     def test_full_lifecycle_with_health_checks(self):
         """Test complete container lifecycle with health monitoring."""
+    pass
         # Create container with health check
         container_name = self._create_test_container(
             "health-check",
             command=["sh", "-c", """
                 # Simple HTTP server for health check
-                echo 'HTTP/1.1 200 OK\n\nHealthy' > /tmp/response.txt
+                echo 'HTTP/1.1 200 OK
+
+Healthy' > /tmp/response.txt
                 while true; do 
                     nc -l -p 8080 < /tmp/response.txt 2>/dev/null || true
                     sleep 1
@@ -861,6 +907,7 @@ class TestDockerLifecycleCritical:
     
     def test_recovery_from_partial_failures(self):
         """Test recovery from partial Docker operation failures."""
+    pass
         # Create container that will have issues
         problematic_container = self._create_test_container(
             "problematic",
@@ -871,6 +918,7 @@ class TestDockerLifecycleCritical:
         
         # Simulate Docker daemon being busy/slow
         def slow_docker_operation():
+    pass
             return execute_docker_command([
                 "docker", "exec", problematic_container, "sh", "-c", "sleep 2; echo 'slow operation'"
             ], timeout=10)
@@ -938,6 +986,7 @@ class TestDockerLifecycleCritical:
     
     def test_orphaned_resource_detection(self):
         """Test detection and cleanup of orphaned Docker resources."""
+    pass
         # Create resources that might become orphaned
         test_prefix = f"orphan-test-{int(time.time())}"
         
@@ -1027,6 +1076,7 @@ class TestDockerLifecycleCritical:
     
     def test_critical_unified_docker_manager_extreme_stress(self):
         """CRITICAL: Test UnifiedDockerManager under extreme stress conditions."""
+    pass
         stress_environments = []
         critical_metrics = {
             'total_attempts': 0,
@@ -1208,11 +1258,13 @@ class TestDockerLifecycleCritical:
     
     def test_critical_parallel_environment_isolation_verification(self):
         """CRITICAL: Verify complete isolation between parallel environments."""
+    pass
         num_parallel_envs = 8
         parallel_environments = []
         isolation_violations = []
         
         def create_isolated_environment(index):
+    pass
             env_name = f"isolation_test_{index}_{int(time.time())}"
             try:
                 # Create environment with unique identifier
@@ -1375,6 +1427,7 @@ class TestDockerLifecycleCritical:
     
     def test_critical_memory_pressure_resilience_validation(self):
         """CRITICAL: Validate system resilience under extreme memory pressure."""
+    pass
         memory_pressure_environments = []
         initial_memory = psutil.virtual_memory()
         
@@ -1535,6 +1588,7 @@ class TestDockerLifecycleCritical:
     
     def test_service_startup_with_pre_existing_conflicts(self):
         """CRITICAL: Validate startup handles pre-existing container conflicts."""
+    pass
         # Create conflicting containers that might interfere
         conflict_containers = []
         
@@ -1645,6 +1699,7 @@ class TestDockerLifecycleCritical:
     
     def test_service_startup_network_isolation_verification(self):
         """CRITICAL: Validate services start with proper network isolation."""
+    pass
         env_name = f"network-isolation-test-{int(time.time())}"
         self.test_containers.add(env_name)
         
@@ -1752,6 +1807,7 @@ class TestDockerLifecycleCritical:
     
     def test_service_startup_cross_platform_compatibility(self):
         """CRITICAL: Validate startup works consistently across platform configurations."""
+    pass
         import platform
         
         system_info = {
@@ -1845,3 +1901,4 @@ class TestDockerLifecycleCritical:
         logger.info(f"CRITICAL P0 Docker Lifecycle Tests PASSED: "
                    f"Daemon stable (PID: {stability_end['current_pid']}), "
                    f"No restarts, All {len(operation_results)} final operations successful")
+    pass

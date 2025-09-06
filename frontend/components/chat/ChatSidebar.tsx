@@ -7,6 +7,8 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { ThreadOperationManager } from '@/lib/thread-operation-manager';
+import { threadStateMachineManager } from '@/lib/thread-state-machine';
+import { logger } from '@/lib/logger';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { 
   useChatSidebarState, 
@@ -102,14 +104,30 @@ export const ChatSidebar: React.FC = () => {
     handleThreadClick
   );
   
-  // Handle new chat creation with proper thread switching
+  // Handle new chat creation with state machine and proper thread switching
   const handleNewChat = useCallback(async () => {
-    // Use ThreadOperationManager to ensure atomic operation
+    const stateMachine = threadStateMachineManager.getStateMachine('newChat');
+    
+    // Check if we can transition to creating state
+    if (!stateMachine.canTransition('START_CREATE')) {
+      logger.warn('Cannot start new chat creation - state machine blocked');
+      return;
+    }
+    
+    // Start state machine transition
+    const operationId = `create_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    stateMachine.transition('START_CREATE', {
+      operationId,
+      startTime: Date.now(),
+      targetThreadId: null
+    });
+    
+    // Use ThreadOperationManager with enhanced debouncing and mutex
     const result = await ThreadOperationManager.startOperation(
       'create',
       null,
       async (signal) => {
-        // Prevent double-clicks and concurrent creation
+        // State machine guards against concurrent operations
         if (isCreatingThread || isProcessing || threadSwitchState.isLoading) {
           return { success: false, error: new Error('Operation already in progress') };
         }
@@ -130,26 +148,34 @@ export const ChatSidebar: React.FC = () => {
             throw new Error('Operation aborted');
           }
           
-          // Use the thread switching hook to properly navigate to the new thread
-          // Force the switch to ensure it happens even if another operation is pending
+          // Update state machine with target thread
+          stateMachine.transition('START_SWITCH', {
+            targetThreadId: newThread.id
+          });
+          
+          // Use the thread switching hook with explicit URL management
           const switchSuccess = await switchToThread(newThread.id, {
             clearMessages: true,
             showLoadingIndicator: false, // We're already showing creation state
-            updateUrl: true, // Critical: ensures URL is updated
+            updateUrl: true, // Critical: ensures URL is updated atomically
+            skipUrlUpdate: false, // Ensure URL sync happens
             force: true // Force switch for new chat
           });
           
           if (switchSuccess) {
             // Reload the thread list to show the new thread
             await loadThreads();
+            stateMachine.transition('COMPLETE_SUCCESS');
             return { success: true, threadId: newThread.id };
           } else {
+            stateMachine.transition('COMPLETE_ERROR', { error: new Error('Failed to switch to new thread') });
             return { success: false, error: new Error('Failed to switch to new thread') };
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           const errorObj = error instanceof Error ? error : new Error(errorMessage);
           console.error('Failed to create thread:', errorObj);
+          stateMachine.transition('COMPLETE_ERROR', { error: errorObj });
           return { success: false, error: errorObj };
         } finally {
           setIsCreatingThread(false);
@@ -158,12 +184,13 @@ export const ChatSidebar: React.FC = () => {
       {
         timeoutMs: 10000,
         retryAttempts: 1,
-        force: true // Force new chat creation
+        force: false // Let the enhanced mutex handle concurrency instead of forcing
       }
     );
     
     if (!result.success) {
       console.error('Failed to create new chat:', result.error);
+      stateMachine.transition('COMPLETE_ERROR', { error: result.error });
     }
   }, [isCreatingThread, isProcessing, threadSwitchState.isLoading, switchToThread, loadThreads]);
   

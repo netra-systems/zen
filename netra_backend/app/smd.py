@@ -790,8 +790,11 @@ class StartupOrchestrator:
             
             # Verify dependencies are available
             deps = status['dependencies']
-            if not deps['websocket_manager_available']:
-                raise DeterministicStartupError("WebSocket manager not available in bridge")
+            # NOTE: In the new per-request isolation architecture, WebSocket manager
+            # is None at startup and created per-request via factory pattern.
+            # This is expected and correct behavior for proper user isolation.
+            # We no longer check for websocket_manager_available at startup.
+            
             # Registry is no longer required with factory pattern - skip check
             # Factory pattern ensures per-request isolation without global registry
             

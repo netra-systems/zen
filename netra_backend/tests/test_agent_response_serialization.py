@@ -6,6 +6,7 @@ ensuring proper JSON serialization and type consistency.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -20,7 +21,7 @@ from netra_backend.app.schemas.agent import (
     AgentErrorMessage,
     AgentStarted,
 )
-from netra_backend.app.schemas.registry import AgentUpdate
+from netra_backend.app.schemas import AgentUpdate
 from netra_backend.app.schemas.tool import ToolCompleted, ToolStarted, ToolStatus
 
 class TestAgentResponseSerialization:

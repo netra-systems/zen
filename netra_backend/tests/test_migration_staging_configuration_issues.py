@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """Migration Configuration Staging Issues - Failing Tests
 
 Tests that expose database migration configuration failures found during GCP staging logs audit.
@@ -29,7 +32,6 @@ Test Categories:
 import os
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 import pytest
 
 from netra_backend.app.db.migration_utils import (

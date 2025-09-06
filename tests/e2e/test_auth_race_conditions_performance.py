@@ -8,6 +8,7 @@ import pytest
 import os
 import sys
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import psutil
 

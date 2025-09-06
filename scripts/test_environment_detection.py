@@ -6,6 +6,7 @@ Run this to ensure all environment detection logic defaults to staging, not prod
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 

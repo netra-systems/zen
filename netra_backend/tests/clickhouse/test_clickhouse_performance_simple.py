@@ -8,6 +8,7 @@ import random
 import time
 import uuid
 from datetime import UTC, datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from netra_backend.app.logging_config import central_logger as logger

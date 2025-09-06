@@ -19,6 +19,7 @@ Without this, 100% system downtime occurs when auth has issues.
 
 import asyncio
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 import sys

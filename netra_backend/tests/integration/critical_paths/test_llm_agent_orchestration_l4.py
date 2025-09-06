@@ -18,6 +18,13 @@ This test validates real-world LLM agent orchestration including:
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
@@ -30,7 +37,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -46,7 +52,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 # Define execution context and result for L4 real testing
 @dataclass
@@ -264,7 +270,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             await self.tool_dispatcher.initialize()
             
             # Initialize real database session
-            db_session = await get_db_session()
+            db_session = await get_db()
             
             # Initialize supervisor agent with real dependencies for L4 testing
             self.supervisor_agent = SupervisorAgent(

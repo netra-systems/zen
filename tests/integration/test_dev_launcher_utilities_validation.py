@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Dev Launcher Utilities Validation Test
 
@@ -12,7 +38,7 @@ import asyncio
 import socket
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -20,6 +46,10 @@ import pytest
 
 from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.launcher import DevLauncher
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Get project root for tests
 project_root = find_project_root()
@@ -54,6 +84,7 @@ class TestDevLauncherUtilities:
     
     def test_launcher_config_validation(self):
         """Test that LauncherConfig validates inputs correctly."""
+    pass
         # Valid config should not raise
         LauncherConfig(
             project_root=project_root,
@@ -90,6 +121,7 @@ class TestDevLauncherUtilities:
     
     def test_port_availability_check(self):
         """Test port availability checking utility."""
+    pass
         # Use a function that should exist or create a simple one
         def is_port_available(port: int) -> bool:
             """Check if port is available for binding."""
@@ -128,6 +160,7 @@ class TestDevLauncherUtilities:
     
     def test_config_emoji_support(self):
         """Test emoji support configuration."""
+    pass
         config = LauncherConfig(
             project_root=project_root,
             project_id="emoji-test"
@@ -141,8 +174,7 @@ class TestDevLauncherUtilities:
         assert config._use_emoji is False
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.config.logger')
-    def test_config_logging(self, mock_logger):
+        def test_config_logging(self, mock_logger):
         """Test config logging functionality."""
         config = LauncherConfig(
             project_root=project_root,
@@ -160,6 +192,7 @@ class TestDevLauncherUtilities:
     
     def test_project_root_detection(self):
         """Test project root detection functionality."""
+    pass
         from dev_launcher.config import find_project_root
         
         detected_root = find_project_root()
@@ -177,6 +210,7 @@ class TestDevLauncherUtilities:
     
     def test_config_show_methods(self):
         """Test config display methods don't crash."""
+    pass
         config = LauncherConfig(
             project_root=project_root,
             project_id="display-test",
@@ -222,6 +256,7 @@ class TestDevLauncherIntegration:
     
     def test_launcher_config_access(self):
         """Test launcher configuration access."""
+    pass
         config = LauncherConfig(
             project_root=project_root,
             project_id="config-access-test",

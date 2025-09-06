@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any, Set
 import signal
 import resource
+from shared.isolated_environment import IsolatedEnvironment
 
 # Docker and system monitoring
 import docker

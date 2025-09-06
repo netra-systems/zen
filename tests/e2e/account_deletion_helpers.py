@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Account Deletion E2E Test Helpers - Complete Data Cleanup Testing
 
@@ -14,9 +37,12 @@ REQUIREMENTS:
 """
 import time
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class AccountDeletionE2ETester:
@@ -38,8 +64,7 @@ class AccountDeletionE2ETester:
     async def _setup_auth_service_mock(self) -> None:
         """Setup auth service with real user deletion logic."""
         # Mock: Auth service isolation for controlled GDPR deletion testing
-        self.mock_services["auth"] = MagicMock()
-        self.mock_services["auth"].delete_user = AsyncMock(return_value=True)
+        self.mock_services["auth"] = Magic        self.mock_services["auth"].delete_user = AsyncMock(return_value=True)
         self.mock_services["auth"].verify_user_deleted = AsyncMock(return_value=True)
         self.mock_services["auth"].get_user = AsyncMock(return_value=None)
         self.mock_services["auth"].create_user = AsyncMock(return_value={"id": "test_user_123"})
@@ -49,8 +74,7 @@ class AccountDeletionE2ETester:
     async def _setup_backend_service_mock(self) -> None:
         """Setup backend service with profile deletion logic."""
         # Mock: Backend service isolation for controlled profile deletion testing
-        self.mock_services["backend"] = MagicMock()
-        self.mock_services["backend"].delete_user_profile = AsyncMock(return_value=True)
+        self.mock_services["backend"] = Magic        self.mock_services["backend"].delete_user_profile = AsyncMock(return_value=True)
         self.mock_services["backend"].delete_user_threads = AsyncMock(return_value=True)
         self.mock_services["backend"].verify_profile_deleted = AsyncMock(return_value=True)
         self.mock_services["backend"].create_profile = AsyncMock(return_value={"id": "profile_123"})
@@ -61,8 +85,7 @@ class AccountDeletionE2ETester:
     async def _setup_clickhouse_mock(self) -> None:
         """Setup ClickHouse service with usage data deletion."""
         # Mock: ClickHouse isolation for controlled usage data deletion testing
-        self.mock_services["clickhouse"] = MagicMock()
-        self.mock_services["clickhouse"].delete_user_usage = AsyncMock(return_value=True)
+        self.mock_services["clickhouse"] = Magic        self.mock_services["clickhouse"].delete_user_usage = AsyncMock(return_value=True)
         self.mock_services["clickhouse"].delete_billing_data = AsyncMock(return_value=True)
         self.mock_services["clickhouse"].verify_data_deleted = AsyncMock(return_value=True)
         self.mock_services["clickhouse"].create_usage_data = AsyncMock(return_value={"id": "usage_123"})
@@ -72,8 +95,7 @@ class AccountDeletionE2ETester:
     async def _setup_websocket_manager_mock(self) -> None:
         """Setup WebSocket manager for deletion notifications."""
         # Mock: WebSocket isolation for controlled connection management testing
-        self.mock_services["websocket"] = MagicMock()
-        self.mock_services["websocket"].close_user_connections = AsyncMock(return_value=True)
+        self.mock_services["websocket"] = Magic        self.mock_services["websocket"].close_user_connections = AsyncMock(return_value=True)
         self.mock_services["websocket"].notify_deletion = AsyncMock(return_value=True)
         self.mock_services["websocket"].get_user_connections = AsyncMock(return_value=[])
 

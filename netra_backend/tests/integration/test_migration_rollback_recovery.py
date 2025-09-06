@@ -13,6 +13,9 @@ using real PostgreSQL containers (L3 realism) to catch production-level issues.
 
 import sys
 from pathlib import Path
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -22,7 +25,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -37,10 +39,14 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.integration
 class TestMigrationRollbackRecovery:
     """Integration tests for database migration rollback recovery mechanisms."""
+    pass
 
     @pytest.fixture(scope="function")
     def postgres_container(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create real PostgreSQL container for L3 testing using Docker CLI."""
+    pass
         container_name = f"test_postgres_{os.getpid()}_{id(self)}"
         
         try:
@@ -83,7 +89,10 @@ class TestMigrationRollbackRecovery:
 
     @pytest.fixture
     def migration_config(self, postgres_container):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create migration configuration with real database."""
+    pass
         pg = postgres_container
         database_url = f"postgresql://{pg['user']}:{pg['password']}@{pg['host']}:{pg['port']}/{pg['database']}"
         
@@ -105,6 +114,7 @@ class TestMigrationRollbackRecovery:
         - Automatic rollback to backup state
         - Database consistency after rollback
         """
+    pass
         # Setup initial database state
         initial_tables = await self._create_initial_schema(migration_config)
         backup_created = await self._create_schema_backup(migration_config)
@@ -139,6 +149,7 @@ class TestMigrationRollbackRecovery:
     @pytest.mark.asyncio
     async def test_partial_migration_rollback_atomicity(self, migration_config):
         """Test that partial migrations are rolled back atomically."""
+    pass
         # Setup multi-table migration scenario
         multi_table_setup = await self._setup_multi_table_migration(migration_config)
         
@@ -169,6 +180,7 @@ class TestMigrationRollbackRecovery:
 
     async def _create_initial_schema(self, config: Dict[str, Any]) -> List[str]:
         """Create initial database schema for testing."""
+    pass
         engine = create_async_engine(config["database_url"])
         try:
             async with engine.begin() as conn:
@@ -180,7 +192,8 @@ class TestMigrationRollbackRecovery:
                         email VARCHAR(100) UNIQUE
                     )
                 """))
-                return ["users"]
+                await asyncio.sleep(0)
+    return ["users"]
         finally:
             await engine.dispose()
 

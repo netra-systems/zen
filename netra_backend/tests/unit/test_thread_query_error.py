@@ -4,8 +4,9 @@ This test demonstrates the DB_QUERY_FAILED error when fetching a non-existent th
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.exc import ProgrammingError
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.database.repository_errors import RepositoryErrorHandler
@@ -20,7 +21,7 @@ class TestThreadQueryError:
         """Test that fetching a thread with asyncpg parameter error raises DB_QUERY_FAILED."""
         # Arrange
         repository = ThreadRepository()
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Simulate the exact asyncpg error we're seeing in production
         error_msg = "could not determine data type of parameter $1"
@@ -47,10 +48,10 @@ class TestThreadQueryError:
         """Test that thread repository returns None for non-existent threads without errors."""
         # Arrange
         repository = ThreadRepository()
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Configure mock to return None (thread doesn't exist)
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = None
         mock_session.execute.return_value = mock_result
         repository._session = mock_session
@@ -67,7 +68,7 @@ class TestThreadQueryError:
         """Test that development mode thread IDs are handled correctly."""
         # Arrange
         repository = ThreadRepository()
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Test various development mode thread ID formats
         dev_thread_ids = [

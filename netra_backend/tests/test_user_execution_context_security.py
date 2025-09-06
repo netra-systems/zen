@@ -10,6 +10,7 @@ data leakage between users or system failures.
 
 import pytest
 from netra_backend.app.models.user_execution_context import UserExecutionContext
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestUserExecutionContextSecurity:

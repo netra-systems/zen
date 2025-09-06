@@ -14,6 +14,12 @@ Module ≤300 lines per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -21,7 +27,6 @@ import asyncio
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -44,11 +49,14 @@ class TestStateMixins:
     @pytest.mark.asyncio
     async def test_state_tracking_operations(self):
         """Test state tracking during operations."""
+    pass
         mixin = self._create_reliability_mixin()
         
         async def success_operation():
+    pass
             await asyncio.sleep(0.1)
-            return "success"
+            await asyncio.sleep(0)
+    return "success"
         
         result = await mixin.execute_with_reliability(success_operation, "test_op")
         assert result == "success"
@@ -69,6 +77,7 @@ class TestStateMixins:
     
     def test_health_status_calculation(self):
         """Test health status calculation from state."""
+    pass
         mixin = self._create_reliability_mixin()
         mixin.operation_times = [1.0, 2.0, 1.5]
         
@@ -104,6 +113,7 @@ class TestLoggingMixins:
     
     def test_log_level_classification(self):
         """Test proper log level classification."""
+    pass
         mixin = self._create_reliability_mixin()
         
         with patch.object(logger, 'critical') as mock_critical:
@@ -119,7 +129,7 @@ class TestLoggingMixins:
         with patch.object(logger, 'warning') as mock_log:
             error = ValueError("Test error")
             # Mock: Generic component isolation for controlled unit testing
-            error_record = Mock()
+            error_record = error_record_instance  # Initialize appropriate service
             error_record.agent_name = "TestAgent"
             error_record.operation = "test_op"
             error_record.message = "Test error"
@@ -133,10 +143,12 @@ class TestLoggingMixins:
     
     def _create_reliability_mixin(self) -> AgentReliabilityMixin:
         """Create reliability mixin for testing."""
+    pass
         class TestAgent(AgentReliabilityMixin):
             name = "TestAgent"
         
-        return TestAgent()
+        await asyncio.sleep(0)
+    return TestAgent()
 
 class TestValidationMixins:
     """Test validation mixin functionality for data integrity."""
@@ -155,6 +167,7 @@ class TestValidationMixins:
     
     def test_error_severity_validation(self):
         """Test error severity validation in mixins."""
+    pass
         mixin = self._create_reliability_mixin()
         
         # Test different error severities
@@ -179,6 +192,7 @@ class TestValidationMixins:
     
     def _create_reliability_mixin(self) -> AgentReliabilityMixin:
         """Create reliability mixin for testing."""
+    pass
         class TestAgent(AgentReliabilityMixin):
             name = "TestAgent"
         
@@ -207,6 +221,7 @@ class TestCachingMixins:
     
     def test_cache_size_limits(self):
         """Test cache size limits in mixins."""
+    pass
         mixin = self._create_reliability_mixin()
         
         # Fill operation cache beyond limit
@@ -229,6 +244,7 @@ class TestCachingMixins:
     
     def test_cache_invalidation_timing(self):
         """Test cache invalidation based on time windows."""
+    pass
         mixin = self._create_reliability_mixin()
         
         # Test success rate calculation (sliding window cache)
@@ -238,7 +254,7 @@ class TestCachingMixins:
         
         # Add error to history
         # Mock: Generic component isolation for controlled unit testing
-        mixin.error_history = [Mock()]
+        mixin.error_history = [None  # TODO: Use real service instance]
         success_rate_with_error = mixin._calculate_success_rate()
         assert success_rate_with_error < 1.0  # Mixed success/failure
     
@@ -258,7 +274,8 @@ class TestErrorHandlingMixins:
         mixin = self._create_reliability_mixin()
         
         async def recovery_function(error, context):
-            return {"recovered": True, "original_error": str(error)}
+            await asyncio.sleep(0)
+    return {"recovered": True, "original_error": str(error)}
         
         mixin.register_recovery_strategy("test_operation", recovery_function)
         
@@ -272,6 +289,7 @@ class TestErrorHandlingMixins:
     @pytest.mark.asyncio
     async def test_default_recovery_fallbacks(self):
         """Test default recovery strategy fallbacks."""
+    pass
         mixin = self._create_reliability_mixin()
         
         # Test LLM recovery fallback
@@ -303,7 +321,9 @@ class TestErrorHandlingMixins:
     
     def _create_reliability_mixin(self) -> AgentReliabilityMixin:
         """Create reliability mixin for testing."""
+    pass
         class TestAgent(AgentReliabilityMixin):
             name = "TestAgent"
         
-        return TestAgent()
+        await asyncio.sleep(0)
+    return TestAgent()

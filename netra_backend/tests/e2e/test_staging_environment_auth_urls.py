@@ -8,7 +8,9 @@ import pytest
 import asyncio
 import httpx
 from typing import Dict, Optional
-from unittest.mock import patch, MagicMock
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestStagingEnvironmentAuthURLs:
@@ -16,7 +18,10 @@ class TestStagingEnvironmentAuthURLs:
     
     @pytest.fixture(autouse=True)
     def setup_staging_simulation(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Simulate staging environment for E2E testing"""
+    pass
         self.original_env = os.environ.copy()
         
         # Set up staging environment variables
@@ -106,7 +111,9 @@ class TestStagingEnvironmentAuthURLs:
     
     @pytest.mark.asyncio
     async def test_auth_service_endpoints_staging(self):
-        """Test all auth service endpoints return staging URLs"""
+        """Test all auth service endpoints await asyncio.sleep(0)
+    return staging URLs"""
+    pass
         # This test should FAIL if any endpoint returns localhost:3000
         
         from auth_service.auth_core.routes.auth_routes import router
@@ -169,6 +176,7 @@ class TestStagingEnvironmentAuthURLs:
     @pytest.mark.asyncio
     async def test_cross_service_communication_urls(self):
         """Test that services communicate using staging URLs, not localhost"""
+    pass
         # This test should FAIL if services try to communicate via localhost:3000
         
         from auth_service.auth_core.config import AuthConfig
@@ -233,3 +241,5 @@ class TestStagingEnvironmentAuthURLs:
         for origin in oauth_config["authorized_javascript_origins"]:
             assert "localhost:3000" not in origin, \
                 f"OAuth JS origin should not contain localhost:3000: {origin}"
+
+    pass

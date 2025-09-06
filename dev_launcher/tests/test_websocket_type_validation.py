@@ -22,9 +22,9 @@ import pytest
 import json
 import asyncio
 from typing import Dict, Any, List, Optional, Union
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from datetime import datetime, timezone
 from enum import Enum
+from shared.isolated_environment import IsolatedEnvironment
 
 # Backend imports 
 from netra_backend.app.schemas.registry import (

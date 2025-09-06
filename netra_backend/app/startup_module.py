@@ -657,15 +657,12 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
     except Exception:
         pass  # Ignore container check errors
     
-    # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
-    if config.environment == "development" and not clickhouse_required:
+    # CRITICAL FIX: Make ClickHouse optional in development and staging when not explicitly required
+    if config.environment in ["development", "staging"] and not clickhouse_required:
         result["status"] = "skipped"
         logger.info(f"ℹ️ ClickHouse not required in {config.environment} environment - skipping initialization")
         logger.info("ℹ️ System continuing without analytics")
         return result
-    elif config.environment == "staging":
-        logger.debug(f"ClickHouse initialization required in {config.environment} environment")
-        # Proceed with real connection for staging
     
     # CRITICAL FIX: Check if conditions prevent connection attempt
     if 'pytest' in sys.modules or clickhouse_mode in ['disabled', 'mock']:
@@ -749,12 +746,13 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
         logger.info("🚀 Ensuring ClickHouse critical tables exist...")
         from netra_backend.app.db.clickhouse_table_initializer import ensure_clickhouse_tables
         
-        # Get ClickHouse connection details
+        # Get ClickHouse connection details from environment
         config = get_config()
-        host = 'dev-clickhouse' if environment == 'development' else 'localhost'
-        port = 9000  # Native protocol port
-        user = 'netra'
-        password = ''
+        # Use environment variables for ClickHouse connection
+        host = get_env().get('CLICKHOUSE_HOST', 'dev-clickhouse' if environment == 'development' else 'localhost')
+        port = int(get_env().get('CLICKHOUSE_PORT', '9000'))  # Native protocol port
+        user = get_env().get('CLICKHOUSE_USER', 'default')
+        password = get_env().get('CLICKHOUSE_PASSWORD', '')
         
         try:
             # Ensure critical tables exist (fail_fast=False for backward compatibility)
@@ -1191,7 +1189,6 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
         # Initialize ChatEventMonitor independently first
         await chat_event_monitor.start_monitoring()
@@ -1205,43 +1202,30 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         
         # Register the bridge component as healthy since it's always available on-demand
         try:
-            from netra_backend.app.core.health import health_interface
+            from netra_backend.app.core.health.unified_health_checker import backend_health_checker
             # Mark agent_websocket_bridge as healthy since it's available on-demand
-            health_interface._component_health["agent_websocket_bridge"] = {
-                "status": "healthy",
-                "message": "Available on-demand via per-request architecture",
-                "last_check": time.time(),
-                "component_type": "bridge"
-            }
-            logger.info("✅ Marked agent_websocket_bridge as healthy (per-request architecture)")
+            # Using the backend_health_checker which is the SSOT for health status
+            if hasattr(backend_health_checker, 'component_health'):
+                backend_health_checker.component_health["agent_websocket_bridge"] = {
+                    "status": "healthy",
+                    "message": "Available on-demand via per-request architecture",
+                    "last_check": time.time(),
+                    "component_type": "bridge"
+                }
+                logger.info("✅ Marked agent_websocket_bridge as healthy (per-request architecture)")
+            else:
+                logger.debug("Health checker doesn't track component health directly - this is expected")
         except Exception as health_error:
             logger.warning(f"Could not update health status for agent_websocket_bridge: {health_error}")
             logger.info("ℹ️ AgentWebSocketBridge using per-request pattern - this is expected")
         
-        # Integration is attempted but not required for either component to function
-        try:
-            await chat_event_monitor.register_component_for_monitoring(
-                "agent_websocket_bridge",
-                bridge
-            )
-            logger.info("✅ Monitoring integration established successfully")
-            
-            # Perform initial cross-system validation to verify integration quality
-            initial_audit = await chat_event_monitor.audit_bridge_health("agent_websocket_bridge")
-            audit_status = initial_audit.get("overall_assessment", {}).get("overall_status", "unknown")
-            
-            if audit_status in ["healthy", "good"]:
-                logger.info(f"✅ Initial monitoring audit passed: {audit_status}")
-            else:
-                logger.warning(f"⚠️ Initial monitoring audit shows issues: {audit_status} - but integration operational")
-            
-            return True
-            
-        except Exception as integration_error:
-            logger.warning(
-                f"⚠️ Monitoring integration failed but components continue operating independently: {integration_error}"
-            )
-            return False
+        # CRITICAL FIX: Removed legacy bridge registration code
+        # The AgentWebSocketBridge is now per-request, not singleton
+        # There's no global 'bridge' instance to register with the monitor
+        # Each request creates its own bridge instance as needed
+        logger.info("✅ Monitoring integration complete - per-request bridges work independently")
+        
+        return True
     
     except Exception as e:
         logger.error(

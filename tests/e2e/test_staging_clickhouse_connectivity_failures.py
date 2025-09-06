@@ -69,6 +69,7 @@ class ClickHouseConnectivityResult:
 @pytest.mark.e2e
 class TestStagingClickHouseConnectivityFailures:
     """Test suite for ClickHouse connectivity failures in staging environment."""
+    pass
 
     def setup_method(self):
         """Setup isolated test environment."""
@@ -78,6 +79,7 @@ class TestStagingClickHouseConnectivityFailures:
         
     def teardown_method(self):
         """Clean up test environment."""
+    pass
         if hasattr(self, 'env'):
             self.env.reset_to_original()
 
@@ -95,6 +97,7 @@ class TestStagingClickHouseConnectivityFailures:
         Business Impact: Analytics system non-functional, deployment validation fails
         Root Causes: Service not provisioned, DNS issues, firewall blocking, port closed
         """
+    pass
         # Configuration loading
         clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai")
         clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123"))
@@ -139,11 +142,17 @@ class TestStagingClickHouseConnectivityFailures:
             
             assert False, (
                 f"CRITICAL CLICKHOUSE NETWORK TIMEOUT: Cannot connect to {clickhouse_host}:{clickhouse_port} "
-                f"after {connection_time:.2f}s timeout. This indicates:\n"
-                f"  1. ClickHouse service not provisioned in staging\n"
-                f"  2. Network policies blocking ClickHouse traffic\n"
-                f"  3. DNS resolution working but service unavailable\n"
-                f"  4. Port 8123 not open on staging ClickHouse instance\n\n"
+                f"after {connection_time:.2f}s timeout. This indicates:
+"
+                f"  1. ClickHouse service not provisioned in staging
+"
+                f"  2. Network policies blocking ClickHouse traffic
+"
+                f"  3. DNS resolution working but service unavailable
+"
+                f"  4. Port 8123 not open on staging ClickHouse instance
+
+"
                 f"Business Impact: Analytics system non-functional, deployment validation fails"
             )
             
@@ -188,6 +197,7 @@ class TestStagingClickHouseConnectivityFailures:
         
         This tests the actual application-level ClickHouse client used by the backend
         """
+    pass
         # Test ClickHouse client import and instantiation
         try:
             from netra_backend.app.db.clickhouse import get_clickhouse_client
@@ -211,7 +221,8 @@ class TestStagingClickHouseConnectivityFailures:
             
             # Connection succeeded
             assert connection_result is True, (
-                "ClickHouse client connection should return True on success"
+                "ClickHouse client connection should await asyncio.sleep(0)
+    return True on success"
             )
             assert connection_time < 5.0, (
                 f"ClickHouse client connection too slow: {connection_time:.2f}s. "
@@ -225,16 +236,28 @@ class TestStagingClickHouseConnectivityFailures:
             assert False, (
                 f"CRITICAL CLICKHOUSE CLIENT TIMEOUT: Client connection timed out after {connection_time:.2f}s. "
                 f"This causes /health/ready endpoint to return 503 status, blocking deployment validation. "
-                f"Health checks require ClickHouse connectivity for analytics system validation.\n\n"
-                f"Impact Analysis:\n"
-                f"  - Deployment validation fails (503 health response)\n"
-                f"  - Analytics data collection broken\n"
-                f"  - Monitoring dashboards show no data\n"
-                f"  - Business intelligence reports unavailable\n\n"
-                f"Root Cause Investigation Required:\n"
-                f"  1. Check ClickHouse service provisioning in staging\n"
-                f"  2. Verify network connectivity and firewall rules\n"
-                f"  3. Validate ClickHouse authentication credentials\n"
+                f"Health checks require ClickHouse connectivity for analytics system validation.
+
+"
+                f"Impact Analysis:
+"
+                f"  - Deployment validation fails (503 health response)
+"
+                f"  - Analytics data collection broken
+"
+                f"  - Monitoring dashboards show no data
+"
+                f"  - Business intelligence reports unavailable
+
+"
+                f"Root Cause Investigation Required:
+"
+                f"  1. Check ClickHouse service provisioning in staging
+"
+                f"  2. Verify network connectivity and firewall rules
+"
+                f"  3. Validate ClickHouse authentication credentials
+"
                 f"  4. Test DNS resolution and service discovery"
             )
             
@@ -281,6 +304,7 @@ class TestStagingClickHouseConnectivityFailures:
         
         Deployment Impact: GCP Cloud Run deployment validation fails, preventing releases
         """
+    pass
         # Test backend health endpoint with ClickHouse dependency
         backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
         health_ready_url = f"{backend_url}/health/ready"
@@ -326,18 +350,35 @@ class TestStagingClickHouseConnectivityFailures:
                     
                     assert False, (
                         f"CRITICAL HEALTH CHECK FAILURE: /health/ready returned 503 after {response_time:.2f}s "
-                        f"due to ClickHouse connectivity issues.\n\n"
-                        f"ClickHouse Error: {clickhouse_error}\n\n"
-                        f"Full Error Response:\n{error_summary}\n\n"
-                        f"Business Impact:\n"
-                        f"  - Deployment validation fails (503 health response)\n"
-                        f"  - GCP Cloud Run marks service as unhealthy\n"
-                        f"  - Analytics data collection completely broken\n"
-                        f"  - Production release pipeline blocked\n\n"
-                        f"Root Cause Investigation:\n"
-                        f"  1. Verify ClickHouse service provisioning in staging\n"
-                        f"  2. Check network connectivity to clickhouse.staging.netrasystems.ai:8123\n"
-                        f"  3. Validate ClickHouse authentication and credentials\n"
+                        f"due to ClickHouse connectivity issues.
+
+"
+                        f"ClickHouse Error: {clickhouse_error}
+
+"
+                        f"Full Error Response:
+{error_summary}
+
+"
+                        f"Business Impact:
+"
+                        f"  - Deployment validation fails (503 health response)
+"
+                        f"  - GCP Cloud Run marks service as unhealthy
+"
+                        f"  - Analytics data collection completely broken
+"
+                        f"  - Production release pipeline blocked
+
+"
+                        f"Root Cause Investigation:
+"
+                        f"  1. Verify ClickHouse service provisioning in staging
+"
+                        f"  2. Check network connectivity to clickhouse.staging.netrasystems.ai:8123
+"
+                        f"  3. Validate ClickHouse authentication and credentials
+"
                         f"  4. Review firewall rules and security groups"
                     )
                 else:
@@ -373,6 +414,7 @@ class TestStagingClickHouseConnectivityFailures:
         
         Configuration Cascade: Missing config -> localhost fallback -> connection failure -> 503 health
         """
+    pass
         # Test ClickHouse configuration environment variables
         clickhouse_config_vars = {
             'CLICKHOUSE_HOST': {
@@ -441,14 +483,24 @@ class TestStagingClickHouseConnectivityFailures:
         
         # Report configuration failures
         if configuration_failures:
-            failure_report = "\n".join(f"  - {failure}" for failure in configuration_failures)
+            failure_report = "
+".join(f"  - {failure}" for failure in configuration_failures)
             assert False, (
-                f"CRITICAL CLICKHOUSE CONFIGURATION FAILURES:\n{failure_report}\n\n"
-                f"These configuration issues prevent ClickHouse connectivity, causing:\n"
-                f"  - Health check 503 responses\n"
-                f"  - Deployment validation failures\n"
-                f"  - Analytics system breakdown\n"
-                f"  - Production release pipeline blocks\n\n"
+                f"CRITICAL CLICKHOUSE CONFIGURATION FAILURES:
+{failure_report}
+
+"
+                f"These configuration issues prevent ClickHouse connectivity, causing:
+"
+                f"  - Health check 503 responses
+"
+                f"  - Deployment validation failures
+"
+                f"  - Analytics system breakdown
+"
+                f"  - Production release pipeline blocks
+
+"
                 f"Fix by updating staging environment variables with correct ClickHouse configuration."
             )
 
@@ -465,6 +517,7 @@ class TestStagingClickHouseConnectivityFailures:
         
         Infrastructure Gap: Staging != Production in ClickHouse availability
         """
+    pass
         clickhouse_host = "clickhouse.staging.netrasystems.ai"
         clickhouse_port = 8123
         
@@ -493,10 +546,14 @@ class TestStagingClickHouseConnectivityFailures:
                     assert False, (
                         f"CRITICAL CLICKHOUSE PROVISIONING FAILURE at {test_name.upper()}: "
                         f"{result.error_message} "
-                        f"(Response time: {result.response_time_seconds:.2f}s)\n\n"
+                        f"(Response time: {result.response_time_seconds:.2f}s)
+
+"
                         f"This indicates ClickHouse service provisioning gap in staging infrastructure. "
-                        f"Progressive test results:\n" +
-                        "\n".join(f"  {r['test']}: {'PASS' if r['success'] else 'FAIL'}" for r in test_results)
+                        f"Progressive test results:
+" +
+                        "
+".join(f"  {r['test']}: {'PASS' if r['success'] else 'FAIL'}" for r in test_results)
                     )
                     
             except Exception as e:
@@ -528,6 +585,7 @@ class TestStagingClickHouseConnectivityFailures:
         
         Configuration Issue: Dev timeouts != Staging latency requirements
         """
+    pass
         # Test ClickHouse timeout configuration
         timeout_config_vars = {
             'CLICKHOUSE_TIMEOUT': {
@@ -579,9 +637,13 @@ class TestStagingClickHouseConnectivityFailures:
         
         # Report timeout configuration issues
         if timeout_failures:
-            failure_report = "\n".join(f"  - {failure}" for failure in timeout_failures)
+            failure_report = "
+".join(f"  - {failure}" for failure in timeout_failures)
             assert False, (
-                f"CRITICAL CLICKHOUSE TIMEOUT MISCONFIGURATION:\n{failure_report}\n\n"
+                f"CRITICAL CLICKHOUSE TIMEOUT MISCONFIGURATION:
+{failure_report}
+
+"
                 f"Aggressive timeout settings cause premature connection failures in staging. "
                 f"Staging network latency requires more generous timeouts than development. "
                 f"This creates false negatives where ClickHouse is available but timeouts are too short."
@@ -597,7 +659,8 @@ class TestStagingClickHouseConnectivityFailures:
         try:
             socket.gethostbyname(host)
             response_time = time.time() - start_time
-            return ClickHouseConnectivityResult(
+            await asyncio.sleep(0)
+    return ClickHouseConnectivityResult(
                 test_type="dns_resolution",
                 host=host,
                 port=port,
@@ -753,6 +816,7 @@ async def test_clickhouse_staging_connectivity_quick_validation():
     EXPECTED TO FAIL: Quick validation of ClickHouse connectivity issues
     Purpose: Rapid feedback on ClickHouse provisioning and connectivity
     """
+    pass
     try:
         host = "clickhouse.staging.netrasystems.ai"
         port = 8123

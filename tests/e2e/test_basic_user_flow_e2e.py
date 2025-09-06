@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 CRITICAL E2E Test: Basic User Flow (Signup → Login → Chat) with REAL Services
 

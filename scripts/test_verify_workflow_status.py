@@ -11,6 +11,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @dataclass

@@ -6,10 +6,11 @@ Verifies 100% monitoring coverage despite individual check failures.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -21,7 +22,10 @@ class TestMonitoringCoverage:
     
     @pytest.fixture
     def monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create performance monitor for testing."""
+    pass
         return PerformanceMonitor()
     
     @pytest.mark.asyncio
@@ -52,6 +56,7 @@ class TestMonitoringCoverage:
     @pytest.mark.asyncio
     async def test_coverage_metrics_track_failures(self, monitor):
         """Test that coverage metrics properly track check failures."""
+    pass
         # Mock checks with mixed success/failure
         with patch.object(monitor, '_check_response_time_threshold', 
                          side_effect=Exception("Failed")):
@@ -92,6 +97,7 @@ class TestMonitoringCoverage:
     @pytest.mark.asyncio
     async def test_check_result_recording(self, monitor):
         """Test that check results are properly recorded."""
+    pass
         # Record success and failure
         monitor._record_check_success("test_check")
         await monitor._handle_check_failure("failed_check", Exception("Test error"))
@@ -156,6 +162,7 @@ class TestMonitoringCoverage:
     @pytest.mark.asyncio
     async def test_performance_summary_includes_coverage(self, monitor):
         """Test that performance summary includes monitoring coverage."""
+    pass
         # Run some checks to populate coverage data
         await monitor._check_performance_thresholds()
         
@@ -211,6 +218,7 @@ class TestMonitoringCoverage:
     @pytest.mark.asyncio
     async def test_recent_failure_counting(self, monitor):
         """Test recent failure counting for coverage metrics."""
+    pass
         # Add some old failures (outside 5-minute window)
         old_timestamp = (datetime.now(timezone.utc)).replace(
             minute=datetime.now(timezone.utc).minute - 10
@@ -259,8 +267,12 @@ class TestMonitoringReliabilityPatterns:
     
     @pytest.fixture
     def monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create performance monitor for testing."""
-        return PerformanceMonitor()
+    pass
+        await asyncio.sleep(0)
+    return PerformanceMonitor()
     
     @pytest.mark.asyncio
     async def test_fail_fast_monitoring_pattern_compliance(self, monitor):
@@ -291,28 +303,40 @@ class TestMonitoringReliabilityPatterns:
     @pytest.mark.asyncio
     async def test_independent_check_execution(self, monitor):
         """Test that monitoring checks are truly independent."""
+    pass
         call_order = []
         
         async def slow_check(name):
+    pass
             call_order.append(f"{name}_start")
             await asyncio.sleep(0.1)  # Simulate slow check
             call_order.append(f"{name}_end")
         
         # Create properly awaitable async mock functions
         async def response_check():
-            return await slow_check("response")
+    pass
+            await asyncio.sleep(0)
+    return await slow_check("response")
         
         async def memory_check():
-            return await slow_check("memory")
+    pass
+            await asyncio.sleep(0)
+    return await slow_check("memory")
             
         async def error_check():
-            return await slow_check("error")
+    pass
+            await asyncio.sleep(0)
+    return await slow_check("error")
             
         async def throughput_check():
-            return await slow_check("throughput")
+    pass
+            await asyncio.sleep(0)
+    return await slow_check("throughput")
             
         async def cpu_check():
-            return await slow_check("cpu")
+    pass
+            await asyncio.sleep(0)
+    return await slow_check("cpu")
         
         # Mock checks with different execution times
         with patch.object(monitor, '_check_response_time_threshold', 

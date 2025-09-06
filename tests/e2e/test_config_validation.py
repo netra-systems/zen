@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """Unified test configuration validation
 
 Test file to validate that the unified test configuration

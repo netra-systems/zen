@@ -5,6 +5,7 @@ This test validates the simplified UVS architecture without complex dependencies
 
 import pytest
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestUVSSimplified:

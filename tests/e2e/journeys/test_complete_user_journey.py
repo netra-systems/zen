@@ -100,6 +100,7 @@ from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import httpx

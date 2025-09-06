@@ -15,6 +15,7 @@ prevents connection failures during deployment changes and multi-environment sup
 import asyncio
 import json
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

@@ -10,7 +10,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest

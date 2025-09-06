@@ -7,16 +7,9 @@ Provides standardized execution context and result structures.
 from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from dataclasses import dataclass
-from enum import Enum
 
-
-class ExecutionStatus(Enum):
-    """Execution status enumeration"""
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+# SSOT: Import ExecutionStatus from core_enums to prevent duplication
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
 @dataclass
@@ -29,6 +22,12 @@ class ExecutionContext:
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     correlation_id: Optional[str] = None
+    
+    # Agent-specific context
+    run_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    state: Optional[Any] = None
+    stream_updates: bool = False
     
     # Execution parameters
     parameters: Dict[str, Any] = None
@@ -92,7 +91,7 @@ class ExecutionResult:
     @property
     def is_success(self) -> bool:
         """Check if execution was successful"""
-        return self.status == ExecutionStatus.SUCCESS
+        return self.status == ExecutionStatus.COMPLETED
     
     @property
     def is_failed(self) -> bool:
@@ -102,7 +101,22 @@ class ExecutionResult:
     @property
     def is_complete(self) -> bool:
         """Check if execution is complete (success or failed)"""
-        return self.status in [ExecutionStatus.SUCCESS, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED]
+        return self.status in [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED]
+    
+    @property
+    def error(self) -> Optional[str]:
+        """Get error message (compatibility property)"""
+        return self.error_message
+    
+    @property
+    def result(self) -> Optional[Dict[str, Any]]:
+        """Get result data (compatibility property)"""
+        return self.data
+    
+    @property
+    def success(self) -> bool:
+        """Get success status (compatibility property)"""
+        return self.is_success
 
 
 # Type aliases for backward compatibility

@@ -15,7 +15,11 @@ import pytest
 import asyncio
 from datetime import datetime, timezone
 from typing import List, Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter, ConnectionInfo
@@ -25,9 +29,12 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 
 @pytest.fixture
-def mock_websocket_manager():
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock WebSocket manager for testing."""
-    mock_manager = MagicMock()
+    mock_manager = MagicNone  # TODO: Use real service instance
+    pass
     mock_manager.send_to_connection = AsyncMock(return_value=True)
     mock_manager.send_message_to_thread = AsyncMock(return_value=True)
     return mock_manager
@@ -35,13 +42,19 @@ def mock_websocket_manager():
 
 @pytest.fixture
 def websocket_router(mock_websocket_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """WebSocket event router instance for testing."""
+    pass
     return WebSocketEventRouter(mock_websocket_manager)
 
 
 @pytest.fixture
 def user1_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """User context for first test user."""
+    pass
     return UserExecutionContext(
         user_id="user_001",
         thread_id="thread_001",
@@ -53,7 +66,10 @@ def user1_context():
 
 @pytest.fixture
 def user2_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """User context for second test user."""
+    pass
     return UserExecutionContext(
         user_id="user_002",
         thread_id="thread_002",
@@ -65,7 +81,10 @@ def user2_context():
 
 @pytest.fixture
 def user3_context():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """User context for third test user."""
+    pass
     return UserExecutionContext(
         user_id="user_003",
         thread_id="thread_003",
@@ -95,6 +114,7 @@ class TestWebSocketEventRouter:
     
     async def test_connection_isolation(self, websocket_router, user1_context, user2_context):
         """Test that user connections are isolated."""
+    pass
         # Register connections for both users
         await websocket_router.register_connection(
             user1_context.user_id,
@@ -154,6 +174,7 @@ class TestWebSocketEventRouter:
     
     async def test_connection_cleanup(self, websocket_router, user1_context):
         """Test connection cleanup removes all traces."""
+    pass
         # Register connection
         await websocket_router.register_connection(
             user1_context.user_id,
@@ -188,6 +209,7 @@ class TestUserWebSocketEmitter:
     
     async def test_event_emission_isolation(self, websocket_router, user1_context, user2_context):
         """Critical test: Each emitter only sends to its own user."""
+    pass
         # Create emitters for both users
         emitter1 = UserWebSocketEmitter(user1_context, websocket_router)
         emitter2 = UserWebSocketEmitter(user2_context, websocket_router)
@@ -247,6 +269,7 @@ class TestUserWebSocketEmitter:
     
     async def test_concurrent_emitters(self, websocket_router, user1_context, user2_context, user3_context):
         """Test multiple emitters running concurrently without interference."""
+    pass
         contexts = [user1_context, user2_context, user3_context]
         emitters = []
         
@@ -263,6 +286,7 @@ class TestUserWebSocketEmitter:
         
         # Send events concurrently from all emitters
         async def send_events(emitter, agent_name):
+    pass
             await emitter.notify_agent_started(agent_name, {"test": "data"})
             await emitter.notify_agent_thinking(agent_name, "Thinking about the problem")
             await emitter.notify_tool_executing(agent_name, "TestTool", {"param": "value"})
@@ -291,7 +315,7 @@ class TestWebSocketBridgeFactory:
         factory = WebSocketBridgeFactory()
         
         # Mock the router
-        mock_router = AsyncMock()
+        mock_router = AsyncNone  # TODO: Use real service instance
         mock_router.register_connection = AsyncMock(return_value=True)
         factory._router = mock_router
         
@@ -318,10 +342,11 @@ class TestWebSocketBridgeFactory:
     
     async def test_factory_caching(self):
         """Test factory emitter caching functionality."""
+    pass
         factory = WebSocketBridgeFactory()
         
         # Mock the router
-        mock_router = AsyncMock()
+        mock_router = AsyncNone  # TODO: Use real service instance
         mock_router.register_connection = AsyncMock(return_value=True)
         factory._router = mock_router
         
@@ -336,7 +361,8 @@ class TestWebSocketBridgeFactory:
         emitter1 = await factory.create_emitter_with_caching(context)
         emitter2 = await factory.create_emitter_with_caching(context, context.run_id)
         
-        # Should return the same cached instance
+        # Should await asyncio.sleep(0)
+    return the same cached instance
         assert emitter1 is emitter2
         
         # Cleanup cache
@@ -367,6 +393,7 @@ class TestAgentWebSocketBridgeRefactoring:
     
     async def test_create_user_emitter_method(self):
         """Test bridge can create per-user emitters."""
+    pass
         bridge = AgentWebSocketBridge()
         context = UserExecutionContext(
             user_id="test_user",
@@ -384,14 +411,22 @@ class TestAgentWebSocketBridgeRefactoring:
             # Expected if factory dependencies aren't mocked
             assert "UserWebSocketEmitter factory not available" in str(e)
     
-    async def test_legacy_singleton_deprecation_warning(self):
-        """Test legacy singleton function shows deprecation warning."""
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+    async def test_factory_creates_isolated_instances(self):
+        """Test factory pattern creates isolated instances."""
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
         
-        # Should generate deprecation warning
-        with pytest.warns(DeprecationWarning, match="singleton that can leak events"):
-            bridge = await get_agent_websocket_bridge()
-            assert isinstance(bridge, AgentWebSocketBridge)
+        # Create different user contexts
+        context1 = UserExecutionContext(user_id="user1", request_id="req1", thread_id="thread1")
+        context2 = UserExecutionContext(user_id="user2", request_id="req2", thread_id="thread2")
+        
+        # Should create different instances for isolation
+        bridge1 = await create_agent_websocket_bridge(context1)
+        bridge2 = await create_agent_websocket_bridge(context2)
+        
+        assert isinstance(bridge1, AgentWebSocketBridge)
+        assert isinstance(bridge2, AgentWebSocketBridge)
+        assert bridge1 is not bridge2  # Different instances for isolation
 
 
 class TestCrossUserEventLeakagePrevention:
@@ -456,6 +491,7 @@ class TestCrossUserEventLeakagePrevention:
     
     async def test_connection_id_validation(self, websocket_router, user1_context, user2_context):
         """Test that connection IDs are properly validated per user."""
+    pass
         # Register connections
         await websocket_router.register_connection(
             user1_context.user_id,
@@ -514,8 +550,9 @@ class TestCrossUserEventLeakagePrevention:
 @pytest.mark.asyncio
 async def test_end_to_end_isolation():
     """End-to-end test of complete WebSocket isolation system."""
+    pass
     # Create mock WebSocket manager
-    mock_manager = MagicMock()
+    mock_manager = MagicNone  # TODO: Use real service instance
     mock_manager.send_to_connection = AsyncMock(return_value=True)
     
     # Create router

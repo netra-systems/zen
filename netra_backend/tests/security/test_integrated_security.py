@@ -5,6 +5,7 @@ Tests integrated security across all components
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time

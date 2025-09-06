@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

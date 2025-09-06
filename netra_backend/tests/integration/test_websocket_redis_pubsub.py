@@ -10,10 +10,14 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
@@ -21,14 +25,13 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -42,9 +45,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     verify_redis_connection,
 
-    wait_for_message,
-
-)
+    wait_for_message)
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
 
@@ -53,6 +54,7 @@ from test_framework.real_services import get_real_services
 @pytest.mark.integration
 
 class TestWebSocketRedisPubSubL3:
+    pass
 
     """L3 integration tests for WebSocket connections with real Redis pub/sub."""
     
@@ -132,6 +134,10 @@ class TestWebSocketRedisPubSubL3:
     @pytest.fixture
 
     def test_users(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    await asyncio.sleep(0)
+    return None
 
         """Create test users for WebSocket testing."""
 

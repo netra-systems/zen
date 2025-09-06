@@ -6,6 +6,7 @@ Verifies that all required origins are included in CORS configuration
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
 project_root = Path(__file__).parent
@@ -62,7 +63,7 @@ def test_cors_staging_origins():
         "https://api.staging.netrasystems.ai",
         "http://localhost:3000",
         "https://evil.com",
-        "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
+        "https://auth.staging.netrasystems.ai",
     ]
     
     for origin in test_origins:

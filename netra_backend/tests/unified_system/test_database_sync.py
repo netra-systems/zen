@@ -7,15 +7,17 @@ WebSocket event propagation, and frontend state consistency.
 Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 import sqlalchemy
@@ -25,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,
@@ -69,10 +71,10 @@ class TestDatabaseSynchronization:
         # Mock WebSocket connection for user
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_connection = AsyncMock()
+        mock_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_connection.state = MagicMock()
+        mock_connection.state = MagicNone  # TODO: Use real service instance
 
         mock_connection.state.value = 1  # CONNECTED state
         
@@ -265,18 +267,18 @@ class TestDatabaseSynchronization:
         # Mock WebSocket connections for multiple users
 
         # Mock: Generic component isolation for controlled unit testing
-        user1_connection = AsyncMock()
+        user1_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        user1_connection.state = MagicMock()
+        user1_connection.state = MagicNone  # TODO: Use real service instance
 
         user1_connection.state.value = 1
         
         # Mock: Generic component isolation for controlled unit testing
-        user2_connection = AsyncMock()
+        user2_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        user2_connection.state = MagicMock()
+        user2_connection.state = MagicNone  # TODO: Use real service instance
 
         user2_connection.state.value = 1
         
@@ -374,26 +376,26 @@ class TestDatabaseSynchronization:
         # Mock multiple tabs for same user
 
         # Mock: Generic component isolation for controlled unit testing
-        tab1_connection = AsyncMock()
+        tab1_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        tab1_connection.state = MagicMock()
+        tab1_connection.state = MagicNone  # TODO: Use real service instance
 
         tab1_connection.state.value = 1
         
         # Mock: Generic component isolation for controlled unit testing
-        tab2_connection = AsyncMock()
+        tab2_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        tab2_connection.state = MagicMock()
+        tab2_connection.state = MagicNone  # TODO: Use real service instance
 
         tab2_connection.state.value = 1
         
         # Mock: Generic component isolation for controlled unit testing
-        tab3_connection = AsyncMock()
+        tab3_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        tab3_connection.state = MagicMock()
+        tab3_connection.state = MagicNone  # TODO: Use real service instance
 
         tab3_connection.state.value = 1
         
@@ -517,10 +519,10 @@ class TestDatabaseSynchronization:
         for i in range(3):
 
             # Mock: Generic component isolation for controlled unit testing
-            conn = AsyncMock()
+            conn = AsyncNone  # TODO: Use real service instance
 
             # Mock: Generic component isolation for controlled unit testing
-            conn.state = MagicMock()
+            conn.state = MagicNone  # TODO: Use real service instance
 
             conn.state.value = 1
 
@@ -723,10 +725,10 @@ class TestDatabaseSynchronization:
         # Mock connection
 
         # Mock: Generic component isolation for controlled unit testing
-        connection = AsyncMock()
+        connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        connection.state = MagicMock()
+        connection.state = MagicNone  # TODO: Use real service instance
 
         connection.state.value = 1
         
@@ -743,10 +745,10 @@ class TestDatabaseSynchronization:
         # Create new connection (recovery)
 
         # Mock: Generic component isolation for controlled unit testing
-        new_connection = AsyncMock()
+        new_connection = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        new_connection.state = MagicMock()
+        new_connection.state = MagicNone  # TODO: Use real service instance
 
         new_connection.state.value = 1
         

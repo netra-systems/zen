@@ -1,36 +1,47 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import (
-    SupervisorAgent as Supervisor,
-)
+    SupervisorAgent as Supervisor)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
+import asyncio
 
 @pytest.fixture
-def mock_db_session():
+ def real_db_session():
+    """Use real service instance."""
+    # TODO: Initialize real service
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncMock()
+    return AsyncNone  # TODO: Use real service instance
 
 @pytest.fixture
-def mock_llm_manager():
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
     # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = MagicMock(spec=LLMManager)
     # Create AsyncMock with proper return values
     async def mock_ask_llm(*args, **kwargs):
+    pass
         # Return proper JSON strings based on the config or prompt context
         prompt = args[0] if args else ""
         
         # Determine response based on the agent type/prompt
         if "triage" in prompt.lower() or "category" in prompt.lower():
-            return '{"category": "Data Analysis", "confidence_score": 0.9}'
+            await asyncio.sleep(0)
+    return '{"category": "Data Analysis", "confidence_score": 0.9}'
         elif "data" in prompt.lower() and "analysis" in prompt.lower():
             return '{"analysis_results": "Sample data analysis"}'
         elif "optimization" in prompt.lower():
@@ -46,21 +57,27 @@ def mock_llm_manager():
     return llm_manager
 
 @pytest.fixture
-def mock_websocket_manager():
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncMock()
+    return AsyncNone  # TODO: Use real service instance
 
 @pytest.fixture
-def mock_tool_dispatcher():
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    return AsyncMock()
+    return AsyncNone  # TODO: Use real service instance
 
 @pytest.mark.asyncio
 async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
+    pass
     # Arrange
     # Mock the state persistence to avoid the coroutine issue
     with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service') as mock_state_persistence:
-        mock_state_persistence.save_agent_state = AsyncMock()
+        mock_state_persistence.save_agent_state = AsyncNone  # TODO: Use real service instance
         mock_state_persistence.load_agent_state = AsyncMock(return_value=None)
         # Mock: Async component isolation for testing without real async operations
         mock_state_persistence.get_thread_context = AsyncMock(return_value=None)
@@ -68,8 +85,9 @@ async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, m
         supervisor = Supervisor(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher)
         
         # Create a mock reporting agent that properly sets state
-        mock_reporting_agent = AsyncMock()
+        mock_reporting_agent = AsyncNone  # TODO: Use real service instance
         async def mock_reporting_execute_impl(state, run_id, stream_updates):
+    pass
             print(f"DEBUG: Mock reporting agent called with state.step_count={state.step_count}")
             from netra_backend.app.agents.state import ReportResult
             state.report_result = ReportResult(

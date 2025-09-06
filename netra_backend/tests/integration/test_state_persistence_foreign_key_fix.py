@@ -6,6 +6,7 @@ dev users to prevent foreign key violations when saving agent state.
 
 import uuid
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from sqlalchemy import select

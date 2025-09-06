@@ -6,6 +6,10 @@ Test classes: TestSupervisorConsolidatedAgentRouting, TestSupervisorErrorCascade
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,7 +17,6 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -25,11 +28,11 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.base.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    ExecutionStrategy,
 )
+from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -132,7 +135,7 @@ class TestSupervisorConsolidatedAgentRouting:
         for agent_name in ["triage", "data", "optimization"]:
             agent = supervisor.agents.get(agent_name)
             # Mock: Generic component isolation for controlled unit testing
-            agent.execute = AsyncMock()
+            agent.execute = AsyncNone  # TODO: Use real service instance
             agent.execute.return_value = create_agent_state("Complex query")
         
         pipeline = create_pipeline_config(

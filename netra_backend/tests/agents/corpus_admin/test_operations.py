@@ -5,20 +5,27 @@ Business Value: Revenue-critical component
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestOperations:
     """Test suite for CorpusOperationHandler"""
     
     @pytest.fixture
-    def mock_tool_dispatcher(self):
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock tool dispatcher"""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def instance(self, mock_tool_dispatcher):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return CorpusOperationHandler(mock_tool_dispatcher)
     
     def test_initialization(self, instance):
@@ -30,6 +37,7 @@ class TestOperations:
     
     def test_get_corpus_statistics(self, instance):
         """Test core statistics functionality"""
+    pass
         # Test happy path
         result = instance.get_corpus_statistics()
         assert result is not None
@@ -47,6 +55,7 @@ class TestOperations:
     
     def test_analysis_operation_detection(self, instance):
         """Test analysis operation detection"""
+    pass
         assert instance._is_analysis_operation("analyze") == True
         assert instance._is_analysis_operation("export") == True
         assert instance._is_analysis_operation("import") == True
@@ -62,3 +71,5 @@ class TestOperations:
         assert isinstance(stats["total_corpora"], int)
         assert isinstance(stats["total_documents"], int)
         assert isinstance(stats["total_size_gb"], float)
+
+    pass

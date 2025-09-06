@@ -5,15 +5,19 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.models.session import Session
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestSession:
     """Test suite for Session"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return Session(session_id="test_session_123", user_id="test_user_456")
     
     def test_initialization(self, instance):
@@ -23,6 +27,7 @@ class TestSession:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test happy path
         instance.store_data("test_key", "test_value")
         result = instance.get_data("test_key")
@@ -36,6 +41,7 @@ class TestSession:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -43,3 +49,5 @@ class TestSession:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

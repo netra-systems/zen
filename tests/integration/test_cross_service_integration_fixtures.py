@@ -6,7 +6,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi import FastAPI, Request
@@ -18,12 +18,16 @@ from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceStat
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import (
-    setup_cors_middleware,
-)
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+    setup_cors_middleware)
 
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
+    pass
 
     def app(self):
         """Create test FastAPI app."""
@@ -31,25 +35,32 @@ class TestSyntaxFix:
         
         @app.get("/test")
         async def test_endpoint():
-            return {"message": "test"}
+            await asyncio.sleep(0)
+    return {"message": "test"}
         
         @app.options("/test")
         async def test_options():
-            return Response(status_code=200)
+            await asyncio.sleep(0)
+    return Response(status_code=200)
         
         return app
 
     def app(self):
         """Create test FastAPI app."""
+    pass
         app = FastAPI()
         
         @app.get("/test")
         async def test_endpoint():
-            return {"message": "test"}
+    pass
+            await asyncio.sleep(0)
+    return {"message": "test"}
         
         @app.options("/test")
         async def test_options():
-            return Response(status_code=200)
+    pass
+            await asyncio.sleep(0)
+    return Response(status_code=200)
         
         return app
 
@@ -69,6 +80,7 @@ class TestSyntaxFix:
 
     def health_monitor(self):
         """Create test health monitor."""
+    pass
         return HealthMonitor(check_interval=1)
 
     def service_discovery(self):

@@ -68,38 +68,28 @@ class AuthDatabaseManager:
         is_valid, error_msg = builder.validate()
         if not is_valid:
             logger.error(f"Database configuration validation failed: {error_msg}")
-            # For backwards compatibility, fall back to basic URL construction
-            # if validation fails in development/test environments
+            # NO MANUAL FALLBACKS - DatabaseURLBuilder is the SINGLE SOURCE OF TRUTH
             environment = env_vars.get("ENVIRONMENT", "development")
-            if environment in ["development", "test"]:
-                logger.warning("Using fallback URL construction for development/test")
-                return (
-                    f"postgresql+asyncpg://"
-                    f"{env.get('POSTGRES_USER', 'netra')}:"
-                    f"{env.get('POSTGRES_PASSWORD', 'netra123')}@"
-                    f"{env.get('POSTGRES_HOST', 'postgres')}:"
-                    f"{env.get('POSTGRES_PORT', '5432')}/"
-                    f"{env.get('POSTGRES_DB', 'netra_dev')}"
-                )
-            else:
-                raise ValueError(f"Database configuration error: {error_msg}")
+            raise ValueError(
+                f"Database configuration error in {environment} environment: {error_msg}. "
+                f"DatabaseURLBuilder must be able to construct a valid URL. "
+                f"Check your environment variables."
+            )
         
         # Get URL for current environment
         database_url = builder.get_url_for_environment(sync=False)
         
         if not database_url:
+            # NO MANUAL FALLBACKS - DatabaseURLBuilder is the SINGLE SOURCE OF TRUTH
             environment = env_vars.get("ENVIRONMENT", "development")
-            logger.warning(f"No database URL generated for {environment} environment")
-            # Fallback for development/test
-            if environment in ["development", "test"]:
-                return (
-                    f"postgresql+asyncpg://"
-                    f"{env.get('POSTGRES_USER', 'netra')}:"
-                    f"{env.get('POSTGRES_PASSWORD', 'netra123')}@"
-                    f"{env.get('POSTGRES_HOST', 'postgres')}:"
-                    f"{env.get('POSTGRES_PORT', '5432')}/"
-                    f"{env.get('POSTGRES_DB', 'netra_dev')}"
-                )
-            return ""
+            debug_info = builder.debug_info()
+            logger.error(f"No database URL generated for {environment} environment. Debug info: {debug_info}")
+            raise ValueError(
+                f"DatabaseURLBuilder failed to generate URL for {environment} environment. "
+                f"Ensure DATABASE_URL is set or proper POSTGRES_* environment variables are configured. "
+                f"Debug info: {debug_info}"
+            )
         
+        # Log safe connection info
+        logger.info(builder.get_safe_log_message())
         return database_url

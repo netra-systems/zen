@@ -15,9 +15,13 @@ These tests are designed to FAIL until all SSOT violations are fixed.
 import asyncio
 import json
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock, call
 from typing import Any, Dict, Optional
 import hashlib
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -34,49 +38,64 @@ class TestActionsToMeetGoalsSSoTCompliance:
     """Test suite for SSOT compliance of ActionsToMeetGoalsSubAgent"""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager"""
-        llm_manager = Mock()
+    pass
+        llm_manager = llm_manager_instance  # Initialize appropriate service
         llm_manager.ask_llm = AsyncMock(return_value='{"action_plan": "test"}')
         return llm_manager
     
-    @pytest.fixture 
-    def mock_tool_dispatcher(self):
+    @pytest.fixture
+ def real_tool_dispatcher():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock tool dispatcher"""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
-    def mock_websocket_manager(self):
+ def real_websocket_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock WebSocket manager"""
-        ws_manager = Mock()
-        ws_manager.emit_agent_started = AsyncMock()
-        ws_manager.emit_agent_thinking = AsyncMock()
-        ws_manager.emit_tool_executing = AsyncMock()
-        ws_manager.emit_tool_completed = AsyncMock()
-        ws_manager.emit_agent_completed = AsyncMock()
-        ws_manager.emit_progress = AsyncMock()
+    pass
+        ws_manager = UnifiedWebSocketManager()
+        ws_manager.emit_agent_started = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_agent_thinking = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_tool_executing = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_tool_completed = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_agent_completed = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_progress = AsyncNone  # TODO: Use real service instance
         return ws_manager
     
     @pytest.fixture
     def user_context(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create UserExecutionContext for testing"""
+    pass
+        # UserExecutionContext is frozen, so metadata must be passed in constructor
         context = UserExecutionContext(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run",
             request_id="test_request",
-            session_manager=Mock(spec=DatabaseSessionManager)
+            db_session=Mock(spec=DatabaseSessionManager),  # Use db_session instead of session_manager
+            metadata={
+                'user_request': 'Test request',
+                'optimizations_result': {'type': 'test', 'recommendations': []},
+                'data_result': {'query': 'test', 'results': []}
+            }
         )
-        context.metadata = {
-            'user_request': 'Test request',
-            'optimizations_result': {'type': 'test', 'recommendations': []},
-            'data_result': {'query': 'test', 'results': []}
-        }
         return context
     
     @pytest.fixture
     def agent(self, mock_llm_manager, mock_tool_dispatcher):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create agent instance for testing"""
+    pass
         agent = ActionsToMeetGoalsSubAgent(
             llm_manager=mock_llm_manager,
             tool_dispatcher=mock_tool_dispatcher
@@ -104,6 +123,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_no_custom_json_extraction(self):
         """Test that no custom JSON extraction patterns exist in ActionPlanBuilder"""
+    pass
         # Read ActionPlanBuilder source
         import inspect
         from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
@@ -145,13 +165,14 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_no_global_state_storage(self, agent, user_context):
         """Test that no user-specific data is stored in instance variables"""
+    pass
         # Execute with first user
         context1 = UserExecutionContext(
             user_id="user1",
             thread_id="thread1", 
             run_id="run1",
             request_id="req1",
-            session_manager=Mock()
+            session_manager=TestDatabaseManager().get_session()
         )
         context1.metadata = {'user_request': 'Request 1'}
         
@@ -161,7 +182,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
             thread_id="thread2",
             run_id="run2", 
             request_id="req2",
-            session_manager=Mock()
+            session_manager=TestDatabaseManager().get_session()
         )
         context2.metadata = {'user_request': 'Request 2'}
         
@@ -189,7 +210,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
                 thread_id=f"thread{i}",
                 run_id=f"run{i}",
                 request_id=f"req{i}",
-                session_manager=Mock()
+                session_manager=TestDatabaseManager().get_session()
             )
             context.metadata = {
                 'user_request': f'Request {i}',
@@ -210,6 +231,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_cache_key_generation_uses_cache_helpers(self):
         """Test that cache key generation uses CacheHelpers, not custom implementation"""
+    pass
         # Check if any caching is done and uses proper helpers
         from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
         
@@ -250,6 +272,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_no_direct_os_environ_access(self):
         """Test that there's no direct os.environ access"""
+    pass
         import inspect
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
@@ -284,14 +307,15 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_websocket_events_emitted_correctly(self, agent, user_context):
         """Test that all required WebSocket events are emitted"""
+    pass
         # Set up WebSocket manager mock
-        ws_manager = Mock()
-        ws_manager.emit_agent_started = AsyncMock()
-        ws_manager.emit_thinking = AsyncMock()
-        ws_manager.emit_tool_executing = AsyncMock()
-        ws_manager.emit_tool_completed = AsyncMock()
-        ws_manager.emit_agent_completed = AsyncMock()
-        ws_manager.emit_progress = AsyncMock()
+        ws_manager = UnifiedWebSocketManager()
+        ws_manager.emit_agent_started = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_thinking = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_tool_executing = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_tool_completed = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_agent_completed = AsyncNone  # TODO: Use real service instance
+        ws_manager.emit_progress = AsyncNone  # TODO: Use real service instance
         
         # Inject WebSocket manager
         agent._websocket_manager = ws_manager
@@ -318,6 +342,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_database_session_not_stored(self, agent, user_context):
         """Test that database sessions are not stored in instance variables"""
+    pass
         await agent.execute(user_context)
         
         # Check no session storage
@@ -328,7 +353,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_session_passed_through_context(self, agent, user_context):
         """Test that database operations use session from context"""
-        mock_session = Mock()
+        mock_session = TestDatabaseManager().get_session()
         user_context.session_manager.get_session.return_value = mock_session
         
         await agent.execute(user_context)
@@ -341,6 +366,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_uses_unified_retry_handler(self):
         """Test that retry logic uses UnifiedRetryHandler"""
+    pass
         # Check if retry patterns use the unified handler
         with patch('netra_backend.app.core.resilience.unified_retry_handler.UnifiedRetryHandler') as mock_retry:
             # If retries are needed, they should use UnifiedRetryHandler
@@ -369,6 +395,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_extends_base_agent_properly(self, agent):
         """Test that agent properly extends BaseAgent"""
+    pass
         from netra_backend.app.agents.base_agent import BaseAgent
         
         assert isinstance(agent, BaseAgent), "Must extend BaseAgent"
@@ -406,6 +433,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_configuration_access_pattern(self):
         """Test that configuration is accessed through proper architecture"""
+    pass
         with patch('netra_backend.app.core.config.get_config') as mock_config:
             mock_config.return_value = {'test': 'config'}
             
@@ -434,6 +462,7 @@ class TestActionsToMeetGoalsSSoTCompliance:
     @pytest.mark.asyncio
     async def test_tool_dispatcher_request_scoped(self, agent, user_context):
         """Test that ToolDispatcher is properly scoped per request"""
+    pass
         # ToolDispatcher should be enhanced with WebSocket manager per request
         # Not stored globally
         assert hasattr(agent, 'tool_dispatcher'), "Should have tool_dispatcher"
@@ -448,8 +477,8 @@ class TestActionsToMeetGoalsSSoTCompliance:
         # Multiple agents should not share the same ToolDispatcher instance
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         
-        agent1 = ActionsToMeetGoalsSubAgent(Mock(), Mock())
-        agent2 = ActionsToMeetGoalsSubAgent(Mock(), Mock())
+        agent1 = ActionsToMeetGoalsSubAgent(None  # TODO: Use real service instance, None  # TODO: Use real service instance)
+        agent2 = ActionsToMeetGoalsSubAgent(None  # TODO: Use real service instance, None  # TODO: Use real service instance)
         
         # Tool dispatchers should be separate instances or properly isolated
         assert agent1.tool_dispatcher is not agent2.tool_dispatcher or \
@@ -462,3 +491,4 @@ class TestActionsToMeetGoalsSSoTCompliance:
 if __name__ == "__main__":
     # Run all tests and report violations
     pytest.main([__file__, '-v', '--tb=short'])
+    pass

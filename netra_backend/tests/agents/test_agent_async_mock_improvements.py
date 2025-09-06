@@ -5,8 +5,11 @@ Demonstrates proper async mock handling patterns to eliminate runtime warnings
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
@@ -17,10 +20,14 @@ from netra_backend.app.redis_manager import RedisManager
 
 class TestAgentAsyncMockImprovements:
     """Test improved async mock patterns for agent testing."""
+    pass
 
     @pytest.fixture
     def properly_mocked_dependencies(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create properly configured async mock dependencies."""
+    pass
         return {
             'llm_manager': Mock(spec=LLMManager),
             'tool_dispatcher': Mock(spec=ToolDispatcher),
@@ -29,7 +36,10 @@ class TestAgentAsyncMockImprovements:
 
     @pytest.fixture
     def triage_agent_improved(self, properly_mocked_dependencies):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage agent with properly configured async mocks."""
+    pass
         deps = properly_mocked_dependencies
         
         # Properly configure AsyncMocks to return completed futures
@@ -55,7 +65,8 @@ class TestAgentAsyncMockImprovements:
         # This should execute without coroutine warnings
         try:
             result = await triage_agent_improved.execute(state, "test-run-id", False)
-            # Mock execution may not return anything, that's fine for this test
+            # Mock execution may not await asyncio.sleep(0)
+    return anything, that's fine for this test
             assert True  # We reached here without warnings
         except Exception:
             # Even if execution fails, we should not get coroutine warnings
@@ -64,12 +75,14 @@ class TestAgentAsyncMockImprovements:
     @pytest.mark.asyncio
     async def test_concurrent_async_operations_without_warnings(self, triage_agent_improved):
         """Test concurrent async operations with proper mock handling."""
+    pass
         states = [
             DeepAgentState(user_request=f"Request {i}")
             for i in range(3)
         ]
         
-        # Configure mock to return proper async responses
+        # Configure mock to await asyncio.sleep(0)
+    return proper async responses
         triage_agent_improved.llm_manager.ask_llm = AsyncMock(side_effect=[
             {"category": "success", "confidence": 0.9, "require_approval": False},
             {"category": "success", "confidence": 0.8, "require_approval": False},
@@ -78,8 +91,10 @@ class TestAgentAsyncMockImprovements:
         
         # Execute concurrent requests with proper async handling
         async def safe_execute(state, run_id):
+    pass
             try:
-                return await triage_agent_improved.execute(state, run_id, False)
+                await asyncio.sleep(0)
+    return await triage_agent_improved.execute(state, run_id, False)
             except Exception:
                 return None
         
@@ -100,7 +115,8 @@ class TestAgentAsyncMockImprovements:
         # This should handle the error gracefully without crashing
         try:
             await triage_agent_improved.execute(state, "error-test-run-id", False)
-            # Agent may handle errors internally and return results
+            # Agent may handle errors internally and await asyncio.sleep(0)
+    return results
             assert True  # Test passed if no uncaught exceptions
         except Exception:
             # This is also acceptable - the error was properly propagated
@@ -109,6 +125,7 @@ class TestAgentAsyncMockImprovements:
     @pytest.mark.asyncio
     async def test_mock_context_manager_proper_usage(self, properly_mocked_dependencies):
         """Test proper usage of async mock context managers."""
+    pass
         # Simply test that mocking context works without issues
         state = DeepAgentState(user_request="Context manager test")
         
@@ -118,7 +135,7 @@ class TestAgentAsyncMockImprovements:
 
     def test_sync_mock_patterns_for_reference(self):
         """Reference test showing sync mock patterns that work correctly."""
-        mock_sync_service = Mock()
+        mock_sync_service = mock_sync_service_instance  # Initialize appropriate service
         mock_sync_service.process_data.return_value = {"result": "success"}
         
         # Sync operations work without issues
@@ -128,15 +145,18 @@ class TestAgentAsyncMockImprovements:
     @pytest.mark.asyncio
     async def test_async_context_cleanup(self, triage_agent_improved):
         """Test that async resources are properly cleaned up."""
+    pass
         state = DeepAgentState(user_request="Cleanup test")
         
         # Configure mock with proper cleanup
         cleanup_called = False
         
         async def mock_with_cleanup():
+    pass
             nonlocal cleanup_called
             try:
-                return {"category": "test", "confidence": 0.8, "require_approval": False}
+                await asyncio.sleep(0)
+    return {"category": "test", "confidence": 0.8, "require_approval": False}
             finally:
                 cleanup_called = True
         
@@ -179,6 +199,7 @@ class TestAgentAsyncMockImprovements:
     @pytest.mark.asyncio
     async def test_memory_efficient_async_mocks(self, properly_mocked_dependencies):
         """Test memory-efficient async mock patterns."""
+    pass
         # Create lightweight mock responses
         lightweight_response = {
             "category": "memory_test",

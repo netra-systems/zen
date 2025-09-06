@@ -25,6 +25,7 @@ Architecture: Modular helper functions maintain readability while staying under 
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 

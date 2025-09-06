@@ -227,6 +227,42 @@ class ReliabilityManager:
             "successful_calls": self._successful_calls,
             "timestamp": datetime.utcnow()
         }
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status of reliability manager (synchronous version)."""
+        health_status = "healthy"
+        if self._circuit_state == CircuitState.OPEN:
+            health_status = "degraded"
+        elif self._circuit_state == CircuitState.HALF_OPEN:
+            health_status = "recovering"
+        
+        # Calculate overall health
+        overall_health = health_status
+        
+        return {
+            "status": health_status,
+            "overall_health": overall_health,
+            "circuit_state": self._circuit_state.value,
+            "failure_count": self._failure_count,
+            "successful_calls": self._successful_calls,
+            "failure_threshold": self.failure_threshold,
+            "recovery_timeout": self.recovery_timeout,
+            "last_failure_time": self._last_failure_time,
+            "timestamp": datetime.utcnow()
+        }
+    
+    def reset_metrics(self) -> None:
+        """Reset reliability manager metrics."""
+        self._failure_count = 0
+        self._successful_calls = 0
+        self._half_open_call_count = 0
+        self._last_failure_time = None
+        self._circuit_state = CircuitState.CLOSED
+        logger.info("Reliability manager metrics reset")
+    
+    def reset_health_tracking(self) -> None:
+        """Reset health tracking state."""
+        self.reset_metrics()  # Same as reset_metrics for now
 
 
 __all__ = [

@@ -317,3 +317,107 @@ class AuthAuditRepository:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+
+class AuthRepository:
+    """Composite repository providing access to all auth repositories"""
+    
+    def __init__(self, session: Optional[AsyncSession] = None):
+        self.session = session
+        self.user_repo = None
+        self.session_repo = None
+        self.audit_repo = None
+        
+        if session:
+            self.user_repo = AuthUserRepository(session)
+            self.session_repo = AuthSessionRepository(session)
+            self.audit_repo = AuthAuditRepository(session)
+    
+    def _ensure_repositories(self):
+        """Ensure repositories are initialized"""
+        if not self.session:
+            raise RuntimeError("Database session not available")
+        if not self.user_repo:
+            self.user_repo = AuthUserRepository(self.session)
+            self.session_repo = AuthSessionRepository(self.session)
+            self.audit_repo = AuthAuditRepository(self.session)
+    
+    # User repository methods
+    async def get_user_by_email(self, email: str) -> Optional[AuthUser]:
+        """Get user by email"""
+        self._ensure_repositories()
+        return await self.user_repo.get_by_email(email)
+    
+    async def get_user_by_id(self, user_id: str) -> Optional[AuthUser]:
+        """Get user by ID"""
+        self._ensure_repositories()
+        return await self.user_repo.get_by_id(user_id)
+    
+    async def create_oauth_user(self, user_info: Dict) -> AuthUser:
+        """Create or update OAuth user"""
+        self._ensure_repositories()
+        return await self.user_repo.create_oauth_user(user_info)
+    
+    async def create_local_user(self, email: str, password_hash: str, full_name: Optional[str] = None) -> AuthUser:
+        """Create local user with password"""
+        self._ensure_repositories()
+        return await self.user_repo.create_local_user(email, password_hash, full_name)
+    
+    async def update_login_time(self, user_id: str):
+        """Update user's last login time"""
+        self._ensure_repositories()
+        return await self.user_repo.update_login_time(user_id)
+    
+    async def increment_failed_attempts(self, email: str) -> int:
+        """Increment failed login attempts"""
+        self._ensure_repositories()
+        return await self.user_repo.increment_failed_attempts(email)
+    
+    async def reset_failed_attempts(self, user_id: str):
+        """Reset failed login attempts"""
+        self._ensure_repositories()
+        return await self.user_repo.reset_failed_attempts(user_id)
+    
+    async def check_account_locked(self, email: str) -> bool:
+        """Check if account is locked"""
+        self._ensure_repositories()
+        return await self.user_repo.check_account_locked(email)
+    
+    # Session repository methods
+    async def create_session(self, user_id: str, refresh_token: str, client_info: Dict) -> AuthSession:
+        """Create new auth session"""
+        self._ensure_repositories()
+        return await self.session_repo.create_session(user_id, refresh_token, client_info)
+    
+    async def get_active_session(self, session_id: str) -> Optional[AuthSession]:
+        """Get active session by ID"""
+        self._ensure_repositories()
+        return await self.session_repo.get_active_session(session_id)
+    
+    async def revoke_session(self, session_id: str):
+        """Revoke a session"""
+        self._ensure_repositories()
+        return await self.session_repo.revoke_session(session_id)
+    
+    async def revoke_user_sessions(self, user_id: str):
+        """Revoke all sessions for a user"""
+        self._ensure_repositories()
+        return await self.session_repo.revoke_user_sessions(user_id)
+    
+    async def cleanup_expired_sessions(self):
+        """Clean up expired sessions"""
+        self._ensure_repositories()
+        return await self.session_repo.cleanup_expired_sessions()
+    
+    # Audit repository methods
+    async def log_event(self, event_type: str, user_id: Optional[str] = None, success: bool = True, 
+                       error_message: Optional[str] = None, metadata: Optional[Dict] = None,
+                       client_info: Optional[Dict] = None):
+        """Log authentication event"""
+        self._ensure_repositories()
+        return await self.audit_repo.log_event(event_type, user_id, success, error_message, metadata, client_info)
+    
+    async def get_user_events(self, user_id: str, limit: int = 100) -> List[AuthAuditLog]:
+        """Get audit events for a user"""
+        self._ensure_repositories()
+        return await self.audit_repo.get_user_events(user_id, limit)

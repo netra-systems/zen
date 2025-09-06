@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 """
 Critical test suite for staging configuration and logging circular dependency.
 
@@ -13,7 +15,6 @@ tries to load config during initialization, creating a circular dependency.
 import pytest
 import sys
 import threading
-from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any
 
 
@@ -100,7 +101,7 @@ class TestConfigurationLoggingCircularDependency:
             from netra_backend.app.core.unified_logging import central_logger
             central_logger.info("Loading configuration...")  # This triggers recursion
             # Mock: Generic component isolation for controlled unit testing
-            return Mock()
+            return None  # TODO: Use real service instance
         
         def mock_logger_setup(self):
             call_count['logger_setup'] += 1

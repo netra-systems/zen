@@ -18,7 +18,7 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.websocket_core.message_buffer import BufferConfig, BufferedMessage, BufferPriority
 from netra_backend.app.core.websocket_reconnection_handler import WebSocketReconnectionHandler, ReconnectionConfig
 from netra_backend.app.websocket_core.utils import is_websocket_connected

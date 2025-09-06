@@ -5,6 +5,10 @@ Tests database operations, queries, and repository patterns.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -12,7 +16,6 @@ import asyncio
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import select
@@ -24,7 +27,7 @@ class TestThreadRepositoryOperations:
     
     @pytest.mark.asyncio
     async def test_thread_crud_operations(self):
-        from netra_backend.app.schemas.registry import Thread
+        from netra_backend.app.schemas import Thread
         from netra_backend.app.services.database.thread_repository import (
             ThreadRepository,
         )
@@ -44,7 +47,7 @@ class TestThreadRepositoryOperations:
         
         # Mock the return from the database - set up proper async mock chain
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = None  # Create will return new thread
         mock_session.execute.return_value = mock_result
         
@@ -63,9 +66,9 @@ class TestThreadRepositoryOperations:
         
         # Mock session.add and session.flush for create operation
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = AsyncMock()
+        mock_session.add = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.flush = AsyncMock()
+        mock_session.flush = AsyncNone  # TODO: Use real service instance
         
         # Mock ThreadRepository.create to return our test thread
         with patch.object(repo, 'create', return_value=created_thread) as mock_create:
@@ -107,7 +110,7 @@ class TestThreadRepositoryOperations:
         
         # Set up mock result for queries
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_session.execute.return_value = mock_result
         
         # Create a simple mock thread object
@@ -152,7 +155,7 @@ class TestMessageRepositoryQueries:
     
     @pytest.mark.asyncio
     async def test_message_pagination(self):
-        from netra_backend.app.schemas.registry import Message, MessageType
+        from netra_backend.app.schemas import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
             MessageRepository,
         )
@@ -190,7 +193,7 @@ class TestMessageRepositoryQueries:
     
     @pytest.mark.asyncio
     async def test_complex_message_queries(self):
-        from netra_backend.app.schemas.registry import Message, MessageType
+        from netra_backend.app.schemas import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
             MessageRepository,
         )
@@ -582,11 +585,11 @@ class TestMigrationRunnerSafety:
                 self.session = session
                 # Mock the async session methods properly
                 # Mock: Session isolation for controlled testing without external state
-                self.session.begin = AsyncMock()
+                self.session.begin = AsyncNone  # TODO: Use real service instance
                 # Mock: Session isolation for controlled testing without external state
-                self.session.commit = AsyncMock()
+                self.session.commit = AsyncNone  # TODO: Use real service instance
                 # Mock: Session isolation for controlled testing without external state
-                self.session.rollback = AsyncMock()
+                self.session.rollback = AsyncNone  # TODO: Use real service instance
             
             async def run_migration(self, migration):
                 await self.session.begin()
@@ -639,7 +642,7 @@ class TestDatabaseHealthChecks:
         
         # Test connection health
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = AsyncMock()
+        mock_result = AsyncNone  # TODO: Use real service instance
         mock_result.scalar.return_value = 1
         mock_session.execute.return_value = mock_result
         
@@ -663,7 +666,7 @@ class TestDatabaseHealthChecks:
             
             async def check_slow_queries(self, threshold_ms=1000):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_result = AsyncMock()
+                mock_result = AsyncNone  # TODO: Use real service instance
                 mock_result.all.return_value = [
                     ("SELECT * FROM large_table", 5000)  # 5 second query
                 ]
@@ -679,7 +682,7 @@ class TestDatabaseHealthChecks:
             
             async def check_connection_pool(self, threshold_percent=80):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_result = AsyncMock()
+                mock_result = AsyncNone  # TODO: Use real service instance
                 mock_result.scalar.return_value = 95  # 95% pool usage
                 self.session.execute.return_value = mock_result
                 

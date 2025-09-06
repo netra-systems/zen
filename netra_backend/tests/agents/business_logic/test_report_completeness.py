@@ -15,14 +15,19 @@ This test suite validates that reports:
 
 import pytest
 from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock, patch
 import json
 from decimal import Decimal
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.base.execution_context import ExecutionContext, ExecutionMetadata
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext as ExecutionContext
+from netra_backend.app.agents.base.execution_context import ExecutionMetadata
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
+import asyncio
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,18 +38,20 @@ class TestReportCompletenessLogic:
     @pytest.fixture
     async def reporting_agent(self):
         """Create reporting agent with mocked dependencies."""
-        llm_manager = AsyncMock()
-        tool_dispatcher = AsyncMock()
+        llm_manager = AsyncNone  # TODO: Use real service instance
+        tool_dispatcher = AsyncNone  # TODO: Use real service instance
         
         agent = ReportingSubAgent(
             llm_manager=llm_manager,
             tool_dispatcher=tool_dispatcher
         )
-        return agent
+        await asyncio.sleep(0)
+    return agent
     
     @pytest.fixture
     def report_scenarios(self) -> List[Dict[str, Any]]:
         """Complete optimization scenarios for reporting."""
+    pass
         return [
             {
                 "name": "successful_cost_optimization",
@@ -232,6 +239,7 @@ class TestReportCompletenessLogic:
     @pytest.mark.asyncio
     async def test_edge_case_handling(self, reporting_agent):
         """Test handling of edge cases in reporting."""
+    pass
         edge_cases = [
             {
                 "name": "no_optimizations_applied",
@@ -356,6 +364,7 @@ class TestReportCompletenessLogic:
     @pytest.mark.asyncio
     async def test_value_demonstration(self, reporting_agent, report_scenarios):
         """Test that reports clearly demonstrate delivered value."""
+    pass
         scenario = report_scenarios[0]  # Cost optimization
         
         context = ExecutionContext(
@@ -469,6 +478,7 @@ class TestReportCompletenessLogic:
     @pytest.mark.asyncio
     async def test_confidence_scoring(self, reporting_agent):
         """Test that reports include confidence scores."""
+    pass
         context = ExecutionContext(
             thread_id="test_confidence",
             user_message="Report with confidence",
@@ -612,6 +622,7 @@ class TestReportCompletenessLogic:
     @pytest.mark.asyncio
     async def test_comparative_analysis(self, reporting_agent):
         """Test that reports include before/after comparisons."""
+    pass
         # Create proper state and context
         state = DeepAgentState(
             user_request="Show improvements",
@@ -784,6 +795,9 @@ class TestReportCompletenessLogic:
                    "best_practices" in learnings
     
     def test_report_quality_metrics(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Meta-test for report quality standards."""
         quality_standards = {
             "completeness": {

@@ -15,6 +15,8 @@ import re
 import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestFixer:

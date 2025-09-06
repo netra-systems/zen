@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.reporter_base import ReporterConstants
 from test_framework.test_index_manager import TestIndexManager

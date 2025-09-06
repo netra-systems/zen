@@ -7,6 +7,7 @@ with required trace_id field, fixing the validation error:
 
 import pytest
 from pydantic import ValidationError
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.schemas.shared_types import ErrorContext
 

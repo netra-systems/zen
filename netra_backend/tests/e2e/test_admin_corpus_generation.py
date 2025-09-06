@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 E2E Admin Corpus Generation Test Suite
@@ -15,7 +20,6 @@ from pathlib import Path
 
 import asyncio
 from typing import Dict
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -39,6 +43,8 @@ from netra_backend.app.schemas.admin_corpus_messages import (
 
 @pytest.fixture
 def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Setup admin corpus test environment with real or mock dependencies"""
     import os
     if env.get("ENABLE_REAL_LLM_TESTING") == "true":
@@ -57,7 +63,7 @@ def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispa
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_dispatcher = AsyncMock(spec=ToolDispatcher)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
         agent = CorpusAdminSubAgent(mock_llm, mock_dispatcher)
         agent.websocket_manager = mock_websocket
         return {

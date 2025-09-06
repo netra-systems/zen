@@ -6,11 +6,13 @@ COMPLIANCE: 450-line max file, 25-line max functions
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams
@@ -60,7 +62,7 @@ class TestContentGeneration:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_db.return_value = mock_instance
             
             await save_corpus_to_clickhouse(corpus, "test_table", "job_id")
@@ -81,7 +83,7 @@ class TestContentGeneration:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_db.return_value = mock_instance
             
             # Mock query results
@@ -105,7 +107,7 @@ class TestBatchProcessing:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             db, corpus = _setup_batch_test_mocks()
@@ -140,7 +142,7 @@ class TestBatchProcessing:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_db.return_value = mock_instance
             
             # Mock: ClickHouse external database isolation for unit testing performance
@@ -198,12 +200,11 @@ def _create_query_results():
 
 def _setup_batch_test_mocks():
     """Setup mocks for batch testing."""
-    from unittest.mock import MagicMock
     
     # Mock: Generic component isolation for controlled unit testing
-    db = MagicMock()
+    db = MagicNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    corpus = MagicMock()
+    corpus = MagicNone  # TODO: Use real service instance
     corpus.status = "available"
     corpus.table_name = "test_table"
     db.query().filter().first.return_value = corpus

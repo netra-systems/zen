@@ -12,6 +12,9 @@ Coverage: Runtime configuration updates, validation mechanisms, rollback capabil
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -27,12 +30,11 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.registry import TaskPriority
+from netra_backend.app.schemas import TaskPriority
 
 logger = logging.getLogger(__name__)
 
@@ -278,7 +280,7 @@ class ConfigurationHotReloader:
         services = ["web_service", "worker_service", "cache_service", "database_service"]
         for service in services:
             # Mock: Generic component isolation for controlled unit testing
-            self.service_coordinators[service] = AsyncMock()
+            self.service_coordinators[service] = AsyncNone  # TODO: Use real service instance
     
     async def hot_reload_configuration(self, config_type: ConfigurationType,
                                      new_config: Dict[str, Any],

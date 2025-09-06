@@ -590,7 +590,7 @@ class DockerResourceMonitor:
         """Check Docker disk usage."""
         try:
             # Use docker system df to get disk usage
-            result = execute_docker_command(["system", "df", "--format", "json"])
+            result = execute_docker_command(["docker", "system", "df", "--format", "json"])
             if result.returncode == 0:
                 df_data = json.loads(result.stdout)
                 
@@ -981,7 +981,7 @@ class DockerResourceMonitor:
             logger.info("Running Docker system prune...")
             
             result = execute_docker_command([
-                "system", "prune", "-f", "--volumes"
+                "docker", "system", "prune", "--force", "--volumes"
             ])
             
             if result.returncode == 0:

@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-env = get_env()
 Post-deployment authentication integration test.
 Verifies that authentication is working correctly between auth service and backend.
 
@@ -19,6 +17,7 @@ import sys
 import time
 from typing import Dict, Optional
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

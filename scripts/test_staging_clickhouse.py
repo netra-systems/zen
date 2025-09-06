@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, Optional
 import clickhouse_connect
 from google.cloud import secretmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))

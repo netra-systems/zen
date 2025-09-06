@@ -6,7 +6,6 @@ This module has been removed but tests still reference it.
 """
 
 from typing import Any
-from unittest.mock import Mock
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 

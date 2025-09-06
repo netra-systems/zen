@@ -23,7 +23,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import os

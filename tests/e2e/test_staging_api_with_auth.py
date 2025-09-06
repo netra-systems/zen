@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 E2E Tests for Staging API with OAUTH SIMULATION
@@ -31,7 +32,7 @@ async def auth_helper():
     """Provide auth helper for tests with GCP staging configuration."""
     # Use staging service URLs from task requirements
     auth_helper = StagingAuthHelper()
-    auth_helper.staging_auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    auth_helper.staging_auth_url = "https://auth.staging.netrasystems.ai"
     auth_helper.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
     auth_helper.staging_frontend_url = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
     return auth_helper
@@ -163,7 +164,7 @@ async def test_token_caching(auth_helper):
 async def test_invalid_bypass_key():
     """Test that invalid bypass key is rejected by GCP staging services."""
     auth = StagingAuthHelper(bypass_key="invalid-key-12345")
-    auth.staging_auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    auth.staging_auth_url = "https://auth.staging.netrasystems.ai"
     
     with pytest.raises(Exception) as exc_info:
         await auth.get_test_token()

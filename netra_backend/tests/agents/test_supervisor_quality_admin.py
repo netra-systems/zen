@@ -6,6 +6,10 @@ Test classes: TestQualitySupervisorValidation, TestAdminToolDispatcherRouting
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -13,7 +17,6 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -25,11 +28,11 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.base.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    ExecutionStrategy,
 )
+from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -64,7 +67,7 @@ class QualitySupervisor:
         return json.loads(quality_check)
 
 # Import real AdminToolDispatcher for proper testing
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.admin.tools.unified_admin_dispatcher import UnifiedAdminToolDispatcher as AdminToolDispatcher
 
 class TestQualitySupervisorValidation:
     """Test 3: Test quality checks on agent responses"""
@@ -108,7 +111,7 @@ class TestQualitySupervisorValidation:
         mocks = create_quality_supervisor_mocks()
         quality_supervisor = QualitySupervisor(mocks['llm_manager'], mocks['websocket_manager'])
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mocks['llm_manager'].ask_llm = AsyncMock()
+        mocks['llm_manager'].ask_llm = AsyncNone  # TODO: Use real service instance
         mocks['llm_manager'].ask_llm.side_effect = [
             json.dumps({"quality_score": 0.5, "approved": False, "issues": ["Too brief"]}),
             json.dumps({"quality_score": 0.8, "approved": True, "issues": []})
@@ -157,7 +160,7 @@ class TestAdminToolDispatcherRouting:
         mocks = create_admin_dispatcher_mocks()
         admin_dispatcher = MockAdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
         # Mock: Generic component isolation for controlled unit testing
-        admin_dispatcher.audit_logger = AsyncMock()
+        admin_dispatcher.audit_logger = AsyncNone  # TODO: Use real service instance
         setup_tool_dispatcher_mock(mocks['tool_dispatcher'], {"success": True, "result": "Config updated"})
         operation = create_admin_operation("system_config", {"setting": "debug_mode", "value": True}, user_id="admin-123")
         

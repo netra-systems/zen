@@ -39,13 +39,27 @@ venv.bak
 *~
 .DS_Store
 
-# Testing
+# Testing (exclude ALL test files for production builds)
 .pytest_cache
 .coverage
 htmlcov
 .tox
 .hypothesis
 test_reports
+tests
+netra_backend/tests
+auth_service/tests
+**/test_*.py
+**/*_test.py
+**/conftest.py
+test_framework
+**/test_*.json
+**/test_*.xml
+coverage.json
+coverage.xml
+junit.xml
+**/junit.xml
+**/coverage.*
 
 # Node modules (for frontend)
 node_modules
@@ -99,11 +113,21 @@ README.md
 CLAUDE.md
 LICENSE
 
-# Scripts and development files (keep some for container)
-# scripts - needed for wait_for_db.py and init scripts
-# dev_launcher - not needed in container
+# Scripts and development files (selective inclusion for performance)
+# Only include essential scripts for container operation
+scripts/test_*.py
+scripts/dev_*.py
+scripts/staging_*.py
+scripts/deploy_*.py
+scripts/docker_*.py
+scripts/scan_*.py
+scripts/query_*.py
+scripts/refresh_*.py
+scripts/validate_*.py
+scripts/check_*.py
+scripts/demonstrate_*.py
+# Keep wait_for_db.py and __init__.py (copied explicitly in Dockerfile)
 dev_launcher
-# test_framework - needed for imports
 terraform-*
 .github
 act-cli

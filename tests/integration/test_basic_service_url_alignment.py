@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Basic Service URL Alignment Tests
 
@@ -16,9 +17,11 @@ import asyncio
 import os
 import pytest
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.core.unified_logging import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = central_logger.get_logger(__name__)
 

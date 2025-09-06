@@ -29,19 +29,19 @@ services:
         -c wal_buffers=16MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
-      interval: 5s
-      timeout: 3s
-      retries: 15
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
           cpus: '0.5'
         reservations:
-          memory: 512M
+          memory: 1G
 
   alpine-test-redis:
     image: redis:7-alpine
@@ -49,7 +49,7 @@ services:
       redis-server
         --appendonly no
         --save ""
-        --maxmemory 200mb
+        --maxmemory 800mb
         --maxmemory-policy allkeys-lru
         --tcp-keepalive 60
     ports:
@@ -58,19 +58,19 @@ services:
       - alpine-test-redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 20s
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
           cpus: '0.25'
         reservations:
-          memory: 256M
+          memory: 512M
 
   alpine-test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
@@ -87,19 +87,19 @@ services:
       - alpine-test-clickhouse-data:/var/lib/clickhouse
     healthcheck:
       test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
-      interval: 15s
+      interval: 10s
       timeout: 10s
       retries: 30
-      start_period: 90s
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 2G
           cpus: '0.5'
         reservations:
-          memory: 512M
+          memory: 1G
 
   # ============================================
   # ALPINE APPLICATION SERVICES
@@ -125,8 +125,10 @@ services:
       REDIS_HOST: alpine-test-redis
       REDIS_PORT: 6379
       CLICKHOUSE_HOST: alpine-test-clickhouse
-      CLICKHOUSE_PORT: 9000
-      CLICKHOUSE_MOCK_MODE: "true"
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_HTTP_PORT: 8123
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
       AUTH_SERVICE_URL: http://alpine-test-auth:8081
       TEST_MODE: "true"
       WORKERS: 2
@@ -139,25 +141,27 @@ services:
     depends_on:
       alpine-test-postgres:
         condition: service_healthy
+        restart: true
       alpine-test-redis:
         condition: service_healthy
+        restart: true
       alpine-test-clickhouse:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 60s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
           cpus: '1.0'
         reservations:
-          memory: 1G
+          memory: 2G
 
   alpine-test-auth:
     image: netra-alpine-test-auth:latest
@@ -187,23 +191,25 @@ services:
     depends_on:
       alpine-test-postgres:
         condition: service_healthy
+        restart: true
       alpine-test-redis:
         condition: service_healthy
+        restart: true
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 60s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 3G
           cpus: '1.0'
         reservations:
-          memory: 1G
+          memory: 1.5G
 
   alpine-test-frontend:
     image: netra-alpine-test-frontend:latest
@@ -230,19 +236,19 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
           cpus: '0.3'
         reservations:
-          memory: 256M
+          memory: 512M
 
 networks:
   default:

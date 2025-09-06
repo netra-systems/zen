@@ -6,6 +6,7 @@ This script tests the error threshold and decision logic without requiring GCP a
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the parent directory to sys.path to import from staging_error_monitor
 

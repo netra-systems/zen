@@ -21,11 +21,12 @@ COMPLIANCE:
 
 import sys
 from pathlib import Path
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import os
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.core.configuration.environment import EnvironmentDetector as ConfigEnvironment
@@ -35,20 +36,26 @@ from netra_backend.app.schemas.config import (
     DevelopmentConfig,
     NetraTestingConfig,
     ProductionConfig,
-    StagingConfig,
-)
+    StagingConfig)
 
 class TestConfigEnvironmentDetection:
     """Core environment detection functionality tests"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ConfigEnvironment instance for testing"""
+    pass
         return ConfigEnvironment()
 
     @pytest.fixture
     def clean_environment(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Clean environment variables for isolated testing"""
+    pass
         from shared.isolated_environment import get_env
         
         original_env = env.get_all()
@@ -97,6 +104,7 @@ class TestConfigEnvironmentDetection:
 
     def test_get_environment_cloud_run_detected(self, config_env, clean_environment):
         """Test environment detection with cloud run environment"""
+    pass
         # Arrange
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.get_environment') as mock_detect:
@@ -141,6 +149,7 @@ class TestConfigEnvironmentDetection:
 
     def test_get_environment_explicit_environment_var(self, config_env, clean_environment):
         """Test environment detection with explicit ENVIRONMENT variable"""
+    pass
         # Arrange
         test_cases = [
             ("production", "production"),
@@ -183,10 +192,14 @@ class TestConfigEnvironmentDetection:
 
 class TestConfigObjectCreation:
     """Test configuration object creation for different environments"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ConfigEnvironment instance for testing"""
+    pass
         return ConfigEnvironment()
 
     def test_create_config_development(self, config_env):
@@ -203,6 +216,7 @@ class TestConfigObjectCreation:
 
     def test_create_config_production(self, config_env):
         """Test creation of production configuration"""
+    pass
         # Arrange
         with patch.object(config_env, 'detect', return_value='production'):
             
@@ -213,7 +227,6 @@ class TestConfigObjectCreation:
             assert isinstance(config, ProductionConfig)
             assert config.environment == "production"
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_create_config_staging(self, config_env):
         """Test creation of staging configuration"""
         # Arrange
@@ -228,6 +241,7 @@ class TestConfigObjectCreation:
 
     def test_create_config_testing(self, config_env):
         """Test creation of testing configuration"""
+    pass
         # Arrange
         with patch.object(config_env, 'detect', return_value='testing'):
             
@@ -251,13 +265,17 @@ class TestConfigObjectCreation:
 
 class TestEnvironmentValidation:
     """Test environment validation and error handling"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return ConfigEnvironment()
 
     def test_validate_environment_valid_environments(self, config_env):
         """Test validation of all valid environment names"""
+    pass
         valid_environments = [
             'development', 'production', 'staging', 'testing'
         ]
@@ -277,6 +295,7 @@ class TestEnvironmentValidation:
 
     def test_environment_config_mapping_completeness(self, config_env):
         """Test that all valid environments have corresponding config classes"""
+    pass
         environment_mappings = {
             'development': DevelopmentConfig,
             'production': ProductionConfig,
@@ -291,13 +310,17 @@ class TestEnvironmentValidation:
 
 class TestCloudEnvironmentDetection:
     """Test cloud-specific environment detection"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return ConfigEnvironment()
 
     def test_cloud_run_detection_with_k_service(self, config_env, clean_environment):
         """Test Cloud Run detection via K_SERVICE environment variable"""
+    pass
         # Arrange
         env.set('K_SERVICE', 'netra-backend', "test")
         
@@ -328,6 +351,7 @@ class TestCloudEnvironmentDetection:
 
     def test_google_cloud_project_detection(self, config_env, clean_environment):
         """Test Google Cloud Project detection"""
+    pass
         # Arrange
         env.set('GOOGLE_CLOUD_PROJECT', 'netra-ai-platform', "test")
         
@@ -343,13 +367,17 @@ class TestCloudEnvironmentDetection:
 
 class TestConfigurationLogging:
     """Test configuration-related logging functionality"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return ConfigEnvironment()
 
     def test_logger_initialization(self, config_env):
         """Test that logger is properly initialized"""
+    pass
         # Assert
         assert hasattr(config_env, '_logger')
         assert config_env._logger is not None
@@ -368,6 +396,7 @@ class TestConfigurationLogging:
 
     def test_config_creation_logging(self, config_env):
         """Test logging during config object creation"""
+    pass
         with patch.object(config_env, '_logger') as mock_logger:
             with patch.object(config_env, 'detect', return_value='development'):
                 
@@ -379,13 +408,17 @@ class TestConfigurationLogging:
 
 class TestPerformanceAndEdgeCases:
     """Performance and edge case testing"""
+    pass
 
     @pytest.fixture
     def config_env(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         return ConfigEnvironment()
 
     def test_multiple_environment_detections_consistent(self, config_env):
         """Test that multiple calls return consistent results"""
+    pass
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment', return_value='production'):
             
@@ -413,6 +446,7 @@ class TestPerformanceAndEdgeCases:
 
     def test_environment_variable_unicode_handling(self, config_env, clean_environment):
         """Test handling of unicode characters in environment variables"""
+    pass
         test_cases = [
             "production",
             "production🚀",

@@ -13,7 +13,7 @@ from dataclasses import is_dataclass
 import pytest
 import asyncio
 import importlib
-from unittest.mock import MagicMock, AsyncMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -27,12 +27,17 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TypeSafetyAnalyzer:
     """Analyzer for type safety compliance"""
     
     def __init__(self):
+    pass
         self.violations = []
         self.critical_violations = []
         
@@ -80,6 +85,7 @@ class TestAgentTypeSafetyCompliance:
     
     @pytest.fixture
     def analyzer(self):
+    pass
         return TypeSafetyAnalyzer()
     
     def test_agent_communication_type_hints(self, analyzer):
@@ -101,6 +107,7 @@ class TestAgentTypeSafetyCompliance:
     
     def test_agent_lifecycle_type_hints(self, analyzer):
         """Test agent_lifecycle.py for complete type hints"""
+    pass
         module_path = project_root / "netra_backend/app/agents/agent_lifecycle.py"
         violations = analyzer.analyze_module(str(module_path))
         
@@ -121,6 +128,7 @@ class TestAgentTypeSafetyCompliance:
     
     def test_no_duplicate_error_classes(self):
         """Test that WebSocketError and ErrorContext are not locally defined"""
+    pass
         module_path = project_root / "netra_backend/app/agents/agent_communication.py"
         
         with open(module_path, 'r') as f:
@@ -155,6 +163,7 @@ class TestAgentTypeSafetyCompliance:
     
     def test_data_sub_agent_type_completeness(self):
         """Test DataSubAgent has complete type annotations"""
+    pass
         # Get all methods
         methods = inspect.getmembers(DataSubAgent, predicate=inspect.ismethod)
         
@@ -190,7 +199,9 @@ class TestAgentTypeSafetyCompliance:
     
     @pytest.mark.asyncio
     async def test_async_method_return_types(self):
-        """Test that all async methods have proper return type hints"""
+        """Test that all async methods have proper await asyncio.sleep(0)
+    return type hints"""
+    pass
         # Test AgentCommunicationMixin async methods
         # Note: AgentCommunicationMixin is a mixin, so we skip instantiation
         
@@ -234,6 +245,7 @@ class TestAgentTypeSafetyCompliance:
     
     def test_protocol_compliance(self):
         """Test that all protocol implementations have correct signatures"""
+    pass
         # Skip this test as interface has been removed
         # This test was checking legacy interface that is no longer needed
         pytest.skip("Legacy interface has been removed - cleanup complete")
@@ -258,6 +270,7 @@ class TestAgentTypeSafetyCompliance:
     
     def test_import_order_compliance(self):
         """Test that imports are at the top of files"""
+    pass
         module_path = project_root / "netra_backend/app/agents/validation_sub_agent.py"
         
         with open(module_path, 'r') as f:
@@ -296,6 +309,7 @@ class TestTypeSafetyRuntime:
     @pytest.mark.asyncio
     async def test_execution_result_typing(self):
         """Test ExecutionResult has proper runtime typing"""
+    pass
         result = ExecutionResult(
             success=True,
             result_data={"test": "data"},
@@ -322,6 +336,7 @@ class TestTypeSafetyRuntime:
     @pytest.mark.asyncio 
     async def test_websocket_type_consistency(self):
         """Test WebSocket types are consistent across modules"""
+    pass
         # All modules should use the same WebSocket types
         websocket_types = {
             'WebSocketManagerProtocol',
@@ -380,6 +395,7 @@ class TestSSOTCompliance:
     
     def test_canonical_location_compliance(self):
         """Test types are defined in canonical locations"""
+    pass
         canonical_locations = {
             'AgentState': 'app/schemas/agent_state.py',
             'ExecutionStatus': 'app/schemas/core_enums.py',
@@ -424,11 +440,14 @@ class TestTypeCheckingIntegration:
             
             # Should have no errors
             assert result.returncode == 0, \
-                f"mypy errors in {module}:\n{result.stdout}\n{result.stderr}"
+                f"mypy errors in {module}:
+{result.stdout}
+{result.stderr}"
     
     @pytest.mark.asyncio
     async def test_runtime_type_validation(self):
         """Test runtime type validation works correctly"""
+    pass
         # Create a mock context with wrong types
         with pytest.raises(TypeError):
             context = ExecutionContext(
@@ -457,7 +476,8 @@ class TestTypeCheckingIntegration:
                 method = getattr(module_class, method_name)
                 if hasattr(method, '__annotations__'):
                     annotations = method.__annotations__
-                    # Should have at least return type
+                    # Should have at least await asyncio.sleep(0)
+    return type
                     assert 'return' in annotations or method_name == '__init__', \
                         f"{module_class.__name__}.{method_name} missing type annotations"
 
@@ -487,11 +507,13 @@ class TestBaseAgentInheritanceTypeCompliance:
                     annotations = method.__annotations__
                     if method_name != '__init__':
                         assert 'return' in annotations, \
-                            f"BaseAgent.{method_name} missing return type annotation"
+                            f"BaseAgent.{method_name} missing await asyncio.sleep(0)
+    return type annotation"
     
     @pytest.mark.asyncio
     async def test_baseagent_state_type_consistency(self):
         """Test BaseAgent state management type consistency"""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -501,7 +523,8 @@ class TestBaseAgentInheritanceTypeCompliance:
         # Mock agent for testing
         class TestAgent(BaseAgent):
             async def execute_core_logic(self, context) -> Dict[str, Any]:
-                return {"test": "result"}
+                await asyncio.sleep(0)
+    return {"test": "result"}
         
         agent = TestAgent(name="TypeSafetyTest")
         
@@ -529,7 +552,8 @@ class TestBaseAgentInheritanceTypeCompliance:
         
         class TestAgent(BaseAgent):
             async def execute_core_logic(self, context) -> Dict[str, Any]:
-                return {"test": "websocket_types"}
+                await asyncio.sleep(0)
+    return {"test": "websocket_types"}
         
         agent = TestAgent(name="WebSocketTypeTest")
         
@@ -561,7 +585,8 @@ class TestExecuteCorePatternTypeCompliance:
         
         class TypeSafeAgent(BaseAgent):
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-                return {"type_safe": True, "context_id": context.run_id}
+                await asyncio.sleep(0)
+    return {"type_safe": True, "context_id": context.run_id}
         
         agent = TypeSafeAgent(name="TypeSafeTest")
         
@@ -582,6 +607,7 @@ class TestExecuteCorePatternTypeCompliance:
     @pytest.mark.asyncio 
     async def test_execute_core_context_type_validation(self):
         """Test _execute_core validates context types properly"""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.agents.base.interface import ExecutionContext
@@ -595,7 +621,8 @@ class TestExecuteCorePatternTypeCompliance:
                 assert hasattr(context, 'run_id'), "Context must have run_id"
                 assert hasattr(context, 'agent_name'), "Context must have agent_name" 
                 assert isinstance(context.run_id, str), "run_id must be string"
-                return {"validated": True}
+                await asyncio.sleep(0)
+    return {"validated": True}
         
         agent = StrictTypeAgent(name="StrictTypeTest")
         
@@ -623,7 +650,8 @@ class TestExecuteCorePatternTypeCompliance:
     
     @pytest.mark.asyncio
     async def test_execute_core_return_type_consistency(self):
-        """Test _execute_core return types are consistent"""
+        """Test _execute_core await asyncio.sleep(0)
+    return types are consistent"""
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.agents.base.interface import ExecutionContext
@@ -695,7 +723,8 @@ class TestErrorRecoveryTypeCompliance:
                 elif self.error_type == "runtime_error":
                     raise RuntimeError("Test runtime error")
                 else:
-                    return {"error_type": "none", "success": True}
+                    await asyncio.sleep(0)
+    return {"error_type": "none", "success": True}
         
         # Test that different exception types are properly typed
         exception_types = [
@@ -725,6 +754,7 @@ class TestErrorRecoveryTypeCompliance:
     @pytest.mark.asyncio
     async def test_error_recovery_state_type_consistency(self):
         """Test error recovery maintains state type consistency"""
+    pass
         try:
             from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.agents.base.interface import ExecutionContext
@@ -745,7 +775,8 @@ class TestErrorRecoveryTypeCompliance:
                         raise RuntimeError("Simulated failure")
                     
                     self.set_state(SubAgentLifecycle.COMPLETED)
-                    return {"state_recovery": "success"}
+                    await asyncio.sleep(0)
+    return {"state_recovery": "success"}
                     
                 except RuntimeError:
                     # Error recovery should maintain proper state types
@@ -807,7 +838,8 @@ class TestErrorRecoveryTypeCompliance:
                         raise TimeoutError("Simulated timeout")
                     
                     end_time = time.time()
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "execution_time": end_time - start_time,
                         "start_time": start_time,
                         "end_time": end_time,
@@ -866,3 +898,4 @@ class TestErrorRecoveryTypeCompliance:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

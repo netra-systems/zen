@@ -7,9 +7,9 @@ Tests the workflow orchestrator directly with different data sufficiency scenari
 import asyncio
 import json
 from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, MagicMock
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

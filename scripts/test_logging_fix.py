@@ -3,6 +3,7 @@
 
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

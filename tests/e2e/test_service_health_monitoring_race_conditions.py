@@ -6,6 +6,7 @@ preventing service disruptions that lead to customer churn and revenue loss.
 """
 import pytest
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.helpers.core.service_independence_helpers import ServiceHealthChecker
 from tests.e2e.config import get_test_config

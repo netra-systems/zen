@@ -7,10 +7,11 @@ import json
 import sys
 from datetime import datetime
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Staging URLs
 BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-AUTH_URL = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+AUTH_URL = "https://auth.staging.netrasystems.ai"
 FRONTEND_URL = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
 
 class StagingTester:

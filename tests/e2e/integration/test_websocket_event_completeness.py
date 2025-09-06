@@ -13,6 +13,7 @@ from typing import Dict
 from datetime import datetime, timezone
 import pytest
 import pytest_asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_USERS
 from tests.e2e.integration.helpers.websocket_test_helpers import (

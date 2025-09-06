@@ -690,7 +690,10 @@ class AgentInstanceFactory:
                         llm_manager = self._agent_registry.llm_manager
                         tool_dispatcher = self._agent_registry.tool_dispatcher
                     else:
-                        raise ValueError("No LLM manager available")
+                        # No LLM manager available - this is OK for agents that don't need one
+                        # They will handle the None values appropriately in their constructor
+                        llm_manager = None
+                        tool_dispatcher = None
                 
                 # Fallback to legacy AgentRegistry with state reset
                 elif self._agent_registry:
@@ -1011,7 +1014,7 @@ class AgentInstanceFactory:
                 ws_manager = get_websocket_manager()
                 self._emitter_pool = WebSocketEmitterPool(
                     manager=ws_manager,
-                    max_size=self._performance_config.emitter_pool_size if self._performance_config else 100
+                    max_size=self._performance_config.pool_max_size if self._performance_config else 100
                 )
             
             # Get from pool (this will return an OptimizedUserWebSocketEmitter)

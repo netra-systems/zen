@@ -5,10 +5,14 @@ Tests message validation, field extraction, and error handling for malformed mes
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import json
 import uuid
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -16,7 +20,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.types import ConnectionInfo
 
 from netra_backend.app.websocket_core.handlers import (
-    BaseMessageHandler as MessageHandler,
+    UserMessageHandler as MessageHandler,
 )
 from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor as MessageProcessor
 from netra_backend.app.agents.synthetic_data_approval_handler import ApprovalMessageBuilder as MessageBuilder

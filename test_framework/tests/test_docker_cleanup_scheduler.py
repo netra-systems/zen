@@ -23,8 +23,9 @@ import os
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, call
 from dataclasses import asdict
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework imports
 from test_framework.base import BaseTestCase
@@ -228,8 +229,6 @@ class TestDockerCleanupSchedulerUnit(BaseTestCase):
         assert len(scheduler._active_test_sessions) == 1
     
     @pytest.mark.unit
-    @patch('psutil.disk_usage')
-    @patch('psutil.virtual_memory')
     def test_resource_threshold_checking(self, mock_memory, mock_disk):
         """Test resource threshold checking functionality."""
         # Mock system resource usage
@@ -615,7 +614,6 @@ class TestDockerCleanupSchedulerIntegration(BaseTestCase):
         assert "context_test" not in scheduler._active_test_sessions
     
     @pytest.mark.integration
-    @patch('time.sleep')  # Speed up the test
     def test_scheduler_thread_behavior(self, mock_sleep):
         """Test scheduler background thread behavior."""
         mock_sleep.return_value = None  # Skip actual sleep

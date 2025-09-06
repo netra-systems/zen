@@ -13,6 +13,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -51,6 +52,7 @@ def test_auth_service_uses_central_validator_for_jwt():
 
 def test_backend_service_uses_central_validator_for_jwt():
     """Test backend service delegates JWT secret to central validator."""
+    pass
     print("✅ Testing backend service central validator integration for JWT...")
     
     # Import backend service
@@ -115,6 +117,7 @@ def test_backend_service_uses_central_validator_for_database():
 
 def test_backend_service_uses_central_validator_for_redis():
     """Test backend service delegates Redis credentials to central validator."""
+    pass
     print("✅ Testing backend service central validator integration for Redis...")
     
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
@@ -180,6 +183,7 @@ def test_backend_service_uses_central_validator_for_llm():
 
 def test_central_validator_eliminates_dangerous_defaults():
     """Test that central validator eliminates dangerous empty string defaults."""
+    pass
     print("✅ Testing central validator eliminates dangerous empty string defaults...")
     
     from shared.configuration import get_central_validator
@@ -187,6 +191,7 @@ def test_central_validator_eliminates_dangerous_defaults():
     
     # Mock environment getter that returns None for missing values
     def mock_env_getter(key, default=None):
+    pass
         return None  # Simulate missing environment variables
     
     validator = get_central_validator(mock_env_getter)
@@ -240,6 +245,7 @@ def test_development_environment_allows_defaults():
 
 def test_services_use_same_central_validator():
     """Test that both services use the same central validator instance."""
+    pass
     print("✅ Testing services use the same central validator...")
     
     from shared.configuration import get_central_validator
@@ -280,7 +286,8 @@ def run_all_tests():
             print(f"❌ {test.__name__} FAILED: {e}")
             failed += 1
     
-    print(f"\n📊 Results: {passed} passed, {failed} failed")
+    print(f"
+📊 Results: {passed} passed, {failed} failed")
     
     if failed == 0:
         print("✅ All central validator integration tests PASSED")
@@ -294,3 +301,4 @@ def run_all_tests():
 if __name__ == "__main__":
     success = run_all_tests()
     sys.exit(0 if success else 1)
+    pass

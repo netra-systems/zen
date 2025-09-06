@@ -25,8 +25,8 @@ import logging
 import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
-from unittest.mock import patch, AsyncMock, MagicMock
 import asyncpg
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports  
 project_root = Path(__file__).parent.parent.parent
@@ -37,6 +37,10 @@ from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.config import AuthConfig
 from shared.database_url_builder import DatabaseURLBuilder
 from test_framework.environment_markers import env
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -8,10 +8,12 @@ This script shows how to run different test categories with and without Docker.
 import subprocess
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def run_test(command, description):
     """Run a test command and report results."""
-    print(f"\n{'='*60}")
+    print(f"
+{'='*60}")
     print(f"TEST: {description}")
     print(f"COMMAND: {command}")
     print('='*60)
@@ -19,7 +21,8 @@ def run_test(command, description):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     
     # Print only key lines that show Docker behavior
-    for line in result.stdout.split('\n'):
+    for line in result.stdout.split('
+'):
         if any(keyword in line for keyword in [
             'Docker', 'docker', 'DOCKER',
             'Skipping', 'required', 'optional',
@@ -38,10 +41,13 @@ def run_test(command, description):
 
 def main():
     """Run demonstration of Docker-optional testing."""
-    print("\n" + "="*80)
+    pass
+    print("
+" + "="*80)
     print("DOCKER-OPTIONAL TEST EXECUTION DEMONSTRATION")
     print("="*80)
-    print("\nThis demonstrates the improved ability to run tests without Docker when it's not needed.")
+    print("
+This demonstrates the improved ability to run tests without Docker when it's not needed.")
     
     tests = [
         # Tests that DON'T need Docker
@@ -71,7 +77,8 @@ def main():
         ),
     ]
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("TEST CATEGORIES THAT DON'T REQUIRE DOCKER:")
     print("="*80)
     no_docker_categories = [
@@ -86,7 +93,8 @@ def main():
     for category in no_docker_categories:
         print(f"  - {category}")
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("TEST CATEGORIES THAT REQUIRE DOCKER:")
     print("="*80)
     docker_categories = [
@@ -102,24 +110,30 @@ def main():
     for category in docker_categories:
         print(f"  - {category}")
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("USAGE EXAMPLES:")
     print("="*80)
-    print("\n1. Run unit tests without Docker (fast, no external dependencies):")
+    print("
+1. Run unit tests without Docker (fast, no external dependencies):")
     print("   python tests/unified_test_runner.py --category unit --no-docker")
     
-    print("\n2. Run smoke tests without Docker (pre-commit validation):")
+    print("
+2. Run smoke tests without Docker (pre-commit validation):")
     print("   python tests/unified_test_runner.py --category smoke --no-docker")
     
-    print("\n3. Let the runner auto-detect if Docker is needed:")
+    print("
+3. Let the runner auto-detect if Docker is needed:")
     print("   python tests/unified_test_runner.py --category unit  # Auto-detects no Docker needed")
     print("   python tests/unified_test_runner.py --category e2e   # Auto-detects Docker required")
     
-    print("\n4. Force Docker to be skipped (useful for CI/CD with limited resources):")
+    print("
+4. Force Docker to be skipped (useful for CI/CD with limited resources):")
     print("   export TEST_NO_DOCKER=true")
     print("   python tests/unified_test_runner.py --category unit")
     
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("KEY IMPROVEMENTS:")
     print("="*80)
     print("[OK] Faster test execution for unit/smoke tests (no Docker overhead)")

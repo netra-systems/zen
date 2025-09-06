@@ -14,13 +14,16 @@ configured and that services can construct necessary connection strings.
 import os
 import pytest
 from typing import Dict, List, Optional
-from unittest.mock import patch, MagicMock
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test both backend and auth service configurations
 from netra_backend.app.core.configuration.database import DatabaseConfig
 from netra_backend.app.core.environment_validator import EnvironmentValidator
 from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretLoader
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class TestStagingConfiguration:

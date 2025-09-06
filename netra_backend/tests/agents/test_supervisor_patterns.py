@@ -6,18 +6,21 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.base.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
@@ -85,7 +88,7 @@ class TestWorkflowPatterns:
         supervisor.agents["data"].execute = self._mock_data_processor
         supervisor.agents["optimization"].execute = self._mock_opt_processor
         # Mock: Generic component isolation for controlled unit testing
-        validation_agent = AsyncMock()
+        validation_agent = AsyncNone  # TODO: Use real service instance
         validation_agent.execute = self._mock_validation_processor
         supervisor.agents["validation"] = validation_agent
 

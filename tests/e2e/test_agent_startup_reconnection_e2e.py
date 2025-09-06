@@ -19,6 +19,7 @@ Architecture: 450-line compliance through focused reconnection and isolation tes
 
 import asyncio
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

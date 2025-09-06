@@ -12,6 +12,7 @@ import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncpg
 import httpx

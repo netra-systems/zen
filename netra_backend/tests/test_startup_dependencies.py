@@ -33,7 +33,12 @@ import asyncio
 import time
 import os
 from typing import Dict, Any, Optional
-from unittest.mock import patch, MagicMock, AsyncMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml
 from netra_backend.app.startup_module import initialize_logging

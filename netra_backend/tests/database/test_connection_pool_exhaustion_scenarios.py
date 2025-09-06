@@ -10,7 +10,8 @@ rewritten to use the current database architecture.
 """
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Using canonical DatabaseManager instead of removed ConnectionPoolManager
 from netra_backend.app.db.postgres_core import Database

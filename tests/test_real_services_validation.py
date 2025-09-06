@@ -12,6 +12,7 @@ import json
 import pytest
 import time
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import real services fixtures
 from test_framework.conftest_real_services import (

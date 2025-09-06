@@ -7,6 +7,7 @@ for real-time frontend communication.
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
@@ -17,7 +18,7 @@ from typing import Any, Dict
 import pytest
 
 # Import backend schemas
-from netra_backend.app.schemas.registry import (
+from netra_backend.app.schemas import (
     StreamChunk,
     StreamComplete,
     WebSocketMessage,

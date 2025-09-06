@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Integration tests for the dev launcher.
 
@@ -13,7 +14,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import ANY, MagicMock, Mock, call, patch
 
 
 from dev_launcher.config import LauncherConfig
@@ -36,9 +36,7 @@ class TestDevLauncher(unittest.TestCase):
             )
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_dependencies')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_project_structure')
     def test_check_environment_success(self, mock_structure, mock_deps):
         """Test successful environment check."""
         self._setup_successful_environment(mock_deps, mock_structure)
@@ -62,7 +60,6 @@ class TestDevLauncher(unittest.TestCase):
         return DevLauncher(self.config)
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_dependencies')
     def test_check_environment_missing_deps(self, mock_deps):
         """Test environment check with missing dependencies."""
         self._setup_missing_dependencies(mock_deps)
@@ -80,7 +77,6 @@ class TestDevLauncher(unittest.TestCase):
         }
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     def test_start_backend_success(self, mock_start_backend):
         """Test successful backend startup."""
         mock_process = self._create_mock_backend_process()
@@ -105,7 +101,6 @@ class TestDevLauncher(unittest.TestCase):
         self.assertEqual(process, expected_process)
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     def test_start_backend_failure(self, mock_start_backend):
         """Test backend startup failure."""
         mock_start_backend.return_value = (None, None)
@@ -135,17 +130,11 @@ class TestFullIntegration(unittest.TestCase):
     """Integration tests for complete launch cycles."""
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_dependencies')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_project_structure')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.wait_for_service')
     # Mock: Component isolation for testing without external dependencies
-    @patch('webbrowser.open')
     def test_full_launch_cycle(self, mock_browser, mock_wait, mock_start_frontend, mock_start_backend,
                                mock_structure, mock_deps):
         """Test a complete launch cycle."""
@@ -218,15 +207,10 @@ class TestRollingRestart(unittest.TestCase):
     """Test rolling restart scenarios."""
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_dependencies')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.check_project_structure')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.utils.wait_for_service')
     def test_rolling_restart(self, mock_wait, mock_start_frontend, mock_start_backend,
                             mock_structure, mock_deps):
         """Test rolling restart of services."""

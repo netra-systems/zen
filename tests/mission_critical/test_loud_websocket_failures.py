@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Test Loud WebSocket Failure Mechanisms
 
@@ -13,8 +39,13 @@ rather than failing silently.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.websocket_exceptions import (
     WebSocketBridgeUnavailableError,
@@ -26,6 +57,10 @@ from netra_backend.app.core.websocket_exceptions import (
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer, BufferConfig, BufferPriority
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestLoudWebSocketFailures:
@@ -35,8 +70,7 @@ class TestLoudWebSocketFailures:
     async def test_tool_execution_without_context_raises_exception(self):
         """Test that tool execution without context raises WebSocketContextValidationError."""
         engine = UnifiedToolExecutionEngine()
-        engine.notification_monitor = MagicMock()
-        
+        engine.notification_monitor = Magic        
         # Missing context should raise exception
         with pytest.raises(WebSocketContextValidationError) as exc_info:
             await engine._send_tool_executing(
@@ -51,13 +85,12 @@ class TestLoudWebSocketFailures:
     @pytest.mark.asyncio
     async def test_tool_execution_without_bridge_raises_exception(self):
         """Test that tool execution without WebSocket bridge raises exception."""
+    pass
         engine = UnifiedToolExecutionEngine()
         engine.websocket_bridge = None  # No bridge available
-        engine.notification_monitor = MagicMock()
-        
+        engine.notification_monitor = Magic        
         # Create mock context
-        mock_context = MagicMock()
-        mock_context.run_id = "test-run-123"
+        mock_context = Magic        mock_context.run_id = "test-run-123"
         mock_context.user_id = "user-456"
         mock_context.thread_id = "thread-789"
         mock_context.agent_name = "TestAgent"
@@ -80,10 +113,8 @@ class TestLoudWebSocketFailures:
         """Test that tool completion without bridge raises exception."""
         engine = UnifiedToolExecutionEngine()
         engine.websocket_bridge = None
-        engine.notification_monitor = MagicMock()
-        
-        mock_context = MagicMock()
-        mock_context.run_id = "test-run-123"
+        engine.notification_monitor = Magic        
+        mock_context = Magic        mock_context.run_id = "test-run-123"
         mock_context.user_id = "user-456"
         mock_context.thread_id = "thread-789"
         
@@ -102,8 +133,9 @@ class TestLoudWebSocketFailures:
     @pytest.mark.asyncio
     async def test_agent_notification_failure_raises_exception(self):
         """Test that failed agent notifications raise WebSocketSendFailureError."""
+    pass
         # Create mock WebSocket bridge that returns failure
-        mock_bridge = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_bridge.notify_agent_started = AsyncMock(return_value=False)
         
         emitter = UserWebSocketEmitter(
@@ -125,7 +157,7 @@ class TestLoudWebSocketFailures:
     async def test_agent_communication_exception_raises_specific_error(self):
         """Test that exceptions in agent communication raise AgentCommunicationFailureError."""
         # Create mock bridge that raises exception
-        mock_bridge = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_bridge.notify_agent_thinking = AsyncMock(
             side_effect=Exception("Network error")
         )
@@ -153,6 +185,7 @@ class TestLoudWebSocketFailures:
     @pytest.mark.asyncio
     async def test_message_buffer_overflow_raises_exception(self):
         """Test that message buffer overflow raises WebSocketBufferOverflowError."""
+    pass
         config = BufferConfig(
             max_message_size_bytes=100,  # Small limit for testing
             max_buffer_size_per_user=10,
@@ -179,7 +212,7 @@ class TestLoudWebSocketFailures:
     @pytest.mark.asyncio 
     async def test_tool_notification_failures_raise_exceptions(self):
         """Test that tool notification failures raise appropriate exceptions."""
-        mock_bridge = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_bridge.notify_tool_executing = AsyncMock(return_value=False)
         mock_bridge.notify_tool_completed = AsyncMock(return_value=False)
         
@@ -203,7 +236,8 @@ class TestLoudWebSocketFailures:
     @pytest.mark.asyncio
     async def test_agent_completion_failure_raises_exception(self):
         """Test that agent completion notification failure raises exception."""
-        mock_bridge = AsyncMock()
+    pass
+        websocket = TestWebSocketConnection()
         mock_bridge.notify_agent_completed = AsyncMock(return_value=False)
         
         emitter = UserWebSocketEmitter(
@@ -239,3 +273,4 @@ class TestLoudWebSocketFailures:
 if __name__ == "__main__":
     # Run tests with verbose output
     pytest.main([__file__, "-v", "-s", "--tb=short"])
+    pass

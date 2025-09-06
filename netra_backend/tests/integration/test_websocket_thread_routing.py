@@ -9,12 +9,16 @@ This test verifies that:
 
 import asyncio
 import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
 
 
 class TestWebSocketThreadRouting:
@@ -22,7 +26,10 @@ class TestWebSocketThreadRouting:
     
     @pytest.fixture
     def websocket_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock WebSocket manager with proper thread support."""
+    pass
         manager = Mock(spec=WebSocketManager)
         manager.send_to_thread = AsyncMock(return_value=True)
         manager.send_to_user = AsyncMock(return_value=True)
@@ -31,15 +38,21 @@ class TestWebSocketThreadRouting:
     
     @pytest.fixture
     def thread_registry(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock thread registry."""
-        registry = Mock()
+    pass
+        registry = registry_instance  # Initialize appropriate service
         registry.get_thread = AsyncMock(return_value=None)
         registry.register = AsyncMock(return_value=True)
         return registry
     
     @pytest.fixture
     def bridge(self, websocket_manager, thread_registry):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create an AgentWebSocketBridge with mocked dependencies."""
+    pass
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager', return_value=websocket_manager):
             with patch('netra_backend.app.services.agent_websocket_bridge.get_thread_run_registry', return_value=thread_registry):
                 bridge = AgentWebSocketBridge()
@@ -70,6 +83,7 @@ class TestWebSocketThreadRouting:
     
     def test_thread_id_extraction_from_unified_id_manager_format(self):
         """Test extraction of thread_id from UnifiedIDManager format."""
+    pass
         # Test cases with UnifiedIDManager format (requires 8 hex chars at end)
         test_cases = [
             ("run_user_123_abc12345", "user_123"),
@@ -122,6 +136,7 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio
     async def test_websocket_notification_with_correct_thread_id(self, bridge, websocket_manager):
         """Test that WebSocket notifications use the correct thread_id."""
+    pass
         # Test run_id with expected thread extraction (8 hex chars for UUID)
         run_id = "thread_user123_run_1756919162904_abc12345"
         agent_name = "TestAgent"
@@ -167,6 +182,7 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio
     async def test_thread_resolution_with_registry_hit(self, bridge, thread_registry):
         """Test that thread registry is checked first."""
+    pass
         run_id = "custom_run_format_12345"
         expected_thread = "thread_from_registry"
         
@@ -206,6 +222,7 @@ class TestWebSocketThreadRouting:
     @pytest.mark.asyncio
     async def test_all_notification_types_use_correct_thread(self, bridge, websocket_manager):
         """Test that all notification types properly route to thread_id."""
+    pass
         run_id = "thread_notification_test_run_123_abc12345"  # Fixed: 8 hex chars
         expected_thread = "thread_notification_test"
         
@@ -244,3 +261,4 @@ class TestWebSocketThreadRouting:
         run_id_mgr = "run_user456_a1b2c3d4"  # Proper UnifiedIDManager format
         extracted_mgr = bridge._extract_thread_from_standardized_run_id(run_id_mgr)
         assert extracted_mgr == "thread_user456"  # Should add thread_ prefix
+    pass

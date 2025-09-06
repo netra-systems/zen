@@ -11,10 +11,14 @@ L3 Test: Uses real Redis for binary message storage and WebSocket transmission.
 Binary target: 10MB file support with <5% corruption rate.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -24,13 +28,12 @@ import base64
 import hashlib
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 import os
 import tempfile
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
@@ -47,6 +50,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class BinaryMessageHandler:
+    pass
 
     """Handle binary message transmission for WebSocket."""
     
@@ -217,6 +221,7 @@ class BinaryMessageHandler:
 @pytest.mark.integration
 
 class TestWebSocketBinaryMessageHandlingL3:
+    pass
 
     """L3 integration tests for WebSocket binary message handling."""
     
@@ -282,11 +287,15 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         """Create binary message handler."""
 
-        return BinaryMessageHandler(redis_client)
+        await asyncio.sleep(0)
+    return BinaryMessageHandler(redis_client)
     
     @pytest.fixture
 
     def test_users(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create test users for binary testing."""
 

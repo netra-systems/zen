@@ -8,6 +8,7 @@ Business Value: Ensures reliable data persistence for user conversations
 
 from datetime import datetime, timezone
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

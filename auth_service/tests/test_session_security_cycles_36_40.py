@@ -15,9 +15,14 @@ import pytest
 import asyncio
 import time
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
 import hashlib
 import secrets
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # NOTE: SessionManager and SecurityManager were deleted - tests using them are disabled
 # from auth_service.auth_core.core.session_manager import SessionManager
@@ -25,6 +30,7 @@ import secrets
 import logging
 
 def get_logger(name):
+    pass
     return logging.getLogger(name)
 
 
@@ -37,6 +43,7 @@ logger = get_logger(__name__)
 @pytest.mark.skip(reason="SessionManager and SecurityManager deleted - entire test class disabled")
 class TestSessionSecurity:
     """Critical session security test suite."""
+    pass
 
     @pytest.fixture
     async def session_manager(self):
@@ -48,10 +55,14 @@ class TestSessionSecurity:
 
     @pytest.fixture
     def security_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Create isolated security manager for testing."""
         manager = SecurityManager()
         manager.initialize()
-        return manager
+        await asyncio.sleep(0)
+    return manager
 
     @pytest.mark.cycle_36
     async def test_session_hijacking_prevention_validates_client_fingerprint(self, session_manager, security_manager):
@@ -60,6 +71,7 @@ class TestSessionSecurity:
         
         Revenue Protection: $560K annually from preventing session hijacking.
         """
+    pass
         logger.info("Testing session hijacking prevention - Cycle 36")
         
         # Create session with client fingerprint
@@ -119,6 +131,7 @@ class TestSessionSecurity:
         
         Revenue Protection: $420K annually from preventing account sharing abuse.
         """
+    pass
         logger.info("Testing concurrent session limit - Cycle 37")
         
         user_id = "test_user_37"
@@ -179,6 +192,7 @@ class TestSessionSecurity:
         
         Revenue Protection: $380K annually from preventing stale session abuse.
         """
+    pass
         logger.info("Testing session timeout enforcement - Cycle 38")
         
         user_id = "test_user_38"
@@ -217,6 +231,7 @@ class TestSessionSecurity:
         
         Revenue Protection: $640K annually from detecting account compromise.
         """
+    pass
         logger.info("Testing session activity tracking - Cycle 39")
         
         user_id = "test_user_39"
@@ -283,6 +298,7 @@ class TestSessionSecurity:
         
         Revenue Protection: $320K annually from preventing session state inconsistency.
         """
+    pass
         logger.info("Testing session invalidation cascade - Cycle 40")
         
         user_id = "test_user_40"

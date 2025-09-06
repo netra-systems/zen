@@ -40,8 +40,9 @@ psycopg2-binary>=2.9.10
 redis>=6.4.0
 
 # --- Analytics Database ---
-# ClickHouse driver for Python.
-clickhouse-connect>=0.8.18
+# ClickHouse drivers for Python (both needed for compatibility).
+clickhouse-driver>=0.2.9  # Native Python driver used by existing code
+clickhouse-connect>=0.8.18  # Alternative driver (may be used elsewhere)
 # LZ4 is a dependency for ClickHouse for fast compression.
 lz4>=4.4.4
 

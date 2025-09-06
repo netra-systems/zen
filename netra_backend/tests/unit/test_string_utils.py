@@ -5,15 +5,18 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.utils.string_utils import StringUtils
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestStringUtils:
     """Test suite for StringUtils"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
+    pass
         return StringUtils()
     
     def test_initialization(self, instance):
@@ -23,6 +26,7 @@ class TestStringUtils:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test HTML sanitization
         result = instance.sanitize_html("<script>alert('test')</script>Hello")
         assert "script" not in result
@@ -36,6 +40,7 @@ class TestStringUtils:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -43,3 +48,5 @@ class TestStringUtils:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

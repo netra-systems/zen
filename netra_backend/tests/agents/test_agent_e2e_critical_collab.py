@@ -5,13 +5,16 @@ Tests 7-8: Authentication/authorization, multi-agent collaboration.
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 
 import asyncio
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

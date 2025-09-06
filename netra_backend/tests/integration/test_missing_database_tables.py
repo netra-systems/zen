@@ -6,6 +6,7 @@ import pytest
 import asyncio
 from sqlalchemy import create_engine, text, inspect
 from netra_backend.app.config import get_config
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMissingDatabaseTables:

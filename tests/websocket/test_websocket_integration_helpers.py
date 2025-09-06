@@ -12,15 +12,19 @@ from netra_backend.app.routes.websocket_unified import (
 from netra_backend.app.websocket_core import get_websocket_manager, WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, patch
 import asyncio
 import json
 import pytest
 import time
 import websockets
+from shared.isolated_environment import IsolatedEnvironment
 
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 class WebSocketTestHelpers:
     """Helper utilities for WebSocket testing."""

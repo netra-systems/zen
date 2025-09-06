@@ -13,6 +13,7 @@ import sys
 import time
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class CORSTestResult:

@@ -9,7 +9,6 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -19,6 +18,10 @@ from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from tests.e2e.config import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     CustomerTier,
     UnifiedTestConfig,
     get_test_user,

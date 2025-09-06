@@ -11,6 +11,7 @@ import tempfile
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 def run_command(cmd, capture=True):
     """Run a command and return output."""

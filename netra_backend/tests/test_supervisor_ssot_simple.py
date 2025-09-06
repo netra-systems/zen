@@ -4,6 +4,7 @@ import os
 import subprocess
 import pytest
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestSSOTFixesApplied:

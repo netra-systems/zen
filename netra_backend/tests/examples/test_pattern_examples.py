@@ -7,20 +7,24 @@ maintain, and debug. Use these patterns as templates for new tests.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
 from netra_backend.app.services.agent_service import AgentService
 
 from netra_backend.tests.helpers.shared_test_types import (
-    TestErrorHandling as SharedTestErrorHandling,
-)
+    TestErrorHandling as SharedTestErrorHandling)
 
 # ==============================================================================
 # EXAMPLE 1: Clear Unit Test with Explicit Mocking
@@ -36,7 +40,9 @@ class TestAgentServiceUnit:
     """
     
     @pytest.fixture
-    def mock_dependencies(self):
+ def real_dependencies():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create all mocked dependencies for AgentService.
         
         MOCKED COMPONENTS:
@@ -47,6 +53,7 @@ class TestAgentServiceUnit:
         Returns:
             dict: All mocked dependencies ready for injection
         """
+    pass
         return {
             # Mock: Async component isolation for testing without real async operations
             'supervisor': AsyncMock(spec=['run', 'stop']),
@@ -71,6 +78,7 @@ class TestAgentServiceUnit:
         WHEN: AgentService.process_request is called
         THEN: SupervisorAgent.run is called with correct parameters
         """
+    pass
         # Arrange: Setup mock response
         mock_dependencies['supervisor'].run.return_value = {
             'status': 'success',
@@ -116,6 +124,7 @@ class TestAgentServiceIntegration:
         This fixture uses a REAL database for integration testing.
         It's cleaned up after each test to ensure isolation.
         """
+    pass
         from netra_backend.app.db import create_test_database
         
         # Setup: Create test database
@@ -142,6 +151,7 @@ class TestAgentServiceIntegration:
         REAL COMPONENTS: Database, message queue
         MOCKED COMPONENTS: LLM API, WebSocket delivery
         """
+    pass
         # Arrange: Setup service with real DB, mocked LLM
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.client.generate') as mock_llm:
@@ -199,11 +209,13 @@ class TestAgentPerformance:
         - Each request processes minimal work (mocked LLM)
         - Measures actual processing time, not LLM latency
         """
+    pass
         # Arrange: Create service with mocked slow operations
         service = AgentService()
         
         # Create 100 concurrent requests
         async def make_request(request_id: int):
+    pass
             start_time = asyncio.get_event_loop().time()
             try:
                 result = await service.process_request(
@@ -212,7 +224,8 @@ class TestAgentPerformance:
                     thread_id=f'thread_{request_id}'
                 )
                 latency = asyncio.get_event_loop().time() - start_time
-                return {'success': True, 'latency': latency}
+                await asyncio.sleep(0)
+    return {'success': True, 'latency': latency}
             except Exception as e:
                 latency = asyncio.get_event_loop().time() - start_time
                 return {'success': False, 'latency': latency, 'error': str(e)}
@@ -271,9 +284,10 @@ class TestErrorHandling(SharedTestErrorHandling):
             failure_type: Type of failure to simulate
             expected_error: Expected error message
         """
+    pass
         # Arrange: Configure service to fail in specific way
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = AsyncMock()
+        mock_supervisor = AsyncNone  # TODO: Use real service instance
         service = AgentService(supervisor=mock_supervisor)
         
         if failure_type == "database_timeout":
@@ -330,7 +344,10 @@ class TestErrorHandling(SharedTestErrorHandling):
 
 @pytest.fixture
 def test_data_factory():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """
+    pass
     Factory for creating consistent test data.
     
     PROVIDES:
@@ -358,11 +375,13 @@ def test_data_factory():
                 'created_at': datetime.now(),
             }
             base.update(overrides)
-            return base
+            await asyncio.sleep(0)
+    return base
         
         @staticmethod
         def create_thread(user_id: str, **overrides):
             """Create test thread linked to user."""
+    pass
             base = {
                 'id': f'thread_{datetime.now().timestamp()}',
                 'user_id': user_id,
@@ -393,6 +412,7 @@ def test_data_factory():
 # ==============================================================================
 
 """
+    pass
 TEST DOCUMENTATION TEMPLATE - Copy this for new test files:
 
 MODULE: [test file name]

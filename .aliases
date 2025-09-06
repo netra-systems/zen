@@ -1,0 +1,35 @@
+# Netra Development Aliases
+# Add these to your shell profile (.bashrc, .zshrc, .profile) for convenience:
+
+# The ONE way to refresh development environment
+alias refresh-dev="python scripts/refresh_dev.py"
+
+# Quick shortcuts for specific services
+alias refresh-backend="python scripts/refresh_dev.py backend"
+alias refresh-auth="python scripts/refresh_dev.py auth"  
+alias refresh-frontend="python scripts/refresh_dev.py frontend"
+
+# Clean refresh when things get weird
+alias refresh-clean="python scripts/refresh_dev.py --clean"
+
+# Docker management shortcuts
+alias docker-status="python scripts/docker_manual.py status"
+alias docker-clean="python scripts/docker_manual.py clean"
+alias docker-logs="docker-compose -f docker-compose.yml logs -f"
+
+# Test shortcuts
+alias test-quick="python tests/unified_test_runner.py --categories unit --fast-fail"
+alias test-integration="python tests/unified_test_runner.py --categories integration --real-services"
+alias test-e2e="python tests/unified_test_runner.py --categories e2e --real-services"
+
+# Development URLs (for quick access)
+alias open-frontend="open http://localhost:3000"
+alias open-backend="open http://localhost:8000/docs"
+alias open-auth="open http://localhost:8081/docs"
+
+# Example usage after adding to shell:
+# $ refresh-dev              # Full environment refresh
+# $ refresh-backend          # Just backend service
+# $ refresh-clean            # Clean rebuild everything
+# $ docker-status            # Check what's running
+# $ test-quick               # Quick unit tests

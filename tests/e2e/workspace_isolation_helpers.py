@@ -19,9 +19,12 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class WorkspaceIsolationTestCore:

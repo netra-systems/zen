@@ -30,8 +30,8 @@ class AuthEnvironment:
         """Validate auth-specific configuration on initialization."""
         # Core auth requirements
         required_vars = [
-            "JWT_SECRET_KEY",
-            "DATABASE_URL"
+            "JWT_SECRET_KEY"
+            # DATABASE_URL is now built from components, not required directly
         ]
         
         missing = []
@@ -44,27 +44,63 @@ class AuthEnvironment:
     
     # JWT & Security Configuration
     def get_jwt_secret_key(self) -> str:
-        """Get JWT secret key for token generation/validation."""
+        """Get JWT secret key for token generation/validation.
+        
+        UPDATED: Now supports environment-specific JWT secrets to align with backend service.
+        Fallback chain matches netra_backend/app/core/configuration/unified_secrets.py:94
+        
+        Priority order:
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
+        2. Generic JWT_SECRET_KEY  
+        3. Legacy JWT_SECRET
+        4. Development/test fallbacks
+        
+        This fixes the 401 authentication regression in staging where JWT_SECRET_STAGING
+        was configured but auth service only looked for JWT_SECRET_KEY.
+        """
         env = self.get_environment()
+        
+        # 1. Try environment-specific secret first (matches backend service logic)
+        env_specific_key = f"JWT_SECRET_{env.upper()}"
+        secret = self.env.get(env_specific_key, "")
+        if secret:
+            logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
+            return secret.strip()
+        
+        # 2. Try generic JWT_SECRET_KEY (original logic)
         secret = self.env.get("JWT_SECRET_KEY", "")
+        if secret:
+            logger.debug("Using generic JWT_SECRET_KEY")
+            return secret.strip()
+            
+        # 3. Try legacy JWT_SECRET
+        secret = self.env.get("JWT_SECRET", "")
+        if secret:
+            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY or environment-specific)")
+            return secret.strip()
         
-        if not secret:
-            if env == "development":
-                # Development: Generate consistent dev secret
-                import hashlib
-                dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
-                self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
-                return dev_secret
-            elif env == "test":
-                # Test: Generate consistent test secret
-                import hashlib
-                test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
-                self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
-                return test_secret
-            elif env in ["staging", "production"]:
-                raise ValueError(f"JWT_SECRET_KEY must be explicitly set in {env} environment")
+        # 4. Environment-specific fallbacks
+        if env == "development":
+            # Development: Generate consistent dev secret
+            import hashlib
+            dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
+            self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
+            logger.debug("Generated development JWT secret")
+            return dev_secret
+        elif env == "test":
+            # Test: Generate consistent test secret
+            import hashlib
+            test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
+            self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
+            logger.debug("Generated test JWT secret")
+            return test_secret
+        elif env in ["staging", "production"]:
+            # Hard failure for staging/production - no fallbacks
+            expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+            raise ValueError(f"JWT secret not configured for {env} environment. Expected one of: {expected_vars}")
         
-        return secret
+        # Fallback for unknown environments
+        raise ValueError(f"JWT secret not configured for {env} environment")
     
     def get_jwt_algorithm(self) -> str:
         """Get JWT algorithm with environment-specific defaults."""
@@ -209,7 +245,7 @@ class AuthEnvironment:
     
     # Database Configuration
     def get_database_url(self) -> str:
-        """Get database connection URL with environment-specific behavior."""
+        """Get database connection URL using DatabaseURLBuilder."""
         env = self.get_environment()
         
         # CRITICAL: Test environment gets SQLite in-memory for isolation and speed (per CLAUDE.md)
@@ -220,24 +256,50 @@ class AuthEnvironment:
             logger.info("Using in-memory SQLite for test environment (permissive test mode per CLAUDE.md)")
             return url
         
-        # For non-test environments, check for explicit DATABASE_URL first
-        url = self.env.get("DATABASE_URL")
+        # Use DatabaseURLBuilder for all non-test environments
+        from shared.database_url_builder import DatabaseURLBuilder
         
-        if not url:
-            if env == "development":
-                # Development: Use local PostgreSQL with standard dev database
-                host = self.get_postgres_host()
-                port = self.get_postgres_port()
-                user = self.get_postgres_user() 
-                password = self.get_postgres_password()
-                db = self.get_postgres_db()
-                url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
-                logger.info(f"Generated development database URL for host {host}")
-                return url
-            elif env in ["staging", "production"]:
-                raise ValueError(f"DATABASE_URL must be explicitly set in {env} environment")
+        # Build environment variables dict for DatabaseURLBuilder
+        env_vars = {
+            "ENVIRONMENT": env,
+            "POSTGRES_HOST": self.env.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": self.env.get("POSTGRES_PORT"),
+            "POSTGRES_DB": self.env.get("POSTGRES_DB"),
+            "POSTGRES_USER": self.env.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD"),
+            "DATABASE_URL": self.env.get("DATABASE_URL")  # For backward compatibility
+        }
         
-        return url
+        # Create URL builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Get URL for current environment - NO MANUAL FALLBACKS
+        database_url = builder.get_url_for_environment(sync=False)  # async for auth service
+        
+        if not database_url:
+            # NO MANUAL FALLBACKS - DatabaseURLBuilder is the SINGLE SOURCE OF TRUTH
+            # Log the debug info to help diagnose the issue
+            debug_info = builder.debug_info()
+            logger.error(f"DatabaseURLBuilder failed to construct URL for {env} environment. Debug info: {debug_info}")
+            
+            # Provide helpful error message based on environment
+            if env == "production" or env == "staging":
+                raise ValueError(
+                    f"DatabaseURLBuilder failed to construct URL for {env} environment. "
+                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                    f"or DATABASE_URL is provided. Debug info: {debug_info}"
+                )
+            else:
+                # For development/test, still fail but with more helpful message
+                raise ValueError(
+                    f"DatabaseURLBuilder failed to construct URL for {env} environment. "
+                    f"For development, ensure DATABASE_URL is set or use default localhost configuration. "
+                    f"Debug info: {debug_info}"
+                )
+        
+        # Log safe connection info
+        logger.info(builder.get_safe_log_message())
+        return database_url
     
     def get_postgres_host(self) -> str:
         """Get PostgreSQL host with environment-specific defaults."""
@@ -590,8 +652,11 @@ class AuthEnvironment:
             return host
             
         # Environment-specific defaults (no fallback pattern)
-        if env in ["production", "staging"]:
-            # Cloud Run binds to 0.0.0.0
+        if env == "production":
+            # Production Cloud Run: Bind to all interfaces
+            return "0.0.0.0"
+        elif env == "staging":
+            # Staging Cloud Run: Bind to all interfaces
             return "0.0.0.0"
         elif env == "development":
             # Development: Bind to all interfaces for Docker compatibility
@@ -603,12 +668,110 @@ class AuthEnvironment:
             return "0.0.0.0"
     
     def get_backend_url(self) -> str:
-        """Get backend service URL for callbacks."""
-        return self.env.get("BACKEND_URL", "http://localhost:8000")
+        """Get backend service URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("BACKEND_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults (no fallback pattern)
+        if env == "production":
+            return "https://api.netrasystems.ai"
+        elif env == "staging":
+            return "https://api.staging.netrasystems.ai"
+        elif env == "development":
+            return "http://localhost:8000"
+        elif env == "test":
+            return "http://localhost:8001"
+        else:
+            return "http://localhost:8000"
     
     def get_frontend_url(self) -> str:
-        """Get frontend URL for redirects."""
-        return self.env.get("FRONTEND_URL", "http://localhost:3000")
+        """Get frontend URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("FRONTEND_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults (no fallback pattern)
+        if env == "production":
+            return "https://app.netrasystems.ai"
+        elif env == "staging":
+            return "https://app.staging.netrasystems.ai"
+        elif env == "development":
+            return "http://localhost:3000"
+        elif env == "test":
+            return "http://localhost:3001"
+        else:
+            return "http://localhost:3000"
+    
+    def get_auth_service_url(self) -> str:
+        """Get complete auth service URL with environment-specific defaults."""
+        env = self.get_environment()
+        
+        # Check for explicit override first
+        url = self.env.get("AUTH_SERVICE_URL")
+        if url:
+            return url
+        
+        # Environment-specific defaults
+        if env == "production":
+            return "https://auth.netrasystems.ai"
+        elif env == "staging":
+            return "https://auth.staging.netrasystems.ai"
+        elif env == "development":
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            # For dev, use the bind address for URL construction
+            if host == "0.0.0.0":
+                host = "localhost"
+            return f"http://{host}:{port}"
+        elif env == "test":
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            return f"http://{host}:{port}"
+        else:
+            host = self.get_auth_service_host()
+            port = self.get_auth_service_port()
+            if host == "0.0.0.0":
+                host = "localhost"
+            return f"http://{host}:{port}"
+    
+    def get_oauth_redirect_uri(self, provider: str = "google") -> str:
+        """DEPRECATED: DO NOT USE - Violates SSOT principles.
+        
+        **CRITICAL**: This method is deprecated and will be removed.
+        Use GoogleOAuthProvider.get_redirect_uri() instead.
+        
+        This method incorrectly returns frontend URLs which cannot handle OAuth callbacks.
+        See: /OAUTH_SSOT_COMPLIANCE_ANALYSIS.md for details.
+        See: /auth_service/auth_core/oauth/google_oauth.py:78 for SSOT implementation.
+        
+        Args:
+            provider: OAuth provider name (google, github, etc.)
+            
+        Returns:
+            Full OAuth callback URL for the provider
+            
+        Raises:
+            DeprecationWarning: Always - this method should not be used
+        """
+        import warnings
+        warnings.warn(
+            "get_oauth_redirect_uri() is deprecated and violates SSOT. "
+            "Use GoogleOAuthProvider.get_redirect_uri() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # TEMPORARY: Return auth service URL to fix immediate issue
+        # This entire method will be removed once all callers are updated
+        auth_url = self.get_auth_service_url()
+        return f"{auth_url}/auth/callback"
     
     # Environment & Deployment
     def get_environment(self) -> str:
@@ -907,8 +1070,8 @@ class AuthEnvironment:
         
         # Required variables
         required = {
-            "JWT_SECRET_KEY": self.get_jwt_secret_key(),
-            "DATABASE_URL": self.get_database_url()
+            "JWT_SECRET_KEY": self.get_jwt_secret_key()
+            # DATABASE_URL is validated through DatabaseURLBuilder
         }
         
         for name, value in required.items():

@@ -4,6 +4,7 @@ import time
 from typing import Optional
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class SimpleWebSocketNotifier:

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Feature Flag Environment Variable Override Demonstration.
 
 env = get_env()

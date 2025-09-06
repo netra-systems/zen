@@ -14,6 +14,7 @@ These tests need to be redesigned to work with the current agent architectures o
 replaced with integration-level tests that properly mock/provide the required dependencies.
 """
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.skip(reason="Test outdated - agent constructors have evolved to require complex dependencies")

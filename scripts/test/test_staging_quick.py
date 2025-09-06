@@ -5,6 +5,7 @@ import asyncio
 import aiohttp
 import json
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 STAGING_BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
 STAGING_AUTH_URL = "https://auth-service-staging-pnovr5vsba-uc.a.run.app"

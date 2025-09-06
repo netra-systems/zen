@@ -38,6 +38,69 @@
         </prevention>
     </learning>
     
+    <learning id="fake-staging-tests-critical-failure-2025-09-05">
+        <title>🚨 CRITICAL: Fake Staging Tests Creating False Confidence</title>
+        <category>Testing/Staging/FakeTests/CriticalFailure/Abomination</category>
+        <keywords>fake-tests, staging-tests, false-confidence, zero-duration, simulation, mock-tests, test-fraud, critical-failure</keywords>
+        <path>fake_staging_tests_critical_failure_20250905.xml</path>
+        <critical-takeaway>
+            ENTIRE STAGING TEST SUITE IS FAKE! 158 tests complete in 0.000s because they test NOTHING.
+            Tests validate local dictionaries, use hardcoded simulations, print "[PASS]" without testing.
+            97.5% pass rate is MEANINGLESS. $120K+ MRR at risk from untested staging deployments.
+            NEVER accept tests completing in 0 seconds. ALWAYS verify real network calls.
+        </critical-takeaway>
+        <severity>CRITICAL-ABOMINATION</severity>
+        <business-impact>Entire staging validation is fake - production deployments based on lies</business-impact>
+        <prevention>
+            FORBID tests with 0.000s duration. REQUIRE real API/WebSocket calls. MANDATE packet capture proof.
+            Minimum E2E test duration >0.1s. Every test MUST make real network calls to staging.
+        </prevention>
+    </learning>
+    
+    <learning id="permanent-failure-state-pattern-2025-09-05">
+        <title>Systemic Permanent Failure State Pattern - Critical Discovery</title>
+        <category>Resilience/CircuitBreaker/AntiPattern/SystemicIssue</category>
+        <keywords>permanent-failure, circuit-breaker, mock-circuit-breaker, recovery-mechanism, cascade-failure, error-behind-error, resilience, self-healing</keywords>
+        <path>permanent_failure_state_pattern_20250905.xml</path>
+        <critical-takeaway>
+            AUTH FAILURES WERE A SYMPTOM NOT THE CAUSE! Systemic anti-pattern where components enter 
+            permanent failure states (is_open=True, _connected=False) with NO recovery mechanism.
+            MockCircuitBreaker opens on ANY error and NEVER recovers. Pattern replicated in Redis, 
+            Database, WebSocket managers. Always look for "error behind the error" - auth issues 
+            were actually circuit breaker architecture flaws. EVERY failure state MUST have recovery.
+        </critical-takeaway>
+        <severity>CRITICAL-SYSTEMIC</severity>
+        <business-impact>Complete system outages from transient failures, manual restart required</business-impact>
+        <prevention>
+            Use UnifiedCircuitBreaker everywhere. Add recovery timers, exponential backoff, health monitoring.
+            Test failure AND recovery paths. Never set permanent states without recovery mechanism.
+        </prevention>
+        <cross-references>
+            AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md,
+            SYSTEM_WIDE_RESILIENCE_AUDIT_20250905.md,
+            auth_circuit_breaker_fixes_2025.xml
+        </cross-references>
+    </learning>
+    
+    <learning id="config-env-regression-prevention-2025-09-05">
+        <title>Configuration and Environment Regression Prevention Patterns</title>
+        <category>Configuration/Environment/RegressionPrevention</category>
+        <keywords>config-regression, oauth-failure, environment-isolation, ssot-config, dependency-mapping, migration-paths, test-credentials</keywords>
+        <path>config_env_regression_prevention_20250905.xml</path>
+        <critical-takeaway>
+            Configuration SSOT differs from code SSOT - environment-specific configs are NOT duplicates.
+            OAuth failed due to missing GOOGLE_OAUTH_CLIENT_ID_TEST after blind consolidation.
+            ALWAYS check ConfigDependencyMap before deletion. Each environment needs independent credentials.
+            Hard failures better than silent fallbacks. Test environments need real test configs, not mocks.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Authentication completely broken, 503 errors, cascade failures across services</business-impact>
+        <prevention>
+            Never delete configs without dependency check. Provide test credentials. 
+            Run scripts/check_config_before_deploy.py. Monitor config health continuously.
+        </prevention>
+    </learning>
+    
     <learning id="orchestration-data-handling-patterns-2025-09-04">
         <title>Orchestration Data Handling Patterns - Partial and Insufficient Data</title>
         <category>Agent/Orchestration/DataHandling</category>

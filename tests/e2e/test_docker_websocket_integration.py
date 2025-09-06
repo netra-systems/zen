@@ -37,6 +37,8 @@ import subprocess
 import psutil
 import websockets
 from websockets.exceptions import ConnectionClosedError
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -109,6 +111,7 @@ class PerformanceMetrics:
 @dataclass
 class TestExecutionContext:
     """Context for test execution with real services."""
+    pass
     docker_manager: Any
     websocket_bridge: AgentWebSocketBridge
     agent_service: AgentService
@@ -128,6 +131,7 @@ class DockerWebSocketIntegrationTests:
     """
     
     def __init__(self):
+    pass
         self.context: Optional[TestExecutionContext] = None
         self.test_results: Dict[str, TestResult] = {}
         self.performance_metrics: List[PerformanceMetrics] = []
@@ -198,8 +202,10 @@ class DockerWebSocketIntegrationTests:
         
         Business Value: Prevents resource leaks that could affect subsequent tests.
         """
+    pass
         if not self.context:
-            return
+            await asyncio.sleep(0)
+    return
             
         logger.info("🧹 Starting comprehensive test environment cleanup")
         
@@ -263,6 +269,7 @@ class DockerWebSocketIntegrationTests:
             events_received = []
             
             def event_handler(message):
+    pass
                 if isinstance(message, dict):
                     events_received.append(message)
                     logger.info(f"📨 WebSocket event received: {message.get('type', 'unknown')}")
@@ -425,7 +432,8 @@ class DockerWebSocketIntegrationTests:
                     
                     await user_ws_client.disconnect()
                     
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "user_id": task_info["user_id"],
                         "success": result and result.get('success', False),
                         "events_count": len(user_events),
@@ -504,6 +512,7 @@ class DockerWebSocketIntegrationTests:
 
     async def test_failure_recovery_scenarios(self) -> PerformanceMetrics:
         """
+    pass
         Test Scenario 3: Failure Recovery Scenarios
         
         Business Value: Validates system resilience and recovery capabilities.
@@ -533,7 +542,9 @@ class DockerWebSocketIntegrationTests:
             
             # Execute task that should survive service restart
             async def long_running_task():
-                return await self.context.agent_service.execute_agent_task(
+    pass
+                await asyncio.sleep(0)
+    return await self.context.agent_service.execute_agent_task(
                     agent_type="system_info",
                     task="Long running system analysis task",
                     user_id=task_user_id,
@@ -743,7 +754,8 @@ class DockerWebSocketIntegrationTests:
                     
                     await agent_ws_client.disconnect()
                     
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         'agent_idx': agent_idx,
                         'results': agent_results,
                         'events': agent_events,
@@ -880,6 +892,7 @@ class DockerWebSocketIntegrationTests:
     
     def generate_performance_report(self) -> Dict[str, Any]:
         """
+    pass
         Generate comprehensive performance metrics report.
         
         Business Value: Provides actionable insights for system optimization.
@@ -986,6 +999,7 @@ class TestDockerWebSocketIntegration:
         
         This test is marked as mission-critical and must pass for deployment approval.
         """
+    pass
         integration_tests = DockerWebSocketIntegrationTests()
         
         try:
@@ -1028,7 +1042,8 @@ class TestDockerWebSocketIntegration:
             logger.info(f"📊 Production Readiness: {report['business_value_validation']['production_load_readiness']}")
             
             # Recommendations
-            logger.info("\n🔍 RECOMMENDATIONS:")
+            logger.info("
+🔍 RECOMMENDATIONS:")
             for rec in report['recommendations']:
                 logger.info(f"  • {rec}")
                 
@@ -1042,7 +1057,8 @@ class TestDockerWebSocketIntegration:
                               if result != TestResult.PASS]
                 pytest.fail(f"Integration tests failed: {', '.join(failed_tests)}")
                 
-            return report
+            await asyncio.sleep(0)
+    return report
             
         finally:
             # Always cleanup test environment
@@ -1076,7 +1092,8 @@ if __name__ == "__main__":
             # Generate and display report
             report = integration_tests.generate_performance_report()
             
-            print("\n" + "=" * 60)
+            print("
+" + "=" * 60)
             print("🎯 FINAL TEST RESULTS")
             print("=" * 60)
             
@@ -1084,10 +1101,12 @@ if __name__ == "__main__":
                 status = "PASS ✅" if result == TestResult.PASS else f"FAIL ❌ ({result.value})"
                 print(f"{test_name}: {status}")
                 
-            print(f"\nOverall System Health: {'HEALTHY ✅' if report['business_value_validation']['overall_system_health'] else 'UNHEALTHY ❌'}")
+            print(f"
+Overall System Health: {'HEALTHY ✅' if report['business_value_validation']['overall_system_health'] else 'UNHEALTHY ❌'}")
             
             if report['recommendations']:
-                print("\n🔍 Recommendations:")
+                print("
+🔍 Recommendations:")
                 for rec in report['recommendations']:
                     print(f"  • {rec}")
                     
@@ -1099,3 +1118,4 @@ if __name__ == "__main__":
             
     # Run the integration tests
     asyncio.run(main())
+    pass

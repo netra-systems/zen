@@ -10,6 +10,7 @@ import os
 import sys
 import asyncio
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent

@@ -9,6 +9,7 @@ import time
 import uuid
 from typing import Any, Callable, Dict, Optional
 from datetime import datetime, UTC
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession

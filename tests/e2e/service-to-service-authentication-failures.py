@@ -34,13 +34,15 @@ import httpx
 import time
 import json
 import os
-from unittest.mock import Mock, patch, AsyncMock
 from fastapi import HTTPException, status
 import jwt
 from datetime import datetime, timedelta, timezone
 
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_e2e_test import BaseE2ETest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e

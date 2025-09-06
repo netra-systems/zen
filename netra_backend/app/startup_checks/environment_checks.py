@@ -53,7 +53,8 @@ class EnvironmentChecker:
         if self.environment == "development":
             return []  # Allow defaults in development
         # In production/staging, require explicit configuration
-        return ["DATABASE_URL", "SECRET_KEY"]
+        # DATABASE_URL is built from individual POSTGRES_* variables via DatabaseURLBuilder
+        return ["SECRET_KEY"]
     
     def _get_optional_vars(self) -> List[str]:
         """Get optional environment variables"""
@@ -67,7 +68,9 @@ class EnvironmentChecker:
     
     def _get_optional_auth_vars(self) -> List[str]:
         """Get optional authentication environment variables"""
-        return ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]
+        # OAuth credentials are handled by the auth service, not backend
+        # Backend only needs JWT tokens and service secrets for auth
+        return []
     
     def _check_missing_vars(self, vars_list: List[str]) -> List[str]:
         """Check for missing variables"""
@@ -94,8 +97,12 @@ class EnvironmentChecker:
         if self.environment == "development":
             return  # Skip validation, allow defaults
         config = unified_config_manager.get_config()
-        if not self.is_staging and not getattr(config, 'database_url', None):
-            raise ValueError("DATABASE_URL is not configured")
+        # DATABASE_URL is now built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # Check that we can construct a database URL (the backend_environment handles this)
+        from netra_backend.app.core.backend_environment import get_backend_env
+        db_url = get_backend_env().get_database_url()
+        if not self.is_staging and not db_url:
+            raise ValueError("Database configuration not found (check POSTGRES_* environment variables)")
     
     def _validate_secret_key(self) -> None:
         """Validate secret key configuration"""

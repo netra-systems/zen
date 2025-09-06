@@ -12,8 +12,9 @@ from fastapi.testclient import TestClient
 import uvicorn
 from threading import Thread
 import websockets
+from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 

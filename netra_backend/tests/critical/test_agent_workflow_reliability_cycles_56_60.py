@@ -14,8 +14,12 @@ Cycles Covered: 56, 57, 58, 59, 60
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.workflow_engine import WorkflowEngine
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

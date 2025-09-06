@@ -2,6 +2,7 @@
 # This provides the minimal classes needed for test_config_validator.py
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestConfigFileChecking:
     """Test class for config file checking."""

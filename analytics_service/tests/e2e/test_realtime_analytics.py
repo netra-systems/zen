@@ -30,6 +30,7 @@ import websockets
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from websockets.exceptions import ConnectionClosed, WebSocketException
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 from analytics_service.tests.e2e.test_full_flow import AnalyticsE2ETestHarness

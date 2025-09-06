@@ -19,6 +19,7 @@ CRITICAL: Maximum 300 lines, async/await pattern, real service validation
 
 import asyncio
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root for imports
 import sys

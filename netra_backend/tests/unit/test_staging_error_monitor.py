@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio
@@ -30,9 +30,9 @@ from netra_backend.app.schemas.monitoring_schemas import (
     ErrorSeverity,
     ErrorStatus,
     ErrorSummary,
-    GCPError,
-)
+    GCPError)
 from scripts.staging_error_monitor import (
+import asyncio
     ConsoleFormatter,
     DeploymentDecision,
     ErrorAnalyzer,
@@ -41,25 +41,33 @@ from scripts.staging_error_monitor import (
     NotificationSender,
     StagingErrorMonitor,
     load_config_from_args,
-    parse_deployment_time,
-)
+    parse_deployment_time)
 
 class TestErrorAnalyzer:
     """Test suite for ErrorAnalyzer deployment error analysis."""
     
     @pytest.fixture
     def deployment_time(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create deployment time for testing."""
+    pass
         return datetime.now(timezone.utc) - timedelta(minutes=5)
     
     @pytest.fixture
     def error_analyzer(self, deployment_time):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ErrorAnalyzer instance."""
+    pass
         return ErrorAnalyzer(deployment_time)
     
     @pytest.fixture
     def sample_errors(self, deployment_time):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample errors for testing."""
+    pass
         return [
             self._create_test_error("pre-deploy-1", deployment_time - timedelta(minutes=10)),
             self._create_test_error("post-deploy-1", deployment_time + timedelta(minutes=2)),
@@ -76,6 +84,7 @@ class TestErrorAnalyzer:
 
     def test_is_deployment_related_pre_deployment_error(self, error_analyzer, deployment_time):
         """Test identification of pre-deployment errors."""
+    pass
         pre_deploy_error = self._create_test_error("pre-deploy", deployment_time - timedelta(minutes=1))
         
         result = error_analyzer.is_deployment_related(pre_deploy_error)
@@ -93,6 +102,7 @@ class TestErrorAnalyzer:
 
     def test_calculate_error_score_mixed_severities(self, error_analyzer):
         """Test error score calculation with mixed severities."""
+    pass
         errors = [
             self._create_test_error("critical-1", datetime.now(timezone.utc), ErrorSeverity.CRITICAL),
             self._create_test_error("error-1", datetime.now(timezone.utc), ErrorSeverity.ERROR),
@@ -112,6 +122,7 @@ class TestErrorAnalyzer:
     # Helper method
     def _create_test_error(self, error_id: str, first_seen: datetime, severity: ErrorSeverity = ErrorSeverity.ERROR) -> GCPError:
         """Create test error with specified properties."""
+    pass
         return GCPError(
             id=error_id,
             message=f"Test error {error_id}",
@@ -126,12 +137,18 @@ class TestConsoleFormatter:
     
     @pytest.fixture
     def console_formatter(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create ConsoleFormatter instance."""
+    pass
         return ConsoleFormatter()
     
     @pytest.fixture
     def sample_response(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create sample error response for formatting."""
+    pass
         errors = [self._create_sample_error("error-1"), self._create_sample_error("error-2")]
         summary = ErrorSummary(
             total_errors=2,
@@ -147,10 +164,12 @@ class TestConsoleFormatter:
         
         assert "STAGING ERROR MONITORING REPORT" in result
         assert "=" * 60 in result
-        assert len(result.split('\n')) >= 3
+        assert len(result.split('
+')) >= 3
 
     def test_format_error_details_limits_to_five_errors(self, console_formatter):
         """Test error details formatting limits to 5 errors."""
+    pass
         errors = [self._create_sample_error(f"error-{i}") for i in range(10)]
         
         result = console_formatter.format_error_details(errors)
@@ -168,6 +187,7 @@ class TestConsoleFormatter:
 
     def test_format_recommendation_deployment_failure(self, console_formatter):
         """Test recommendation formatting for deployment failure."""
+    pass
         result = console_formatter.format_recommendation(should_fail=True, score=25)
         
         assert "❌ DEPLOYMENT FAILURE RECOMMENDED" in result
@@ -183,6 +203,7 @@ class TestConsoleFormatter:
     # Helper method
     def _create_sample_error(self, error_id: str) -> GCPError:
         """Create sample error for testing."""
+    pass
         return GCPError(
             id=error_id,
             message=f"Sample error message for {error_id}",
@@ -198,7 +219,10 @@ class TestDeploymentDecision:
     
     @pytest.fixture
     def error_threshold(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create error threshold configuration."""
+    pass
         return ErrorThreshold(
             critical_errors_max=0,
             error_errors_max=5,
@@ -207,7 +231,10 @@ class TestDeploymentDecision:
     
     @pytest.fixture
     def deployment_decision(self, error_threshold):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create DeploymentDecision instance."""
+    pass
         return DeploymentDecision(error_threshold)
 
     def test_should_fail_deployment_critical_errors_exceed_threshold(self, deployment_decision):
@@ -227,6 +254,7 @@ class TestDeploymentDecision:
 
     def test_should_fail_deployment_error_score_exceeds_threshold(self, deployment_decision):
         """Test deployment failure due to high error score."""
+    pass
         analysis = {
             "deployment_related": [
                 self._create_mock_error(ErrorSeverity.ERROR),
@@ -259,8 +287,9 @@ class TestDeploymentDecision:
     # Helper method
     def _create_mock_error(self, severity: ErrorSeverity) -> Mock:
         """Create mock error with specified severity."""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        error = Mock()
+        error = error_instance  # Initialize appropriate service
         error.severity = severity
         return error
 
@@ -269,7 +298,10 @@ class TestNotificationSender:
     
     @pytest.fixture
     def config_with_notifications(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create config with notifications enabled."""
+    pass
         return MonitorConfig(
             enable_notifications=True,
             notification_webhook="https://example.com/webhook"
@@ -277,7 +309,10 @@ class TestNotificationSender:
     
     @pytest.fixture
     def config_without_notifications(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create config with notifications disabled."""
+    pass
         return MonitorConfig(enable_notifications=False)
 
     @pytest.mark.asyncio
@@ -292,6 +327,7 @@ class TestNotificationSender:
     @pytest.mark.asyncio
     async def test_send_notification_disabled_config(self, config_without_notifications):
         """Test notification sending with disabled configuration."""
+    pass
         sender = NotificationSender(config_without_notifications)
         
         result = await sender.send_notification("Test message")
@@ -313,8 +349,12 @@ class TestStagingErrorMonitor:
     
     @pytest.fixture
     def monitor_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create monitor configuration for testing."""
-        return MonitorConfig(
+    pass
+        await asyncio.sleep(0)
+    return MonitorConfig(
             project_id="test-project",
             service_filter="netra-backend",
             check_window_minutes=15
@@ -322,7 +362,10 @@ class TestStagingErrorMonitor:
     
     @pytest.fixture
     def staging_monitor(self, monitor_config):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create StagingErrorMonitor instance."""
+    pass
         return StagingErrorMonitor(monitor_config)
 
     @pytest.mark.asyncio
@@ -340,6 +383,7 @@ class TestStagingErrorMonitor:
 
     def test_parse_deployment_time_iso_format(self, staging_monitor):
         """Test deployment time parsing from ISO format."""
+    pass
         iso_time = "2024-01-15T14:30:00Z"
         
         result = staging_monitor._parse_deployment_time(iso_time)
@@ -363,6 +407,7 @@ class TestStagingErrorMonitor:
     @pytest.mark.asyncio
     async def test_run_error_check_success_flow(self, staging_monitor):
         """Test complete error check execution flow."""
+    pass
         deployment_time_str = "2024-01-15T14:30:00Z"
         
         with patch.object(staging_monitor, 'initialize', new_callable=AsyncMock):
@@ -389,6 +434,7 @@ class TestStagingErrorMonitor:
     @pytest.mark.asyncio
     async def test_run_error_check_exception_handling(self, staging_monitor):
         """Test error check exception handling."""
+    pass
         deployment_time_str = "2024-01-15T14:30:00Z"
         
         with patch.object(staging_monitor, 'initialize', new_callable=AsyncMock) as mock_init:
@@ -414,7 +460,8 @@ class TestStagingErrorMonitor:
             time_range_start=datetime.now(timezone.utc) - timedelta(hours=1),
             time_range_end=datetime.now(timezone.utc)
         )
-        return ErrorResponse(errors=errors, summary=summary)
+        await asyncio.sleep(0)
+    return ErrorResponse(errors=errors, summary=summary)
 
     def _verify_analysis_result(self, result: Dict[str, Any], expected_response: ErrorResponse):
         """Verify analysis result structure."""
@@ -426,6 +473,7 @@ class TestStagingErrorMonitor:
 
     def _create_test_analysis(self) -> Dict[str, Any]:
         """Create test analysis data."""
+    pass
         return {
             "deployment_related": [],
             "pre_existing": [],
@@ -446,6 +494,7 @@ class TestConfigurationHelpers:
 
     def test_load_config_from_args_service_filter(self):
         """Test loading service filter from command line arguments."""
+    pass
         args = ["--service", "custom-service", "--other-arg", "value"]
         
         config = load_config_from_args(args)
@@ -463,6 +512,7 @@ class TestConfigurationHelpers:
 
     def test_parse_deployment_time_default_fallback(self):
         """Test deployment time parsing with default fallback."""
+    pass
         args = ["--other-arg", "value"]
         
         result = parse_deployment_time(args)

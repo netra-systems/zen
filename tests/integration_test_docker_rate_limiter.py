@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 #!/usr/bin/env python3
 """
 Integration test demonstrating Docker rate limiting to prevent API storms.
@@ -17,9 +40,12 @@ sys.path.insert(0, str(project_root))
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from unittest.mock import patch, MagicMock
 
 from test_framework.docker_rate_limiter import get_docker_rate_limiter
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 def simulate_concurrent_docker_operations():
@@ -89,14 +115,17 @@ def demonstrate_rate_limiting_effectiveness():
     Demonstrate that rate limiting prevents API storms by comparing
     with and without rate limiting.
     """
-    print("\n[DEMO] Demonstrating rate limiting effectiveness...")
+    print("
+[DEMO] Demonstrating rate limiting effectiveness...")
     
     # Test WITH rate limiting
-    print("\n1. Testing WITH rate limiting (should be slower but safer):")
+    print("
+1. Testing WITH rate limiting (should be slower but safer):")
     duration_with_limits, ops_with_limits, rate_limited = simulate_concurrent_docker_operations()
     
     # Test WITHOUT rate limiting (simulated)
-    print("\n2. Simulating WITHOUT rate limiting (would be faster but dangerous):")
+    print("
+2. Simulating WITHOUT rate limiting (would be faster but dangerous):")
     
     start_time = time.time()
     with patch('subprocess.run') as mock_run:
@@ -136,7 +165,8 @@ def demonstrate_rate_limiting_effectiveness():
 
 def test_docker_manager_integration():
     """Test that Docker managers properly use the rate limiter."""
-    print("\n[LINK] Testing Docker manager integration...")
+    print("
+[LINK] Testing Docker manager integration...")
     
     try:
         from test_framework.unified_docker_manager import UnifiedDockerManager
@@ -180,7 +210,8 @@ def main():
         # Test 2: Docker manager integration
         success &= test_docker_manager_integration()
         
-        print("\n" + "=" * 60)
+        print("
+" + "=" * 60)
         if success:
             print("[SUCCESS] ALL TESTS PASSED - Rate limiter is working correctly!")
             print("[OK] Docker API storms should now be prevented")
@@ -190,7 +221,8 @@ def main():
         print("=" * 60)
         
     except Exception as e:
-        print(f"\n[ERROR] Test failed with exception: {e}")
+        print(f"
+[ERROR] Test failed with exception: {e}")
         import traceback
         traceback.print_exc()
 

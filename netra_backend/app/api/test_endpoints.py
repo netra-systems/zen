@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test endpoints for development - bypasses authentication
 ONLY enabled in development environment

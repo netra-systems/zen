@@ -23,9 +23,29 @@ from netra_backend.app.websocket_core.unified_emitter import (
     WebSocketEmitterPool,
 )
 
+# CRITICAL SECURITY MIGRATION: Import factory pattern components
+from netra_backend.app.websocket_core.websocket_manager_factory import (
+    WebSocketManagerFactory,
+    IsolatedWebSocketManager,
+    get_websocket_manager_factory,
+    create_websocket_manager
+)
+
+from netra_backend.app.websocket_core.migration_adapter import (
+    WebSocketManagerAdapter,
+    get_legacy_websocket_manager,
+    migrate_singleton_usage
+)
+
+from netra_backend.app.websocket_core.user_context_extractor import (
+    UserContextExtractor,
+    get_user_context_extractor,
+    extract_websocket_user_context
+)
+
 # Backward compatibility aliases
 WebSocketManager = UnifiedWebSocketManager
-websocket_manager = get_websocket_manager()
+# SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter
@@ -119,10 +139,26 @@ __all__ = [
     "WebSocketEmitterFactory",
     "WebSocketEmitterPool",
     
+    # CRITICAL SECURITY MIGRATION: Factory pattern exports
+    "WebSocketManagerFactory",
+    "IsolatedWebSocketManager",
+    "get_websocket_manager_factory",
+    "create_websocket_manager",
+    
+    # Migration support
+    "WebSocketManagerAdapter", 
+    "get_legacy_websocket_manager",
+    "migrate_singleton_usage",
+    
+    # User context extraction
+    "UserContextExtractor",
+    "get_user_context_extractor", 
+    "extract_websocket_user_context",
+    
     # Backward compatibility
     "WebSocketManager",
-    "websocket_manager",
-    "get_websocket_manager",
+    # SECURITY FIX: Removed websocket_manager singleton export
+    # SECURITY: get_websocket_manager removed - causes multi-user data leakage
     "WebSocketEventEmitter",
     "IsolatedWebSocketEventEmitter",
     "UserWebSocketEmitter",
@@ -169,4 +205,4 @@ __all__ = [
 # Log consolidation
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
-logger.info("WebSocket SSOT loaded - All 5 critical events preserved")
+logger.info("WebSocket SSOT loaded - CRITICAL SECURITY MIGRATION: Factory pattern available, singleton vulnerabilities mitigated")

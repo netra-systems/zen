@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Comprehensive CORS Integration Tests
 
@@ -25,7 +26,6 @@ import json
 import os
 import pytest
 from typing import Dict, List, Optional, Any
-from unittest.mock import patch, MagicMock
 
 import aiohttp
 import websockets
@@ -38,6 +38,9 @@ from shared.cors_config_builder import (
     get_websocket_cors_origins, get_cors_health_info, validate_cors_config
 )
 from test_framework.fixtures import create_test_app, create_test_client
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class CORSTestHelper:

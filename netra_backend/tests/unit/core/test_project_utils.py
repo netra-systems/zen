@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 """Tests for project_utils module.
 
 This module tests the SSOT project utility functions for path resolution
@@ -14,7 +16,6 @@ Business Value Justification (BVJ):
 import os
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 import pytest
 
 from netra_backend.app.core.project_utils import (
@@ -193,16 +194,19 @@ class TestEnvironmentDetection:
     
     def test_non_test_environment_detection(self):
         """Test that non-test environments return False."""
-        # Clear all test-related env vars
-        test_vars = ['PYTEST_CURRENT_TEST', 'TESTING', '_', 'ENVIRONMENT', 'NETRA_ENV']
-        for var in test_vars:
-            os.environ.pop(var, None)
-        
-        # Set production-like environment
-        env.set('ENVIRONMENT', 'production', "test")
-        env.set('NETRA_ENV', 'production', "test")
-        
-        assert is_test_environment() is False
+        # Mock IsolatedEnvironment to return production values
+        with patch('shared.isolated_environment.get_env') as mock_get_env:
+            mock_env = mock_env_instance  # Initialize appropriate service
+            mock_env.get.side_effect = lambda key, default='': {
+                'PYTEST_CURRENT_TEST': None,
+                'TESTING': None,
+                '_': '',
+                'ENVIRONMENT': 'production',
+                'NETRA_ENV': 'production'
+            }.get(key, default)
+            mock_get_env.return_value = mock_env
+            
+            assert is_test_environment() is False
     
     def test_case_insensitive_detection(self):
         """Test that environment detection is case-insensitive."""
@@ -245,17 +249,19 @@ class TestEnvironmentDetection:
     
     def test_empty_environment_variables(self):
         """Test behavior with empty environment variables."""
-        # Clear all test-related env vars
-        test_vars = ['PYTEST_CURRENT_TEST', 'TESTING', '_', 'ENVIRONMENT', 'NETRA_ENV']
-        for var in test_vars:
-            os.environ.pop(var, None)
-        
-        # Set empty values
-        env.set('ENVIRONMENT', '', "test")
-        env.set('NETRA_ENV', '', "test")
-        env.set('_', '', "test")
-        
-        assert is_test_environment() is False
+        # Mock IsolatedEnvironment to return empty values
+        with patch('shared.isolated_environment.get_env') as mock_get_env:
+            mock_env = mock_env_instance  # Initialize appropriate service
+            mock_env.get.side_effect = lambda key, default='': {
+                'PYTEST_CURRENT_TEST': None,
+                'TESTING': None,
+                '_': '',
+                'ENVIRONMENT': '',
+                'NETRA_ENV': ''
+            }.get(key, default)
+            mock_get_env.return_value = mock_env
+            
+            assert is_test_environment() is False
 
 
 class TestPathResolutionEdgeCases:

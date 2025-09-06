@@ -30,6 +30,7 @@ from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
+from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool, ConnectionInfo
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -187,7 +188,7 @@ class WebSocketBridgeFactory:
         self.notification_monitor = get_websocket_notification_monitor()
         
         # Infrastructure components (shared, thread-safe)
-        self._connection_pool: Optional['WebSocketConnectionPool'] = None
+        self._connection_pool: Optional[WebSocketConnectionPool] = None
         self._agent_registry: Optional['AgentRegistry'] = None
         self._health_monitor: Optional[Any] = None
         
@@ -208,7 +209,7 @@ class WebSocketBridgeFactory:
         logger.info("WebSocketBridgeFactory initialized")
         
     def configure(self, 
-                 connection_pool: 'WebSocketConnectionPool',
+                 connection_pool: WebSocketConnectionPool,
                  agent_registry: 'AgentRegistry',
                  health_monitor: Any) -> None:
         """Configure factory with infrastructure components.
@@ -274,22 +275,20 @@ class WebSocketBridgeFactory:
                 connection_id, user_id
             )
             
-            # Create or get UserWebSocketConnection wrapper
-            if connection_info:
-                # Wrap the connection info in UserWebSocketConnection
-                connection = UserWebSocketConnection(
-                    user_id=user_id,
-                    connection_id=connection_id,
-                    websocket=connection_info.websocket
+            # CRITICAL: Only create emitter if real WebSocket connection exists
+            # This prevents mock connections that bypass UserExecutionContext
+            if not connection_info or not connection_info.websocket:
+                raise RuntimeError(
+                    f"No active WebSocket connection found for user {user_id}, connection {connection_id}. "
+                    "WebSocket connection must be established before creating emitter."
                 )
-            else:
-                # If no existing connection, create a placeholder
-                # This will queue events until actual connection is established
-                connection = UserWebSocketConnection(
-                    user_id=user_id,
-                    connection_id=connection_id,
-                    websocket=None  # Will be set when client connects
-                )
+            
+            # Create UserWebSocketConnection wrapper with REAL WebSocket
+            connection = UserWebSocketConnection(
+                user_id=user_id,
+                connection_id=connection_id,
+                websocket=connection_info.websocket  # Real WebSocket instance
+            )
             
             # Create user-specific emitter
             emitter = UserWebSocketEmitter(
@@ -824,117 +823,6 @@ class UserWebSocketEmitter:
             logger.error(f"❌ UserWebSocketEmitter cleanup failed for user {self.user_context.user_id}: {e}")
 
 
-class WebSocketConnectionPool:
-    """Pool of WebSocket connections with per-user isolation."""
-    
-    def __init__(self):
-        self._connections: Dict[str, 'UserWebSocketConnection'] = {}
-        self._connection_lock = asyncio.Lock()
-        self._health_monitor_task: Optional[asyncio.Task] = None
-        
-        # Initialize monitoring
-        self.notification_monitor = get_websocket_notification_monitor()
-        
-        # Initialize metrics
-        from netra_backend.app.monitoring.websocket_metrics import get_websocket_metrics_collector
-        self.metrics_collector = get_websocket_metrics_collector()
-        
-    async def start_health_monitoring(self) -> None:
-        """Start connection health monitoring."""
-        if not self._health_monitor_task:
-            self._health_monitor_task = asyncio.create_task(self._monitor_connections())
-            
-    async def get_user_connection(self, user_id: str, connection_id: str) -> 'UserWebSocketConnection':
-        """Get or create user-specific WebSocket connection."""
-        connection_key = f"{user_id}:{connection_id}"
-        
-        async with self._connection_lock:
-            if connection_key not in self._connections:
-                # For now, create a mock connection - this would be replaced with real WebSocket logic
-                self._connections[connection_key] = UserWebSocketConnection(
-                    user_id=user_id,
-                    connection_id=connection_id,
-                    websocket=None  # Would be real WebSocket instance
-                )
-            return self._connections[connection_key]
-            
-    async def add_user_connection(self, user_id: str, connection_id: str, websocket: Any) -> None:
-        """Add new user connection to pool."""
-        from netra_backend.app.monitoring.websocket_metrics import record_websocket_connection
-        
-        connection_key = f"{user_id}:{connection_id}"
-        
-        async with self._connection_lock:
-            if connection_key in self._connections:
-                # Close existing connection
-                await self._connections[connection_key].close()
-                
-                # MONITORING: Track connection restored (replacing existing)
-                self.notification_monitor.track_connection_restored(
-                    user_id, "unknown", connection_id
-                )
-                
-            self._connections[connection_key] = UserWebSocketConnection(
-                user_id=user_id,
-                connection_id=connection_id,
-                websocket=websocket
-            )
-            
-            # MONITORING: Track connection established  
-            self.notification_monitor.track_connection_restored(
-                user_id, "unknown", connection_id
-            )
-            
-            # Record connection metrics
-            record_websocket_connection(user_id, "created")
-            
-    async def remove_user_connection(self, user_id: str, connection_id: str) -> None:
-        """Remove user connection from pool."""
-        from netra_backend.app.monitoring.websocket_metrics import record_websocket_connection
-        
-        connection_key = f"{user_id}:{connection_id}"
-        
-        async with self._connection_lock:
-            if connection_key in self._connections:
-                connection = self._connections[connection_key]
-                lifetime_seconds = (datetime.now(timezone.utc) - connection.created_at).total_seconds()
-                
-                await connection.close()
-                del self._connections[connection_key]
-                
-                # MONITORING: Track connection lost
-                self.notification_monitor.track_connection_lost(
-                    user_id, "unknown", connection_id, "Connection removed from pool"
-                )
-                
-                # Record connection metrics
-                record_websocket_connection(
-                    user_id, "closed", 
-                    lifetime_seconds=lifetime_seconds
-                )
-                
-    async def _monitor_connections(self) -> None:
-        """Monitor connection health and cleanup stale connections."""
-        while True:
-            try:
-                await asyncio.sleep(60)  # Check every minute
-                
-                current_time = datetime.now(timezone.utc)
-                stale_connections = []
-                
-                async with self._connection_lock:
-                    for key, connection in self._connections.items():
-                        if connection.is_stale(current_time):
-                            stale_connections.append(key)
-                            
-                # Clean up stale connections
-                for key in stale_connections:
-                    user_id, connection_id = key.split(':', 1)
-                    await self.remove_user_connection(user_id, connection_id)
-                    
-            except Exception as e:
-                logger.error(f"Connection health monitoring error: {e}")
-
 
 class UserWebSocketConnection:
     """Individual user WebSocket connection with health tracking."""
@@ -952,6 +840,9 @@ class UserWebSocketConnection:
         if self._closed:
             raise ConnectionError(f"Connection closed for user {self.user_id}")
             
+        if self.websocket is None:
+            raise ConnectionError(f"No WebSocket connection available for user {self.user_id}")
+            
         try:
             # Send actual WebSocket event
             event_data = {
@@ -962,18 +853,17 @@ class UserWebSocketConnection:
                 'timestamp': event.timestamp.isoformat()
             }
             
-            # Send via actual WebSocket if available
-            if self.websocket is not None:
-                # Check if websocket has send_json method (FastAPI WebSocket)
-                if hasattr(self.websocket, 'send_json'):
-                    await self.websocket.send_json(event_data)
-                # Check if it has send method (generic WebSocket)
-                elif hasattr(self.websocket, 'send'):
-                    import json
-                    await self.websocket.send(json.dumps(event_data))
-                else:
-                    # Fallback to logging if WebSocket type is unknown
-                    logger.warning(f"WebSocket type unknown, logging event: {event.event_type}")
+            # Send via actual WebSocket - guaranteed to exist at this point
+            # Check if websocket has send_json method (FastAPI WebSocket)
+            if hasattr(self.websocket, 'send_json'):
+                await self.websocket.send_json(event_data)
+            # Check if it has send method (generic WebSocket)
+            elif hasattr(self.websocket, 'send'):
+                import json
+                await self.websocket.send(json.dumps(event_data))
+            else:
+                # This should never happen with properly configured WebSockets
+                raise ConnectionError(f"WebSocket type unsupported for user {self.user_id}: {type(self.websocket)}")
                     
             logger.debug(f"📤 WebSocket event sent to user {self.user_id}: {event.event_type}")
             self.last_activity = datetime.now(timezone.utc)
@@ -987,20 +877,22 @@ class UserWebSocketConnection:
         if self._closed:
             return False
             
+        if self.websocket is None:
+            return False
+            
         try:
-            # Perform actual ping if WebSocket supports it
-            if self.websocket is not None:
-                # Check if websocket has ping method
-                if hasattr(self.websocket, 'ping'):
-                    await self.websocket.ping()
-                # Check if it's a FastAPI WebSocket (check application_state)
-                elif hasattr(self.websocket, 'application_state'):
-                    from fastapi.websockets import WebSocketState
-                    # Check if connection is still open
-                    if self.websocket.application_state == WebSocketState.CONNECTED:
-                        # Send a ping frame using send_text with empty message
-                        if hasattr(self.websocket, 'send_text'):
-                            await self.websocket.send_text("")  # Empty message as ping
+            # Perform actual ping - WebSocket guaranteed to exist at this point
+            # Check if websocket has ping method
+            if hasattr(self.websocket, 'ping'):
+                await self.websocket.ping()
+            # Check if it's a FastAPI WebSocket (check application_state)
+            elif hasattr(self.websocket, 'application_state'):
+                from fastapi.websockets import WebSocketState
+                # Check if connection is still open
+                if self.websocket.application_state == WebSocketState.CONNECTED:
+                    # Send a ping frame using send_text with empty message
+                    if hasattr(self.websocket, 'send_text'):
+                        await self.websocket.send_text("")  # Empty message as ping
             
             self.last_activity = datetime.now(timezone.utc)
             return True

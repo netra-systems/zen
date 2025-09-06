@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta, timezone
 import pytest
 import httpx
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger

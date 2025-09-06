@@ -7,6 +7,7 @@ Test script to verify ClickHouse graceful failure handling
 import asyncio
 import os
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 # Set up environment to simulate staging
 env.set("ENVIRONMENT", "staging", "test") 

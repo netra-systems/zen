@@ -4,8 +4,12 @@ Tests the new class-based CORS configuration system.
 """
 
 import pytest
-from unittest.mock import patch
 from shared.cors_config_builder import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
     CORSConfigurationBuilder,
     CORSEnvironment,
     CORSSecurityEvent
@@ -25,12 +29,19 @@ class TestCORSConfigurationBuilder:
     
     def test_initialization_with_env_vars(self):
         """Test initialization with custom environment variables."""
+    pass
         env_vars = {"ENVIRONMENT": "production"}
         cors = CORSConfigurationBuilder(env_vars)
         assert cors.environment == "production"
     
     def test_environment_detection(self):
         """Test environment detection from various env vars."""
+        # List of all environment variable names that could interfere with detection
+        env_var_names = [
+            "ENVIRONMENT", "ENV", "NETRA_ENVIRONMENT", "NETRA_ENV", 
+            "NODE_ENV", "AUTH_ENV", "K_SERVICE", "GCP_PROJECT_ID"
+        ]
+        
         test_cases = [
             ({"ENVIRONMENT": "production"}, "production"),
             ({"ENV": "staging"}, "staging"),
@@ -41,11 +52,17 @@ class TestCORSConfigurationBuilder:
         ]
         
         for env_vars, expected in test_cases:
-            cors = CORSConfigurationBuilder(env_vars)
-            assert cors.environment == expected
+            # Create isolated environment by clearing all environment detection variables
+            # then setting only the specific one we want to test
+            isolated_env_vars = {var_name: None for var_name in env_var_names}
+            isolated_env_vars.update(env_vars)
+            
+            cors = CORSConfigurationBuilder(isolated_env_vars)
+            assert cors.environment == expected, f"Failed for env_vars={env_vars}, expected={expected}, got={cors.environment}"
     
     def test_sub_builders_exist(self):
         """Test that all sub-builders are initialized."""
+    pass
         cors = CORSConfigurationBuilder()
         assert hasattr(cors, 'origins')
         assert hasattr(cors, 'headers')
@@ -73,6 +90,7 @@ class TestOriginsBuilder:
     
     def test_staging_origins(self):
         """Test staging environment origins."""
+    pass
         env_vars = {"ENVIRONMENT": "staging"}
         cors = CORSConfigurationBuilder(env_vars)
         origins = cors.origins.allowed
@@ -93,6 +111,7 @@ class TestOriginsBuilder:
     
     def test_custom_cors_origins(self):
         """Test custom CORS_ORIGINS environment variable."""
+    pass
         env_vars = {
             "ENVIRONMENT": "production",
             "CORS_ORIGINS": "https://custom1.com,https://custom2.com"
@@ -112,6 +131,7 @@ class TestOriginsBuilder:
     
     def test_is_allowed_localhost_in_dev(self):
         """Test localhost is allowed in development."""
+    pass
         env_vars = {"ENVIRONMENT": "development"}
         cors = CORSConfigurationBuilder(env_vars)
         
@@ -127,6 +147,7 @@ class TestOriginsBuilder:
     
     def test_validate_origin_format(self):
         """Test origin format validation."""
+    pass
         cors = CORSConfigurationBuilder()
         
         # Valid origins
@@ -163,6 +184,7 @@ class TestHeadersBuilder:
     
     def test_exposed_headers(self):
         """Test exposed headers list."""
+    pass
         cors = CORSConfigurationBuilder()
         headers = cors.headers.exposed_headers
         
@@ -181,6 +203,7 @@ class TestHeadersBuilder:
     
     def test_is_header_allowed(self):
         """Test header validation."""
+    pass
         cors = CORSConfigurationBuilder()
         
         assert cors.headers.is_header_allowed("Authorization") is True
@@ -216,6 +239,7 @@ class TestSecurityBuilder:
     
     def test_validate_content_type_suspicious(self):
         """Test content type validation for suspicious types."""
+    pass
         cors = CORSConfigurationBuilder()
         
         suspicious_types = [
@@ -253,6 +277,7 @@ class TestSecurityBuilder:
     
     def test_security_events_bounded(self):
         """Test that security events are bounded to prevent memory leaks."""
+    pass
         cors = CORSConfigurationBuilder()
         cors.security.clear_security_events()
         
@@ -285,6 +310,7 @@ class TestServiceDetector:
     
     def test_is_internal_request_by_user_agent(self):
         """Test internal request detection by user agent."""
+    pass
         cors = CORSConfigurationBuilder()
         
         headers = {"user-agent": "httpx/0.24.0"}
@@ -325,6 +351,7 @@ class TestFastAPIBuilder:
     
     def test_get_middleware_kwargs(self):
         """Test FastAPI middleware kwargs generation."""
+    pass
         cors = CORSConfigurationBuilder()
         kwargs = cors.fastapi.get_middleware_kwargs()
         
@@ -348,6 +375,7 @@ class TestHealthBuilder:
     
     def test_validate_config(self):
         """Test configuration validation."""
+    pass
         cors = CORSConfigurationBuilder()
         
         valid_config = {
@@ -395,6 +423,7 @@ class TestWebSocketBuilder:
     
     def test_is_origin_allowed(self):
         """Test WebSocket origin validation."""
+    pass
         cors = CORSConfigurationBuilder({"ENVIRONMENT": "production"})
         
         assert cors.websocket.is_origin_allowed("https://netrasystems.ai") is True
@@ -415,6 +444,7 @@ class TestStaticAssetsBuilder:
     
     def test_get_cdn_config(self):
         """Test CDN CORS configuration."""
+    pass
         cors = CORSConfigurationBuilder()
         config = cors.static.get_cdn_config()
         
@@ -437,6 +467,7 @@ class TestValidation:
     
     def test_validate_production_with_wildcard(self):
         """Test validation fails in production with wildcard."""
+    pass
         env_vars = {
             "ENVIRONMENT": "production",
             "CORS_ORIGINS": "*"
@@ -469,6 +500,7 @@ class TestBackwardCompatibility:
     
     def test_get_cors_config(self):
         """Test backward compatibility for get_cors_config."""
+    pass
         from shared.cors_config_builder import get_cors_config
         
         config = get_cors_config("staging")
@@ -488,6 +520,7 @@ class TestBackwardCompatibility:
     
     def test_validate_content_type(self):
         """Test backward compatibility for validate_content_type."""
+    pass
         from shared.cors_config_builder import validate_content_type
         
         assert validate_content_type("application/json") is True
@@ -499,3 +532,4 @@ class TestBackwardCompatibility:
         
         headers = {"x-service-name": "auth-service"}
         assert is_service_to_service_request(headers) is True
+    pass

@@ -20,19 +20,20 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Optional, Any
-from unittest.mock import patch, MagicMock
 import pytest
 import websockets
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core import (
     WebSocketManager,
     get_websocket_manager,
     WebSocketHeartbeat
 )
-from netra_backend.app.websocket_core.manager import (
-    WebSocketHeartbeatManager,
+from netra_backend.app.websocket_core import (
+    UnifiedWebSocketManager,
     HeartbeatConfig,
     get_heartbeat_manager
 )
@@ -101,7 +102,7 @@ async def heartbeat_manager():
         max_missed_heartbeats=2,
         cleanup_interval_seconds=5
     )
-    manager = WebSocketHeartbeatManager(config)
+    manager = UnifiedWebSocketManager(config)
     await manager.start()
     yield manager
     await manager.stop()
@@ -430,7 +431,7 @@ class TestPresenceDetectionErrorScenarios:
         connection_id = "error_conn"
         
         # Create mock that raises errors
-        ws = MagicMock()
+        ws = MagicNone  # TODO: Use real service instance
         ws.ping = AsyncMock(side_effect=ConnectionError("Connection lost"))
         
         await heartbeat_manager.register_connection(connection_id)

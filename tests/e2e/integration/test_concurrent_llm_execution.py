@@ -1,5 +1,6 @@
 """E2E Test: Concurrent LLM Execution at Scale
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 CRITICAL: Tests concurrent real LLM execution with proper resource management.
 Validates system performance under concurrent load with real APIs.

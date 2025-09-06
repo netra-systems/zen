@@ -13,6 +13,7 @@ Root Cause Addressed (from Five Whys):
 import asyncio
 import pytest
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestStartupImportSequence:

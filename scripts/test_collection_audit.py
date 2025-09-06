@@ -14,6 +14,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from collections import defaultdict
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

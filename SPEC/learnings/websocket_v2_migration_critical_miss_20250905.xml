@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Critical WebSocket v2 Migration Miss - Multi-User Safety</title>
+    <date>2025-09-05</date>
+    <severity>CRITICAL</severity>
+    <category>Security, Architecture, Multi-User Safety</category>
+    <impact>Data leakage between concurrent users</impact>
+  </metadata>
+
+  <problem_discovered>
+    <summary>
+      WebSocket message handler was still using singleton supervisor pattern while REST endpoints
+      had migrated to v2 factory patterns. This created a critical security vulnerability where
+      90% of agent traffic (via WebSocket) could leak data between concurrent users.
+    </summary>
+    
+    <technical_details>
+      <websocket_path>
+        WebSocket (/ws) → AgentMessageHandler → MessageHandlerService → supervisor (singleton)
+      </websocket_path>
+      <rest_path>
+        REST API (/api/agent/v2/*) → RequestScopedSupervisorDep (factory pattern)
+      </rest_path>
+      <traffic_distribution>
+        - WebSocket: ~90% of agent execution traffic
+        - REST API: ~10% of agent execution traffic
+      </traffic_distribution>
+    </technical_details>
+
+    <root_causes>
+      <cause priority="1">
+        <what>Dual communication paths created architectural blind spot</what>
+        <why>WebSocket path viewed as "just transport" not requiring factory patterns</why>
+      </cause>
+      <cause priority="2">
+        <what>Incomplete factory pattern migration</what>
+        <why>Migration focused on visible REST endpoints, not event-driven WebSocket flows</why>
+      </cause>
+      <cause priority="3">
+        <what>Testing gap for multi-user isolation</what>
+        <why>Tests verified WebSocket events were emitted, not that they used factory patterns</why>
+      </cause>
+      <cause priority="4">
+        <what>Silent failure mode</what>
+        <why>Data leakage produces no errors - User A seeing User B's data might not report it</why>
+      </cause>
+      <cause priority="5">
+        <what>Gradual migration strategy backfired</what>
+        <why>v1 and v2 coexistence allowed WebSocket to keep using dangerous singleton pattern</why>
+      </cause>
+    </root_causes>
+  </problem_discovered>
+
+  <solution_implemented>
+    <changes>
+      <change file="netra_backend/app/websocket_core/agent_handler.py">
+        - Create UserExecutionContext for EVERY WebSocket message
+        - Use get_request_scoped_supervisor instead of singleton
+        - Create isolated message handlers per request
+        - ALL message types (start_agent, user_message, chat) use v2 isolation
+      </change>
+      <change file="frontend/lib/unified-api-config.ts">
+        - Enable v2 API by default in production
+        - Set migration mode to 'full' for complete isolation
+        - Remove requirement for environment variables to enable v2
+      </change>
+    </changes>
+    
+    <architecture_pattern>
+      1. WebSocket receives message from user
+      2. Creates UserExecutionContext with unique IDs
+      3. Creates request-scoped supervisor using factory pattern
+      4. Processes message with complete isolation
+      5. Returns results only to the correct user
+    </architecture_pattern>
+  </solution_implemented>
+
+  <critical_lessons>
+    <lesson priority="CRITICAL">
+      Always trace ALL execution paths during security migrations, especially the PRIMARY traffic path
+    </lesson>
+    <lesson priority="CRITICAL">
+      WebSocket handlers are NOT just transport - they are security boundaries requiring same isolation as REST
+    </lesson>
+    <lesson priority="HIGH">
+      Silent failures (data leakage) are most dangerous - require active multi-user testing
+    </lesson>
+    <lesson priority="HIGH">
+      Factory patterns must be enforced at ALL entry points, not just deep in the stack
+    </lesson>
+    <lesson priority="HIGH">
+      Never assume "it works" means "it's safe" - functionality ≠ security
+    </lesson>
+    <lesson priority="MEDIUM">
+      Gradual migrations for security fixes are dangerous - use hard cutovers with feature flags
+    </lesson>
+  </critical_lessons>
+
+  <detection_patterns>
+    <pattern>Any singleton usage in request handlers</pattern>
+    <pattern>Global state in async contexts</pattern>
+    <pattern>Shared mutable state across WebSocket connections</pattern>
+    <pattern>Missing UserExecutionContext in message flows</pattern>
+    <pattern>Direct supervisor usage without factory creation</pattern>
+  </detection_patterns>
+
+  <prevention_guidelines>
+    <guideline>
+      MANDATORY: All request handlers (REST, WebSocket, gRPC) MUST create UserExecutionContext
+    </guideline>
+    <guideline>
+      MANDATORY: All supervisor/agent usage MUST go through factory patterns
+    </guideline>
+    <guideline>
+      MANDATORY: Multi-user isolation tests for ALL communication paths
+    </guideline>
+    <guideline>
+      FORBIDDEN: Singleton patterns for any user-specific state or processing
+    </guideline>
+    <guideline>
+      REQUIRED: Document and audit ALL execution paths, not just REST APIs
+    </guideline>
+  </prevention_guidelines>
+
+  <testing_requirements>
+    <test type="isolation">
+      Every endpoint must have multi-user concurrency test
+    </test>
+    <test type="factory_usage">
+      Verify factory patterns are used, not just that features work
+    </test>
+    <test type="state_leakage">
+      Active testing for cross-user data visibility
+    </test>
+    <test type="websocket_specific">
+      WebSocket handlers need same security test coverage as REST
+    </test>
+  </testing_requirements>
+
+  <related_files>
+    <file>netra_backend/app/websocket_core/agent_handler.py</file>
+    <file>netra_backend/app/services/message_handlers.py</file>
+    <file>netra_backend/app/dependencies.py</file>
+    <file>netra_backend/app/agents/supervisor/user_execution_context.py</file>
+    <file>frontend/lib/unified-api-config.ts</file>
+    <file>FIVE_WHYS_FACTORY_PATTERN_V2_API_20250905.md</file>
+  </related_files>
+
+  <cross_references>
+    <ref>SPEC/learnings/websocket_agent_integration_critical.xml</ref>
+    <ref>docs/design/factory_pattern_design_summary.md</ref>
+    <ref>USER_CONTEXT_ARCHITECTURE.md</ref>
+    <ref>WEBSOCKET_MODERNIZATION_REPORT.md</ref>
+  </cross_references>
+</learning>

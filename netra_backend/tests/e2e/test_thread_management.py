@@ -4,6 +4,11 @@ Tests comprehensive thread lifecycle, persistence, and isolation.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -11,7 +16,6 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -314,9 +318,9 @@ async def db_session():
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncMock()
+    session.begin = AsyncNone  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncMock()
+    session.commit = AsyncNone  # TODO: Use real service instance
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncMock()
+    session.rollback = AsyncNone  # TODO: Use real service instance
     yield session

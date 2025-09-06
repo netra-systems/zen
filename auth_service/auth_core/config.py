@@ -109,16 +109,8 @@ class AuthConfig:
     @staticmethod
     def get_auth_service_url() -> str:
         """Get auth service URL."""
-        env = get_auth_env().get_environment()
-        host = get_auth_env().get_auth_service_host()
-        port = get_auth_env().get_auth_service_port()
-        
-        if env in ["production", "staging"]:
-            # Cloud Run uses HTTPS
-            return f"https://{host}"
-        else:
-            # Local development uses HTTP
-            return f"http://{host}:{port}"
+        # Delegate to AuthEnvironment's new method
+        return get_auth_env().get_auth_service_url()
     
     # Database Configuration - delegate to SSOT
     @staticmethod

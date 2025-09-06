@@ -9,6 +9,7 @@ Tests circuit breaker behavior with real service failures using Docker container
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

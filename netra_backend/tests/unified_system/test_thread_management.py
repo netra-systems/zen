@@ -7,15 +7,18 @@ concurrent operations, search, permissions, and access control.
 Business Value: Data integrity and proper thread state management
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 import sqlalchemy
@@ -24,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,
@@ -275,10 +278,10 @@ class TestThreadLifecycle:
         for i in range(3):
 
             # Mock: Generic component isolation for controlled unit testing
-            conn = AsyncMock()
+            conn = AsyncNone  # TODO: Use real service instance
 
             # Mock: Generic component isolation for controlled unit testing
-            conn.state = MagicMock()
+            conn.state = MagicNone  # TODO: Use real service instance
 
             conn.state.value = 1
 

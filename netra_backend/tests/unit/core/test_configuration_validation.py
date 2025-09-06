@@ -1,8 +1,12 @@
 from shared.isolated_environment import get_env
 """Test configuration validation and environment management."""
 import pytest
-from unittest.mock import Mock, patch
 import os
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.health_checkers import (
     _get_service_priority_for_environment,
@@ -199,7 +203,6 @@ class TestSecurityBoundaryConfiguration:
     def test_environment_isolation_configuration(self):
         """Test that environment isolation is properly configured."""
         import os
-        from unittest.mock import patch
         
         # Test production environment security settings
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}):

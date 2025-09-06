@@ -96,7 +96,12 @@ class ConfigurationEntry:
     
     def get_display_value(self) -> Any:
         """Get value safe for display/logging."""
-        return self._display_value if self.sensitive else self.value
+        if self.sensitive and isinstance(self.value, str):
+            if len(self.value) > 4:
+                return self.value[:2] + "*" * (len(self.value) - 4) + self.value[-2:]
+            else:
+                return "***"
+        return self.value
     
     def validate(self) -> bool:
         """Validate configuration entry against rules."""
@@ -310,11 +315,14 @@ class UnifiedConfigurationManager:
             "database.max_overflow": (20, int, "Database pool max overflow"),
             "database.pool_timeout": (30, int, "Database pool timeout"),
             "database.pool_recycle": (3600, int, "Database connection recycle time"),
+            "database.echo": (False, bool, "Database echo SQL statements"),
             
             # Redis defaults
             "redis.max_connections": (50, int, "Redis max connections"),
             "redis.socket_timeout": (5.0, float, "Redis socket timeout"),
             "redis.socket_connect_timeout": (5.0, float, "Redis connection timeout"),
+            "redis.retry_on_timeout": (True, bool, "Redis retry on timeout"),
+            "redis.health_check_interval": (30, int, "Redis health check interval"),
             
             # LLM defaults
             "llm.timeout": (30.0, float, "LLM request timeout"),
@@ -330,16 +338,33 @@ class UnifiedConfigurationManager:
             "websocket.ping_interval": (20, int, "WebSocket ping interval"),
             "websocket.ping_timeout": (10, int, "WebSocket ping timeout"), 
             "websocket.max_connections": (1000, int, "Max WebSocket connections"),
+            "websocket.message_queue_size": (100, int, "WebSocket message queue size"),
+            "websocket.close_timeout": (10, int, "WebSocket close timeout"),
             
             # Security defaults
+            "security.jwt_algorithm": ("HS256", str, "JWT signing algorithm"),
             "security.jwt_expire_minutes": (30, int, "JWT expiration minutes"),
             "security.password_min_length": (8, int, "Minimum password length"),
             "security.max_login_attempts": (5, int, "Max login attempts"),
+            "security.require_https": (True, bool, "Require HTTPS connections"),
             
             # Performance defaults
             "performance.request_timeout": (30.0, float, "HTTP request timeout"),
             "performance.max_request_size": (10485760, int, "Max request size bytes"),
-            "performance.rate_limit_requests": (100, int, "Rate limit requests per minute")
+            "performance.rate_limit_requests": (100, int, "Rate limit requests per minute"),
+            
+            # Dashboard defaults
+            "dashboard.refresh_interval": (30, int, "Dashboard refresh interval"),
+            "dashboard.max_data_points": (1000, int, "Dashboard max data points"),
+            "dashboard.auto_refresh": (True, bool, "Dashboard auto refresh"),
+            "dashboard.theme": ("light", str, "Dashboard theme"),
+            "dashboard.charts.animation_duration": (300, int, "Dashboard chart animation duration"),
+            "dashboard.charts.show_legends": (True, bool, "Dashboard chart show legends"),
+            
+            # Agent circuit breaker defaults
+            "agent.circuit_breaker.failure_threshold": (5, int, "Agent circuit breaker failure threshold"),
+            "agent.circuit_breaker.recovery_timeout": (60, int, "Agent circuit breaker recovery timeout"),
+            "agent.circuit_breaker.half_open_max_calls": (3, int, "Agent circuit breaker half-open max calls")
         }
         
         with self._config_lock:
@@ -621,6 +646,8 @@ class UnifiedConfigurationManager:
                 data_type=existing_entry.data_type if existing_entry else type(value),
                 sensitive=existing_entry.sensitive if existing_entry else (key in self._sensitive_keys),
                 required=existing_entry.required if existing_entry else (key in self._required_keys),
+                validation_rules=existing_entry.validation_rules if existing_entry else [],
+                description=existing_entry.description if existing_entry else "",
                 environment=self.environment,
                 service=self.service_name,
                 user_id=self.user_id

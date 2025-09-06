@@ -5,10 +5,34 @@ Functionality consolidated into modern database layer.
 
 from typing import Any, Dict, Optional
 from contextlib import contextmanager
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+class SessionIsolationError(Exception):
+    """Raised when session isolation is violated."""
+    pass
+
+
+class SessionScopeValidator:
+    """Validates that database sessions maintain proper request scope."""
+    
+    @staticmethod
+    def validate_request_scoped(session: AsyncSession) -> None:
+        """Validate that a session is request-scoped.
+        
+        Args:
+            session: Database session to validate
+            
+        Raises:
+            SessionIsolationError: If session is not properly request-scoped
+        """
+        if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+            raise SessionIsolationError("Session must be request-scoped, not globally stored")
+        logger.debug(f"Validated session {id(session)} is request-scoped")
 
 
 class SessionManager:
@@ -79,4 +103,6 @@ __all__ = [
     "session_manager", 
     "managed_session",
     "validate_agent_session_isolation",
+    "SessionIsolationError",
+    "SessionScopeValidator",
 ]

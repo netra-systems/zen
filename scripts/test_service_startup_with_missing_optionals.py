@@ -12,6 +12,7 @@ Ensures 99.9% service availability by preventing startup failures from optional 
 import sys
 import os
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent

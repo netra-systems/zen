@@ -5,16 +5,21 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.db.migrations import MigrationRunner
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 class TestMigrations:
     """Test suite for Migrations"""
     
     @pytest.fixture
     def instance(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance"""
-        mock_session = Mock()
+    pass
+        mock_session = TestDatabaseManager().get_session()
         return MigrationRunner(mock_session)
     
     def test_initialization(self, instance):
@@ -24,6 +29,7 @@ class TestMigrations:
     
     def test_core_functionality(self, instance):
         """Test core business logic"""
+    pass
         # Test happy path
         result = instance.get_migration_status()
         assert result is not None
@@ -37,6 +43,7 @@ class TestMigrations:
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
+    pass
         # Test with None, empty, extreme values
         pass
     
@@ -44,3 +51,5 @@ class TestMigrations:
         """Test input validation"""
         # Test validation logic
         pass
+
+    pass

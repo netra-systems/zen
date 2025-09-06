@@ -3,13 +3,13 @@
 
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to Python path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
 try:
-    from unittest.mock import Mock
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

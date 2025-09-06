@@ -8,6 +8,7 @@ import asyncio
 import json
 import os
 from datetime import datetime, timedelta, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

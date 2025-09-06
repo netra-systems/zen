@@ -6,6 +6,7 @@ Basic validation tests for concurrent agent processing.
 import pytest
 import asyncio
 from typing import Dict, Any, List
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.asyncio

@@ -49,7 +49,7 @@ jobs:
   
   code-quality:
     name: Code Quality
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -85,7 +85,7 @@ jobs:
   
   architecture-compliance:
     name: Architecture Compliance
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -121,7 +121,7 @@ jobs:
     name: CI Status
     needs: [test, code-quality, architecture-compliance]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
       - name: Determine overall status
         id: status

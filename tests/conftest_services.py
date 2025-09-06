@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Service fixtures for database, memory optimization, and session management.
 
@@ -13,11 +36,14 @@ Uses lazy loading to prevent unnecessary imports during collection phase.
 import asyncio
 import uuid
 from typing import Optional, Dict, Any, Callable, Tuple
-from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 import pytest
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Lazy import flag - prevents heavy imports during collection
 _SQLALCHEMY_IMPORTS_LOADED = False
@@ -132,10 +158,7 @@ async def isolated_db_session():
     
     if not sqlalchemy_available or not phase0_available:
         # Mock session for testing without real database
-        mock_session = AsyncMock()
-        mock_session.commit = AsyncMock()
-        mock_session.rollback = AsyncMock() 
-        mock_session.close = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_session.info = {'mock_session': True}
         yield mock_session
         return
@@ -151,10 +174,7 @@ async def isolated_db_session():
             yield session
     except Exception as e:
         # Fallback to mock if real session creation fails
-        mock_session = AsyncMock()
-        mock_session.commit = AsyncMock()
-        mock_session.rollback = AsyncMock()
-        mock_session.close = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_session.info = {'mock_session': True, 'fallback': True}
         yield mock_session
 
@@ -176,7 +196,7 @@ async def database_session_isolation():
     
     if not sqlalchemy_available or not phase0_available:
         # Mock session with validation
-        mock_session = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_session.info = {'test_isolated': True}
         
         def validate_isolation():
@@ -219,14 +239,10 @@ async def memory_optimization_service():
     """
     if not _lazy_import_phase0():
         # Mock memory service
-        mock_service = MagicMock()
-        mock_service.start = AsyncMock()
-        mock_service.stop = AsyncMock()
-        mock_service.get_memory_stats = MagicMock()
-        mock_service.get_active_scopes_count = MagicMock(return_value=0)
+        mock_service = Magic        mock_service.websocket = TestWebSocketConnection()
+        mock_service.get_memory_stats = Magic        mock_service.get_active_scopes_count = MagicMock(return_value=0)
         mock_service.request_scope = asynccontextmanager(
-            lambda request_id, user_id, **kwargs: MagicMock()
-        )
+            lambda request_id, user_id, **kwargs: Magic        )
         
         await mock_service.start()
         try:
@@ -259,14 +275,10 @@ async def session_memory_manager():
     """
     if not _lazy_import_phase0():
         # Mock session manager
-        mock_manager = MagicMock()
-        mock_manager.start = AsyncMock()
-        mock_manager.stop = AsyncMock()
-        mock_manager.create_user_session = AsyncMock()
+        mock_manager = Magic        mock_manager.websocket = TestWebSocketConnection()
         mock_manager.cleanup_session = AsyncMock(return_value=True)
         mock_manager.session_scope = asynccontextmanager(
-            lambda session_id, user_id, **kwargs: MagicMock()
-        )
+            lambda session_id, user_id, **kwargs: Magic        )
         
         await mock_manager.start()
         try:
@@ -311,20 +323,15 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
     
     if not _lazy_import_phase0():
         # Mock supervisor for testing
-        mock_supervisor = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_supervisor.user_context = valid_user_execution_context
-        mock_supervisor.cleanup = AsyncMock()
+        mock_supervisor.websocket = TestWebSocketConnection()
         yield mock_supervisor
         return
     
     try:
         # Create mock FastAPI request for supervisor creation
-        mock_request = MagicMock()
-        mock_request.app.state.llm_manager = MagicMock()
-        mock_request.app.state.websocket_bridge = MagicMock()
-        mock_request.app.state.agent_supervisor = MagicMock()
-        mock_request.app.state.agent_supervisor.tool_dispatcher = MagicMock()
-        
+        mock_request = Magic        mock_request.app.state.llm_manager = Magic        mock_request.app.state.websocket_bridge = Magic        mock_request.app.state.agent_supervisor = Magic        mock_request.app.state.agent_supervisor.tool_dispatcher = Magic        
         # Create request-scoped context
         context = RequestScopedContext(
             user_id=valid_user_execution_context.user_id,
@@ -346,9 +353,9 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
             
     except Exception as e:
         # Fallback to mock supervisor if creation fails
-        mock_supervisor = AsyncMock()
+        websocket = TestWebSocketConnection()
         mock_supervisor.user_context = valid_user_execution_context
-        mock_supervisor.cleanup = AsyncMock()
+        mock_supervisor.websocket = TestWebSocketConnection()
         yield mock_supervisor
 
 # =============================================================================
@@ -370,11 +377,7 @@ def factory_pattern_mocks():
         Dict[str, Any]: Dictionary of mock factory components
     """
     return {
-        'execution_engine_factory': MagicMock(),
-        'websocket_bridge_factory': MagicMock(),
-        'factory_adapter': MagicMock(), 
-        'agent_instance_factory': MagicMock()
-    }
+        'execution_engine_factory': Magic        'websocket_bridge_factory': Magic        'factory_adapter': Magic        'agent_instance_factory': Magic    }
 
 # =============================================================================
 # COMPLETE PHASE 0 TEST ENVIRONMENT

@@ -9,6 +9,7 @@ import ast
 import glob
 from pathlib import Path
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from scripts.compliance.core import ComplianceConfig, Violation, ViolationBuilder
 

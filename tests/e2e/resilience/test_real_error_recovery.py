@@ -29,6 +29,7 @@ USAGE:
 import asyncio
 import logging
 import signal
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 import sys

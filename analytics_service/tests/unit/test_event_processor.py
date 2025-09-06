@@ -26,6 +26,7 @@ import pytest
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # =============================================================================
 # EVENT PROCESSOR IMPLEMENTATION (To be moved to actual processor module)

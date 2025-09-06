@@ -11,7 +11,7 @@ import sys
 import os
 import time
 from typing import Dict, List, Any
-from unittest.mock import MagicMock, AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -20,11 +20,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from fastapi.websockets import WebSocketState
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class MockWebSocket:
     """Minimal mock WebSocket for testing"""
     def __init__(self, fail_after: int = None):
+    pass
         self.client_state = WebSocketState.CONNECTED
         self.application_state = WebSocketState.CONNECTED
         self.messages_sent = []
@@ -43,7 +48,8 @@ class MockWebSocket:
 
 def test_error_handling_improvements():
     """Test that WebSocket manager handles errors gracefully"""
-    print("\n[PASS] TEST 1: Error Handling Improvements")
+    print("
+[PASS] TEST 1: Error Handling Improvements")
     
     ws_manager = WebSocketManager()
     mock_ws = MockWebSocket(fail_after=2)  # Fail after 2 messages
@@ -81,7 +87,9 @@ def test_error_handling_improvements():
 
 def test_concurrent_connections():
     """Test that multiple connections are isolated"""
-    print("\n[PASS] TEST 2: Concurrent Connection Isolation")
+    pass
+    print("
+[PASS] TEST 2: Concurrent Connection Isolation")
     
     ws_manager = WebSocketManager()
     
@@ -112,7 +120,8 @@ def test_concurrent_connections():
 
 async def test_heartbeat_manager_async():
     """Test heartbeat manager improvements"""
-    print("\n[PASS] TEST 3: Heartbeat Manager Thread Safety")
+    print("
+[PASS] TEST 3: Heartbeat Manager Thread Safety")
     
     config = HeartbeatConfig(
         heartbeat_interval_seconds=1,
@@ -146,12 +155,15 @@ async def test_heartbeat_manager_async():
     assert healthy_count == 10, "All connections should be healthy"
     print(f"  [OK] {healthy_count}/10 connections healthy after activity")
     
+    await asyncio.sleep(0)
     return True
 
 
 async def test_message_buffering():
     """Test message handling during failures"""
-    print("\n[PASS] TEST 4: Message Resilience During Failures")
+    pass
+    print("
+[PASS] TEST 4: Message Resilience During Failures")
     
     ws_manager = WebSocketManager()
     
@@ -183,12 +195,14 @@ async def test_message_buffering():
     
     # Verify partial success handling
     assert len(mock_ws.messages_sent) <= 3, "Should stop after failure"
+    await asyncio.sleep(0)
     return True
 
 
 async def test_memory_management():
     """Test memory leak prevention"""
-    print("\n[PASS] TEST 5: Memory Leak Prevention")
+    print("
+[PASS] TEST 5: Memory Leak Prevention")
     
     ws_manager = WebSocketManager()
     
@@ -215,11 +229,13 @@ async def test_memory_management():
     # Check no leaks
     assert len(ws_manager.connections) == 0, f"Should have 0 connections, have {len(ws_manager.connections)}"
     print(f"  [OK] No memory leaks after 30 connection cycles")
+    await asyncio.sleep(0)
     return True
 
 
 def main():
     """Run all standalone tests"""
+    pass
     print("=" * 60)
     print("WEBSOCKET IMPROVEMENTS STANDALONE PROOF")
     print("No external dependencies required!")
@@ -239,7 +255,8 @@ def main():
     results.append(loop.run_until_complete(test_memory_management()))
     
     # Summary
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     print("RESULTS SUMMARY")
     print("=" * 60)
     
@@ -248,13 +265,15 @@ def main():
     
     if passed == total:
         print(f"[SUCCESS] ALL TESTS PASSED ({passed}/{total})")
-        print("\nBUSINESS VALUE CONFIRMED:")
+        print("
+BUSINESS VALUE CONFIRMED:")
         print("- Chat reliability enhanced with error recovery")
         print("- Concurrent users properly isolated")
         print("- Memory leaks prevented")
         print("- Connection health monitoring works")
         print("- Message resilience during failures")
-        print("\n>>> WebSocket improvements are PRODUCTION READY!")
+        print("
+>>> WebSocket improvements are PRODUCTION READY!")
         return 0
     else:
         print(f"[ERROR] SOME TESTS FAILED ({passed}/{total} passed)")

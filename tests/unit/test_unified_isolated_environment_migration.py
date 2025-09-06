@@ -12,10 +12,12 @@ import os
 import pytest
 import threading
 import time
-from unittest.mock import patch
 from pathlib import Path
 
 from shared.isolated_environment import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
     get_env, 
     IsolatedEnvironment, 
     ValidationResult,
@@ -31,11 +33,11 @@ class TestUnifiedIsolatedEnvironment:
     @pytest.fixture(autouse=True)
     def setup_and_cleanup(self):
         """Setup and cleanup for each test."""
-        # Store original environment
-        original_env = env.get_all()
-        
         # Get fresh environment instance for each test
         env = get_env()
+        
+        # Store original environment
+        original_env = env.get_all()
         
         # Ensure we start in a clean state
         if env.is_isolated():
@@ -45,11 +47,16 @@ class TestUnifiedIsolatedEnvironment:
         
         # Cleanup: restore original environment
         env.disable_isolation()
-        env.clear()
+        
+        # Only clear if isolation is enabled
+        if env.is_isolated():
+            env.clear()
+        
         env.update(original_env, "test")
     
     def test_singleton_behavior(self):
         """Test that IsolatedEnvironment maintains singleton behavior."""
+    pass
         env1 = get_env()
         env2 = get_env()
         env3 = IsolatedEnvironment()
@@ -64,6 +71,7 @@ class TestUnifiedIsolatedEnvironment:
         instances = []
         
         def get_instance():
+    pass
             instances.append(get_env())
         
         threads = [threading.Thread(target=get_instance) for _ in range(10)]
@@ -96,6 +104,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_isolation_mode_functionality(self):
         """Test isolation mode prevents os.environ pollution."""
+    pass
         env = get_env()
         
         # Set initial value in os.environ
@@ -110,7 +119,7 @@ class TestUnifiedIsolatedEnvironment:
         
         # Check values
         assert env.get('TEST_ISOLATION') == 'isolated_value'
-        assert env.get('TEST_ISOLATION') == 'os_value'  # Should not be polluted
+        assert os.environ['TEST_ISOLATION'] == 'os_value'  # Should not be polluted
         
         # Test new variable in isolation
         env.set('TEST_NEW_VAR', 'new_value', 'test')
@@ -143,6 +152,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_value_sanitization(self):
         """Test that values are sanitized while preserving database URLs."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -169,10 +179,11 @@ class TestUnifiedIsolatedEnvironment:
         normal_value = env._expand_shell_commands("normal_value")
         assert normal_value == "normal_value"
         
-        # Test with ${VARIABLE} expansion
+        # Test with ${VARIABLE} expansion (should be skipped during pytest)
         env.set('EXPAND_TEST', 'expanded_value', "test")
         test_value = env._expand_shell_commands("prefix_${EXPAND_TEST}_suffix")
-        assert test_value == "prefix_expanded_value_suffix"
+        # During pytest, shell expansion is skipped for safety
+        assert test_value == "prefix_${EXPAND_TEST}_suffix"
         
         # Test during pytest (should skip expansion)
         # This test itself is running in pytest context, so expansion should be skipped
@@ -181,6 +192,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_staging_database_validation(self):
         """Test staging database credential validation (auth_service feature)."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -230,6 +242,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_comprehensive_validation(self):
         """Test comprehensive validation functionality (dev_launcher feature)."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -276,6 +289,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_subprocess_environment(self):
         """Test subprocess environment management."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -318,6 +332,7 @@ class TestUnifiedIsolatedEnvironment:
     
     def test_file_loading(self):
         """Test loading environment variables from files."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -382,6 +397,7 @@ TEST_FILE_VAR3='single quoted'
     
     def test_environment_detection_methods(self):
         """Test environment detection methods."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -439,6 +455,7 @@ TEST_FILE_VAR3='single quoted'
     
     def test_debug_information(self):
         """Test debug information functionality."""
+    pass
         env = get_env()
         env.enable_isolation()
         
@@ -482,6 +499,7 @@ class TestBackwardsCompatibility:
     
     def test_secret_loader_compatibility(self):
         """Test SecretLoader backwards compatibility."""
+    pass
         from shared.isolated_environment import SecretLoader
         
         loader = SecretLoader()
@@ -525,7 +543,8 @@ class TestErrorHandling:
         assert "File not found" in errors[0]
         
         # Test malformed file
-        malformed_content = "INVALID_LINE_WITHOUT_EQUALS\n"
+        malformed_content = "INVALID_LINE_WITHOUT_EQUALS
+"
         test_file = Path("malformed.env")
         test_file.write_text(malformed_content)
         
@@ -540,10 +559,12 @@ class TestErrorHandling:
     
     def test_callback_error_handling(self):
         """Test that callback errors don't break environment operations."""
+    pass
         env = get_env()
         env.enable_isolation()
         
         def failing_callback(key, old_value, new_value):
+    pass
             raise Exception("Callback error")
         
         env.add_change_callback(failing_callback)
@@ -569,3 +590,4 @@ class TestErrorHandling:
         # Test non-string value
         env.set('INT_TEST', 123, 'test')
         assert env.get('INT_TEST') == '123'  # Converted to string
+    pass

@@ -6,12 +6,12 @@ Targeted test to identify the exact source of event loop blocking.
 import asyncio
 import time
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
-from unittest.mock import AsyncMock, MagicMock
 from fastapi import WebSocket
 
 

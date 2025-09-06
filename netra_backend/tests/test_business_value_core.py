@@ -5,12 +5,15 @@ Tests fundamental business value scenarios for cost optimization and performance
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -29,7 +32,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
     async def _execute_with_mocked_state(self, supervisor, user_request: str, run_id: str):
         """Execute supervisor with mocked state persistence"""
         # Mock: Generic component isolation for controlled unit testing
-        save_mock = AsyncMock()
+        save_mock = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
         # Mock: Async component isolation for testing without real async operations

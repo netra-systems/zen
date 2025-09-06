@@ -12,6 +12,7 @@ import asyncio
 import statistics
 import time
 from typing import Any, Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

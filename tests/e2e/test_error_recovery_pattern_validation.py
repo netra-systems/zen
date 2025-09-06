@@ -6,6 +6,7 @@ error propagation that causes user session failures and revenue loss.
 """
 import pytest
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.helpers.core.service_independence_helpers import ServiceCommunicator
 from tests.e2e.helpers.resilience import ErrorPropagationTester

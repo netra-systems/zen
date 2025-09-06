@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any, Generator
-from unittest.mock import patch, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Docker and container management
 import docker
@@ -56,6 +56,10 @@ except ImportError:
 # Pytest collection testing
 from _pytest.config import Config
 from _pytest.main import Session
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass

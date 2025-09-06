@@ -25,19 +25,33 @@ class OAuthConfigGenerator:
     
     def __init__(self):
         self.env = get_env()
+        detector = EnvironmentDetector()
+        current_env = detector.get_environment()
+        
+        # Dynamically set redirect URI based on environment
+        dev_redirect_uri = self.env.get('OAUTH_REDIRECT_URI', 'http://localhost:3000/auth/callback')
+        prod_redirect_uri = self.env.get('OAUTH_REDIRECT_URI', 'https://app.netra.ai/auth/callback')
+        
         self.env_configs = {
             'development': {
                 'google': {
                     'client_id': self.env.get('GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT', 'dev-google-client-id'),
                     'client_secret': self.env.get('GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT', 'dev-google-client-secret'),
-                    'redirect_uri': 'http://localhost:3000/auth/callback'
+                    'redirect_uri': dev_redirect_uri
                 }
             },
             'production': {
                 'google': {
                     'client_id': self.env.get('GOOGLE_OAUTH_CLIENT_ID_PRODUCTION', 'prod-google-client-id'),
                     'client_secret': self.env.get('GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION', 'prod-google-client-secret'),
-                    'redirect_uri': 'https://app.netra.ai/auth/callback'
+                    'redirect_uri': prod_redirect_uri
+                }
+            },
+            'staging': {
+                'google': {
+                    'client_id': self.env.get('GOOGLE_OAUTH_CLIENT_ID_STAGING', 'staging-google-client-id'),
+                    'client_secret': self.env.get('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', 'staging-google-client-secret'),
+                    'redirect_uri': self.env.get('OAUTH_REDIRECT_URI', 'https://app.staging.netra.ai/auth/callback')
                 }
             }
         }
@@ -55,12 +69,26 @@ class OAuthConfigGenerator:
 @dataclass
 class AuthClientConfig:
     """Configuration for auth client."""
-    service_url: str = "http://localhost:8081"
+    service_url: str = None
     timeout: int = 30
     max_retries: int = 3
     retry_delay: float = 1.0
     verify_ssl: bool = True
     api_version: str = "v1"
+    
+    def __post_init__(self):
+        """Initialize service URL based on environment."""
+        if not self.service_url:
+            env = get_env()
+            detector = EnvironmentDetector()
+            current_env = detector.get_environment()
+            
+            if current_env == 'production':
+                self.service_url = env.get('AUTH_SERVICE_URL', 'https://auth.netrasystems.ai')
+            elif current_env == 'staging':
+                self.service_url = env.get('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai')
+            else:
+                self.service_url = env.get('AUTH_SERVICE_URL', 'http://localhost:8081')
     
     @property
     def base_url(self) -> str:

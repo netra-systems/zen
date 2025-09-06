@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from unittest.mock import patch, AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.unified.auth_database_session import AuthDatabaseSessionTestManager
 from test_framework.fixtures.database_fixtures import database_session_factory

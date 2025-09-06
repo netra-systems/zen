@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 import re
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.absolute()

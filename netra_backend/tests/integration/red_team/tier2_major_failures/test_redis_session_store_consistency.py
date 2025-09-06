@@ -21,6 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import redis.asyncio as redis
@@ -32,7 +33,7 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.network_constants import DatabaseConstants, ServicePorts
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.user_service import UserService
 from netra_backend.app.models.user import User

@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """CRITICAL END-TO-END TEST: Agent Chat WebSocket Flow
 
 THIS IS THE PRIMARY VALIDATION FOR CHAT FUNCTIONALITY.
@@ -16,8 +42,12 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Any
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
@@ -32,12 +62,17 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.message_processing import process_user_message_with_notifications
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class CriticalFlowValidator:
     """Validates the critical chat flow events."""
     
     def __init__(self):
+    pass
         self.events = []
         self.agent_started = False
         self.agent_thinking = False
@@ -99,7 +134,8 @@ class CriticalFlowValidator:
         is_valid, errors = self.validate()
         
         report = [
-            "\n" + "=" * 60,
+            "
+" + "=" * 60,
             "CRITICAL CHAT FLOW VALIDATION",
             "=" * 60,
             f"Overall Status: {'✅ PASSED' if is_valid else '❌ FAILED'}",
@@ -125,7 +161,8 @@ class CriticalFlowValidator:
                 report.append(f"  ... and {len(self.events) - 10} more")
                 
         report.append("=" * 60)
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 class TestCriticalAgentChatFlow:
@@ -137,7 +174,8 @@ class TestCriticalAgentChatFlow:
     async def test_complete_chat_flow_with_real_components(self):
         """Test complete chat flow with real supervisor and WebSocket components."""
         
-        logger.info("\n" + "=" * 60)
+        logger.info("
+" + "=" * 60)
         logger.info("STARTING CRITICAL CHAT FLOW TEST")
         logger.info("=" * 60)
         
@@ -150,11 +188,11 @@ class TestCriticalAgentChatFlow:
         user_id = "test-user"
         
         # Mock WebSocket that captures events
-        mock_ws = MagicMock()
-        sent_messages = []
+        mock_ws = Magic        sent_messages = []
         
         async def capture_send(message: str):
             """Capture sent WebSocket messages."""
+    pass
             try:
                 if isinstance(message, str):
                     data = json.loads(message)
@@ -205,8 +243,10 @@ class TestCriticalAgentChatFlow:
         
         # Mock LLM responses to avoid external calls
         async def mock_llm_call(*args, **kwargs):
+    pass
             await asyncio.sleep(0.1)  # Simulate processing
-            return {
+            await asyncio.sleep(0)
+    return {
                 "content": "The system is operational.",
                 "reasoning": "Checking system status...",
                 "confidence": 0.95
@@ -214,8 +254,10 @@ class TestCriticalAgentChatFlow:
         
         # Mock tool execution
         async def mock_tool_execute(tool_name, arguments, context=None):
+    pass
             await asyncio.sleep(0.05)  # Simulate tool execution
-            return {"status": "success", "data": f"Tool {tool_name} executed"}
+            await asyncio.sleep(0)
+    return {"status": "success", "data": f"Tool {tool_name} executed"}
         
         with patch.object(llm_manager, 'generate', new_callable=AsyncMock) as mock_gen:
             mock_gen.side_effect = mock_llm_call
@@ -266,7 +308,8 @@ class TestCriticalAgentChatFlow:
         # Cleanup
         await ws_manager.disconnect_user(user_id, mock_ws, connection_id)
         
-        logger.info("\n✅ Critical chat flow test completed")
+        logger.info("
+✅ Critical chat flow test completed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -274,7 +317,8 @@ class TestCriticalAgentChatFlow:
     async def test_websocket_notifier_basic_flow(self):
         """Test WebSocket notifier sends all required events."""
         
-        logger.info("\n" + "=" * 60)
+        logger.info("
+" + "=" * 60)
         logger.info("TESTING WEBSOCKET NOTIFIER")
         logger.info("=" * 60)
         
@@ -287,8 +331,7 @@ class TestCriticalAgentChatFlow:
         user_id = "test-user"
         request_id = "req-456"
         
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             if isinstance(message, str):
                 data = json.loads(message)
@@ -330,9 +373,11 @@ class TestCriticalAgentChatFlow:
         # Cleanup
         await ws_manager.disconnect_user(user_id, mock_ws, connection_id)
         
-        logger.info("\n✅ WebSocket notifier test completed")
+        logger.info("
+✅ WebSocket notifier test completed")
 
 
 if __name__ == "__main__":
     # Run with: python -m pytest tests/e2e/test_critical_agent_chat_flow.py -v
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

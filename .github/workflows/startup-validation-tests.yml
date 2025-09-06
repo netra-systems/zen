@@ -33,7 +33,7 @@ permissions:
 jobs:
   startup-tests:
     name: Deterministic Startup Validation
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     outputs:
       passed: ${{ steps.test-result.outputs.passed }}

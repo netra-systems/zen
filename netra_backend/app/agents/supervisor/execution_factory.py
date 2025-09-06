@@ -122,6 +122,33 @@ class UserExecutionContext:
         self.execution_metrics['failed_runs'] += 1
         logger.warning(f"Run failed: {run_id} for user {self.user_id}: {error}")
     
+    def create_child_context(self, child_id: str) -> 'UserExecutionContext':
+        """Create a child execution context for agent isolation.
+        
+        Args:
+            child_id: Identifier for the child context (e.g., "agent_triage")
+            
+        Returns:
+            UserExecutionContext: New isolated context for the agent
+        """
+        child_request_id = f"{self.request_id}_{child_id}"
+        child_thread_id = f"{self.thread_id}_{child_id}"
+        
+        child_context = UserExecutionContext(
+            user_id=self.user_id,
+            request_id=child_request_id,
+            thread_id=child_thread_id,
+            session_id=self.session_id
+        )
+        
+        # Inherit parent metrics but start fresh
+        child_context.execution_metrics = self.execution_metrics.copy()
+        child_context.execution_metrics['parent_request_id'] = self.request_id
+        child_context.execution_metrics['child_id'] = child_id
+        
+        logger.debug(f"Created child context {child_request_id} for user {self.user_id}")
+        return child_context
+    
     async def cleanup(self) -> None:
         """Clean up user-specific resources."""
         if self._is_cleaned:

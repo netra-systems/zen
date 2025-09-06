@@ -26,6 +26,7 @@ import json
 import uuid
 from typing import Dict, Optional, Any
 from datetime import datetime, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -63,6 +64,7 @@ class TestTokenValidationComprehensive:
             
     def test_mock_token_rejection_patterns(self):
         """Test that all mock token patterns are rejected."""
+    pass
         mock_patterns = [
             f"mock_token_{uuid.uuid4().hex[:16]}",
             f"mock_refresh_{uuid.uuid4().hex[:16]}",
@@ -109,6 +111,7 @@ class TestTokenValidationComprehensive:
         
     def test_jwt_manager_with_real_tokens(self):
         """Test JWT manager with real token generation."""
+    pass
         # Test with real JWT tokens
         jwt_manager_real = create_mock_jwt_manager(use_real_jwt=True)
         
@@ -152,6 +155,7 @@ class TestTokenValidationComprehensive:
             
     def test_websocket_auth_validation(self):
         """Test WebSocket authentication with real vs mock tokens."""
+    pass
         try:
             from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
             from netra_backend.app.websocket_core.types import WebSocketConfig
@@ -189,6 +193,7 @@ class TestTokenValidationComprehensive:
         
     def test_test_framework_fixtures(self):
         """Test that test framework fixtures work correctly."""
+    pass
         # Test with mock tokens (default)
         mock_token = create_test_user_token(self.test_user_id)
         assert mock_token.token.startswith("mock_"), "Default should create mock token"
@@ -223,6 +228,7 @@ class TestTokenValidationComprehensive:
             
     def test_security_monitoring_integration(self):
         """Test security monitoring integration."""
+    pass
         try:
             from netra_backend.app.core.security_monitoring import get_security_monitor
             
@@ -245,7 +251,8 @@ class TestTokenValidationComprehensive:
             
     def test_end_to_end_token_flow(self):
         """Test complete token flow from creation to validation."""
-        print("\n=== End-to-End Token Flow Test ===")
+        print("
+=== End-to-End Token Flow Test ===")
         
         # Step 1: Create tokens
         print("1. Creating test tokens...")
@@ -284,11 +291,14 @@ class TestTokenValidationComprehensive:
         except ImportError:
             print("   WARNING: Security monitoring not available")
             
-        print("\nPASS: End-to-end token flow test completed successfully")
+        print("
+PASS: End-to-end token flow test completed successfully")
         
     def test_comprehensive_validation_summary(self):
         """Summary test that validates all components are working."""
-        print("\n" + "="*60)
+    pass
+        print("
+" + "="*60)
         print("COMPREHENSIVE TOKEN VALIDATION TEST SUMMARY")
         print("="*60)
         
@@ -306,7 +316,8 @@ class TestTokenValidationComprehensive:
         for component, status in results.items():
             print(f"{component:.<30} {status}")
             
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("SECURITY IMPLEMENTATION STATUS: COMPLETE")
         print("="*60)
         
@@ -321,7 +332,8 @@ class TestTokenValidationComprehensive:
         for component in critical_components:
             assert "PASS" in results[component], f"Critical component failed: {component}"
             
-        print("\nSUCCESS: All critical security components validated successfully!")
+        print("
+SUCCESS: All critical security components validated successfully!")
 
 
 if __name__ == "__main__":

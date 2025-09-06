@@ -19,10 +19,13 @@ Test Scenarios:
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 from netra_backend.app.services.external_api_client import (
@@ -32,7 +35,7 @@ from netra_backend.app.services.external_api_client import (
     http_client_manager
 )
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreakerManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.core.unified_logging import get_logger
 from netra_backend.app.llm.llm_provider_manager import LLMProviderManager
 from test_framework.environment_markers import env, dev_and_staging
@@ -45,43 +48,62 @@ logger = get_logger(__name__)
 @pytest.mark.cascade_failure
 class TestThirdPartyAPIQuotaCascadeFailure:
     """Critical third-party API quota/rate limit cascade failure test suite."""
+    pass
 
     @pytest.fixture
-    def mock_openai_client(self):
+ def real_openai_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock OpenAI client for testing."""
+    pass
         client = MagicMock(spec=ResilientHTTPClient)
         client.base_url = "https://api.openai.com"
         return client
 
     @pytest.fixture
-    def mock_anthropic_client(self):
+ def real_anthropic_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock Anthropic client for testing."""
+    pass
         client = MagicMock(spec=ResilientHTTPClient)
         client.base_url = "https://api.anthropic.com"
         return client
 
     @pytest.fixture
-    def mock_google_oauth_client(self):
+ def real_google_oauth_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock Google OAuth client for testing."""
+    pass
         client = MagicMock(spec=ResilientHTTPClient)
         client.base_url = "https://oauth2.googleapis.com"
         return client
 
     @pytest.fixture
     def websocket_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create WebSocket manager for testing."""
+    pass
         manager = WebSocketManager()
         return manager
 
     @pytest.fixture
     def circuit_breaker_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create circuit breaker manager for testing."""
+    pass
         manager = UnifiedCircuitBreakerManager()
         return manager
 
     @pytest.fixture
     def llm_provider_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create LLM provider manager for testing."""
+    pass
         from netra_backend.app.schemas.config import AppConfig
         
         # Create mock settings for testing
@@ -331,8 +353,8 @@ class TestThirdPartyAPIQuotaCascadeFailure:
         mock_openai_client.post.side_effect = quota_error
         
         # Mock WebSocket connections
-        mock_websocket_1 = MagicMock()
-        mock_websocket_2 = MagicMock()
+        mock_websocket_1 = MagicNone  # TODO: Use real service instance
+        mock_websocket_2 = MagicNone  # TODO: Use real service instance
         mock_websocket_1.client_state = "connected"
         mock_websocket_2.client_state = "connected"
         
@@ -373,7 +395,8 @@ class TestThirdPartyAPIQuotaCascadeFailure:
     
     async def _simulate_openai_request(self, client: MagicMock) -> Dict[str, Any]:
         """Simulate OpenAI API request."""
-        return await client.post(
+        await asyncio.sleep(0)
+    return await client.post(
             "/v1/chat/completions",
             "openai_api",
             json_data={"model": LLMModel.GEMINI_2_5_FLASH.value, "messages": [{"role": "user", "content": "test"}]}
@@ -440,7 +463,10 @@ class TestQuotaMonitoringAndAlerts:
     
     @pytest.fixture
     def quota_monitor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create quota monitoring service for testing."""
+    pass
         from netra_backend.app.services.monitoring.quota_monitor import QuotaMonitor
         return QuotaMonitor()
     
@@ -450,6 +476,7 @@ class TestQuotaMonitoringAndAlerts:
         
         Revenue Protection: $420K annually from proactive quota monitoring.
         """
+    pass
         logger.info("Testing quota threshold alert generation")
         
         # Simulate quota usage approaching limits
@@ -479,6 +506,7 @@ class TestQuotaMonitoringAndAlerts:
         
         Revenue Protection: $380K annually from cascade pattern early detection.
         """
+    pass
         logger.info("Testing quota cascade pattern detection")
         
         # Simulate cascade failure pattern

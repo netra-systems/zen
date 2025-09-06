@@ -10,6 +10,7 @@ import asyncio
 import inspect
 from typing import Dict, List, Set
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent

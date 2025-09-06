@@ -6,8 +6,13 @@ Tests error handling patterns across different agent types and scenarios
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -20,10 +25,14 @@ from netra_backend.app.redis_manager import RedisManager
 
 class TestAgentErrorPatternsComprehensive:
     """Test comprehensive error patterns across agent types."""
+    pass
 
     @pytest.fixture
-    def mock_dependencies(self):
+ def real_dependencies():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock dependencies for agent testing."""
+    pass
         return {
             'llm_manager': Mock(spec=LLMManager),
             'tool_dispatcher': Mock(spec=ToolDispatcher),
@@ -32,9 +41,12 @@ class TestAgentErrorPatternsComprehensive:
 
     @pytest.fixture
     def triage_agent(self, mock_dependencies):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create triage agent with mocked dependencies."""
+    pass
         deps = mock_dependencies
-        deps['llm_manager'].ask_llm = AsyncMock()
+        deps['llm_manager'].ask_llm = AsyncNone  # TODO: Use real service instance
         deps['redis_manager'].get = AsyncMock(return_value=None)
         deps['redis_manager'].set = AsyncMock(return_value=True)
         
@@ -66,6 +78,7 @@ class TestAgentErrorPatternsComprehensive:
     @pytest.mark.asyncio
     async def test_cascading_failure_isolation(self, triage_agent):
         """Test that agent failures don't cascade across the system."""
+    pass
         # Simulate LLM failure
         triage_agent.llm_manager.ask_llm.side_effect = Exception("LLM service down")
         
@@ -111,7 +124,8 @@ class TestAgentErrorPatternsComprehensive:
         async def execute_with_mock_result(state, run_id="test"):
             try:
                 await triage_agent.execute(state, run_id, False)
-                return Mock(success=True)
+                await asyncio.sleep(0)
+    return Mock(success=True)
             except Exception as e:
                 return Mock(success=False, error=str(e))
         
@@ -129,6 +143,7 @@ class TestAgentErrorPatternsComprehensive:
 
     def test_error_recovery_strategies(self):
         """Test different error recovery strategies are properly implemented."""
+    pass
         recovery_strategies = {
             "retry_with_backoff": {
                 "max_attempts": 3,
@@ -206,6 +221,7 @@ class TestAgentErrorPatternsComprehensive:
 
     def test_error_metrics_collection(self):
         """Test that error metrics are properly collected for monitoring."""
+    pass
         expected_metrics = [
             "agent_error_total",
             "agent_error_by_type", 
@@ -225,12 +241,12 @@ class TestAgentErrorPatternsComprehensive:
     async def test_resource_cleanup_on_error(self, triage_agent):
         """Test that resources are properly cleaned up when errors occur."""
         # Simulate a scenario where resources need cleanup
-        mock_resource = Mock()
-        mock_resource.cleanup = Mock()
+        mock_resource = mock_resource_instance  # Initialize appropriate service
+        mock_resource.cleanup = cleanup_instance  # Initialize appropriate service
         
         # Patch the agent to use our mock resource (create method if needed)
         if not hasattr(triage_agent, '_cleanup_resources'):
-            triage_agent._cleanup_resources = Mock()
+            triage_agent._cleanup_resources = _cleanup_resources_instance  # Initialize appropriate service
         
         with patch.object(triage_agent, '_cleanup_resources') as mock_cleanup:
             mock_cleanup.return_value = None
@@ -250,6 +266,7 @@ class TestAgentErrorPatternsComprehensive:
 
     def test_error_boundary_implementation(self):
         """Test that proper error boundaries exist between agent components."""
+    pass
         component_boundaries = {
             "triage_validation": ["input_validation", "schema_validation"],
             "llm_interaction": ["request_preparation", "response_parsing"],

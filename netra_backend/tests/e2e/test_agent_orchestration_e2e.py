@@ -8,7 +8,12 @@ import asyncio
 import time
 import uuid
 from typing import Dict, List, TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -17,7 +22,7 @@ from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 
@@ -27,6 +32,8 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def orchestration_setup():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Setup orchestration environment with mocked agents for testing."""
     # Always use mocks for consistent testing - real agent setup removed for now
     # TODO: Implement real_agent_setup fixture when needed for integration tests
@@ -53,16 +60,16 @@ def _create_websocket_mock():
     websocket_mock = AsyncMock(spec=UnifiedWebSocketManager)
 
     # Mock: Generic component isolation for controlled unit testing
-    websocket_mock.send_message = AsyncMock()
+    websocket_mock.send_message = AsyncNone  # TODO: Use real service instance
 
     # Mock: Agent service isolation for testing without LLM agent execution
-    websocket_mock.send_agent_update = AsyncMock()
+    websocket_mock.send_agent_update = AsyncNone  # TODO: Use real service instance
 
     # Mock: Agent service isolation for testing without LLM agent execution
-    websocket_mock.send_agent_log = AsyncMock()
+    websocket_mock.send_agent_log = AsyncNone  # TODO: Use real service instance
 
     # Mock: Generic component isolation for controlled unit testing
-    websocket_mock.send_error = AsyncMock()
+    websocket_mock.send_error = AsyncNone  # TODO: Use real service instance
 
     return websocket_mock
 
@@ -76,7 +83,7 @@ def _build_mock_dependency_dict(websocket_mock):
         'llm': AsyncMock(spec=LLMManager), 'websocket': websocket_mock,
 
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        'dispatcher': AsyncMock(), 'redis': AsyncMock()
+        'dispatcher': AsyncNone  # TODO: Use real service instance, 'redis': AsyncNone  # TODO: Use real service instance
 
     }
 

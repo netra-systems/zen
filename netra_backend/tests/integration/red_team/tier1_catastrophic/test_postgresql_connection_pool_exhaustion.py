@@ -24,6 +24,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import psutil
@@ -37,7 +38,7 @@ from sqlalchemy.pool import QueuePool, NullPool
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.db.postgres import initialize_postgres, async_engine, async_session_factory
 
 

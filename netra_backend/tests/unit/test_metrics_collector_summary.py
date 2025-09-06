@@ -9,22 +9,27 @@ for customer optimization and revenue forecasting.
 
 from pathlib import Path
 import sys
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from collections import deque
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
 
 class TestMetricsCollectorSummary:
+    pass
 
     """Test suite for MetricsCollector summary and analysis features."""
     
     @pytest.fixture
 
     def collector(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create metrics collector with minimal retention."""
 
@@ -404,3 +409,4 @@ class TestMetricsCollectorSummary:
         
         performance_degraded = (max_cache_ratio - min_cache_ratio) > degradation_threshold
         assert performance_degraded, "Should detect significant cache performance degradation"
+    pass

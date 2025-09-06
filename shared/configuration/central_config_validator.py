@@ -13,9 +13,10 @@ CRITICAL: This is the SSOT for configuration requirements - do not duplicate log
 
 import os
 import logging
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Any
 from enum import Enum
 from dataclasses import dataclass
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,8 @@ class ConfigRequirement(Enum):
     REQUIRED_SECURE = "required_secure"  # Must be present, non-empty, and meet security criteria
     OPTIONAL = "optional"           # Can be missing or empty
     DEV_ONLY = "dev_only"          # Only allowed in development/test
+    LEGACY = "legacy"              # Deprecated but still supported temporarily
+    LEGACY_REQUIRED = "legacy_required"  # Deprecated but still required temporarily
 
 
 @dataclass
@@ -45,6 +48,128 @@ class ConfigRule:
     min_length: Optional[int] = None
     forbidden_values: Optional[Set[str]] = None
     error_message: Optional[str] = None
+    # Legacy support fields
+    legacy_info: Optional['LegacyConfigInfo'] = None
+    replacement_vars: Optional[List[str]] = None
+
+
+@dataclass
+class LegacyConfigInfo:
+    """Information about legacy configuration variables."""
+    deprecation_date: str  # ISO format date string
+    migration_guide: str
+    still_supported: bool
+    removal_version: Optional[str] = None
+
+
+class LegacyConfigMarker:
+    """Mark and track legacy configuration variables to prevent regression."""
+    
+    LEGACY_VARIABLES: Dict[str, Dict[str, Any]] = {
+        "DATABASE_URL": {
+            "replacement": ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"],
+            "deprecation_date": "2025-12-01",
+            "migration_guide": "Use component-based database configuration (POSTGRES_HOST, POSTGRES_PORT, etc.) instead of single DATABASE_URL. The system will construct the URL internally.",
+            "still_supported": True,
+            "removal_version": "2.0.0",
+            "environments_affected": ["development", "test"],
+            "auto_construct": True  # System can construct this from components
+        },
+        "JWT_SECRET": {
+            "replacement": "JWT_SECRET_KEY",
+            "deprecation_date": "2025-10-01",
+            "migration_guide": "Rename JWT_SECRET to JWT_SECRET_KEY in all environments for consistency.",
+            "still_supported": False,
+            "removal_version": "1.5.0",
+            "environments_affected": ["all"]
+        },
+        "REDIS_URL": {
+            "replacement": ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "REDIS_DB"],
+            "deprecation_date": "2025-11-01",
+            "migration_guide": "Use component-based Redis configuration instead of single REDIS_URL.",
+            "still_supported": True,
+            "removal_version": "2.0.0",
+            "environments_affected": ["development", "test"],
+            "auto_construct": True
+        },
+        "GOOGLE_OAUTH_CLIENT_ID": {
+            "replacement": ["GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "GOOGLE_OAUTH_CLIENT_ID_TEST", "GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION"],
+            "deprecation_date": "2025-09-01",
+            "migration_guide": "Use environment-specific OAuth client IDs (e.g., GOOGLE_OAUTH_CLIENT_ID_STAGING) to prevent credential leakage between environments.",
+            "still_supported": False,
+            "removal_version": "1.3.0",
+            "environments_affected": ["all"],
+            "critical_security": True  # This was a security issue
+        },
+        "GOOGLE_OAUTH_CLIENT_SECRET": {
+            "replacement": ["GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT", "GOOGLE_OAUTH_CLIENT_SECRET_TEST", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION"],
+            "deprecation_date": "2025-09-01",
+            "migration_guide": "Use environment-specific OAuth client secrets to prevent credential leakage between environments.",
+            "still_supported": False,
+            "removal_version": "1.3.0",
+            "environments_affected": ["all"],
+            "critical_security": True
+        },
+        "APP_SECRET_KEY": {
+            "replacement": "SECRET_KEY",
+            "deprecation_date": "2025-10-15",
+            "migration_guide": "Use SECRET_KEY instead of APP_SECRET_KEY for consistency.",
+            "still_supported": True,
+            "removal_version": "1.6.0",
+            "environments_affected": ["all"]
+        }
+    }
+    
+    @classmethod
+    def is_legacy_variable(cls, var_name: str) -> bool:
+        """Check if a variable is marked as legacy."""
+        return var_name in cls.LEGACY_VARIABLES
+    
+    @classmethod
+    def get_legacy_info(cls, var_name: str) -> Optional[Dict[str, Any]]:
+        """Get legacy information for a variable."""
+        return cls.LEGACY_VARIABLES.get(var_name)
+    
+    @classmethod
+    def get_replacement_variables(cls, legacy_var: str) -> List[str]:
+        """Get replacement variables for a legacy config."""
+        config = cls.LEGACY_VARIABLES.get(legacy_var, {})
+        replacement = config.get("replacement", [])
+        return replacement if isinstance(replacement, list) else [replacement]
+    
+    @classmethod
+    def check_legacy_usage(cls, configs: Dict[str, Any]) -> List[str]:
+        """Check for usage of legacy variables and return warnings."""
+        warnings = []
+        
+        for var_name, value in configs.items():
+            if cls.is_legacy_variable(var_name) and value:
+                legacy_info = cls.get_legacy_info(var_name)
+                if legacy_info:
+                    if legacy_info["still_supported"]:
+                        warnings.append(
+                            f"WARNING: '{var_name}' is deprecated and will be removed in version {legacy_info['removal_version']}. "
+                            f"Migration: {legacy_info['migration_guide']}"
+                        )
+                    else:
+                        warnings.append(
+                            f"ERROR: '{var_name}' is no longer supported (removed in {legacy_info['removal_version']}). "
+                            f"You must use: {', '.join(cls.get_replacement_variables(var_name))}"
+                        )
+                    
+                    if legacy_info.get("critical_security"):
+                        warnings.append(
+                            f"SECURITY WARNING: Using '{var_name}' poses a security risk. "
+                            f"This was identified as a critical security issue. Please migrate immediately."
+                        )
+        
+        return warnings
+    
+    @classmethod
+    def can_auto_construct(cls, legacy_var: str) -> bool:
+        """Check if a legacy variable can be auto-constructed from components."""
+        config = cls.LEGACY_VARIABLES.get(legacy_var, {})
+        return config.get("auto_construct", False)
 
 
 class CentralConfigurationValidator:
@@ -542,6 +667,9 @@ class CentralConfigurationValidator:
         logger.info(f"🔍 Central Configuration Validation - {environment.value.upper()} Environment")
         
         try:
+            # Check for legacy variable usage
+            self._check_and_warn_legacy_configs()
+            
             # Validate all configuration requirements
             self.validate_all_requirements()
             
@@ -553,6 +681,28 @@ class CentralConfigurationValidator:
         except ValueError as e:
             logger.critical(f"❌ Central configuration validation FAILED: {e}")
             raise
+    
+    def _check_and_warn_legacy_configs(self) -> None:
+        """Check for legacy configuration usage and log warnings."""
+        # Collect all environment variables
+        current_configs = {}
+        for key in os.environ:
+            current_configs[key] = os.environ.get(key)
+        
+        # Check for legacy usage
+        warnings = LegacyConfigMarker.check_legacy_usage(current_configs)
+        
+        for warning in warnings:
+            if warning.startswith("ERROR:"):
+                logger.error(warning)
+                # Don't fail hard on legacy configs if they're still supported
+                # This allows gradual migration
+                if "no longer supported" in warning:
+                    raise ValueError(warning)
+            elif warning.startswith("SECURITY WARNING:"):
+                logger.critical(warning)
+            else:
+                logger.warning(warning)
     
     def _validate_environment_consistency(self) -> None:
         """Validate environment-specific consistency requirements."""
@@ -682,3 +832,109 @@ def get_oauth_client_secret() -> str:
     """
     validator = get_central_validator()
     return validator.get_oauth_client_secret()
+
+
+def check_config_before_deletion(config_key: str, service_name: Optional[str] = None) -> Tuple[bool, str, List[str]]:
+    """
+    Check if a configuration can be safely deleted.
+    
+    Args:
+        config_key: The configuration key to check
+        service_name: Optional service context for the check
+    
+    Returns:
+        (can_delete, reason, affected_services)
+    """
+    # First check if it's a legacy variable
+    if LegacyConfigMarker.is_legacy_variable(config_key):
+        legacy_info = LegacyConfigMarker.get_legacy_info(config_key)
+        if legacy_info and legacy_info["still_supported"]:
+            return (
+                False,
+                f"Legacy variable '{config_key}' is still supported until {legacy_info['deprecation_date']}. "
+                f"Migration required: {legacy_info['migration_guide']}",
+                legacy_info.get("environments_affected", [])
+            )
+        elif legacy_info and not legacy_info["still_supported"]:
+            return (
+                True,
+                f"Legacy variable '{config_key}' is deprecated and can be removed. "
+                f"Ensure replacements are in place: {', '.join(LegacyConfigMarker.get_replacement_variables(config_key))}",
+                legacy_info.get("environments_affected", [])
+            )
+    
+    # Check against configuration rules
+    validator = get_central_validator()
+    for rule in validator.CONFIGURATION_RULES:
+        if rule.env_var == config_key:
+            if rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
+                affected_envs = [env.value for env in rule.environments]
+                return (
+                    False,
+                    f"Configuration '{config_key}' is required in environments: {', '.join(affected_envs)}. "
+                    f"Cannot be deleted without migration plan.",
+                    affected_envs
+                )
+            elif rule.requirement == ConfigRequirement.OPTIONAL:
+                return (
+                    True,
+                    f"Configuration '{config_key}' is optional and can be safely deleted.",
+                    []
+                )
+    
+    # Not in our configuration rules - check with backend-specific dependencies if available
+    try:
+        from netra_backend.app.core.config_dependencies import ConfigDependencyMap
+        can_delete, reason = ConfigDependencyMap.can_delete_config(config_key)
+        return (can_delete, reason, [])
+    except ImportError:
+        # Backend not available, assume it's safe to delete unknown configs
+        return (
+            True,
+            f"Configuration '{config_key}' is not tracked in central validator. Verify with service-specific checks.",
+            []
+        )
+
+
+def get_legacy_migration_report() -> str:
+    """
+    Generate a report of all legacy configurations and their migration status.
+    
+    Returns:
+        Formatted migration report string
+    """
+    report_lines = [
+        "=" * 80,
+        "LEGACY CONFIGURATION MIGRATION REPORT",
+        "=" * 80,
+        ""
+    ]
+    
+    current_date = datetime.now()
+    
+    for var_name, info in LegacyConfigMarker.LEGACY_VARIABLES.items():
+        deprecation_date = datetime.fromisoformat(info["deprecation_date"])
+        days_until_removal = (deprecation_date - current_date).days
+        
+        status = "✅ REMOVED" if not info["still_supported"] else (
+            "⚠️  DEPRECATED" if days_until_removal > 0 else "🚨 OVERDUE FOR REMOVAL"
+        )
+        
+        report_lines.extend([
+            f"Variable: {var_name}",
+            f"Status: {status}",
+            f"Deprecation Date: {info['deprecation_date']}",
+            f"Removal Version: {info.get('removal_version', 'TBD')}",
+            f"Replacement: {info['replacement'] if isinstance(info['replacement'], str) else ', '.join(info['replacement'])}",
+            f"Migration Guide: {info['migration_guide']}",
+        ])
+        
+        if info.get("critical_security"):
+            report_lines.append("⚠️  SECURITY CRITICAL: This variable poses a security risk!")
+        
+        if info.get("auto_construct"):
+            report_lines.append("✅ Auto-Construction: System can build this from components")
+        
+        report_lines.extend(["", "-" * 40, ""])
+    
+    return "\n".join(report_lines)

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Multi-Service Health Check Tests
 
@@ -83,6 +84,7 @@ class MultiServiceHealthChecker:
     """Comprehensive multi-service health checker with timeout handling."""
     
     def __init__(self):
+    pass
         self.results: List[HealthCheckResult] = []
         self.redis_manager = RedisManager()
     
@@ -395,6 +397,7 @@ async def test_multi_service_health_comprehensive():
 @pytest.mark.e2e
 async def test_critical_services_availability():
     """Test that critical services (auth, backend, postgres) are available."""
+    pass
     checker = MultiServiceHealthChecker()
     results = await checker.run_comprehensive_health_check()
     
@@ -438,7 +441,8 @@ if __name__ == "__main__":
         checker = MultiServiceHealthChecker()
         results = await checker.run_comprehensive_health_check()
         
-        print("\n=== Multi-Service Health Check Results ===")
+        print("
+=== Multi-Service Health Check Results ===")
         for result in results:
             status_symbol = {"healthy": "[OK]", "unhealthy": "[FAIL]", "timeout": "[TIMEOUT]", "error": "[ERROR]", "disabled": "[DISABLED]", "skipped": "[SKIP]"}.get(result.status, "[?]")
             print(f"{status_symbol} {result.service.upper()}: {result.status} ({result.response_time_ms:.1f}ms)")
@@ -448,3 +452,4 @@ if __name__ == "__main__":
                 print(f"   Details: {result.details}")
     
     asyncio.run(main())
+    pass

@@ -71,16 +71,7 @@ class ContainerManualControl:
         Returns:
             Tuple of (runtime_command, compose_command)
         """
-        # Windows: Prefer Podman if available for better performance
-        if platform.system() == 'Windows' and not preferred:
-            if shutil.which("podman"):
-                logger.info("🐧 Windows detected - preferring Podman for better performance")
-                if shutil.which("podman-compose"):
-                    return "podman", "podman-compose"
-                elif shutil.which("docker-compose"):
-                    logger.info("Using docker-compose with Podman backend")
-                    return "podman", "docker-compose"
-        
+        # If preferred is specified, use it first
         if preferred:
             if preferred == "docker" and shutil.which("docker"):
                 if shutil.which("docker-compose"):
@@ -91,10 +82,28 @@ class ContainerManualControl:
                 if shutil.which("podman-compose"):
                     return "podman", "podman-compose"
                 else:
-                    logger.warning("podman-compose not found. Install with: pip install podman-compose")
-                    if shutil.which("docker-compose"):
-                        logger.info("Falling back to docker-compose with Podman backend")
-                        return "podman", "docker-compose"
+                    # SSOT: No fallbacks - user must install proper compose tool
+                    logger.error("❌ SSOT VIOLATION: podman-compose not found")
+                    logger.error("Solution: Install podman-compose with: pip install podman-compose")
+                    raise RuntimeError(
+                        "SSOT RUNTIME REQUIREMENT: When using Podman, podman-compose must be installed. "
+                        "Install with: pip install podman-compose. No docker-compose fallbacks allowed."
+                    )
+        
+        # Windows: Prefer Podman if available for better performance (only if not preferred)
+        if platform.system() == 'Windows' and not preferred:
+            if shutil.which("podman"):
+                logger.info("🐧 Windows detected - preferring Podman for better performance")
+                if shutil.which("podman-compose"):
+                    return "podman", "podman-compose"
+                else:
+                    # SSOT: No docker-compose fallback with Podman
+                    logger.error("❌ SSOT VIOLATION: podman-compose required on Windows")
+                    logger.error("Solution: Install podman-compose with: pip install podman-compose") 
+                    raise RuntimeError(
+                        "SSOT WINDOWS REQUIREMENT: Podman on Windows requires podman-compose. "
+                        "Install with: pip install podman-compose. No docker-compose fallbacks."
+                    )
         
         # Auto-detect (non-Windows or no Podman)
         if shutil.which("docker"):
@@ -414,7 +423,7 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["start", "stop", "restart", "clean", "test", "status", "monitor"],
+        choices=["start", "stop", "restart", "clean", "test", "status", "monitor", "refresh-dev"],
         help="Command to execute"
     )
     parser.add_argument(
@@ -462,6 +471,16 @@ def main():
             success = controller.status()
         elif args.command == "monitor":
             success = controller.monitor_resources()
+        elif args.command == "refresh-dev":
+            logger.info("🔄 Forwarding to refresh_dev command...")
+            # Forward to the official refresh_dev script
+            import subprocess
+            script_path = Path(__file__).parent / "refresh_dev.py"
+            cmd = [sys.executable, str(script_path)]
+            if args.services:
+                cmd.extend(args.services)
+            result = subprocess.run(cmd)
+            success = result.returncode == 0
         else:
             logger.error(f"Unknown command: {args.command}")
             success = False

@@ -18,12 +18,13 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.exc import ProgrammingError, OperationalError
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from test_framework.performance_helpers import fast_test, timeout_override
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMigrationIdempotencyFailures:
@@ -43,7 +44,7 @@ class TestMigrationIdempotencyFailures:
         Current behavior: Migration fails when index doesn't exist, making it non-idempotent
         """
         # Mock scenario where index doesn't exist in database
-        mock_connection = MagicMock()
+        mock_connection = MagicNone  # TODO: Use real service instance
         mock_connection.execute.side_effect = ProgrammingError(
             "index 'idx_userbase_created_at' does not exist",
             None,
@@ -81,7 +82,7 @@ class TestMigrationIdempotencyFailures:
         Current behavior: May fail to properly restore state when indexes weren't originally present
         """
         # Mock scenario where we try to restore indexes that never existed
-        mock_connection = MagicMock()
+        mock_connection = MagicNone  # TODO: Use real service instance
         mock_connection.execute.side_effect = [
             ProgrammingError("index already exists", None, None),  # First index fails
             None,  # Other operations succeed
@@ -163,7 +164,7 @@ class TestMigrationIdempotencyFailures:
         Current behavior: Second run fails due to non-idempotent index operations
         """
         # Mock a successful first run followed by a failing second run
-        mock_connection = MagicMock()
+        mock_connection = MagicNone  # TODO: Use real service instance
         
         # First call succeeds (index exists and gets dropped)
         # Second call fails (index no longer exists)

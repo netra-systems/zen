@@ -7,6 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 # Add project root to path
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework import setup_test_path
 

@@ -28,6 +28,7 @@ import pytest_asyncio
 import asyncio
 import time
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.workspace_isolation_helpers import (
     WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator, RBACEnforcementTester, WorkspaceAuditTrailValidator, WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils,

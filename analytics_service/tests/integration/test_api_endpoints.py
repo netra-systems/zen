@@ -28,6 +28,7 @@ from typing import Any, Dict, List
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from httpx import AsyncClient
+from shared.isolated_environment import IsolatedEnvironment
 
 # =============================================================================
 # API IMPLEMENTATION (To be moved to actual API module)

@@ -9,8 +9,8 @@ import asyncio
 import pytest
 import time
 import threading
-from unittest.mock import Mock, patch, MagicMock
 from concurrent.futures import TimeoutError
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.parallel_executor import (
     ParallelExecutor,

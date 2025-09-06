@@ -20,6 +20,7 @@ This test protects 100% of new revenue generation. Without this test passing,
 we cannot convert free users to paid, which is the entire business model.
 """
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

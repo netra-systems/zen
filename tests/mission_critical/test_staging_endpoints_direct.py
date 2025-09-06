@@ -19,6 +19,7 @@ import time
 import uuid
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -35,12 +36,14 @@ class StagingEndpointTester:
     """Test actual staging endpoints."""
     
     def __init__(self):
+    pass
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
         self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
     
     async def test_auth_service_health(self):
         """Test auth service health endpoint."""
-        print("\n=== AUTH SERVICE HEALTH TEST ===")
+        print("
+=== AUTH SERVICE HEALTH TEST ===")
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -54,7 +57,8 @@ class StagingEndpointTester:
                     except:
                         print(f"[OK] Health response: {response.text}")
                 
-                return response.status_code == 200
+                await asyncio.sleep(0)
+    return response.status_code == 200
                 
         except Exception as e:
             print(f"[FAIL] Auth service health failed: {e}")
@@ -62,7 +66,9 @@ class StagingEndpointTester:
     
     async def test_backend_service_health(self):
         """Test backend service health endpoint."""
-        print("\n=== BACKEND SERVICE HEALTH TEST ===")
+    pass
+        print("
+=== BACKEND SERVICE HEALTH TEST ===")
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -76,7 +82,8 @@ class StagingEndpointTester:
                     except:
                         print(f"[OK] Health response: {response.text}")
                 
-                return response.status_code == 200
+                await asyncio.sleep(0)
+    return response.status_code == 200
                 
         except Exception as e:
             print(f"[FAIL] Backend service health failed: {e}")
@@ -84,7 +91,8 @@ class StagingEndpointTester:
     
     async def test_create_token_via_auth_service(self):
         """Test creating a token via auth service."""
-        print("\n=== CREATE TOKEN VIA AUTH SERVICE ===")
+        print("
+=== CREATE TOKEN VIA AUTH SERVICE ===")
         
         # Try to create a token using the auth service
         test_endpoints = [
@@ -127,7 +135,8 @@ class StagingEndpointTester:
                                 token_data = response.json()
                                 if "access_token" in token_data:
                                     print(f"  [SUCCESS] Got access token!")
-                                    return token_data["access_token"]
+                                    await asyncio.sleep(0)
+    return token_data["access_token"]
                             except:
                                 pass
                 
@@ -139,7 +148,9 @@ class StagingEndpointTester:
     
     async def generate_mock_staging_token(self):
         """Generate a mock token that mimics staging auth service."""
-        print("\n=== GENERATE MOCK STAGING TOKEN ===")
+    pass
+        print("
+=== GENERATE MOCK STAGING TOKEN ===")
         
         # This simulates what the staging auth service would generate
         # Using a development secret since we don't have access to staging secret
@@ -179,7 +190,8 @@ class StagingEndpointTester:
             print(f"    Issuer: {decoded.get('iss')}")
             print(f"    Audience: {decoded.get('aud')}")
             
-            return token
+            await asyncio.sleep(0)
+    return token
             
         except Exception as e:
             print(f"[FAIL] Mock token generation failed: {e}")
@@ -187,11 +199,13 @@ class StagingEndpointTester:
     
     async def test_backend_with_token(self, token):
         """Test backend service with the provided token."""
-        print(f"\n=== TEST BACKEND WITH TOKEN ===")
+        print(f"
+=== TEST BACKEND WITH TOKEN ===")
         
         if not token:
             print("[SKIP] No token provided")
-            return False
+            await asyncio.sleep(0)
+    return False
         
         headers = {
             "Authorization": f"Bearer {token}",
@@ -251,11 +265,14 @@ class StagingEndpointTester:
     
     async def test_auth_token_validation_endpoint(self, token):
         """Test if auth service can validate the token."""
-        print(f"\n=== TEST AUTH TOKEN VALIDATION ===")
+    pass
+        print(f"
+=== TEST AUTH TOKEN VALIDATION ===")
         
         if not token:
             print("[SKIP] No token provided")
-            return False
+            await asyncio.sleep(0)
+    return False
         
         # Try different validation endpoints
         validation_endpoints = [
@@ -458,13 +475,15 @@ async def main():
         auth_healthy = await tester.test_auth_service_health()
         backend_healthy = await tester.test_backend_service_health()
         
-        print(f"\n[RESULTS] Service Health:")
+        print(f"
+[RESULTS] Service Health:")
         print(f"  Auth service: {auth_healthy}")
         print(f"  Backend service: {backend_healthy}")
         
         if not auth_healthy or not backend_healthy:
             print("[CRITICAL] Services are not healthy - cannot proceed with token tests")
-            return False
+            await asyncio.sleep(0)
+    return False
         
         # Test 2: Try to get a real token
         real_token = await tester.test_create_token_via_auth_service()
@@ -474,16 +493,19 @@ async def main():
         
         # Test 4: Test tokens with backend
         if real_token:
-            print(f"\n[TEST] Testing real token with backend...")
+            print(f"
+[TEST] Testing real token with backend...")
             real_result = await tester.test_backend_with_token(real_token)
             await tester.test_auth_token_validation_endpoint(real_token)
         
         if mock_token:
-            print(f"\n[TEST] Testing mock token with backend...")
+            print(f"
+[TEST] Testing mock token with backend...")
             mock_result = await tester.test_backend_with_token(mock_token)
             await tester.test_auth_token_validation_endpoint(mock_token)
         
-        print(f"\n" + "=" * 50)
+        print(f"
+" + "=" * 50)
         print("FINAL ANALYSIS:")
         
         if real_token:
@@ -507,3 +529,4 @@ async def main():
 if __name__ == "__main__":
     success = asyncio.run(main())
     sys.exit(0 if success else 1)
+    pass

@@ -12,13 +12,15 @@ import json
 import sys
 import os
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
 

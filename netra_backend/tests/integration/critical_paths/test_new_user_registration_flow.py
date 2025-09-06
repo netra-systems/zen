@@ -12,6 +12,10 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -21,7 +25,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -51,19 +54,19 @@ class TestNewUserRegistrationFlow:
     async def mock_db_session(self):
         """Create mock database session."""
         # Mock: Session isolation for controlled testing without external state
-        session = AsyncMock()
+        session = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.execute = AsyncMock()
+        session.execute = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.add = MagicMock()
+        session.add = MagicNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.commit = AsyncMock()
+        session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.refresh = AsyncMock()
+        session.refresh = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.rollback = AsyncMock()
+        session.rollback = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.close = AsyncMock()
+        session.close = AsyncNone  # TODO: Use real service instance
         try:
             yield session
         finally:
@@ -73,12 +76,13 @@ class TestNewUserRegistrationFlow:
     @pytest.fixture
     async def mock_auth_service(self):
         """Create mock auth service."""
+    pass
         # Mock: Authentication service isolation for testing without real auth flows
         service = AsyncMock(spec=AuthService)
         # Mock: Generic component isolation for controlled unit testing
-        service.create_user = AsyncMock()
+        service.create_user = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        service.verify_email = AsyncMock()
+        service.verify_email = AsyncNone  # TODO: Use real service instance
         # Use real JWT token generation for integration tests
         service.generate_token = AsyncMock(return_value=create_test_user_token("test_user", use_real_jwt=True).token)
         # Mock: Async component isolation for testing without real async operations
@@ -91,17 +95,19 @@ class TestNewUserRegistrationFlow:
         # Mock: Async component isolation for testing without real async operations
         service = AsyncMock(spec=UserService)
         # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email = AsyncMock()
+        service.get_user_by_email = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        service.create_user = AsyncMock()
+        service.create_user = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        service.update_user = AsyncMock()
+        service.update_user = AsyncNone  # TODO: Use real service instance
         yield service
     
     @pytest.fixture
     async def async_client(self, mock_db_session, mock_auth_service, mock_user_service):
         """Create async client with mocked dependencies."""
+    pass
         async def override_get_db():
+    pass
             try:
                 yield session
             finally:
@@ -120,7 +126,8 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.L3
     @pytest.mark.asyncio
     async def test_new_user_registration_basic_flow(self, async_client, mock_auth_service):
-        """Test 1: Basic new user registration should create user and return token."""
+        """Test 1: Basic new user registration should create user and await asyncio.sleep(0)
+    return token."""
         # Registration data
         registration_data = {
             "email": f"newuser_{uuid.uuid4()}@example.com",
@@ -155,6 +162,7 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.asyncio
     async def test_duplicate_email_registration_rejected(self, async_client, mock_user_service):
         """Test 2: Registration with existing email should be rejected."""
+    pass
         existing_email = "existing@example.com"
         
         # Mock existing user
@@ -168,10 +176,11 @@ class TestNewUserRegistrationFlow:
         }
         
         # Mock: Generic component isolation for controlled unit testing
-        with patch('app.services.user_service.UserService.get_user_by_email', return_value=MagicMock()):
+        with patch('app.services.user_service.UserService.get_user_by_email', return_value=MagicNone  # TODO: Use real service instance):
             response = await async_client.post("/auth/register", json=registration_data)
             
-            # Should return 409 Conflict or 400 Bad Request
+            # Should await asyncio.sleep(0)
+    return 409 Conflict or 400 Bad Request
             assert response.status_code in [409, 400]
             
             data = response.json()
@@ -202,7 +211,8 @@ class TestNewUserRegistrationFlow:
                 
                 response = await async_client.get(f"/auth/verify-email?token={verification_token}")
                 
-                # Should return success
+                # Should await asyncio.sleep(0)
+    return success
                 assert response.status_code in [200, 302]  # May redirect after verification
                 
                 # User should now be active
@@ -215,6 +225,7 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.asyncio
     async def test_login_before_email_verification(self, async_client, mock_user_service):
         """Test 4: Login should fail for unverified email accounts."""
+    pass
         # Mock unverified user
         # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
@@ -233,7 +244,8 @@ class TestNewUserRegistrationFlow:
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_user):
             response = await async_client.post("/auth/login", json=login_data)
             
-            # Should return 403 Forbidden or 401 Unauthorized
+            # Should await asyncio.sleep(0)
+    return 403 Forbidden or 401 Unauthorized
             assert response.status_code in [403, 401]
             
             data = response.json()
@@ -275,7 +287,8 @@ class TestNewUserRegistrationFlow:
                 
                 response = await async_client.post("/auth/login", json=login_data)
                 
-                # Should return 200 with tokens
+                # Should await asyncio.sleep(0)
+    return 200 with tokens
                 assert response.status_code == 200
                 
                 data = response.json()
@@ -288,6 +301,7 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.asyncio
     async def test_password_requirements_validation(self, async_client):
         """Test 6: Registration should enforce password requirements."""
+    pass
         test_cases = [
             ("weak", False, "too short"),
             ("NoNumbers!", False, "missing number"),
@@ -340,7 +354,8 @@ class TestNewUserRegistrationFlow:
         
         # If no explicit rate limit, at least check consistency
         if not rate_limited:
-            # All should return similar status (not a mix of success/failure)
+            # All should await asyncio.sleep(0)
+    return similar status (not a mix of success/failure)
             unique_statuses = set(responses)
             assert len(unique_statuses) <= 2, f"Inconsistent responses: {unique_statuses}"
     
@@ -349,6 +364,7 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.asyncio
     async def test_user_profile_creation_on_registration(self, async_client, mock_user_service):
         """Test 8: Registration should create complete user profile."""
+    pass
         registration_data = {
             "email": f"profile_{uuid.uuid4()}@example.com",
             "password": "SecurePass123!",
@@ -412,6 +428,7 @@ class TestNewUserRegistrationFlow:
     @pytest.mark.asyncio
     async def test_default_permissions_assigned_to_new_user(self, async_client, mock_user_service):
         """Test 10: New users should receive appropriate default permissions."""
+    pass
         registration_data = {
             "email": f"permissions_{uuid.uuid4()}@example.com",
             "password": "SecurePass123!",

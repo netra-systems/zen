@@ -7,6 +7,7 @@ Business Value: Customer-facing functionality
 import pytest
 import asyncio
 from netra_backend.app.websocket_core.rate_limiter import WebSocketRateLimiter
+from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
 class TestRateLimiterAsync:

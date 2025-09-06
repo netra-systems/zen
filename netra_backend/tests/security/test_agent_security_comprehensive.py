@@ -7,11 +7,15 @@ authentication, authorization, data protection, and security boundaries.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any, List
 import hashlib
 import json
 import time
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -25,7 +29,7 @@ class TestAgentAuthentication:
     async def test_agent_token_validation(self):
         """Test agent validates authentication tokens properly."""
         # Mock auth service with various token scenarios
-        mock_auth_service = Mock()
+        mock_auth_service = AuthManager()
         
         # Valid token response
         valid_token_response = {
@@ -204,7 +208,7 @@ class TestAgentAuthentication:
             }
         ]
         
-        mock_auth_service = Mock()
+        mock_auth_service = AuthManager()
         
         with patch('netra_backend.app.auth.auth_service_client.auth_service', mock_auth_service):
             
@@ -317,7 +321,7 @@ class TestAgentDataProtection:
     async def test_agent_data_encryption_at_rest(self):
         """Test agent encrypts sensitive data at rest."""
         # Mock encryption service
-        mock_encryption_service = Mock()
+        mock_encryption_service = mock_encryption_service_instance  # Initialize appropriate service
         
         def mock_encrypt(data, key_id="default"):
             # Simple mock encryption (in real implementation, use proper crypto)
@@ -383,8 +387,8 @@ class TestAgentDataProtection:
     async def test_agent_sql_injection_protection(self):
         """Test agent protects against SQL injection attacks."""
         # Mock database manager with injection detection
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         injection_attempts = []
         

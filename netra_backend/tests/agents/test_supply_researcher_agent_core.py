@@ -4,11 +4,15 @@ Core tests for SupplyResearcherAgent - Basic functionality
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -16,8 +20,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
-    SupplyResearcherAgent,
-)
+    SupplyResearcherAgent)
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 
@@ -25,23 +28,29 @@ class TestSupplyResearcherAgentCore:
     """Test suite for SupplyResearcherAgent core functionality"""
     
     @pytest.fixture
-    def mock_db(self):
+ def real_db():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock database session"""
+    pass
         # Mock: Generic component isolation for controlled unit testing
-        db = Mock()
+        db = TestDatabaseManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
-        db.query = Mock()
+        db.query = query_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
-        db.add = AsyncMock()
+        db.add = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        db.commit = AsyncMock()
+        db.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        db.rollback = AsyncMock()
+        db.rollback = AsyncNone  # TODO: Use real service instance
         return db
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager"""
+    pass
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -49,22 +58,28 @@ class TestSupplyResearcherAgentCore:
         return llm
     
     @pytest.fixture
-    def mock_supply_service(self, mock_db):
+ def real_supply_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock supply research service"""
+    pass
         # Mock: Component isolation for controlled unit testing
         service = Mock(spec=SupplyResearchService)
         service.db = mock_db
         # Mock: Component isolation for controlled unit testing
         service.get_supply_items = Mock(return_value=[])
         # Mock: Generic component isolation for controlled unit testing
-        service.create_or_update_supply_item = Mock()
+        service.create_or_update_supply_item = create_or_update_supply_item_instance  # Initialize appropriate service
         # Mock: Component isolation for controlled unit testing
         service.validate_supply_data = Mock(return_value=(True, []))
         return service
     
     @pytest.fixture
     def agent(self, mock_llm_manager, mock_db, mock_supply_service):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create SupplyResearcherAgent instance"""
+    pass
         return SupplyResearcherAgent(
             llm_manager=mock_llm_manager,
             db=mock_db,
@@ -80,6 +95,7 @@ class TestSupplyResearcherAgentCore:
     
     def test_parse_pricing_request(self, agent):
         """Test parsing pricing-related requests"""
+    pass
         request = "Add GPT-5 pricing information"
         parsed = agent.parser.parse_natural_language_request(request)
         
@@ -98,6 +114,7 @@ class TestSupplyResearcherAgentCore:
     
     def test_parse_availability_request(self, agent):
         """Test parsing availability-related requests"""
+    pass
         request = "Check API availability for Gemini models"
         parsed = agent.parser.parse_natural_language_request(request)
         
@@ -120,6 +137,7 @@ class TestSupplyResearcherAgentCore:
     
     def test_generate_market_overview_query(self, agent):
         """Test generating Deep Research query for market overview"""
+    pass
         parsed = {
             "research_type": ResearchType.MARKET_OVERVIEW,
             "provider": None,
@@ -152,6 +170,7 @@ class TestSupplyResearcherAgentCore:
     
     def test_calculate_confidence_score(self, agent):
         """Test confidence score calculation"""
+    pass
         research_result = {
             "citations": [
                 {"source": "Official Documentation", "url": "https://example.com"},

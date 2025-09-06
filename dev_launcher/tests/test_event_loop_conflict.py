@@ -20,8 +20,8 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
@@ -75,9 +75,6 @@ class TestEventLoopConflict(unittest.TestCase):
         import shutil
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    @patch('dev_launcher.launcher.asyncio.new_event_loop')
-    @patch('dev_launcher.launcher.asyncio.set_event_loop')
-    @patch('dev_launcher.launcher.asyncio.get_running_loop')
     def test_backend_readiness_event_loop_conflict_when_loop_exists(self, mock_get_running, mock_set_loop, mock_new_loop):
         """
         FAILING TEST: Event loop conflict in _wait_for_backend_readiness().

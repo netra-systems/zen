@@ -10,6 +10,7 @@ import time
 import json
 import sys
 from typing import Dict, Any, List
+from shared.isolated_environment import IsolatedEnvironment
 
 class AgentOrchestrationRecoveryTest:
     """Test agent orchestration recovery mechanisms directly via API"""

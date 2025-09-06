@@ -7,6 +7,8 @@ Focuses on memory efficiency and system resource utilization.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -14,7 +16,6 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -28,6 +29,8 @@ from netra_backend.app.services.generation_service import run_content_generation
 
 @pytest.fixture
 def large_corpus_params():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Large corpus generation parameters"""
     return ContentCorpusGenParams(
         samples_per_type=100,
@@ -38,6 +41,8 @@ def large_corpus_params():
 
 @pytest.fixture
 def resource_monitor():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Resource utilization monitor"""
     class ResourceMonitor:
         def __init__(self):
@@ -82,7 +87,7 @@ class TestLargeScaleGeneration:
             
             # Mock: WebSocket manager isolation for testing without external dependencies
             with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                mock_manager.broadcast_to_job = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                 
                 start_time = time.perf_counter()
                 job_id = str(uuid.uuid4())
@@ -135,7 +140,7 @@ class TestLargeScaleGeneration:
             
             # Mock: WebSocket manager isolation for testing without external dependencies
             with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                mock_manager.broadcast_to_job = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                 
                 job_id = str(uuid.uuid4())
                 await run_content_generation_job(job_id, perf_params)
@@ -175,8 +180,8 @@ class TestLargeScaleGeneration:
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager = AsyncMock()
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager = AsyncNone  # TODO: Use real service instance
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     mock_ws_manager.return_value = mock_manager
                     
                     start_time = time.perf_counter()

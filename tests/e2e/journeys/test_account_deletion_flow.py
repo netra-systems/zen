@@ -27,6 +27,7 @@ SUCCESS CRITERIA:
 - Proper audit trail maintained
 """
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

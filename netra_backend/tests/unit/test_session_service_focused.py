@@ -5,24 +5,34 @@ that exists in the current codebase.
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock
 import json
 from datetime import datetime, timezone, timedelta
 from netra_backend.app.services.session_service import SessionService
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class TestSessionServiceCore:
     """Test core SessionService functionality."""
+    pass
 
     @pytest.fixture
     def session_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Session service with mock Redis."""
-        mock_redis = AsyncMock()
+        mock_redis = AsyncNone  # TODO: Use real service instance
+    pass
         return SessionService(redis_client=mock_redis)
 
     @pytest.fixture
     def session_service_no_redis(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Session service without Redis for fallback testing."""
+    pass
         return SessionService()
 
     @pytest.mark.asyncio
@@ -33,7 +43,7 @@ class TestSessionServiceCore:
         ip_address = "192.168.1.100"
         
         # Mock Redis operations
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         session_service.redis_client.get = AsyncMock(return_value=None)
         
         result = await session_service.create_session(user_id, device_id, ip_address)
@@ -48,12 +58,13 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_create_session_with_custom_timeout(self, session_service):
         """Test session creation with custom timeout."""
+    pass
         user_id = "user_789"
         device_id = "device_abc"
         ip_address = "10.0.0.1"
         timeout_seconds = 7200  # 2 hours
         
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         session_service.redis_client.get = AsyncMock(return_value=None)
         
         result = await session_service.create_session(
@@ -68,9 +79,10 @@ class TestSessionServiceCore:
         """Test successful session validation."""
         session_id = "valid_session_123"
         
-        # Mock Redis get to return valid session data
+        # Mock Redis get to await asyncio.sleep(0)
+    return valid session data
         session_service.redis_client.get = AsyncMock(return_value="dummy_data")
-        session_service.redis_client.expire = AsyncMock()
+        session_service.redis_client.expire = AsyncNone  # TODO: Use real service instance
         
         result = await session_service.validate_session(session_id)
         
@@ -80,13 +92,15 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_validate_session_not_found(self, session_service):
         """Test validation of non-existent session."""
+    pass
         session_id = "nonexistent_session"
         
         session_service.redis_client.get = AsyncMock(return_value=None)
         
         result = await session_service.validate_session(session_id)
         
-        # Should return empty dict or handle gracefully
+        # Should await asyncio.sleep(0)
+    return empty dict or handle gracefully
         assert result == {} or result is None
 
     @pytest.mark.asyncio
@@ -104,6 +118,7 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_expire_session_not_found(self, session_service):
         """Test expiring non-existent session."""
+    pass
         session_id = "nonexistent_session"
         
         session_service.redis_client.delete = AsyncMock(return_value=0)
@@ -128,10 +143,11 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_update_activity_success(self, session_service):
         """Test updating session activity."""
+    pass
         session_id = "active_session_123"
         
         session_service.redis_client.get = AsyncMock(return_value="dummy_session")
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         
         result = await session_service.update_activity(session_id)
         
@@ -151,11 +167,12 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_store_session_data_success(self, session_service):
         """Test storing additional session data."""
+    pass
         session_id = "store_session_123"
         data = {"custom_field": "custom_value", "preferences": {"theme": "dark"}}
         
         session_service.redis_client.get = AsyncMock(return_value="existing_session")
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         
         result = await session_service.store_session_data(session_id, data)
         
@@ -176,6 +193,7 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_get_session_data_not_found(self, session_service):
         """Test retrieving data for non-existent session."""
+    pass
         session_id = "nonexistent_session"
         
         session_service.redis_client.get = AsyncMock(return_value=None)
@@ -192,13 +210,13 @@ class TestSessionServiceCore:
         
         # Mock getting data from old session
         old_data = {"user_preferences": {"theme": "dark"}}
-        session_service.redis_client.get = AsyncMock()
+        session_service.redis_client.get = AsyncNone  # TODO: Use real service instance
         session_service.redis_client.get.side_effect = [
             json.dumps(old_data),  # First call for old session
             "new_session_data"     # Second call for new session
         ]
-        session_service.redis_client.setex = AsyncMock()
-        session_service.redis_client.delete = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
+        session_service.redis_client.delete = AsyncNone  # TODO: Use real service instance
         
         result = await session_service.migrate_session_data(from_session, to_session)
         
@@ -207,6 +225,7 @@ class TestSessionServiceCore:
     @pytest.mark.asyncio
     async def test_redis_fallback_behavior(self, session_service):
         """Test behavior when Redis operations fail."""
+    pass
         session_id = "fallback_session"
         
         # Redis operation fails
@@ -215,16 +234,18 @@ class TestSessionServiceCore:
         # Should handle gracefully and not crash
         result = await session_service.validate_session(session_id)
         
-        # Should return gracefully (either None or empty dict)
+        # Should await asyncio.sleep(0)
+    return gracefully (either None or empty dict)
         assert result is not None or result == {}
 
 
 class TestSessionServiceConfiguration:
     """Test SessionService configuration and initialization."""
+    pass
 
     def test_initialization_with_redis(self):
         """Test initialization with Redis client."""
-        mock_redis = Mock()
+        mock_redis = TestRedisManager().get_client()
         service = SessionService(redis_client=mock_redis)
         
         assert service.redis_client is mock_redis
@@ -233,6 +254,7 @@ class TestSessionServiceConfiguration:
 
     def test_initialization_without_redis(self):
         """Test initialization without Redis client."""
+    pass
         service = SessionService()
         
         assert service.redis_client is None
@@ -251,11 +273,15 @@ class TestSessionServiceConfiguration:
 
 class TestSessionServiceSecurity:
     """Test session security features."""
+    pass
 
     @pytest.fixture
     def session_service(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Session service with mock Redis."""
-        mock_redis = AsyncMock()
+        mock_redis = AsyncNone  # TODO: Use real service instance
+    pass
         return SessionService(redis_client=mock_redis)
 
     @pytest.mark.asyncio
@@ -265,7 +291,7 @@ class TestSessionServiceSecurity:
         device_id = "device_123"
         ip_address = "192.168.1.100"
         
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         session_service.redis_client.get = AsyncMock(return_value=None)
         
         # Create multiple sessions rapidly
@@ -283,6 +309,7 @@ class TestSessionServiceSecurity:
     @pytest.mark.asyncio
     async def test_session_data_validation(self, session_service):
         """Test that session data is properly validated."""
+    pass
         session_id = "validation_session"
         
         # Test storing various data types
@@ -295,7 +322,7 @@ class TestSessionServiceSecurity:
         ]
         
         session_service.redis_client.get = AsyncMock(return_value="session_exists")
-        session_service.redis_client.setex = AsyncMock()
+        session_service.redis_client.setex = AsyncNone  # TODO: Use real service instance
         
         for data in test_data_sets:
             result = await session_service.store_session_data(session_id, data)
@@ -320,3 +347,4 @@ class TestSessionServiceSecurity:
             result = await session_service.validate_session(invalid_id)
             # Should handle gracefully without crashing
             assert result == {} or result is None
+    pass

@@ -21,6 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi.testclient import TestClient
@@ -53,7 +54,7 @@ except ImportError:
     from netra_backend.app.db.models import Thread, Message
 
 try:
-    from netra_backend.app.database import get_db_session
+    from netra_backend.app.database import get_db
 except ImportError:
     from netra_backend.app.db.database_manager import DatabaseManager
     get_db_session = lambda: DatabaseManager().get_session()

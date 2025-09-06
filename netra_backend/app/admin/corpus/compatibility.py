@@ -8,6 +8,9 @@ after all imports are updated to use UnifiedCorpusAdmin directly.
 import warnings
 from typing import TYPE_CHECKING, Any
 
+# Import BaseAgent for proper inheritance in compatibility layer
+from netra_backend.app.agents.base_agent import BaseAgent
+
 from netra_backend.app.admin.corpus.unified_corpus_admin import (
     UnifiedCorpusAdmin,
     UnifiedCorpusAdminFactory,
@@ -31,17 +34,28 @@ if TYPE_CHECKING:
 
 
 # Deprecated class mappings
-class CorpusAdminSubAgent:
+class CorpusAdminSubAgent(BaseAgent):
     """
     Deprecated: Use UnifiedCorpusAdmin instead.
-    This class provides backward compatibility.
+    This class provides backward compatibility by inheriting from BaseAgent.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, llm_manager=None, tool_dispatcher=None, websocket_manager=None, *args, **kwargs):
         warnings.warn(
             "CorpusAdminSubAgent is deprecated. Use UnifiedCorpusAdmin instead.",
             DeprecationWarning,
             stacklevel=2
         )
+        # Initialize BaseAgent with proper parameters
+        super().__init__(
+            llm_manager=llm_manager,
+            name="CorpusAdminSubAgent",
+            description="Corpus administration agent (compatibility layer)",
+            tool_dispatcher=tool_dispatcher
+        )
+        
+        # Store websocket_manager for compatibility
+        self.websocket_manager = websocket_manager
+        
         # Create a default context if not provided
         self._context = UserExecutionContext(
             user_id="legacy_user",
@@ -62,8 +76,8 @@ class CorpusAdminSubAgent:
         request = CorpusOperationRequest(
             operation=operation,
             params=params,
-            user_id=context.get('user_id', 'legacy_user'),
-            request_id=context.get('request_id', 'legacy_request')
+            user_id=context.get('user_id', 'legacy_user') if isinstance(context, dict) else getattr(context, 'user_id', 'legacy_user'),
+            request_id=context.get('request_id', 'legacy_request') if isinstance(context, dict) else getattr(context, 'request_id', 'legacy_request')
         )
         result = await self._unified_admin.execute_operation(request)
         
@@ -73,6 +87,30 @@ class CorpusAdminSubAgent:
             'message': result.message,
             'corpus_id': result.corpus_id,
             'data': result.data
+        }
+    
+    async def execute(self, user_request: str, context: Any = None, run_id: str = None):
+        """Execute method required by BaseAgent interface"""
+        # Parse the request to determine operation
+        operation = 'update'  # Default operation
+        params = {'request': user_request}
+        
+        if context:
+            # Update internal context
+            if hasattr(context, 'user_id'):
+                self._context.user_id = context.user_id
+            if hasattr(context, 'request_id'):
+                self._context.request_id = context.request_id
+            if hasattr(context, 'thread_id'):
+                self._context.thread_id = context.thread_id
+        
+        # Execute the operation
+        result = await self._execute_corpus_operation(operation, context or {}, params)
+        
+        return {
+            'status': 'success' if result['success'] else 'failed',
+            'message': result['message'],
+            'data': result['data']
         }
 
 

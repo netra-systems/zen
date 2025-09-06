@@ -48,6 +48,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set
 from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest

@@ -23,9 +23,9 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List, Set, Optional
-from unittest.mock import AsyncMock, MagicMock
 import json
 from dataclasses import dataclass
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the components we're testing
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -33,6 +33,10 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass

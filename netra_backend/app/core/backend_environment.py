@@ -29,10 +29,10 @@ class BackendEnvironment:
     def _validate_backend_config(self) -> None:
         """Validate backend-specific configuration on initialization."""
         # Core backend requirements
+        # DATABASE_URL is built from POSTGRES_* variables via DatabaseURLBuilder
         required_vars = [
             "JWT_SECRET_KEY",
-            "SECRET_KEY",
-            "DATABASE_URL"
+            "SECRET_KEY"
         ]
         
         missing = []
@@ -42,6 +42,11 @@ class BackendEnvironment:
         
         if missing:
             logger.warning(f"Missing required backend environment variables: {missing}")
+        
+        # Check if we can build a database URL (not required, just informational)
+        db_url = self.get_database_url()
+        if not db_url:
+            logger.info("Database URL will be built from POSTGRES_* environment variables")
     
     # Authentication & Security
     def get_jwt_secret_key(self) -> str:
@@ -57,9 +62,33 @@ class BackendEnvironment:
         return self.env.get("FERNET_KEY", "")
     
     # Database Configuration
-    def get_database_url(self) -> str:
-        """Get database connection URL."""
-        return self.env.get("DATABASE_URL", "")
+    def get_database_url(self, sync: bool = False) -> str:
+        """Get database connection URL using DatabaseURLBuilder.
+        
+        Args:
+            sync: If True, return synchronous URL (for Alembic, etc.)
+        """
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        # First check if DATABASE_URL is explicitly set
+        database_url = self.env.get("DATABASE_URL", "")
+        if database_url:
+            return database_url
+        
+        # Use DatabaseURLBuilder to construct URL from components
+        builder = DatabaseURLBuilder(self.env.as_dict())
+        
+        # Get URL for current environment (async by default, sync if requested)
+        database_url = builder.get_url_for_environment(sync=sync)
+        
+        if database_url:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(builder.get_safe_log_message())
+            return database_url
+        
+        # No fallback - let caller handle missing URL
+        return ""
     
     def get_postgres_host(self) -> str:
         """Get PostgreSQL host."""
@@ -247,16 +276,20 @@ class BackendEnvironment:
         issues = []
         warnings = []
         
-        # Required variables
+        # Required variables (DATABASE_URL is built dynamically, not required as env var)
         required = {
             "JWT_SECRET_KEY": self.get_jwt_secret_key(),
-            "SECRET_KEY": self.get_secret_key(),
-            "DATABASE_URL": self.get_database_url()
+            "SECRET_KEY": self.get_secret_key()
         }
         
         for name, value in required.items():
             if not value:
                 issues.append(f"Missing required variable: {name}")
+        
+        # Check database configuration separately
+        db_url = self.get_database_url()
+        if not db_url:
+            issues.append("Unable to build database URL from POSTGRES_* variables")
         
         # Check for insecure defaults in non-development
         if not self.is_development():
@@ -295,9 +328,13 @@ def get_jwt_secret_key() -> str:
     return get_backend_env().get_jwt_secret_key()
 
 
-def get_database_url() -> str:
-    """Get database URL."""
-    return get_backend_env().get_database_url()
+def get_database_url(sync: bool = False) -> str:
+    """Get database URL.
+    
+    Args:
+        sync: If True, return synchronous URL (for Alembic, etc.)
+    """
+    return get_backend_env().get_database_url(sync=sync)
 
 
 def get_environment() -> str:

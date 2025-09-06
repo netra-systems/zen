@@ -5,10 +5,13 @@ Focuses on data transformation and enrichment
 
 import sys
 from pathlib import Path
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -20,9 +23,9 @@ class TestDataTransformation:
     async def test_transform_text_data(self):
         """Test transformation of text data"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.redis_manager.RedisManager'):
@@ -44,9 +47,9 @@ class TestDataTransformation:
     async def test_transform_json_data(self):
         """Test transformation of JSON data"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.redis_manager.RedisManager'):
@@ -68,9 +71,9 @@ class TestDataTransformation:
     async def test_transform_with_pipeline(self):
         """Test transformation with processing pipeline"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.redis_manager.RedisManager'):
@@ -100,9 +103,9 @@ class TestDataEnrichment:
     async def test_enrich_with_metadata(self):
         """Test data enrichment with metadata"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.redis_manager.RedisManager'):
@@ -124,9 +127,9 @@ class TestDataEnrichment:
     async def test_enrich_with_external_source(self):
         """Test enrichment with external data source"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        mock_llm_manager = Mock()
+        mock_llm_manager = mock_llm_manager_instance  # Initialize appropriate service
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher = mock_tool_dispatcher_instance  # Initialize appropriate service
         
         with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)

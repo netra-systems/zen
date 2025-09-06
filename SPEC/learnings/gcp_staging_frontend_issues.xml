@@ -373,7 +373,7 @@
         <service_urls>
             <frontend>https://netra-frontend-staging-pnovr5vsba-uc.a.run.app</frontend>
             <backend>https://netra-backend-staging-pnovr5vsba-uc.a.run.app</backend>
-            <auth>https://netra-auth-service-pnovr5vsba-uc.a.run.app</auth>
+            <auth>https://auth.staging.netrasystems.ai</auth>
         </service_urls>
         
         <health_check_results>

@@ -25,12 +25,15 @@ import logging
 import aiohttp
 import json
 from datetime import datetime, timezone
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 
 from test_framework.environment_markers import env, staging_only, env_requires
 from netra_backend.tests.unit.test_real_auth_service_integration import RealAuthServiceTestFixture
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 

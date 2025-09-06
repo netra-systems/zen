@@ -28,7 +28,7 @@ None - All critical services are operational
 ### 1. Service Health Status
 All three core services are running and healthy:
 - **Backend**: Version 1.0.0 running at https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-- **Auth**: Version 1.0.0 with database connected at https://netra-auth-service-pnovr5vsba-uc.a.run.app
+- **Auth**: Version 1.0.0 with database connected at https://auth.staging.netrasystems.ai
 - **Frontend**: Successfully serving React application at https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 
 ### 2. API Endpoint Issues

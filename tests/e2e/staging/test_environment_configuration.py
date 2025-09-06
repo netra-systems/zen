@@ -16,6 +16,7 @@ import asyncio
 import json
 from typing import Dict, List, Optional, Any
 from test_framework.environment_markers import staging_only, env_requires
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 

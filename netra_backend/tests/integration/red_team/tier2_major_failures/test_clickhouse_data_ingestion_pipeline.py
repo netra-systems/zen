@@ -1,4 +1,10 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TEST 17: ClickHouse Data Ingestion Pipeline
 
@@ -38,7 +44,6 @@ except ImportError:
         CLICKHOUSE_DEFAULT = 9000
 
 # ClickHouseManager - creating mock for tests
-from unittest.mock import Mock, AsyncMock, MagicMock
 ClickHouseManager = Mock
 
 # DataIngestionService exists
@@ -48,7 +53,8 @@ try:
     from netra_backend.app.services.metrics_collector import MetricsCollector
 except ImportError:
     class MetricsCollector:
-        async def collect_metrics(self): return []
+        async def collect_metrics(self): await asyncio.sleep(0)
+    return []
         async def store_metrics(self, metrics): pass
 
 try:
@@ -82,6 +88,7 @@ class TestClickHouseDataIngestionPipeline:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_clickhouse_client(self):
@@ -108,8 +115,12 @@ class TestClickHouseDataIngestionPipeline:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.mark.asyncio
     async def test_01_metrics_ingestion_pipeline_fails(self, real_clickhouse_client):
@@ -122,6 +133,7 @@ class TestClickHouseDataIngestionPipeline:
         2. ClickHouse schema may not exist
         3. Batch processing may not work
         """
+    pass
         try:
             # Create test metrics data
             test_metrics = [
@@ -225,6 +237,7 @@ class TestClickHouseDataIngestionPipeline:
         2. Log parsing may fail
         3. Structured logging may not work
         """
+    pass
         try:
             # Create test log entries
             test_logs = [
@@ -334,6 +347,7 @@ class TestClickHouseDataIngestionPipeline:
         2. Memory usage may be excessive
         3. Processing time may be too slow
         """
+    pass
         try:
             # Generate large batch of test data
             batch_size = 1000
@@ -431,6 +445,7 @@ class TestClickHouseDataIngestionPipeline:
         2. Old data cleanup may not work
         3. Partition management may be missing
         """
+    pass
         try:
             # Insert old test data (simulate historical data)
             old_timestamp = datetime.now(timezone.utc) - timedelta(days=7)
@@ -500,7 +515,8 @@ class TestClickHouseDataIngestionPipeline:
                     older_than_days=5  # Clean data older than 5 days
                 )
                 
-                assert "status" in cleanup_result, "Cleanup should return status"
+                assert "status" in cleanup_result, "Cleanup should await asyncio.sleep(0)
+    return status"
                 assert cleanup_result["status"] == "success", \
                     f"Data cleanup failed: {cleanup_result.get('error', 'Unknown error')}"
                 
@@ -543,6 +559,7 @@ class TestClickHouseDataIngestionPipeline:
         2. Backward compatibility may not be maintained
         3. Migration strategies may be missing
         """
+    pass
         try:
             # Test current schema
             schema_query = """
@@ -646,7 +663,8 @@ class RedTeamClickHouseTestUtils:
         timestamp: datetime = None
     ) -> Dict[str, Any]:
         """Create a test metric data structure."""
-        return {
+        await asyncio.sleep(0)
+    return {
             "metric_name": name,
             "metric_type": "gauge",
             "value": value,

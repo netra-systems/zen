@@ -5,6 +5,7 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Set
+from shared.isolated_environment import IsolatedEnvironment
 
 # Imports
 from netra_backend.app.websocket_core.manager import WebSocketManager

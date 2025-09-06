@@ -34,7 +34,7 @@ def check_docker_running():
 
 def start_docker_services():
     """Start Docker services using docker-compose."""
-    compose_file = PROJECT_ROOT / "docker-compose.test.yml"
+    compose_file = PROJECT_ROOT / "docker-compose.alpine-test.yml"
     
     if not compose_file.exists():
         # Create a basic test compose file
@@ -58,7 +58,7 @@ def start_docker_services():
 
 
 def create_test_compose_file(compose_file):
-    """Create a basic docker-compose.test.yml file."""
+    """Create a basic docker-compose.alpine-test.yml file."""
     content = """version: '3.8'
 
 services:

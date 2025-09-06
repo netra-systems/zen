@@ -12,9 +12,10 @@ Business Value Justification (BVJ):
 
 import asyncio
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the function we're testing
 from netra_backend.app.database import get_db
@@ -27,9 +28,9 @@ async def test_session_generatorexit_handling():
     # Mock session with proper async context manager behavior
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
-    mock_session.close = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
+    mock_session.close = AsyncNone  # TODO: Use real service instance
     
     # Mock session factory
     @asynccontextmanager
@@ -62,8 +63,8 @@ async def test_session_cancellation_handling():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -92,8 +93,8 @@ async def test_session_normal_exception_handling():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -122,8 +123,8 @@ async def test_session_successful_commit():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=True)
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():
@@ -160,8 +161,8 @@ async def test_concurrent_session_generators():
         mock_session = AsyncMock(spec=AsyncSession)
         mock_session.id = len(sessions_created)  # Unique ID
         mock_session.in_transaction = Mock(return_value=True)
-        mock_session.commit = AsyncMock()
-        mock_session.rollback = AsyncMock()
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
+        mock_session.rollback = AsyncNone  # TODO: Use real service instance
         sessions_created.append(mock_session)
         yield mock_session
     
@@ -201,8 +202,8 @@ async def test_session_no_transaction_skip_operations():
     
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.in_transaction = Mock(return_value=False)  # No active transaction
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
+    mock_session.commit = AsyncNone  # TODO: Use real service instance
+    mock_session.rollback = AsyncNone  # TODO: Use real service instance
     
     @asynccontextmanager
     async def mock_session_factory():

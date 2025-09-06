@@ -11,9 +11,10 @@ Purpose: Demonstrate how these issues compound and create system-wide failures.
 
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
 
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager

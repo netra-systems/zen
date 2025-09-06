@@ -7,6 +7,7 @@ conflicts using the EnvironmentManager.
 
 import os
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.config import LauncherConfig
 from shared.isolated_environment import get_env, get_environment_manager

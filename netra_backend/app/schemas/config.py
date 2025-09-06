@@ -542,25 +542,45 @@ class DevelopmentConfig(AppConfig):
         LEGACY: This method uses direct os.environ access. Consider
         migration to unified configuration system.
         """
+        # Get environment instance for loading values
+        env = get_env()
+        
         # LEGACY: Direct env access - should migrate to unified config
         self._load_database_url_from_unified_config(data)
         service_modes = self._get_service_modes_from_unified_config()
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
+        
+        # Load API keys from environment for development
+        self._load_api_keys_from_environment(env, data)
+        
         super().__init__(**data)
     
     def _load_database_url_from_unified_config(self, data: dict) -> None:
-        """Load database URL from environment with fallback.
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
         
-        Uses IsolatedEnvironment for consistent environment access.
+        Uses DatabaseURLBuilder to ensure SSOT compliance and proper URL construction.
         """
+        from shared.database_url_builder import DatabaseURLBuilder
+        
         # Use IsolatedEnvironment for database URL loading
         env = get_env()
-        env_db_url = env.get('DATABASE_URL')
-        if env_db_url:
-            data['database_url'] = env_db_url
-        elif 'database_url' not in data or data.get('database_url') is None:
-            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for current environment (development config = development environment)
+        database_url = builder.development.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+        else:
+            # Log critical error - let the system handle missing configuration properly
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error("DatabaseURLBuilder failed to construct URL - check environment configuration")
+            # Don't set any fallback - let upstream handle the missing URL
     
     def _get_service_modes_from_unified_config(self) -> dict:
         """Get service modes from environment with fallback.
@@ -591,6 +611,98 @@ class DevelopmentConfig(AppConfig):
         """Deprecated: Mock mode is not supported in development."""
         # Mock mode is only for specific testing cases, not for development
         pass
+    
+    def _load_api_keys_from_environment(self, env, data: dict) -> None:
+        """Load API keys from environment variables for development."""
+        # Load API keys from environment variables
+        api_key_mappings = {
+            'GEMINI_API_KEY': 'gemini_api_key',
+            'ANTHROPIC_API_KEY': 'anthropic_api_key', 
+            'OPENAI_API_KEY': 'openai_api_key',
+        }
+        
+        for env_var, field_name in api_key_mappings.items():
+            api_key = env.get(env_var)
+            if api_key:
+                data[field_name] = api_key
+        
+        # Special handling for llm_configs - populate API keys from environment
+        gemini_api_key = env.get('GEMINI_API_KEY')
+        if gemini_api_key:
+            # Create or update llm_configs with the API key populated
+            data['llm_configs'] = {
+                "default": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "analysis": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                    generation_config={"temperature": 0.5},
+                ),
+                "triage": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "data": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "optimizations_core": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "actions_to_meet_goals": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "reporting": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+            }
+        
+        # Load OAuth credentials from environment
+        oauth_client_id = env.get('OAUTH_GOOGLE_CLIENT_ID_ENV')
+        oauth_client_secret = env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV')
+        
+        if oauth_client_id or oauth_client_secret:
+            if 'google_cloud' not in data:
+                data['google_cloud'] = {}
+            if 'oauth_config' not in data:
+                data['oauth_config'] = {}
+            
+            if oauth_client_id:
+                data['google_cloud']['client_id'] = oauth_client_id
+                data['oauth_config']['client_id'] = oauth_client_id
+            if oauth_client_secret:
+                data['google_cloud']['client_secret'] = oauth_client_secret
+                data['oauth_config']['client_secret'] = oauth_client_secret
+        
+        # Load other configuration from environment
+        cors_origins = env.get('CORS_ORIGINS')
+        if cors_origins:
+            data['cors_origins'] = cors_origins
+        
+        # Load service modes from environment
+        llm_mode = env.get('LLM_MODE')
+        if llm_mode:
+            data['llm_mode'] = llm_mode
+            
+        redis_mode = env.get('REDIS_MODE')
+        if redis_mode:
+            data['redis_mode'] = redis_mode
+            
+        clickhouse_mode = env.get('CLICKHOUSE_MODE')
+        if clickhouse_mode:
+            data['clickhouse_mode'] = clickhouse_mode
 
 class ProductionConfig(AppConfig):
     """Production-specific settings with MANDATORY services."""
@@ -598,10 +710,180 @@ class ProductionConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     
+    def _load_database_url_from_unified_config_production(self, data: dict) -> None:
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
+        
+        Uses DatabaseURLBuilder to ensure SSOT compliance for production environment.
+        """
+        from shared.database_url_builder import DatabaseURLBuilder
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Use IsolatedEnvironment for production database URL
+        env = get_env()
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for production environment
+        database_url = builder.production.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+            logger.info(builder.get_safe_log_message())
+        else:
+            # Production MUST have a database URL - this is critical
+            raise ValueError(
+                "DatabaseURLBuilder failed to construct URL for production environment. "
+                "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                "or DATABASE_URL is provided."
+            )
+    
     def __init__(self, **data):
         """Initialize production config."""
+        # Get environment instance for loading values
+        env = get_env()
+        
+        # CRITICAL: Load secrets FIRST as they may be needed by database URL
+        self._load_secrets_from_environment(data)
+        # Load API keys from environment for production
+        self._load_api_keys_from_environment(env, data)
+        # Load database URL after secrets are available
+        self._load_database_url_from_unified_config_production(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
+    
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables.
+        
+        This ensures SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from Google Secret Manager or environment.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        env = get_env()
+        
+        # Load critical secrets that may come from Google Secret Manager
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+        
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
+                data[config_name] = env_value
+                logger.info(f"Loaded {env_name} from environment")
+        
+        # Log what's loaded for debugging
+        logger.info(f"SERVICE_ID configured: {bool(data.get('service_id'))}")
+        logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
+    
+    def _load_api_keys_from_environment(self, env, data: dict) -> None:
+        """Load API keys from environment variables for production."""
+        # Load API keys from environment variables
+        api_key_mappings = {
+            'GEMINI_API_KEY': 'gemini_api_key',
+            'ANTHROPIC_API_KEY': 'anthropic_api_key', 
+            'OPENAI_API_KEY': 'openai_api_key',
+        }
+        
+        for env_var, field_name in api_key_mappings.items():
+            api_key = env.get(env_var)
+            if api_key:
+                data[field_name] = api_key
+        
+        # Special handling for llm_configs - populate API keys from environment
+        gemini_api_key = env.get('GEMINI_API_KEY')
+        if gemini_api_key:
+            # Create or update llm_configs with the API key populated
+            data['llm_configs'] = {
+                "default": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "analysis": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                    generation_config={"temperature": 0.5},
+                ),
+                "triage": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "data": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "optimizations_core": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "actions_to_meet_goals": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "reporting": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+            }
+        
+        # Load OAuth credentials from environment
+        oauth_client_id = env.get('OAUTH_GOOGLE_CLIENT_ID_ENV') or env.get('GOOGLE_CLIENT_ID')
+        oauth_client_secret = env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV') or env.get('GOOGLE_CLIENT_SECRET')
+        
+        if oauth_client_id or oauth_client_secret:
+            if 'google_cloud' not in data:
+                data['google_cloud'] = {}
+            if 'oauth_config' not in data:
+                data['oauth_config'] = {}
+            
+            if oauth_client_id:
+                data['google_cloud']['client_id'] = oauth_client_id
+                data['oauth_config']['client_id'] = oauth_client_id
+            if oauth_client_secret:
+                data['google_cloud']['client_secret'] = oauth_client_secret
+                data['oauth_config']['client_secret'] = oauth_client_secret
+        
+        # Load other configuration from environment
+        cors_origins = env.get('CORS_ORIGINS')
+        if cors_origins:
+            data['cors_origins'] = cors_origins
+        
+        # Load service modes from environment
+        llm_mode = env.get('LLM_MODE')
+        if llm_mode:
+            data['llm_mode'] = llm_mode
+            
+        redis_mode = env.get('REDIS_MODE')
+        if redis_mode:
+            data['redis_mode'] = redis_mode
+            
+        clickhouse_mode = env.get('CLICKHOUSE_MODE')
+        if clickhouse_mode:
+            data['clickhouse_mode'] = clickhouse_mode
+        
+        # Load GitHub token
+        github_token = env.get('GITHUB_TOKEN')
+        if github_token:
+            data['github_token'] = github_token
     
     def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for production."""
@@ -639,8 +921,186 @@ class StagingConfig(AppConfig):
     
     def __init__(self, **data):
         """Initialize staging config."""
+        # Get environment instance for loading values
+        env = get_env()
+        
+        # CRITICAL: Load secrets FIRST as they may be needed by database URL
+        self._load_secrets_from_environment(data)
+        # Load API keys from environment for staging
+        self._load_api_keys_from_environment(env, data)
+        # Load database URL after secrets are available
+        self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
         # Validation moved to validate_mandatory_services() to be called after population
+    
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables.
+        
+        This ensures SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from Google Secret Manager or environment.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        env = get_env()
+        
+        # Load critical secrets that may come from Google Secret Manager
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+        
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
+                data[config_name] = env_value
+                logger.info(f"Loaded {env_name} from environment")
+        
+        # Log what's loaded for debugging
+        logger.info(f"SERVICE_ID configured: {bool(data.get('service_id'))}")
+        logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
+    
+    def _load_api_keys_from_environment(self, env, data: dict) -> None:
+        """Load API keys from environment variables for staging."""
+        # Load API keys from environment variables
+        api_key_mappings = {
+            'GEMINI_API_KEY': 'gemini_api_key',
+            'ANTHROPIC_API_KEY': 'anthropic_api_key', 
+            'OPENAI_API_KEY': 'openai_api_key',
+        }
+        
+        for env_var, field_name in api_key_mappings.items():
+            api_key = env.get(env_var)
+            if api_key:
+                data[field_name] = api_key
+        
+        # Special handling for llm_configs - populate API keys from environment
+        gemini_api_key = env.get('GEMINI_API_KEY')
+        if gemini_api_key:
+            # Create or update llm_configs with the API key populated
+            data['llm_configs'] = {
+                "default": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "analysis": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                    generation_config={"temperature": 0.5},
+                ),
+                "triage": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "data": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "optimizations_core": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "actions_to_meet_goals": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "reporting": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+            }
+        
+        # Load OAuth credentials from environment (with additional staging fallbacks)
+        oauth_client_id = (env.get('OAUTH_GOOGLE_CLIENT_ID_ENV') or 
+                          env.get('GOOGLE_CLIENT_ID') or 
+                          env.get('GOOGLE_OAUTH_CLIENT_ID'))
+        oauth_client_secret = (env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV') or 
+                              env.get('GOOGLE_CLIENT_SECRET') or 
+                              env.get('GOOGLE_OAUTH_CLIENT_SECRET'))
+        
+        if oauth_client_id or oauth_client_secret:
+            if 'google_cloud' not in data:
+                data['google_cloud'] = {}
+            if 'oauth_config' not in data:
+                data['oauth_config'] = {}
+            
+            if oauth_client_id:
+                data['google_cloud']['client_id'] = oauth_client_id
+                data['oauth_config']['client_id'] = oauth_client_id
+            if oauth_client_secret:
+                data['google_cloud']['client_secret'] = oauth_client_secret
+                data['oauth_config']['client_secret'] = oauth_client_secret
+        
+        # Load other configuration from environment
+        cors_origins = env.get('CORS_ORIGINS')
+        if cors_origins:
+            data['cors_origins'] = cors_origins
+        
+        # Load service modes from environment
+        llm_mode = env.get('LLM_MODE')
+        if llm_mode:
+            data['llm_mode'] = llm_mode
+            
+        redis_mode = env.get('REDIS_MODE')
+        if redis_mode:
+            data['redis_mode'] = redis_mode
+            
+        clickhouse_mode = env.get('CLICKHOUSE_MODE')
+        if clickhouse_mode:
+            data['clickhouse_mode'] = clickhouse_mode
+        
+        # Load GitHub token
+        github_token = env.get('GITHUB_TOKEN')
+        if github_token:
+            data['github_token'] = github_token
+        
+        # Load Redis URL for staging
+        redis_url = env.get('REDIS_URL')
+        if redis_url:
+            data['redis_url'] = redis_url
+        
+        # Load ClickHouse configuration for staging
+        clickhouse_host = env.get('CLICKHOUSE_HOST')
+        clickhouse_port = env.get('CLICKHOUSE_PORT')
+        clickhouse_password = env.get('CLICKHOUSE_PASSWORD')
+        
+        if clickhouse_host:
+            if 'clickhouse_native' not in data:
+                data['clickhouse_native'] = {}
+            if 'clickhouse_https' not in data:
+                data['clickhouse_https'] = {}
+            data['clickhouse_native']['host'] = clickhouse_host
+            data['clickhouse_https']['host'] = clickhouse_host
+            
+        if clickhouse_port:
+            try:
+                port_value = int(clickhouse_port)
+                if 'clickhouse_native' not in data:
+                    data['clickhouse_native'] = {}
+                data['clickhouse_native']['port'] = port_value
+            except (ValueError, TypeError):
+                pass
+                
+        if clickhouse_password:
+            if 'clickhouse_native' not in data:
+                data['clickhouse_native'] = {}
+            if 'clickhouse_https' not in data:
+                data['clickhouse_https'] = {}
+            data['clickhouse_native']['password'] = clickhouse_password
+            data['clickhouse_https']['password'] = clickhouse_password
     
     def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for staging."""
@@ -666,24 +1126,203 @@ class StagingConfig(AppConfig):
             )
     
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
-        """Load database URL from environment for staging with fallback.
+        """Load database URL from environment using DatabaseURLBuilder SSOT.
         
-        Uses IsolatedEnvironment for consistent environment access.
+        Uses DatabaseURLBuilder to ensure SSOT compliance for staging environment.
         """
+        from shared.database_url_builder import DatabaseURLBuilder
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
         # Use IsolatedEnvironment for staging database URL
         env = get_env()
-        if 'database_url' not in data and env.get('DATABASE_URL'):
-            data['database_url'] = env.get('DATABASE_URL')
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for staging environment
+        database_url = builder.staging.auto_url
+        
+        # Set the database URL from builder - NO MANUAL FALLBACKS
+        if database_url:
+            data['database_url'] = database_url
+            logger.info(builder.get_safe_log_message())
+        else:
+            # Staging MUST have a database URL - this is critical
+            raise ValueError(
+                "DatabaseURLBuilder failed to construct URL for staging environment. "
+                "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
+                "or DATABASE_URL is provided."
+            )
+    
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
-    database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+    # database_url will be set dynamically via DatabaseURLBuilder in __init__
     auth_service_url: str = "http://localhost:8081"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
-    service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
-    jwt_secret_key: str = "test_jwt_secret_key_for_testing_32_chars_minimum_required_length"  # Test-safe JWT secret
+    service_secret: str = "mock-service-auth-key-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
+    jwt_secret_key: str = "mock_jwt_auth_key_for_checking_32_chars_minimum_required_length"  # Test-safe JWT secret
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
+    
+    def __init__(self, **data):
+        """Initialize test configuration using DatabaseURLBuilder."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env.as_dict())
+        
+        # Get URL for test environment - uses test.auto_url which handles DATABASE_URL or test defaults
+        database_url = builder.test.auto_url
+        
+        if database_url:
+            data['database_url'] = database_url
+        else:
+            # For tests, if no URL available, let it fail properly
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("No database URL available from DatabaseURLBuilder for test environment")
+        
+        # Load API keys from environment for testing
+        self._load_api_keys_from_environment(env, data)
+        
+        super().__init__(**data)
+    
+    def _load_api_keys_from_environment(self, env, data: dict) -> None:
+        """Load API keys from environment variables for testing."""
+        # Load API keys from environment variables
+        api_key_mappings = {
+            'GEMINI_API_KEY': 'gemini_api_key',
+            'ANTHROPIC_API_KEY': 'anthropic_api_key', 
+            'OPENAI_API_KEY': 'openai_api_key',
+        }
+        
+        for env_var, field_name in api_key_mappings.items():
+            api_key = env.get(env_var)
+            if api_key:
+                data[field_name] = api_key
+        
+        # Load security keys from environment (override defaults)
+        security_key_mappings = {
+            'JWT_SECRET_KEY': 'jwt_secret_key',
+            'FERNET_KEY': 'fernet_key',
+            'SERVICE_SECRET': 'service_secret',
+        }
+        
+        for env_var, field_name in security_key_mappings.items():
+            key_value = env.get(env_var)
+            if key_value:
+                data[field_name] = key_value
+        
+        # Special handling for llm_configs - populate API keys from environment
+        gemini_api_key = env.get('GEMINI_API_KEY')
+        if gemini_api_key:
+            # Create or update llm_configs with the API key populated
+            data['llm_configs'] = {
+                "default": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "analysis": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                    generation_config={"temperature": 0.5},
+                ),
+                "triage": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "data": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "optimizations_core": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "actions_to_meet_goals": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+                "reporting": LLMConfig(
+                    provider=LLMProvider.GOOGLE,
+                    model_name="gemini-2.5-pro",
+                    api_key=gemini_api_key,
+                ),
+            }
+        
+        # Load OAuth credentials from environment
+        oauth_client_id = env.get('OAUTH_GOOGLE_CLIENT_ID_ENV')
+        oauth_client_secret = env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV')
+        
+        if oauth_client_id or oauth_client_secret:
+            if 'google_cloud' not in data:
+                data['google_cloud'] = {}
+            if 'oauth_config' not in data:
+                data['oauth_config'] = {}
+            
+            if oauth_client_id:
+                data['google_cloud']['client_id'] = oauth_client_id
+                data['oauth_config']['client_id'] = oauth_client_id
+            if oauth_client_secret:
+                data['google_cloud']['client_secret'] = oauth_client_secret
+                data['oauth_config']['client_secret'] = oauth_client_secret
+        
+        # Load other configuration from environment
+        cors_origins = env.get('CORS_ORIGINS')
+        if cors_origins:
+            data['cors_origins'] = cors_origins
+        
+        # Load service modes from environment
+        llm_mode = env.get('LLM_MODE')
+        if llm_mode:
+            data['llm_mode'] = llm_mode
+            
+        redis_mode = env.get('REDIS_MODE')
+        if redis_mode:
+            data['redis_mode'] = redis_mode
+            
+        clickhouse_mode = env.get('CLICKHOUSE_MODE')
+        if clickhouse_mode:
+            data['clickhouse_mode'] = clickhouse_mode
+        
+        # Load database configuration
+        database_url = env.get('DATABASE_URL')
+        if database_url:
+            data['database_url'] = database_url
+        
+        redis_url = env.get('REDIS_URL')
+        if redis_url:
+            data['redis_url'] = redis_url
+        
+        # Load ClickHouse configuration
+        clickhouse_host = env.get('CLICKHOUSE_HOST')
+        clickhouse_port = env.get('CLICKHOUSE_PORT')
+        clickhouse_password = env.get('CLICKHOUSE_PASSWORD')
+        
+        if clickhouse_host or clickhouse_port or clickhouse_password:
+            if 'clickhouse_native' not in data:
+                data['clickhouse_native'] = {}
+            if clickhouse_host:
+                data['clickhouse_native']['host'] = clickhouse_host
+            if clickhouse_port:
+                try:
+                    data['clickhouse_native']['port'] = int(clickhouse_port)
+                except (ValueError, TypeError):
+                    pass
+            if clickhouse_password:
+                data['clickhouse_native']['password'] = clickhouse_password
 
 class LLMProvider(str, Enum):
     """LLM provider enum for configuration schemas (local to avoid circular imports)."""

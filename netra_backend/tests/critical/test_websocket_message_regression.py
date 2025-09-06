@@ -23,7 +23,10 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional, Any
-from unittest.mock import Mock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi.testclient import TestClient
@@ -42,7 +45,7 @@ class TestWebSocketMessageRegression:
         """Setup real test clients and services for each test."""
         self.backend_client = TestClient(backend_app)
         # Mock JWT handler for backend tests
-        self.jwt_handler = Mock()
+        self.jwt_handler = jwt_handler_instance  # Initialize appropriate service
     
     def _create_valid_test_token(self, user_id: str = None) -> str:
         """Create valid JWT token for WebSocket testing."""
@@ -295,7 +298,7 @@ class TestRealWebSocketErrorHandling:
         """Setup real test clients."""
         self.backend_client = TestClient(backend_app)
         # Mock JWT handler for backend tests
-        self.jwt_handler = Mock()
+        self.jwt_handler = jwt_handler_instance  # Initialize appropriate service
     
     def _create_valid_test_token(self) -> str:
         """Create mock JWT token for testing."""
@@ -385,7 +388,7 @@ class TestRealWebSocketAuthIntegration:
         """Setup real authentication components."""
         self.backend_client = TestClient(backend_app)
         # Mock JWT handler for backend tests
-        self.jwt_handler = Mock()
+        self.jwt_handler = jwt_handler_instance  # Initialize appropriate service
     
     @pytest.mark.asyncio
     async def test_real_jwt_token_processing(self):

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Critical System Initialization Tests - 30 Comprehensive Cold Start Scenarios
 
@@ -62,6 +63,7 @@ class SystemInitializationTestBase:
     @classmethod
     def teardown_class(cls):
         """Cleanup after all tests."""
+    pass
         cleanup_test_environment()
         
     def setup_method(self):
@@ -72,6 +74,7 @@ class SystemInitializationTestBase:
         
     def teardown_method(self):
         """Cleanup after each test."""
+    pass
         self.cleanup_processes()
         
     def cleanup_processes(self):
@@ -96,6 +99,7 @@ class SystemInitializationTestBase:
                 
     def reset_databases(self):
         """Reset all databases to clean state."""
+    pass
         try:
             # Reset PostgreSQL
             engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
@@ -128,6 +132,7 @@ class SystemInitializationTestBase:
     @contextmanager
     def start_dev_launcher(self, args: List[str] = None, timeout: int = 30):
         """Start dev launcher with specified arguments."""
+    pass
         if args is None:
             args = ["--minimal", "--no-browser", "--non-interactive"]
             
@@ -239,6 +244,7 @@ class TestCriticalPath(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_02_service_startup_order_dependency_chain(self):
         """Test 2: Verify correct service startup sequencing and dependencies."""
+    pass
         # Start services in wrong order intentionally
         self.cleanup_processes()
         
@@ -310,6 +316,7 @@ class TestCriticalPath(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_04_authentication_flow_end_to_end_setup(self):
         """Test 4: JWT and OAuth provider setup with cross-service validation."""
+    pass
         with self.start_dev_launcher() as proc:
             # Test JWT secret generation and synchronization
             # Create token in auth service
@@ -378,6 +385,7 @@ class TestCriticalPath(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_06_real_time_message_processing_pipeline(self):
         """Test 6: End-to-end message flow from WebSocket to LLM to response."""
+    pass
         with self.start_dev_launcher() as proc:
             # Create authenticated session
             auth_response = httpx.post(
@@ -450,6 +458,7 @@ class TestCriticalPath(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_08_health_check_cascade_validation(self):
         """Test 8: All service health endpoints with dependency validation."""
+    pass
         with self.start_dev_launcher() as proc:
             # Check each service's health endpoint
             services = [
@@ -499,6 +508,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_10_clickhouse_port_configuration_matrix(self):
         """Test 10: Test all ClickHouse port configurations."""
+    pass
         clickhouse_ports = {
             "http": 8123,
             "native": 9000,
@@ -552,6 +562,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_12_service_discovery_dynamic_ports(self):
         """Test 12: Dynamic port allocation and service discovery."""
+    pass
         # Occupy default ports
         occupied_sockets = []
         try:
@@ -605,6 +616,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_14_cross_service_token_propagation(self):
         """Test 14: Tokens work across all services."""
+    pass
         with self.start_dev_launcher() as proc:
             # Create token in auth service
             auth_response = httpx.post(
@@ -699,6 +711,7 @@ class TestUserJourney(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_17_initial_chat_session_creation(self):
         """Test 17: First-time user creates a chat thread."""
+    pass
         with self.start_dev_launcher() as proc:
             # Register user
             email = f"chat_user_{int(time.time())}@test.com"
@@ -748,6 +761,7 @@ class TestUserJourney(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_19_real_time_chat_message_exchange(self):
         """Test 19: User sends message and receives AI response."""
+    pass
         with self.start_dev_launcher() as proc:
             # Create user and get token
             email = f"realtime_{int(time.time())}@test.com"
@@ -823,6 +837,7 @@ class TestUserJourney(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_21_multi_tab_session_synchronization(self):
         """Test 21: Multiple tabs with synchronized state."""
+    pass
         with self.start_dev_launcher() as proc:
             # Create user session
             email = f"multitab_{int(time.time())}@test.com"
@@ -885,6 +900,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_23_service_restart_without_data_loss(self):
         """Test 23: Backend restart with connection recovery."""
+    pass
         with self.start_dev_launcher() as launcher_proc:
             # Create a thread
             email = f"restart_{int(time.time())}@test.com"
@@ -936,6 +952,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_25_auth_service_recovery_token_refresh(self):
         """Test 25: Auth service restart with session survival."""
+    pass
         with self.start_dev_launcher() as proc:
             # Create session
             email = f"auth_recovery_{int(time.time())}@test.com"
@@ -982,8 +999,12 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         
         try:
             # Write conflicting values
-            env_test.write_text("TEST_VAR=from_test\nPORT=8001\n")
-            env_local.write_text("TEST_VAR=from_local\nPORT=8002\n")
+            env_test.write_text("TEST_VAR=from_test
+PORT=8001
+")
+            env_local.write_text("TEST_VAR=from_local
+PORT=8002
+")
             
             # Set system environment variable
             
@@ -999,6 +1020,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_28_secrets_management_gcp_integration(self):
         """Test 28: Secrets loading with fallback mechanisms."""
+    pass
         with self.start_dev_launcher(["--no-secrets"]) as proc:
             # Should work without GCP secrets
             response = httpx.get(f"{self.backend_url}/health")
@@ -1049,6 +1071,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
     @pytest.mark.e2e
     def test_30_container_health_check_integration(self):
         """Test 30: Container health checks work correctly."""
+    pass
         with self.start_dev_launcher() as proc:
             # Test all health endpoints match container expectations
             health_endpoints = [

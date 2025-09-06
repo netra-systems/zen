@@ -15,6 +15,7 @@ import json
 import logging
 import time
 from typing import Dict, List
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

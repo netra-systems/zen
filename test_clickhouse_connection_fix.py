@@ -7,6 +7,7 @@ Tests the connection manager's ability to handle missing/stopped ClickHouse serv
 import asyncio
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent

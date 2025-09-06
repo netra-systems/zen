@@ -12,10 +12,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base.execution_context import (
+    AgentExecutionContext as BaseAgentExecutionContext,
+)
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    ExecutionStrategy,
 )
+from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager

@@ -14,13 +14,11 @@ prime directives. your operating instructions. your core principles.
   * **Ship for Value:** As a startup, time-to-market is critical. We must ship working products quickly.
   * **Think with Nuance:** Use "wise mind" middle-ground thinking.
 
------
-
 ## 0\. Current Mission: Stabilize Core Systems
 
 Your primary mission is to get existing systems fully operational. **Maintain the current feature set.**
 
-**Goals:**
+**MUST ALWAYS THINK ABOUT:**
   * **0.1: Business Value and Systems Up:** The point is to have a working real system. Tests exists to serve the working system. The system exists to serve the business. Business > Real System > Tests.
   * **0.2: User and Dev Experience:** User chat works and first-time user experience work end-to-end.
   * **0.3: Staging Parity:** The staging environment works end-to-end.
@@ -30,7 +28,6 @@ Your primary mission is to get existing systems fully operational. **Maintain th
 
 CRUCIAL: ULTRA THINK DEEPLY.
 
------
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
 
@@ -42,6 +39,26 @@ The system has a lot of async, websockets, and other patterns that require heavy
 2. Solve for the 95% of cases first. Always make sure the breadth and coverage of those expected cases is ironclad before the 5%.
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
+5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
+6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./CONFIG_REGRESSION_PREVENTION_PLAN.md)
+Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
+   - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
+   - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
+   - **NO silent fallbacks** - Hard failures are better than wrong environment configs leaking
+   - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
+   - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
+7. **MULTI-USER** The system is MULTI-USER.
+8. **🚨 CRITICAL WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
+   - **ALL entry points need factory patterns** - WebSocket, REST, gRPC, background tasks
+   - **WebSocket is PRIMARY path (90% traffic)** - Not just "transport layer"
+   - **Silent data leakage is a bug** - User A sees User B's data with no errors
+   - **UserExecutionContext** - Every message/request MUST have isolation
+   - **NO SINGLETONS for user data** - Factory patterns are NOT optional
+9. **PARAMOUNT IMPORTANCE** Always look for the "error behind the error". Example: AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md
+Often the face value error message is masking other errors, sometimes the real root.
+Look for the "error behind the error" up to 10 times until true true root cause.
+Especially when dealing with apparent regression issues.
+10. The point of the system is to provide business value. Keep the scope as small as reasonable for startup team.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
@@ -104,6 +121,10 @@ CRITICAL: Develop a globally coherent and modular architecture.
 
   * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
   * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
+    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
+    - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
+    - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
+    - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
   * **"Search First, Create Second":** Always check for existing implementations before writing new code.
   * **ATOMIC SCOPE:** Edits must be complete, functional updates. Delegate tasks to sub-agents with scopes you are certain they can handle. Split and divide work appropriately.
   * **Complete Work:** An update is complete only when all relevant parts of the system are updated, integrated, tested, validated, and documented, and all legacy code has been removed.
@@ -520,6 +541,7 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
 2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
+    - **SPECIAL ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
 3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.

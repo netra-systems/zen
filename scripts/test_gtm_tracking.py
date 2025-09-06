@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from shared.isolated_environment import IsolatedEnvironment
 
 def setup_driver():
     """Setup Chrome driver with options for testing"""

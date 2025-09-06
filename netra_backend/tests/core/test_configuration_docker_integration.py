@@ -8,6 +8,7 @@ import subprocess
 import time
 import json
 from typing import List, Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDockerConfigurationIntegration(unittest.TestCase):

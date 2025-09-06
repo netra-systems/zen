@@ -15,10 +15,11 @@ Examples show:
 
 import sys
 from pathlib import Path
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -118,15 +119,19 @@ class TestValidationCompliant:
 
 @pytest.fixture
 def auth_service():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing auth service instance"""
     # Mock: Generic component isolation for controlled unit testing
-    return Mock()
+    return None  # TODO: Use real service instance
 
 @pytest.fixture  
 def valid_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing valid user data"""
     # Mock: Generic component isolation for controlled unit testing
-    user = Mock()
+    user = user_instance  # Initialize appropriate service
     user.id = 123
     user.email = "test@example.com"
     user.password = "validpass"
@@ -134,9 +139,11 @@ def valid_user():
 
 @pytest.fixture
 def locked_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing locked user data"""
     # Mock: Generic component isolation for controlled unit testing
-    user = Mock()
+    user = user_instance  # Initialize appropriate service
     user.email = "locked@example.com" 
     user.password = "validpass"
     user.locked = True
@@ -144,15 +151,19 @@ def locked_user():
 
 @pytest.fixture
 def processor():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing data processor"""
     # Mock: Generic component isolation for controlled unit testing
-    return Mock()
+    return None  # TODO: Use real service instance
 
 @pytest.fixture
 def validator():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Fixture providing validator instance"""
     # Mock: Generic component isolation for controlled unit testing
-    return Mock()
+    return None  # TODO: Use real service instance
 
 # ===== EXAMPLE 5: INTEGRATION TEST PATTERNS =====
 

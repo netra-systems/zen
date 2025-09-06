@@ -16,9 +16,11 @@ Connection Pool Monitoring Coverage:
 """
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 import time
 from contextlib import asynccontextmanager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.dependencies import get_db_dependency
@@ -39,7 +41,7 @@ class TestDatabaseConnectionPoolMonitoring:
         mock_pool.checkedout.return_value = 2
         mock_pool.overflow.return_value = 0
         
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
         mock_engine.pool = mock_pool
         
         mock_session = Mock(spec=AsyncSession)
@@ -81,7 +83,7 @@ class TestDatabaseConnectionPoolMonitoring:
         mock_pool.checkedin.return_value = 0
         mock_pool.overflow.return_value = 0
         
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
         mock_engine.pool = mock_pool
         
         # Mock a session that raises pool exhaustion on creation
@@ -131,7 +133,7 @@ class TestDatabaseConnectionPoolMonitoring:
                     return True
             return False
         
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
         mock_engine.pool = mock_pool
         mock_session = Mock(spec=AsyncSession)
         mock_session.get_bind.return_value = mock_engine
@@ -176,7 +178,7 @@ class TestDatabaseConnectionPoolMonitoring:
             'pool_utilization_percent'
         ]
         
-        mock_engine = Mock()
+        mock_engine = UserExecutionEngine()
         mock_engine.pool = mock_pool
         mock_session = Mock(spec=AsyncSession)
         mock_session.get_bind.return_value = mock_engine

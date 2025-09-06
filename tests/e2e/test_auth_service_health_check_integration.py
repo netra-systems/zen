@@ -1,6 +1,7 @@
 """Auth Service Health Check Integration Test Suite
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 BVJ: Protects $145K+ MRR by ensuring auth service availability across all customer segments.
 # Tests health endpoints, lazy DB initialization, recovery scenarios, and performance under load. # Possibly broken comprehension
 Architecture: <300 lines, async/await pattern, comprehensive AAA testing.

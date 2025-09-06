@@ -14,6 +14,7 @@ Architecture: 450-line compliance through focused testing scope
 """
 
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.agent_orchestration_fixtures import (
     mock_supervisor_agent,

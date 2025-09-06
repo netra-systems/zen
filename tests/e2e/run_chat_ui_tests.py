@@ -240,7 +240,8 @@ def main():
         if args.report:
             runner.generate_summary_report()
         
-        print("\n" + "=" * 50)
+        print("
+" + "=" * 50)
         if test_success:
             print("✅ Tests completed successfully")
             print("⚠️  Note: If all tests passed, UI issues may not be properly exposed")

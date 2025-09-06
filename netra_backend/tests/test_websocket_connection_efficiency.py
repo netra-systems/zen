@@ -6,8 +6,10 @@ This test validates WebSocket connection handling, cleanup, and resource managem
 
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
 from fastapi.testclient import TestClient
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketConnectionEfficiency:
@@ -64,7 +66,7 @@ class TestWebSocketConnectionEfficiency:
         from starlette.websockets import WebSocketState
         
         # Mock WebSocket
-        mock_websocket = Mock()
+        mock_websocket = UnifiedWebSocketManager()
         mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Test connection check

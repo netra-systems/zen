@@ -11,9 +11,13 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from contextlib import asynccontextmanager
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -22,16 +26,19 @@ from netra_backend.app.services.key_manager import KeyManager
 
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.tests.routes.test_route_fixtures import (
+import asyncio
     TEST_DOCUMENT_DATA,
-    CommonResponseValidators,
-)
+    CommonResponseValidators)
 
 class TestCorpusRoute:
     """Test corpus CRUD operations and search functionality."""
     
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Corpus-specific test client with required app state."""
+    pass
         from fastapi.testclient import TestClient
 
         from netra_backend.app.main import app
@@ -39,7 +46,8 @@ class TestCorpusRoute:
         # Mock the db_session_factory to prevent state errors
         @asynccontextmanager
         async def mock_db_session():
-            mock_session = MagicMock()
+            mock_session = MagicNone  # TODO: Use real service instance
+    pass
             yield mock_session
         
         if not hasattr(app.state, 'db_session_factory'):
@@ -51,7 +59,8 @@ class TestCorpusRoute:
             key_manager = KeyManager.load_from_settings(config)
             app.state.security_service = SecurityService(key_manager)
         
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
     
     def _validate_document_creation_success(self, response, expected_document):
         """Validate successful document creation response."""
@@ -64,6 +73,7 @@ class TestCorpusRoute:
 
     def test_corpus_create(self, client):
         """Test creating corpus documents."""
+    pass
         document = TEST_DOCUMENT_DATA.copy()
         response = client.post("/api/corpus/document", json=document)
         
@@ -108,10 +118,10 @@ class TestCorpusRoute:
     @pytest.mark.asyncio
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
+    pass
         from netra_backend.app.routes.corpus import (
             BulkIndexRequest,
-            bulk_index_documents,
-        )
+            bulk_index_documents)
         
         documents = [
             {"title": f"Doc {i}", "content": f"Content {i}"}
@@ -146,6 +156,7 @@ class TestCorpusRoute:
     
     def test_corpus_delete(self, client):
         """Test deleting corpus documents."""
+    pass
         document_id = "doc123"
         
         # Mock: Component isolation for testing without external dependencies
@@ -195,6 +206,7 @@ class TestCorpusRoute:
     
     def test_corpus_metadata_extraction(self, client):
         """Test automatic metadata extraction from documents."""
+    pass
         document_with_file = {
             "title": "PDF Document",
             "file_url": "https://example.com/document.pdf",
@@ -252,6 +264,7 @@ class TestCorpusRoute:
     
     def test_corpus_indexing_status(self, client):
         """Test corpus indexing status via existing status endpoint."""
+    pass
         corpus_id = "test_corpus"
         
         # Since get_corpus_status method doesn't exist, test the endpoint behavior directly
@@ -296,3 +309,4 @@ class TestCorpusRoute:
             else:
                 # Updated to include 405 for non-existent endpoint
                 assert response.status_code in [404, 405, 422]
+    pass

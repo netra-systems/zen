@@ -630,6 +630,10 @@ class IsolatedEnvironment:
         """Get all environment variables (alias for compatibility)."""
         return self.get_all()
     
+    def as_dict(self) -> Dict[str, str]:
+        """Get all environment variables as a dictionary (compatibility method)."""
+        return self.get_all()
+    
     def update(self, variables: Dict[str, str], source: str = "unknown", force: bool = False) -> Dict[str, bool]:
         """Update multiple environment variables."""
         results = {}

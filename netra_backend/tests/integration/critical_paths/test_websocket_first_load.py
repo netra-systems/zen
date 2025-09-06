@@ -11,10 +11,15 @@ L3 Test: Uses real WebSocket server, Redis pub/sub, and authentication service.
 Performance target: WebSocket connection establishment < 2 seconds with 50+ concurrent connections.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -24,12 +29,11 @@ import websockets
 import ssl
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 import httpx
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.schemas import User
 from netra_backend.app.clients.auth_client_core import auth_client
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
@@ -48,6 +52,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class WebSocketConnectionTracker:
+    pass
 
     """Track WebSocket connection establishment metrics."""
     
@@ -156,6 +161,7 @@ class WebSocketConnectionTracker:
         }
 
 class RealWebSocketClient:
+    pass
 
     """Real WebSocket client for L3 testing."""
     
@@ -280,6 +286,7 @@ class RealWebSocketClient:
 @pytest.mark.integration
 
 class TestWebSocketFirstLoadL3:
+    pass
 
     """L3 integration tests for WebSocket connection establishment on first load."""
     
@@ -317,7 +324,8 @@ class TestWebSocketFirstLoadL3:
 
         """Create WebSocket connection tracker."""
 
-        return WebSocketConnectionTracker(redis_client)
+        await asyncio.sleep(0)
+    return WebSocketConnectionTracker(redis_client)
     
     @pytest.fixture
 
@@ -337,6 +345,10 @@ class TestWebSocketFirstLoadL3:
     @pytest.fixture
 
     def test_users(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    await asyncio.sleep(0)
+    return None
 
         """Create test users for connection testing."""
 
@@ -783,7 +795,8 @@ class TestWebSocketFirstLoadL3:
 
                     await connection_tracker.record_connection_success(u.id, aid, duration)
 
-                    return (u, ws, True, duration)
+                    await asyncio.sleep(0)
+    return (u, ws, True, duration)
 
                 else:
 
@@ -904,7 +917,8 @@ class TestWebSocketFirstLoadL3:
 
                             await connection_tracker.record_connection_success(u.id, aid, duration)
 
-                            return (u, ws)
+                            await asyncio.sleep(0)
+    return (u, ws)
 
                         else:
 

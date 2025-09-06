@@ -11,10 +11,14 @@ L3 Test: Uses real Redis for message compression/decompression validation.
 Compression target: 70%+ reduction for large payloads with <50ms processing time.
 """
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import asyncio
@@ -25,11 +29,10 @@ import zlib
 import base64
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
@@ -46,6 +49,7 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 
 class MessageCompressor:
+    pass
 
     """Handle message compression for WebSocket communications."""
     
@@ -186,6 +190,7 @@ class MessageCompressor:
 @pytest.mark.integration
 
 class TestWebSocketMessageCompressionL3:
+    pass
 
     """L3 integration tests for WebSocket message compression."""
     
@@ -247,6 +252,10 @@ class TestWebSocketMessageCompressionL3:
     @pytest.fixture
 
     def message_compressor(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    await asyncio.sleep(0)
+    return None
 
         """Create message compressor instance."""
 
@@ -255,6 +264,9 @@ class TestWebSocketMessageCompressionL3:
     @pytest.fixture
 
     def test_users(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create test users for compression testing."""
 

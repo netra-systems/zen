@@ -20,6 +20,7 @@ Each test follows 25-line function limit through delegation to specialized helpe
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import IsolatedEnvironment
 
 
 import pytest

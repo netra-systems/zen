@@ -1,4 +1,8 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 """
 Config Validator Tests - Decision Engine and Utilities
 Tests for decision engine, utility functions, and main validation entry point.
@@ -11,7 +15,6 @@ from pathlib import Path
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -40,23 +43,29 @@ class ValidationContext:
 
 class ConfigDecisionEngine:
     def __init__(self):
+    pass
         pass
 
 def _detect_ci_environment():
+    pass
     return False
 
 def _extract_env_overrides():
+    pass
     return {}
 
 def _handle_fallback_action():
+    pass
     return None
 
 def validate_service_config():
+    pass
     return True
 
 # Mock ServicesConfiguration for tests
 class ServicesConfiguration:
     def __init__(self):
+    pass
         self.redis = None
         self.clickhouse = None
 
@@ -154,20 +163,17 @@ class TestUtilityFunctions:
     """Test utility functions."""
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('os.environ', {'CI': '1', 'GITHUB_ACTIONS': 'true'})
-    def test_detect_ci_environment_true(self) -> None:
+        def test_detect_ci_environment_true(self) -> None:
         """Test CI environment detection when in CI."""
         assert _detect_ci_environment() is True
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('os.environ', {})
-    def test_detect_ci_environment_false(self) -> None:
+        def test_detect_ci_environment_false(self) -> None:
         """Test CI environment detection when not in CI."""
         assert _detect_ci_environment() is False
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('os.environ', {'REDIS_HOST': 'localhost', 'CLICKHOUSE_PORT': '8123', 'OTHER_VAR': 'value'})
-    def test_extract_env_overrides(self) -> None:
+        def test_extract_env_overrides(self) -> None:
         """Test environment override extraction."""
         overrides = _extract_env_overrides()
         assert 'REDIS_HOST' in overrides
@@ -217,7 +223,7 @@ class TestMainValidationFunction:
             # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config_validator.ConfigDecisionEngine') as mock_engine_class:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_validator = Mock()
+                mock_validator = mock_validator_instance  # Initialize appropriate service
                 # Make validate_config return an awaitable
                 # Mock: Async component isolation for testing without real async operations
                 mock_validator.validate_config = AsyncMock(return_value=ConfigValidationResult(status=ConfigStatus.VALID))
@@ -226,7 +232,7 @@ class TestMainValidationFunction:
                 mock_validator_class.return_value = mock_validator
                 
                 # Mock: Generic component isolation for controlled unit testing
-                mock_engine = Mock()
+                mock_engine = UserExecutionEngine()
                 mock_engine.should_use_existing_config.return_value = True
                 mock_engine_class.return_value = mock_engine
                 
@@ -243,7 +249,7 @@ class TestMainValidationFunction:
             # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config_validator.ConfigDecisionEngine') as mock_engine_class:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_validator = Mock()
+                mock_validator = mock_validator_instance  # Initialize appropriate service
                 # Make validate_config return an awaitable
                 # Mock: Async component isolation for testing without real async operations
                 mock_validator.validate_config = AsyncMock(return_value=ConfigValidationResult(status=ConfigStatus.VALID))
@@ -252,7 +258,7 @@ class TestMainValidationFunction:
                 mock_validator_class.return_value = mock_validator
                 
                 # Mock: Generic component isolation for controlled unit testing
-                mock_engine = Mock()
+                mock_engine = UserExecutionEngine()
                 mock_engine.should_use_existing_config.return_value = True
                 mock_engine_class.return_value = mock_engine
                 

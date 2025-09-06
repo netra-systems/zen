@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 PROJECT_ROOT = Path(__file__).parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"

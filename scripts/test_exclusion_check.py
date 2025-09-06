@@ -5,6 +5,7 @@ Quick script to verify that test scanning is excluding site-packages and virtual
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def check_test_file_locations():

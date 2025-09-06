@@ -11,6 +11,7 @@ import pytest_asyncio
 import asyncio
 import uuid
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import dependencies with fallbacks
 try:

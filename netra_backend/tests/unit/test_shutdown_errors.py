@@ -10,8 +10,12 @@ These tests will pass once the bugs are fixed.
 """
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from fastapi import FastAPI
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.shutdown import _stop_performance_monitoring, run_complete_shutdown
@@ -56,9 +60,9 @@ class TestShutdownErrors:
         app.state.performance_monitor = ExecutionMonitor()
         
         # Create mock logger
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
+        logger = logger_instance  # Initialize appropriate service
+        logger.info = info_instance  # Initialize appropriate service
+        logger.error = error_instance  # Initialize appropriate service
         
         # This should now work since ExecutionMonitor has stop_monitoring method
         await _stop_performance_monitoring(app, logger)
@@ -77,13 +81,13 @@ class TestShutdownErrors:
         app = FastAPI()
         
         # Mock logger
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
-        logger.warning = Mock()
+        logger = logger_instance  # Initialize appropriate service
+        logger.info = info_instance  # Initialize appropriate service
+        logger.error = error_instance  # Initialize appropriate service
+        logger.warning = warning_instance  # Initialize appropriate service
         
         # Create mock background task manager that raises CancelledError
-        mock_task_manager = AsyncMock()
+        mock_task_manager = AsyncNone  # TODO: Use real service instance
         mock_task_manager.shutdown.side_effect = asyncio.CancelledError("Task was cancelled during shutdown")
         app.state.background_task_manager = mock_task_manager
         
@@ -91,13 +95,13 @@ class TestShutdownErrors:
         app.state.agent_supervisor = None
         
         with patch('netra_backend.app.shutdown.websocket_manager') as mock_ws_manager:
-            mock_ws_manager.shutdown = AsyncMock()
+            mock_ws_manager.shutdown = AsyncNone  # TODO: Use real service instance
             
             with patch('netra_backend.app.shutdown.redis_manager') as mock_redis:
-                mock_redis.disconnect = AsyncMock()
+                mock_redis.disconnect = AsyncNone  # TODO: Use real service instance
                 
                 with patch('netra_backend.app.shutdown.central_logger') as mock_central_logger:
-                    mock_central_logger.shutdown = AsyncMock()
+                    mock_central_logger.shutdown = AsyncNone  # TODO: Use real service instance
                     
                     # This should handle CancelledError gracefully, but currently doesn't
                     # The test expects the shutdown to complete without re-raising CancelledError
@@ -126,9 +130,9 @@ class TestShutdownErrors:
         # Create a mock logger
         import logging
         mock_logger = Mock(spec=logging.Logger)
-        mock_logger.info = Mock()
-        mock_logger.error = Mock()
-        mock_logger.warning = Mock()
+        mock_logger.info = info_instance  # Initialize appropriate service
+        mock_logger.error = error_instance  # Initialize appropriate service
+        mock_logger.warning = warning_instance  # Initialize appropriate service
         
         # Simulate the lifespan manager scenario with proper protection
         with patch('netra_backend.app.startup_module.run_complete_startup') as mock_startup:
@@ -163,30 +167,30 @@ class TestShutdownErrors:
         app = FastAPI()
         
         # Setup multiple failing components
-        mock_task_manager = AsyncMock()
+        mock_task_manager = AsyncNone  # TODO: Use real service instance
         mock_task_manager.shutdown.side_effect = asyncio.CancelledError("Background tasks cancelled")
         app.state.background_task_manager = mock_task_manager
         
-        mock_agent_supervisor = AsyncMock() 
+        mock_agent_supervisor = AsyncNone  # TODO: Use real service instance 
         mock_agent_supervisor.shutdown.side_effect = RuntimeError("Agent supervisor cleanup failed")
         app.state.agent_supervisor = mock_agent_supervisor
         
         # Also simulate missing stop_monitoring method
         app.state.performance_monitor = ExecutionMonitor()  # Missing stop_monitoring method
         
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
-        logger.warning = Mock()
+        logger = logger_instance  # Initialize appropriate service
+        logger.info = info_instance  # Initialize appropriate service
+        logger.error = error_instance  # Initialize appropriate service
+        logger.warning = warning_instance  # Initialize appropriate service
         
         with patch('netra_backend.app.shutdown.websocket_manager') as mock_ws_manager:
             mock_ws_manager.shutdown.side_effect = RuntimeError("aclose(): asynchronous generator is already running")
             
             with patch('netra_backend.app.shutdown.redis_manager') as mock_redis:
-                mock_redis.disconnect = AsyncMock()
+                mock_redis.disconnect = AsyncNone  # TODO: Use real service instance
                 
                 with patch('netra_backend.app.shutdown.central_logger') as mock_central_logger:
-                    mock_central_logger.shutdown = AsyncMock()
+                    mock_central_logger.shutdown = AsyncNone  # TODO: Use real service instance
                     
                     # This should complete shutdown despite multiple failures
                     # Currently FAILS due to unhandled exceptions
@@ -246,9 +250,9 @@ class TestShutdownErrors:
         monitor = ExecutionMonitor()
         app.state.performance_monitor = monitor
         
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
+        logger = logger_instance  # Initialize appropriate service
+        logger.info = info_instance  # Initialize appropriate service
+        logger.error = error_instance  # Initialize appropriate service
         
         # This integration test will FAIL until stop_monitoring is properly implemented
         await _stop_performance_monitoring(app, logger)

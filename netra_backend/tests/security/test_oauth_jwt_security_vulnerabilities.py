@@ -24,7 +24,9 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import AsyncMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
 import pytest

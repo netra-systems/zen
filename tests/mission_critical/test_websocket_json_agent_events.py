@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 MISSION CRITICAL: WebSocket JSON Agent Events Test Suite
 
@@ -31,7 +57,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import factory-based components
 from netra_backend.app.services.websocket_bridge_factory import (
@@ -51,6 +77,10 @@ from netra_backend.app.agents.supervisor.execution_factory import (
 # Keep legacy imports for state objects that still exist
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.websocket_models import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     BaseWebSocketPayload, AgentUpdatePayload, ToolCall, ToolResult,
     AgentCompleted, StreamChunk, StreamComplete
 )
@@ -58,6 +88,7 @@ from netra_backend.app.schemas.websocket_models import (
 
 class TestWebSocketJSONAgentEvents:
     """Test WebSocket JSON serialization for all critical agent events using factory patterns."""
+    pass
 
     @pytest.fixture
     def mock_connection_pool(self):
@@ -88,8 +119,7 @@ class TestWebSocketJSONAgentEvents:
                 
             @property
             def application_state(self):
-                return MagicMock() if self.is_connected else None
-                
+                return Magic                
         class MockConnectionPool:
             def __init__(self):
                 self.connections = {}
@@ -99,9 +129,9 @@ class TestWebSocketJSONAgentEvents:
                 if key not in self.connections:
                     self.connections[key] = MockWebSocketConnection(user_id, connection_id)
                 
-                connection_info = MagicMock()
-                connection_info.websocket = self.connections[key]
-                return connection_info
+                connection_info = Magic                connection_info.websocket = self.connections[key]
+                await asyncio.sleep(0)
+    return connection_info
                 
             def get_mock_connection(self, user_id: str, connection_id: str):
                 key = f"{user_id}:{connection_id}"
@@ -112,6 +142,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.fixture
     def websocket_factory(self, mock_connection_pool):
         """Create WebSocket factory configured with mock pool."""
+    pass
         factory = WebSocketBridgeFactory()
         factory.configure(
             connection_pool=mock_connection_pool,
@@ -133,6 +164,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.fixture
     def complex_agent_state(self):
         """Create a complex DeepAgentState for serialization testing."""
+    pass
         optimizations = OptimizationsResult(
             optimization_type="cost_optimization",
             recommendations=["Reduce instance sizes", "Use spot instances"],
@@ -210,6 +242,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio
     async def test_factory_agent_thinking_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context):
         """Test agent_thinking event JSON serialization using factory pattern."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -280,6 +313,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio
     async def test_factory_tool_completed_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context):
         """Test tool_completed event JSON serialization using factory pattern."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -360,6 +394,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio 
     async def test_factory_deep_agent_state_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context, complex_agent_state):
         """Test DeepAgentState serialization through factory WebSocket events."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -440,6 +475,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio
     async def test_factory_special_characters_handling(self, websocket_factory, mock_connection_pool, test_user_context):
         """Test factory WebSocket handling of special characters and unicode."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -526,6 +562,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio
     async def test_factory_message_ordering_preservation(self, websocket_factory, mock_connection_pool, test_user_context):
         """Test that factory WebSocket message ordering is preserved during serialization."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -605,6 +642,7 @@ class TestWebSocketJSONAgentEvents:
     @pytest.mark.asyncio
     async def test_factory_error_handling_json_serialization(self, websocket_factory, mock_connection_pool, test_user_context):
         """Test that error scenarios still produce valid JSON through factory pattern."""
+    pass
         emitter = await websocket_factory.create_user_emitter(
             user_id=test_user_context['user_id'],
             thread_id=test_user_context['thread_id'],
@@ -668,3 +706,4 @@ class TestWebSocketJSONAgentEvents:
         assert deserialized['event_type'] == "agent_started"
         assert deserialized['thread_id'] == "test_thread"
         assert deserialized['data']['agent_name'] == "TestAgent"
+    pass

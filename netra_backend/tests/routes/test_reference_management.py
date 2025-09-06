@@ -1,13 +1,14 @@
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.main import app
 
 class TestReferenceManagement:
@@ -29,11 +30,11 @@ class TestReferenceManagement:
         
         # Setup mock session
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.add = MagicMock()
+        mock_session.add = MagicNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.commit = AsyncMock()
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
         
         # The refresh method should set the auto-generated fields
         async def mock_refresh(ref):
@@ -66,7 +67,7 @@ class TestReferenceManagement:
         """Test retrieving a reference by ID"""
         # Setup mock reference with proper structure
         # Mock: Generic component isolation for controlled unit testing
-        mock_reference = MagicMock()
+        mock_reference = MagicNone  # TODO: Use real service instance
         mock_reference.id = "ref-123"
         mock_reference.name = "test_reference"
         mock_reference.friendly_name = "Test Reference"
@@ -79,14 +80,14 @@ class TestReferenceManagement:
         
         # Setup mock session
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Setup proper mock chain for result.scalars().first()
         # Mock: Generic component isolation for controlled unit testing
-        mock_scalars = MagicMock()
+        mock_scalars = MagicNone  # TODO: Use real service instance
         mock_scalars.first.return_value = mock_reference
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalars.return_value = mock_scalars
         
         # Mock execute as an async method that returns the result
@@ -140,9 +141,9 @@ class TestReferenceManagement:
         
         # Setup mock session with proper async context manager
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalars.return_value.all.return_value = mock_references
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(return_value=mock_result)
@@ -173,9 +174,9 @@ class TestReferenceManagement:
         
         # Setup mock session
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_reference = MagicMock()
+        mock_reference = MagicNone  # TODO: Use real service instance
         mock_reference.id = "ref-123"
         mock_reference.name = "test_reference"
         mock_reference.friendly_name = "Original Name"
@@ -183,14 +184,14 @@ class TestReferenceManagement:
         mock_reference.type = "document"
         mock_reference.version = "1.0"
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = mock_reference
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(return_value=mock_result)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.commit = AsyncMock()
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.refresh = AsyncMock()
+        mock_session.refresh = AsyncNone  # TODO: Use real service instance
         
         # Create generator for session (not async since TestClient is sync)
         def mock_get_db_session():
@@ -214,18 +215,18 @@ class TestReferenceManagement:
         """Test deleting a reference"""
         # Setup mock session
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_reference = MagicMock()
+        mock_reference = MagicNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicMock()
+        mock_result = MagicNone  # TODO: Use real service instance
         mock_result.scalar_one_or_none.return_value = mock_reference
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(return_value=mock_result)
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.delete = AsyncMock()
+        mock_session.delete = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session.commit = AsyncMock()
+        mock_session.commit = AsyncNone  # TODO: Use real service instance
         
         # Setup mock context manager - session should be a context manager itself
         # Mock: Database session isolation for transaction testing without real database dependency

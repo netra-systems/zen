@@ -12,6 +12,7 @@ Coverage: Real Docker containers, actual HTTP headers, browser-like requests
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

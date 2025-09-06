@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Standalone test for database connection auth logging issues.
@@ -114,7 +115,8 @@ def test_database_connection_no_auth_errors():
         for pattern in unwanted_auth_patterns:
             if pattern.lower() in log_output.lower():
                 # Find the actual line for better reporting
-                for line in log_output.split('\n'):
+                for line in log_output.split('
+'):
                     if pattern.lower() in line.lower():
                         found_auth_issues.append(f"Found unwanted auth pattern '{pattern}' in: {line.strip()}")
         
@@ -123,7 +125,8 @@ def test_database_connection_no_auth_errors():
             print("❌ Found authentication error logs that indicate auth issues:")
             for issue in found_auth_issues:
                 print(f"   {issue}")
-            print("\nFull log output:")
+            print("
+Full log output:")
             print(log_output)
             return False
         else:
@@ -136,7 +139,8 @@ def test_database_connection_no_auth_errors():
                     async with auth_db.get_session() as session:
                         from sqlalchemy import text
                         result = await session.execute(text("SELECT 1 as test_value"))
-                        return result.scalar()
+                        await asyncio.sleep(0)
+    return result.scalar()
                 
                 test_result = asyncio.run(test_db_op())
                 if test_result == 1:
@@ -166,6 +170,7 @@ def test_database_connection_no_auth_errors():
 
 def test_database_manager_no_credential_logging():
     """Test that DatabaseManager URL building doesn't log credentials."""
+    pass
     print("Testing DatabaseManager credential logging...")
     
     # Capture all log output
@@ -244,7 +249,8 @@ def test_database_manager_no_credential_logging():
         for credential in credentials:
             if credential in log_output:
                 # Find the actual line for better reporting
-                for line in log_output.split('\n'):
+                for line in log_output.split('
+'):
                     if credential in line:
                         found_credentials.append(f"Found credential '{credential}' in: {line.strip()}")
         
@@ -253,7 +259,8 @@ def test_database_manager_no_credential_logging():
             print("❌ Found credentials in logs (security issue):")
             for cred in found_credentials:
                 print(f"   {cred}")
-            print("\nFull log output:")
+            print("
+Full log output:")
             print(log_output)
             return False
         else:
@@ -309,3 +316,4 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+    pass

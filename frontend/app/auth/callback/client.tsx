@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { logger } from '@/lib/logger';
+import { unifiedApiConfig } from '@/lib/unified-api-config';
 
 export default function AuthCallbackClient() {
   const router = useRouter();
@@ -11,8 +12,21 @@ export default function AuthCallbackClient() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const token = searchParams.get('token');
-      const refreshToken = searchParams.get('refresh');
+      // Log all query parameters for debugging
+      const params: Record<string, string> = {};
+      searchParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      logger.info('OAuth callback received with params:', params);
+      
+      // Check for OAuth code from Google
+      const code = searchParams.get('code');
+      const state = searchParams.get('state');
+      
+      // Check for tokens (from auth service callback)
+      // Auth service sends 'access_token' and 'refresh_token'
+      const token = searchParams.get('access_token') || searchParams.get('token');
+      const refreshToken = searchParams.get('refresh_token') || searchParams.get('refresh');
       const error = searchParams.get('message');
       const errorCode = searchParams.get('error');
 
@@ -53,6 +67,61 @@ export default function AuthCallbackClient() {
           router.push('/login?error=' + encodeURIComponent(userFriendlyError));
         }, 500);
         return;
+      }
+
+      // Handle OAuth code exchange if we have a code from Google
+      if (code && state) {
+        logger.info('OAuth code received, exchanging for tokens');
+        
+        try {
+          // Forward the code to auth service for token exchange
+          const params = new URLSearchParams({
+            code,
+            state
+          });
+          
+          const response = await fetch(`${unifiedApiConfig.urls.auth}/auth/oauth/callback?${params.toString()}`, {
+            method: 'GET',
+            redirect: 'manual'
+          });
+          
+          if (response.type === 'opaqueredirect') {
+            // The auth service redirected, we need to follow it
+            logger.info('Auth service redirect detected');
+            // The auth service should redirect back here with tokens
+            return;
+          }
+          
+          // If we got a direct response, check for redirect header
+          if (response.status === 302 || response.status === 303) {
+            const redirectUrl = response.headers.get('Location');
+            if (redirectUrl) {
+              logger.info('Following auth service redirect:', redirectUrl);
+              window.location.href = redirectUrl;
+              return;
+            }
+          }
+          
+          // If direct response with tokens
+          if (response.ok) {
+            const data = await response.json();
+            if (data.access_token) {
+              localStorage.setItem('jwt_token', data.access_token);
+              if (data.refresh_token) {
+                localStorage.setItem('refresh_token', data.refresh_token);
+              }
+              logger.info('OAuth tokens received and stored');
+              router.push('/chat');
+              return;
+            }
+          }
+          
+          throw new Error('Failed to exchange OAuth code for tokens');
+        } catch (err) {
+          logger.error('OAuth code exchange failed:', err);
+          setCriticalError('Authentication Failed - Could not complete OAuth login. Please try again.');
+          return;
+        }
       }
 
       if (token) {

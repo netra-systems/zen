@@ -9,8 +9,12 @@ import uuid
 import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, MagicMock
 from contextlib import asynccontextmanager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
@@ -208,8 +212,8 @@ class TestUserExecutionContextFactoryMethods:
     def test_from_fastapi_request_factory(self):
         """Test from_fastapi_request factory method."""
         # Mock FastAPI Request
-        mock_request = Mock()
-        mock_request.client = Mock()
+        mock_request = mock_request_instance  # Initialize appropriate service
+        mock_request.client = client_instance  # Initialize appropriate service
         mock_request.client.host = "192.168.1.100"
         mock_request.method = "POST"
         mock_request.url = "https://api.example.com/agents/execute"
@@ -238,7 +242,7 @@ class TestUserExecutionContextFactoryMethods:
     
     def test_from_fastapi_request_missing_client_info(self):
         """Test from_fastapi_request handles missing client information."""
-        mock_request = Mock()
+        mock_request = mock_request_instance  # Initialize appropriate service
         mock_request.client = None
         mock_request.method = "GET"
         mock_request.url = "https://api.example.com/status"
@@ -362,7 +366,7 @@ class TestUserExecutionContextImmutability:
     
     def test_with_db_session(self):
         """Test creating context with database session."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         context = UserExecutionContext(
             user_id="user_12345",
@@ -442,7 +446,7 @@ class TestUserExecutionContextIsolation:
     
     def test_verify_isolation_with_db_session(self):
         """Test isolation verification with database session."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         context = UserExecutionContext(
             user_id="user_12345",
@@ -518,7 +522,7 @@ class TestUserExecutionContextUtilityMethods:
     
     def test_to_dict_with_db_session(self):
         """Test dictionary serialization with database session."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         context = UserExecutionContext(
             user_id="user_12345",
             thread_id="thread_67890",
@@ -631,7 +635,7 @@ class TestManagedUserContext:
     @pytest.mark.asyncio
     async def test_managed_context_with_db_session_cleanup(self):
         """Test managed context with database session cleanup."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         context = UserExecutionContext(
             user_id="user_12345",
             thread_id="thread_67890",
@@ -648,7 +652,7 @@ class TestManagedUserContext:
     @pytest.mark.asyncio
     async def test_managed_context_without_cleanup(self):
         """Test managed context without database session cleanup."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         context = UserExecutionContext(
             user_id="user_12345",
             thread_id="thread_67890",
@@ -665,7 +669,7 @@ class TestManagedUserContext:
     @pytest.mark.asyncio
     async def test_managed_context_exception_handling(self):
         """Test managed context handles exceptions properly."""
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         context = UserExecutionContext(
             user_id="user_12345",
             thread_id="thread_67890",
@@ -686,7 +690,7 @@ class TestManagedUserContext:
         import logging
         caplog.set_level(logging.WARNING, logger="netra_backend.app.services.user_execution_context")
         
-        mock_session = AsyncMock()
+        mock_session = AsyncNone  # TODO: Use real service instance
         mock_session.close.side_effect = Exception("Close failed")
         
         context = UserExecutionContext(

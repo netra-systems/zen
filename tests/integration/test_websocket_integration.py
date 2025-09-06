@@ -1,10 +1,14 @@
 import asyncio
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from fastapi.testclient import TestClient
 
 from netra_backend.app.main import app
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 client = TestClient(app)
 

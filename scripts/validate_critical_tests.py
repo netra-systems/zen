@@ -40,7 +40,7 @@ def validate_websocket_integration():
             pass
         
         tool_dispatcher = ToolDispatcher()
-        registry = AgentRegistry(), tool_dispatcher)
+        registry = AgentRegistry(tool_dispatcher)
         original_executor = tool_dispatcher.executor
         
         registry.set_websocket_manager(ws_manager)

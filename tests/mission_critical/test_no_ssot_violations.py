@@ -31,7 +31,7 @@ import psutil
 from collections import defaultdict
 import threading
 import random
-from unittest.mock import patch as mock_patch  # FORBIDDEN - for detection only
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # Real service imports - NO MOCKS
 from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
@@ -41,6 +41,9 @@ from netra_backend.app.services.database_manager import DatabaseManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @dataclass
@@ -60,6 +63,7 @@ class UserContextSimulator:
     """Simulates isolated user contexts for concurrent testing."""
     
     def __init__(self, user_id: str):
+    pass
         self.user_id = user_id
         self.session_id = str(uuid.uuid4())
         self.data_cache = {}
@@ -106,6 +110,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_concurrent_10_users_no_data_leakage(self, isolated_test_env):
         """CRITICAL: Test 10+ concurrent users with zero data leakage."""
+    pass
         user_count = 12
         users = [UserContextSimulator(f"user_{i}") for i in range(user_count)]
         results = []
@@ -154,6 +159,7 @@ class TestNoSSotViolationsWithIsolation:
         
     def test_user_context_thread_safety(self, isolated_test_env):
         """CRITICAL: Verify thread safety in user context operations."""
+    pass
         shared_counter = {'value': 0}
         thread_results = []
         lock = threading.Lock()
@@ -182,7 +188,7 @@ class TestNoSSotViolationsWithIsolation:
         thread_count = 10
         
         for i in range(thread_count):
-            thread = threading.Thread(target=thread_operation, args=(i,))
+            thread = threading.Thread(target=thread_operation, args=(i))
             threads.append(thread)
             thread.start()
         
@@ -202,6 +208,7 @@ class TestNoSSotViolationsWithIsolation:
         
     def test_user_session_isolation_under_load(self, isolated_test_env):
         """CRITICAL: Test user session isolation under high load."""
+    pass
         load_duration = 5  # seconds
         max_users = 20
         operations_per_user = 50
@@ -257,6 +264,7 @@ class TestNoSSotViolationsWithIsolation:
         
     def test_websocket_channel_user_separation(self, isolated_test_env):
         """CRITICAL: Verify WebSocket channels maintain user separation."""
+    pass
         user_count = 8
         websocket_channels = {}
         message_routing = defaultdict(list)
@@ -298,6 +306,7 @@ class TestNoSSotViolationsWithIsolation:
         
         def user_cache_operations(user_id: str):
             """Execute cache operations for specific user."""
+    pass
             user_cache = cache_data[user_id]
             
             for i in range(cache_operations):
@@ -367,6 +376,7 @@ class TestNoSSotViolationsWithIsolation:
         
     def test_no_session_sharing_between_requests(self, isolated_test_env):
         """CRITICAL: Ensure no database session sharing between requests."""
+    pass
         request_count = 15
         session_tracker = {}
         shared_sessions = []
@@ -403,6 +413,7 @@ class TestNoSSotViolationsWithIsolation:
         
     def test_transaction_isolation_levels(self, isolated_test_env):
         """CRITICAL: Test database transaction isolation levels."""
+    pass
         transaction_data = defaultdict(list)
         isolation_violations = []
         
@@ -452,6 +463,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_connection_pool_user_separation(self, isolated_test_env):
         """CRITICAL: Test database connection pool maintains user separation."""
+    pass
         connection_pool = {}
         user_connections = defaultdict(set)
         connection_reuse_violations = []
@@ -502,6 +514,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_query_result_user_isolation(self, isolated_test_env):
         """CRITICAL: Ensure query results are isolated per user."""
+    pass
         query_results = defaultdict(list)
         result_contamination = []
         
@@ -558,6 +571,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_websocket_events_user_specific(self, isolated_test_env):
         """CRITICAL: Verify WebSocket events are user-specific."""
+    pass
         websocket_events = defaultdict(list)
         event_routing_errors = []
         
@@ -601,6 +615,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_no_broadcast_leakage(self, isolated_test_env):
         """CRITICAL: Ensure no WebSocket broadcast leakage between users."""
+    pass
         broadcast_channels = defaultdict(set)
         broadcast_leaks = []
         
@@ -647,6 +662,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_channel_subscription_isolation(self, isolated_test_env):
         """CRITICAL: Test WebSocket channel subscription isolation."""
+    pass
         channel_subscriptions = defaultdict(set)
         subscription_violations = []
         
@@ -693,6 +709,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_websocket_auth_boundaries(self, isolated_test_env):
         """CRITICAL: Test WebSocket authentication boundaries."""
+    pass
         authenticated_connections = {}
         auth_violations = []
         
@@ -743,6 +760,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_concurrent_websocket_isolation(self, isolated_test_env):
         """CRITICAL: Test concurrent WebSocket connection isolation."""
+    pass
         concurrent_connections = {}
         isolation_failures = []
         message_queues = defaultdict(list)
@@ -806,6 +824,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_concurrent_writes_no_collision(self, isolated_test_env):
         """CRITICAL: Test concurrent writes without collision."""
+    pass
         shared_resource = {'counter': 0, 'data': {}}
         write_operations = []
         collision_detected = []
@@ -859,6 +878,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_atomic_operations_verified(self, isolated_test_env):
         """CRITICAL: Verify atomic operations maintain consistency."""
+    pass
         atomic_resource = {'balance': 1000, 'transactions': []}
         consistency_violations = []
         transaction_lock = threading.Lock()
@@ -925,6 +945,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_lock_mechanisms_per_user(self, isolated_test_env):
         """CRITICAL: Test user-specific lock mechanisms."""
+    pass
         user_locks = {}
         user_resources = defaultdict(dict)
         lock_violations = []
@@ -936,6 +957,7 @@ class TestNoSSotViolationsWithIsolation:
         
         def user_locked_operation(user_id: str, operation_id: str):
             """Perform operation with user-specific lock."""
+    pass
             if user_id not in user_locks:
                 lock_violations.append(f"Missing lock for user {user_id}")
                 return
@@ -1000,6 +1022,7 @@ class TestNoSSotViolationsWithIsolation:
         
         def process_user_input(user_id: str, input_data: str):
             """Process potentially malicious input with containment."""
+    pass
             try:
                 # Input sanitization and containment
                 sanitized_input = input_data.replace('<', '&lt;').replace('>', '&gt;')
@@ -1071,6 +1094,7 @@ class TestNoSSotViolationsWithIsolation:
         
         def validate_user_privilege(user_id: str, attempted_action: str, target: str):
             """Validate user privilege and prevent escalation."""
+    pass
             user_perms = user_privileges.get(user_id, [])
             
             # Check if user has required privilege
@@ -1123,6 +1147,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_cross_user_access_denied(self, isolated_test_env):
         """CRITICAL: Test denial of cross-user access attempts."""
+    pass
         user_data = {
             'access_user_0': {'private_files': ['file_0_1.txt', 'file_0_2.txt'], 'secrets': ['secret_0']},
             'access_user_1': {'private_files': ['file_1_1.txt', 'file_1_2.txt'], 'secrets': ['secret_1']},
@@ -1194,6 +1219,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_isolation_performance_metrics(self, isolated_test_env):
         """Monitor performance impact of isolation mechanisms."""
+    pass
         start_time = time.time()
         start_memory = psutil.Process().memory_info().rss / 1024 / 1024
         
@@ -1246,6 +1272,7 @@ class TestNoSSotViolationsWithIsolation:
     
     def test_comprehensive_isolation_validation(self, isolated_test_env):
         """FINAL: Comprehensive validation of all isolation mechanisms."""
+    pass
         validation_report = {
             'user_context_isolation': True,
             'database_session_isolation': True,
@@ -1291,7 +1318,8 @@ class TestNoSSotViolationsWithIsolation:
         assert validation_report['total_violations'] == 0, f"Isolation validation failed: {validation_report}"
         assert all(validation_report[key] for key in validation_report if key.endswith('_isolation') or key == 'performance_within_thresholds'), f"Critical isolation mechanisms failed: {validation_report}"
         
-        print(f"\nCOMPREHENSIVE ISOLATION VALIDATION PASSED")
+        print(f"
+COMPREHENSIVE ISOLATION VALIDATION PASSED")
         print(f"Memory growth: {memory_growth:.2f}MB")
         print(f"Performance tests completed: {len(self.performance_metrics)}")
         print(f"All isolation mechanisms validated successfully")

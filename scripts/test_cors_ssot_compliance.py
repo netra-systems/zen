@@ -10,6 +10,7 @@ This script verifies that:
 
 import sys
 import os
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

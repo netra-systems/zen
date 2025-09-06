@@ -6,6 +6,7 @@ Test script to verify ANSI escape codes are properly handled in logs.
 import os
 import sys
 import traceback
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -2,6 +2,7 @@
 
 import pytest
 from netra_backend.app.core.serialization.unified_json_handler import llm_parser
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestJSONFragmentParsing:

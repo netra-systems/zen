@@ -1,0 +1,227 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: token-optimization-dashboard
+  namespace: production
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Token Optimization - Production Monitoring",
+        "tags": ["token-optimization", "production", "business-metrics"],
+        "timezone": "UTC",
+        "panels": [
+          {
+            "title": "Token Optimization Success Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "rate(token_optimization_success_total[5m]) / rate(token_optimization_attempts_total[5m]) * 100",
+                "legendFormat": "Success Rate %"
+              }
+            ],
+            "thresholds": [
+              {"color": "red", "value": 80},
+              {"color": "yellow", "value": 90},
+              {"color": "green", "value": 95}
+            ]
+          },
+          {
+            "title": "Cost Savings Per Hour",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(cost_savings_usd_total[1h]))",
+                "legendFormat": "Total Savings $/hour"
+              },
+              {
+                "expr": "avg(rate(cost_savings_usd_total[1h]))",
+                "legendFormat": "Average Savings $/hour"
+              }
+            ]
+          },
+          {
+            "title": "User Engagement with Cost Features",
+            "type": "pie",
+            "targets": [
+              {
+                "expr": "sum by (feature) (user_cost_feature_usage_total)",
+                "legendFormat": "{{feature}}"
+              }
+            ]
+          },
+          {
+            "title": "Token Usage by Model",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum by (model) (rate(tokens_used_total[5m]))",
+                "legendFormat": "{{model}}"
+              }
+            ]
+          },
+          {
+            "title": "Real-time Cost Tracking Accuracy",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "avg(cost_calculation_accuracy_ratio) * 100",
+                "legendFormat": "Accuracy %"
+              }
+            ],
+            "thresholds": [
+              {"color": "red", "value": 95},
+              {"color": "yellow", "value": 98},
+              {"color": "green", "value": 99}
+            ]
+          },
+          {
+            "title": "WebSocket Event Delivery Latency",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(websocket_event_duration_seconds_bucket[5m]))",
+                "legendFormat": "P95 Latency"
+              },
+              {
+                "expr": "histogram_quantile(0.50, rate(websocket_event_duration_seconds_bucket[5m]))",
+                "legendFormat": "P50 Latency"
+              }
+            ]
+          },
+          {
+            "title": "Free-to-Paid Conversion Rate",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "rate(paid_conversions_total[24h]) / rate(free_user_signups_total[24h]) * 100",
+                "legendFormat": "Conversion Rate %"
+              }
+            ],
+            "thresholds": [
+              {"color": "red", "value": 10},
+              {"color": "yellow", "value": 15},
+              {"color": "green", "value": 20}
+            ]
+          },
+          {
+            "title": "Session Isolation Health",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(session_isolation_violations_total)",
+                "legendFormat": "Isolation Violations"
+              }
+            ],
+            "thresholds": [
+              {"color": "green", "value": 0},
+              {"color": "red", "value": 1}
+            ]
+          },
+          {
+            "title": "Monthly Revenue Attribution",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(revenue_attributed_to_token_optimization_usd[30d]))",
+                "legendFormat": "Revenue Attributed to Token Features"
+              },
+              {
+                "expr": "sum(rate(customer_cost_savings_usd[30d]))",
+                "legendFormat": "Customer Cost Savings"
+              }
+            ]
+          },
+          {
+            "title": "System Health Overview",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "up{job=\"token-optimization\"}",
+                "legendFormat": "Service Uptime",
+                "format": "table"
+              },
+              {
+                "expr": "rate(http_requests_total{job=\"token-optimization\"}[5m])",
+                "legendFormat": "Request Rate",
+                "format": "table"
+              },
+              {
+                "expr": "rate(http_request_errors_total{job=\"token-optimization\"}[5m])",
+                "legendFormat": "Error Rate",
+                "format": "table"
+              }
+            ]
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "10s"
+      }
+    }
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: token-optimization-alerts
+  namespace: production
+spec:
+  groups:
+  - name: token-optimization
+    rules:
+    - alert: TokenOptimizationFailureRateHigh
+      expr: rate(token_optimization_failures_total[5m]) / rate(token_optimization_attempts_total[5m]) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Token optimization failure rate is above 5%"
+        description: "The token optimization system is failing at a rate of {{ $value }}% which is above the 5% threshold."
+
+    - alert: CostCalculationAccuracyLow
+      expr: avg(cost_calculation_accuracy_ratio) < 0.95
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Cost calculation accuracy below 95%"
+        description: "Cost calculation accuracy is {{ $value }}% which is below the required 95% threshold."
+
+    - alert: WebSocketEventLatencyHigh
+      expr: histogram_quantile(0.95, rate(websocket_event_duration_seconds_bucket[5m])) > 0.2
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: "WebSocket event latency is high"
+        description: "P95 WebSocket event latency is {{ $value }}s which is above the 200ms threshold."
+
+    - alert: SessionIsolationViolation
+      expr: increase(session_isolation_violations_total[5m]) > 0
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Session isolation violation detected"
+        description: "{{ $value }} session isolation violations detected in the last 5 minutes."
+
+    - alert: RevenueImpactTracking
+      expr: increase(revenue_attributed_to_token_optimization_usd[1h]) < 10
+      for: 60m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low revenue attribution to token optimization"
+        description: "Only ${{ $value }} in revenue attributed to token optimization in the last hour."
+
+    - alert: UserEngagementDrop
+      expr: rate(user_cost_feature_interactions_total[1h]) < 100
+      for: 30m
+      labels:
+        severity: warning
+      annotations:
+        summary: "User engagement with cost features is low"
+        description: "User interactions with cost features is {{ $value }}/hour which is below expected levels."

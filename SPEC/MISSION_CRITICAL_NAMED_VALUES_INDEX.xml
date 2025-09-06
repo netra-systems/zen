@@ -90,6 +90,34 @@
     </category>
     
     <category name="Backend Critical Variables">
+      <variable name="SERVICE_SECRET" type="env_var">
+        <description>Inter-service authentication secret for backend-to-auth communication</description>
+        <cascade_impact>CRITICAL: Complete authentication failure, circuit breaker permanently open, 100% user lockout, system unusable</cascade_impact>
+        <severity>ULTRA_CRITICAL</severity>
+        <critical_learning date="2025-09-05">
+          <discovery>Missing SERVICE_SECRET triggers MockCircuitBreaker permanent failure</discovery>
+          <cross_reference>SPEC/learnings/permanent_failure_state_pattern_20250905.xml</cross_reference>
+          <note>This was "error behind the error" - auth failures were actually circuit breaker architecture flaw</note>
+        </critical_learning>
+        <required_by>
+          <service>netra-backend-staging</service>
+          <service>netra-backend-production</service>
+          <location>netra_backend/app/clients/auth_client_core.py</location>
+        </required_by>
+        <incident_history>
+          <incident date="2025-09-05" severity="CRITICAL" duration="multiple_hours">
+            <description>Missing SERVICE_SECRET caused complete staging outage - circuit breaker permanently open</description>
+            <impact>100% user authentication failure, complete system unusable</impact>
+            <logs_pattern>INTER-SERVICE AUTHENTICATION CRITICAL ERROR</logs_pattern>
+          </incident>
+        </incident_history>
+        <used_in>
+          <location>auth_service configuration</location>
+          <location>netra_backend inter-service auth</location>
+          <location>GCP Secret Manager (recommended)</location>
+        </used_in>
+      </variable>
+      
       <variable name="ENVIRONMENT" type="env_var">
         <description>Backend environment identifier</description>
         <cascade_impact>Wrong database, wrong URLs, wrong configurations loaded</cascade_impact>
@@ -392,6 +420,16 @@
   </common_failure_patterns>
 
   <incident_history>
+    <incident date="2025-09-05" severity="CRITICAL">
+      <description>SERVICE_SECRET missing from GCP staging - Complete system outage</description>
+      <impact>100% authentication failure, circuit breaker permanently open, all users locked out</impact>
+      <root_cause>Configuration deployment process lacks validation for critical environment variables</root_cause>
+      <fix>Deploy SERVICE_SECRET immediately, implement pre-deployment validation</fix>
+      <logs_pattern>INTER-SERVICE AUTHENTICATION CRITICAL ERROR, Circuit breaker _validate_token_remote_breaker is open</logs_pattern>
+      <duration>Multiple hours</duration>
+      <business_impact>Complete staging environment unusable, development velocity blocked</business_impact>
+    </incident>
+    
     <incident date="2025-09-05" severity="CRITICAL">
       <description>Agent execution order incorrect (Optimization before Data)</description>
       <impact>Empty optimization results, no business value delivered</impact>

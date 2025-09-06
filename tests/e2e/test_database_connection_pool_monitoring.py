@@ -13,6 +13,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

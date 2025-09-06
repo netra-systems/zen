@@ -5,8 +5,10 @@ Business Value: Revenue-critical component
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.agents.corpus_admin import corpus_creation_io
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 class TestCorpusCreationIo:
     """Test suite for corpus_creation_io functions"""

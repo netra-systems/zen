@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 """Simple working test for NACIS system.
 
@@ -23,7 +24,8 @@ env.set("GUARDRAILS_ENABLED", "true", "test")
 env = get_env()
 def test_imports():
     """Test that all NACIS components can be imported."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("NACIS IMPORT TEST")
     print("="*60)
     
@@ -48,13 +50,16 @@ def test_imports():
         except Exception as e:
             print(f"❌ {name}: {e}")
     
-    print(f"\n{success_count}/{len(components)} components imported successfully")
+    print(f"
+{success_count}/{len(components)} components imported successfully")
     return success_count == len(components)
 
 
 def test_guardrails():
     """Test input filtering works."""
-    print("\n" + "="*60)
+    pass
+    print("
+" + "="*60)
     print("GUARDRAILS TEST")
     print("="*60)
     
@@ -89,7 +94,8 @@ def test_guardrails():
 
 def test_model_cascade():
     """Test CLQT model routing."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("MODEL CASCADE TEST")
     print("="*60)
     
@@ -117,7 +123,9 @@ def test_model_cascade():
 
 def test_reliability_scorer():
     """Test source reliability scoring."""
-    print("\n" + "="*60)
+    pass
+    print("
+" + "="*60)
     print("RELIABILITY SCORER TEST")
     print("="*60)
     
@@ -138,7 +146,8 @@ def test_reliability_scorer():
         for source_type, expected_score in sources:
             print(f"  {source_type}: ~{expected_score}")
         
-        print("\n✅ Reliability scorer initialized successfully")
+        print("
+✅ Reliability scorer initialized successfully")
         return True
     except Exception as e:
         print(f"❌ Reliability scorer test failed: {e}")
@@ -147,7 +156,8 @@ def test_reliability_scorer():
 
 def test_environment_variables():
     """Test that NACIS environment variables are recognized."""
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("ENVIRONMENT VARIABLES TEST")
     print("="*60)
     
@@ -189,6 +199,7 @@ def test_environment_variables():
 
 def main():
     """Run all tests."""
+    pass
     print("""
 ╔══════════════════════════════════════════════════════════════╗
 ║     NACIS - Netra's Agentic Customer Interaction System     ║
@@ -210,11 +221,13 @@ def main():
             result = test_func()
             results.append((test_name, result))
         except Exception as e:
-            print(f"\n❌ {test_name} crashed: {e}")
+            print(f"
+❌ {test_name} crashed: {e}")
             results.append((test_name, False))
     
     # Summary
-    print("\n" + "="*60)
+    print("
+" + "="*60)
     print("TEST SUMMARY")
     print("="*60)
     
@@ -225,12 +238,15 @@ def main():
         status = "✅ PASSED" if result else "❌ FAILED"
         print(f"{test_name:<30} {status}")
     
-    print(f"\nTotal: {passed}/{total} tests passed")
+    print(f"
+Total: {passed}/{total} tests passed")
     
     if passed == total:
-        print("\n🎉 All tests passed! NACIS is ready for use.")
+        print("
+🎉 All tests passed! NACIS is ready for use.")
     else:
-        print(f"\n⚠️  {total - passed} test(s) failed. Review the output above.")
+        print(f"
+⚠️  {total - passed} test(s) failed. Review the output above.")
     
     print("""
 Next Steps to Test NACIS Fully:

@@ -5,11 +5,13 @@ All functions ≤8 lines per requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 
 import asyncio
-from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

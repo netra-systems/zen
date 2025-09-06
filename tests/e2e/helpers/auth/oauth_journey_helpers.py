@@ -1,4 +1,26 @@
-"""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+\n"""
 OAuth Journey Helper Functions
 
 Helper functions for OAuth authentication flow testing and validation.
@@ -10,10 +32,13 @@ import json
 import time
 import uuid
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, patch
 from urllib.parse import parse_qs, urlparse
 
 import httpx
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 try:
     import websockets
 except ImportError:
@@ -110,11 +135,11 @@ class OAuthCallbackHelper:
             
             # Mock Google OAuth API responses
             with patch('httpx.AsyncClient') as mock_client:
-                mock_instance = AsyncMock()
+                websocket = TestWebSocketConnection()
                 mock_client.return_value.__aenter__.return_value = mock_instance
                 
                 # Mock token exchange response
-                token_response = AsyncMock()
+                websocket = TestWebSocketConnection()
                 token_response.status_code = 200
                 # Mock OAuth token response
                 token_response.json.return_value = {
@@ -125,7 +150,7 @@ class OAuthCallbackHelper:
                 mock_instance.post.return_value = token_response
                 
                 # Mock user info response
-                user_response = AsyncMock()
+                websocket = TestWebSocketConnection()
                 user_response.status_code = 200
                 user_response.json.return_value = oauth_user_data
                 mock_instance.get.return_value = user_response
@@ -251,11 +276,11 @@ class OAuthReturningUserHelper:
         try:
             # Simulate same user attempting OAuth again
             with patch('httpx.AsyncClient') as mock_client:
-                mock_instance = AsyncMock()
+                websocket = TestWebSocketConnection()
                 mock_client.return_value.__aenter__.return_value = mock_instance
                 
                 # Mock same user responses
-                token_response = AsyncMock()
+                websocket = TestWebSocketConnection()
                 token_response.status_code = 200
                 # Mock OAuth token response
                 token_response.json.return_value = {
@@ -265,7 +290,7 @@ class OAuthReturningUserHelper:
                 }
                 mock_instance.post.return_value = token_response
                 
-                user_response = AsyncMock()
+                websocket = TestWebSocketConnection()
                 user_response.status_code = 200
                 user_response.json.return_value = oauth_user_data
                 mock_instance.get.return_value = user_response

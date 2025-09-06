@@ -7,12 +7,16 @@ latency, throughput, memory usage, and optimization patterns.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 import time
 import psutil
 import gc
 from typing import Dict, Any, List
 from statistics import mean, median, stdev
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -68,8 +72,8 @@ class TestAgentLatencyPerformance:
     async def test_agent_task_execution_latency(self):
         """Test agent task execution latency under different loads."""
         # Mock database operations with realistic delays
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         async def mock_db_operation(*args, **kwargs):
             # Simulate database latency
@@ -80,8 +84,8 @@ class TestAgentLatencyPerformance:
         mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
         
         # Mock WebSocket operations
-        mock_websocket_manager = Mock()
-        mock_websocket_manager.broadcast_to_thread = AsyncMock()
+        mock_websocket_manager = UnifiedWebSocketManager()
+        mock_websocket_manager.broadcast_to_thread = AsyncNone  # TODO: Use real service instance
         
         with patch('netra_backend.app.core.unified.db_connection_manager.db_manager', mock_db_manager):
             with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
@@ -141,8 +145,8 @@ class TestAgentLatencyPerformance:
     async def test_agent_concurrent_execution_latency(self):
         """Test agent latency under concurrent execution."""
         # Mock shared resources
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Simulate connection pool contention
         connection_pool_delay = 0
@@ -441,8 +445,8 @@ class TestAgentThroughputOptimization:
     async def test_agent_batch_processing_throughput(self):
         """Test agent throughput with batch processing optimization."""
         # Mock database for batch operations
-        mock_db_manager = Mock()
-        mock_session = AsyncMock()
+        mock_db_manager = TestDatabaseManager().get_session()
+        mock_session = AsyncNone  # TODO: Use real service instance
         
         # Track batch operations
         batch_operations = []

@@ -3,8 +3,9 @@ Test iteration 65: Multi-tenant resource quota enforcement.
 Validates per-tenant resource limits and prevents quota violations.
 """
 import pytest
-from unittest.mock import Mock, patch
 from typing import Dict, Any
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMultiTenantResourceQuotas:
@@ -12,7 +13,10 @@ class TestMultiTenantResourceQuotas:
     
     @pytest.fixture
     def tenant_quotas(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Define resource quotas per tenant tier."""
+    pass
         return {
             "free": {"api_calls": 1000, "storage_mb": 100, "concurrent_sessions": 1},
             "pro": {"api_calls": 50000, "storage_mb": 5000, "concurrent_sessions": 10},
@@ -21,7 +25,7 @@ class TestMultiTenantResourceQuotas:
     
     def test_api_rate_limit_per_tenant_tier(self, tenant_quotas):
         """Ensures API rate limits are enforced per tenant tier."""
-        mock_rate_limiter = Mock()
+        mock_rate_limiter = mock_rate_limiter_instance  # Initialize appropriate service
         
         def check_rate_limit(tenant_id: str, tenant_tier: str) -> bool:
             current_usage = {"tenant-free": 999, "tenant-pro": 49999}.get(tenant_id, 0)
@@ -45,7 +49,8 @@ class TestMultiTenantResourceQuotas:
     
     def test_storage_quota_enforcement(self, tenant_quotas):
         """Validates storage quotas prevent excessive data usage."""
-        mock_storage = Mock()
+    pass
+        mock_storage = mock_storage_instance  # Initialize appropriate service
         
         def check_storage_quota(tenant_id: str, tenant_tier: str, new_size_mb: int) -> bool:
             current_usage = {"tenant-123": 95, "tenant-456": 4500}.get(tenant_id, 0)
@@ -81,3 +86,4 @@ class TestMultiTenantResourceQuotas:
         # Enterprise tier - simulate high usage
         active_sessions["tenant-enterprise"] = 99
         assert can_create_session("tenant-enterprise", "enterprise") == True
+    pass

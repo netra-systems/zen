@@ -9,6 +9,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -19,6 +20,7 @@ from scripts.comprehensive_import_scanner import ComprehensiveImportScanner
 
 class TestImportCheckerEdgeCases:
     """Test suite for edge cases that import checkers must catch"""
+    pass
 
     def setup_method(self):
         """Setup test environment"""
@@ -27,6 +29,7 @@ class TestImportCheckerEdgeCases:
 
     def test_double_dot_syntax_error(self):
         """Test that double dots in module path are caught"""
+    pass
         test_file = Path(self.temp_dir) / "test_double_dot.py"
         test_file.write_text(
             """
@@ -45,6 +48,7 @@ from auth_service.app..services.auth_service import AuthService
         test_file = Path(self.temp_dir) / "test_triple_dot.py"
         test_file.write_text(
             """
+    pass
 from some.module...config import Config
 from another...module.service import Service
 """
@@ -59,6 +63,7 @@ from another...module.service import Service
         test_file = Path(self.temp_dir) / "test_middle_dots.py"
         test_file.write_text(
             """
+    pass
 from netra_backend..app.config import Config
 from tests..unit.test_something import TestCase
 import module..submodule.component
@@ -74,6 +79,7 @@ import module..submodule.component
         test_file = Path(self.temp_dir) / "test_trailing_dots.py"
         test_file.write_text(
             """
+    pass
 from module.submodule. import something
 from another.module.. import Config
 import package.module.
@@ -89,6 +95,7 @@ import package.module.
         test_file = Path(self.temp_dir) / "test_leading_dots.py"
         test_file.write_text(
             """
+    pass
 from ..auth_service.config import Config  # Valid relative import
 from ...netra_backend.app import app  # Valid relative import
 from ....absolute.path import Something  # Too many dots for relative
@@ -104,6 +111,7 @@ from ....absolute.path import Something  # Too many dots for relative
         test_file = Path(self.temp_dir) / "test_dots_spaces.py"
         test_file.write_text(
             """
+    pass
 from module. .submodule import Config
 from another . . module import Service
 """
@@ -118,6 +126,7 @@ from another . . module import Service
         test_file = Path(self.temp_dir) / "test_alias_dots.py"
         test_file.write_text(
             """
+    pass
 import module.submodule as sub..module
 from package import module as mod..ule
 """
@@ -132,6 +141,7 @@ from package import module as mod..ule
         test_file = Path(self.temp_dir) / "test_empty_segments.py"
         test_file.write_text(
             """
+    pass
 from module..config import Config  # Empty segment
 from .module import Service  # Valid relative
 from module. import Utils  # Invalid trailing dot
@@ -169,6 +179,7 @@ from module. import Utils  # Invalid trailing dot
 
     def test_syntax_error_line_numbers(self):
         """Test that syntax errors report correct line numbers"""
+    pass
         test_file = Path(self.temp_dir) / "test_line_numbers.py"
         test_file.write_text(
             """# Line 1
@@ -195,6 +206,7 @@ def function():  # Line 8
         test_file = Path(self.temp_dir) / "test_complex.py"
         test_file.write_text(
             """
+    pass
 try:
     from module..config import Config
 except ImportError:
@@ -205,6 +217,7 @@ if True:
 
 class MyClass:
     def method(self):
+    pass
         from local..import import Something
 """
         )
@@ -220,12 +233,12 @@ class MyClass:
         test_file = Path(self.temp_dir) / "test_unicode.py"
         test_file.write_text(
             """
+    pass
 from module..cönfig import Config
 from module..🔥 import Fire
 from module..config! import Config
 """,
-            encoding="utf-8",
-        )
+            encoding="utf-8")
 
         result = self.scanner.scan_file(test_file)
         assert result.has_issues()
@@ -234,6 +247,7 @@ from module..config! import Config
 
 class TestImportCheckerRegexPrevalidation:
     """Test regex-based pre-validation before AST parsing"""
+    pass
 
     @staticmethod
     def validate_import_line(line: str) -> bool:
@@ -299,6 +313,7 @@ class TestImportCheckerRegexPrevalidation:
 
     def test_integration_with_scanner(self):
         """Test that scanner could use pre-validation to fail fast"""
+    pass
         content_with_errors = """
 import os
 from pathlib import Path
@@ -307,6 +322,7 @@ from auth_service.app..config import AuthConfig  # Error here
 from auth_service.app.services import AuthService  # Valid
 
 def main():
+    pass
     pass
 """
 
@@ -318,7 +334,8 @@ def main():
             assert e.lineno == 5  # Error on line 5
 
         # Now test with pre-validation
-        lines = content_with_errors.split("\n")
+        lines = content_with_errors.split("
+")
         errors = []
         for i, line in enumerate(lines, 1):
             if not self.validate_import_line(line):
@@ -331,12 +348,14 @@ def main():
 
 class TestEnhancedImportChecker:
     """Test enhancements to make import checker more robust"""
+    pass
 
     def test_pre_ast_validation(self):
         """Test that we can validate imports before AST parsing"""
 
         def pre_validate_file(file_path: Path) -> list:
             """Pre-validate a file for import syntax errors"""
+    pass
             errors = []
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
@@ -383,6 +402,7 @@ from valid.module import Something
 
         def comprehensive_validate(file_path: Path) -> dict:
             """Comprehensive validation with multiple checks"""
+    pass
             results = {
                 "pre_validation_errors": [],
                 "ast_errors": [],

@@ -6,12 +6,14 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
@@ -162,7 +164,7 @@ class TestSupervisorOrchestration:
         # Mock specialized optimization agent
         spec_opt_agent = supervisor.agents.get("optimization")
         # Mock: Generic component isolation for controlled unit testing
-        spec_opt_agent.execute = AsyncMock()
+        spec_opt_agent.execute = AsyncNone  # TODO: Use real service instance
         spec_opt_agent.execute.return_value = create_agent_state("Branch test",
                                                                optimizations_result={
                                                                    "optimization_type": "specialized",
@@ -199,14 +201,14 @@ class TestSupervisorOrchestration:
         
         # Each agent adds to the state
         triage_agent = supervisor.agents["triage"]
-        triage_agent.execute = AsyncMock()
+        triage_agent.execute = AsyncNone  # TODO: Use real service instance
         # Create state with triage_result manually to avoid type conversion
         triage_state = create_agent_state("State test")
         triage_state.triage_result = {"step": 1, "agent": "triage"}
         triage_agent.execute.return_value = triage_state
         
         data_agent = supervisor.agents["data"]
-        data_agent.execute = AsyncMock()
+        data_agent.execute = AsyncNone  # TODO: Use real service instance
         
         def mock_data_execute(state, run_id, stream_updates=True):
             # Modify state in place to avoid type conversion
@@ -216,7 +218,7 @@ class TestSupervisorOrchestration:
         data_agent.execute.side_effect = mock_data_execute
         
         opt_agent = supervisor.agents["optimization"]
-        opt_agent.execute = AsyncMock()
+        opt_agent.execute = AsyncNone  # TODO: Use real service instance
         
         async def mock_opt_execute(state, run_id, stream_updates=True):
             # Modify state in place to avoid type conversion

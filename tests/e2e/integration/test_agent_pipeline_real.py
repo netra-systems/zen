@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Real Agent Pipeline Execution Flow Test - E2E Critical Test
 

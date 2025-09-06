@@ -3,6 +3,7 @@
 import multiprocessing
 import os
 from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import environment management
 from shared.isolated_environment import get_env

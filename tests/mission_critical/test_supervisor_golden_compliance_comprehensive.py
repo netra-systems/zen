@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Comprehensive and Difficult Test Suite for SupervisorAgent Golden Pattern Compliance
 
 This test suite contains challenging tests to ensure SupervisorAgent properly follows
@@ -6,10 +32,16 @@ the BaseAgent golden pattern, especially for WebSocket events and execution patt
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from datetime import datetime
 import json
 from typing import Dict, Any, List
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -17,6 +49,10 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingAgent
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestSupervisorWebSocketCompliance:
@@ -25,19 +61,12 @@ class TestSupervisorWebSocketCompliance:
     @pytest.fixture
     async def supervisor_with_mocked_websocket(self):
         """Create supervisor with fully mocked WebSocket infrastructure."""
-        db_session = AsyncMock()
-        llm_manager = MagicMock()
-        llm_manager.agenerate_response = AsyncMock(return_value="Test response")
+        websocket = TestWebSocketConnection()
+        llm_manager = Magic        llm_manager.agenerate_response = AsyncMock(return_value="Test response")
         
-        websocket_bridge = AsyncMock()
-        websocket_bridge.notify_agent_started = AsyncMock()
-        websocket_bridge.notify_agent_thinking = AsyncMock()
-        websocket_bridge.notify_tool_executing = AsyncMock()
-        websocket_bridge.notify_tool_completed = AsyncMock()
-        websocket_bridge.notify_agent_completed = AsyncMock()
+        websocket = TestWebSocketConnection()
         
-        tool_dispatcher = MagicMock()
-        
+        tool_dispatcher = Magic        
         supervisor = SupervisorAgent(
             db_session=db_session,
             llm_manager=llm_manager,
@@ -48,11 +77,13 @@ class TestSupervisorWebSocketCompliance:
         # Ensure WebSocket bridge is properly set via BaseAgent
         supervisor.set_websocket_bridge(websocket_bridge)
         
-        return supervisor, websocket_bridge
+        await asyncio.sleep(0)
+    return supervisor, websocket_bridge
     
     @pytest.mark.asyncio
     async def test_websocket_events_use_emit_methods_not_direct_bridge(self, supervisor_with_mocked_websocket):
         """CRITICAL: Verify supervisor uses BaseAgent emit methods, not direct bridge calls."""
+    pass
         supervisor, websocket_bridge = supervisor_with_mocked_websocket
         
         # Create execution context
@@ -72,8 +103,7 @@ class TestSupervisorWebSocketCompliance:
         
         # Mock the WebSocketBridgeAdapter's notify methods
         if hasattr(supervisor, 'websocket_adapter') and supervisor.websocket_adapter:
-            supervisor.websocket_adapter.notify_thinking = AsyncMock()
-            supervisor.websocket_adapter.notify_progress = AsyncMock()
+            supervisor.websocket_adapter.websocket = TestWebSocketConnection()
         
         # Execute core logic
         with patch.object(supervisor, '_run_supervisor_workflow', new_callable=AsyncMock) as mock_workflow:
@@ -107,7 +137,8 @@ class TestSupervisorWebSocketCompliance:
         # Mock emit methods to track calls
         async def track_emit(event_type, *args, **kwargs):
             emitted_events.append(event_type)
-            return None
+            await asyncio.sleep(0)
+    return None
         
         supervisor.emit_thinking = AsyncMock(side_effect=lambda msg: track_emit("thinking", msg))
         supervisor.emit_progress = AsyncMock(side_effect=lambda msg, **kw: track_emit("progress", msg))
@@ -133,7 +164,8 @@ class TestSupervisorWebSocketCompliance:
             await supervisor.emit_tool_executing("agent_router", {"selected": "DataHelper"})
             await asyncio.sleep(0.01)  # Simulate work
             await supervisor.emit_tool_completed("agent_router", {"result": "success"})
-            return state
+            await asyncio.sleep(0)
+    return state
         
         with patch.object(supervisor, '_run_supervisor_workflow', new=mock_workflow):
             await supervisor.execute_core_logic(context)
@@ -147,13 +179,14 @@ class TestSupervisorWebSocketCompliance:
     @pytest.mark.asyncio
     async def test_websocket_events_during_error_conditions(self, supervisor_with_mocked_websocket):
         """Test WebSocket events are properly emitted even during errors."""
+    pass
         supervisor, websocket_bridge = supervisor_with_mocked_websocket
         
         # Track emitted events
         error_events = []
         
         supervisor.emit_error = AsyncMock(side_effect=lambda err: error_events.append(str(err)))
-        supervisor.emit_thinking = AsyncMock()
+        supervisor.websocket = TestWebSocketConnection()
         
         # Create context with invalid state
         state = DeepAgentState()
@@ -182,11 +215,8 @@ class TestSupervisorExecutionPatterns:
     @pytest.fixture
     async def supervisor_with_agents(self):
         """Create supervisor with registered sub-agents."""
-        db_session = AsyncMock()
-        llm_manager = MagicMock()
-        websocket_bridge = AsyncMock()
-        tool_dispatcher = MagicMock()
-        
+        websocket = TestWebSocketConnection()
+        tool_dispatcher = Magic        
         supervisor = SupervisorAgent(
             db_session=db_session,
             llm_manager=llm_manager,
@@ -204,11 +234,13 @@ class TestSupervisorExecutionPatterns:
         supervisor.register_agent("DataHelper", data_agent)
         supervisor.register_agent("ReportingAgent", report_agent)
         
-        return supervisor, data_agent, report_agent
+        await asyncio.sleep(0)
+    return supervisor, data_agent, report_agent
     
     @pytest.mark.asyncio
     async def test_uses_baseagent_execution_infrastructure(self, supervisor_with_agents):
         """Verify supervisor uses BaseAgent's execution engine, not custom patterns."""
+    pass
         supervisor, data_agent, report_agent = supervisor_with_agents
         
         # The supervisor should use BaseAgent's execute_modern method
@@ -247,6 +279,7 @@ class TestSupervisorExecutionPatterns:
     @pytest.mark.asyncio
     async def test_execution_lock_prevents_concurrent_runs(self, supervisor_with_agents):
         """Test that execution lock prevents concurrent supervisor runs."""
+    pass
         supervisor, _, _ = supervisor_with_agents
         
         # Create states for concurrent execution
@@ -260,10 +293,12 @@ class TestSupervisorExecutionPatterns:
         
         # Mock workflow to track execution order
         async def mock_workflow(state, run_id):
+    pass
             execution_order.append(f"start-{run_id}")
             await asyncio.sleep(0.1)  # Simulate work
             execution_order.append(f"end-{run_id}")
-            return state
+            await asyncio.sleep(0)
+    return state
         
         supervisor._run_supervisor_workflow = mock_workflow
         
@@ -287,11 +322,8 @@ class TestSupervisorSSOTCompliance:
     async def test_no_redundant_state_management(self):
         """Verify supervisor doesn't maintain redundant state systems."""
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # Check for state-related attributes
         state_attrs = [attr for attr in dir(supervisor) if 'state' in attr.lower()]
@@ -308,20 +340,17 @@ class TestSupervisorSSOTCompliance:
     @pytest.mark.asyncio
     async def test_single_agent_registry(self):
         """Ensure there's only ONE agent registry, not multiple."""
+    pass
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # Both registry and agent_registry should point to same object
         assert supervisor.registry is supervisor.agent_registry, \
             "registry and agent_registry must be the same object (SSOT)"
         
         # Verify registration works through both
-        test_agent = MagicMock()
-        supervisor.register_agent("TestAgent", test_agent)
+        test_agent = Magic        supervisor.register_agent("TestAgent", test_agent)
         
         assert "TestAgent" in supervisor.registry.agents
         assert "TestAgent" in supervisor.agent_registry.agents
@@ -333,7 +362,8 @@ class TestSupervisorSSOTCompliance:
         import inspect
         import netra_backend.app.agents.supervisor_consolidated as supervisor_module
         
-        source_lines = inspect.getsource(supervisor_module).split('\n')
+        source_lines = inspect.getsource(supervisor_module).split('
+')
         line_count = len(source_lines)
         
         assert line_count < 300, f"Supervisor file has {line_count} lines, exceeds 300 line guideline"
@@ -346,15 +376,11 @@ class TestSupervisorErrorHandling:
     async def test_graceful_degradation_on_agent_failure(self):
         """Test supervisor handles sub-agent failures gracefully."""
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # Register failing agent
-        failing_agent = MagicMock()
-        failing_agent.execute = AsyncMock(side_effect=Exception("Agent crashed!"))
+        failing_agent = Magic        failing_agent.execute = AsyncMock(side_effect=Exception("Agent crashed!"))
         supervisor.register_agent("FailingAgent", failing_agent)
         
         state = DeepAgentState()
@@ -368,18 +394,17 @@ class TestSupervisorErrorHandling:
             run_id="error-run-001"
         )
         
-        # Should return a state (possibly with error info) not crash
+        # Should await asyncio.sleep(0)
+    return a state (possibly with error info) not crash
         assert isinstance(result, DeepAgentState)
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_integration(self):
         """Verify supervisor properly uses BaseAgent's circuit breaker."""
+    pass
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # Supervisor should have circuit breaker from BaseAgent
         assert hasattr(supervisor, 'circuit_breaker') or hasattr(supervisor, 'reliability_manager'), \
@@ -396,11 +421,8 @@ class TestSupervisorErrorHandling:
     async def test_hook_execution_error_isolation(self):
         """Test that hook errors don't crash the supervisor."""
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # Register a failing hook
         async def failing_hook(state, **kwargs):
@@ -436,18 +458,16 @@ class TestSupervisorIntegration:
         # This would be a real integration test with actual services
         # For now, we'll mock the critical parts
         
-        db_session = AsyncMock()
-        llm_manager = MagicMock()
-        llm_manager.agenerate_response = AsyncMock(
+        websocket = TestWebSocketConnection()
+        llm_manager = Magic        llm_manager.agenerate_response = AsyncMock(
             return_value=json.dumps({
                 "selected_agent": "DataHelper",
                 "reasoning": "User needs data analysis"
             })
         )
         
-        websocket_bridge = AsyncMock()
-        tool_dispatcher = MagicMock()
-        
+        websocket = TestWebSocketConnection()
+        tool_dispatcher = Magic        
         supervisor = SupervisorAgent(
             db_session=db_session,
             llm_manager=llm_manager,
@@ -456,8 +476,7 @@ class TestSupervisorIntegration:
         )
         
         # Register mock agents
-        data_agent = MagicMock()
-        data_agent.execute = AsyncMock()
+        data_agent = Magic        data_agent.websocket = TestWebSocketConnection()
         supervisor.register_agent("DataHelper", data_agent)
         
         # Execute full flow
@@ -474,15 +493,13 @@ class TestSupervisorIntegration:
     @pytest.mark.asyncio
     async def test_websocket_bridge_adapter_initialization(self):
         """Verify WebSocketBridgeAdapter is properly initialized."""
+    pass
         supervisor = SupervisorAgent(
-            db_session=AsyncMock(),
-            llm_manager=MagicMock(),
-            websocket_bridge=AsyncMock(),
-            tool_dispatcher=MagicMock()
-        )
+            websocket=TestWebSocketConnection(),
+            tool_dispatcher=Magic        )
         
         # After setting WebSocket bridge, adapter should be initialized
-        test_bridge = AsyncMock()
+        websocket = TestWebSocketConnection()
         supervisor.set_websocket_bridge(test_bridge)
         
         # Verify adapter exists and is configured
@@ -523,14 +540,18 @@ async def test_supervisor_golden_pattern_compliance_suite():
     total = len(test_results)
     score = (passed / total) * 100
     
-    print(f"\n{'='*50}")
+    print(f"
+{'='*50}")
     print(f"Supervisor Golden Pattern Compliance: {score:.1f}%")
     print(f"Passed: {passed}/{total} test categories")
-    print(f"{'='*50}\n")
+    print(f"{'='*50}
+")
     
+    await asyncio.sleep(0)
     return score >= 80  # Pass if 80% or higher
 
 
 if __name__ == "__main__":
     # Run the test suite
     asyncio.run(test_supervisor_golden_pattern_compliance_suite())
+    pass

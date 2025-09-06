@@ -420,11 +420,10 @@ class BaseExecutionEngine:
         """Create successful execution result."""
         execution_time = self._calculate_execution_time(context)
         return ExecutionResult(
-            success=True,
             status=ExecutionStatus.COMPLETED,
-            result=result_data,
+            request_id=context.request_id,
+            data=result_data,
             execution_time_ms=execution_time,
-            retry_count=context.retry_count,
             metrics=self.monitor.get_execution_metrics(context)
         )
     
@@ -433,11 +432,10 @@ class BaseExecutionEngine:
         """Create error execution result."""
         execution_time = self._calculate_execution_time(context)
         return ExecutionResult(
-            success=False,
             status=ExecutionStatus.FAILED,
-            error=error_message,
+            request_id=context.request_id,
+            error_message=error_message,
             execution_time_ms=execution_time,
-            retry_count=context.retry_count,
             metrics=self.monitor.get_execution_metrics(context)
         )
     
@@ -515,11 +513,10 @@ class BaseExecutionEngine:
         """Create successful execution result from phase results."""
         execution_time = self._calculate_execution_time(context)
         return ExecutionResult(
-            success=True,
             status=ExecutionStatus.COMPLETED,
-            result=phase_results,
+            request_id=context.request_id,
+            data=phase_results,
             execution_time_ms=execution_time,
-            retry_count=context.retry_count,
             metrics=self.monitor.get_execution_metrics(context)
         )
     

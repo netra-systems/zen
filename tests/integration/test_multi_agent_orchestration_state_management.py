@@ -19,13 +19,17 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
 from test_framework.base_integration_test import BaseIntegrationTest
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -60,6 +64,7 @@ class MultiAgentOrchestrator:
     """Orchestrates multi-agent interactions with state management."""
     
     def __init__(self):
+    pass
         self.supervisor_type = "supervisor_agent"
         self.available_agents = [
             "research_agent",
@@ -243,7 +248,9 @@ class MultiAgentOrchestrator:
             if content:
                 aggregated.append(f"[{agent_type}]: {content}")
                 
-        return "\n\n".join(aggregated) if aggregated else "Processing complete."
+        return "
+
+".join(aggregated) if aggregated else "Processing complete."
     
     def calculate_parallelization_efficiency(
         self,
@@ -281,6 +288,7 @@ class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
     
     async def test_multi_agent_orchestration_with_state_management(self):
         """Test complete multi-agent orchestration flow with state management."""
+    pass
         # Test message requiring multiple agents
         test_message = "Research the latest AI trends, implement a code example, and test it"
         thread_id = f"thread_{int(time.time())}"
@@ -405,6 +413,7 @@ class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
     
     async def test_sequential_agent_dependencies(self):
         """Test that dependent agents execute sequentially."""
+    pass
         # Message requiring sequential execution
         test_message = "Implement code and test it thoroughly"
         context = {"thread_id": "sequential_test"}
@@ -462,6 +471,7 @@ class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
     
     async def test_error_handling_in_agent_chain(self):
         """Test error handling when an agent in the chain fails."""
+    pass
         with patch.object(
             self.orchestrator,
             '_execute_single_agent',
@@ -501,7 +511,8 @@ class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
         # Create a slow agent execution
         async def slow_agent(agent_type: str, context: Dict[str, Any]):
             await asyncio.sleep(10)  # Longer than timeout
-            return AgentExecutionMetrics(
+            await asyncio.sleep(0)
+    return AgentExecutionMetrics(
                 agent_type=agent_type,
                 start_time=time.time(),
                 end_time=time.time(),
@@ -527,6 +538,7 @@ class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
     
     async def test_response_aggregation_quality(self):
         """Test quality of aggregated responses from multiple agents."""
+    pass
         agent_responses = [
             {"agent_type": "research_agent", "content": "Found 5 relevant papers on AI"},
             {"agent_type": "code_agent", "content": "Implemented neural network with 98% accuracy"},

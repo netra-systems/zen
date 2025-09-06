@@ -446,9 +446,8 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         )
     
     async def _send_legacy_update(self, run_id: str, update_data: Dict[str, Any]) -> None:
-        """Send legacy format update via AgentWebSocketBridge (compatibility bridge)."""
+        """Send legacy format update via BaseAgent WebSocket methods (factory pattern compliant)."""
         try:
-            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
             # Use BaseAgent's WebSocket methods instead of direct bridge access
             status = update_data.get('status', 'processing')

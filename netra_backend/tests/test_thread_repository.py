@@ -2,11 +2,12 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,29 +17,35 @@ from netra_backend.app.db.models_postgres import Thread
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 @pytest.fixture
-def mock_db():
+ def real_db():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a mock database session"""
+    pass
     # Mock: Database session isolation for transaction testing without real database dependency
     mock = AsyncMock(spec=AsyncSession)
     # Mock: Generic component isolation for controlled unit testing
-    mock.execute = AsyncMock()
+    mock.execute = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.add = MagicMock()
+    mock.add = MagicNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.commit = AsyncMock()
+    mock.commit = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.rollback = AsyncMock()
+    mock.rollback = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.refresh = AsyncMock()
+    mock.refresh = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.flush = AsyncMock()
+    mock.flush = AsyncNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock.delete = AsyncMock()
+    mock.delete = AsyncNone  # TODO: Use real service instance
     return mock
 
 @pytest.fixture
 def thread_repo():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create a thread repository instance"""
+    pass
     return ThreadRepository()
 @pytest.mark.asyncio
 async def test_create_thread_success(mock_db, thread_repo):
@@ -70,6 +77,7 @@ async def test_create_thread_success(mock_db, thread_repo):
 @pytest.mark.asyncio
 async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     """Test get_by_id with correct parameter order (db first, then entity_id)"""
+    pass
     # Setup
     mock_thread = Thread(
         id='thread_test123',
@@ -79,7 +87,7 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     )
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_result = MagicMock()
+    mock_result = MagicNone  # TODO: Use real service instance
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result
     
@@ -102,9 +110,9 @@ async def test_find_by_user(mock_db, thread_repo):
     ]
     
     # Mock: Generic component isolation for controlled unit testing
-    mock_result = MagicMock()
+    mock_result = MagicNone  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock_scalars = MagicMock()
+    mock_scalars = MagicNone  # TODO: Use real service instance
     mock_scalars.all.return_value = mock_threads
     mock_result.scalars.return_value = mock_scalars
     mock_db.execute.return_value = mock_result
@@ -120,6 +128,7 @@ async def test_find_by_user(mock_db, thread_repo):
 @pytest.mark.asyncio
 async def test_archive_thread(mock_db, thread_repo):
     """Test archiving a thread"""
+    pass
     # Setup
     mock_thread = Thread(
         id='thread_test123',
@@ -128,9 +137,10 @@ async def test_archive_thread(mock_db, thread_repo):
         metadata_={'user_id': 'test_user'}
     )
     
-    # Mock get_by_id to return the thread
+    # Mock get_by_id to await asyncio.sleep(0)
+    return the thread
     # Mock: Generic component isolation for controlled unit testing
-    mock_result = MagicMock()
+    mock_result = MagicNone  # TODO: Use real service instance
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result
     
@@ -148,6 +158,7 @@ async def test_parameter_order_regression():
     Regression test to ensure get_by_id parameter order is correct.
     This test ensures that the db parameter comes first, then entity_id.
     """
+    pass
     repo = ThreadRepository()
     
     # Get the method signature

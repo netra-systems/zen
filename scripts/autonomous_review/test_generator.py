@@ -8,6 +8,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from scripts.autonomous_review.ultra_thinking_analyzer import UltraThinkingAnalyzer
 
@@ -104,7 +105,6 @@ Generated: {timestamp}
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 import sys
 from pathlib import Path
 

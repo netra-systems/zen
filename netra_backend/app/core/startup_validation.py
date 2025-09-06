@@ -123,13 +123,13 @@ class StartupValidator:
                     expected_min = len(expected_agents)
                     
                     if agent_count == 0:
-                        self.logger.warning(f"⚠️ ZERO AGENTS REGISTERED - Expected at least {expected_min} agents")
-                        self.logger.warning(f"   Expected agents: {', '.join(expected_agents)}")
+                        self.logger.info(f"ℹ️ Legacy registry empty - agents will be created per-request (factory pattern)")
+                        self.logger.debug(f"   Legacy expected agents: {', '.join(expected_agents)}")
                     elif agent_count < expected_min:
-                        self.logger.warning(f"⚠️ INSUFFICIENT AGENTS - {agent_count}/{expected_min} registered")
+                        self.logger.info(f"ℹ️ Legacy registry has {agent_count}/{expected_min} agents - transitioning to factory pattern")
                         missing = set(expected_agents) - set(registry.agents.keys() if hasattr(registry, 'agents') else [])
                         if missing:
-                            self.logger.warning(f"   Missing agents: {', '.join(missing)}")
+                            self.logger.debug(f"   Not in legacy registry: {', '.join(missing)}")
                     else:
                         self.logger.info(f"✓ Agent Registry: {agent_count} agents registered")
                 # else: No registry - this is expected with factory pattern (already validated above)
@@ -320,7 +320,7 @@ class StartupValidator:
                 )
                 
                 if handler_count == 0:
-                    self.logger.warning("⚠️ ZERO WebSocket message handlers registered")
+                    self.logger.info("ℹ️ WebSocket handlers will be created per-user (factory pattern)")
                 else:
                     self.logger.info(f"✓ WebSocket: {handler_count} handlers, {connection_count} connections")
                     

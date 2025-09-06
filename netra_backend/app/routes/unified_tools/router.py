@@ -168,6 +168,6 @@ async def migrate_legacy_admin(
 ) -> Dict[str, Any]:
     """Migrate user from legacy admin system to new tool-based system"""
     try:
-        return process_migration_request(current_user, db)
+        return await process_migration_request(current_user, db)
     except Exception as e:
         handle_migration_error(e)

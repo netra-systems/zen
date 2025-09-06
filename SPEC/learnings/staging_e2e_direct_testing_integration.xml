@@ -63,7 +63,7 @@ def _configure_staging_e2e_auth(self):
             </changes>
             <urls>
                 <backend>https://netra-backend-staging-pnovr5vsba-uc.a.run.app</backend>
-                <auth>https://netra-auth-service-pnovr5vsba-uc.a.run.app</auth>
+                <auth>https://auth.staging.netrasystems.ai</auth>
                 <frontend>https://netra-frontend-staging-pnovr5vsba-uc.a.run.app</frontend>
                 <websocket>wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws</websocket>
             </urls>
@@ -153,7 +153,7 @@ def _configure_staging_e2e_auth(self):
                 <health_data>{"status": "healthy", "service": "netra-ai-platform", "version": "1.0.0"}</health_data>
             </service>
             <service name="auth">
-                <url>https://netra-auth-service-pnovr5vsba-uc.a.run.app</url>
+                <url>https://auth.staging.netrasystems.ai</url>
                 <status>HEALTHY</status>
                 <response_time>172ms</response_time>
                 <health_data>{"ready": true}</health_data>

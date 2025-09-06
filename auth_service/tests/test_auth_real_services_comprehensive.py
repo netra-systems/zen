@@ -22,6 +22,7 @@ import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import redis.asyncio as redis
@@ -488,7 +489,6 @@ class TestRealErrorHandling:
         # Try to create factory with invalid configuration
         try:
             # Temporarily modify config to use invalid URL
-            from unittest.mock import patch
             with patch.object(AuthConfig, 'get_database_url', return_value="postgresql://invalid:invalid@localhost:9999/invalid"):
                 factory = TestRepositoryFactory(use_real_db=True)
                 await factory.initialize()

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 """
 Complete WebSocket JWT Authentication Flow Test

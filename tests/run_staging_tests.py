@@ -116,18 +116,21 @@ class StagingTestRunner:
     
     async def run_quick_tests(self) -> bool:
         """Run quick smoke tests."""
-        logger.info("\n=== Running Quick Staging Tests ===")
+        logger.info("
+=== Running Quick Staging Tests ===")
         
         all_passed = True
         
         # Test auth
-        logger.info("\n1. Testing Authentication...")
+        logger.info("
+1. Testing Authentication...")
         auth_passed = await test_staging_auth()
         self.test_results.append(("Authentication", auth_passed))
         all_passed = all_passed and auth_passed
         
         # Test WebSocket
-        logger.info("\n2. Testing WebSocket...")
+        logger.info("
+2. Testing WebSocket...")
         ws_passed = await test_staging_websocket()
         self.test_results.append(("WebSocket", ws_passed))
         all_passed = all_passed and ws_passed
@@ -136,7 +139,8 @@ class StagingTestRunner:
     
     def run_pytest_suite(self, markers: Optional[List[str]] = None) -> bool:
         """Run pytest test suite."""
-        logger.info("\n=== Running Pytest Suite ===")
+        logger.info("
+=== Running Pytest Suite ===")
         
         cmd = [
             sys.executable, "-m", "pytest",
@@ -161,7 +165,8 @@ class StagingTestRunner:
     
     def print_summary(self) -> None:
         """Print test summary."""
-        logger.info("\n" + "=" * 50)
+        logger.info("
+" + "=" * 50)
         logger.info("STAGING TEST SUMMARY")
         logger.info("=" * 50)
         
@@ -197,7 +202,8 @@ async def main():
     
     # Validate environment
     if not runner.validate_environment():
-        logger.error("\nPlease set required environment variables:")
+        logger.error("
+Please set required environment variables:")
         logger.error("  export E2E_OAUTH_SIMULATION_KEY=<your-key>")
         logger.error("  export ENVIRONMENT=staging")
         return 1
@@ -205,7 +211,8 @@ async def main():
     # Test connectivity
     if not args.skip_connectivity:
         if not await runner.test_connectivity():
-            logger.error("\nCannot connect to staging services")
+            logger.error("
+Cannot connect to staging services")
             logger.error("Ensure staging environment is deployed and accessible")
             return 1
     

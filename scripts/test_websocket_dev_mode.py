@@ -18,6 +18,7 @@ import sys
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to the Python path
 

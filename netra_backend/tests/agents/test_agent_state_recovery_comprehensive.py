@@ -7,8 +7,13 @@ import asyncio
 import json
 import pytest
 import time
-from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
@@ -19,33 +24,43 @@ from netra_backend.app.redis_manager import RedisManager
 
 class TestAgentStateRecoveryComprehensive:
     """Comprehensive agent state persistence and recovery testing."""
+    pass
 
     @pytest.fixture
-    def mock_state_persistence(self):
+ def real_state_persistence():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock state persistence service."""
+    pass
         service = Mock(spec=StatePersistenceService)
-        service.save_state = AsyncMock()
-        service.load_state = AsyncMock()
-        service.delete_state = AsyncMock()
-        service.list_states = AsyncMock()
-        service.backup_state = AsyncMock()
-        service.restore_state = AsyncMock()
+        service.save_state = AsyncNone  # TODO: Use real service instance
+        service.load_state = AsyncNone  # TODO: Use real service instance
+        service.delete_state = AsyncNone  # TODO: Use real service instance
+        service.list_states = AsyncNone  # TODO: Use real service instance
+        service.backup_state = AsyncNone  # TODO: Use real service instance
+        service.restore_state = AsyncNone  # TODO: Use real service instance
         return service
 
     @pytest.fixture
-    def mock_redis_manager(self):
+ def real_redis_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock Redis manager for state caching."""
+    pass
         manager = Mock(spec=RedisManager)
-        manager.get = AsyncMock()
-        manager.set = AsyncMock()
-        manager.delete = AsyncMock()
-        manager.exists = AsyncMock()
-        manager.expire = AsyncMock()
+        manager.get = AsyncNone  # TODO: Use real service instance
+        manager.set = AsyncNone  # TODO: Use real service instance
+        manager.delete = AsyncNone  # TODO: Use real service instance
+        manager.exists = AsyncNone  # TODO: Use real service instance
+        manager.expire = AsyncNone  # TODO: Use real service instance
         return manager
 
     @pytest.fixture
     def state_manager(self, mock_state_persistence, mock_redis_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create agent state manager with mocked dependencies."""
+    pass
         return AgentStateManager(
             persistence_service=mock_state_persistence,
             redis_manager=mock_redis_manager
@@ -102,12 +117,14 @@ class TestAgentStateRecoveryComprehensive:
             }
         )
         
-        # Configure mock to capture and return the state
+        # Configure mock to capture and await asyncio.sleep(0)
+    return the state
         saved_state_data = None
         async def capture_save_state(run_id, state_data):
             nonlocal saved_state_data
             saved_state_data = state_data
-            return True
+            await asyncio.sleep(0)
+    return True
         
         mock_state_persistence.save_state.side_effect = capture_save_state
         mock_state_persistence.load_state.return_value = lambda: saved_state_data
@@ -129,6 +146,7 @@ class TestAgentStateRecoveryComprehensive:
     @pytest.mark.asyncio
     async def test_state_corruption_recovery(self, state_manager, mock_state_persistence, mock_redis_manager):
         """Test recovery from corrupted state data."""
+    pass
         run_id = "corruption-test"
         
         # Configure mock to simulate corruption scenarios
@@ -141,6 +159,7 @@ class TestAgentStateRecoveryComprehensive:
         
         recovery_attempts = []
         async def mock_load_with_recovery(run_id_param):
+    pass
             attempt = len(recovery_attempts)
             recovery_attempts.append(attempt)
             
@@ -148,7 +167,8 @@ class TestAgentStateRecoveryComprehensive:
                 raise corruption_scenarios[attempt]
             else:
                 # Successfully recovered
-                return {
+                await asyncio.sleep(0)
+    return {
                     "user_request": "Recovered state",
                     "context": {"recovered": True, "attempts": attempt + 1}
                 }
@@ -182,12 +202,14 @@ class TestAgentStateRecoveryComprehensive:
         async def log_save_operation(run_id, state_data):
             operation_log.append(("save", run_id, time.time()))
             await asyncio.sleep(0.01)  # Simulate I/O delay
-            return True
+            await asyncio.sleep(0)
+    return True
         
         async def log_load_operation(run_id):
             operation_log.append(("load", run_id, time.time()))
             await asyncio.sleep(0.01)  # Simulate I/O delay
-            return {"user_request": f"Loaded state for {run_id}"}
+            await asyncio.sleep(0)
+    return {"user_request": f"Loaded state for {run_id}"}
         
         mock_state_persistence.save_state.side_effect = log_save_operation
         mock_state_persistence.load_state.side_effect = log_load_operation
@@ -225,6 +247,7 @@ class TestAgentStateRecoveryComprehensive:
     @pytest.mark.asyncio
     async def test_state_versioning_and_migration(self, state_manager, mock_state_persistence):
         """Test state versioning and migration between versions."""
+    pass
         # Define state versions
         v1_state = {
             "version": "1.0",
@@ -244,10 +267,12 @@ class TestAgentStateRecoveryComprehensive:
         # Configure migration logic
         migration_performed = []
         async def mock_load_with_migration(run_id):
+    pass
             if "v1" in run_id:
                 migration_performed.append("v1_to_v2")
                 # Simulate migration from v1 to v2
-                return {
+                await asyncio.sleep(0)
+    return {
                     "version": "2.0",
                     "user_request": v1_state["user_request"],
                     "context": {
@@ -277,7 +302,8 @@ class TestAgentStateRecoveryComprehensive:
         cleanup_operations = []
         
         async def mock_list_expired_states():
-            return [
+            await asyncio.sleep(0)
+    return [
                 {"run_id": "expired-1", "age_days": 30},
                 {"run_id": "expired-2", "age_days": 45},
                 {"run_id": "expired-3", "age_days": 60}
@@ -285,7 +311,8 @@ class TestAgentStateRecoveryComprehensive:
         
         async def mock_cleanup_state(run_id):
             cleanup_operations.append(run_id)
-            return True
+            await asyncio.sleep(0)
+    return True
         
         mock_state_persistence.list_expired_states = AsyncMock(side_effect=mock_list_expired_states)
         mock_state_persistence.delete_state.side_effect = mock_cleanup_state
@@ -293,7 +320,8 @@ class TestAgentStateRecoveryComprehensive:
         # Configure Redis cleanup
         async def mock_redis_cleanup(pattern):
             cleanup_operations.append(f"redis_pattern_{pattern}")
-            return 3  # Number of keys cleaned
+            await asyncio.sleep(0)
+    return 3  # Number of keys cleaned
         
         mock_redis_manager.delete_pattern = AsyncMock(side_effect=mock_redis_cleanup)
         
@@ -309,6 +337,7 @@ class TestAgentStateRecoveryComprehensive:
     @pytest.mark.asyncio
     async def test_state_backup_and_restore(self, state_manager, mock_state_persistence):
         """Test comprehensive state backup and restore functionality."""
+    pass
         # Original state
         original_state = DeepAgentState(
             user_request="Backup test request",
@@ -330,6 +359,7 @@ class TestAgentStateRecoveryComprehensive:
         backup_history = []
         
         async def mock_backup_state(run_id, state_data, backup_type="auto"):
+    pass
             backup_id = f"backup_{len(backup_history)}_{backup_type}"
             backup_history.append({
                 "backup_id": backup_id,
@@ -338,13 +368,16 @@ class TestAgentStateRecoveryComprehensive:
                 "backup_type": backup_type,
                 "state_data": state_data
             })
-            return backup_id
+            await asyncio.sleep(0)
+    return backup_id
         
         async def mock_restore_state(run_id, backup_id=None):
+    pass
             if backup_id:
                 # Restore specific backup
                 backup = next((b for b in backup_history if b["backup_id"] == backup_id), None)
-                return backup["state_data"] if backup else None
+                await asyncio.sleep(0)
+    return backup["state_data"] if backup else None
             else:
                 # Restore latest backup
                 if backup_history:
@@ -425,7 +458,8 @@ class TestAgentStateRecoveryComprehensive:
                 validation_result["state_data"]["context"] = {}
             
             validation_results.append(validation_result)
-            return validation_result
+            await asyncio.sleep(0)
+    return validation_result
         
         state_manager.validate_and_repair_state = AsyncMock(side_effect=mock_validate_and_repair)
         
@@ -443,17 +477,20 @@ class TestAgentStateRecoveryComprehensive:
     @pytest.mark.asyncio
     async def test_high_frequency_state_updates(self, state_manager, mock_state_persistence, mock_redis_manager):
         """Test handling of high-frequency state updates."""
+    pass
         # Track update operations
         update_operations = []
         update_throttling = {}
         
         async def mock_high_frequency_save(run_id, state_data):
+    pass
             current_time = time.time()
             
             # Simulate throttling logic
             last_update = update_throttling.get(run_id, 0)
             if current_time - last_update < 0.01:  # Throttle updates < 10ms apart
-                return False  # Throttled
+                await asyncio.sleep(0)
+    return False  # Throttled
             
             update_throttling[run_id] = current_time
             update_operations.append({

@@ -9,7 +9,7 @@
       "run.googleapis.com/ingress-status": "all",
       "run.googleapis.com/invoker-iam-disabled": "true",
       "run.googleapis.com/operation-id": "96198b18-e5ad-4a57-a64f-61d1c7cda2c4",
-      "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://netra-auth-service-pnovr5vsba-uc.a.run.app\"]",
+      "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://auth.staging.netrasystems.ai\"]",
       "serving.knative.dev/creator": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
       "serving.knative.dev/lastModifier": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com"
     },
@@ -256,7 +256,7 @@
   },
   "status": {
     "address": {
-      "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+      "url": "https://auth.staging.netrasystems.ai"
     },
     "conditions": [
       {
@@ -285,6 +285,6 @@
         "revisionName": "netra-auth-service-00018-m8k"
       }
     ],
-    "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    "url": "https://auth.staging.netrasystems.ai"
   }
 }

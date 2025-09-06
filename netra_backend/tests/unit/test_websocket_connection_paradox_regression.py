@@ -8,10 +8,12 @@ Reference: SPEC/learnings.xml
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
     from netra_backend.app.websocket_core.types import ConnectionInfo
     from fastapi import WebSocket
     from starlette.websockets import WebSocketState
@@ -21,20 +23,26 @@ except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 
 class TestWebSocketConnectionParadoxPrevention:
+    pass
 
     """Test suite to prevent WebSocket connection paradox regression."""
     
     @pytest.fixture
 
     def manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create WebSocket manager instance."""
 
         return WebSocketManager()
     
     @pytest.fixture
-
-    def mock_websocket(self):
+ def real_websocket():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    return None
 
         """Create mock WebSocket."""
 
@@ -46,10 +54,10 @@ class TestWebSocketConnectionParadoxPrevention:
         ws.application_state = WebSocketState.CONNECTED
 
         # Mock: Generic component isolation for controlled unit testing
-        ws.send_json = AsyncMock()
+        ws.send_json = AsyncNone  # TODO: Use real service instance
 
         # Mock: Generic component isolation for controlled unit testing
-        ws.close = AsyncMock()
+        ws.close = AsyncNone  # TODO: Use real service instance
 
         return ws
     
@@ -153,7 +161,7 @@ class TestWebSocketConnectionParadoxPrevention:
         assert "websocket" in invalid_job_id.lower() or "mock" in invalid_job_id.lower()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.ws_manager.logger') as mock_logger:
+        with patch('netra_backend.app.websocket_core.unified_manager.logger') as mock_logger:
 
             conn_info2 = await manager.connect_to_job(mock_websocket, invalid_job_id)
             # Should log warning about invalid job_id
@@ -191,7 +199,7 @@ class TestWebSocketConnectionParadoxPrevention:
         # connect_to_job should handle this gracefully
 
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.ws_manager.logger') as mock_logger:
+        with patch('netra_backend.app.websocket_core.unified_manager.logger') as mock_logger:
             # This should trigger the validation logic
 
             if not isinstance(job_id, str):

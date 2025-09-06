@@ -7,10 +7,12 @@ import jwt
 import pytest
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.main import app
 from auth_service.auth_core.config import AuthConfig
+import asyncio
 
 
 class TestRefreshEndpointCompatibility:
@@ -18,12 +20,18 @@ class TestRefreshEndpointCompatibility:
     
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
     
     @pytest.fixture
     def valid_refresh_token(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Generate a valid refresh token for testing"""
+    pass
         secret = AuthConfig.get_jwt_secret() or "test_secret_minimum_20_characters_long"
         payload = {
             "sub": "test_user_id",
@@ -35,7 +43,10 @@ class TestRefreshEndpointCompatibility:
     
     @pytest.fixture
     def expired_refresh_token(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Generate an expired refresh token"""
+    pass
         secret = AuthConfig.get_jwt_secret() or "test_secret_minimum_20_characters_long"
         payload = {
             "sub": "test_user_id",
@@ -64,6 +75,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_camel_case_field(self, client, valid_refresh_token):
         """Test refresh endpoint with camelCase field name (frontend format)"""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             
@@ -94,6 +106,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_empty_body(self, client):
         """Test refresh endpoint with empty JSON body"""
+    pass
         response = client.post("/auth/refresh", json={})
         
         assert response.status_code == 422
@@ -116,6 +129,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_invalid_token(self, client):
         """Test refresh endpoint with invalid token format"""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = None
             
@@ -144,6 +158,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_null_value(self, client):
         """Test refresh endpoint with null token value"""
+    pass
         response = client.post(
             "/auth/refresh",
             json={"refresh_token": None}
@@ -166,6 +181,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_invalid_json(self, client):
         """Test refresh endpoint with invalid JSON"""
+    pass
         response = client.post(
             "/auth/refresh",
             data="invalid json",
@@ -205,6 +221,7 @@ class TestRefreshEndpointCompatibility:
     ])
     def test_refresh_field_variations(self, client, field_name, token_value, expected_status):
         """Parameterized test for various field name and value combinations"""
+    pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             if expected_status == 200:
                 mock_refresh.return_value = ("new_access_token", "new_refresh_token")
@@ -225,12 +242,16 @@ class TestRefreshEndpointIntegration:
     
     @pytest.fixture
     def client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test client"""
+    pass
         return TestClient(app)
     
     @pytest.fixture
     async def authenticated_user(self, client):
-        """Create an authenticated user and return tokens"""
+        """Create an authenticated user and await asyncio.sleep(0)
+    return tokens"""
         # Use dev login to get real tokens
         response = client.post(
             "/auth/dev/login",
@@ -246,6 +267,7 @@ class TestRefreshEndpointIntegration:
     @pytest.mark.asyncio
     async def test_refresh_with_real_token_snake_case(self, client, authenticated_user):
         """Test refresh with real token using snake_case"""
+    pass
         refresh_token = authenticated_user.get("refresh_token")
         if not refresh_token:
             pytest.skip("No refresh token available")
@@ -284,7 +306,10 @@ class TestRefreshEndpointStagingCompatibility:
     
     @pytest.mark.env("staging")
     def test_refresh_endpoint_staging_format(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Test that refresh endpoint works with staging frontend format"""
+    pass
         # This test would run against actual staging environment
         # Marked for staging environment testing
         client = TestClient(app)
@@ -320,3 +345,4 @@ class TestRefreshEndpointStagingCompatibility:
             # Check that raw body was logged
             log_calls = [str(call) for call in mock_logger.info.call_args_list]
             assert any("raw body" in str(call) for call in log_calls)
+    pass

@@ -8,6 +8,7 @@ import asyncio
 import uuid
 from decimal import Decimal
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio
@@ -28,7 +29,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
 

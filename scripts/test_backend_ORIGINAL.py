@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """
 env = get_env()
@@ -153,7 +154,6 @@ def _check_postgresql_service(status):
 def _check_all_python_packages(status):
     """Check all required Python packages"""
     packages = [("pytest", "pytest"), ("pytest_asyncio", "pytest-asyncio"),
-                ("pytest_mock", "pytest-mock"), ("pytest_cov", "pytest-cov"),
                 ("xdist", "pytest-xdist")]
     for pkg_name, status_key in packages:
         _check_python_package(pkg_name, status_key, status)

@@ -19,9 +19,13 @@ logger = central_logger.get_logger(__name__)
 
 def _validate_session_type(session) -> None:
     """Validate session is AsyncSession type."""
-    if not isinstance(session, AsyncSession):
+    from shared.database.session_validation import validate_db_session
+    
+    try:
+        validate_db_session(session, "auth_dependencies_validation")
+    except TypeError as e:
         logger.error(f"Invalid session type: {type(session)}")
-        raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+        raise RuntimeError(str(e))
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
 
 

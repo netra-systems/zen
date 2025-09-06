@@ -17,6 +17,11 @@ Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session 
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -30,7 +35,6 @@ import uuid
 from typing import Any, Dict, Optional
 
 # OAuth service replaced with mock
-from unittest.mock import AsyncMock, MagicMock
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
@@ -45,15 +49,13 @@ OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 # from app.auth_integration.auth import create_access_token
-from unittest.mock import AsyncMock, MagicMock
 
 # Mock: Generic component isolation for controlled unit testing
-create_access_token = AsyncMock()
+create_access_token = AsyncNone  # TODO: Use real service instance
 # from app.core.unified.jwt_validator import validate_token_jwt
-from unittest.mock import AsyncMock, MagicMock
 
 # Mock: Generic component isolation for controlled unit testing
-validate_token_jwt = AsyncMock()
+validate_token_jwt = AsyncNone  # TODO: Use real service instance
 JWTService = AsyncMock
 # Session manager replaced with mock
 SessionManager = AsyncMock

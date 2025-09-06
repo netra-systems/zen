@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """
 Quick Startup Validation Tests
@@ -126,7 +127,7 @@ async def test_websocket_types_exist():
         from netra_backend.app.schemas.websocket_models import (
             AgentUpdatePayload,
         )
-        from netra_backend.app.schemas.registry import (
+        from netra_backend.app.schemas import (
             WebSocketMessage,
             WebSocketMessageType,
         )

@@ -5,6 +5,7 @@ Business Value: $35K+ MRR protection through unified token expiry handling.
 import asyncio
 import time
 from datetime import datetime, timedelta, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

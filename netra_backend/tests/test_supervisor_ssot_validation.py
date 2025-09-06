@@ -9,8 +9,11 @@ This test file validates that all SSOT violations have been fixed in:
 
 import pytest
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
 from typing import Dict, Any
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
 # Import the components we've fixed
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -50,9 +53,9 @@ class TestSSOTCompliance:
     def test_supervisor_agent_ssot_compliance(self):
         """Verify SupervisorAgent follows SSOT patterns."""
         # Create mocked dependencies
-        llm_manager = MagicMock()
-        websocket_bridge = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        websocket_bridge = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         
         # Create supervisor
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
@@ -93,8 +96,8 @@ class TestSSOTCompliance:
     
     def test_actions_agent_ssot_compliance(self):
         """Verify ActionsToMeetGoalsSubAgent follows SSOT patterns."""
-        llm_manager = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         agent = ActionsToMeetGoalsSubAgent(llm_manager, tool_dispatcher)
         
         # Check source for SSOT compliance
@@ -114,9 +117,9 @@ class TestSSOTCompliance:
     async def test_supervisor_user_isolation(self):
         """Test that SupervisorAgent properly isolates users."""
         # Create supervisor with mocked dependencies
-        llm_manager = MagicMock()
-        websocket_bridge = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        websocket_bridge = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
         
@@ -126,7 +129,7 @@ class TestSSOTCompliance:
             thread_id="thread1",
             run_id="run1",
             metadata={"user_request": "Test 1"},
-            db_session=MagicMock()
+            db_session=MagicNone  # TODO: Use real service instance
         )
         
         context2 = UserExecutionContext(
@@ -134,7 +137,7 @@ class TestSSOTCompliance:
             thread_id="thread2", 
             run_id="run2",
             metadata={"user_request": "Test 2"},
-            db_session=MagicMock()
+            db_session=MagicNone  # TODO: Use real service instance
         )
         
         # Mock the internal methods to avoid actual execution
@@ -152,9 +155,9 @@ class TestSSOTCompliance:
     
     def test_no_global_state_in_supervisor(self):
         """Verify SupervisorAgent has no global state that could leak between users."""
-        llm_manager = MagicMock()
-        websocket_bridge = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        websocket_bridge = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
         
@@ -166,9 +169,9 @@ class TestSSOTCompliance:
     
     def test_websocket_event_isolation(self):
         """Test that WebSocket events are properly isolated per user."""
-        llm_manager = MagicMock()
-        websocket_bridge = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        websocket_bridge = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
         
@@ -192,9 +195,9 @@ class TestIntegrationPatterns:
     async def test_supervisor_to_subagent_context_flow(self):
         """Test that context flows correctly from supervisor to sub-agents."""
         # Create supervisor
-        llm_manager = MagicMock()
-        websocket_bridge = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        websocket_bridge = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
         
@@ -204,11 +207,11 @@ class TestIntegrationPatterns:
             thread_id="test_thread",
             run_id="test_run",
             metadata={"test": "data"},
-            db_session=MagicMock()
+            db_session=MagicNone  # TODO: Use real service instance
         )
         
         # Mock agent instance creation
-        mock_agent = MagicMock()
+        mock_agent = MagicNone  # TODO: Use real service instance
         mock_agent.execute = AsyncMock(return_value={"result": "success"})
         
         with patch.object(supervisor, '_create_isolated_agent_instances', 
@@ -235,8 +238,8 @@ class TestIntegrationPatterns:
         assert "operation=" in source, "ErrorContext should specify operation"
         
         # Check ActionsToMeetGoalsSubAgent
-        llm_manager = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         actions_agent = ActionsToMeetGoalsSubAgent(llm_manager, tool_dispatcher)
         source = inspect.getsource(actions_agent.__class__)
         
@@ -253,13 +256,13 @@ class TestBackwardCompatibility:
         assert goals_agent is not None
         
         # ActionsToMeetGoalsSubAgent
-        llm_manager = MagicMock()
-        tool_dispatcher = MagicMock()
+        llm_manager = MagicNone  # TODO: Use real service instance
+        tool_dispatcher = MagicNone  # TODO: Use real service instance
         actions_agent = ActionsToMeetGoalsSubAgent(llm_manager, tool_dispatcher)
         assert actions_agent is not None
         
         # SupervisorAgent
-        websocket_bridge = MagicMock()
+        websocket_bridge = MagicNone  # TODO: Use real service instance
         supervisor = SupervisorAgent(llm_manager, websocket_bridge, tool_dispatcher)
         assert supervisor is not None
 

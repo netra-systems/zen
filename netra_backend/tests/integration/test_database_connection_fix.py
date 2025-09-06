@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """
 Test and fix database connection issues.
 This test identifies and fixes database authentication problems.
@@ -6,9 +5,10 @@ This test identifies and fixes database authentication problems.
 import pytest
 import os
 from netra_backend.app.config import get_config
+from shared.isolated_environment import IsolatedEnvironment
 
 
-env = get_env()
+env = IsolatedEnvironment()
 class TestDatabaseConnectionFix:
     """Test and fix database connection issues."""
 
@@ -34,8 +34,8 @@ class TestDatabaseConnectionFix:
                        f"Should use postgres:postgres credentials for development database.")
         
         # Check environment variables
-        test_db_url = get_env().get('TEST_DATABASE_URL')
-        db_url = get_env().get('DATABASE_URL')
+        test_db_url = env.get('TEST_DATABASE_URL')
+        db_url = env.get('DATABASE_URL')
         
         print(f"TEST_DATABASE_URL env var: {test_db_url}")
         print(f"DATABASE_URL env var: {db_url}")
@@ -65,13 +65,13 @@ class TestDatabaseConnectionFix:
         try:
             result = sock.connect_ex(('localhost', 5432))
             if result == 0:
-                print("✓ PostgreSQL server is running on localhost:5432")
+                print("OK: PostgreSQL server is running on localhost:5432")
                 return True
             else:
-                print(f"✗ PostgreSQL server not accessible (result: {result})")
+                print(f"ERROR: PostgreSQL server not accessible (result: {result})")
                 return False
         except Exception as e:
-            print(f"✗ Error checking PostgreSQL server: {e}")
+            print(f"ERROR: Error checking PostgreSQL server: {e}")
             return False
         finally:
             sock.close()
@@ -101,7 +101,7 @@ class TestDatabaseConnectionFix:
             for fix in fixes:
                 print(fix)
         else:
-            print("✓ No obvious database setup issues found")
+            print("OK: No obvious database setup issues found")
 
     def test_apply_temporary_database_fix(self):
         """Apply temporary fix by using development database for testing."""
@@ -117,11 +117,10 @@ class TestDatabaseConnectionFix:
         print(f"DATABASE_URL set to: {dev_db_url}")
         
         # Verify the fix would work
-        from shared.isolated_environment import IsolatedEnvironment
-        env = IsolatedEnvironment()
-        env.set('DATABASE_URL', dev_db_url, source='database_fix')
+        temp_env = IsolatedEnvironment()
+        temp_env.set('DATABASE_URL', dev_db_url, source='database_fix')
         
-        print("✓ Applied database connection fix to isolated environment")
+        print("OK: Applied database connection fix to isolated environment")
 
 
 if __name__ == "__main__":

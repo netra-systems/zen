@@ -11,9 +11,11 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from datetime import UTC, datetime
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -99,7 +101,7 @@ class TestQualityRoute:
         )
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_service = Mock()
+        mock_service = mock_service_instance  # Initialize appropriate service
         mock_service.alert_history = [test_alert]
         
         alerts = await handle_alerts_request(mock_service, None, None, 50)

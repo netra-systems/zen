@@ -4,7 +4,11 @@ Tests the checkIfFirstMessage and message type determination logic.
 """
 
 import unittest
-from unittest.mock import Mock, patch
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestMessageInputLogic(unittest.TestCase):

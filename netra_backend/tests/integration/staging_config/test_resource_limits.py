@@ -7,6 +7,7 @@ are enforced in the staging environment.
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 # Test framework import - using pytest fixtures instead

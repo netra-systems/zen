@@ -4,6 +4,7 @@ Handles token validation, authentication, and service-to-service communication.
 """
 
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -63,6 +64,20 @@ class AuthServiceClient:
         self.service_id = config.service_id or "netra-backend"
         self.service_secret = config.service_secret
         
+        # CRITICAL FIX: Fallback to environment if config doesn't have service_secret
+        # This ensures we always get the secret even if config loading fails
+        if not self.service_secret:
+            env = get_env()
+            env_service_secret = env.get('SERVICE_SECRET')
+            if env_service_secret:
+                self.service_secret = env_service_secret
+                logger.info("Loaded SERVICE_SECRET from environment as auth client fallback")
+            else:
+                logger.error("SERVICE_SECRET not found in config or environment - auth will fail")
+        
+        # Log initialization status for debugging
+        logger.info(f"AuthServiceClient initialized - Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
+        
         # PRODUCTION SECURITY: Validate auth service requirements in production
         # Check both unified config and environment variable for robust production detection
         env = get_env()
@@ -103,6 +118,13 @@ class AuthServiceClient:
         if self.service_id and self.service_secret:
             headers["X-Service-ID"] = self.service_id
             headers["X-Service-Secret"] = self.service_secret
+        else:
+            # Log detailed diagnostic info when service auth is missing
+            logger.warning(f"Service auth headers not set - ID: {bool(self.service_id)}, Secret: {bool(self.service_secret)}")
+            if not self.service_id:
+                logger.warning("SERVICE_ID is missing - using default 'netra-backend'")
+            if not self.service_secret:
+                logger.error("SERVICE_SECRET is missing - auth service calls will fail")
         return headers
     
     def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:
@@ -133,15 +155,32 @@ class AuthServiceClient:
         return headers
     
     async def _check_auth_service_enabled(self, token: str) -> Optional[Dict]:
-        """Check if auth service is enabled."""
+        """Check if auth service is enabled with user-visible error reporting."""
         if not self.settings.enabled:
-            logger.error("Auth service is required for token validation")
-            return {"valid": False, "error": "auth_service_disabled"}
+            logger.critical(
+                "AUTH SERVICE DISABLED: Auth service is required for token validation but is disabled. "
+                "Users cannot authenticate. This is a critical system configuration issue."
+            )
+            return {
+                "valid": False, 
+                "error": "auth_service_disabled",
+                "user_notification": {
+                    "message": "Authentication service is disabled",
+                    "severity": "critical",
+                    "user_friendly_message": (
+                        "The authentication system is currently disabled. "
+                        "This is a system configuration issue. "
+                        "Please contact support immediately."
+                    ),
+                    "action_required": "Contact support - this requires immediate technical intervention",
+                    "support_code": f"AUTH_DISABLED_{datetime.now().strftime('%H%M%S')}"
+                }
+            }
         return None
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
         """Try to get token from cache with atomic blacklist checking."""
-        cached_result = self.token_cache.get_cached_token(token)
+        cached_result = await self.token_cache.get_cached_token(token)
         if cached_result:
             # ATOMIC FIX: Check blacklist BEFORE accepting cached result
             # This prevents race conditions where token is cached but then blacklisted
@@ -164,7 +203,7 @@ class AuthServiceClient:
         return result
     
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
-        """Handle validation error with detailed error information and fallback."""
+        """Handle validation error with enhanced user notification and detailed error information."""
         error_type = type(error).__name__
         error_msg = str(error)
         
@@ -176,51 +215,103 @@ class AuthServiceClient:
             "forbidden" in error_msg.lower()
         )
         
+        # LOUD ERROR: Authentication failures should be highly visible
         if is_service_auth_issue:
-            logger.error("INTER-SERVICE AUTHENTICATION ERROR")
-            logger.error(f"Error: {error}")
-            logger.error(f"Auth service URL: {self.settings.base_url}")
-            logger.error(f"Service ID configured: {bool(self.service_id)} (value: {self.service_id or 'NOT SET'})")
-            logger.error(f"Service Secret configured: {bool(self.service_secret)}")
-            logger.error("ACTION REQUIRED: Configure SERVICE_ID and SERVICE_SECRET environment variables")
+            logger.critical("INTER-SERVICE AUTHENTICATION CRITICAL ERROR")
+            logger.critical(f"Error: {error}")
+            logger.critical(f"Auth service URL: {self.settings.base_url}")
+            logger.critical(f"Service ID configured: {bool(self.service_id)} (value: {self.service_id or 'NOT SET'})")
+            logger.critical(f"Service Secret configured: {bool(self.service_secret)}")
+            logger.critical("CRITICAL ACTION REQUIRED: Configure SERVICE_ID and SERVICE_SECRET environment variables")
+            logger.critical("BUSINESS IMPACT: Users may experience authentication failures or be unable to access the system")
         else:
-            logger.error(f"Token validation failed: {error}")
-            logger.error(f"Auth service URL: {self.settings.base_url}")
-            logger.error(f"Auth service enabled: {self.settings.enabled}")
+            logger.critical(f"USER AUTHENTICATION FAILURE: Token validation failed: {error}")
+            logger.critical(f"Auth service URL: {self.settings.base_url}")
+            logger.critical(f"Auth service enabled: {self.settings.enabled}")
+            logger.critical("BUSINESS IMPACT: Users may be unable to authenticate or access protected resources")
         
         # Always try local fallback when validation fails
         fallback_result = await self._local_validate(token)
         
-        # If fallback worked, return it with error context
+        # If fallback worked, return it with error context and user notification
         if fallback_result and fallback_result.get("valid", False):
             fallback_result["error_context"] = f"Primary validation failed: {error_msg}"
             fallback_result["error_type"] = error_type
+            fallback_result["user_notification"] = {
+                "message": "Authentication system temporarily using backup validation",
+                "severity": "warning",
+                "user_friendly_message": (
+                    "You're successfully authenticated using our backup system. "
+                    "All features are available normally."
+                ),
+                "action_required": None
+            }
             if is_service_auth_issue:
                 fallback_result["warning"] = "Using fallback due to inter-service auth failure"
+                fallback_result["user_notification"]["message"] = "Service authentication using backup method"
             logger.info(f"Using fallback validation: {fallback_result.get('source', 'unknown')}")
             return fallback_result
         
         # If fallback also failed or returned invalid token
         # Check if this is a connection/service error
         if any(conn_err in error_msg.lower() for conn_err in ['connection', 'timeout', 'network', 'unreachable', 'circuit breaker', 'service_unavailable']):
-            logger.warning(f"Auth service appears unreachable: {error_msg}")
-            return {"valid": False, "error": "auth_service_unreachable", "details": error_msg}
+            logger.critical(f"AUTH SERVICE UNREACHABLE: {error_msg}. Users cannot authenticate.")
+            return {
+                "valid": False, 
+                "error": "auth_service_unreachable", 
+                "details": error_msg,
+                "user_notification": {
+                    "message": "Authentication service temporarily unavailable",
+                    "severity": "error",
+                    "user_friendly_message": (
+                        "We're having trouble with our authentication system. "
+                        "Please try logging in again in a few moments. "
+                        "If this persists, contact support."
+                    ),
+                    "action_required": "Try logging in again or contact support if the issue persists",
+                    "support_code": f"AUTH_UNAVAIL_{datetime.now().strftime('%H%M%S')}"
+                }
+            }
         
-        # For inter-service auth issues, provide clearer error
+        # For inter-service auth issues, provide clearer error with user notification
         if is_service_auth_issue:
             return {
                 "valid": False, 
                 "error": "inter_service_auth_failed",
                 "details": "Service credentials not configured or invalid",
-                "fix": "Set SERVICE_ID and SERVICE_SECRET environment variables"
+                "fix": "Set SERVICE_ID and SERVICE_SECRET environment variables",
+                "user_notification": {
+                    "message": "Service authentication configuration error",
+                    "severity": "critical",
+                    "user_friendly_message": (
+                        "There's a configuration issue with our authentication system. "
+                        "Our technical team has been notified. "
+                        "Please try again later or contact support."
+                    ),
+                    "action_required": "Contact support if you continue to have login issues",
+                    "support_code": f"SERVICE_AUTH_{datetime.now().strftime('%H%M%S')}"
+                }
             }
         
-        # For other errors, return the fallback result with error details
-        if fallback_result:
-            fallback_result["error"] = f"validation_failed_{error_type.lower()}"
-            fallback_result["details"] = error_msg
+        # For other errors, return the fallback result with enhanced error details
+        enhanced_result = fallback_result or {"valid": False}
+        enhanced_result.update({
+            "error": f"validation_failed_{error_type.lower()}",
+            "details": error_msg,
+            "user_notification": {
+                "message": "Authentication validation failed",
+                "severity": "error", 
+                "user_friendly_message": (
+                    "We couldn't validate your login credentials. "
+                    "This might be a temporary issue. "
+                    "Please try logging in again."
+                ),
+                "action_required": "Try logging in again. Contact support if the problem continues.",
+                "support_code": f"AUTH_FAIL_{error_type}_{datetime.now().strftime('%H%M%S')}"
+            }
+        })
         
-        return fallback_result
+        return enhanced_result
     
     async def _try_validation_steps(self, token: str) -> Optional[Dict]:
         """Try validation with cache and circuit breaker."""
@@ -697,7 +788,7 @@ class AuthServiceClient:
             }
         
         # First, try cached token as fallback
-        cached_result = self.token_cache.get_cached_token(token)
+        cached_result = await self.token_cache.get_cached_token(token)
         if cached_result:
             logger.warning("Using cached token validation due to auth service unavailability")
             cached_result["fallback_used"] = True
@@ -1306,7 +1397,7 @@ class AuthServiceClient:
             logger.error(f"Token validation with resilience failed: {e}")
             
             # Try cached validation as fallback
-            cached_result = self.token_cache.get_cached_token(token)
+            cached_result = await self.token_cache.get_cached_token(token)
             if cached_result and cached_result.get("valid"):
                 logger.warning("Using cached token validation due to auth service unavailability")
                 return {

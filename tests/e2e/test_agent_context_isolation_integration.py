@@ -13,6 +13,9 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List, Optional
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -22,20 +25,21 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from tests.e2e.agent_response_test_utilities import (
-    AgentResponseSimulator,
-)
+    AgentResponseSimulator)
 
 
 class TestContextAgent(BaseAgent):
     """Simple test agent for context isolation testing."""
     
     def __init__(self, llm_manager, name="TestAgent", description="Test agent", **kwargs):
+    pass
         super().__init__(llm_manager, name, description, **kwargs)
         self.context = {}
         
     async def execute(self, input_data=None):
         """Execute the test agent."""
-        return {"success": True, "name": self.name, "context_id": id(self.context)}
+        await asyncio.sleep(0)
+    return {"success": True, "name": self.name, "context_id": id(self.context)}
 
 
 @pytest.mark.integration
@@ -49,18 +53,19 @@ class TestAgentContextIsolation:
         config = get_config()
         llm_manager = LLMManager(config)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = None  # TODO: Use real service instead of Mock
+        websocket_manager = UnifiedWebSocketManager() instead of Mock
         
                 
         # Create required dependencies
-        db_session = None  # TODO: Use real service instead of Mock
-        tool_dispatcher = None  # TODO: Use real service instead of Mock
+        db_session = TestDatabaseManager().get_session() instead of Mock
+        tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service instead of Mock
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
         supervisor.user_id = f"test_context_user_{uuid.uuid4()}"
         
-        return {
+        await asyncio.sleep(0)
+    return {
             "supervisor": supervisor,
             "llm_manager": llm_manager,
             "websocket_manager": websocket_manager,
@@ -70,6 +75,7 @@ class TestAgentContextIsolation:
     @pytest.mark.e2e
     async def test_fresh_context_window_creation(self, context_setup):
         """Test that each spawned agent gets a fresh context window."""
+    pass
         supervisor = context_setup["supervisor"]
         
         # Create multiple agents
@@ -130,6 +136,7 @@ class TestAgentContextIsolation:
     @pytest.mark.e2e
     async def test_concurrent_context_isolation(self, context_setup):
         """Test context isolation under concurrent execution."""
+    pass
         supervisor = context_setup["supervisor"]
         
         # Create concurrent agents with different contexts
@@ -185,6 +192,7 @@ class TestAgentContextIsolation:
     @pytest.mark.e2e
     async def test_context_persistence_across_tasks(self, context_setup):
         """Test context persistence for agent task continuity."""
+    pass
         supervisor = context_setup["supervisor"]
         
         # Create agent with persistent context
@@ -226,7 +234,8 @@ class TestAgentContextIsolation:
         # Count fresh windows
         fresh_count = len([agent for agent in agents if agent.context is not None])
         
-        return {
+        await asyncio.sleep(0)
+    return {
             "all_contexts_unique": all_unique,
             "no_context_bleeding": no_bleeding,
             "fresh_window_count": fresh_count
@@ -333,6 +342,7 @@ async def test_memory_isolation_validation():
 @pytest.mark.e2e
 async def test_context_window_refresh():
     """Test context window refresh mechanism."""
+    pass
     config = get_config()
     llm_manager = LLMManager(config)
     

@@ -16,6 +16,7 @@ import aiohttp
 import requests
 from typing import Dict, List, Optional
 from test_framework.environment_markers import staging_only, env_requires
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestFrontendBackendConnection:

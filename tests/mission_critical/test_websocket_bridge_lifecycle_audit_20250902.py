@@ -1,4 +1,6 @@
 from shared.isolated_environment import get_env
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Bridge Lifecycle Audit 20250902
 
@@ -33,7 +35,6 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional, Tuple, Union
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from dataclasses import dataclass, field
 import random
 
@@ -59,6 +60,9 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @dataclass
@@ -231,10 +235,10 @@ class WebSocketBridgeLifecycleAuditor:
         
         # Create WebSocket bridge instances with mocked websocket manager
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_ws_manager:
-            mock_manager = AsyncMock()
+            websocket = TestWebSocketConnection()
             mock_manager.send_to_user = self._create_send_to_user_mock("test_user_0")
             mock_manager.connections = {}
-            mock_manager.send_to_thread = AsyncMock()
+            mock_manager.websocket = TestWebSocketConnection()
             mock_get_ws_manager.return_value = mock_manager
             
             # Create single bridge instance for all users (singleton pattern)
@@ -870,3 +874,27 @@ class TestWebSocketBridgeEdgeCases:
 if __name__ == "__main__":
     # Run the tests
     pytest.main([__file__, "-v", "-s", "--tb=short"])
+
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()

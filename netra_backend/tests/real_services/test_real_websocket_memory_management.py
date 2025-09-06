@@ -29,13 +29,14 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Set
 from contextlib import asynccontextmanager
+from shared.isolated_environment import IsolatedEnvironment
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 import uvicorn
 
 from test_framework.environment_isolation import get_test_env_manager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 

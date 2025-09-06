@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "category": "critical_domain_development",
+    "generated_at": "2025-09-05T09:42:05.444259",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 4
+  },
+  "literals": {
+    "localhost:3000": {
+      "value": "localhost:3000",
+      "category": "critical_domain_development",
+      "locations": [
+        "scripts/scan_string_literals.py:91",
+        "scripts/scan_string_literals.py:97",
+        "scripts/validate_network_constants.py:138"
+      ],
+      "environment": "development",
+      "warning": "CRITICAL DOMAIN for development - verify before changing!"
+    },
+    "localhost:8000": {
+      "value": "localhost:8000",
+      "category": "critical_domain_development",
+      "locations": [
+        "scripts/scan_string_literals.py:92",
+        "scripts/scan_string_literals.py:98"
+      ],
+      "environment": "development",
+      "warning": "CRITICAL DOMAIN for development - verify before changing!"
+    },
+    "localhost:8081": {
+      "value": "localhost:8081",
+      "category": "critical_domain_development",
+      "locations": [
+        "scripts/scan_string_literals.py:93",
+        "scripts/scan_string_literals.py:99"
+      ],
+      "environment": "development",
+      "warning": "CRITICAL DOMAIN for development - verify before changing!"
+    },
+    "ws://localhost:8000": {
+      "value": "ws://localhost:8000",
+      "category": "critical_domain_development",
+      "locations": [
+        "scripts/scan_string_literals.py:94",
+        "scripts/scan_string_literals.py:100",
+        "scripts/verify_cold_start.py:173",
+        "scripts/verify_cold_start.py:272"
+      ],
+      "environment": "development",
+      "warning": "CRITICAL DOMAIN for development - verify before changing!"
+    }
+  }
+}

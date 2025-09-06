@@ -31,6 +31,7 @@ import tempfile
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

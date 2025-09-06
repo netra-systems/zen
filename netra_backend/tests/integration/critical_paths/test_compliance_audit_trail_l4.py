@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """L4 Compliance Audit Trail Critical Path Test
 
 Business Value Justification (BVJ):
@@ -39,7 +40,7 @@ import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
-from netra_backend.app.schemas.registry import (
+from netra_backend.app.schemas import (
     CorpusAuditAction,
     CorpusAuditMetadata,
     CorpusAuditRecord,

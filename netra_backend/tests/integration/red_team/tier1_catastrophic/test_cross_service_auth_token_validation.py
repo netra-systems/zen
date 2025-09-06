@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TEST 1: Cross-Service Auth Token Validation
 
@@ -37,7 +38,7 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.services.user_auth_service import UserAuthService
 from netra_backend.app.redis_manager import RedisManager
 

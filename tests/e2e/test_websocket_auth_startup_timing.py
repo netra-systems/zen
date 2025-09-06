@@ -18,12 +18,14 @@ import jwt
 import datetime
 from datetime import timezone
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketAuthStartuper:
     """Tests WebSocket authentication timing during startup."""
     
     def __init__(self):
+    pass
         self.auth_url = "http://localhost:8081"  # Corrected port
         self.backend_url = "http://localhost:8001"
         self.websocket_url = "ws://localhost:8001/ws"
@@ -202,6 +204,7 @@ async def test_services_ready_before_websocket_auth():
     
     This ensures proper startup sequence and prevents timing-related auth failures.
     """
+    pass
     tester = WebSocketAuthStartupTester()
     
     # Test auth service readiness
@@ -223,6 +226,7 @@ async def test_websocket_authentication_with_valid_token():
     
     This validates the WebSocket authentication flow works when both services are ready.
     """
+    pass
     tester = WebSocketAuthStartupTester()
     
     # Ensure services are ready first
@@ -240,7 +244,8 @@ async def test_websocket_authentication_with_valid_token():
     # Test WebSocket connection with authentication
     result = await tester.test_websocket_connection_with_auth(token)
     
-    print(f"\n=== WEBSOCKET AUTH TEST RESULTS ===")
+    print(f"
+=== WEBSOCKET AUTH TEST RESULTS ===")
     print(f"Connection successful: {result['connection_successful']}")
     print(f"Auth accepted: {result['auth_accepted']}")
     print(f"Connection time: {result['connection_time_ms']:.1f}ms" if result['connection_time_ms'] else "N/A")
@@ -270,6 +275,7 @@ async def test_websocket_rejects_connections_without_auth():
     
     This validates the security of the WebSocket authentication system.
     """
+    pass
     tester = WebSocketAuthStartupTester()
     
     # Ensure services are ready first
@@ -282,7 +288,8 @@ async def test_websocket_rejects_connections_without_auth():
     # Test WebSocket connection without authentication
     result = await tester.test_websocket_auth_without_token()
     
-    print(f"\n=== WEBSOCKET SECURITY TEST RESULTS ===")
+    print(f"
+=== WEBSOCKET SECURITY TEST RESULTS ===")
     print(f"Connection rejected: {result['connection_rejected']}")
     
     if result['error']:
@@ -308,6 +315,7 @@ async def test_websocket_auth_timing_requirements():
     
     This ensures WebSocket auth is fast enough for good user experience.
     """
+    pass
     tester = WebSocketAuthStartupTester()
     
     # Ensure services are ready
@@ -336,7 +344,8 @@ async def test_websocket_auth_timing_requirements():
         # Small delay between tests
         await asyncio.sleep(0.5)
     
-    print(f"\n=== WEBSOCKET TIMING ANALYSIS ===")
+    print(f"
+=== WEBSOCKET TIMING ANALYSIS ===")
     print(f"Successful connections: {successful_connections}/3")
     
     if connection_times:
@@ -360,6 +369,7 @@ async def test_websocket_auth_timing_requirements():
 
 if __name__ == "__main__":
     async def main():
+    pass
         tester = WebSocketAuthStartupTester()
         
         print("=== WEBSOCKET AUTH STARTUP TEST ===")

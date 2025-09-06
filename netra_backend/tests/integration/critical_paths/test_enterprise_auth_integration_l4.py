@@ -20,6 +20,7 @@ import base64
 import hashlib
 import json
 import secrets
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import time

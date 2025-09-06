@@ -6,12 +6,32 @@
 import React from 'react';
 import { render, waitFor, act, screen } from '@testing-library/react';
 import { WebSocketProvider, useWebSocketContext } from '../../providers/WebSocketProvider';
-import { webSocketService } from '../../services/webSocketService';
 import { AuthContext } from '@/auth/context';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 
-// Mock dependencies
-jest.mock('../../services/webSocketService');
+// Mock the webSocketService module
+jest.mock('../../services/webSocketService', () => ({
+  webSocketService: {
+    connect: jest.fn(),
+    updateToken: jest.fn().mockResolvedValue(undefined),
+    disconnect: jest.fn(),
+    sendMessage: jest.fn(),
+    getSecureUrl: jest.fn((url) => url),
+    onStatusChange: null,
+    onMessage: null,
+    getState: jest.fn(() => 'disconnected'),
+  }
+}));
+
+import { webSocketService } from '../../services/webSocketService';
+
+// Get typed mocks after import
+const mockConnect = webSocketService.connect as jest.MockedFunction<typeof webSocketService.connect>;
+const mockUpdateToken = webSocketService.updateToken as jest.MockedFunction<typeof webSocketService.updateToken>;
+const mockDisconnect = webSocketService.disconnect as jest.MockedFunction<typeof webSocketService.disconnect>;
+const mockSendMessage = webSocketService.sendMessage as jest.MockedFunction<typeof webSocketService.sendMessage>;
+const mockGetSecureUrl = webSocketService.getSecureUrl as jest.MockedFunction<typeof webSocketService.getSecureUrl>;
+
 jest.mock('@/lib/unified-auth-service');
 jest.mock('@/config', () => ({
   config: {
@@ -56,36 +76,38 @@ const TestConsumer = () => {
 
 describe('WebSocketProvider - SSOT Connection Management', () => {
   let mockAuthContext: any;
-  let mockConnect: jest.Mock;
-  let mockUpdateToken: jest.Mock;
-  let mockDisconnect: jest.Mock;
-  let mockSendMessage: jest.Mock;
-  let mockGetSecureUrl: jest.Mock;
 
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
+    mockConnect.mockClear();
+    mockUpdateToken.mockClear();
+    mockDisconnect.mockClear();
+    mockSendMessage.mockClear();
+    mockGetSecureUrl.mockClear();
     
-    // Setup WebSocket service mocks
-    mockConnect = jest.fn();
-    mockUpdateToken = jest.fn().mockResolvedValue(undefined);
-    mockDisconnect = jest.fn();
-    mockSendMessage = jest.fn();
-    mockGetSecureUrl = jest.fn((url) => url);
-
-    (webSocketService as any).connect = mockConnect;
-    (webSocketService as any).updateToken = mockUpdateToken;
-    (webSocketService as any).disconnect = mockDisconnect;
-    (webSocketService as any).sendMessage = mockSendMessage;
-    (webSocketService as any).getSecureUrl = mockGetSecureUrl;
-    (webSocketService as any).onStatusChange = null;
-    (webSocketService as any).onMessage = null;
+    // Reset mock implementation
+    mockUpdateToken.mockResolvedValue(undefined);
+    mockGetSecureUrl.mockImplementation((url) => url);
 
     // Setup auth context mock
     mockAuthContext = {
       token: null,
       initialized: false,
       user: null,
+    };
+
+    // CRITICAL: Override the global auth mock to control useAuth() behavior
+    (global as any).mockAuthState = {
+      token: null,
+      initialized: false,
+      user: null,
+      loading: false,
+      error: null,
+      isAuthenticated: false,
+      authConfig: {},
+      login: jest.fn(),
+      logout: jest.fn()
     };
 
     // Setup unified auth service mock
@@ -115,6 +137,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         user: { id: 'user1', email: 'test@test.com' }
       };
 
+      // CRITICAL: Update global mock state to match
+      (global as any).mockAuthState = {
+        token: 'test_token_123',
+        initialized: true,
+        user: { id: 'user1', email: 'test@test.com' },
+        loading: false,
+        error: null,
+        isAuthenticated: true,
+        authConfig: {},
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+
       await act(async () => {
         rerender(
           <AuthContext.Provider value={mockAuthContext}>
@@ -125,7 +160,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         );
       });
 
-      // Wait for effects to settle
+      // Wait for debounced effects to settle (WebSocketProvider uses 50ms debounce)
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
+
       await waitFor(() => {
         // CRITICAL: Should only connect ONCE despite multiple state changes
         expect(mockConnect).toHaveBeenCalledTimes(1);
@@ -156,6 +195,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         </AuthContext.Provider>
       );
 
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
+
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalledTimes(1);
       });
@@ -167,6 +211,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         user: { id: 'user1', email: 'test@test.com' }
       };
 
+      // Update global mock state
+      (global as any).mockAuthState = {
+        token: 'refreshed_token',
+        initialized: true,
+        user: { id: 'user1', email: 'test@test.com' },
+        loading: false,
+        error: null,
+        isAuthenticated: true,
+        authConfig: {},
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+
       await act(async () => {
         rerender(
           <AuthContext.Provider value={mockAuthContext}>
@@ -175,6 +232,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
             </WebSocketProvider>
           </AuthContext.Provider>
         );
+      });
+
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
 
       await waitFor(() => {
@@ -192,6 +254,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         user: { id: 'user1', email: 'test@test.com' }
       };
 
+      // Update global mock state
+      (global as any).mockAuthState = {
+        token: 'test_token',
+        initialized: true,
+        user: { id: 'user1', email: 'test@test.com' },
+        loading: false,
+        error: null,
+        isAuthenticated: true,
+        authConfig: {},
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+
       const { rerender } = render(
         <AuthContext.Provider value={mockAuthContext}>
           <WebSocketProvider>
@@ -207,6 +282,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           token: `token_${i}`,
         };
 
+        // Update global mock state
+        (global as any).mockAuthState = {
+          token: `token_${i}`,
+          initialized: true,
+          user: { id: 'user1', email: 'test@test.com' },
+          loading: false,
+          error: null,
+          isAuthenticated: true,
+          authConfig: {},
+          login: jest.fn(),
+          logout: jest.fn()
+        };
+
         await act(async () => {
           rerender(
             <AuthContext.Provider value={mockAuthContext}>
@@ -217,6 +305,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           );
         });
       }
+
+      // Wait for all debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      });
 
       // Despite 5 token changes, should still only have 1 connection
       await waitFor(() => {
@@ -234,6 +327,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         user: { id: 'user1', email: 'test@test.com' }
       };
 
+      // Update global mock state
+      (global as any).mockAuthState = {
+        token: 'test_token',
+        initialized: true,
+        user: { id: 'user1', email: 'test@test.com' },
+        loading: false,
+        error: null,
+        isAuthenticated: true,
+        authConfig: {},
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+
       const { rerender } = render(
         <AuthContext.Provider value={mockAuthContext}>
           <WebSocketProvider>
@@ -241,6 +347,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           </WebSocketProvider>
         </AuthContext.Provider>
       );
+
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
 
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalledTimes(1);
@@ -253,6 +364,19 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         user: null
       };
 
+      // Update global mock state for logout
+      (global as any).mockAuthState = {
+        token: null,
+        initialized: true,
+        user: null,
+        loading: false,
+        error: null,
+        isAuthenticated: false,
+        authConfig: {},
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+
       await act(async () => {
         rerender(
           <AuthContext.Provider value={mockAuthContext}>
@@ -261,6 +385,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
             </WebSocketProvider>
           </AuthContext.Provider>
         );
+      });
+
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
       });
 
       await waitFor(() => {
@@ -301,6 +430,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           </WebSocketProvider>
         </AuthContext.Provider>
       );
+
+      // Wait for debounced effects and simulate connection completion
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
 
       await waitFor(() => {
         expect(stateLog).toEqual(['connecting', 'connected']);
@@ -363,6 +497,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         </AuthContext.Provider>
       );
 
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
+
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalled();
       });
@@ -403,6 +542,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           </WebSocketProvider>
         </AuthContext.Provider>
       );
+
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
 
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalled();
@@ -462,6 +606,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
           </WebSocketProvider>
         </AuthContext.Provider>
       );
+
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
 
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalledTimes(1);
@@ -529,6 +678,11 @@ describe('WebSocketProvider - SSOT Connection Management', () => {
         </AuthContext.Provider>
       );
 
+      // Wait for debounced effects to settle
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
+
       await waitFor(() => {
         expect(mockConnect).toHaveBeenCalled();
       });
@@ -548,24 +702,17 @@ describe('WebSocketProvider - Integration Tests', () => {
   it('should handle complete auth flow without connection loops', async () => {
     const connectionLog: string[] = [];
     
-    const mockWebSocketService = {
-      connect: jest.fn((url, options) => {
-        connectionLog.push(`connect:${url}`);
-      }),
-      updateToken: jest.fn((token) => {
-        connectionLog.push(`updateToken:${token}`);
-        return Promise.resolve();
-      }),
-      disconnect: jest.fn(() => {
-        connectionLog.push('disconnect');
-      }),
-      sendMessage: jest.fn(),
-      getSecureUrl: jest.fn((url) => url),
-      onStatusChange: null,
-      onMessage: null,
-    };
-
-    (webSocketService as any) = mockWebSocketService;
+    // Setup mocks to track calls
+    mockConnect.mockImplementation((url, options) => {
+      connectionLog.push(`connect:${url}`);
+    });
+    mockUpdateToken.mockImplementation((token) => {
+      connectionLog.push(`updateToken:${token}`);
+      return Promise.resolve();
+    });
+    mockDisconnect.mockImplementation(() => {
+      connectionLog.push('disconnect');
+    });
 
     // Simulate complete auth flow
     const authStates = [
@@ -596,8 +743,10 @@ describe('WebSocketProvider - Integration Tests', () => {
         );
       });
       
-      // Small delay to let effects settle
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for debounced effects to settle (WebSocketProvider uses 50ms debounce)
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
     }
 
     // Verify correct connection sequence

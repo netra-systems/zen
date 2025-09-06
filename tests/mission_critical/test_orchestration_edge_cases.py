@@ -45,7 +45,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
-from unittest.mock import Mock, patch, MagicMock, PropertyMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -139,6 +144,7 @@ class TestNetworkPartitionChaos:
 
     def test_split_brain_prevention(self, multi_region_topology):
         """CRITICAL: Test split-brain prevention during network partitions."""
+    pass
         regions = multi_region_topology["regions"]
         consensus_nodes = multi_region_topology["consensus_nodes"]
         
@@ -548,6 +554,7 @@ class TestResourceExhaustionChaos:
 
     def test_cpu_starvation_recovery(self):
         """CRITICAL: Test recovery from CPU starvation scenarios."""
+    pass
         # CPU-intensive workload simulation
         cpu_starvation_scenarios = [
             {
@@ -1176,14 +1183,16 @@ if __name__ == "__main__":
     result = pytest.main(pytest_args)
     
     if result == 0:
-        print("\n" + "=" * 90)
+        print("
+" + "=" * 90)
         print("✅ ALL CHAOS ENGINEERING TESTS PASSED")
         print("🛡️  Orchestration system is BULLETPROOF against extreme failure conditions")
         print("🚀 Enterprise-ready for 100+ services with 99.9% uptime SLA guaranteed")
         print("💪 Byzantine fault tolerance, DDoS resilience, split-brain prevention VERIFIED")
         print("=" * 90)
     else:
-        print("\n" + "=" * 90)
+        print("
+" + "=" * 90)
         print("❌ CHAOS ENGINEERING TESTS FAILED")
         print("🚨 Orchestration system VULNERABLE to extreme failure conditions")
         print("⚠️  NOT ready for enterprise deployment - critical resilience gaps detected")
@@ -1191,3 +1200,4 @@ if __name__ == "__main__":
         print("=" * 90)
     
     sys.exit(result)
+    pass

@@ -17,6 +17,7 @@ import pytest
 import sys
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -61,7 +62,7 @@ class TestCORSConfiguration:
         cloud_run_patterns = [
             "https://netra-frontend-701982941522.us-central1.run.app",
             "https://netra-backend-701982941522.us-central1.run.app",
-            "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            "https://auth.staging.netrasystems.ai"
         ]
         
         missing_urls = []
@@ -379,7 +380,7 @@ class TestCORSRegressionPrevention:
         cors = CORSConfigurationBuilder({"ENVIRONMENT": "staging"})
         
         # This specific URL must be present for auth service
-        assert "https://netra-auth-service-pnovr5vsba-uc.a.run.app" in cors.origins.allowed, (
+        assert "https://auth.staging.netrasystems.ai" in cors.origins.allowed, (
             "Auth service Cloud Run URL missing from staging origins"
         )
     

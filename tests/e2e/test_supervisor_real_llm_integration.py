@@ -6,6 +6,7 @@ CRITICAL: Uses ONLY real services - no mocks allowed per CLAUDE.md principles.
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

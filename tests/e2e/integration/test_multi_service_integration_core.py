@@ -7,6 +7,7 @@ Business Value: $500K+ MRR protection via comprehensive cross-service validation
 import asyncio
 import uuid
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

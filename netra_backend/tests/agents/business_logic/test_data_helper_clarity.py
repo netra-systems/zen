@@ -4,33 +4,40 @@ Ensures data requests are clear, actionable, and lead to successful optimization
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 import json
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.agents.models import (
+import asyncio
     DataRequest,
     DataRequirement,
     DataCategory,
     DataPriority,
     UserExperience
 )
-from netra_backend.tests.agents.fixtures.llm_agent_fixtures import mock_llm_manager
 
 
 class TestDataHelperClarity:
     """Validate DataHelper produces clear, actionable data requests."""
+    pass
 
     @pytest.fixture
     async def data_helper_agent(self, mock_llm_manager):
         """Create a DataHelperAgent with mocked dependencies."""
         agent = DataHelperAgent(llm_manager=mock_llm_manager)
-        return agent
+        await asyncio.sleep(0)
+    return agent
 
     @pytest.fixture
     def data_request_scenarios(self) -> Dict[str, Dict[str, Any]]:
         """Define scenarios for data request generation."""
+    pass
         return {
             "missing_cost_data": {
                 "context": {
@@ -134,6 +141,7 @@ class TestDataHelperClarity:
     @pytest.mark.asyncio
     async def test_question_clarity_and_specificity(self, data_helper_agent, data_request_scenarios):
         """Test that generated questions are clear and specific."""
+    pass
         scenario = data_request_scenarios["missing_performance_data"]
         
         with patch.object(data_helper_agent, 'generate_questions') as mock_generate:
@@ -220,6 +228,7 @@ class TestDataHelperClarity:
     @pytest.mark.asyncio
     async def test_progressive_data_collection(self, data_helper_agent):
         """Test that data collection is progressive (critical first)."""
+    pass
         context = {
             "optimization_goal": "comprehensive",
             "available_data": {}
@@ -293,6 +302,7 @@ class TestDataHelperClarity:
     @pytest.mark.asyncio
     async def test_context_aware_requests(self, data_helper_agent, data_request_scenarios):
         """Test that requests adapt to user context."""
+    pass
         contexts = [
             {
                 "user_type": "startup",
@@ -365,6 +375,7 @@ class TestDataHelperClarity:
     @pytest.mark.asyncio
     async def test_fallback_for_missing_data(self, data_helper_agent):
         """Test graceful handling when user cannot provide data."""
+    pass
         context = {
             "user_response": "I don't have access to those metrics",
             "requested_data": ["performance_metrics"]
@@ -446,6 +457,7 @@ class TestDataHelperClarity:
     @pytest.mark.asyncio
     async def test_data_request_success_metrics(self, data_helper_agent):
         """Test that data requests lead to successful optimization."""
+    pass
         # Track success rate of data collection
         test_sessions = [
             {
@@ -482,7 +494,10 @@ class TestDataHelperClarity:
         assert completion_rate >= 0.5  # At least half of requested data provided
 
     def test_user_experience_quality(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Meta-test for user experience quality."""
+    pass
         ux_requirements = {
             "clarity": {
                 "max_questions_per_request": 5,

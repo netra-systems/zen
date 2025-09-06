@@ -43,7 +43,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -179,6 +184,7 @@ class TestServiceMeshIntegration:
     
     def test_sidecar_injection_and_configuration(self, service_mesh_topology):
         """CRITICAL: Test automatic sidecar injection and configuration management."""
+    pass
         services = service_mesh_topology["services"]
         sidecar_configurations = {}
         injection_events = []
@@ -530,6 +536,7 @@ class TestDistributedTransactionCoordination:
 
     def test_multi_tenant_service_isolation(self, distributed_transaction_services):
         """CRITICAL: Test multi-tenant service isolation and resource boundaries."""
+    pass
         services = distributed_transaction_services
         
         # Multi-tenant configuration
@@ -717,13 +724,15 @@ if __name__ == "__main__":
     result = pytest.main(pytest_args)
     
     if result == 0:
-        print("\n" + "=" * 85)
+        print("
+" + "=" * 85)
         print("✅ ALL MULTI-SERVICE INTEGRATION TESTS PASSED")
         print("🚀 Multi-service orchestration ready for ENTERPRISE DEPLOYMENT")
         print("🏗️ Service mesh, distributed transactions, event coordination VERIFIED")
         print("=" * 85)
     else:
-        print("\n" + "=" * 85)
+        print("
+" + "=" * 85)
         print("❌ MULTI-SERVICE INTEGRATION TESTS FAILED")
         print("🚨 Multi-service coordination BROKEN - fix before deployment")
         print("⚠️ Enterprise integration requirements not met")

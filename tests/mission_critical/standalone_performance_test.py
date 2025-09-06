@@ -11,12 +11,15 @@ import time
 import statistics
 import psutil
 import gc
-from unittest.mock import Mock, MagicMock, AsyncMock
 from datetime import datetime, timezone
 import uuid
 from typing import List, Dict, Any, Tuple
 from dataclasses import dataclass
 from collections import defaultdict
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 @dataclass
@@ -256,7 +259,8 @@ async def test_latency_baseline():
 
 async def test_throughput_baseline():
     """Test throughput performance baseline."""
-    print("\nTesting throughput baseline...")
+    print("
+Testing throughput baseline...")
     
     emitter = MockWebSocketEmitter("throughput-test-user", latency_ms=0.01)
     
@@ -296,7 +300,8 @@ async def test_throughput_baseline():
 
 async def test_connection_establishment():
     """Test connection establishment time."""
-    print("\n🔗 Testing connection establishment...")
+    print("
+🔗 Testing connection establishment...")
     
     connection_times = []
     num_connections = 100
@@ -333,7 +338,8 @@ async def test_connection_establishment():
 
 async def test_concurrent_users():
     """Test concurrent user performance."""
-    print("\n👥 Testing concurrent users (25+)...")
+    print("
+👥 Testing concurrent users (25+)...")
     
     num_users = 30
     events_per_user = 50
@@ -452,7 +458,8 @@ async def test_comprehensive_performance():
         )
         
         # Generate final report
-        print("\n📊 COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
+        print("
+📊 COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
         print("=" * 60)
         print(f"Performance Summary:")
         print(f"  P50 Latency: {metrics.p50_latency:.2f}ms")
@@ -478,10 +485,12 @@ async def test_comprehensive_performance():
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed])
         
         if all_passed:
-            print("\n🎉 ALL PERFORMANCE REQUIREMENTS PASSED!")
+            print("
+🎉 ALL PERFORMANCE REQUIREMENTS PASSED!")
             print("✅ WebSocket bridge ready for production with 25+ concurrent users")
         else:
-            print("\n💥 SOME PERFORMANCE REQUIREMENTS FAILED!")
+            print("
+💥 SOME PERFORMANCE REQUIREMENTS FAILED!")
             print("❌ Performance optimization required before production")
         
         return metrics
@@ -572,7 +581,8 @@ async def main():
         with open("websocket_performance_baseline_report.md", "w") as f:
             f.write(report)
         
-        print("\n📋 Performance baseline report generated: websocket_performance_baseline_report.md")
+        print("
+📋 Performance baseline report generated: websocket_performance_baseline_report.md")
         
         # Print final status
         requirements_met = (

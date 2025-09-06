@@ -1,5 +1,6 @@
 """
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 Comprehensive E2E OAuth flow test for staging environment.
 Validates complete OAuth token flow across all services.
 """
@@ -30,6 +31,7 @@ class TestOAuthFlower:
     """Complete OAuth flow tester for staging environment"""
     
     def __init__(self):
+    pass
         self.auth_service_url = get_env().get(
             "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
         )
@@ -334,19 +336,22 @@ class TestOAuthFlower:
     
     async def run_comprehensive_test(self):
         """Run comprehensive OAuth flow test"""
-        print("\n" + "=" * 70)
+        print("
+" + "=" * 70)
         print("COMPREHENSIVE OAUTH FLOW TEST - STAGING ENVIRONMENT")
         print("=" * 70)
         print(f"Auth Service: {self.auth_service_url}")
         print(f"Frontend: {self.frontend_url}")
         print(f"API: {self.api_url}")
         print(f"WebSocket: {self.websocket_url}")
-        print("=" * 70 + "\n")
+        print("=" * 70 + "
+")
         
         results = []
         
         # 1. Test OAuth Configuration
-        print("\n[1/7] Testing OAuth Configuration...")
+        print("
+[1/7] Testing OAuth Configuration...")
         print("-" * 50)
         try:
             config = await self.test_oauth_configuration()
@@ -356,7 +361,8 @@ class TestOAuthFlower:
             results.append(("OAuth Configuration", False))
         
         # 2. Test OAuth Initiation
-        print("\n[2/7] Testing OAuth Initiation...")
+        print("
+[2/7] Testing OAuth Initiation...")
         print("-" * 50)
         try:
             redirect_uri = await self.test_oauth_initiation()
@@ -366,7 +372,8 @@ class TestOAuthFlower:
             results.append(("OAuth Initiation", False))
         
         # 3. Test OAuth Callback
-        print("\n[3/7] Testing OAuth Callback Handling...")
+        print("
+[3/7] Testing OAuth Callback Handling...")
         print("-" * 50)
         try:
             callback_result = await self.test_oauth_callback_simulation()
@@ -376,7 +383,8 @@ class TestOAuthFlower:
             results.append(("OAuth Callback", False))
         
         # 4. Test Token Validation
-        print("\n[4/7] Testing Token Validation...")
+        print("
+[4/7] Testing Token Validation...")
         print("-" * 50)
         try:
             validation_result = await self.test_token_validation()
@@ -386,7 +394,8 @@ class TestOAuthFlower:
             results.append(("Token Validation", False))
         
         # 5. Test API Authentication
-        print("\n[5/7] Testing API Authentication...")
+        print("
+[5/7] Testing API Authentication...")
         print("-" * 50)
         try:
             api_auth_result = await self.test_api_authentication()
@@ -396,7 +405,8 @@ class TestOAuthFlower:
             results.append(("API Authentication", False))
         
         # 6. Test WebSocket Authentication
-        print("\n[6/7] Testing WebSocket Authentication...")
+        print("
+[6/7] Testing WebSocket Authentication...")
         print("-" * 50)
         try:
             ws_auth_result = await self.test_websocket_authentication()
@@ -406,7 +416,8 @@ class TestOAuthFlower:
             results.append(("WebSocket Authentication", False))
         
         # 7. Test Service Integration
-        print("\n[7/7] Testing Service Integration...")
+        print("
+[7/7] Testing Service Integration...")
         print("-" * 50)
         try:
             integration_results = await self.test_service_integration()
@@ -417,7 +428,8 @@ class TestOAuthFlower:
             results.append(("Service Integration", False))
         
         # Summary
-        print("\n" + "=" * 70)
+        print("
+" + "=" * 70)
         print("TEST SUMMARY")
         print("=" * 70)
         
@@ -428,15 +440,20 @@ class TestOAuthFlower:
             status = "[PASS]" if result else "[FAIL]"
             print(f"{status} {test_name}")
         
-        print(f"\nTotal: {passed}/{total} tests passed")
+        print(f"
+Total: {passed}/{total} tests passed")
         
         if passed == total:
-            print("\n[SUCCESS] All OAuth flow tests passed!")
-            print("The OAuth token return flow is working correctly in staging.")
+            print("
+[SUCCESS] All OAuth flow tests passed!")
+            print("The OAuth token await asyncio.sleep(0)
+    return flow is working correctly in staging.")
             return True
         else:
-            print(f"\n[WARNING] {total - passed} test(s) failed")
-            print("\nRecommendations:")
+            print(f"
+[WARNING] {total - passed} test(s) failed")
+            print("
+Recommendations:")
             
             failed_tests = [name for name, result in results if not result]
             
@@ -460,8 +477,10 @@ class TestOAuthFlower:
 
 async def main():
     """Main test runner"""
+    pass
     tester = OAuthFlowTester()
     success = await tester.run_comprehensive_test()
+    await asyncio.sleep(0)
     return 0 if success else 1
 
 

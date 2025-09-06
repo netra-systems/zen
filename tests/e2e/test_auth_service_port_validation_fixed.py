@@ -12,12 +12,14 @@ import asyncio
 import httpx
 import pytest
 from typing import Dict, Any, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class AuthServicePortValidator:
     """Validates auth service is accessible on the correct port."""
     
     def __init__(self):
+    pass
         self.correct_port = 8081  # Port configured in dev launcher
         self.auth_url = f"http://localhost:{self.correct_port}"
     
@@ -113,11 +115,13 @@ async def test_auth_service_port_8081_accessibility():
     This test ensures the port configuration matches between the dev launcher 
     configuration and the actual running auth service.
     """
+    pass
     validator = AuthServicePortValidator()
     result = await validator.validate_auth_service_accessibility()
     
     # Print results for debugging
-    print(f"\n=== AUTH SERVICE PORT VALIDATION ===")
+    print(f"
+=== AUTH SERVICE PORT VALIDATION ===")
     print(f"Port: {result['port']}")
     print(f"Accessible: {result['accessible']}")
     print(f"Health Status: {result['health_status']}")
@@ -148,10 +152,12 @@ async def test_auth_service_endpoints_availability():
     
     This validates the auth service is properly initialized with its main endpoints.
     """
+    pass
     validator = AuthServicePortValidator()
     results = await validator.validate_auth_endpoints()
     
-    print(f"\n=== AUTH SERVICE ENDPOINTS ===")
+    print(f"
+=== AUTH SERVICE ENDPOINTS ===")
     for endpoint, result in results.items():
         status = "✅" if result['accessible'] else "❌"
         print(f"{status} {endpoint}: {result.get('status_code', 'NO_RESPONSE')} - {result['description']}")
@@ -186,6 +192,7 @@ async def test_auth_service_timing_expectations():
     This ensures the auth service responds quickly enough for WebSocket authentication
     during connection establishment.
     """
+    pass
     validator = AuthServicePortValidator()
     
     # Test multiple rapid requests to simulate WebSocket handshake timing
@@ -208,7 +215,8 @@ async def test_auth_service_timing_expectations():
     max_response_time = max(request_times)
     min_response_time = min(request_times)
     
-    print(f"\n=== AUTH SERVICE TIMING ANALYSIS ===")
+    print(f"
+=== AUTH SERVICE TIMING ANALYSIS ===")
     print(f"Average response time: {avg_response_time:.1f}ms")
     print(f"Min response time: {min_response_time:.1f}ms")
     print(f"Max response time: {max_response_time:.1f}ms")
@@ -227,13 +235,15 @@ async def test_auth_service_timing_expectations():
 
 if __name__ == "__main__":
     async def main():
+    pass
         validator = AuthServicePortValidator()
         
         print("=== AUTH SERVICE PORT VALIDATION ===")
         result = await validator.validate_auth_service_accessibility()
         print(f"Accessibility: {result}")
         
-        print("\n=== AUTH SERVICE ENDPOINTS ===") 
+        print("
+=== AUTH SERVICE ENDPOINTS ===") 
         endpoints = await validator.validate_auth_endpoints()
         for endpoint, result in endpoints.items():
             print(f"{endpoint}: {result}")

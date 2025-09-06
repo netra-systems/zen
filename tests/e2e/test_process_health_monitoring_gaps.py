@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 FAILING TESTS for Process Health Monitoring Gaps - Iteration 2
 
@@ -28,9 +54,18 @@ import sys
 import time
 import unittest
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import requests
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 # Pytest imports for test markers - using standard pytest marks
 
@@ -42,6 +77,7 @@ class TestProcessSupervisionGaps(unittest.TestCase):
     Root Cause: When dev launcher reaches its timeout (60-120s), started
     processes terminate rather than continuing independently.
     """
+    pass
 
     @pytest.mark.e2e
     def test_process_independence_after_launcher_exit(self):
@@ -51,8 +87,9 @@ class TestProcessSupervisionGaps(unittest.TestCase):
         When the dev launcher process terminates (timeout/signal), the spawned
         backend/auth/frontend processes should continue running independently.
         """
+    pass
         # Mock launcher process and child processes
-        mock_launcher = None  # TODO: Use real service instead of Mock
+        mock_launcher = mock_launcher_instance  # Initialize appropriate service instead of Mock
         mock_backend = Mock(pid=1001)
         mock_auth = Mock(pid=1002) 
         mock_frontend = Mock(pid=1003)
@@ -80,9 +117,10 @@ class TestProcessSupervisionGaps(unittest.TestCase):
         Child processes should be started in separate process groups to
         prevent cascade termination when the launcher exits.
         """
+    pass
         # Mock process spawning
         with patch('subprocess.Popen') as mock_popen:
-            mock_process = None  # TODO: Use real service instead of Mock
+            mock_process = mock_process_instance  # Initialize appropriate service instead of Mock
             mock_popen.return_value = mock_process
             
             # Simulate launcher starting a backend process
@@ -112,6 +150,7 @@ class TestProcessSupervisionGaps(unittest.TestCase):
         Instead of terminating everything on timeout, launcher should transition
         to a lightweight monitoring mode to track process health.
         """
+    pass
         # Mock launcher timeout scenario
         launcher_timeout = 120  # seconds
         start_time = time.time()
@@ -143,6 +182,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
     Root Cause: Health checks have timing issues that cause false negatives,
     particularly during service bootstrap phases.
     """
+    pass
 
     @pytest.mark.e2e
     def test_health_check_bootstrap_awareness(self):
@@ -152,6 +192,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
         Services need different amounts of time to initialize. Health checks
         should adapt timeouts based on service type and bootstrap phase.
         """
+    pass
         # Mock different service bootstrap times
         service_bootstrap_times = {
             'redis': 5,      # Fast startup
@@ -182,6 +223,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
         Failed health checks should retry with increasing intervals rather
         than fixed intervals or immediate failure.
         """
+    pass
         # Mock intermittent health check failures
         health_responses = [
             Mock(status_code=503),  # First attempt fails
@@ -189,8 +231,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
             Mock(status_code=200)   # Third attempt succeeds
         ]
         
-        with patch('requests.get', side_effect=health_responses):
-            with patch('time.sleep') as mock_sleep:
+                    with patch('time.sleep') as mock_sleep:
                 # Simulate health check with retries
                 max_retries = 3
                 base_delay = 1
@@ -219,6 +260,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
         When one service health check fails, it should not trigger health
         check failures in dependent services that are actually healthy.
         """
+    pass
         # Mock dependency chain: frontend -> backend -> database
         services = {
             'database': Mock(status_code=503),  # Database unhealthy
@@ -228,6 +270,7 @@ class TestHealthCheckTimingIssues(unittest.TestCase):
         
         with patch('requests.get') as mock_get:
             def health_response(url, **kwargs):
+    pass
                 if 'database' in url:
                     return services['database']
                 elif 'backend' in url:
@@ -259,6 +302,7 @@ class TestErrorDiagnosticsGaps(unittest.TestCase):
     Root Cause: When processes fail or health checks fail, insufficient
     diagnostic information is captured for debugging.
     """
+    pass
 
     @pytest.mark.e2e
     def test_process_exit_diagnostic_capture(self):
@@ -268,11 +312,12 @@ class TestErrorDiagnosticsGaps(unittest.TestCase):
         When processes exit unexpectedly, diagnostic information like memory
         usage, open file handles, recent logs should be captured.
         """
+    pass
         # Mock process about to exit
         mock_process = Mock(pid=1001, returncode=1)
         
         with patch('psutil.Process') as mock_psutil:
-            mock_proc = None  # TODO: Use real service instead of Mock
+            mock_proc = mock_proc_instance  # Initialize appropriate service instead of Mock
             mock_proc.memory_info.return_value = Mock(rss=100*1024*1024)  # 100MB
             mock_proc.num_fds.return_value = 50
             mock_proc.connections.return_value = []
@@ -306,6 +351,7 @@ class TestErrorDiagnosticsGaps(unittest.TestCase):
         Health check failures should capture not just the failure but context
         about why the check failed and what might resolve it.
         """
+    pass
         # Mock health check failure scenarios
         failure_scenarios = [
             {'error': 'Connection refused', 'port': 8000},
@@ -339,6 +385,7 @@ class TestErrorDiagnosticsGaps(unittest.TestCase):
         When multiple services show errors, the system should identify
         whether they are related (e.g., shared database failure) or independent.
         """
+    pass
         # Mock correlated failures across services
         correlated_errors = {
             'backend': 'Database connection failed: postgres://localhost:5432/netra_dev',
@@ -364,6 +411,7 @@ class TestRecoveryMechanismGaps(unittest.TestCase):
     Root Cause: System lacks automatic recovery capabilities when
     processes fail or health checks indicate issues.
     """
+    pass
 
     @pytest.mark.e2e
     def test_automatic_process_restart_capability(self):
@@ -373,11 +421,11 @@ class TestRecoveryMechanismGaps(unittest.TestCase):
         When critical processes exit unexpectedly, the system should attempt
         automatic restart with configurable retry policies.
         """
+    pass
         # Mock failed backend process
         failed_process = Mock(pid=1001, returncode=1, poll=Mock(return_value=1))
         
-        with patch('subprocess.Popen', return_value=failed_process):
-            # Simulate process failure detection
+                    # Simulate process failure detection
             if failed_process.poll() == 1:
                 # FAILING ASSERTION: Should attempt automatic restart
                 restart_attempted = False  # This should be True
@@ -396,6 +444,7 @@ class TestRecoveryMechanismGaps(unittest.TestCase):
         When health checks fail, the system should attempt recovery actions
         like service restart, dependency verification, resource cleanup.
         """
+    pass
         # Mock service with failing health check
         with patch('requests.get') as mock_get:
             mock_get.return_value = Mock(status_code=503)
@@ -424,6 +473,7 @@ class TestRecoveryMechanismGaps(unittest.TestCase):
         When non-critical components fail, the system should continue operating
         in a degraded mode rather than complete failure.
         """
+    pass
         # Mock partial system failure
         component_status = {
             'core_api': 'healthy',

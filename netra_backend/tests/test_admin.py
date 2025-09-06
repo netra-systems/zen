@@ -1,12 +1,14 @@
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime
 from datetime import timezone
 import uuid
-from unittest.mock import MagicMock, patch
 
 import pytest
 from netra_backend.app.auth_integration.auth import ActiveUserWsDep
@@ -18,6 +20,8 @@ from netra_backend.app.config import get_config
 
 @pytest.fixture(scope="function", autouse=True)
 def settings_override():
+    """Use real service instance."""
+    # TODO: Initialize real service
     config = get_config()
     original_tables = list(config.clickhouse_logging.available_tables)
     original_default_table = config.clickhouse_logging.default_table
@@ -29,6 +33,8 @@ def settings_override():
 
 @pytest.fixture
 def superuser_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     mock_user = User(
         id=str(uuid.uuid4()),
         email="superuser@example.com",
@@ -45,6 +51,8 @@ def superuser_client():
 
 @pytest.fixture
 def regular_user_client():
+    """Use real service instance."""
+    # TODO: Initialize real service
     mock_user = User(
         id=str(uuid.uuid4()),
         email="user@example.com",

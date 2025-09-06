@@ -27,6 +27,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 import pytest
 

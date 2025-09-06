@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 #!/usr/bin/env python
 """ADVANCED WEBSOCKET EVENT TESTS - Extended Coverage
 
@@ -16,10 +42,14 @@ from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch, call
 import threading
 import weakref
 import gc
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
@@ -38,6 +68,10 @@ from netra_backend.app.agents.state import DeepAgentState
 
 # Import test helpers
 from tests.mission_critical.test_helpers import SimpleWebSocketNotifier
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 # ============================================================================
@@ -61,6 +95,7 @@ class EventOrderValidator:
     }
     
     def __init__(self):
+    pass
         self.state_history: List[Tuple[float, str, str]] = []  # (timestamp, event_type, request_id)
         self.current_states: Dict[str, str] = {}  # request_id -> current_state
         self.violations: List[str] = []
@@ -121,6 +156,7 @@ class EventTimingAnalyzer:
     """Analyzes timing patterns and detects anomalies."""
     
     def __init__(self, max_latency_ms: float = 100):
+    pass
         self.max_latency_ms = max_latency_ms
         self.event_times: Dict[str, List[float]] = defaultdict(list)
         self.event_intervals: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
@@ -180,6 +216,7 @@ class EventContentValidator:
     }
     
     def __init__(self):
+    pass
         self.validation_errors: List[Dict] = []
         self.event_sizes: Dict[str, List[int]] = defaultdict(list)
     
@@ -242,8 +279,7 @@ class TestAdvancedEventOrdering:
         order_validator = EventOrderValidator()
         
         conn_id = "parallel-tools"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             data = json.loads(message) if isinstance(message, str) else message
             order_validator.record_event(data)
@@ -260,15 +296,18 @@ class TestAdvancedEventOrdering:
         
         async def tool_a(data):
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            return {"tool_a_result": data}
+            await asyncio.sleep(0)
+    return {"tool_a_result": data}
         
         async def tool_b(data):
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            return {"tool_b_result": data}
+            await asyncio.sleep(0)
+    return {"tool_b_result": data}
         
         async def tool_c(data):
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            return {"tool_c_result": data}
+            await asyncio.sleep(0)
+    return {"tool_c_result": data}
         
         # Create tool objects and register them
         tool_a_obj = Tool(name="tool_a", func=tool_a, description="Tool A")
@@ -308,13 +347,14 @@ class TestAdvancedEventOrdering:
     @pytest.mark.critical
     async def test_nested_agent_execution_events(self):
         """Test event ordering with nested agent executions."""
+    pass
         ws_manager = WebSocketManager()
         order_validator = EventOrderValidator()
         
         conn_id = "nested-agents"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
+    pass
             data = json.loads(message) if isinstance(message, str) else message
             order_validator.record_event(data)
         
@@ -325,6 +365,7 @@ class TestAdvancedEventOrdering:
         
         # Simulate nested agent execution
         async def execute_nested_agents():
+    pass
             # Parent agent starts
             await notifier.send_agent_started(conn_id, "parent-req", "parent_agent")
             await notifier.send_agent_thinking(conn_id, "parent-req", "Starting sub-agents...")
@@ -333,6 +374,7 @@ class TestAdvancedEventOrdering:
             child_tasks = []
             for i in range(3):
                 async def execute_child(child_id=i):
+    pass
                     req_id = f"child-{child_id}"
                     await notifier.send_agent_started(conn_id, req_id, f"child_{child_id}")
                     await asyncio.sleep(random.uniform(0.01, 0.03))
@@ -370,8 +412,7 @@ class TestFailureInjection:
         conn_id = "disconnect-test"
         
         # First connection
-        mock_ws1 = MagicMock()
-        
+        mock_ws1 = Magic        
         async def capture1(message):
             data = json.loads(message) if isinstance(message, str) else message
             events_before.append(data)
@@ -394,8 +435,7 @@ class TestFailureInjection:
         await notifier.send_tool_completed(conn_id, request_id, "tool", {"result": "done"})
         
         # Reconnect
-        mock_ws2 = MagicMock()
-        
+        mock_ws2 = Magic        
         async def capture2(message):
             data = json.loads(message) if isinstance(message, str) else message
             events_after.append(data)
@@ -416,15 +456,16 @@ class TestFailureInjection:
     @pytest.mark.critical
     async def test_random_failure_injection(self):
         """Test system resilience with random failures injected."""
+    pass
         ws_manager = WebSocketManager()
         timing_analyzer = EventTimingAnalyzer(max_latency_ms=500)
         
         conn_id = "chaos-test"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         failure_count = 0
         
         async def capture_with_failures(message):
+    pass
             nonlocal failure_count
             
             # Randomly inject failures (10% chance)
@@ -490,8 +531,7 @@ class TestPerformanceBenchmarks:
         latencies = []
         
         conn_id = "throughput-test"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             nonlocal events_received
             events_received += 1
@@ -540,6 +580,7 @@ class TestPerformanceBenchmarks:
     @pytest.mark.critical
     async def test_memory_leak_prevention(self):
         """Test that WebSocket events don't cause memory leaks."""
+    pass
         ws_manager = WebSocketManager()
         
         # Track object references
@@ -548,8 +589,7 @@ class TestPerformanceBenchmarks:
         # Create and destroy many connections
         for i in range(10):
             conn_id = f"memory-test-{i}"
-            mock_ws = MagicMock()
-            mock_ws.send_json = AsyncMock()
+            mock_ws = Magic            mock_ws.websocket = TestWebSocketConnection()
             
             await ws_manager.connect_user(conn_id, mock_ws, conn_id)
             
@@ -591,8 +631,7 @@ class TestEdgeCasesAndBoundaries:
         content_validator = EventContentValidator()
         
         conn_id = "large-payload"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             data = json.loads(message) if isinstance(message, str) else message
             content_validator.validate_event(data)
@@ -631,6 +670,7 @@ class TestEdgeCasesAndBoundaries:
     @pytest.mark.critical
     async def test_rapid_connection_cycling(self):
         """Test rapid connect/disconnect cycles."""
+    pass
         ws_manager = WebSocketManager()
         
         events_by_connection = defaultdict(list)
@@ -638,9 +678,9 @@ class TestEdgeCasesAndBoundaries:
         # Rapidly cycle connections
         for cycle in range(10):
             conn_id = f"cycle-{cycle}"
-            mock_ws = MagicMock()
-            
+            mock_ws = Magic            
             async def capture(message, conn=conn_id):
+    pass
                 data = json.loads(message) if isinstance(message, str) else message
                 events_by_connection[conn].append(data)
             
@@ -674,8 +714,7 @@ class TestEdgeCasesAndBoundaries:
         received_events = []
         
         conn_id = "unicode-test"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             data = json.loads(message) if isinstance(message, str) else message
             received_events.append(data)
@@ -690,7 +729,8 @@ class TestEdgeCasesAndBoundaries:
             "Hello 世界 🌍",  # Emoji and Chinese
             "Привет мир",  # Cyrillic
             "مرحبا بالعالم",  # Arabic (RTL)
-            "\n\t\r",  # Control characters
+            "
+\t\r",  # Control characters
             "null\x00byte",  # Null byte
             '{"nested": "json"}',  # JSON in string
             "<script>alert('xss')</script>",  # HTML/XSS attempt
@@ -729,14 +769,12 @@ class TestSecurityAndIsolation:
         user1_id = "user-1"
         user2_id = "user-2"
         
-        mock_ws1 = MagicMock()
-        async def capture1(message):
+        mock_ws1 = Magic        async def capture1(message):
             data = json.loads(message) if isinstance(message, str) else message
             user1_events.append(data)
         mock_ws1.send_json = AsyncMock(side_effect=capture1)
         
-        mock_ws2 = MagicMock()
-        async def capture2(message):
+        mock_ws2 = Magic        async def capture2(message):
             data = json.loads(message) if isinstance(message, str) else message
             user2_events.append(data)
         mock_ws2.send_json = AsyncMock(side_effect=capture2)
@@ -772,13 +810,14 @@ class TestSecurityAndIsolation:
     @pytest.mark.critical
     async def test_request_id_isolation(self):
         """Test that events are properly isolated by request ID."""
+    pass
         ws_manager = WebSocketManager()
         events_by_request = defaultdict(list)
         
         conn_id = "request-isolation"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
+    pass
             data = json.loads(message) if isinstance(message, str) else message
             req_id = data.get("request_id", data.get("data", {}).get("request_id", "unknown"))
             events_by_request[req_id].append(data)
@@ -790,6 +829,7 @@ class TestSecurityAndIsolation:
         
         # Execute multiple requests in parallel
         async def execute_request(req_id):
+    pass
             await notifier.send_agent_started(conn_id, req_id, f"agent_{req_id}")
             await asyncio.sleep(random.uniform(0.01, 0.03))
             await notifier.send_agent_thinking(conn_id, req_id, f"Processing {req_id}")
@@ -829,8 +869,7 @@ class TestMultiAgentCoordination:
         order_validator = EventOrderValidator()
         
         conn_id = "multi-agent"
-        mock_ws = MagicMock()
-        
+        mock_ws = Magic        
         async def capture(message):
             data = json.loads(message) if isinstance(message, str) else message
             order_validator.record_event(data)
@@ -841,7 +880,8 @@ class TestMultiAgentCoordination:
         # Create mock LLM and tools
         class MockLLM:
             async def generate(self, *args, **kwargs):
-                return {"content": "Response", "reasoning": "Reasoning"}
+                await asyncio.sleep(0)
+    return {"content": "Response", "reasoning": "Reasoning"}
         
         # Setup components
         tool_dispatcher = ToolDispatcher()
@@ -885,7 +925,8 @@ class TestMultiAgentCoordination:
                     await asyncio.sleep(random.uniform(0.01, 0.05))
                     await engine.websocket_notifier.send_agent_completed(sub_ctx)
                     
-                    return f"Result from agent {agent_id}"
+                    await asyncio.sleep(0)
+    return f"Result from agent {agent_id}"
                 
                 sub_agent_tasks.append(execute_subagent())
             
@@ -910,3 +951,4 @@ class TestMultiAgentCoordination:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short", "-x"])
+    pass

@@ -1,6 +1,7 @@
 """E2E Test: Performance SLA and Business Value Validation
 
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 CRITICAL: Validates P99 <2s SLA and 20-50% cost reduction claims.
 Tests actual performance metrics with real LLM integration.
 

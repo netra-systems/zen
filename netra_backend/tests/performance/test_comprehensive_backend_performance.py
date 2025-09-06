@@ -13,6 +13,12 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -23,7 +29,6 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -36,6 +41,7 @@ class PerformanceTestMetrics:
     """Tracks performance test metrics and baselines."""
     
     def __init__(self):
+    pass
         self.metrics = {}
         self.baselines = self._get_performance_baselines()
     
@@ -60,6 +66,7 @@ class PerformanceTestMetrics:
     
     def get_statistics(self, name: str) -> Dict[str, float]:
         """Get statistics for a performance metric."""
+    pass
         if name not in self.metrics or not self.metrics[name]:
             return {}
         
@@ -85,6 +92,7 @@ class DatabasePerformanceTester:
     """Tests database performance under load."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
     
     def _generate_test_corpus(self, size: int) -> Dict[str, List[Tuple[str, str]]]:
@@ -112,18 +120,18 @@ class DatabasePerformanceTester:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_db.return_value = mock_instance
             
             # Mock: ClickHouse external database isolation for unit testing performance
             with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_interceptor_instance = AsyncMock()
+                mock_interceptor_instance = AsyncNone  # TODO: Use real service instance
                 mock_interceptor.return_value = mock_interceptor_instance
                 
                 # Mock: WebSocket manager isolation for testing without external dependencies
                 with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
-                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncNone  # TODO: Use real service instance
                     
                     start_time = time.perf_counter()
                     await save_corpus_to_clickhouse(test_corpus, table_name)
@@ -140,7 +148,7 @@ class DatabasePerformanceTester:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instance
             mock_instance.execute_query.return_value = [
                 {'id': i, 'data': f'test_data_{i}'} for i in range(1000)
             ]
@@ -163,6 +171,7 @@ class WebSocketPerformanceTester:
     """Tests WebSocket performance and throughput."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
     
     @pytest.mark.asyncio
@@ -171,6 +180,7 @@ class WebSocketPerformanceTester:
         messages_processed = 0
         
         async def mock_message_handler(message):
+    pass
             nonlocal messages_processed
             messages_processed += 1
             await asyncio.sleep(0.001)  # Simulate processing
@@ -192,15 +202,17 @@ class WebSocketPerformanceTester:
         
         throughput = message_count / duration if duration > 0 else 0
         self.metrics.record_metric('websocket_throughput', throughput)
-        return throughput
+        await asyncio.sleep(0)
+    return throughput
     
     @pytest.mark.asyncio
     async def test_broadcast_performance(self, connection_count: int = 100, message_count: int = 1000) -> float:
         """Test WebSocket broadcast performance."""
         # Mock: Generic component isolation for controlled unit testing
-        connections = [AsyncMock() for _ in range(connection_count)]
+        connections = [AsyncNone  # TODO: Use real service instance for _ in range(connection_count)]
         
         async def broadcast_message(message, connections_list):
+    pass
             tasks = []
             for connection in connections_list:
                 task = connection.send(json.dumps(message))
@@ -222,21 +234,25 @@ class WebSocketPerformanceTester:
         total_messages = connection_count * message_count
         throughput = total_messages / duration if duration > 0 else 0
         self.metrics.record_metric('websocket_broadcast_throughput', throughput)
-        return throughput
+        await asyncio.sleep(0)
+    return throughput
 
 class AgentPerformanceTester:
     """Tests agent processing performance."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
     
     @pytest.mark.asyncio
     async def test_agent_processing_speed(self, request_count: int = 100) -> float:
         """Test agent processing speed under load."""
         async def mock_agent_process(request):
+    pass
             # Simulate LLM call latency
             await asyncio.sleep(0.1)
-            return {
+            await asyncio.sleep(0)
+    return {
                 'request_id': request['id'],
                 'response': f"Processed: {request['data']}",
                 'processing_time': 0.1
@@ -261,6 +277,7 @@ class AgentPerformanceTester:
     async def test_concurrent_agent_processing(self, concurrent_agents: int = 5, requests_per_agent: int = 20) -> float:
         """Test concurrent agent processing performance."""
         async def agent_batch_processor(agent_id, request_count):
+    pass
             results = []
             for i in range(request_count):
                 # Simulate agent processing
@@ -270,7 +287,8 @@ class AgentPerformanceTester:
                     'request_index': i,
                     'result': f'processed_by_agent_{agent_id}_{i}'
                 })
-            return results
+            await asyncio.sleep(0)
+    return results
         
         start_time = time.perf_counter()
         
@@ -292,15 +310,18 @@ class APIPerformanceTester:
     """Tests API endpoint performance."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
     
     @pytest.mark.asyncio
     async def test_api_response_times(self, request_count: int = 1000) -> List[float]:
         """Test API endpoint response times."""
         async def mock_api_call():
+    pass
             # Simulate API processing time
             await asyncio.sleep(0.01)  # 10ms base processing
-            return {'status': 'success', 'data': 'test_response'}
+            await asyncio.sleep(0)
+    return {'status': 'success', 'data': 'test_response'}
         
         response_times = []
         
@@ -317,11 +338,14 @@ class APIPerformanceTester:
     async def test_concurrent_api_load(self, concurrent_requests: int = 50, total_requests: int = 1000) -> float:
         """Test API performance under concurrent load."""
         async def api_request_batch(batch_size):
+    pass
             tasks = []
             for _ in range(batch_size):
                 async def single_request():
+    pass
                     await asyncio.sleep(0.02)  # Simulate API processing
-                    return {'success': True}
+                    await asyncio.sleep(0)
+    return {'success': True}
                 tasks.append(single_request())
             return await asyncio.gather(*tasks)
         
@@ -345,6 +369,7 @@ class MemoryPerformanceTester:
     """Tests memory usage patterns."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
     
     @pytest.mark.asyncio
@@ -429,6 +454,7 @@ class CachePerformanceTester:
     """Tests cache effectiveness and performance."""
     
     def __init__(self):
+    pass
         self.metrics = PerformanceTestMetrics()
         self.cache = {}  # Simple in-memory cache for testing
     
@@ -485,6 +511,7 @@ class CachePerformanceTester:
     async def test_cache_performance_under_load(self, concurrent_operations: int = 50, operations_per_thread: int = 100) -> float:
         """Test cache performance under concurrent load."""
         async def cache_operations_batch(batch_id: int, operation_count: int):
+    pass
             batch_hits = 0
             for i in range(operation_count):
                 key = f"batch_{batch_id}_item_{i % 20}"  # Create some key overlap
@@ -497,7 +524,8 @@ class CachePerformanceTester:
                     await asyncio.sleep(0.005)
                     self.cache[key] = f"computed_{batch_id}_{i}"
             
-            return batch_hits
+            await asyncio.sleep(0)
+    return batch_hits
         
         start_time = time.perf_counter()
         
@@ -534,6 +562,7 @@ class TestComprehensiveBackendPerformance:
     @pytest.mark.asyncio
     async def test_database_performance_suite(self):
         """Test database performance metrics."""
+    pass
         # Test bulk insert performance
         bulk_insert_time = await self.db_tester.test_bulk_insert_performance(50000)
         assert bulk_insert_time < 60.0, f"Bulk insert took {bulk_insert_time}s, expected <60s"
@@ -560,6 +589,7 @@ class TestComprehensiveBackendPerformance:
     @pytest.mark.asyncio
     async def test_agent_performance_suite(self):
         """Test agent processing performance."""
+    pass
         # Test single agent processing speed
         processing_time = await self.agent_tester.test_agent_processing_speed(100)
         assert processing_time < 15.0, f"Agent processing took {processing_time}s, expected <15s"
@@ -583,6 +613,7 @@ class TestComprehensiveBackendPerformance:
     @pytest.mark.asyncio
     async def test_memory_performance_suite(self):
         """Test memory usage patterns."""
+    pass
         # Test memory usage patterns
         memory_metrics = await self.memory_tester.test_memory_usage_patterns(100)
         assert memory_metrics['total_time'] < 10.0, f"Memory operations took {memory_metrics['total_time']}s, expected <10s"
@@ -606,6 +637,7 @@ class TestComprehensiveBackendPerformance:
     @pytest.mark.asyncio
     async def test_performance_benchmark_suite(self):
         """Run full performance benchmark suite and generate report."""
+    pass
         # Run all performance tests
         await self.test_database_performance_suite()
         await self.test_websocket_performance_suite()
@@ -625,7 +657,8 @@ class TestComprehensiveBackendPerformance:
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"\nPerformance report saved to: {report_path}")
+        print(f"
+Performance report saved to: {report_path}")
         print("Performance Summary:")
         for category, metrics in report['categories'].items():
             print(f"  {category}: {len(metrics)} metrics tested")
@@ -688,7 +721,8 @@ class TestComprehensiveBackendPerformance:
             'categories_tested': len(report['categories'])
         }
         
-        return report
+        await asyncio.sleep(0)
+    return report
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

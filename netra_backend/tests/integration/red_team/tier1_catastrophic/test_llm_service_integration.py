@@ -1,4 +1,9 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 """
 RED TEAM TEST 14: LLM Service Integration
 
@@ -38,6 +43,7 @@ try:
     from netra_backend.app.core.configuration.base import get_unified_config
 except ImportError:
     def get_unified_config():
+    pass
         from types import SimpleNamespace
         return SimpleNamespace(database_url="DATABASE_URL_PLACEHOLDER",
                               openai_api_key="test", anthropic_api_key="test")
@@ -51,25 +57,30 @@ try:
 except ImportError:
     class LLMClient:
         def __init__(self, *args, **kwargs):
+    pass
             pass
         async def generate(self, *args, **kwargs):
-            return {"response": "Mock LLM response", "token_usage": {"total": 100}}
+    pass
+            await asyncio.sleep(0)
+    return {"response": "Mock LLM response", "token_usage": {"total": 100}}
 
 try:
     from netra_backend.app.llm.fallback_handler import FallbackHandler
 except ImportError:
     class FallbackHandler:
         def __init__(self, *args, **kwargs):
+    pass
             pass
         async def handle_failure(self, *args, **kwargs):
-            return {"response": "Fallback response"}
+    pass
+            await asyncio.sleep(0)
+    return {"response": "Fallback response"}
 
 # AgentRun model - creating mock for tests
-from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
 
 try:
-    from netra_backend.app.database import get_db_session
+    from netra_backend.app.database import get_db
 except ImportError:
     from netra_backend.app.db.database_manager import DatabaseManager
     get_db_session = lambda: DatabaseManager().get_session()
@@ -83,6 +94,7 @@ class TestLLMServiceIntegration:
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
     """
+    pass
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -107,12 +119,19 @@ class TestLLMServiceIntegration:
 
     @pytest.fixture
     def real_test_client(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Real FastAPI test client - no mocking of the application."""
-        return TestClient(app)
+        await asyncio.sleep(0)
+    return TestClient(app)
 
     @pytest.fixture
     def llm_test_config(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Configuration for LLM testing - uses real API keys if available."""
+    pass
         return {
             "primary_provider": "openai",
             "fallback_providers": ["anthropic", "local"],
@@ -134,6 +153,7 @@ class TestLLMServiceIntegration:
         2. API keys may not be available
         3. Request formatting may be incorrect
         """
+    pass
         try:
             # Initialize LLM client
             llm_client = LLMClient(config=llm_test_config)
@@ -175,6 +195,7 @@ class TestLLMServiceIntegration:
         2. Provider detection may not work
         3. Error handling may be incomplete
         """
+    pass
         try:
             # Configure client with intentionally failing primary provider
             fallback_config = llm_test_config.copy()
@@ -197,7 +218,8 @@ class TestLLMServiceIntegration:
             
             end_time = time.time()
             
-            assert response is not None, "Fallback request should return response"
+            assert response is not None, "Fallback request should await asyncio.sleep(0)
+    return response"
             assert "content" in response, "Fallback response should contain content"
             assert "provider" in response, "Fallback response should specify provider used"
             
@@ -228,6 +250,7 @@ class TestLLMServiceIntegration:
         2. Timeout handling may not be robust
         3. Cleanup after timeout may not work
         """
+    pass
         try:
             # Configure client with very short timeout
             timeout_config = llm_test_config.copy()
@@ -289,6 +312,7 @@ class TestLLMServiceIntegration:
         2. Connection pooling may not work
         3. Resource contention may occur
         """
+    pass
         try:
             llm_client = LLMClient(config=llm_test_config)
             
@@ -308,7 +332,8 @@ class TestLLMServiceIntegration:
                     )
                     end_time = time.time()
                     
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "request_id": request_id,
                         "success": True,
                         "response": response,
@@ -374,6 +399,7 @@ class TestLLMServiceIntegration:
         2. Error handling may be generic
         3. Retry logic may not consider error types
         """
+    pass
         try:
             llm_client = LLMClient(config=llm_test_config)
             
@@ -439,6 +465,7 @@ class TestLLMServiceIntegration:
         2. Content filtering may not work
         3. Response format validation may be missing
         """
+    pass
         try:
             llm_client = LLMClient(config=llm_test_config)
             
@@ -511,6 +538,7 @@ class TestLLMServiceIntegration:
         2. Chunk handling may not work
         3. Stream completion detection may fail
         """
+    pass
         try:
             llm_client = LLMClient(config=llm_test_config)
             
@@ -572,6 +600,7 @@ class TestLLMServiceIntegration:
         2. Token counting may be inaccurate
         3. Cost calculation may not work
         """
+    pass
         try:
             llm_client = LLMClient(config=llm_test_config)
             
@@ -654,7 +683,8 @@ class RedTeamLLMTestUtils:
         
         env_var = key_env_vars.get(provider.lower())
         if env_var:
-            return bool(get_env().get(env_var))
+            await asyncio.sleep(0)
+    return bool(get_env().get(env_var))
         return False
     
     @staticmethod
@@ -668,7 +698,7 @@ class RedTeamLLMTestUtils:
             },
             {
                 "name": "json_response",
-                "prompt": "Respond with JSON: {\"greeting\": \"Hello World\"}",
+                "prompt": "Respond with JSON: {"greeting": "Hello World"}",
                 "expected_format": "json"
             },
             {

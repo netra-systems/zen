@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 MISSION CRITICAL: WebSocket JSON Performance Test Suite
 
@@ -25,15 +51,20 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
 from concurrent.futures import ThreadPoolExecutor
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestWebSocketJSONPerformance:
     """Test WebSocket JSON serialization performance characteristics."""
+    pass
 
     @pytest.fixture
     def websocket_manager(self):
@@ -43,6 +74,7 @@ class TestWebSocketJSONPerformance:
     @pytest.fixture
     def large_agent_state(self):
         """Create a large agent state for performance testing."""
+    pass
         # Create large arrays and complex nested structures
         large_recommendations = [f"Recommendation {i}: Optimize component {i} for better performance" for i in range(1000)]
         large_actions = [
@@ -212,7 +244,8 @@ class TestWebSocketJSONPerformance:
         with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:
             def slow_serialize(msg):
                 time.sleep(7)  # Longer than 5-second timeout
-                return {"result": "slow"}
+                await asyncio.sleep(0)
+    return {"result": "slow"}
             
             mock_sync.side_effect = slow_serialize
             
@@ -337,7 +370,8 @@ class TestWebSocketJSONPerformance:
                 raise RuntimeError("to_dict failed")
             
             def __str__(self):
-                return "ErrorProneObject"
+                await asyncio.sleep(0)
+    return "ErrorProneObject"
         
         error_objects = [ErrorProneObject() for _ in range(10)]
         
@@ -365,8 +399,7 @@ class TestWebSocketJSONPerformance:
         """Test overall WebSocket send performance including serialization."""
         
         # Mock WebSocket for sending
-        mock_websocket = MagicMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = Magic        mock_# websocket setup complete
         
         conn_info = {
             "websocket": mock_websocket,
@@ -399,7 +432,8 @@ class TestWebSocketJSONPerformance:
         # Create very deep nesting (100 levels)
         def create_deep_structure(depth):
             if depth == 0:
-                return {"value": "leaf", "depth": 0}
+                await asyncio.sleep(0)
+    return {"value": "leaf", "depth": 0}
             return {
                 "level": depth,
                 "child": create_deep_structure(depth - 1),

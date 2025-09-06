@@ -8,11 +8,15 @@ CRITICAL: This test ensures startup stability by validating grace period behavio
 """
 
 import time
-from unittest.mock import patch
 import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.core.critical_path_validator import CriticalPathValidator
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestHandlerRegistrationGracePeriod:

@@ -22,7 +22,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Union, AsyncGenerator, Callable
-from unittest.mock import AsyncMock, MagicMock
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -180,7 +180,8 @@ class TestContext:
                 self.websocket_url,
                 headers=headers if headers else None,
                 timeout=self.websocket_timeout,
-                max_retries=3
+                max_retries=3,
+                user_id=self.user_context.user_id
             )
         except Exception as e:
             raise ConnectionError(f"Failed to setup WebSocket connection: {e}")
@@ -204,6 +205,23 @@ class TestContext:
         await WebSocketTestHelpers.send_test_message(
             self.websocket_connection,
             message,
+            timeout=self.websocket_timeout
+        )
+    
+    async def send_raw_message(self, raw_message: str) -> None:
+        """
+        Send a raw string message through the WebSocket connection.
+        Used for testing malformed JSON messages.
+        
+        Args:
+            raw_message: Raw string message to send
+        """
+        if not self.websocket_connection:
+            raise RuntimeError("WebSocket connection not established. Call setup_websocket_connection first.")
+        
+        await WebSocketTestHelpers.send_raw_test_message(
+            self.websocket_connection,
+            raw_message,
             timeout=self.websocket_timeout
         )
     
@@ -303,6 +321,42 @@ class TestContext:
                 pass
         
         return False
+    
+    async def get_received_events(self, timeout: float = 0.5) -> List[Dict[str, Any]]:
+        """
+        Get all currently available received events without blocking.
+        
+        Args:
+            timeout: Maximum time to wait for each event
+            
+        Returns:
+            List of all available events
+        """
+        events = []
+        
+        if not self.websocket_connection:
+            return events
+        
+        while True:
+            try:
+                event = await asyncio.wait_for(
+                    WebSocketTestHelpers.receive_test_message(
+                        self.websocket_connection,
+                        timeout=timeout
+                    ),
+                    timeout=timeout
+                )
+                events.append(event)
+                self.event_capture.capture_event(event)
+            except asyncio.TimeoutError:
+                # No more events available - break
+                break
+            except Exception as e:
+                # Error receiving event - break
+                print(f"Error receiving event: {e}")
+                break
+        
+        return events
     
     def get_captured_events(self, event_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """

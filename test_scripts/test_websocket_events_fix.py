@@ -14,7 +14,9 @@ import json
 import sys
 import time
 from typing import Dict, List, Set, Optional, Any
-from unittest.mock import Mock, AsyncMock, MagicMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Test auth service route availability issues found in staging.
 
 These tests reproduce the 404 errors for missing authentication routes,

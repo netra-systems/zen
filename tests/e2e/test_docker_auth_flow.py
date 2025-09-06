@@ -11,6 +11,7 @@ import subprocess
 import sys
 from typing import Dict, Optional, Tuple
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test configuration
 BASE_URL_AUTH = "http://localhost:8081"
@@ -28,12 +29,14 @@ class Colors:
 
 def print_test_header(test_name: str):
     """Print a formatted test header"""
-    print(f"\n{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.RESET}")
+    print(f"
+{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.RESET}")
     print(f"{Colors.BLUE}{Colors.BOLD}TEST: {test_name}{Colors.RESET}")
     print(f"{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.RESET}")
 
 def print_result(passed: bool, message: str):
     """Print test result with color"""
+    pass
     if passed:
         print(f"{Colors.GREEN}[PASS]{Colors.RESET} {message}")
     else:
@@ -343,7 +346,9 @@ def check_docker_logs():
             error_patterns = ["ERROR", "CRITICAL", "FATAL", "Failed", "refused"]
             errors_found = []
             
-            for line in result.stdout.split('\n') + result.stderr.split('\n'):
+            for line in result.stdout.split('
+') + result.stderr.split('
+'):
                 for pattern in error_patterns:
                     if pattern in line and "No token received" not in line:  # Ignore expected errors
                         errors_found.append(line[:100])
@@ -361,13 +366,15 @@ def check_docker_logs():
 
 def main():
     """Run all tests"""
+    pass
     print(f"{Colors.BOLD}{'='*60}{Colors.RESET}")
     print(f"{Colors.BOLD}Docker Compose Authentication Flow Test Suite{Colors.RESET}")
     print(f"{Colors.BOLD}{'='*60}{Colors.RESET}")
     
     # Check if services are running
     if not test_services_running():
-        print(f"\n{Colors.RED}Services not healthy. Start them with:{Colors.RESET}")
+        print(f"
+{Colors.RED}Services not healthy. Start them with:{Colors.RESET}")
         print("  docker-compose -f docker-compose.dev.yml up -d")
         return 1
     
@@ -404,7 +411,8 @@ def main():
     check_docker_logs()
     
     # Print summary
-    print(f"\n{Colors.BOLD}{'='*60}{Colors.RESET}")
+    print(f"
+{Colors.BOLD}{'='*60}{Colors.RESET}")
     print(f"{Colors.BOLD}TEST SUMMARY{Colors.RESET}")
     print(f"{Colors.BOLD}{'='*60}{Colors.RESET}")
     
@@ -415,7 +423,8 @@ def main():
         status = f"{Colors.GREEN}PASS{Colors.RESET}" if result else f"{Colors.RED}FAIL{Colors.RESET}"
         print(f"  [{status}] {test_name}")
     
-    print(f"\n{Colors.BOLD}Results: {passed}/{total} tests passed{Colors.RESET}")
+    print(f"
+{Colors.BOLD}Results: {passed}/{total} tests passed{Colors.RESET}")
     
     if passed == total:
         print(f"{Colors.GREEN}{Colors.BOLD}All tests passed!{Colors.RESET}")

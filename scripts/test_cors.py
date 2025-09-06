@@ -24,6 +24,7 @@ import sys
 from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse, urljoin
 import time
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import websockets

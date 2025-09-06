@@ -13,7 +13,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Dict, List, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()

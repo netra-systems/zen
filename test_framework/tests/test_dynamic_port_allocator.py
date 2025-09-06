@@ -13,7 +13,8 @@ import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Set
-from unittest.mock import MagicMock, patch, mock_open
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.dynamic_port_allocator import (
     DynamicPortAllocator,

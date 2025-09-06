@@ -6,6 +6,7 @@ import re
 import json
 from typing import Dict, List, Optional, Tuple
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 def test_gtm_loading(url: str, env_name: str) -> Tuple[bool, Dict[str, any]]:
     """Test if GTM is properly loaded on a given URL"""

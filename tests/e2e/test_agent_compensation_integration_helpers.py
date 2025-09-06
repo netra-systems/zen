@@ -18,6 +18,7 @@ import uuid
 import pytest
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 # Absolute imports per CLAUDE.md import_management_architecture.xml
 from shared.isolated_environment import get_env

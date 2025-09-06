@@ -13,6 +13,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import jwt

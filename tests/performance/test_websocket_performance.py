@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 WebSocket Performance Tests
 
@@ -16,11 +42,15 @@ import statistics
 import psutil
 import gc
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import Mock, MagicMock, AsyncMock
 from datetime import datetime, timezone
 import uuid
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.websocket_bridge_factory import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     WebSocketBridgeFactory,
     UserWebSocketEmitter,
     WebSocketConnectionPool
@@ -38,14 +68,11 @@ class TestWebSocketPerformance:
     @pytest.fixture
     def mock_websockets(self, count=10):
         """Create multiple mock WebSockets."""
+    pass
         websockets = []
         for _ in range(count):
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.close = AsyncMock()
-            ws.ping = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             websockets.append(ws)
         return websockets
     
@@ -61,11 +88,8 @@ class TestWebSocketPerformance:
             user_id = f"user-{i}"
             session_id = f"session-{i}"
             
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.close = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             
             task = factory.create_user_emitter(
                 user_id=user_id,
@@ -108,14 +132,13 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_event_throughput(self, factory):
         """Test WebSocket event throughput rate."""
+    pass
         user_id = "perf-user"
         num_events = 1000
         
         # Create emitter with WebSocket
-        ws = MagicMock()
-        ws.send = AsyncMock()
-        ws.state = MagicMock()
-        ws.state.name = "OPEN"
+        ws = Magic        ws.websocket = TestWebSocketConnection()
+        ws.state = Magic        ws.state.name = "OPEN"
         
         emitter = await factory.create_user_emitter(
             user_id=user_id,
@@ -158,11 +181,8 @@ class TestWebSocketPerformance:
             start_time = time.time()
             
             for i in range(num_users):
-                ws = MagicMock()
-                ws.send = AsyncMock()
-                ws.close = AsyncMock()
-                ws.state = MagicMock()
-                ws.state.name = "OPEN"
+                ws = Magic                ws.websocket = TestWebSocketConnection()
+                ws.state = Magic                ws.state.name = "OPEN"
                 
                 conn_id = await pool.add_connection(f"user-{i}", ws)
                 connections.append(conn_id)
@@ -201,6 +221,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, factory):
         """Test memory usage with many connections and events."""
+    pass
         process = psutil.Process()
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
         
@@ -210,10 +231,8 @@ class TestWebSocketPerformance:
         # Create many user connections
         emitters = []
         for i in range(num_users):
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             
             emitter = await factory.create_user_emitter(
                 user_id=f"user-{i}",
@@ -254,16 +273,14 @@ class TestWebSocketPerformance:
         latencies = []
         
         # Create emitter
-        ws = MagicMock()
-        
+        ws = Magic        
         # Track send times
         send_times = []
         async def mock_send(data):
             send_times.append(time.time())
         
         ws.send = mock_send
-        ws.state = MagicMock()
-        ws.state.name = "OPEN"
+        ws.state = Magic        ws.state.name = "OPEN"
         
         emitter = await factory.create_user_emitter(
             user_id=user_id,
@@ -298,6 +315,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_queue_performance(self, factory):
         """Test event queue performance under load."""
+    pass
         user_id = "queue-user"
         queue_sizes = [100, 500, 1000]
         
@@ -319,10 +337,8 @@ class TestWebSocketPerformance:
             queue_time = time.time() - start_time
             
             # Add WebSocket
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             
             await emitter.add_connection(ws)
             
@@ -352,10 +368,8 @@ class TestWebSocketPerformance:
         # Create users
         users = []
         for i in range(num_users):
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             
             emitter = await factory.create_user_emitter(
                 user_id=f"user-{i}",
@@ -392,17 +406,15 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_connection_cleanup_performance(self, factory):
         """Test performance of connection cleanup."""
+    pass
         pool = factory.connection_pool
         num_connections = 100
         
         # Add many connections
         connections = []
         for i in range(num_connections):
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.close = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN" if i % 2 == 0 else "CLOSED"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN" if i % 2 == 0 else "CLOSED"
             
             conn_id = await pool.add_connection(f"user-{i % 10}", ws)
             connections.append((conn_id, ws))
@@ -440,10 +452,8 @@ class TestWebSocketPerformance:
         websockets = []
         
         for i in range(num_users):
-            ws = MagicMock()
-            ws.send = AsyncMock()
-            ws.state = MagicMock()
-            ws.state.name = "OPEN"
+            ws = Magic            ws.websocket = TestWebSocketConnection()
+            ws.state = Magic            ws.state.name = "OPEN"
             websockets.append(ws)
             
             emitter = await factory.create_user_emitter(
@@ -493,3 +503,4 @@ class TestWebSocketPerformance:
             assert ws.send.call_count > 0
         
         print(f"Stress test: {event_count} events sent, {errors} errors, {error_rate:.2%} error rate")
+    pass

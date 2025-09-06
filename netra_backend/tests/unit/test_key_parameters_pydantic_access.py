@@ -2,8 +2,12 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -19,23 +23,26 @@ class TestKeyParametersAccess:
     
     @pytest.fixture
     def execution_engine(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create execution engine instance."""
+    pass
         engine = ExecutionEngine(
             # Mock: ClickHouse external database isolation for unit testing performance
-            clickhouse_ops=MagicMock(),
+            clickhouse_ops=MagicNone  # TODO: Use real service instance,
             # Mock: Generic component isolation for controlled unit testing
-            query_builder=MagicMock(),
+            query_builder=MagicNone  # TODO: Use real service instance,
             # Mock: Generic component isolation for controlled unit testing
-            analysis_engine=MagicMock(),
+            analysis_engine=MagicNone  # TODO: Use real service instance,
             # Mock: Redis caching isolation to prevent test interference and external dependencies
-            redis_manager=MagicMock(),
+            redis_manager=MagicNone  # TODO: Use real service instance,
             # Mock: LLM provider isolation to prevent external API usage and costs
-            llm_manager=MagicMock()
+            llm_manager=MagicNone  # TODO: Use real service instance
         )
         # Mock: Generic component isolation for controlled unit testing
-        engine.metrics_service = AsyncMock()
+        engine.metrics_service = AsyncNone  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        engine.analysis_service = AsyncMock()
+        engine.analysis_service = AsyncNone  # TODO: Use real service instance
         return engine
 
     def test_build_analysis_params_with_pydantic_model(self, execution_engine):
@@ -62,6 +69,7 @@ class TestKeyParametersAccess:
 
     def test_build_analysis_params_with_dict(self, execution_engine):
         """Test _build_analysis_params_dict handles dict input."""
+    pass
         # Create key_params as dict
         key_params = {
             "user_id": 456,
@@ -99,6 +107,7 @@ class TestKeyParametersAccess:
 
     def test_build_analysis_params_with_partial_pydantic(self, execution_engine):
         """Test _build_analysis_params_dict handles Pydantic model with some fields."""
+    pass
         # Create KeyParameters with only some fields
         key_params = KeyParameters(
             workload_type="streaming",
@@ -157,6 +166,7 @@ class TestKeyParametersAccess:
 
     def test_build_analysis_params_no_triage_result(self, execution_engine):
         """Test _build_analysis_params handles state without triage_result."""
+    pass
         state = DeepAgentState(
             run_id="test_run",
             thread_id="test_thread",
@@ -201,3 +211,4 @@ class TestKeyParametersAccess:
                 if "'get'" in str(e):
                     pytest.fail(f"AttributeError with .get() for {type(key_params)}: {e}")
                 raise
+    pass

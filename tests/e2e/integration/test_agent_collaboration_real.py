@@ -22,6 +22,7 @@ import time
 from typing import Dict, Any
 import pytest
 import pytest_asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.agent_collaboration_helpers import (
     AgentCollaborationTestCore, MultiAgentFlowSimulator, CollaborationFlowValidator, AgentCollaborationTestUtils, RealTimeOrchestrationValidator, AgentCollaborationTurn,
@@ -29,6 +30,10 @@ from tests.e2e.agent_collaboration_helpers import (
     AgentCollaborationTestUtils, RealTimeOrchestrationValidator, AgentCollaborationTurn
 )
 from netra_backend.app.schemas.user_plan import PlanTier
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -210,7 +215,6 @@ class TestRealAgentCollaboration:
                                              request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute collaboration request with mocked multi-agent responses."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        from unittest.mock import patch
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Multi-agent collaboration analysis completed with agent handoff"
             response = await AgentCollaborationTestUtils.send_collaboration_request(

@@ -16,6 +16,7 @@ import os
 import sys
 import time
 from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))

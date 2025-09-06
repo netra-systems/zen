@@ -5,10 +5,13 @@ Business Value: Long-term maintainability
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class ConcreteTestAgent(BaseAgent):
@@ -27,13 +30,19 @@ class TestBaseAgent:
     """Test suite for BaseAgent"""
     
     @pytest.fixture
-    def mock_llm_manager(self):
+ def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create mock LLM manager"""
+    pass
         return MagicMock(spec=LLMManager)
     
     @pytest.fixture
     def instance(self, mock_llm_manager):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create test instance using concrete implementation"""
+    pass
         return ConcreteTestAgent(llm_manager=mock_llm_manager)
     
     def test_initialization(self, instance):
@@ -45,6 +54,7 @@ class TestBaseAgent:
     
     def test_state_management(self, instance):
         """Test agent state management"""
+    pass
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         assert instance.state == SubAgentLifecycle.PENDING
     
@@ -57,6 +67,7 @@ class TestBaseAgent:
     @pytest.mark.asyncio
     async def test_shutdown(self, instance):
         """Test shutdown cleanup"""
+    pass
         instance.context['test'] = 'data'
         await instance.shutdown()
         assert instance.context == {}

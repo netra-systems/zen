@@ -310,7 +310,7 @@ class UnifiedRetryHandler:
             RetryResult with outcome and attempt information
         """
         # Check circuit breaker if enabled
-        if self._circuit_breaker and not await self._circuit_breaker.can_execute_async():
+        if self._circuit_breaker and not self._circuit_breaker.can_execute():
             return RetryResult(
                 success=False, 
                 attempts=[], 

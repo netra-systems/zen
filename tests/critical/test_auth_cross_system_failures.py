@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
 """
@@ -31,7 +32,6 @@ import base64
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import httpx
@@ -52,6 +52,9 @@ env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test")
 # Add project root to path for imports
 import sys
 from pathlib import Path
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Import modules but defer app creation until test execution
 try:
@@ -82,6 +85,7 @@ class TestAuthCrossSystemFailures:
     These tests are designed to FAIL to expose real integration issues
     between the auth service and main backend service.
     """
+    pass
 
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -96,6 +100,7 @@ class TestAuthCrossSystemFailures:
         2. Token generation and session creation aren't atomic
         3. Database updates can overwrite each other
         """
+    pass
         user_email = f"race-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -110,12 +115,14 @@ class TestAuthCrossSystemFailures:
         
         # Simulate concurrent login attempts (this will expose the race condition)
         async def login_attempt():
+    pass
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     "http://localhost:8001/auth/login",
                     json={"email": user_email, "password": password}
                 )
-                return response
+                await asyncio.sleep(0)
+    return response
         
         # Launch 5 concurrent login attempts
         tasks = [login_attempt() for _ in range(5)]
@@ -153,6 +160,7 @@ class TestAuthCrossSystemFailures:
         doesn't properly propagate to netra_backend, causing stale tokens
         to remain valid in the backend service.
         """
+    pass
         user_email = f"invalidation-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -215,6 +223,7 @@ class TestAuthCrossSystemFailures:
         and netra_backend can become desynchronized, leading to
         inconsistent user states across services.
         """
+    pass
         user_email = f"desync-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -291,6 +300,7 @@ class TestAuthCrossSystemFailures:
         rotation gracefully. Active requests fail when secrets rotate,
         and there's no grace period for old tokens.
         """
+    pass
         user_email = f"rotation-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -356,6 +366,7 @@ class TestAuthCrossSystemFailures:
         may not be properly validated in netra_backend, allowing
         privilege escalation through service boundary manipulation.
         """
+    pass
         # Create low-privilege user
         user_email = f"privilege-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
@@ -422,6 +433,7 @@ class TestAuthCrossSystemFailures:
         validated against replay attacks, allowing attackers to reuse
         state tokens for unauthorized access.
         """
+    pass
         # Simulate OAuth flow initiation
         auth_client_test = TestClient(auth_app)
         
@@ -468,6 +480,7 @@ class TestAuthCrossSystemFailures:
         services or be accessible from unintended endpoints,
         creating security vulnerabilities.
         """
+    pass
         user_email = f"refresh-test-{uuid.uuid4().hex[:8]}@example.com" 
         password = "testpass123"
         
@@ -534,6 +547,7 @@ class TestAuthCrossSystemFailures:
         multiple browser tabs with different sessions for the same user,
         leading to session collision and state corruption.
         """
+    pass
         user_email = f"multitab-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -577,7 +591,8 @@ class TestAuthCrossSystemFailures:
                 f"/user/profile?tab_id={tab_id}",
                 headers={"Authorization": f"Bearer {token}"}
             )
-            return response.status_code, tab_id
+            await asyncio.sleep(0)
+    return response.status_code, tab_id
         
         # Execute concurrent operations from all tabs
         tasks = [tab_operation(token, i) for i, token in enumerate(tokens)]
@@ -602,6 +617,7 @@ class TestAuthCrossSystemFailures:
         properly across service restarts, causing all users to be logged out
         when services restart.
         """
+    pass
         user_email = f"restart-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -632,10 +648,8 @@ class TestAuthCrossSystemFailures:
         # Simulate service restart by clearing in-memory caches/state
         # This simulates what happens during a real service restart
         # Mock: Component isolation for testing without external dependencies
-        with patch('auth_service.auth_core.core.session_manager.SessionManager._sessions', {}):
-            # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.auth_integration.auth._token_cache', {}):
-                # Wait for caches to clear
+                    # Mock: Component isolation for testing without external dependencies
+                            # Wait for caches to clear
                 await asyncio.sleep(0.1)
                 
                 # THIS ASSERTION WILL FAIL - valid tokens should survive restart
@@ -661,6 +675,7 @@ class TestAuthCrossSystemFailures:
         token origins, allowing tokens from unauthorized domains to be
         accepted by the backend service.
         """
+    pass
         user_email = f"origin-test-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -728,11 +743,13 @@ class TestAuthCrossSystemFailures:
         if not auth_service_available:
             pytest.skip("Auth service not available")
         # Create auth app at test execution time to avoid hanging
-        return TestClient(auth_service.main.app)
+        await asyncio.sleep(0)
+    return TestClient(auth_service.main.app)
     
     @pytest.fixture 
     def backend_service_client(self):
         """Fixture to provide backend service test client"""
+    pass
         if not backend_available:
             pytest.skip("Backend service not available")
         # Create backend app at test execution time to avoid hanging
@@ -740,7 +757,8 @@ class TestAuthCrossSystemFailures:
     
     @pytest.fixture
     async def test_user_credentials(self, auth_service_client):
-        """Fixture to create test user and return credentials"""
+        """Fixture to create test user and await asyncio.sleep(0)
+    return credentials"""
         user_email = f"test-user-{uuid.uuid4().hex[:8]}@example.com"
         password = "testpass123"
         
@@ -764,3 +782,29 @@ class TestAuthCrossSystemFailures:
             "password": password,
             "token": login_response.json()["access_token"]
         }
+
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()

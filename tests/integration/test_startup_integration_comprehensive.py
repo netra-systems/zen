@@ -1,3 +1,26 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        return self.messages_sent.copy()
+
 """
 Integration Tests: Comprehensive Startup Validation
 
@@ -13,11 +36,14 @@ import time
 import httpx
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from unittest.mock import patch, AsyncMock, Mock
 import logging
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env
 from test_framework.unified_docker_manager import UnifiedDockerManager, ContainerState
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Configure environment
 env = get_env()
@@ -150,8 +176,7 @@ class TestFullStartupIntegration:
         bridge = AgentWebSocketBridge()
         
         # Mock supervisor
-        mock_supervisor = Mock()
-        mock_supervisor.registry = Mock()
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Integrate bridge
         result = await bridge.ensure_integration(
@@ -202,8 +227,7 @@ class TestFullStartupIntegration:
         
         # Mock minimal startup completion
         app.state.startup_complete = True
-        app.state.db_session_factory = Mock()
-        app.state.redis_manager = Mock()
+        app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Add health endpoint
         @app.get("/health")
@@ -252,15 +276,14 @@ class TestStartupFailureScenarios:
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.state = Mock()
+        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Set invalid database URL
         with patch.dict('os.environ', {'DATABASE_URL': 'postgresql://invalid:invalid@nonexistent:5432/db'}):
             orchestrator = StartupOrchestrator(app)
             
             # Mock methods that would succeed
-            orchestrator._validate_environment = Mock()
-            orchestrator._run_migrations = AsyncMock()
+            orchestrator.websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             # Startup should fail
             with pytest.raises(DeterministicStartupError):
@@ -277,17 +300,14 @@ class TestStartupFailureScenarios:
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.state = Mock()
+        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Set invalid Redis URL
         with patch.dict('os.environ', {'REDIS_URL': 'redis://nonexistent:6379'}):
             orchestrator = StartupOrchestrator(app)
             
             # Mock successful database
-            orchestrator._validate_environment = Mock()
-            orchestrator._run_migrations = AsyncMock()
-            orchestrator._initialize_database = AsyncMock()
-            app.state.db_session_factory = Mock()
+            orchestrator.websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
             # Startup should fail at Redis
             with pytest.raises(DeterministicStartupError):
@@ -300,14 +320,14 @@ class TestStartupFailureScenarios:
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.state = Mock()
+        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Track initialization state
         initialized_components = []
         
         async def init_database():
             initialized_components.append("database")
-            app.state.db_session_factory = Mock()
+            app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
         async def init_redis():
             initialized_components.append("redis")
@@ -389,7 +409,7 @@ class TestServiceCoordinationIntegration:
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.state = Mock()
+        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Track service status
         service_status = {
@@ -401,10 +421,10 @@ class TestServiceCoordinationIntegration:
         
         # Initialize only healthy services
         if service_status["database"] == "healthy":
-            app.state.db_session_factory = Mock()
+            app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         if service_status["redis"] == "healthy":
-            app.state.redis_manager = Mock()
+            app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # System should start despite optional service failures
         required_ok = all(
@@ -437,39 +457,15 @@ class TestStartupPerformance:
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.state = Mock()
+        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         orchestrator = StartupOrchestrator(app)
         
         # Mock all components for speed
-        orchestrator._validate_environment = Mock()
-        orchestrator._run_migrations = AsyncMock()
-        orchestrator._initialize_database = AsyncMock()
-        orchestrator._initialize_redis = AsyncMock()
-        orchestrator._initialize_key_manager = Mock()
-        orchestrator._initialize_llm_manager = Mock()
-        orchestrator._apply_startup_fixes = AsyncMock()
-        orchestrator._initialize_websocket = AsyncMock()
-        orchestrator._initialize_tool_registry = Mock()
-        orchestrator._initialize_agent_websocket_bridge_basic = AsyncMock()
-        orchestrator._initialize_agent_supervisor = AsyncMock()
-        orchestrator._perform_complete_bridge_integration = AsyncMock()
-        orchestrator._verify_tool_dispatcher_websocket_support = AsyncMock()
-        orchestrator._register_message_handlers = Mock()
-        orchestrator._phase5_critical_services = AsyncMock()
-        orchestrator._phase6_validation = AsyncMock()
-        orchestrator._phase7_optional_services = AsyncMock()
+        orchestrator.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Set required state
-        app.state.db_session_factory = Mock()
-        app.state.redis_manager = Mock()
-        app.state.key_manager = Mock()
-        app.state.llm_manager = Mock()
-        app.state.websocket_manager = Mock()
-        app.state.tool_dispatcher = Mock()
-        app.state.agent_websocket_bridge = Mock()
-        app.state.agent_supervisor = Mock()
-        app.state.thread_service = Mock()
+        app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         
         # Measure startup time
         start = time.time()

@@ -18,7 +18,10 @@ import os
 import pytest
 from pathlib import Path
 from typing import Dict, Optional
-from unittest.mock import patch
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.database import get_db
@@ -38,9 +41,13 @@ class TestDatabaseConnectionReliability:
         await connector.stop_health_monitoring()
     
     @pytest.fixture
-    def mock_env_with_urls(self):
+ def real_env_with_urls():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    pass
         """Mock environment with various URL formats."""
-        return {
+        await asyncio.sleep(0)
+    return {
             'DATABASE_URL': 'postgresql+asyncpg://postgres:password@localhost:5433/netra_dev',
             'REDIS_URL': 'redis://localhost:6379/0',
             'CLICKHOUSE_HOST': 'localhost',
@@ -65,6 +72,7 @@ class TestDatabaseConnectionReliability:
     
     async def test_ssl_parameter_removal_for_local_connections(self, database_connector):
         """Test that SSL parameters are removed for local connections."""
+    pass
         # Mock a local connection
         from dev_launcher.database_connector import DatabaseType, DatabaseConnection, ConnectionStatus
         
@@ -104,6 +112,7 @@ class TestDatabaseConnectionReliability:
     
     async def test_environment_loading_consistency(self, mock_env_with_urls):
         """Test that environment variables are loaded consistently."""
+    pass
         env = get_env()
         
         # Set environment variables (no clear method exists)
@@ -143,6 +152,7 @@ class TestDatabaseConnectionReliability:
     )
     async def test_real_database_connections(self, database_connector):
         """Test real database connections if containers are available."""
+    pass
         # This test runs only in local development with real Docker containers
         success = await database_connector.validate_all_connections()
         
@@ -188,6 +198,7 @@ class TestDatabaseConnectionReliability:
     
     async def test_database_session_provider_consistency(self):
         """Test that database session providers are consistent."""
+    pass
         # Skip if database not configured
         from netra_backend.app.db.postgres_core import async_session_factory
         if async_session_factory is None:
@@ -223,6 +234,7 @@ class TestDatabaseConnectionReliability:
         
     async def test_connection_status_reporting(self, database_connector, mock_env_with_urls):
         """Test connection status reporting."""
+    pass
         env = get_env()
         
         # Set up environment

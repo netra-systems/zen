@@ -9,6 +9,9 @@ Maximum 300 lines, functions ≤8 lines per architecture requirements.
 import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 
 # Test framework import - using pytest fixtures instead
@@ -17,7 +20,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.llm.llm_response_processing import (
@@ -49,6 +51,8 @@ class ComplexNestedModel(BaseModel):
 
 @pytest.fixture
 def test_llm_config():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create test LLM configuration with proper mock setup."""
     return AppConfig(
         llm_configs={
@@ -69,6 +73,8 @@ def test_llm_config():
 
 @pytest.fixture
 def llm_manager(test_llm_config):
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create LLM manager for testing with mocked API calls."""
     # Disable logging that can cause issues with mock objects
     test_llm_config.llm_data_logging_enabled = False
@@ -79,7 +85,7 @@ def llm_manager(test_llm_config):
 def _create_mock_openai_llm():
     """Create mock OpenAI LLM with proper response format."""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    mock_llm = AsyncMock()
+    mock_llm = AsyncNone  # TODO: Use real service instance
     mock_response = _create_mock_openai_response()
     mock_llm.ainvoke.return_value = mock_response
     mock_llm.with_structured_output.return_value = mock_llm
@@ -88,7 +94,7 @@ def _create_mock_openai_llm():
 def _create_mock_openai_response(content: str = "Mock response"):
     """Create mock response matching OpenAI format."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_response = MagicMock()
+    mock_response = MagicNone  # TODO: Use real service instance
     mock_response.content = content
     mock_response.prompt_tokens = 50
     mock_response.completion_tokens = 25
@@ -176,7 +182,7 @@ class TestRetryMechanisms:
         
         with patch.object(llm_manager, 'get_llm') as mock_get_llm:
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            mock_llm = AsyncMock()
+            mock_llm = AsyncNone  # TODO: Use real service instance
             mock_llm.ainvoke.side_effect = [rate_limit_error, rate_limit_error, "Success"]
             mock_get_llm.return_value = mock_llm
             
@@ -261,7 +267,7 @@ class TestStructuredGenerationEdgeCases:
         
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get_structured:
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            mock_structured_llm = AsyncMock()
+            mock_structured_llm = AsyncNone  # TODO: Use real service instance
             # First call fails, triggers fallback to string parsing
             mock_structured_llm.ainvoke.side_effect = Exception("JSON schema not supported")
             mock_get_structured.return_value = mock_structured_llm
@@ -293,7 +299,7 @@ class TestTokenUsageMonitoring:
     def test_token_usage_calculation(self):
         """Test accurate token usage calculation."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_response = MagicMock()
+        mock_response = MagicNone  # TODO: Use real service instance
         mock_response.prompt_tokens = 100
         mock_response.completion_tokens = 50
         mock_response.total_tokens = 150

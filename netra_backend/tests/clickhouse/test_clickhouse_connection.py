@@ -5,6 +5,7 @@ Tests for basic ClickHouse connectivity and database operations
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 

@@ -12,6 +12,10 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -19,11 +23,71 @@ logger = central_logger.get_logger(__name__)
 class WorkflowOrchestrator:
     """Orchestrates supervisor workflow according to unified spec with adaptive logic."""
     
-    def __init__(self, agent_registry, execution_engine, websocket_manager):
+    def __init__(self, agent_registry, execution_engine, websocket_manager, user_context=None):
         self.agent_registry = agent_registry
         self.execution_engine = execution_engine
         self.websocket_manager = websocket_manager
+        # Store user context for isolated WebSocket events (factory pattern)
+        self.user_context = user_context
+        self._websocket_emitter = None  # Will be created when user_context is available
         # No longer define static workflow - it will be determined dynamically
+    
+    async def _get_user_emitter_from_context(self, context: ExecutionContext):
+        """Get user-isolated WebSocket emitter from ExecutionContext using factory pattern."""
+        try:
+            # Try to get user context if already stored
+            if self.user_context:
+                return await self._get_user_emitter()
+                
+            # Create UserExecutionContext from ExecutionContext if available
+            if hasattr(context, 'user_id') and hasattr(context, 'thread_id') and hasattr(context, 'run_id'):
+                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                
+                user_context = UserExecutionContext(
+                    user_id=context.user_id or "unknown_user",
+                    thread_id=context.thread_id or "unknown_thread", 
+                    run_id=context.run_id or "unknown_run"
+                )
+                
+                # Use factory to create isolated bridge
+                bridge = await create_agent_websocket_bridge(user_context)
+                return await bridge.create_user_emitter(user_context)
+            else:
+                logger.debug("ExecutionContext missing required fields for user emitter")
+                return None
+                
+        except Exception as e:
+            logger.debug(f"Failed to create user emitter from context: {e}")
+            return None
+            
+    async def _get_user_emitter(self):
+        """Get user-isolated WebSocket emitter using factory pattern."""
+        if not self.user_context:
+            return None
+            
+        # Create emitter if not already created (lazy initialization)
+        if not self._websocket_emitter:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                # Use factory to create isolated bridge
+                bridge = await create_agent_websocket_bridge(self.user_context)
+                self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
+            except Exception as e:
+                logger.debug(f"Failed to create user emitter: {e}")
+                return None
+                
+        return self._websocket_emitter
+    
+    def set_user_context(self, user_context: 'UserExecutionContext') -> None:
+        """Set user context for isolated WebSocket events (factory pattern).
+        
+        Args:
+            user_context: User execution context for event isolation
+        """
+        self.user_context = user_context
+        # Reset emitter to force recreation with new context
+        self._websocket_emitter = None
     
     def _define_workflow_based_on_triage(self, triage_result: Dict[str, Any]) -> List[PipelineStep]:
         """Define adaptive workflow based on triage results and data sufficiency.
@@ -162,80 +226,89 @@ class WorkflowOrchestrator:
         )
     
     async def _send_workflow_started(self, context: ExecutionContext) -> None:
-        """Send workflow started notification via AgentWebSocketBridge."""
+        """Send workflow started notification via factory pattern for user isolation."""
         if context.stream_updates:
             try:
-                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-                
-                bridge = await get_agent_websocket_bridge()
-                await bridge.notify_agent_started(
-                    context.run_id, "WorkflowOrchestrator", 
-                    {"workflow_started": True, "total_steps": len(self._workflow_steps)}
-                )
+                # Get user-isolated emitter (factory pattern)
+                emitter = await self._get_user_emitter_from_context(context)
+                if not emitter:
+                    logger.debug("No user context available for workflow WebSocket updates - skipping")
+                    return
+                    
+                await emitter.emit_agent_started("WorkflowOrchestrator", {
+                    "workflow_started": True, 
+                    "total_steps": len(self._workflow_steps)
+                })
             except Exception as e:
-                logger.warning(f"Failed to send workflow started via bridge: {e}")
+                logger.warning(f"Failed to send workflow started via factory pattern: {e}")
     
     async def _send_step_started(self, context: ExecutionContext, 
                                 step: PipelineStep) -> None:
-        """Send step started notification via AgentWebSocketBridge."""
+        """Send step started notification via factory pattern for user isolation."""
         if context.stream_updates:
             try:
-                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-                
-                bridge = await get_agent_websocket_bridge()
-                await bridge.notify_agent_started(
-                    context.run_id, step.agent_name, 
-                    {"step_type": step.metadata.get("step_type"), "order": step.metadata.get("order")}
-                )
+                # Get user-isolated emitter (factory pattern)
+                emitter = await self._get_user_emitter_from_context(context)
+                if not emitter:
+                    logger.debug("No user context available for step WebSocket updates - skipping")
+                    return
+                    
+                await emitter.emit_agent_started(step.agent_name, {
+                    "step_type": step.metadata.get("step_type"), 
+                    "order": step.metadata.get("order")
+                })
             except Exception as e:
-                logger.warning(f"Failed to send step started via bridge: {e}")
+                logger.warning(f"Failed to send step started via factory pattern: {e}")
     
     async def _send_step_completed(self, context: ExecutionContext, 
                                   step: PipelineStep, result: ExecutionResult) -> None:
-        """Send step completed notification via AgentWebSocketBridge."""
+        """Send step completed notification via factory pattern for user isolation."""
         if context.stream_updates:
             try:
-                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-                
-                bridge = await get_agent_websocket_bridge()
+                # Get user-isolated emitter (factory pattern)
+                emitter = await self._get_user_emitter_from_context(context)
+                if not emitter:
+                    logger.debug("No user context available for step completed WebSocket updates - skipping")
+                    return
                 
                 if result.success:
-                    await bridge.notify_agent_completed(
-                        context.run_id, step.agent_name,
-                        result={"step_type": step.metadata.get("step_type")},
-                        execution_time_ms=result.execution_time_ms
-                    )
+                    await emitter.emit_agent_completed(step.agent_name, {
+                        "step_type": step.metadata.get("step_type"),
+                        "execution_time_ms": result.execution_time_ms,
+                        "agent_name": step.agent_name
+                    })
                 else:
-                    await bridge.notify_agent_error(
-                        context.run_id, step.agent_name, 
-                        result.error or "Step execution failed",
-                        {"step_type": step.metadata.get("step_type")}
-                    )
+                    await emitter.emit_custom_event("agent_error", {
+                        "agent_name": step.agent_name,
+                        "error_message": result.error or "Step execution failed",
+                        "step_type": step.metadata.get("step_type")
+                    })
             except Exception as e:
-                logger.warning(f"Failed to send step completed via bridge: {e}")
+                logger.warning(f"Failed to send step completed via factory pattern: {e}")
     
     async def _send_workflow_completed(self, context: ExecutionContext, 
                                       results: List[ExecutionResult]) -> None:
-        """Send workflow completed notification via AgentWebSocketBridge."""
+        """Send workflow completed notification via factory pattern for user isolation."""
         if context.stream_updates:
             try:
-                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-                
-                bridge = await get_agent_websocket_bridge()
-                total_time = sum(r.execution_time_ms for r in results)
+                # Get user-isolated emitter (factory pattern)
+                emitter = await self._get_user_emitter_from_context(context)
+                if not emitter:
+                    logger.debug("No user context available for workflow completed WebSocket updates - skipping")
+                    return
+                    
+                total_time = sum(r.execution_time_ms for r in results if r.execution_time_ms)
                 success_count = sum(1 for r in results if r.success)
                 
-                await bridge.notify_agent_completed(
-                    context.run_id, "WorkflowOrchestrator",
-                    result={
-                        "workflow_completed": True,
-                        "successful_steps": success_count,
-                        "total_steps": len(results)
-                    },
-                    execution_time_ms=total_time
-                )
+                await emitter.emit_agent_completed("WorkflowOrchestrator", {
+                    "workflow_completed": True,
+                    "successful_steps": success_count,
+                    "total_steps": len(results),
+                    "total_execution_time_ms": total_time,
+                    "agent_name": "WorkflowOrchestrator"
+                })
             except Exception as e:
-                logger.warning(f"Failed to send workflow completed via bridge: {e}")
+                logger.warning(f"Failed to send workflow completed via factory pattern: {e}")
     
     def get_workflow_definition(self) -> List[Dict[str, Any]]:
         """Get workflow definition for monitoring.

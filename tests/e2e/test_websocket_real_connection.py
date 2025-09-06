@@ -31,6 +31,7 @@ import json
 import time
 import uuid
 from typing import Any, Dict, List, Optional, Union
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

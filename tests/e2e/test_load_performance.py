@@ -27,6 +27,7 @@ import time
 from typing import Dict, List, Any
 import pytest
 import pytest_asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import UnifiedTestConfig
 from tests.e2e.load_test_utilities import (

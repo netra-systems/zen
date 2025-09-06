@@ -24,9 +24,14 @@ import pytest
 import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from unittest.mock import patch
 import websockets
 import logging
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_isolation import get_test_env_manager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
@@ -34,7 +39,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.config import AgentConfig
 from netra_backend.app.schemas.agent_models import AgentResult
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 
 

@@ -22,7 +22,9 @@ import asyncio
 import re
 import pytest
 from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
 
 from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
@@ -240,7 +242,7 @@ class TestClickHouseSecretFormattingIssues:
         
         # Mock the secret manager
         with patch('netra_backend.app.config.secrets.SecretManager') as mock_secret_manager:
-            mock_instance = MagicMock()
+            mock_instance = MagicNone  # TODO: Use real service instance
             mock_instance.get_secret.side_effect = mock_gcp_secret_with_formatting_issues
             mock_secret_manager.return_value = mock_instance
             

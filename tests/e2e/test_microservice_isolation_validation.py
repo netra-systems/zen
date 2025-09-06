@@ -26,6 +26,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -34,6 +35,7 @@ class MicroserviceIsolationValidator:
     """Validates microservice independence using AST parsing and static analysis"""
     
     def __init__(self):
+    pass
         self.project_root = Path(__file__).parent.parent.parent
         self.backend_services = {
             "main_backend": self.project_root / "app",
@@ -188,10 +190,12 @@ class TestMicroserviceIsolationValidation:
     
     @pytest.fixture(scope="class")
     def validator(self):
+    pass
         return MicroserviceIsolationValidator()
     
     @pytest.fixture(scope="class")
     def validation_results(self, validator):
+    pass
         return validator.run_full_validation()
     
     @pytest.mark.e2e
@@ -199,44 +203,72 @@ class TestMicroserviceIsolationValidation:
         """Test that services have no forbidden cross-service imports"""
         results = validation_results["import_isolation"]
         if not results["isolated"]:
-            violations = "\n".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
-            pytest.fail(f"\nIMPORT ISOLATION VIOLATIONS:\n{violations}\n\nCRITICAL: Services must be 100% import-isolated per SPEC/independent_services.xml")
+            violations = "
+".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
+            pytest.fail(f"
+IMPORT ISOLATION VIOLATIONS:
+{violations}
+
+CRITICAL: Services must be 100% import-isolated per SPEC/independent_services.xml")
     
     @pytest.mark.e2e
     def test_service_independence_maintained(self, validation_results):
         """Test that services maintain structural independence"""
+    pass
         results = validation_results["service_independence"]
         if not results["independent"]:
-            violations = "\n".join([f"  - {v}" for v in results["violations"]])
-            pytest.fail(f"\nSERVICE INDEPENDENCE VIOLATIONS:\n{violations}\n\nServices must maintain independent directory structures.")
+            violations = "
+".join([f"  - {v}" for v in results["violations"]])
+            pytest.fail(f"
+SERVICE INDEPENDENCE VIOLATIONS:
+{violations}
+
+Services must maintain independent directory structures.")
     
     @pytest.mark.e2e
     def test_code_boundaries_clean(self, validation_results):
         """Test that code boundaries are properly enforced"""
         results = validation_results["code_boundaries"]
         if not results["boundaries_clean"]:
-            violations = "\n".join([f"  - {v}" for v in results["violations"]])
-            pytest.fail(f"\nCODE BOUNDARY VIOLATIONS:\n{violations}\n\nServices must not share module namespaces.")
+            violations = "
+".join([f"  - {v}" for v in results["violations"]])
+            pytest.fail(f"
+CODE BOUNDARY VIOLATIONS:
+{violations}
+
+Services must not share module namespaces.")
     
     @pytest.mark.e2e
     def test_configuration_isolation_complete(self, validation_results):
         """Test that each service has isolated configuration"""
+    pass
         results = validation_results["configuration_isolation"]
         if not results["isolated_config"]:
-            violations = "\n".join([f"  - {v}" for v in results["violations"]])
-            pytest.fail(f"\nCONFIGURATION ISOLATION VIOLATIONS:\n{violations}\n\nEach service must have independent configuration files.")
+            violations = "
+".join([f"  - {v}" for v in results["violations"]])
+            pytest.fail(f"
+CONFIGURATION ISOLATION VIOLATIONS:
+{violations}
+
+Each service must have independent configuration files.")
     
     @pytest.mark.e2e
     def test_api_only_communication(self, validation_results):
         """Test that inter-service communication uses only APIs"""
         results = validation_results["communication_protocols"]
         if not results["api_only_communication"]:
-            violations = "\n".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
-            pytest.fail(f"\nCOMMUNICATION PROTOCOL VIOLATIONS:\n{violations}\n\nServices must communicate only via APIs, not direct code calls.")
+            violations = "
+".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
+            pytest.fail(f"
+COMMUNICATION PROTOCOL VIOLATIONS:
+{violations}
+
+Services must communicate only via APIs, not direct code calls.")
     
     @pytest.mark.e2e
     def test_backend_services_only_scope(self, validator):
         """Test that validation correctly scopes to backend services only"""
+    pass
         assert "frontend" not in validator.backend_services
         assert "frontend" in validator.excluded_services
         assert set(validator.backend_services.keys()) == {"main_backend", "auth_service"}
@@ -248,7 +280,8 @@ class TestMicroserviceIsolationValidation:
                      ("Code Boundaries", "code_boundaries"), ("Configuration Isolation", "configuration_isolation"),
                      ("Communication Protocols", "communication_protocols")]
         
-        print("\n" + "=" * 25 + " MICROSERVICE ISOLATION REPORT " + "=" * 25)
+        print("
+" + "=" * 25 + " MICROSERVICE ISOLATION REPORT " + "=" * 25)
         total_violations = 0
         all_passed = True
         
@@ -264,9 +297,11 @@ class TestMicroserviceIsolationValidation:
         print(f"Total Violations: {total_violations}")
         
         if all_passed:
-            print("ALL MICROSERVICE ISOLATION TESTS PASSED\nArchitecture integrity maintained - services are 100% independent")
+            print("ALL MICROSERVICE ISOLATION TESTS PASSED
+Architecture integrity maintained - services are 100% independent")
         else:
-            print("MICROSERVICE ISOLATION VIOLATIONS DETECTED\nFix isolation violations to maintain system stability")
+            print("MICROSERVICE ISOLATION VIOLATIONS DETECTED
+Fix isolation violations to maintain system stability")
         
         print("=" * 80)
         assert True, "Microservice isolation validation report generated"
@@ -275,10 +310,12 @@ class TestMicroserviceIsolationValidation:
 # Standalone execution support
 def run_microservice_isolation_validation():
     """Run microservice isolation validation directly"""
+    pass
     validator = MicroserviceIsolationValidator()
     results = validator.run_full_validation()
     total_violations = sum(category["total_violations"] for category in results.values())
-    print(f"\nMicroservice Isolation Validation: {total_violations} total violations")
+    print(f"
+Microservice Isolation Validation: {total_violations} total violations")
     return total_violations == 0
 
 

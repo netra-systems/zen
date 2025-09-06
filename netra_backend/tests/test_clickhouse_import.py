@@ -1,3 +1,4 @@
+from shared.isolated_environment import IsolatedEnvironment
 """Minimal test to verify clickhouse_connect imports work"""
 
 def test_clickhouse_import():

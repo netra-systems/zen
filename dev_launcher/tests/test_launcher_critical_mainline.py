@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 env = get_env()
 Comprehensive failing tests for mainline dev_launcher critical functionality.
@@ -28,7 +29,6 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, call, patch, PropertyMock
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
@@ -92,9 +92,7 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         return mock_config
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.docker_services.DockerServiceManager')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     def test_docker_discovery_reuses_healthy_containers(self, mock_checker, mock_docker):
         """Test that existing healthy Docker containers are properly discovered and reused."""
         # Configure mock Docker manager to return running services
@@ -130,7 +128,6 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         mock_docker_instance.discover_running_services.assert_called_once()
         
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_docker_discovery_handles_unhealthy_containers(self, mock_docker):
         """Test handling of unhealthy containers during discovery."""
         mock_docker_instance = mock_docker.return_value
@@ -157,7 +154,6 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         self.assertEqual(len(launcher._docker_discovery_report.get('reusable_services', [])), 0)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_docker_discovery_fallback_when_docker_unavailable(self, mock_docker):
         """Test graceful fallback when Docker is unavailable."""
         # Simulate Docker being unavailable
@@ -198,9 +194,7 @@ class TestPortConflictResolution(unittest.TestCase):
         return sock
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.port_utils.find_available_port')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.port_utils.is_port_available')
     def test_port_conflict_auto_reallocation(self, mock_is_available, mock_find_port):
         """Test automatic port reallocation when preferred ports are in use."""
         # Simulate preferred ports being unavailable
@@ -258,7 +252,6 @@ class TestPortConflictResolution(unittest.TestCase):
                 launcher._check_critical_env_vars()
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.config.socket.socket')
     def test_port_cleanup_verification_failure(self, mock_port_manager):
         """Test port cleanup verification when processes don't release ports properly."""
         mock_manager = mock_port_manager.return_value
@@ -299,9 +292,7 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_auto_switch_to_docker_mode(self, mock_docker, mock_checker):
         """Test automatic switching to Docker mode when local services unavailable."""
         # Configure availability checker to recommend Docker mode
@@ -343,7 +334,6 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         self.assertIn('DATABASE_URL', os.environ)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     def test_auto_switch_to_shared_mode_when_docker_unavailable(self, mock_checker):
         """Test fallback to shared mode when both local and Docker are unavailable."""
         mock_checker_instance = mock_checker.return_value
@@ -431,9 +421,7 @@ class TestStartupSequenceOrdering(unittest.TestCase):
         self.execution_order.append(step_name)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.docker_services.DockerServiceManager')
     # Mock: Component isolation for testing without external dependencies
-    @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     async def test_thirteen_step_startup_sequence_order(self, mock_checker, mock_docker):
         """Test that the 13-step startup sequence executes in correct order."""
         # Mock all dependencies

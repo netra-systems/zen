@@ -12,7 +12,7 @@ from typing import Dict, List, Any
 from urllib.parse import urlparse, parse_qs
 
 # Staging URLs
-AUTH_SERVICE_URL = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+AUTH_SERVICE_URL = "https://auth.staging.netrasystems.ai"
 
 class StagingAuthTester:
     def __init__(self):
@@ -363,7 +363,8 @@ async def main():
                 "results": tester.results
             }, f, indent=2)
         
-        print(f"\nDetailed results saved to: staging_auth_test_results.json")
+        print(f"
+Detailed results saved to: staging_auth_test_results.json")
         
         return 0 if success else 1
 

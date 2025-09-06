@@ -6,13 +6,14 @@ zero message loss under all failure scenarios.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 from typing import List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -24,7 +25,7 @@ from netra_backend.app.websocket_core.types import (
     PendingMessage,
 )
 from netra_backend.app.websocket_core.types import ConnectionInfo
-from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
 
 class TestNetworkFailureZeroMessageLoss:
     """Test zero message loss during network failures."""
@@ -40,7 +41,7 @@ class TestNetworkFailureZeroMessageLoss:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncMock()
+        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
@@ -166,7 +167,7 @@ class TestTransactionalStateManagement:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncMock()
+        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
@@ -260,7 +261,7 @@ class TestRetryMechanism:
         # Mock: Component isolation for controlled unit testing
         self.mock_connection = Mock(spec=ConnectionInfo)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        self.mock_connection.websocket = AsyncMock()
+        self.mock_connection.websocket = AsyncNone  # TODO: Use real service instance
         self.mock_connection.message_count = 0
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [

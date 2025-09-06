@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Example test demonstrating the new real service testing infrastructure.
 Shows how to use dev_launcher-based fixtures for E2E testing.

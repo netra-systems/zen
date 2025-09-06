@@ -37,6 +37,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import json
 import ast
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -83,6 +85,7 @@ class DockerComplianceAuditor:
     }
     
     def __init__(self):
+    pass
         self.project_root = project_root
         self.violations = []
         self.compliant_files = []
@@ -99,7 +102,8 @@ class DockerComplianceAuditor:
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
-                lines = content.split('\n')
+                lines = content.split('
+')
                 
             for line_num, line in enumerate(lines, 1):
                 # Skip comments
@@ -111,7 +115,8 @@ class DockerComplianceAuditor:
                     # Check if it's using UnifiedDockerManager context
                     context_start = max(0, line_num - 10)
                     context_end = min(len(lines), line_num + 10)
-                    context = '\n'.join(lines[context_start:context_end])
+                    context = '
+'.join(lines[context_start:context_end])
                     
                     if 'UnifiedDockerManager' not in context and 'get_default_manager' not in context:
                         violations.append({
@@ -290,7 +295,8 @@ class DockerComplianceAuditor:
                 script.append("# With: manager.execute_docker_command(...)")
                 script.append("")
                 
-        return '\n'.join(script)
+        return '
+'.join(script)
 
 
 @dataclass
@@ -311,6 +317,7 @@ class DockerComplianceInfrastructureTests:
     """Infrastructure tests for Docker compliance auditing."""
     
     def __init__(self):
+    pass
         self.logger = logging.getLogger(f"{__name__}.Infrastructure")
         self.project_root = project_root
     
@@ -437,12 +444,14 @@ class DockerComplianceInfrastructureTests:
         test_violations = [
             {
                 'name': 'subprocess_docker_call',
-                'code': 'import subprocess\nsubprocess.run(["docker", "ps"])',
+                'code': 'import subprocess
+subprocess.run(["docker", "ps"])',
                 'expected_fix': 'manager.execute_docker_command'
             },
             {
                 'name': 'os_system_docker_call', 
-                'code': 'import os\nos.system("docker-compose up")',
+                'code': 'import os
+os.system("docker-compose up")',
                 'expected_fix': 'manager.docker_compose_command'
             }
         ]
@@ -474,7 +483,8 @@ class DockerComplianceInfrastructureTests:
                     'remediation_generated': len(remediation_script) > 0,
                     'quality_score': remediation_quality['score'],
                     'contains_expected_fix': remediation_quality['contains_expected_fix'],
-                    'remediation_lines': len(remediation_script.split('\n'))
+                    'remediation_lines': len(remediation_script.split('
+'))
                 })
                 
             finally:
@@ -849,27 +859,35 @@ class DockerComplianceInfrastructureTests:
         return [
             {
                 'name': 'compliant_code',
-                'code': 'from test_framework.unified_docker_manager import get_default_manager\nmanager = get_default_manager()\nmanager.start_services()',
+                'code': 'from test_framework.unified_docker_manager import get_default_manager
+manager = get_default_manager()
+manager.start_services()',
                 'expected_violations': 0
             },
             {
                 'name': 'subprocess_violation',
-                'code': 'import subprocess\nsubprocess.run(["docker", "ps"])',
+                'code': 'import subprocess
+subprocess.run(["docker", "ps"])',
                 'expected_violations': 1
             },
             {
                 'name': 'os_system_violation',
-                'code': 'import os\nos.system("docker-compose up -d")',
+                'code': 'import os
+os.system("docker-compose up -d")',
                 'expected_violations': 1
             },
             {
                 'name': 'multiple_violations',
-                'code': 'import subprocess\nimport os\nsubprocess.run(["docker", "ps"])\nos.system("docker stop container")',
+                'code': 'import subprocess
+import os
+subprocess.run(["docker", "ps"])
+os.system("docker stop container")',
                 'expected_violations': 2
             },
             {
                 'name': 'commented_violation',
-                'code': '# subprocess.run(["docker", "ps"])\nprint("This is fine")',
+                'code': '# subprocess.run(["docker", "ps"])
+print("This is fine")',
                 'expected_violations': 0
             }
         ]
@@ -907,7 +925,8 @@ def test_docker_compliance():
     report = auditor.run_audit()
     
     # Print report
-    print("\n" + "="*80)
+    print("
+" + "="*80)
     print("DOCKER MANAGEMENT COMPLIANCE AUDIT REPORT")
     print("="*80)
     print(f"Total Files Audited: {report['total_files_audited']}")
@@ -915,13 +934,15 @@ def test_docker_compliance():
     print(f"Compliant Critical Files: {report['compliant_critical_files']}")
     print(f"Compliance Score: {report['compliance_score']}%")
     
-    print("\n📦 Frontend Service Integration Status:")
+    print("
+📦 Frontend Service Integration Status:")
     for key, value in report['frontend_integration'].items():
         status = "✅" if value else "❌"
         print(f"  {status} {key}: {value}")
     
     if report['violations']:
-        print("\n⚠️ Violations Found (showing first 10):")
+        print("
+⚠️ Violations Found (showing first 10):")
         for v in report['violations'][:10]:
             print(f"  - {v['file']}:{v['line']} - {v['type']}")
             print(f"    {v['content'][:100]}...")
@@ -932,7 +953,8 @@ def test_docker_compliance():
         script_path = auditor.project_root / 'scripts' / 'docker_compliance_remediation.py'
         with open(script_path, 'w') as f:
             f.write(remediation_script)
-        print(f"\n📝 Remediation script generated: {script_path}")
+        print(f"
+📝 Remediation script generated: {script_path}")
     
     # Fail test if compliance score is below threshold
     assert report['compliance_score'] >= 95, f"Docker compliance score {report['compliance_score']}% is below 95% threshold"
@@ -941,7 +963,8 @@ def test_docker_compliance():
     frontend_checks = report['frontend_integration']
     assert all(frontend_checks.values()), f"Frontend service not fully integrated: {frontend_checks}"
     
-    print("\n✅ Docker Management Compliance Test PASSED")
+    print("
+✅ Docker Management Compliance Test PASSED")
     return True
 
 
@@ -955,3 +978,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"❌ Unexpected error: {e}")
         sys.exit(1)
+    pass

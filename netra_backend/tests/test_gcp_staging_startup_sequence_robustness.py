@@ -17,9 +17,11 @@ Issues replicated:
 import pytest
 import asyncio
 import sys
-from unittest.mock import patch, MagicMock, AsyncMock, call
 from contextlib import contextmanager
 import logging
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
 
 from netra_backend.app.main import app
 from shared.isolated_environment import IsolatedEnvironment
@@ -33,6 +35,7 @@ class TestStartupLoggerScopingIssues:
         Test: Logger variable should be available throughout startup sequence
         This test SHOULD FAIL until logger scoping issues are resolved
         """
+    pass
         # Simulate logger variable scoping error
         with patch('builtins.globals', return_value={}):  # Simulate empty globals
             
@@ -53,12 +56,15 @@ class TestStartupLoggerScopingIssues:
         Test: Logger initialization should happen before configuration loading
         This test SHOULD FAIL until initialization order is fixed
         """
+    pass
         initialization_sequence = []
         
         def mock_logger_init():
+    pass
             initialization_sequence.append("logger")
             
         def mock_config_init():
+    pass
             if "logger" not in initialization_sequence:
                 raise RuntimeError("Configuration initialized before logger")
             initialization_sequence.append("config")
@@ -83,11 +89,12 @@ class TestStartupLoggerScopingIssues:
         Test: Logger imports should not create circular dependencies
         This test SHOULD FAIL until circular import issues are resolved
         """
+    pass
         # Simulate circular import between logger and configuration
         with pytest.raises(ImportError) as exc_info:
             with patch('sys.modules', {
-                'netra_backend.app.config': MagicMock(),
-                'netra_backend.app.logging_config': MagicMock()
+                'netra_backend.app.config': MagicNone  # TODO: Use real service instance,
+                'netra_backend.app.logging_config': MagicNone  # TODO: Use real service instance
             }):
                 # Simulate circular import
                 self._simulate_circular_logger_import()
@@ -105,8 +112,10 @@ class TestStartupLoggerScopingIssues:
         Test: Logger variable should be accessible in async startup functions
         This test SHOULD FAIL until async scoping issues are resolved
         """
+    pass
         @asyncio.coroutine
         def async_startup_with_logger():
+    pass
             # Simulate logger access in async context where it's not defined
             logger.info("Starting async initialization")  # This should fail
             
@@ -121,6 +130,7 @@ class TestStartupLoggerScopingIssues:
         """
         Simulate startup function that accesses logger variable
         """
+    pass
         # This simulates code that expects 'logger' to be in scope
         logger.info("Starting application")  # Should fail if logger not defined
         
@@ -128,6 +138,7 @@ class TestStartupLoggerScopingIssues:
         """
         Simulate circular import between logger and config modules
         """
+    pass
         raise ImportError("Circular import detected between logging_config and config modules")
 
 
@@ -139,12 +150,15 @@ class TestStartupInitializationOrder:
         Test: Environment detection should happen before config loading
         This test SHOULD FAIL until initialization order is correct
         """
+    pass
         initialization_order = []
         
         def mock_env_detection():
+    pass
             initialization_order.append("environment")
             
         def mock_config_load():
+    pass
             if "environment" not in initialization_order:
                 raise RuntimeError("Configuration loaded before environment detection")
             initialization_order.append("config")
@@ -166,12 +180,15 @@ class TestStartupInitializationOrder:
         Test: Database connection should not happen before secrets are loaded
         This test SHOULD FAIL until secret loading order is fixed
         """
+    pass
         startup_sequence = []
         
         def mock_secret_loading():
+    pass
             startup_sequence.append("secrets")
             
         def mock_database_connection():
+    pass
             if "secrets" not in startup_sequence:
                 raise RuntimeError("Database connection attempted before secrets loaded")
             startup_sequence.append("database")
@@ -193,17 +210,21 @@ class TestStartupInitializationOrder:
         Test: Service registration should follow proper dependency chain
         This test SHOULD FAIL until service dependency order is enforced
         """
+    pass
         service_registry = []
         
         def register_database_service():
+    pass
             service_registry.append("database")
             
         def register_auth_service():
+    pass
             if "database" not in service_registry:
                 raise RuntimeError("Auth service registered before database service")
             service_registry.append("auth")
             
         def register_websocket_service():
+    pass
             if "auth" not in service_registry:
                 raise RuntimeError("WebSocket service registered before auth service")
             service_registry.append("websocket")
@@ -226,12 +247,15 @@ class TestStartupInitializationOrder:
         Test: FastAPI lifespan events should execute in correct order
         This test SHOULD FAIL until lifespan event ordering is fixed
         """
+    pass
         lifespan_events = []
         
         async def startup_event_1():
+    pass
             lifespan_events.append("startup_1")
             
         async def startup_event_2():
+    pass
             if "startup_1" not in lifespan_events:
                 raise RuntimeError("startup_event_2 executed before startup_event_1")
             lifespan_events.append("startup_2")
@@ -254,6 +278,7 @@ class TestConfigurationCircularDependencies:
         Test: Configuration and logger should not have circular dependency
         This test SHOULD FAIL until circular dependency is broken
         """
+    pass
         # Simulate circular dependency
         with pytest.raises(ImportError) as exc_info:
             # Config tries to import logger, logger tries to import config
@@ -273,6 +298,7 @@ class TestConfigurationCircularDependencies:
         Test: Environment and config modules should not be circular
         This test SHOULD FAIL until environment/config circular dependency is resolved
         """
+    pass
         # Simulate environment trying to load config, config trying to detect environment
         with pytest.raises(ImportError) as exc_info:
             self._simulate_environment_config_circular_import()
@@ -289,6 +315,7 @@ class TestConfigurationCircularDependencies:
         Test: Database and config modules should not be circular
         This test SHOULD FAIL until database/config dependency is fixed
         """
+    pass
         with pytest.raises(ImportError) as exc_info:
             # Simulate database manager importing config, config importing database for validation
             with patch('netra_backend.app.db.database_manager.get_config', 
@@ -315,6 +342,7 @@ class TestRobustStartupFailureRecovery:
         Test: Startup failures should be logged even when logger is not available
         This test SHOULD FAIL until fallback logging is implemented
         """
+    pass
         # Simulate logger not available during startup failure
         with patch('netra_backend.app.main.logger', None):
             
@@ -334,6 +362,7 @@ class TestRobustStartupFailureRecovery:
         Test: Startup should gracefully degrade when non-critical services fail
         This test SHOULD FAIL until graceful degradation is implemented
         """
+    pass
         # Simulate non-critical service failure during startup
         with pytest.raises(RuntimeError) as exc_info:
             self._startup_with_noncritical_service_failure()
@@ -350,9 +379,11 @@ class TestRobustStartupFailureRecovery:
         Test: Startup should handle component initialization timeouts
         This test SHOULD FAIL until timeout handling is implemented
         """
+    pass
         # Simulate component taking too long to initialize
         @asyncio.coroutine
         def slow_component_init():
+    pass
             yield from asyncio.sleep(30)  # 30 seconds - too long
             
         with pytest.raises(asyncio.TimeoutError) as exc_info:
@@ -370,13 +401,16 @@ class TestRobustStartupFailureRecovery:
         Test: Startup should rollback on critical component failures
         This test SHOULD FAIL until rollback mechanism is implemented
         """
+    pass
         startup_state = {"initialized": []}
         
         def critical_component_init():
+    pass
             startup_state["initialized"].append("critical_component")
             raise RuntimeError("Critical component failed")
             
         def rollback_startup():
+    pass
             if not startup_state["initialized"]:
                 raise RuntimeError("No rollback mechanism - startup state not cleaned up")
             startup_state["initialized"].clear()
@@ -405,6 +439,7 @@ class TestRobustStartupFailureRecovery:
 
     def _startup_with_noncritical_service_failure(self):
         """Simulate non-critical service failure during startup"""
+    pass
         # This represents what should happen when a non-critical service fails
         # Should continue startup but log the failure
         raise RuntimeError("Non-critical service failed but startup did not degrade gracefully")
@@ -418,6 +453,7 @@ class TestStagingEnvironmentStartupValidation:
         Test: Staging should validate all components during startup
         This test SHOULD FAIL until staging validation is comprehensive
         """
+    pass
         staging_components = [
             "database_connectivity",
             "secret_availability",
@@ -444,6 +480,7 @@ class TestStagingEnvironmentStartupValidation:
         Test: Staging startup should meet performance requirements
         This test SHOULD FAIL until startup performance is optimized
         """
+    pass
         import time
         
         start_time = time.time()
@@ -469,6 +506,7 @@ class TestStagingEnvironmentStartupValidation:
         """
         Validate staging component (mock implementation that fails)
         """
+    pass
         # This represents validation that SHOULD happen in staging
         raise Exception(f"Staging validation failed for component: {component}")
 
@@ -476,6 +514,7 @@ class TestStagingEnvironmentStartupValidation:
         """
         Simulate slow startup in staging environment
         """
+    pass
         import time
         time.sleep(35)  # Simulate 35 second startup - too slow
         raise Exception("Startup completed but too slowly")

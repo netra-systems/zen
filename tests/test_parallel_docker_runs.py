@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 import sys
 import os
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # CRITICAL: Import Docker rate limiter to prevent daemon crashes
 from test_framework.docker_rate_limiter import execute_docker_command
@@ -43,6 +45,7 @@ class ParallelDockerTest:
         
     async def run_single_environment(self, env_id: int) -> Dict[str, Any]:
         """Run a single Docker environment."""
+    pass
         logger.info(f"Starting environment {env_id}")
         
         start_time = time.time()
@@ -83,7 +86,8 @@ class ParallelDockerTest:
             result = subprocess.run(cmd, capture_output=True, text=True)
             
             running_containers = result.stdout
-            logger.info(f"Environment {env_id} containers:\n{running_containers}")
+            logger.info(f"Environment {env_id} containers:
+{running_containers}")
             
             # Sleep to simulate test execution
             await asyncio.sleep(5)
@@ -192,6 +196,7 @@ class ParallelDockerTest:
 
 async def main():
     """Main test entry point."""
+    pass
     # Test with different numbers of parallel environments
     test_configs = [
         (2, "Basic parallel test"),
@@ -202,7 +207,8 @@ async def main():
     all_passed = True
     
     for num_parallel, description in test_configs:
-        logger.info(f"\n{'='*60}")
+        logger.info(f"
+{'='*60}")
         logger.info(f"Running: {description} ({num_parallel} parallel environments)")
         logger.info(f"{'='*60}")
         
@@ -227,13 +233,15 @@ async def main():
             await asyncio.sleep(5)
     
     # Final summary
-    logger.info(f"\n{'='*60}")
+    logger.info(f"
+{'='*60}")
     if all_passed:
         logger.info("✅ ALL PARALLEL DOCKER TESTS PASSED")
     else:
         logger.error("❌ SOME PARALLEL DOCKER TESTS FAILED")
     logger.info(f"{'='*60}")
     
+    await asyncio.sleep(0)
     return 0 if all_passed else 1
 
 

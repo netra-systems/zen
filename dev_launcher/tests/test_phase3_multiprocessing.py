@@ -5,7 +5,7 @@ Test Phase 3 multiprocessing engine implementation.
 import asyncio
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -176,7 +176,6 @@ class TestAsyncDependencyChecker:
         assert isinstance(checker.dependency_hashes, dict)
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('subprocess.run')
     def test_pip_check_performance(self, mock_subprocess, temp_project):
         """Test pip check performance for caching."""
         # Mock pip check success
@@ -285,7 +284,6 @@ class TestServiceStartupCoordinator:
         mock_coordinator.cleanup()
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('requests.get')
     def test_async_health_checks(self, mock_requests, mock_coordinator):
         """Test asynchronous health checks."""
         # Mock successful health check responses

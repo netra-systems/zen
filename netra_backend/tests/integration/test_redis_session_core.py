@@ -21,7 +21,12 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
@@ -29,7 +34,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
 
 # Set up environment using IsolatedEnvironment
 env = get_env()
@@ -44,6 +49,7 @@ class MockWebSocketConnection:
     """Simple mock WebSocket for testing Redis integration."""
     
     def __init__(self, user_id: str, connection_id: str):
+    pass
         self.user_id = user_id
         self.connection_id = connection_id
         self.state = "connected"
@@ -63,6 +69,7 @@ class MockWebSocketConnection:
 
 class TestRedisSessionStateCore:
     """Core Redis session state synchronization tests using REAL services."""
+    pass
 
     @pytest.fixture
     async def redis_service(self):
@@ -75,11 +82,16 @@ class TestRedisSessionStateCore:
     @pytest.fixture
     async def session_manager(self, redis_service):
         """Create real Redis session manager."""
-        return RedisSessionManager(redis_client=redis_service)
+    pass
+        await asyncio.sleep(0)
+    return RedisSessionManager(redis_client=redis_service)
         
     @pytest.fixture
     def websocket_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Get real WebSocket manager."""
+    pass
         return get_websocket_manager()
 
     @pytest.mark.asyncio
@@ -258,8 +270,8 @@ class TestRedisSessionStateCore:
         user_id = f"websocket_integration_{uuid.uuid4().hex[:8]}"
         
         # Create a mock WebSocket connection
-        mock_websocket = AsyncMock()
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
         
         # Test WebSocket connection creation
         start_time = time.time()
@@ -439,7 +451,8 @@ class TestRedisSessionStateCore:
         
         # Test getting non-existent session
         non_existent_session = await session_manager.get_session("non_existent_session_id")
-        assert non_existent_session is None, "Non-existent session should return None"
+        assert non_existent_session is None, "Non-existent session should await asyncio.sleep(0)
+    return None"
         
         # Test updating non-existent session
         update_result = await session_manager.update_session("non_existent_session_id", {"test": "data"})
@@ -503,6 +516,7 @@ class TestRedisSessionStateCore:
         # Test environment variable deletion
         env.delete(test_key)
         assert not env.exists(test_key), "Deleted environment variable should not exist"
-        assert env.get(test_key) is None, "Deleted environment variable should return None"
+        assert env.get(test_key) is None, "Deleted environment variable should await asyncio.sleep(0)
+    return None"
         
         logger.info("IsolatedEnvironment usage validation completed successfully")

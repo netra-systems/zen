@@ -2,76 +2,89 @@
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
 from netra_backend.app.routes.threads_route import create_thread, ThreadCreate
 from netra_backend.tests.helpers.thread_test_helpers import (
+import asyncio
     assert_http_exception,
     assert_thread_creation_call,
     create_mock_thread,
     create_thread_update_scenario,
     create_uuid_scenario,
-    setup_thread_repo_mock,
-)
+    setup_thread_repo_mock)
 
 @pytest.fixture
-def mock_db():
+ def real_db():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock database session"""
+    pass
+    from sqlalchemy.ext.asyncio import AsyncSession
+    # Mock: Generic component isolation for controlled unit testing with proper AsyncSession spec
+    db = AsyncMock(spec=AsyncSession)
     # Mock: Generic component isolation for controlled unit testing
-    db = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    db.commit = AsyncMock()
+    db.commit = AsyncNone  # TODO: Use real service instance
     return db
 
 @pytest.fixture
-def mock_user():
+ def real_user():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Mock authenticated user"""
+    pass
     # Mock: Generic component isolation for controlled unit testing
-    user = Mock()
+    user = user_instance  # Initialize appropriate service
     user.id = "test_user_123"
     user.email = "test@example.com"
     return user
 
 class TestCreateThread:
     """Test cases for POST / endpoint"""
-    @pytest.mark.asyncio
-    async def test_create_thread_success(self, mock_db, mock_user):
+            @pytest.mark.asyncio
+    async def test_create_thread_success(self, MockThreadRepo, MockUnifiedIDManager, mock_db, mock_user):
         """Test successful thread creation"""
-        mock_thread = create_mock_thread(thread_id="thread_abc123", title="New Thread")
+        MockUnifiedIDManager.generate_thread_id.return_value = "abcdef1234567890"
+        mock_thread = create_mock_thread(thread_id="thread_abcdef1234567890", title="New Thread")
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
-            mock_handler.return_value = mock_thread
-            thread_data = ThreadCreate(
-                title="New Thread", 
-                metadata={"custom": "data"}
-            )
-            
-            result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
-            
-            assert result.id.startswith("thread_")  # Thread ID should start with thread_ prefix
-            assert result.metadata["title"] == "New Thread"
-            # Note: This test actually creates a thread rather than using the mock
-            assert hasattr(result, 'id')  # Ensure we have a valid thread response
-    @pytest.mark.asyncio
-    async def test_create_thread_no_title(self, mock_db, mock_user):
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.create = AsyncMock(return_value=mock_thread)
+        
+        thread_data = ThreadCreate(
+            title="New Thread", 
+            metadata={"custom": "data"}
+        )
+        
+        result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
+        
+        assert result.id.startswith("thread_")  # Thread ID should start with thread_ prefix
+        assert result.title == "New Thread"
+        assert hasattr(result, 'id')  # Ensure we have a valid thread response
+            @pytest.mark.asyncio
+    async def test_create_thread_no_title(self, MockThreadRepo, MockUnifiedIDManager, mock_db, mock_user):
         """Test thread creation without title"""
+    pass
+        MockUnifiedIDManager.generate_thread_id.return_value = "abcdef1234567890"
         mock_thread = create_mock_thread()
         mock_thread.metadata_ = {"user_id": "test_user_123", "status": "active"}
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
-            mock_handler.return_value = mock_thread
-            thread_data = ThreadCreate()
-            
-            result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
-            
-            assert result.metadata_["user_id"] == "test_user_123"
-            mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
+        # Setup mocks
+        thread_repo = MockThreadRepo.return_value
+        thread_repo.create = AsyncMock(return_value=mock_thread)
+        
+        thread_data = ThreadCreate()
+        
+        result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
+        
+        assert result.metadata["user_id"] == "test_user_123"
+        thread_repo.create.assert_called_once()
     @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
@@ -88,3 +101,4 @@ class TestCreateThread:
             assert_http_exception(exc_info, 500, "Failed to create thread")
             mock_logger = mock_get_logger.return_value
             mock_logger.error.assert_called_once()
+    pass

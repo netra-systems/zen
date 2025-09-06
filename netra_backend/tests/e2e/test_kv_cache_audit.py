@@ -8,12 +8,13 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState

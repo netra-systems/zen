@@ -10,6 +10,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @dataclass

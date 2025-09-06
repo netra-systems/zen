@@ -21,6 +21,7 @@ import jwt
 import pytest
 import os
 import sys
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -57,6 +58,7 @@ class ChatInitializationTester:
     """Mission critical tester for chat initialization using factory patterns."""
     
     def __init__(self):
+    pass
         self.frontend_url = env.get('FRONTEND_URL', 'http://localhost:3000')
         self.backend_url = env.get('BACKEND_URL', 'http://localhost:8000')
         self.auth_url = env.get('AUTH_SERVICE_URL', 'http://localhost:8081')
@@ -94,7 +96,8 @@ class ChatInitializationTester:
         This tests the factory pattern that enables real-time chat functionality.
         """
         test_name = "websocket_factory_initialization"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Create test user context
@@ -150,7 +153,8 @@ class ChatInitializationTester:
         This ensures chat messages only go to the correct user.
         """
         test_name = "user_context_isolation"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Create multiple isolated user contexts
@@ -224,7 +228,8 @@ class ChatInitializationTester:
         This tests the full chat experience from message to agent response.
         """
         test_name = "chat_message_lifecycle"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Create test context for chat session
@@ -314,13 +319,15 @@ class ChatInitializationTester:
         This tests that multiple users can chat simultaneously without issues.
         """
         test_name = "concurrent_chat_sessions"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Create multiple concurrent chat sessions
             sessions = []
             
             async def create_chat_session(session_id: int):
+    pass
                 user_id = f"concurrent_user_{session_id}_{uuid.uuid4().hex[:8]}"
                 thread_id = f"concurrent_thread_{session_id}_{uuid.uuid4().hex[:8]}"
                 connection_id = f"concurrent_conn_{session_id}_{uuid.uuid4().hex[:8]}"
@@ -356,7 +363,8 @@ class ChatInitializationTester:
                     {"response": f"Response for user {session_id}", "session": session_id}
                 )
                 
-                return emitter, user_id, session_id
+                await asyncio.sleep(0)
+    return emitter, user_id, session_id
             
             # Create 5 concurrent chat sessions
             tasks = [create_chat_session(i) for i in range(5)]
@@ -395,7 +403,8 @@ class ChatInitializationTester:
         Verifies that valid tokens enable chat access.
         """
         test_name = "auth_token_integration"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Generate valid token
@@ -473,7 +482,8 @@ class ChatInitializationTester:
         Tests that chat can recover from various error conditions.
         """
         test_name = "error_recovery_in_chat"
-        print(f"\n[TESTING] {test_name}")
+        print(f"
+[TESTING] {test_name}")
         
         try:
             # Create test chat session
@@ -542,7 +552,8 @@ class ChatInitializationTester:
     
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all mission critical chat initialization tests."""
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("[CRITICAL] MISSION CRITICAL: CHAT INITIALIZATION TEST SUITE")
         print("CHAT IS KING - Primary value delivery channel")
         print("Using Factory-Based WebSocket Patterns")
@@ -585,7 +596,8 @@ class ChatInitializationTester:
     
     def generate_summary(self):
         """Generate test summary report."""
-        print("\n" + "="*60)
+        print("
+" + "="*60)
         print("[SUMMARY] CHAT INITIALIZATION TEST SUMMARY")
         print("="*60)
         print(f"Total Tests: {self.test_results['total']}")
@@ -593,23 +605,27 @@ class ChatInitializationTester:
         print(f"Failed: {self.test_results['failed']} [FAIL]")
         
         if self.test_results['critical_failures']:
-            print("\n[CRITICAL FAILURES]:")
+            print("
+[CRITICAL FAILURES]:")
             for failure in self.test_results['critical_failures']:
                 print(f"  - {failure['test']}: {failure['error']}")
                 print(f"    Severity: {failure['severity']}")
         
         # Determine overall status
         if self.test_results['failed'] == 0:
-            print("\n[SUCCESS] ALL TESTS PASSED - Chat initialization is working correctly!")
+            print("
+[SUCCESS] ALL TESTS PASSED - Chat initialization is working correctly!")
             print("[SUCCESS] Factory-based WebSocket patterns functioning properly")
             print("[SUCCESS] User isolation and concurrent chat sessions validated")
             self.test_results['status'] = 'PASSED'
         elif any(f['severity'] == 'CRITICAL' for f in self.test_results['critical_failures']):
-            print("\n[CRITICAL FAILURE] CRITICAL FAILURE - CHAT IS BROKEN! Deployment blocked.")
+            print("
+[CRITICAL FAILURE] CRITICAL FAILURE - CHAT IS BROKEN! Deployment blocked.")
             print("[CRITICAL FAILURE] Factory patterns or WebSocket isolation failing")
             self.test_results['status'] = 'CRITICAL_FAILURE'
         else:
-            print("\n[WARNING] SOME TESTS FAILED - Review and fix before production.")
+            print("
+[WARNING] SOME TESTS FAILED - Review and fix before production.")
             self.test_results['status'] = 'PARTIAL_FAILURE'
         
         print("="*60)
@@ -634,6 +650,7 @@ class TestChatInitialization:
     @pytest.mark.critical
     async def test_user_context_isolation(self):
         """Test user context isolation in chat."""
+    pass
         tester = ChatInitializationTester()
         result = await tester.test_user_context_isolation()
         assert result, "User context isolation failed"
@@ -650,6 +667,7 @@ class TestChatInitialization:
     @pytest.mark.critical
     async def test_concurrent_chat_sessions(self):
         """Test concurrent chat sessions."""
+    pass
         tester = ChatInitializationTester()
         result = await tester.test_concurrent_chat_sessions()
         assert result, "Concurrent chat sessions failed"
@@ -664,6 +682,7 @@ class TestChatInitialization:
     @pytest.mark.asyncio
     async def test_error_recovery_in_chat(self):
         """Test error recovery in chat."""
+    pass
         tester = ChatInitializationTester()
         result = await tester.test_error_recovery_in_chat()
         assert result, "Error recovery in chat failed"
@@ -678,7 +697,8 @@ async def main():
     try:
         with open('chat_initialization_test_results.json', 'w') as f:
             json.dump(results, f, indent=2)
-        print(f"\n[INFO] Results saved to: chat_initialization_test_results.json")
+        print(f"
+[INFO] Results saved to: chat_initialization_test_results.json")
     except Exception as e:
         print(f"[WARN] Could not save results file: {e}")
     
@@ -697,3 +717,4 @@ if __name__ == "__main__":
     print("CHAT IS KING - Testing primary value delivery channel")
     print("-" * 60)
     asyncio.run(main())
+    pass

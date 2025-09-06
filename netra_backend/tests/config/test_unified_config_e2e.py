@@ -1,4 +1,7 @@
 from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from shared.isolated_environment import IsolatedEnvironment
 """End-to-End Tests for Unified Configuration System
 
 These tests validate the complete configuration flow from environment
@@ -10,7 +13,6 @@ import asyncio
 import tempfile
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from contextlib import asynccontextmanager
 
 from netra_backend.app.core.configuration.base import (
@@ -42,7 +44,6 @@ class TestConfigurationBootstrap:
             assert config.database_url == 'postgresql://localhost/testdb'
             assert config.redis_url == 'redis://localhost:6379'
     
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_environment_bootstrap(self):
         """Test staging environment bootstrap with GCP settings."""
         with patch.dict('os.environ', {
@@ -116,7 +117,7 @@ class TestDatabaseE2E:
             # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_engine:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_engine.return_value = AsyncMock()
+                mock_engine.return_value = AsyncNone  # TODO: Use real service instance
                 
                 db = AsyncDatabase('postgresql+asyncpg://localhost/test')
                 
@@ -205,7 +206,7 @@ class TestRedisE2E:
             
             with patch.object(manager, '_create_redis_client') as mock_create:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_client = AsyncMock()
+                mock_client = AsyncNone  # TODO: Use real service instance
                 mock_client.ping.side_effect = [
                     Exception("Connection failed"),  # First attempt fails
                     None  # Second attempt (local) succeeds

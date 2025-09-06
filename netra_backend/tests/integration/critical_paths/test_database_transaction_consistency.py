@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Database Transaction Consistency L4 Critical Path Tests (Staging Environment)
 
 env = get_env()

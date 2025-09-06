@@ -1,7 +1,11 @@
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -68,7 +72,7 @@ class TestConfigEndpoint:
         
         # Mock the User object that would be returned from require_admin
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicMock()
+        mock_user = MagicNone  # TODO: Use real service instance
         mock_user.id = "test-user-id"
         mock_user.email = "admin@test.com"
         mock_user.is_admin = True

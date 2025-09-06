@@ -15,7 +15,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 async def run_tests():
     """Run all refresh-related tests."""
-    print("\n" + "="*70)
+    print("
+" + "="*70)
     print("[RUNNING PAGE REFRESH TEST SUITE]")
     print(f"Timestamp: {datetime.now().isoformat()}")
     print("="*70)
@@ -28,7 +29,8 @@ async def run_tests():
     }
     
     # Test 1: WebSocket Service Unit Tests
-    print("\n[Test 1: WebSocket Service Enhancements]")
+    print("
+[Test 1: WebSocket Service Enhancements]")
     print("-"*50)
     try:
         # Check if the enhanced files exist
@@ -59,7 +61,8 @@ async def run_tests():
         results['total'] += 1
     
     # Test 2: Test File Creation Verification
-    print("\n[Test 2: Test Coverage Files]")
+    print("
+[Test 2: Test Coverage Files]")
     print("-"*50)
     try:
         test_files = [
@@ -93,7 +96,8 @@ async def run_tests():
         results['total'] += 1
     
     # Test 3: Key Feature Validation
-    print("\n[Test 3: Key Features Implementation]")
+    print("
+[Test 3: Key Features Implementation]")
     print("-"*50)
     features = []
     
@@ -153,7 +157,8 @@ async def run_tests():
         results['total'] += 1
     
     # Test 4: Test Structure Validation
-    print("\n[Test 4: Test Structure and Coverage]")
+    print("
+[Test 4: Test Structure and Coverage]")
     print("-"*50)
     try:
         coverage_areas = {
@@ -185,7 +190,8 @@ async def run_tests():
         results['total'] += 1
     
     # Summary
-    print("\n" + "="*70)
+    print("
+" + "="*70)
     print("[TEST SUMMARY]")
     print("="*70)
     print(f"Total Tests: {results['total']}")
@@ -194,7 +200,8 @@ async def run_tests():
     print(f"Pass Rate: {(results['passed']/results['total']*100):.1f}%")
     
     # Overall assessment
-    print("\n[OVERALL ASSESSMENT]:")
+    print("
+[OVERALL ASSESSMENT]:")
     if results['failed'] == 0:
         print("[EXCELLENT] - All refresh robustness improvements verified!")
         print("   - WebSocket reconnection enhanced with exponential backoff")
@@ -219,7 +226,8 @@ async def run_tests():
 
 async def check_playwright_tests():
     """Try to run actual Playwright tests if environment allows."""
-    print("\n" + "="*70)
+    print("
+" + "="*70)
     print("[PLAYWRIGHT TEST VALIDATION]")
     print("="*70)
     
@@ -268,22 +276,26 @@ async def main():
     # Check Playwright capability
     can_run_browser_tests = await check_playwright_tests()
     
-    print("\n" + "="*70)
+    print("
+" + "="*70)
     print("[FINAL REPORT]")
     print("="*70)
     
-    print("\n[Test Implementation Status]:")
+    print("
+[Test Implementation Status]:")
     print(f"   Core Enhancements: {'[COMPLETE]' if results['passed'] > 0 else '[INCOMPLETE]'}")
     print(f"   Test Coverage: {results['passed']}/{results['total']} verified")
     print(f"   Browser Testing: {'[AVAILABLE]' if can_run_browser_tests else '[LIMITED]'}")
     
-    print("\n[Key Achievements]:")
+    print("
+[Key Achievements]:")
     print("   1. WebSocket service enhanced with reconnection logic")
     print("   2. Chat state persistence service created")
     print("   3. Comprehensive test suites developed")
     print("   4. Stress testing framework established")
     
-    print("\n[Recommendations]:")
+    print("
+[Recommendations]:")
     if not can_run_browser_tests:
         print("   - Install Playwright browsers: playwright install chromium")
     print("   - Run frontend: cd frontend && npm run dev")
@@ -292,10 +304,12 @@ async def main():
     
     # Exit code based on results
     if results['failed'] == 0:
-        print("\n[SUCCESS] - Page refresh robustness achieved!")
+        print("
+[SUCCESS] - Page refresh robustness achieved!")
         return 0
     else:
-        print(f"\n[WARNING] {results['failed']} items need attention")
+        print(f"
+[WARNING] {results['failed']} items need attention")
         return 1
 
 

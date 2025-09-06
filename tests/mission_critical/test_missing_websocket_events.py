@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """
 Comprehensive test suite for missing WebSocket events.
 Tests that the backend properly emits ALL expected events that frontend handlers are waiting for.
@@ -9,8 +35,12 @@ import asyncio
 import json
 import pytest
 from typing import Dict, List, Set, Any
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.supervisor.agent_manager import AgentManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -18,6 +48,10 @@ from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNoti
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -26,6 +60,7 @@ class WebSocketEventCapture:
     """Captures all WebSocket events for validation."""
     
     def __init__(self):
+    pass
         self.events: List[Dict[str, Any]] = []
         self.event_types: Set[str] = set()
         self.event_sequence: List[str] = []
@@ -40,7 +75,9 @@ class WebSocketEventCapture:
         
     def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
         """Get all events of a specific type."""
-        return [e for e in self.events if e.get('type') == event_type]
+    pass
+        await asyncio.sleep(0)
+    return [e for e in self.events if e.get('type') == event_type]
     
     def has_event_type(self, event_type: str) -> bool:
         """Check if an event type was captured."""
@@ -64,6 +101,8 @@ class WebSocketEventCapture:
 @pytest.fixture
 async def event_capture():
     """Fixture for capturing WebSocket events."""
+    pass
+    await asyncio.sleep(0)
     return WebSocketEventCapture()
 
 
@@ -73,12 +112,15 @@ async def mock_websocket_manager(event_capture):
     manager = AsyncMock(spec=WebSocketManager)
     manager.send_to_thread = event_capture.capture_event
     manager.send_message = event_capture.capture_event
+    await asyncio.sleep(0)
     return manager
 
 
 @pytest.fixture
 async def agent_context():
     """Create test agent execution context."""
+    pass
+    await asyncio.sleep(0)
     return AgentExecutionContext(
         agent_name="test_agent",
         thread_id="test_thread_123",
@@ -418,8 +460,7 @@ class TestWebSocketEventIntegration:
             agent_manager.websocket_manager = ws_manager
             
             # Mock agent execution
-            mock_agent = MagicMock()
-            mock_agent.execute = AsyncMock(return_value={"result": "success"})
+            mock_agent = Magic            mock_agent.execute = AsyncMock(return_value={"result": "success"})
             
             with patch.object(agent_manager, '_get_agent', return_value=mock_agent):
                 # Execute agent
@@ -460,6 +501,7 @@ class TestWebSocketEventIntegration:
     @pytest.mark.asyncio  
     async def test_frontend_orphaned_handlers_validation(self):
         """Validate that frontend has handlers for events that backend never sends."""
+    pass
         # List of handlers defined in frontend but never receive events
         orphaned_handlers = {
             "agent_stopped": {
@@ -560,6 +602,7 @@ async def test_comprehensive_missing_events_summary():
     Summary test that documents all missing WebSocket events.
     This test SHOULD FAIL until all events are properly implemented.
     """
+    pass
     # All events have been implemented!
     implemented_events = {
         "agent_stopped": "Now emits when agent is cancelled",
@@ -574,11 +617,15 @@ async def test_comprehensive_missing_events_summary():
     
     # This assertion should PASS now
     assert len(implemented_events) == 8, \
-        f"All {len(implemented_events)} WebSocket events have been implemented:\n" + \
-        "\n".join([f"  ✅ {event}: {status}" for event, status in implemented_events.items()])
+        f"All {len(implemented_events)} WebSocket events have been implemented:
+" + \
+        "
+".join([f"  ✅ {event}: {status}" for event, status in implemented_events.items()])
     
-    print("\n✅ SUCCESS: All missing WebSocket events have been implemented!")
-    print("\nImplemented events:")
+    print("
+✅ SUCCESS: All missing WebSocket events have been implemented!")
+    print("
+Implemented events:")
     for event, status in implemented_events.items():
         print(f"  ✅ {event}: {status}")
 

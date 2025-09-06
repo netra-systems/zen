@@ -16,6 +16,7 @@ import os
 import json
 from typing import Dict, Optional
 from shared.port_discovery import PortDiscovery
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestDevLoginDockerCompose:
@@ -32,6 +33,7 @@ class TestDevLoginDockerCompose:
     @classmethod
     def ensure_docker_services_running(cls):
         """Check and start Docker services if needed."""
+    pass
         try:
             # Check if services are running
             result = subprocess.run(
@@ -79,6 +81,7 @@ class TestDevLoginDockerCompose:
         
     def test_dev_login_endpoint_exists(self):
         """Test dev login endpoint is available."""
+    pass
         response = requests.post(
             f"{self.auth_url}/auth/dev/login",
             json={"email": "test@example.com", "password": "test"}
@@ -113,6 +116,7 @@ class TestDevLoginDockerCompose:
         
     def test_dev_login_token_validation(self):
         """Test that dev login tokens can be validated."""
+    pass
         # Get token
         login_response = requests.post(
             f"{self.auth_url}/auth/dev/login",
@@ -161,6 +165,7 @@ class TestDevLoginDockerCompose:
                
     def test_dev_login_with_docker_postgres(self):
         """Test that auth service connects to dev-postgres container."""
+    pass
         # Check auth service environment
         result = subprocess.run(
             ["docker", "exec", "netra-dev-auth", "sh", "-c", 
@@ -188,7 +193,8 @@ class TestDevLoginDockerCompose:
         )
         
         # Look for database URL log line
-        for line in result.stdout.split("\n"):
+        for line in result.stdout.split("
+"):
             if "Database URL:" in line:
                 # Should show asyncpg format
                 assert "postgresql+asyncpg://" in line or "***" in line  # Might be masked
@@ -196,6 +202,7 @@ class TestDevLoginDockerCompose:
                 
     def test_multiple_dev_logins(self):
         """Test multiple concurrent dev logins work."""
+    pass
         # Test that connection pooling works
         responses = []
         for i in range(5):
@@ -229,6 +236,7 @@ class TestDevLoginDockerCompose:
         
     def test_auth_service_uses_correct_database_builder(self):
         """Test that auth service uses DatabaseURLBuilder correctly."""
+    pass
         # Execute Python code in container to verify
         result = subprocess.run(
             ["docker", "exec", "netra-dev-auth", "python", "-c",
@@ -278,6 +286,7 @@ class TestDockerComposeConfiguration:
         
     def test_docker_network_connectivity(self):
         """Test containers can communicate on Docker network."""
+    pass
         # Test auth can reach postgres
         result = subprocess.run(
             ["docker", "exec", "netra-dev-auth", "python", "-c",

@@ -9,6 +9,7 @@ import asyncio
 import json
 import websockets
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = central_logger.get_logger(__name__)
 

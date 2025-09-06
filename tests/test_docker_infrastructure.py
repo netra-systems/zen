@@ -5,6 +5,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
@@ -19,35 +20,43 @@ logger = logging.getLogger(__name__)
 
 def test_docker_service_detection():
     """Test Docker service detection and startup."""
-    print("\n=== Testing Docker Service Infrastructure ===\n")
+    print("
+=== Testing Docker Service Infrastructure ===
+")
     
     # Check Docker availability
     docker_manager = DockerServiceManager()
     print(f"Docker available: {docker_manager.docker_available}")
     
     if not docker_manager.docker_available:
-        print("\n[X] Docker is not available. Please ensure Docker Desktop is running.")
+        print("
+[X] Docker is not available. Please ensure Docker Desktop is running.")
         print("   Run: 'docker version' to verify Docker is working")
         return False
     
     # Check and start services
-    print("\n[*] Checking Docker services...")
+    print("
+[*] Checking Docker services...")
     port_mappings = docker_manager.check_and_start_services()
     
     if port_mappings:
-        print("\n[OK] Docker services discovered:")
+        print("
+[OK] Docker services discovered:")
         for service, port in port_mappings.items():
             print(f"   - {service}: port {port}")
     else:
-        print("\n[!] No Docker services found. Services may need to be started.")
-        print("   Run: docker compose -f docker-compose.alpine.yml up -d")
+        print("
+[!] No Docker services found. Services may need to be started.")
+        print("   Run: docker compose -f docker-compose.alpine-test.yml up -d")
     
     # Test port discovery
-    print("\n[*] Testing port discovery...")
+    print("
+[*] Testing port discovery...")
     port_discovery = DockerPortDiscovery()
     all_ports = port_discovery.discover_all_ports()
     
-    print("\nDiscovered service ports:")
+    print("
+Discovered service ports:")
     for service, mapping in all_ports.items():
         print(f"   - {service}: {mapping.host}:{mapping.external_port} -> {mapping.internal_port}")
         print(f"     Container: {mapping.container_name}")
@@ -58,7 +67,10 @@ def test_docker_service_detection():
 
 async def test_service_connections():
     """Test actual service connections."""
-    print("\n=== Testing Service Connections ===\n")
+    pass
+    print("
+=== Testing Service Connections ===
+")
     
     from test_framework.real_services import RealServices
     
@@ -72,7 +84,8 @@ async def test_service_connections():
         print("[OK] All services are available!")
         
         # Test individual services
-        print("\n[*] Testing individual services:")
+        print("
+[*] Testing individual services:")
         
         # Test PostgreSQL
         async with services.postgres() as db:
@@ -92,10 +105,12 @@ async def test_service_connections():
         except Exception as e:
             print(f"   ClickHouse: [X] ({str(e)})")
         
-        return True
+        await asyncio.sleep(0)
+    return True
         
     except Exception as e:
-        print(f"\n[X] Error testing services: {e}")
+        print(f"
+[X] Error testing services: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -109,24 +124,30 @@ def main():
     
     # Test Docker detection
     if not test_docker_service_detection():
-        print("\n[!] Docker infrastructure test failed.")
-        print("\nTo fix:")
+        print("
+[!] Docker infrastructure test failed.")
+        print("
+To fix:")
         print("1. Start Docker Desktop")
-        print("2. Run: docker compose -f docker-compose.alpine.yml up -d")
+        print("2. Run: docker compose -f docker-compose.alpine-test.yml up -d")
         print("3. Re-run this test")
         return 1
     
     # Test service connections
-    print("\n" + "=" * 60)
+    print("
+" + "=" * 60)
     success = asyncio.run(test_service_connections())
     
     if success:
-        print("\n[OK] All infrastructure tests passed!")
+        print("
+[OK] All infrastructure tests passed!")
         return 0
     else:
-        print("\n[X] Some infrastructure tests failed.")
+        print("
+[X] Some infrastructure tests failed.")
         return 1
 
 
 if __name__ == "__main__":
     sys.exit(main())
+    pass

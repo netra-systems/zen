@@ -21,7 +21,7 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -33,6 +33,10 @@ from netra_backend.app.quality.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 

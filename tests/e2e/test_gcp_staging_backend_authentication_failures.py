@@ -30,6 +30,7 @@ Root Causes to Investigate:
 import asyncio
 import time
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from httpx import AsyncClient

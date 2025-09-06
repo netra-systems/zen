@@ -21,11 +21,12 @@ Key validations:
 
 import sys
 from pathlib import Path
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -132,11 +133,15 @@ class ServiceDegradationSimulator:
 
 @pytest.fixture
 def circuit_breaker_harness():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create circuit breaker test harness."""
     return CircuitBreakerTestHarness()
 
 @pytest.fixture
 def degradation_simulator():
+    """Use real service instance."""
+    # TODO: Initialize real service
     """Create service degradation simulator."""
     return ServiceDegradationSimulator()
 
@@ -372,7 +377,7 @@ async def test_circuit_breaker_recovery_patterns():
     
     # Mock health checker
     # Mock: Generic component isolation for controlled unit testing
-    mock_health_checker = AsyncMock()
+    mock_health_checker = AsyncNone  # TODO: Use real service instance
     # Mock: Async component isolation for testing without real async operations
     mock_health_checker.check_health = AsyncMock(return_value=True)
     

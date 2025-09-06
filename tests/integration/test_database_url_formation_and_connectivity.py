@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Tuple
 import asyncpg
 import psycopg2
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -42,6 +43,7 @@ class DatabaseURLFormationDiagnostic:
     """Diagnostic tool for database URL formation and connectivity issues."""
     
     def __init__(self):
+    pass
         self.env = get_env()
         
     def get_all_database_urls(self) -> Dict[str, Any]:
@@ -228,6 +230,7 @@ class TestDatabaseURLFormationAndConnectivity:
     
     @pytest.fixture(scope="class")
     def diagnostic(self):
+    pass
         return DatabaseURLFormationDiagnostic()
     
     def test_database_url_formation_analysis(self, diagnostic):
@@ -237,18 +240,21 @@ class TestDatabaseURLFormationAndConnectivity:
         This test identifies URL formation issues that can cause connection
         failures, timeouts, or driver compatibility problems.
         """
+    pass
         logger.info("=== DATABASE URL FORMATION ANALYSIS ===")
         
         # Get all URLs
         url_data = diagnostic.get_all_database_urls()
         
-        print(f"\nDatabase URL Sources:")
+        print(f"
+Database URL Sources:")
         urls = url_data.get('urls', {})
         errors = url_data.get('errors', {})
         
         # Display URLs
         for source, source_data in urls.items():
-            print(f"\n{source.upper()}:")
+            print(f"
+{source.upper()}:")
             if isinstance(source_data, dict):
                 for key, value in source_data.items():
                     if key == 'validation':
@@ -263,14 +269,16 @@ class TestDatabaseURLFormationAndConnectivity:
         
         # Display errors
         if errors:
-            print(f"\nURL Formation Errors:")
+            print(f"
+URL Formation Errors:")
             for source, error in errors.items():
                 print(f"  {source}: {error}")
         
         # Analyze issues
         issues = diagnostic.analyze_url_issues(url_data)
         
-        print(f"\nURL Issues Analysis:")
+        print(f"
+URL Issues Analysis:")
         print(f"Total issues found: {len(issues)}")
         
         critical_issues = []
@@ -279,7 +287,8 @@ class TestDatabaseURLFormationAndConnectivity:
         
         for issue in issues:
             severity = issue.get('severity', 'unknown')
-            print(f"\n{severity.upper()}: {issue['issue']}")
+            print(f"
+{severity.upper()}: {issue['issue']}")
             print(f"  Source: {issue['source']}")
             print(f"  Description: {issue['description']}")
             print(f"  URL: {issue['url_masked']}")
@@ -296,18 +305,24 @@ class TestDatabaseURLFormationAndConnectivity:
         
         # Assert no critical issues that would cause connection failures
         assert len(critical_issues) == 0, (
-            f"Critical URL formation issues found that will cause connection failures:\n" +
-            "\n".join(f"  - {issue['source']}: {issue['issue']}" for issue in critical_issues) +
-            f"\n\nThese issues must be fixed before database connections will work properly."
+            f"Critical URL formation issues found that will cause connection failures:
+" +
+            "
+".join(f"  - {issue['source']}: {issue['issue']}" for issue in critical_issues) +
+            f"
+
+These issues must be fixed before database connections will work properly."
         )
         
         # Warn about high-priority issues
         if high_issues:
-            print(f"\n⚠️  High-priority issues that should be addressed:")
+            print(f"
+⚠️  High-priority issues that should be addressed:")
             for issue in high_issues:
                 print(f"  - {issue['source']}: {issue['issue']}")
         
-        print(f"\n✅ Database URL formation analysis completed")
+        print(f"
+✅ Database URL formation analysis completed")
     
     @pytest.mark.asyncio
     async def test_database_url_connectivity_verification(self, diagnostic):
@@ -317,6 +332,7 @@ class TestDatabaseURLFormationAndConnectivity:
         This test verifies that database URLs can actually establish connections
         and identifies which URLs work vs. which fail.
         """
+    pass
         logger.info("=== DATABASE URL CONNECTIVITY VERIFICATION ===")
         
         # Get all URLs
@@ -332,7 +348,8 @@ class TestDatabaseURLFormationAndConnectivity:
                     if isinstance(url, str) and url and not url.startswith('sqlite'):
                         urls_to_test.append((f"{source}.{key}", url))
         
-        print(f"\nTesting connectivity for {len(urls_to_test)} URLs...")
+        print(f"
+Testing connectivity for {len(urls_to_test)} URLs...")
         
         # Test connectivity for each URL
         connectivity_results = []
@@ -344,7 +361,8 @@ class TestDatabaseURLFormationAndConnectivity:
         successful_connections = [r for r in connectivity_results if r['success']]
         failed_connections = [r for r in connectivity_results if not r['success']]
         
-        print(f"\nConnectivity Test Results:")
+        print(f"
+Connectivity Test Results:")
         print(f"Successful: {len(successful_connections)}/{len(connectivity_results)}")
         print(f"Failed: {len(failed_connections)}")
         
@@ -353,7 +371,8 @@ class TestDatabaseURLFormationAndConnectivity:
             status = "✅ SUCCESS" if result['success'] else "❌ FAILED"
             time_str = f"{result['connection_time']:.2f}s" if result['connection_time'] else "N/A"
             
-            print(f"\n{result['description']}: {status} ({time_str})")
+            print(f"
+{result['description']}: {status} ({time_str})")
             print(f"  URL: {result['url_masked']}")
             print(f"  Driver Compatibility: {result['driver_compatibility']}")
             
@@ -366,7 +385,8 @@ class TestDatabaseURLFormationAndConnectivity:
         timeout_failures = [r for r in failed_connections if 'timeout' in r.get('driver_compatibility', '')]
         other_failures = [r for r in failed_connections if r not in ssl_failures + auth_failures + timeout_failures]
         
-        print(f"\nFailure Analysis:")
+        print(f"
+Failure Analysis:")
         print(f"  SSL/Driver issues: {len(ssl_failures)}")
         print(f"  Authentication issues: {len(auth_failures)}")
         print(f"  Timeout issues: {len(timeout_failures)}")
@@ -375,17 +395,21 @@ class TestDatabaseURLFormationAndConnectivity:
         # Assert that at least one URL works for basic connectivity
         assert len(successful_connections) > 0, (
             f"No database URLs successfully connected. This indicates a fundamental "
-            f"connectivity or configuration issue. Failure details:\n" +
-            "\n".join(f"  {r['description']}: {r['error']}" for r in failed_connections[:3])
+            f"connectivity or configuration issue. Failure details:
+" +
+            "
+".join(f"  {r['description']}: {r['error']}" for r in failed_connections[:3])
         )
         
         # Warn if primary URLs fail but others work
         auth_config_results = [r for r in connectivity_results if 'auth_config' in r['description']]
         if auth_config_results and not auth_config_results[0]['success']:
-            print(f"\n⚠️  WARNING: Primary auth_config URL failed but other URLs work.")
+            print(f"
+⚠️  WARNING: Primary auth_config URL failed but other URLs work.")
             print(f"This indicates the auth service may not be using the optimal URL.")
         
-        print(f"\n✅ Database URL connectivity verification completed")
+        print(f"
+✅ Database URL connectivity verification completed")
     
     def test_ssl_parameter_compatibility_check(self):
         """
@@ -394,6 +418,7 @@ class TestDatabaseURLFormationAndConnectivity:
         This test checks that SSL parameters are correctly handled for
         asyncpg vs. psycopg2 drivers to prevent connection failures.
         """
+    pass
         logger.info("=== SSL PARAMETER COMPATIBILITY CHECK ===")
         
         # Test URL transformations for SSL parameters
@@ -418,12 +443,14 @@ class TestDatabaseURLFormationAndConnectivity:
             }
         ]
         
-        print(f"\nSSL Parameter Compatibility Tests:")
+        print(f"
+SSL Parameter Compatibility Tests:")
         
         compatibility_issues = []
         
         for test_case in test_cases:
-            print(f"\nTest: {test_case['name']}")
+            print(f"
+Test: {test_case['name']}")
             print(f"Input URL: {DatabaseURLBuilder.mask_url_for_logging(test_case['input_url'])}")
             
             # Test AuthDatabaseManager URL transformations
@@ -473,7 +500,8 @@ class TestDatabaseURLFormationAndConnectivity:
                 compatibility_issues.append(f"{test_case['name']}: URL transformation failed - {e}")
                 print(f"  ❌ SSL parameter transformation failed: {e}")
         
-        print(f"\nSSL Parameter Compatibility Summary:")
+        print(f"
+SSL Parameter Compatibility Summary:")
         print(f"Issues found: {len(compatibility_issues)}")
         
         for issue in compatibility_issues:
@@ -486,17 +514,23 @@ class TestDatabaseURLFormationAndConnectivity:
         critical_ssl_issues = [issue for issue in compatibility_issues if 'sslmode' in issue and 'AsyncPG' in issue]
         
         assert len(critical_ssl_issues) == 0, (
-            f"Critical SSL parameter compatibility issues found:\n" +
-            "\n".join(f"  {issue}" for issue in critical_ssl_issues) +
-            f"\n\nThese will cause 'unexpected keyword argument sslmode' errors with asyncpg."
+            f"Critical SSL parameter compatibility issues found:
+" +
+            "
+".join(f"  {issue}" for issue in critical_ssl_issues) +
+            f"
+
+These will cause 'unexpected keyword argument sslmode' errors with asyncpg."
         )
         
-        print(f"\n✅ SSL parameter compatibility check completed")
+        print(f"
+✅ SSL parameter compatibility check completed")
 
 
 if __name__ == "__main__":
     # Run diagnostic when executed directly
     async def main():
+    pass
         print("=== DATABASE URL FORMATION AND CONNECTIVITY DIAGNOSIS ===")
         
         diagnostic = DatabaseURLFormationDiagnostic()
@@ -512,7 +546,8 @@ if __name__ == "__main__":
             print(f"  {issue['severity'].upper()}: {issue['issue']}")
         
         # Test connectivity
-        print("\n2. Testing URL connectivity...")
+        print("
+2. Testing URL connectivity...")
         urls = url_data.get('urls', {})
         
         test_urls = []

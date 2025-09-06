@@ -18,6 +18,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 import random
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets

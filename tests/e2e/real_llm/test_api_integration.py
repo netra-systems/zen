@@ -13,6 +13,7 @@ Business Value Justification (BVJ):
 import asyncio
 import time
 from typing import Any, Dict, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

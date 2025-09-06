@@ -21,9 +21,11 @@ Critical Issues Tested:
 import asyncio
 import pytest
 from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 import redis.asyncio as redis
 from redis.exceptions import ConnectionError, AuthenticationError, TimeoutError
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
 
 from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
@@ -201,7 +203,7 @@ class TestRedisConnectionIssues:
     async def test_redis_basic_operations_connectivity_failure(self):
         """Test Redis basic operations fail due to connectivity issues."""
         # Mock Redis client that connects but operations fail
-        mock_redis_client = MagicMock()
+        mock_redis_client = MagicNone  # TODO: Use real service instance
         
         # Mock Redis operations to fail with connection errors
         async def failing_operation(*args, **kwargs):
@@ -396,7 +398,7 @@ class TestRedisConnectionIssues:
     async def test_redis_memory_management_configuration_issues(self):
         """Test Redis memory management configuration issues in staging."""
         # Mock Redis client
-        mock_redis_client = MagicMock()
+        mock_redis_client = MagicNone  # TODO: Use real service instance
         
         # Mock Redis info command to return memory pressure
         async def mock_redis_info():

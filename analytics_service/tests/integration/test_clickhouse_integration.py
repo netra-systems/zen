@@ -27,6 +27,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 # =============================================================================
 # CLICKHOUSE CLIENT IMPLEMENTATION (To be moved to actual database module)  

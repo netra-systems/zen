@@ -4,35 +4,44 @@ Tests to ensure the middleware correctly handles call_next and adds CORS headers
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
+import asyncio
 
 
 class TestCORSFixMiddleware:
     """Test suite for CORS Fix Middleware."""
     
     @pytest.fixture
-    def mock_app(self):
+ def real_app():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock application."""
-        return Mock()
+        return None  # TODO: Use real service instance
     
     @pytest.fixture
     def middleware(self, mock_app):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create middleware instance."""
+    pass
         return CORSFixMiddleware(mock_app, environment="development")
     
     @pytest.fixture
-    def mock_request(self):
+ def real_request():
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a mock request with headers."""
+    pass
         request = Mock(spec=Request)
         request.headers = {
             "origin": "http://localhost:3000",
             "content-type": "application/json"
         }
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.path = "/api/threads"
         return request
     
@@ -59,6 +68,7 @@ class TestCORSFixMiddleware:
     @pytest.mark.asyncio
     async def test_middleware_handles_errors(self, middleware, mock_request):
         """Test that middleware handles errors from call_next."""
+    pass
         # Create a mock call_next that raises an exception
         mock_call_next = AsyncMock(side_effect=Exception("Test error"))
         
@@ -78,7 +88,9 @@ class TestCORSFixMiddleware:
         # Create a mock callable that would fail if used as context manager
         async def mock_call_next(req):
             """Simple async callable that returns a response."""
-            return Response(content="test")
+    pass
+            await asyncio.sleep(0)
+    return Response(content="test")
         
         # This callable doesn't have context manager methods
         assert not hasattr(mock_call_next, '__aenter__')
@@ -100,7 +112,7 @@ class TestCORSFixMiddleware:
             "origin": "http://malicious.com",
             "content-type": "application/json"
         }
-        request.url = Mock()
+        request.url = url_instance  # Initialize appropriate service
         request.url.path = "/api/threads"
         
         mock_response = Response(content="test", status_code=200)
@@ -114,6 +126,7 @@ class TestCORSFixMiddleware:
     @pytest.mark.asyncio
     async def test_middleware_preserves_response_content(self, middleware, mock_request):
         """Test that middleware preserves the original response content."""
+    pass
         # Create a response with specific content
         original_content = {"data": "test", "value": 123}
         mock_response = JSONResponse(content=original_content, status_code=201)

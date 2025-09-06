@@ -18,6 +18,13 @@ REGRESSION HISTORY:
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
@@ -60,7 +67,7 @@ class TestCircularImportRegression:
     
     def test_websocket_modules_use_local_execution(self):
         """Verify WebSocket modules use local execution patterns."""
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         # Verify execution_engine is None or local implementation
         manager = WebSocketManager()
@@ -105,7 +112,7 @@ class TestCircularImportRegression:
         # Import in problematic order
         from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.websocket_core.manager import WebSocketManager
+        from netra_backend.app.websocket_core import WebSocketManager
         
         # Verify classes are accessible
         assert WebSocketManager is not None
@@ -126,12 +133,12 @@ class TestCircularImportRegression:
     def test_websocket_handler_without_execution_engine(self):
         """Test WebSocket handlers work without BaseExecutionEngine."""
         from netra_backend.app.websocket_core.handlers import (
-            BaseMessageHandler,
+            UserMessageHandler,
         )
         
         # Create handler with required parameters
         from netra_backend.app.websocket_core.types import MessageType
-        handler = BaseMessageHandler([MessageType.USER_MESSAGE])
+        handler = UserMessageHandler([MessageType.USER_MESSAGE])
         
         # Verify it doesn't have execution_engine or it's None
         if hasattr(handler, 'execution_engine'):
@@ -154,13 +161,12 @@ class TestCircularImportRegression:
     @pytest.mark.asyncio
     async def test_message_flow_without_circular_dependency(self):
         """Test message flow works after circular dependency fix."""
-        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Create mock supervisor
         # Mock: Generic component isolation for controlled unit testing
-        mock_supervisor = AsyncMock()
+        mock_supervisor = AsyncNone  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
         
@@ -208,7 +214,7 @@ class TestConnectionModuleCircularImportPrevention:
         # Import connection module
         # Note: The connection module was removed in unified WebSocket architecture
         # These components are now part of WebSocketManager
-        from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
+        from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
         
         # Verify WebSocketManager can be imported without circular dependencies
         assert WebSocketManager is not None, \

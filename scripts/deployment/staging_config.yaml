@@ -1,0 +1,114 @@
+# GCP Staging Deployment Configuration
+# CRITICAL: This is the PROVEN WORKING configuration from netra-backend-staging-00035-fnj
+# DO NOT MODIFY without testing in a separate environment first
+
+service: netra-backend-staging
+environment: staging
+project: netra-staging
+region: us-central1
+
+# Environment Variables - Public Values
+env_vars:
+  ENVIRONMENT: staging
+  PYTHONUNBUFFERED: "1"
+  
+  # Service URLs
+  AUTH_SERVICE_URL: https://auth.staging.netrasystems.ai
+  AUTH_SERVICE_ENABLED: "true"
+  FRONTEND_URL: https://app.staging.netrasystems.ai
+  FORCE_HTTPS: "true"
+  GCP_PROJECT_ID: netra-staging
+  
+  # ClickHouse Configuration (non-sensitive)
+  CLICKHOUSE_HOST: xedvrr4c3r.us-central1.gcp.clickhouse.cloud
+  CLICKHOUSE_PORT: "8443"
+  CLICKHOUSE_USER: default
+  CLICKHOUSE_DB: default
+  CLICKHOUSE_SECURE: "true"
+  
+  # WebSocket Configuration
+  WEBSOCKET_CONNECTION_TIMEOUT: "900"
+  WEBSOCKET_HEARTBEAT_INTERVAL: "25"
+  WEBSOCKET_HEARTBEAT_TIMEOUT: "75"
+  WEBSOCKET_CLEANUP_INTERVAL: "180"
+  WEBSOCKET_STALE_TIMEOUT: "900"
+
+# Secret Manager References
+# Format: env_var_name: secret_name:version
+secrets:
+  # Database Secrets
+  POSTGRES_HOST: postgres-host-staging:latest
+  POSTGRES_PORT: postgres-port-staging:latest
+  POSTGRES_DB: postgres-db-staging:latest
+  POSTGRES_USER: postgres-user-staging:latest
+  POSTGRES_PASSWORD: postgres-password-staging:latest
+  
+  # Redis Secrets
+  REDIS_HOST: redis-host-staging:latest
+  REDIS_PORT: redis-port-staging:latest
+  REDIS_URL: redis-url-staging:latest
+  REDIS_PASSWORD: redis-password-staging:latest
+  
+  # Security Secrets
+  JWT_SECRET_STAGING: jwt-secret-staging:latest
+  JWT_SECRET_KEY: jwt-secret-key-staging:latest
+  JWT_SECRET: jwt-secret-staging:latest  # Some code may still use JWT_SECRET
+  SECRET_KEY: secret-key-staging:latest
+  SERVICE_SECRET: service-secret-staging:latest
+  SERVICE_ID: service-id-staging:latest
+  FERNET_KEY: fernet-key-staging:latest
+  
+  # API Keys
+  OPENAI_API_KEY: openai-api-key-staging:latest
+  ANTHROPIC_API_KEY: anthropic-api-key-staging:latest
+  GEMINI_API_KEY: gemini-api-key-staging:latest
+  
+  # ClickHouse Secret
+  CLICKHOUSE_PASSWORD: clickhouse-password-staging:latest
+
+# Cloud Run Configuration
+cloud_run:
+  memory: 4Gi
+  cpu: 2
+  min_instances: 1
+  max_instances: 10
+  concurrency: 100
+  timeout: 900s
+  
+# Health Check Configuration
+health_check:
+  path: /health
+  interval: 30s
+  timeout: 10s
+  failure_threshold: 3
+  success_threshold: 1
+
+# Required GCP APIs
+required_apis:
+  - run.googleapis.com
+  - secretmanager.googleapis.com
+  - cloudbuild.googleapis.com
+  - containerregistry.googleapis.com
+
+# Validation Rules
+validation:
+  required_secrets:
+    - postgres-host-staging
+    - postgres-port-staging
+    - postgres-db-staging
+    - postgres-user-staging
+    - postgres-password-staging
+    - redis-host-staging
+    - redis-port-staging
+    - redis-url-staging
+    - redis-password-staging
+    - jwt-secret-staging
+    - jwt-secret-key-staging
+    - secret-key-staging
+    - service-secret-staging
+    - service-id-staging
+    - fernet-key-staging
+    - openai-api-key-staging
+    - anthropic-api-key-staging
+    - gemini-api-key-staging
+    - clickhouse-password-staging

@@ -27,6 +27,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 import aiohttp
 import websockets

@@ -27,11 +27,15 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import Mock, AsyncMock, patch
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 

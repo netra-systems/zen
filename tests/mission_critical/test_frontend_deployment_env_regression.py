@@ -24,13 +24,17 @@ import unittest
 import requests
 from pathlib import Path
 from typing import Dict, List, Set, Optional
-from unittest.mock import patch, MagicMock, Mock
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.deploy_to_gcp import ServiceConfig, GCPDeployer
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
@@ -112,9 +116,11 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
     
     def test_deployment_script_includes_all_critical_vars(self):
         """
+    pass
         Test that deploy_to_gcp.py ServiceConfig includes ALL critical frontend variables.
         """
-        print("\n🔍 Testing deployment script includes all critical variables...")
+        print("
+🔍 Testing deployment script includes all critical variables...")
         
         # Create a GCPDeployer with correct initialization
         deployer = GCPDeployer(project_id="netra-staging")
@@ -143,18 +149,26 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         
         self.assertEqual(
             len(missing_vars), 0,
-            f"\n🔴 CRITICAL REGRESSION DETECTED!\n"
-            f"Missing {len(missing_vars)} critical environment variables:\n" +
-            "\n".join(f"  - {var}: {self.CRITICAL_FRONTEND_VARS[var]['description']}" 
+            f"
+🔴 CRITICAL REGRESSION DETECTED!
+"
+            f"Missing {len(missing_vars)} critical environment variables:
+" +
+            "
+".join(f"  - {var}: {self.CRITICAL_FRONTEND_VARS[var]['description']}" 
                      for var in missing_vars) +
-            "\n\nThese variables MUST be added back to scripts/deploy_to_gcp.py!"
+            "
+
+These variables MUST be added back to scripts/deploy_to_gcp.py!"
         )
     
     def test_validation_method_checks_all_vars(self):
         """
         Test that validate_frontend_environment_variables() method checks ALL required vars.
         """
-        print("\n🔍 Testing validation method checks all variables...")
+    pass
+        print("
+🔍 Testing validation method checks all variables...")
         
         deployer = GCPDeployer(project_id="netra-staging")
         
@@ -193,7 +207,9 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         """
         Test that frontend/.env.staging contains all critical variables.
         """
-        print("\n🔍 Testing frontend/.env.staging file consistency...")
+    pass
+        print("
+🔍 Testing frontend/.env.staging file consistency...")
         
         env_staging_path = project_root / "frontend" / ".env.staging"
         
@@ -216,15 +232,20 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         
         self.assertEqual(
             len(missing_in_env), 0,
-            f"\n🔴 .env.staging is missing critical variables:\n" +
-            "\n".join(f"  - {var}" for var in missing_in_env)
+            f"
+🔴 .env.staging is missing critical variables:
+" +
+            "
+".join(f"  - {var}" for var in missing_in_env)
         )
     
     def test_production_env_file_consistency(self):
         """
         Test that frontend/.env.production contains all critical variables.
         """
-        print("\n🔍 Testing frontend/.env.production file consistency...")
+    pass
+        print("
+🔍 Testing frontend/.env.production file consistency...")
         
         env_prod_path = project_root / "frontend" / ".env.production"
         
@@ -247,15 +268,20 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         
         self.assertEqual(
             len(missing_in_env), 0,
-            f"\n🔴 .env.production is missing critical variables:\n" +
-            "\n".join(f"  - {var}" for var in missing_in_env)
+            f"
+🔴 .env.production is missing critical variables:
+" +
+            "
+".join(f"  - {var}" for var in missing_in_env)
         )
     
     def test_websocket_url_consistency(self):
         """
         Test that WebSocket URLs are consistent across primary and fallback variables.
         """
-        print("\n🔍 Testing WebSocket URL consistency...")
+    pass
+        print("
+🔍 Testing WebSocket URL consistency...")
         
         deployer = GCPDeployer(project_id="netra-staging")
         
@@ -286,7 +312,9 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         """
         Test that Auth URLs are consistent across all auth-related variables.
         """
-        print("\n🔍 Testing Auth URL consistency...")
+    pass
+        print("
+🔍 Testing Auth URL consistency...")
         
         deployer = GCPDeployer(project_id="netra-staging")
         
@@ -324,7 +352,9 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         Meta-test: Ensure this test file itself contains all critical variable checks.
         This prevents the test from being weakened by accidental removal of checks.
         """
-        print("\n🔍 Meta-test: Validating this test file covers all variables...")
+    pass
+        print("
+🔍 Meta-test: Validating this test file covers all variables...")
         
         # Read this test file with UTF-8 encoding
         test_file_content = Path(__file__).read_text(encoding='utf-8')
@@ -356,7 +386,9 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         - Get any AI responses
         - Experience ANY value from the platform
         """
-        print("\n🚨 CRITICAL: Testing discovery endpoint configuration for chat value...")
+    pass
+        print("
+🚨 CRITICAL: Testing discovery endpoint configuration for chat value...")
         
         deployer = GCPDeployer(project_id="netra-staging")
         
@@ -401,7 +433,8 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         
         print(f"  ✅ Discovery endpoint configured at: {api_url}/api/discovery")
         print(f"  ✅ WebSocket for real-time updates: {ws_url}")
-        print("\n  💡 Chat value delivery chain verified:")
+        print("
+  💡 Chat value delivery chain verified:")
         print("     1. Frontend connects to discovery endpoint")
         print("     2. Discovery provides agent/tool configurations")
         print("     3. WebSocket enables real-time agent updates")
@@ -411,7 +444,9 @@ class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
         """
         Test that discovery endpoint URLs follow the correct format for all environments.
         """
-        print("\n🔍 Testing discovery endpoint URL format consistency...")
+    pass
+        print("
+🔍 Testing discovery endpoint URL format consistency...")
         
         # Test staging configuration
         staging_deployer = GCPDeployer(project_id="netra-staging")
@@ -443,8 +478,10 @@ def main():
     print("=" * 80)
     print("🚨 MISSION CRITICAL: Frontend Deployment Environment Regression Test")
     print("=" * 80)
-    print("\nThis test prevents regression of critical frontend environment variables")
-    print("that have repeatedly been removed, causing complete frontend failure.\n")
+    print("
+This test prevents regression of critical frontend environment variables")
+    print("that have repeatedly been removed, causing complete frontend failure.
+")
     
     # Create test suite
     loader = unittest.TestLoader()
@@ -455,14 +492,16 @@ def main():
     result = runner.run(suite)
     
     # Print summary
-    print("\n" + "=" * 80)
+    print("
+" + "=" * 80)
     if result.wasSuccessful():
         print("✅ SUCCESS: All frontend deployment environment checks passed!")
         print("The deployment configuration contains all critical variables.")
     else:
         print("🔴 FAILURE: Frontend deployment environment regression detected!")
         print(f"Failed: {len(result.failures)} | Errors: {len(result.errors)}")
-        print("\n⚠️  CRITICAL: Do NOT deploy without fixing these issues!")
+        print("
+⚠️  CRITICAL: Do NOT deploy without fixing these issues!")
         print("Missing variables will cause complete frontend failure!")
     print("=" * 80)
     
@@ -471,3 +510,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+    pass

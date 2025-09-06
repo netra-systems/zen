@@ -5,6 +5,7 @@ Defines test categories with descriptions and properties
 """
 
 from typing import Dict
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestCategories:

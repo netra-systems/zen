@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """Core Tests - Split from test_cors_integration.py"""
 
 import os

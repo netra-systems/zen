@@ -5,6 +5,7 @@ Wrapper script for the autonomous test review system
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 from autonomous_review.main import main
 

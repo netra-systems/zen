@@ -3,6 +3,8 @@
 Integration tests of all performance improvements working together.
 """
 import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from shared.isolated_environment import IsolatedEnvironment
 
 # Skip this entire module due to missing dependencies
 # Modules memory_manager, message_batcher, and system_monitor need to be implemented
@@ -15,7 +17,6 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.compression import WebSocketCompressor
@@ -35,13 +36,13 @@ class WebSocketIntegrationTestHelper:
     async def initialize_test_components(self):
         """Initialize all test components."""
         # Using mock objects since actual modules are not yet implemented
-        memory_manager = MagicMock()
-        performance_monitor = MagicMock()
+        memory_manager = MagicNone  # TODO: Use real service instance
+        performance_monitor = MagicNone  # TODO: Use real service instance
         
         async def mock_send_callback(connection_id: str, batch_data: Dict[str, Any]):
             self.sent_messages.append((connection_id, batch_data))
         
-        batcher = MagicMock()
+        batcher = MagicNone  # TODO: Use real service instance
         compressor = WebSocketCompressor()
         
         return memory_manager, performance_monitor, batcher, compressor, mock_send_callback
@@ -49,9 +50,9 @@ class WebSocketIntegrationTestHelper:
     async def start_monitoring_services(self, memory_manager, performance_monitor, batcher, mock_send_callback):
         """Start all monitoring services."""
         # Mock async methods
-        memory_manager.start_monitoring = AsyncMock()
-        performance_monitor.start_monitoring = AsyncMock()
-        batcher.start = AsyncMock()
+        memory_manager.start_monitoring = AsyncNone  # TODO: Use real service instance
+        performance_monitor.start_monitoring = AsyncNone  # TODO: Use real service instance
+        batcher.start = AsyncNone  # TODO: Use real service instance
         
         await memory_manager.start_monitoring()
         await performance_monitor.start_monitoring()

@@ -13,6 +13,7 @@ import statistics
 import time
 import uuid
 from datetime import datetime, timezone
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 

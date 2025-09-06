@@ -7,6 +7,7 @@ import asyncio
 import aiohttp
 import json
 import uuid
+from shared.isolated_environment import IsolatedEnvironment
 
 
 async def test_real_data_pipeline():

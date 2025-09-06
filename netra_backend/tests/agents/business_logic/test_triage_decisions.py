@@ -12,8 +12,13 @@ about data sufficiency and workflow routing, not just technical execution.
 
 import pytest
 from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock, patch
 import json
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -30,9 +35,9 @@ class TestTriageDecisionLogic:
     @pytest.fixture
     async def triage_agent(self):
         """Create triage agent with mocked dependencies."""
-        llm_manager = AsyncMock()
-        tool_dispatcher = AsyncMock()
-        websocket_manager = AsyncMock()
+        llm_manager = AsyncNone  # TODO: Use real service instance
+        tool_dispatcher = AsyncNone  # TODO: Use real service instance
+        websocket_manager = AsyncNone  # TODO: Use real service instance
         
         agent = TriageSubAgent(
             llm_manager=llm_manager,

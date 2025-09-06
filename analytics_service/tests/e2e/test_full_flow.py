@@ -27,6 +27,7 @@ import websockets
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 from websockets.exceptions import ConnectionClosed

@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Configuration tests for the dev launcher.
 
@@ -13,7 +14,6 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
 
 
 from dev_launcher.config import LauncherConfig, find_project_root

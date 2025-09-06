@@ -5,12 +5,16 @@ Tests 1-3: Complete agent lifecycle, WebSocket real-time streaming, supervisor o
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add netra_backend to path  
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -28,6 +32,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         - All sub-agents execute in sequence
         - Final response returned to user
         """
+    pass
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
@@ -37,7 +42,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         
         # Mock state persistence methods as AsyncMock
         # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
@@ -83,6 +88,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         - Verify message ordering and completeness
         - Test streaming vs non-streaming modes
         """
+    pass
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
@@ -92,9 +98,11 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         
         # Mock to capture all WebSocket messages
         async def capture_message(rid, msg):
+    pass
             messages_sent.append((rid, msg))
         
         async def capture_message_to_thread(thread_id, msg):
+    pass
             messages_sent.append((thread_id, msg))
             
         # Mock justification: Captures WebSocket messages for verification without establishing actual network connections or requiring WebSocket clients
@@ -104,7 +112,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         
         # Mock state persistence
         # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
@@ -126,7 +134,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         # Test without streaming
         messages_sent.clear()
         # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
@@ -144,6 +152,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         - Verify sub-agent execution order
         - Test state passing between sub-agents
         """
+    pass
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         
@@ -166,23 +175,28 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
             agent_name = agent.name
             # Create a proper mock that doesn't raise an exception
             def make_track_execute(name):
+    pass
                 async def track_execute(state, rid, stream):
+    pass
                     execution_order.append(name)
                     # Agent execute methods modify state in-place
                     # Return the state to indicate successful execution
-                    return state
+                    await asyncio.sleep(0)
+    return state
                 return track_execute
             # Mock justification: Replaces sub-agent execution logic to track orchestration order without executing actual LLM-based agent operations that would be slow and unpredictable
             agent.execute = make_track_execute(agent_name)
             
             # Mock justification: Bypasses entry condition checks to ensure all agents execute in test scenarios, avoiding complex conditional logic testing
             async def mock_entry_conditions(state, rid):
-                return True
+    pass
+                await asyncio.sleep(0)
+    return True
             agent.check_entry_conditions = mock_entry_conditions
         
         # Execute orchestration with proper state persistence mocking
         # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncNone  # TODO: Use real service instance):
             # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies

@@ -13,6 +13,7 @@ from pathlib import Path
 import importlib.util
 import sys
 from typing import List, Tuple
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def get_all_python_modules() -> List[Tuple[str, Path]]:

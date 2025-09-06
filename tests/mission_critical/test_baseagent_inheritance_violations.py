@@ -30,6 +30,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List, Type
 from concurrent.futures import ThreadPoolExecutor
 import threading
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import the components we're testing
 from netra_backend.app.agents.base_agent import BaseAgent

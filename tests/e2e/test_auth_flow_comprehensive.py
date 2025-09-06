@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Comprehensive Authentication and OAuth Flow Test Suite - Updated for GCP Staging
 
@@ -58,7 +59,7 @@ TEST_CONFIG = {
     "auth_service_url": "http://localhost:8001",  # Auth service port (local dev)
     "backend_url": "http://localhost:8000",       # Main backend port (local dev)
     "frontend_url": "http://localhost:3000",      # Frontend port (local dev)
-    "staging_auth_url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
+    "staging_auth_url": "https://auth.staging.netrasystems.ai",
     "staging_backend_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
     "staging_frontend_url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
     "timeout": 30.0,  # Longer timeout for GCP services

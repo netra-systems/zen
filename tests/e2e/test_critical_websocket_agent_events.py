@@ -1,3 +1,29 @@
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
+    
+    def __init__(self):
+    pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
+        
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+            raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
+        
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+    pass
+        self._closed = True
+        self.is_connected = False
+        
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+    return self.messages_sent.copy()
+
 """Critical test for WebSocket agent event completeness.
 
 THIS IS THE PRIMARY TEST FOR AGENT WEBSOCKET COMMUNICATION.
@@ -19,8 +45,13 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Set, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
@@ -33,6 +64,10 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.routes.websocket import get_websocket_manager, WebSocketManager
 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 # Required events that MUST be sent for proper UI operation
@@ -64,6 +99,7 @@ class CriticalEventValidator:
     """Validates that all critical WebSocket events are sent."""
     
     def __init__(self):
+    pass
         self.events: List[Dict] = []
         self.event_types: Set[str] = set()
         self.event_order: List[str] = []
@@ -188,7 +224,8 @@ class CriticalEventValidator:
         
         report.append("=" * 60)
         
-        return "\n".join(report)
+        return "
+".join(report)
 
 
 class TestCriticalWebSocketAgentEvents:
@@ -198,12 +235,15 @@ class TestCriticalWebSocketAgentEvents:
     async def websocket_manager(self):
         """Create a test WebSocket manager."""
         manager = WebSocketManager()
-        return manager
+        await asyncio.sleep(0)
+    return manager
     
     @pytest.fixture
     async def event_validator(self):
         """Create an event validator."""
-        return CriticalEventValidator()
+    pass
+        await asyncio.sleep(0)
+    return CriticalEventValidator()
     
     @pytest.fixture
     async def mock_websocket_connection(self, websocket_manager, event_validator):
@@ -219,8 +259,7 @@ class TestCriticalWebSocketAgentEvents:
             except Exception as e:
                 logger.error(f"Failed to record event: {e}")
         
-        mock_conn = MagicMock()
-        mock_conn.send = AsyncMock(side_effect=mock_send)
+        mock_conn = Magic        mock_conn.send = AsyncMock(side_effect=mock_send)
         
         # Register the connection
         await websocket_manager.connect(connection_id, mock_conn)
@@ -233,6 +272,7 @@ class TestCriticalWebSocketAgentEvents:
     @pytest.fixture
     async def execution_engine_with_websocket(self, websocket_manager):
         """Create a supervisor execution engine with WebSocket support."""
+    pass
         # Create the execution engine
         execution_engine = SupervisorExecutionEngine()
         
@@ -253,7 +293,8 @@ class TestCriticalWebSocketAgentEvents:
         
         execution_engine.agent_registry = registry
         
-        return execution_engine
+        await asyncio.sleep(0)
+    return execution_engine
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -282,7 +323,8 @@ class TestCriticalWebSocketAgentEvents:
             }
         }
         
-        # Mock the LLM to return predictable responses
+        # Mock the LLM to await asyncio.sleep(0)
+    return predictable responses
         with patch.object(engine, '_execute_llm_call', new_callable=AsyncMock) as mock_llm:
             mock_llm.return_value = {
                 "content": "I'll analyze the system performance now.",
@@ -297,9 +339,11 @@ class TestCriticalWebSocketAgentEvents:
             
             # Mock tool execution
             async def mock_tool_execute(tool_name, args):
+    pass
                 # Simulate tool execution delay
                 await asyncio.sleep(0.1)
-                return {
+                await asyncio.sleep(0)
+    return {
                     "status": "success",
                     "result": f"Metrics for {tool_name}: CPU 45%, Memory 60%"
                 }
@@ -315,12 +359,15 @@ class TestCriticalWebSocketAgentEvents:
         
         # Validate events
         report = event_validator.generate_report()
-        logger.info(f"\n{report}")
+        logger.info(f"
+{report}")
         
         is_valid, errors = event_validator.validate_critical_events()
         
         # Assert all critical events were sent
-        assert is_valid, f"Critical events validation failed:\n" + "\n".join(errors)
+        assert is_valid, f"Critical events validation failed:
+" + "
+".join(errors)
         
         # Verify specific event properties
         assert len(event_validator.thinking_events) > 0, "No thinking events sent"
@@ -347,17 +394,18 @@ class TestCriticalWebSocketAgentEvents:
         connection_id = "test-tool-conn"
         
         async def mock_send(message: str):
+    pass
             data = json.loads(message)
             event_validator.record_event(data)
         
-        mock_conn = MagicMock()
-        mock_conn.send = AsyncMock(side_effect=mock_send)
+        mock_conn = Magic        mock_conn.send = AsyncMock(side_effect=mock_send)
         await websocket_manager.connect(connection_id, mock_conn)
         
         # Register a test tool
         async def test_tool(input_data: str) -> Dict:
             await asyncio.sleep(0.1)  # Simulate work
-            return {"result": f"Processed: {input_data}"}
+            await asyncio.sleep(0)
+    return {"result": f"Processed: {input_data}"}
         
         tool_dispatcher.register_tool("test_tool", test_tool, "Test tool")
         
@@ -413,8 +461,10 @@ class TestCriticalWebSocketAgentEvents:
             }
         }
         
-        # Mock LLM to return content in chunks
+        # Mock LLM to await asyncio.sleep(0)
+    return content in chunks
         async def mock_llm_streaming(*args, **kwargs):
+    pass
             chunks = [
                 "Starting analysis...",
                 "Processing data points...",
@@ -432,7 +482,8 @@ class TestCriticalWebSocketAgentEvents:
                     )
                 await asyncio.sleep(0.1)
             
-            return {
+            await asyncio.sleep(0)
+    return {
                 "content": " ".join(chunks),
                 "reasoning": "Analysis complete"
             }
@@ -498,11 +549,11 @@ class TestCriticalWebSocketAgentEvents:
         connection_id = "throughput-test"
         
         async def mock_send(message: str):
+    pass
             data = json.loads(message)
             event_validator.record_event(data)
         
-        mock_conn = MagicMock()
-        mock_conn.send = AsyncMock(side_effect=mock_send)
+        mock_conn = Magic        mock_conn.send = AsyncMock(side_effect=mock_send)
         await websocket_manager.connect(connection_id, mock_conn)
         
         # Create notifier

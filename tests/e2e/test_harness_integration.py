@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test Harness Integration Test
 Tests the unified test harness service startup functionality.

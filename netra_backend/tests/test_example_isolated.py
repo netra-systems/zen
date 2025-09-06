@@ -13,6 +13,7 @@ Each function ≤8 lines, file ≤300 lines.
 """
 
 import asyncio
+from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 from datetime import UTC, datetime

@@ -10,11 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import from the single source of truth for database sessions
 from netra_backend.app.database import get_db
 
-from netra_backend.app.llm.client_factory import get_llm_client
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 # CRITICAL: Import for proper session lifecycle management
 from contextlib import asynccontextmanager
@@ -30,8 +29,8 @@ if TYPE_CHECKING:
     )
 
 # NEW: Split architecture imports
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import (
-    UserExecutionContext,
     validate_user_context
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
@@ -145,15 +144,20 @@ def ensure_session_lifecycle_logging(session: AsyncSession, operation: str) -> N
 
 def _validate_session_type(session) -> None:
     """Validate session is AsyncSession type and tag with request context."""
-    if not isinstance(session, AsyncSession):
-        logger.error(f"Invalid session type: {type(session)}")
-        raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+    from shared.database.session_validation import validate_db_session, is_real_session
     
-    # Tag session as request-scoped
-    if not hasattr(session, 'info'):
-        session.info = {}
-    session.info['is_request_scoped'] = True
-    session.info['validated_at'] = datetime.now().isoformat()
+    try:
+        validate_db_session(session, "dependencies_validation")
+    except TypeError as e:
+        logger.error(f"Invalid session type: {type(session)}")
+        raise RuntimeError(str(e))
+    
+    # Tag session as request-scoped (only for real sessions)
+    if is_real_session(session):
+        if not hasattr(session, 'info'):
+            session.info = {}
+        session.info['is_request_scoped'] = True
+        session.info['validated_at'] = datetime.now().isoformat()
     
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
     if session:
@@ -297,8 +301,9 @@ UserScopedDbDep = Annotated[AsyncSession, Depends(get_user_scoped_db_session)]
 
 def get_llm_client_from_app(request: Request) -> ResilientLLMClient:
     """Get LLM client - updated from deleted LLMManager."""
-    from netra_backend.app.llm.client_factory import get_llm_client
-    return get_llm_client()
+    from netra_backend.app.llm.client_unified import ResilientLLMClient
+    llm_manager = get_llm_manager(request)
+    return ResilientLLMClient(llm_manager)
 
 # Legacy compatibility - DEPRECATED: use get_db_dependency() instead
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -337,12 +342,22 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
     
     # Verify supervisor has WebSocket capabilities
     if supervisor and hasattr(supervisor, 'agent_registry'):
-        # Get WebSocket manager and ensure it's set on the agent registry
-        websocket_manager = get_websocket_manager()
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="system",
+            request_id=f"supervisor_init_{time.time()}",
+            thread_id="supervisor_main",
+            run_id=f"run_{time.time()}"
+        )
+        websocket_manager = create_websocket_manager(user_context)
         if websocket_manager and hasattr(supervisor.agent_registry, 'set_websocket_manager'):
             # Ensure WebSocket manager is properly configured
-            supervisor.agent_registry.set_websocket_manager(websocket_manager)
-            logger.debug("Verified WebSocket manager is set on supervisor agent registry")
+            if asyncio.iscoroutinefunction(supervisor.agent_registry.set_websocket_manager):
+                # Handle async set_websocket_manager
+                logger.warning("Cannot await set_websocket_manager in sync context - WebSocket events may be limited")
+            else:
+                supervisor.agent_registry.set_websocket_manager(websocket_manager)
+                logger.debug("Verified WebSocket manager is set on supervisor agent registry")
         else:
             logger.warning("WebSocket manager not available or supervisor lacks agent_registry")
     else:
@@ -473,6 +488,8 @@ async def get_request_scoped_supervisor(
     CRITICAL: This function ensures database sessions are NEVER stored globally.
     The supervisor is created fresh for each request with proper session lifecycle.
     
+    Updated to use create_supervisor_core for consistency with WebSocket pattern.
+    
     Args:
         request: FastAPI request object
         context: Request-scoped context (contains no sessions)
@@ -491,15 +508,6 @@ async def get_request_scoped_supervisor(
             raise RuntimeError("Database sessions must be request-scoped only")
             
         logger.debug(f"Creating request-scoped supervisor for user {context.user_id}, session {id(db_session)}")
-        
-        # Create UserExecutionContext with request-scoped session
-        user_context = create_user_execution_context(
-            user_id=context.user_id,
-            thread_id=context.thread_id,
-            run_id=context.run_id,
-            db_session=db_session,  # This session will be closed after request
-            websocket_connection_id=context.websocket_connection_id
-        )
         
         # Get required components from app state (these should be stateless)
         llm_client = get_llm_client_from_app(request)
@@ -523,24 +531,20 @@ async def get_request_scoped_supervisor(
                 detail="Tool dispatcher not configured"
             )
         
-        # CRITICAL: Create session factory that returns the request-scoped session
-        # This session will be automatically closed when the request completes
-        async def request_scoped_session_factory():
-            """Returns the request-scoped session - never creates new sessions."""
-            logger.debug(f"Returning request-scoped session {id(db_session)} to supervisor")
-            return db_session
-        
-        # Create isolated SupervisorAgent using factory method
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        supervisor = await SupervisorAgent.create_with_user_context(
+        # Use core supervisor factory for consistency with WebSocket pattern
+        from netra_backend.app.core.supervisor_factory import create_supervisor_core
+        supervisor = await create_supervisor_core(
+            user_id=context.user_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id,
+            db_session=db_session,
+            websocket_connection_id=context.websocket_connection_id,
             llm_client=llm_client,
             websocket_bridge=websocket_bridge,
-            tool_dispatcher=tool_dispatcher,
-            user_context=user_context,
-            db_session_factory=request_scoped_session_factory  # Returns request-scoped session
+            tool_dispatcher=tool_dispatcher
         )
         
-        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id}")
+        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id} using core factory")
         return supervisor
         
     except Exception as e:
@@ -867,7 +871,14 @@ def get_message_handler_service(request: Request):
     # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
     # This ensures WebSocket events work in all scenarios, not just direct WebSocket routes
     try:
-        websocket_manager = get_websocket_manager()
+        # Create user context for proper isolation
+        user_context = UserExecutionContext(
+            user_id="system",
+            request_id=f"message_handler_{time.time()}",
+            thread_id="message_handler_main",
+            run_id=f"run_{time.time()}"
+        )
+        websocket_manager = create_websocket_manager(user_context)
         logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
         return MessageHandlerService(supervisor, thread_service, websocket_manager)
     except Exception as e:
@@ -898,8 +909,15 @@ async def get_request_scoped_message_handler(
         # Get thread service (stateless)
         thread_service = get_thread_service(request)
         
-        # Get WebSocket manager (stateless)
-        websocket_manager = get_websocket_manager()
+        # Get WebSocket manager using factory pattern for proper isolation
+        # Create user context based on request context
+        user_context = UserExecutionContext(
+            user_id=context.user_id,
+            request_id=context.request_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id
+        )
+        websocket_manager = create_websocket_manager(user_context)
         
         # Create MessageHandlerService with request-scoped components
         from netra_backend.app.services.message_handlers import MessageHandlerService

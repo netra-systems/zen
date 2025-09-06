@@ -32,6 +32,8 @@ from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor
 import aiohttp
 import psutil
+from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from netra_backend.app.core.agent_registry import AgentRegistry
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -128,6 +130,7 @@ class RealWebSocketClient:
     """Real WebSocket client for E2E testing."""
     
     def __init__(self, base_url: str = "ws://localhost:8000"):
+    pass
         self.base_url = base_url
         self.websocket = None
         self.received_messages: List[Dict] = []
@@ -189,12 +192,14 @@ class RealWebSocketClient:
     
     def on_message(self, message_type: str, handler: callable):
         """Register message handler."""
+    pass
         self.message_handlers[message_type] = handler
     
     async def send_user_message(self, message: str) -> bool:
         """Send user message through WebSocket."""
         if not self.websocket or not self.connection_established:
-            return False
+            await asyncio.sleep(0)
+    return False
         
         try:
             await self.websocket.send(json.dumps({
@@ -236,6 +241,7 @@ class RealServiceIntegrator:
     """Integrates with real backend services for E2E testing."""
     
     def __init__(self, env: IsolatedEnvironment):
+    pass
         self.env = env
         self.base_url = env.get('BACKEND_URL', 'http://localhost:8000')
         self.session = None
@@ -247,7 +253,8 @@ class RealServiceIntegrator:
             connector=connector,
             timeout=aiohttp.ClientTimeout(total=60.0)
         )
-        return self.session
+        await asyncio.sleep(0)
+    return self.session
     
     async def create_thread(self, user_id: str) -> str:
         """Create new thread through real API."""
@@ -367,7 +374,9 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.timeout(180)
     async def test_complete_user_to_action_plan_journey(self):
         """CRITICAL: Test complete user journey from request to action plan."""
-        logger.info("\n" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
+    pass
+        logger.info("
+" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
         
         # Create E2E test session
         session = E2ETestSession(
@@ -404,6 +413,7 @@ class TestActionsAgentCompleteUserFlow:
             agent_events_received = []
             
             async def track_agent_event(data):
+    pass
                 agent_events_received.append({
                     'type': data.get('type'),
                     'timestamp': time.time(),
@@ -541,7 +551,8 @@ class TestActionsAgentCompleteUserFlow:
                 f"Overall user experience inadequate: {overall_ux_score:.1%}"
             
             # SUCCESS REPORT
-            logger.info("\n" + "🎉 E2E USER JOURNEY COMPLETED SUCCESSFULLY")
+            logger.info("
+" + "🎉 E2E USER JOURNEY COMPLETED SUCCESSFULLY")
             logger.info("=" * 60)
             logger.info(f"Journey Time: {metrics.request_to_response_time:.2f}s")
             logger.info(f"WebSocket Events: {total_events}")
@@ -567,7 +578,8 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.timeout(120)
     async def test_concurrent_user_sessions_e2e(self):
         """CRITICAL: Test multiple concurrent user sessions E2E."""
-        logger.info("\n" + "👥 STARTING CONCURRENT USER SESSIONS E2E TEST")
+        logger.info("
+" + "👥 STARTING CONCURRENT USER SESSIONS E2E TEST")
         
         concurrent_users = 3
         user_sessions = []
@@ -588,7 +600,8 @@ class TestActionsAgentCompleteUserFlow:
                 # Create thread
                 session.thread_id = await self.service_integrator.create_thread(session.user_id)
                 if not session.thread_id:
-                    return {'success': False, 'error': 'Thread creation failed', 'user_index': user_index}
+                    await asyncio.sleep(0)
+    return {'success': False, 'error': 'Thread creation failed', 'user_index': user_index}
                 
                 # Connect WebSocket
                 ws_client = RealWebSocketClient()
@@ -650,7 +663,9 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.timeout(90)
     async def test_error_recovery_user_experience(self):
         """CRITICAL: Test error recovery from user experience perspective."""
-        logger.info("\n" + "🛠️ STARTING ERROR RECOVERY USER EXPERIENCE TEST")
+    pass
+        logger.info("
+" + "🛠️ STARTING ERROR RECOVERY USER EXPERIENCE TEST")
         
         # Create session
         session = E2ETestSession(
@@ -761,7 +776,9 @@ class TestActionsAgentE2EPerformance:
     @pytest.mark.timeout(300)
     async def test_sustained_load_e2e_performance(self):
         """CRITICAL: Test sustained load performance E2E."""
-        logger.info("\n" + "⚡ STARTING SUSTAINED LOAD E2E PERFORMANCE TEST")
+    pass
+        logger.info("
+" + "⚡ STARTING SUSTAINED LOAD E2E PERFORMANCE TEST")
         
         load_users = 5
         requests_per_user = 3
@@ -834,7 +851,8 @@ class TestActionsAgentE2EPerformance:
                         'request_index': request_index
                     })
             
-            return user_results
+            await asyncio.sleep(0)
+    return user_results
         
         # Execute sustained load
         total_start_time = time.time()
@@ -881,7 +899,8 @@ class TestActionsAgentE2EPerformance:
             f"Throughput too low: {requests_per_second:.3f} req/s (need >0.05)"
         
         # Performance report
-        logger.info("\n" + "📊 SUSTAINED LOAD PERFORMANCE REPORT")
+        logger.info("
+" + "📊 SUSTAINED LOAD PERFORMANCE REPORT")
         logger.info("=" * 50)
         logger.info(f"Total Requests: {len(all_results)}")
         logger.info(f"Successful: {len(successful_results)} ({success_rate:.1%})")
@@ -911,7 +930,8 @@ class TestActionsAgentE2EComprehensive:
     @pytest.mark.asyncio
     async def test_complete_e2e_validation_suite(self):
         """Run complete E2E validation for ActionsAgent."""
-        logger.info("\n" + "=" * 80)
+        logger.info("
+" + "=" * 80)
         logger.info("RUNNING COMPLETE ACTIONS AGENT E2E VALIDATION SUITE")
         logger.info("TESTING: Complete user journey with REAL services")
         logger.info("=" * 80)
@@ -1017,7 +1037,8 @@ class TestActionsAgentE2EComprehensive:
             overall_e2e_score = e2e_metrics.calculate_overall_score()
             
             # E2E validation report
-            logger.info("\n" + "🎯 E2E VALIDATION REPORT")
+            logger.info("
+" + "🎯 E2E VALIDATION REPORT")
             logger.info("=" * 40)
             logger.info(f"WebSocket Responsiveness: {e2e_metrics.websocket_responsiveness_score:.1%}")
             logger.info(f"Action Plan Quality: {e2e_metrics.action_plan_quality_score:.1%}")
@@ -1043,3 +1064,4 @@ if __name__ == "__main__":
     # Run with: python tests/e2e/test_actions_agent_full_flow.py
     # Or: pytest tests/e2e/test_actions_agent_full_flow.py -v
     pytest.main([__file__, "-v", "--tb=short"])
+    pass

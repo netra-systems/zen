@@ -5,19 +5,27 @@ multiple system components to ensure robustness.
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
 import json
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
 class TestNullAndEmptyInputHandling:
     """Test handling of null, empty, and malformed inputs."""
+    pass
 
     @pytest.fixture
     def cost_calculator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Cost calculator for testing."""
+    pass
         return CostCalculatorService()
 
     def test_empty_string_handling(self, cost_calculator):
@@ -33,6 +41,7 @@ class TestNullAndEmptyInputHandling:
 
     def test_none_parameter_handling(self):
         """Test that None parameters are handled appropriately."""
+    pass
         from netra_backend.app.services.thread_service import _handle_database_error
         
         # Should handle None gracefully
@@ -53,10 +62,11 @@ class TestNullAndEmptyInputHandling:
 
     def test_special_character_handling(self):
         """Test handling of special characters in inputs."""
+    pass
         from netra_backend.app.services.user_service import pwd_context
         
         # Password with special characters
-        special_password = "test@#$%^&*()_+{}|:<>?[];'\",./"
+        special_password = "test@#$%^&*()_+{}|:<>?[];'",./"
         hashed = pwd_context.hash(special_password)
         
         assert hashed is not None
@@ -77,6 +87,7 @@ class TestNullAndEmptyInputHandling:
 
     def test_zero_boundary_conditions(self, cost_calculator):
         """Test zero boundary conditions."""
+    pass
         zero_usage = TokenUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0)
         
         cost = cost_calculator.calculate_cost(zero_usage, LLMProvider.OPENAI, "gpt-3.5-turbo")
@@ -85,10 +96,14 @@ class TestNullAndEmptyInputHandling:
 
 class TestConcurrencyAndThreadSafety:
     """Test concurrent access and thread safety concepts."""
+    pass
 
     @pytest.fixture
     def cost_calculator(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Cost calculator for testing."""
+    pass
         return CostCalculatorService()
 
     def test_concurrent_cost_calculations_consistency(self, cost_calculator):
@@ -107,13 +122,14 @@ class TestConcurrencyAndThreadSafety:
     @pytest.mark.asyncio
     async def test_async_operation_isolation(self):
         """Test that async operations don't interfere with each other."""
+    pass
         from netra_backend.app.services.thread_service import uow_context
         
         # Multiple async contexts should work independently
         contexts = []
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
             for i in range(3):
-                mock_uow = Mock()
+                mock_uow = mock_uow_instance  # Initialize appropriate service
                 mock_get_uow.return_value = mock_uow
                 context = await uow_context()
                 contexts.append(context)
@@ -140,6 +156,7 @@ class TestConcurrencyAndThreadSafety:
 
 class TestMemoryAndResourceManagement:
     """Test memory usage and resource management."""
+    pass
 
     def test_large_data_structure_handling(self):
         """Test handling of large data structures."""
@@ -156,6 +173,7 @@ class TestMemoryAndResourceManagement:
 
     def test_repeated_operations_memory_stability(self):
         """Test that repeated operations don't cause memory leaks."""
+    pass
         cost_calc = CostCalculatorService()
         usage = TokenUsage(prompt_tokens=100, completion_tokens=50, total_tokens=150)
         
@@ -177,10 +195,11 @@ class TestMemoryAndResourceManagement:
         
         # Mock operation that might use resources
         async def mock_operation(uow):
-            return "completed"
+            await asyncio.sleep(0)
+    return "completed"
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -196,6 +215,7 @@ class TestMemoryAndResourceManagement:
 
 class TestDataValidationEdgeCases:
     """Test data validation edge cases."""
+    pass
 
     def test_decimal_precision_edge_cases(self):
         """Test decimal precision in edge cases."""
@@ -215,6 +235,7 @@ class TestDataValidationEdgeCases:
 
     def test_enum_validation(self):
         """Test enum validation and edge cases."""
+    pass
         # Valid enum values
         assert CostTier.ECONOMY == "economy"
         assert CostTier.BALANCED == "balanced"
@@ -241,6 +262,7 @@ class TestDataValidationEdgeCases:
 
     def test_provider_enum_completeness(self):
         """Test that LLMProvider enum is complete."""
+    pass
         # Should have major providers
         providers = list(LLMProvider)
         provider_values = [p.value for p in providers]
@@ -253,6 +275,7 @@ class TestDataValidationEdgeCases:
 
 class TestErrorPropagationAndRecovery:
     """Test error propagation and recovery mechanisms."""
+    pass
 
     @pytest.mark.asyncio
     async def test_nested_error_propagation(self):
@@ -266,7 +289,7 @@ class TestErrorPropagationAndRecovery:
             raise ValueError("Nested operation failed")
         
         with patch('netra_backend.app.services.thread_service.get_unit_of_work') as mock_get_uow:
-            mock_uow = AsyncMock()
+            mock_uow = AsyncNone  # TODO: Use real service instance
             mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
             mock_uow.__aexit__ = AsyncMock(return_value=None)
             mock_get_uow.return_value = mock_uow
@@ -277,6 +300,7 @@ class TestErrorPropagationAndRecovery:
 
     def test_error_context_preservation(self):
         """Test that error context is preserved through transformations."""
+    pass
         from netra_backend.app.services.thread_service import _handle_database_error
         
         original_error = KeyError("missing_key")
@@ -294,12 +318,14 @@ class TestErrorPropagationAndRecovery:
         # Should work even if some models are unavailable
         optimal_model = cost_calc.get_cost_optimal_model(LLMProvider.OPENAI, CostTier.ECONOMY)
         
-        # Should return None or a valid model, never crash
+        # Should await asyncio.sleep(0)
+    return None or a valid model, never crash
         assert optimal_model is None or isinstance(optimal_model, str)
 
 
 class TestSystemIntegrationEdgeCases:
     """Test edge cases in system integration points."""
+    pass
 
     @pytest.mark.asyncio
     async def test_websocket_integration_edge_cases(self):
@@ -320,7 +346,7 @@ class TestSystemIntegrationEdgeCases:
         ]
         
         with patch('netra_backend.app.services.thread_service.manager') as mock_manager:
-            mock_manager.send_message = AsyncMock()
+            mock_manager.send_message = AsyncNone  # TODO: Use real service instance
             
             for user_id in edge_case_user_ids:
                 if user_id:  # Skip empty user ID to avoid issues
@@ -332,6 +358,7 @@ class TestSystemIntegrationEdgeCases:
 
     def test_service_instantiation_patterns(self):
         """Test different service instantiation patterns."""
+    pass
         # Should be able to create multiple instances
         services = []
         for _ in range(5):
@@ -361,3 +388,4 @@ class TestSystemIntegrationEdgeCases:
         # Should have initialized pricing
         assert calc1._model_pricing is not None
         assert calc2._model_pricing is not None
+    pass

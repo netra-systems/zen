@@ -18,6 +18,7 @@ from typing import Dict, List, Optional
 import uuid
 import time
 import asyncpg
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

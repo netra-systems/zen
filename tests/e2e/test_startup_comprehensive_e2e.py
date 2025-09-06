@@ -26,6 +26,7 @@ import subprocess
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_markers import env, env_requires, env_safe, all_envs
 

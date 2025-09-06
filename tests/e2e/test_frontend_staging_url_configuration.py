@@ -1,4 +1,5 @@
 from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 """
 Test suite to prevent frontend staging URL regression.
 Validates that frontend builds contain correct environment-specific URLs.
@@ -153,6 +154,7 @@ class TestFrontendStagingURLConfiguration:
     @pytest.mark.e2e
     def test_auth_service_client_uses_unified_config(self, project_root: Path):
         """Test that auth-service-client.ts uses unified configuration."""
+    pass
         client_file = project_root / 'frontend' / 'lib' / 'auth-service-client.ts'
         assert client_file.exists(), f"auth-service-client.ts not found at {client_file}"
         
@@ -181,6 +183,7 @@ class TestFrontendStagingURLConfiguration:
         NOTE: This test is slow as it builds the Docker image.
         Enable with: RUN_DOCKER_BUILD_TEST=1 pytest
         """
+    pass
         dockerfile = project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile'
         
         # Build Docker image
@@ -271,7 +274,8 @@ class TestFrontendStagingURLConfiguration:
         # Check it doesn't try to override NEXT_PUBLIC vars at runtime
         # (they won't work, must be build-time)
         lines_with_next_public = [
-            line for line in content.split('\n')
+            line for line in content.split('
+')
             if 'NEXT_PUBLIC_' in line and 'environment_vars' in line
         ]
         
@@ -284,6 +288,7 @@ class TestFrontendStagingURLConfiguration:
     @pytest.mark.e2e
     def test_cloudbuild_uses_correct_dockerfile(self, project_root: Path):
         """Test that cloudbuild configuration uses correct Dockerfile."""
+    pass
         cloudbuild_file = project_root / 'organized_root' / 'deployment' / 'cloudbuild-frontend.yaml'
         
         if cloudbuild_file.exists():
@@ -299,6 +304,7 @@ class TestFrontendStagingURLConfiguration:
         CRITICAL: Next.js NEXT_PUBLIC_* variables are compile-time constants.
         Runtime overrides don't work.
         """
+    pass
         # Check Cloud Run service configurations if they exist
         service_files = list((project_root / 'deployment').rglob('*service*.yaml'))
         service_files.extend(list((project_root / 'terraform-gcp-staging').rglob('*.tf')))
@@ -313,11 +319,13 @@ class TestFrontendStagingURLConfiguration:
             # but there should be comments explaining they don't work at runtime
             if 'NEXT_PUBLIC_' in content and 'frontend' in content.lower():
                 # Check for warning comments
-                lines = content.split('\n')
+                lines = content.split('
+')
                 for i, line in enumerate(lines):
                     if 'NEXT_PUBLIC_' in line:
                         # Check nearby lines for warning comments
-                        context = '\n'.join(lines[max(0, i-2):min(len(lines), i+3)])
+                        context = '
+'.join(lines[max(0, i-2):min(len(lines), i+3)])
                         # This is just a warning, not an assertion
                         if 'build' not in context.lower() and 'compile' not in context.lower():
                             print(f"Warning: {service_file} sets NEXT_PUBLIC_* without mentioning build-time requirement")
@@ -334,6 +342,7 @@ class TestFrontendURLRegression:
         This is the specific regression that was observed:
         Request URL http://localhost:8081/auth/config in staging
         """
+    pass
         # This test would need to be run against a deployed staging environment
         # It's here as documentation of the specific issue
         pass
@@ -353,3 +362,4 @@ class TestFrontendURLRegression:
             content = dockerfile.read_text()
             assert len(content) > 100, f"{dockerfile} must not be empty"
             assert 'NEXT_PUBLIC_' in content, f"{dockerfile} must set NEXT_PUBLIC_* variables"
+    pass

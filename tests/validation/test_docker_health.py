@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any, Set
 import requests
 import socket
+from shared.isolated_environment import IsolatedEnvironment
 
 # Docker client and container management
 from docker.errors import DockerException, ContainerError, ImageNotFound, APIError

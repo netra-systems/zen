@@ -297,6 +297,27 @@ class TelemetryManager:
             return NullContext()
         return self.collector.trace_operation(operation_name, **tags)
     
+    def start_agent_span(self, agent_name: str, operation: str, attributes: Optional[Dict[str, Any]] = None):
+        """Start an agent span with proper async context management."""
+        return AgentSpanContext(self, agent_name, operation, attributes or {})
+    
+    def add_event(self, span: Optional[Span], event_name: str, attributes: Optional[Dict[str, Any]] = None):
+        """Add an event to a span."""
+        if not self._enabled or not span:
+            return
+        
+        # Extract message from attributes if present, otherwise use event_name
+        attrs = dict(attributes or {})  # Create a copy to avoid mutating original
+        message = attrs.pop("message", event_name)
+        span.add_log(message, level="info", **attrs)
+    
+    def record_exception(self, span: Optional[Span], exception: Exception, attributes: Optional[Dict[str, Any]] = None):
+        """Record an exception on a span."""
+        if not self._enabled or not span:
+            return
+        
+        span.add_log(f"Exception: {str(exception)}", level="error", **attributes or {})
+    
     def get_system_health(self) -> Dict[str, Any]:
         """Get system health from telemetry data."""
         active_spans = self.collector.get_active_spans()
@@ -337,6 +358,34 @@ class NullContext:
         return None
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+
+class AgentSpanContext:
+    """Async context manager for agent spans."""
+    
+    def __init__(self, telemetry_manager: 'TelemetryManager', agent_name: str, operation: str, attributes: Dict[str, Any]):
+        self.telemetry_manager = telemetry_manager
+        self.agent_name = agent_name
+        self.operation = operation
+        self.attributes = attributes
+        self.span: Optional[Span] = None
+    
+    async def __aenter__(self) -> Optional[Span]:
+        if not self.telemetry_manager._enabled:
+            return None
+        
+        # Create span with agent-specific naming
+        operation_name = f"{self.agent_name}.{self.operation}"
+        self.span = self.telemetry_manager.collector.create_span(operation_name, tags=self.attributes)
+        return self.span
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.span:
+            if exc_type:
+                self.span.add_log(f"Agent execution error: {str(exc_val)}", level="error")
+                self.span.finish(status="error")
+            else:
+                self.span.finish(status="success")
 
 
 # Global instances

@@ -7,13 +7,17 @@ import asyncio
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Dict, Any
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add parent directories to path for imports  
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tests.utils.asyncio_test_utils import (
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
     AsyncioTestUtils,
     EventLoopTestError
 )
@@ -30,13 +34,15 @@ class TestAdminToolAsyncioSafety:
         class AdminToolValidator:
             async def validate_tool_async(self, tool_config: dict) -> dict:
                 """Async validation of tool configuration"""
+    pass
                 await asyncio.sleep(0)  # Simulate async operation
                 
                 # Validate required fields
                 required = ["name", "type", "config"]
                 for field in required:
                     if field not in tool_config:
-                        return {"valid": False, "error": f"Missing {field}"}
+                        await asyncio.sleep(0)
+    return {"valid": False, "error": f"Missing {field}"}
                 
                 return {"valid": True, "tool": tool_config}
             
@@ -60,12 +66,14 @@ class TestAdminToolAsyncioSafety:
         class ProperAdminToolValidator:
             async def validate_tool_async(self, tool_config: dict) -> dict:
                 """Async validation"""
+    pass
                 await asyncio.sleep(0)
                 
                 required = ["name", "type", "config"]
                 for field in required:
                     if field not in tool_config:
-                        return {"valid": False, "error": f"Missing {field}"}
+                        await asyncio.sleep(0)
+    return {"valid": False, "error": f"Missing {field}"}
                 
                 # Additional async validations
                 if tool_config["type"] == "llm":
@@ -160,7 +168,8 @@ class TestAdminToolAsyncioSafety:
                 await asyncio.sleep(0)
                 
                 if "name" not in tool:
-                    return {"tool": tool, "valid": False, "error": "Missing name"}
+                    await asyncio.sleep(0)
+    return {"tool": tool, "valid": False, "error": "Missing name"}
                 
                 return {"tool": tool, "valid": True}
             
@@ -203,10 +212,12 @@ class TestAdminToolConfigurationAsync:
         class ToolConfigLoader:
             async def load_config_async(self, config_path: str) -> dict:
                 """Async config loading"""
+    pass
                 await asyncio.sleep(0)  # Simulate file I/O
                 
                 # Simulate config loading
-                return {
+                await asyncio.sleep(0)
+    return {
                     "tools": [
                         {"name": "tool1", "enabled": True},
                         {"name": "tool2", "enabled": False}
@@ -240,6 +251,7 @@ class TestAdminToolConfigurationAsync:
         class ToolDependencyResolver:
             async def resolve_dependencies(self, tool: dict) -> dict:
                 """Resolve tool dependencies asynchronously"""
+    pass
                 dependencies = []
                 
                 if tool.get("requires"):
@@ -250,7 +262,8 @@ class TestAdminToolConfigurationAsync:
                             "resolved": True
                         })
                 
-                return {
+                await asyncio.sleep(0)
+    return {
                     "tool": tool["name"],
                     "dependencies": dependencies,
                     "ready": all(d["resolved"] for d in dependencies)
@@ -281,11 +294,13 @@ class TestAdminToolExecutionAsync:
         class ToolExecutor:
             async def execute_tool_async(self, tool_name: str, params: dict) -> dict:
                 """Execute tool asynchronously"""
+    pass
                 await asyncio.sleep(0)
                 
                 # Simulate tool execution
                 if tool_name == "test_tool":
-                    return {
+                    await asyncio.sleep(0)
+    return {
                         "success": True,
                         "result": f"Executed with {params}"
                     }
@@ -312,11 +327,13 @@ class TestAdminToolExecutionAsync:
         class ToolPipeline:
             async def run_step(self, step: dict, context: dict) -> dict:
                 """Run single pipeline step"""
+    pass
                 await asyncio.sleep(0)
                 
                 # Update context with step result
                 context[step["name"]] = f"Result of {step['name']}"
-                return context
+                await asyncio.sleep(0)
+    return context
             
             async def execute_pipeline(self, steps: list) -> dict:
                 """Execute pipeline steps sequentially"""
@@ -359,7 +376,8 @@ class TestAdminToolMigrationPatterns:
         # BEFORE: Problematic pattern
         class OldToolValidator:
             async def _validate(self, tool):
-                return {"valid": True}
+                await asyncio.sleep(0)
+    return {"valid": True}
             
             def validate(self, tool):
                 # This causes issues in async context
@@ -369,7 +387,8 @@ class TestAdminToolMigrationPatterns:
         class NewToolValidator:
             async def validate_async(self, tool):
                 await asyncio.sleep(0)
-                return {"valid": True, "tool": tool}
+                await asyncio.sleep(0)
+    return {"valid": True, "tool": tool}
             
             def validate_sync(self, tool):
                 # Pure sync validation
@@ -377,6 +396,7 @@ class TestAdminToolMigrationPatterns:
             
             def validate(self, tool):
                 """Smart wrapper"""
+    pass
                 try:
                     asyncio.get_running_loop()
                     # In async context, use sync
@@ -399,8 +419,10 @@ class TestAdminToolMigrationPatterns:
         class BackwardCompatibleValidator:
             async def validate_v2(self, tool):
                 """New async version"""
+    pass
                 await asyncio.sleep(0)
-                return {"version": 2, "valid": True}
+                await asyncio.sleep(0)
+    return {"version": 2, "valid": True}
             
             def validate_v1(self, tool):
                 """Legacy sync version"""
@@ -408,6 +430,7 @@ class TestAdminToolMigrationPatterns:
             
             def validate(self, tool, use_async=None):
                 """Backward compatible interface"""
+    pass
                 if use_async is None:
                     # Auto-detect
                     try:

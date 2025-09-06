@@ -9,19 +9,25 @@ import os
 import sqlite3
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 import pytest
 import asyncio
+from test_framework.database.test_database_manager import TestDatabaseManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager as DatabaseManager
 
 
 class TestAuthDatabaseRegression:
     """Regression tests for auth database SQLite compatibility."""
+    pass
 
     @pytest.fixture
     def temp_db_path(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a temporary database path for testing."""
+    pass
         with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp:
             tmp_path = tmp.name
         yield tmp_path
@@ -31,12 +37,18 @@ class TestAuthDatabaseRegression:
 
     @pytest.fixture
     def sqlite_db_manager(self, temp_db_path):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a SQLite database manager for testing."""
+    pass
         return DatabaseManager(f"sqlite:///{temp_db_path}")
 
     @pytest.fixture
     def postgres_db_manager(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Create a PostgreSQL database manager for testing."""
+    pass
         return DatabaseManager("postgresql://user:pass@localhost/testdb")
 
     def test_sqlite_compatibility_initialization(self, sqlite_db_manager):
@@ -53,6 +65,7 @@ class TestAuthDatabaseRegression:
 
     def test_postgres_compatibility_maintained(self, postgres_db_manager):
         """Test that PostgreSQL compatibility is maintained."""
+    pass
         assert postgres_db_manager is not None
         assert "postgresql" in postgres_db_manager.database_url.lower()
         
@@ -78,6 +91,7 @@ class TestAuthDatabaseRegression:
 
     def test_sqlite_file_creation(self, temp_db_path):
         """Test that SQLite database file is created properly."""
+    pass
         # Remove file if it exists
         if os.path.exists(temp_db_path):
             os.unlink(temp_db_path)
@@ -110,11 +124,14 @@ class TestAuthDatabaseRegression:
     @pytest.mark.asyncio
     async def test_concurrent_sqlite_access(self, sqlite_db_manager):
         """Test that SQLite handles concurrent access correctly."""
+    pass
         # SQLite with proper settings should handle concurrent reads
         async def read_operation():
+    pass
             # Simulate a read operation
             await asyncio.sleep(0.01)
-            return "read_complete"
+            await asyncio.sleep(0)
+    return "read_complete"
         
         # Run multiple concurrent reads
         tasks = [read_operation() for _ in range(5)]
@@ -144,6 +161,7 @@ class TestAuthDatabaseRegression:
 
     def test_migration_compatibility_sqlite(self, sqlite_db_manager):
         """Test that migrations work correctly with SQLite."""
+    pass
         # SQLite has limitations with certain ALTER TABLE operations
         # This test ensures migrations handle SQLite limitations
         
@@ -171,8 +189,9 @@ class TestAuthDatabaseRegression:
     @pytest.mark.asyncio
     async def test_async_session_management(self, sqlite_db_manager):
         """Test async session management for SQLite."""
+    pass
         if hasattr(sqlite_db_manager, 'get_async_session'):
-            async with sqlite_db_manager.get_async_session() as session:
+            async with sqlite_db_manager.get_db() as session:
                 assert session is not None
                 # Session should be usable for async operations
 
@@ -198,6 +217,7 @@ class TestAuthDatabaseRegression:
 
     def test_error_handling_database_specific(self, sqlite_db_manager):
         """Test that database-specific errors are handled correctly."""
+    pass
         # SQLite specific errors
         sqlite_errors = [
             "database is locked",
@@ -226,6 +246,7 @@ class TestAuthDatabaseRegression:
 
     def test_database_compatibility_matrix(self):
         """Test compatibility across different database configurations."""
+    pass
         compatibility_matrix = [
             # (db_url, should_work, reason)
             ("sqlite:///test.db", True, "File-based SQLite"),

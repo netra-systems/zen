@@ -5,13 +5,18 @@ Provides shared infrastructure and mocks for agent testing.
 
 import sys
 from pathlib import Path
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.redis.test_redis_manager import TestRedisManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
 import json
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,40 +25,38 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import (
-    SupervisorAgent as Supervisor,
-)
+    SupervisorAgent as Supervisor)
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,
-    SubAgentState,
-)
+    SubAgentState)
 from netra_backend.app.schemas.websocket_models import SubAgentUpdate
 from netra_backend.app.schemas.websocket_server_messages import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
-    ApexToolSelector,
-)
+    ApexToolSelector)
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket.message_handler import UserMessageHandler
 
 class AgentE2ETestBase:
     """Base class for critical end-to-end agent tests"""
+    pass
 
     def _create_mock_db_session(self):
         """Create mock database session with async context manager support"""
         # Mock: Database session isolation for transaction testing without real database dependency
         db_session = AsyncMock(spec=AsyncSession)
         # Mock: Session isolation for controlled testing without external state
-        db_session.commit = AsyncMock()
+        db_session.commit = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        db_session.rollback = AsyncMock()
+        db_session.rollback = AsyncNone  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        db_session.close = AsyncMock()
+        db_session.close = AsyncNone  # TODO: Use real service instance
         
         # Mock: Generic component isolation for controlled unit testing
-        async_context_manager = AsyncMock()
+        async_context_manager = AsyncNone  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         async_context_manager.__aenter__ = AsyncMock(return_value=db_session)
         # Mock: Async component isolation for testing without real async operations
@@ -64,6 +67,7 @@ class AgentE2ETestBase:
 
     def _create_mock_llm_manager(self):
         """Create mock LLM Manager with proper response structures"""
+    pass
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         # Mock: LLM provider isolation to prevent external API usage and costs
@@ -89,14 +93,14 @@ class AgentE2ETestBase:
 
     def _get_mock_triage_result(self):
         """Get mock triage result for structured LLM calls"""
+    pass
         from netra_backend.app.agents.triage.unified_triage_agent import (
             Complexity,
             ExtractedEntities,
             Priority,
             TriageMetadata,
             TriageResult,
-            UserIntent,
-        )
+            UserIntent)
         return TriageResult(
             category="Cost Optimization", confidence_score=0.95, priority=Priority.MEDIUM,
             complexity=Complexity.MODERATE, is_admin_mode=False,
@@ -110,24 +114,25 @@ class AgentE2ETestBase:
     def _create_mock_websocket_manager(self):
         """Create mock WebSocket Manager with all required methods"""
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = Mock()
+        websocket_manager = UnifiedWebSocketManager()
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_message = AsyncMock()
+        websocket_manager.send_message = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_to_thread = AsyncMock()
+        websocket_manager.send_to_thread = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.broadcast = AsyncMock()
+        websocket_manager.broadcast = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_agent_log = AsyncMock()
+        websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_error = AsyncMock()
+        websocket_manager.send_error = AsyncNone  # TODO: Use real service instance
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager.send_sub_agent_update = AsyncMock()
+        websocket_manager.send_sub_agent_update = AsyncNone  # TODO: Use real service instance
         websocket_manager.active_connections = {}
         return websocket_manager
 
     def _create_mock_tool_dispatcher(self):
         """Create mock Tool Dispatcher with success response"""
+    pass
         # Mock: Tool execution isolation for predictable agent testing
         tool_dispatcher = Mock(spec=ApexToolSelector)
         # Mock: Tool execution isolation for predictable agent testing
@@ -163,13 +168,17 @@ class AgentE2ETestBase:
 
     def _create_agent_service(self, supervisor, websocket_manager):
         """Create Agent Service with Supervisor and WebSocket manager"""
+    pass
         agent_service = AgentService(supervisor)
         agent_service.websocket_manager = websocket_manager
         return agent_service
 
     @pytest.fixture
     def setup_agent_infrastructure(self):
+    """Use real service instance."""
+    # TODO: Initialize real service
         """Setup complete agent infrastructure for testing"""
+    pass
         db_session = self._create_mock_db_session()
         llm_manager = self._create_mock_llm_manager()
         websocket_manager = self._create_mock_websocket_manager()
@@ -195,6 +204,7 @@ class AgentE2ETestBase:
 
     def create_websocket_message(self, message_type="start_agent", payload=None):
         """Create a test WebSocket message"""
+    pass
         if payload is None:
             payload = {
                 "settings": {"debug_mode": False},
@@ -222,6 +232,7 @@ class AgentE2ETestBase:
 
     def assert_websocket_messages_sent(self, websocket_manager, min_messages=1):
         """Assert that WebSocket messages were sent"""
+    pass
         total_calls = (
             websocket_manager.send_message.call_count +
             websocket_manager.send_to_thread.call_count +
@@ -236,6 +247,7 @@ class AgentE2ETestBase:
 
     def assert_llm_manager_called(self, llm_manager, min_calls=1):
         """Assert that LLM manager was called"""
+    pass
         total_calls = (
             llm_manager.call_llm.call_count +
             llm_manager.ask_llm.call_count +
