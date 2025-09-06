@@ -1,13 +1,15 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 RED TEAM TEST 6: Database Migration Failure Recovery
 
 DESIGN TO FAIL: This test is DESIGNED to FAIL initially to validate:
-1. Alembic migrations with active connections
+    1. Alembic migrations with active connections
 2. Rollback scenarios when migration fails midway
 3. Schema consistency after failed migration
 
 These tests use real database connections and will expose actual issues.
-"""
+""""
 import pytest
 import asyncio
 import asyncpg
@@ -55,7 +57,7 @@ class TestDatabaseMigrationFailureRecovery:
     RED TEAM Test Suite: Database Migration Failure Recovery
     
     DESIGNED TO FAIL: These tests expose real migration vulnerabilities
-    """
+    """"
     
     @pytest.fixture
     async def db_manager(self):
@@ -66,13 +68,13 @@ class TestDatabaseMigrationFailureRecovery:
         yield db_manager
         await db_manager.cleanup()
     
-    @pytest.fixture
-    def temp_migration_dir(self):
+        @pytest.fixture
+        def temp_migration_dir(self):
         """Create temporary Alembic migration directory"""
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Create alembic.ini
-            alembic_ini = Path(temp_dir) / "alembic.ini"
-            alembic_ini.write_text("""
+        # Create alembic.ini
+        alembic_ini = Path(temp_dir) / "alembic.ini"
+        alembic_ini.write_text("""
 [alembic]
 script_location = versions
 sqlalchemy.url = driver://user:pass@localhost/dbname
@@ -110,7 +112,7 @@ formatter = generic
 [formatter_generic]
 format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
-""")
+""")"
             
             # Create versions directory
             versions_dir = Path(temp_dir) / "versions"
@@ -124,10 +126,10 @@ datefmt = %H:%M:%S
         DESIGNED TO FAIL: Test migration behavior with active database connections
         
         This test WILL FAIL because:
-        1. Active connections may block schema changes
+            1. Active connections may block schema changes
         2. Migration locks may timeout
         3. Connection pool exhaustion during migration
-        """
+        """"
         # Create multiple active connections to simulate real load
         active_connections = []
         
@@ -168,7 +170,7 @@ def upgrade():
 
 async def downgrade():
     op.drop_table('test_migration_table')
-""")
+""")"
             
             # THIS SHOULD FAIL: Migration with active connections
             with pytest.raises((OperationalError, Exception)) as exc_info:
@@ -195,10 +197,10 @@ async def downgrade():
         DESIGNED TO FAIL: Test rollback scenarios when migration fails midway
         
         This test WILL FAIL because:
-        1. Partial schema changes may not rollback cleanly
+            1. Partial schema changes may not rollback cleanly
         2. Data corruption during rollback
         3. Inconsistent state after failed rollback
-        """
+        """"
         config = Config(os.path.join(temp_migration_dir, "alembic.ini"))
         config.set_main_option("sqlalchemy.url", get_test_database_url())
         
@@ -236,7 +238,7 @@ async def downgrade():
     op.drop_table('partial_table3')
     op.drop_table('partial_table2')
     op.drop_table('partial_table1')
-""")
+""")"
         
         # Get initial schema state
         initial_tables = await self._get_table_list(db_manager)
@@ -274,10 +276,10 @@ async def downgrade():
         DESIGNED TO FAIL: Verify schema consistency after failed migration
         
         This test WILL FAIL because:
-        1. Schema metadata may be inconsistent
+            1. Schema metadata may be inconsistent
         2. Alembic version table may be corrupted
         3. Foreign key constraints may be broken
-        """
+        """"
         # Create test data with foreign key relationships
         async with db_manager.get_session() as session:
             await session.execute(text("""
@@ -285,7 +287,7 @@ async def downgrade():
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(255) NOT NULL
                 )
-            """))
+            """))"
             
             await session.execute(text("""
                 CREATE TABLE IF NOT EXISTS child_table (
@@ -293,17 +295,17 @@ async def downgrade():
                     parent_id INTEGER REFERENCES parent_table(id),
                     data VARCHAR(255)
                 )
-            """))
+            """))"
             
             # Insert test data
             await session.execute(text("""
                 INSERT INTO parent_table (name) VALUES ('test_parent')
-            """))
+            """))"
             
             await session.execute(text("""
                 INSERT INTO child_table (parent_id, data) 
                 SELECT id, 'test_data' FROM parent_table WHERE name = 'test_parent'
-            """))
+            """))"
             
             await session.commit()
         
@@ -330,10 +332,10 @@ async def downgrade():
         DESIGNED TO FAIL: Test race conditions with concurrent migrations
         
         This test WILL FAIL because:
-        1. Multiple migration processes may conflict
+            1. Multiple migration processes may conflict
         2. Version table corruption
         3. Deadlocks during concurrent schema changes
-        """
+        """"
         config = Config(os.path.join(temp_migration_dir, "alembic.ini"))
         config.set_main_option("sqlalchemy.url", get_test_database_url())
         
@@ -361,7 +363,7 @@ def upgrade():
 
 def downgrade():
     op.drop_table('concurrent_table')
-""")
+""")"
         
         # Start multiple concurrent migrations
         async def run_migration():
@@ -404,7 +406,7 @@ def downgrade():
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public'
-            """))
+            """))"
             return [row[0] for row in result.fetchall()]
     
     async def _check_schema_consistency(self, db_manager):
@@ -420,10 +422,10 @@ def downgrade():
                 AND NOT EXISTS (
                     SELECT 1 FROM pg_class WHERE oid = confrelid
                 )
-            """))
+            """))"
             
             for row in broken_fks.fetchall():
-                issues.append(f"Broken foreign key: {row[0]} from {row[1]} to missing table {row[2]}")
+                issues.append(f"Broken foreign key: {row[0]] from {row[1]] to missing table {row[2]]")
             
             # Check for orphaned sequences
             orphaned_sequences = await session.execute(text("""
@@ -433,9 +435,9 @@ def downgrade():
                     SELECT 1 FROM information_schema.columns
                     WHERE column_default LIKE '%' || sequencename || '%'
                 )
-            """))
+            """))"
             
             for row in orphaned_sequences.fetchall():
-                issues.append(f"Orphaned sequence: {row[0]}.{row[1]}")
+                issues.append(f"Orphaned sequence: {row[0]].{row[1]]")
         
         return issues

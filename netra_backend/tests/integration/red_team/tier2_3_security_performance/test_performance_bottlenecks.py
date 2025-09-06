@@ -1,11 +1,13 @@
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, patch, MagicMock
+
 """
 RED TEAM TESTS 31-35: Performance Bottlenecks and Resource Management
 
@@ -13,14 +15,14 @@ CRITICAL: These tests are DESIGNED TO FAIL initially to expose real performance 
 This test validates database performance, connection scaling, and resource management.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Platform Performance, Scalability, Resource Efficiency  
 - Value Impact: Performance bottlenecks directly impact user experience and platform costs
 - Strategic Impact: Core performance foundation for enterprise AI workload optimization
 
 Testing Level: L3 (Real services, real databases, minimal mocking)
 Expected Initial Result: FAILURE (exposes real performance bottlenecks)
-"""
+""""
 
 import asyncio
 import gc
@@ -66,8 +68,7 @@ class TestPerformanceBottlenecks:
     Tests critical performance limits that impact platform scalability.
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
-    """
-    pass
+    """"
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
@@ -79,49 +80,47 @@ class TestPerformanceBottlenecks:
         async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
         
         try:
-            # Test real connection - will fail if DB unavailable
-            async with engine.begin() as conn:
-                await conn.execute(text("SELECT 1"))
+        # Test real connection - will fail if DB unavailable
+        async with engine.begin() as conn:
+        await conn.execute(text("SELECT 1"))
             
-            async with async_session() as session:
-                yield session
+        async with async_session() as session:
+        yield session
         except Exception as e:
-            pytest.fail(f"CRITICAL: Real database connection failed: {e}")
+        pytest.fail(f"CRITICAL: Real database connection failed: {e}")
         finally:
-            await engine.dispose()
+        await engine.dispose()
 
-    @pytest.fixture
-    def real_test_client(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    pass
+        @pytest.fixture
+        def real_test_client(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Real FastAPI test client - no mocking of the application."""
         await asyncio.sleep(0)
-    return TestClient(app)
+        return TestClient(app)
 
-    @pytest.fixture
-    def performance_monitor(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def performance_monitor(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Monitor system performance during tests."""
-    pass
         initial_stats = {
-            "cpu_percent": psutil.cpu_percent(),
-            "memory_info": psutil.Process().memory_info(),
-            "open_files": len(psutil.Process().open_files()) if hasattr(psutil.Process(), 'open_files') else 0,
-            "connections": len(psutil.net_connections()),
-            "timestamp": time.time()
+        "cpu_percent": psutil.cpu_percent(),
+        "memory_info": psutil.Process().memory_info(),
+        "open_files": len(psutil.Process().open_files()) if hasattr(psutil.Process(), 'open_files') else 0,
+        "connections": len(psutil.net_connections()),
+        "timestamp": time.time()
         }
         
         yield initial_stats
         
         # Collect final stats
         final_stats = {
-            "cpu_percent": psutil.cpu_percent(),
-            "memory_info": psutil.Process().memory_info(),
-            "open_files": len(psutil.Process().open_files()) if hasattr(psutil.Process(), 'open_files') else 0,
-            "connections": len(psutil.net_connections()),
-            "timestamp": time.time()
+        "cpu_percent": psutil.cpu_percent(),
+        "memory_info": psutil.Process().memory_info(),
+        "open_files": len(psutil.Process().open_files()) if hasattr(psutil.Process(), 'open_files') else 0,
+        "connections": len(psutil.net_connections()),
+        "timestamp": time.time()
         }
         
         # Calculate deltas for analysis
@@ -130,8 +129,8 @@ class TestPerformanceBottlenecks:
         time_delta = final_stats["timestamp"] - initial_stats["timestamp"]
         
         # Log performance impact
-        print(f"
-Performance Impact:")
+        print(f""
+Performance Impact:")"
         print(f"  Memory Delta: {memory_delta / 1024 / 1024:.1f} MB")
         print(f"  File Handle Delta: {file_delta}")
         print(f"  Test Duration: {time_delta:.1f}s")
@@ -143,11 +142,10 @@ Performance Impact:")
         
         Tests database performance under concurrent load.
         Will likely FAIL because:
-        1. Queries may not be optimized
+            1. Queries may not be optimized
         2. Indexes may be missing
         3. Connection pool may be insufficient
-        """
-    pass
+        """"
         start_time = time.time()
         
         try:
@@ -169,7 +167,7 @@ Performance Impact:")
                         INSERT INTO threads (id, title, description, user_id, created_at)
                         VALUES (:id, :title, :content, :user_id, :created_at)
                         ON CONFLICT (id) DO NOTHING
-                    """)
+                    """)"
                     await real_database_session.execute(insert_query, data)
                 except Exception as e:
                     # Continue with existing data if insert fails
@@ -181,14 +179,13 @@ Performance Impact:")
             async def perform_heavy_query():
                 """Simulate heavy database query."""
                 query = text("""
-    pass
                     SELECT t.*, u.username 
                     FROM threads t 
                     LEFT JOIN users u ON t.user_id = u.id 
                     WHERE t.title LIKE '%Performance%'
                     ORDER BY t.created_at DESC
                     LIMIT 50
-                """)
+                """)"
                 
                 query_start = time.time()
                 result = await real_database_session.execute(query)
@@ -209,7 +206,7 @@ Performance Impact:")
             failed_queries = [r for r in results if isinstance(r, Exception)]
             
             assert len(failed_queries) == 0, \
-                f"Some queries failed under load: {[str(e) for e in failed_queries[:3]]}"
+                f"Some queries failed under load: {[str(e) for e in failed_queries[:3]]]"
             
             if successful_queries:
                 avg_query_time = sum(r["time"] for r in successful_queries) / len(successful_queries)
@@ -231,13 +228,13 @@ Performance Impact:")
                 WHERE t.title LIKE '%Performance%'
                 ORDER BY t.created_at DESC
                 LIMIT 50
-            """)
+            """)"
             
             try:
                 explain_result = await real_database_session.execute(explain_query)
                 explain_rows = explain_result.fetchall()
-                explain_text = "
-".join([str(row) for row in explain_rows])
+                explain_text = ""
+".join([str(row) for row in explain_rows])"
                 
                 # Check for performance issues in query plan
                 if "Seq Scan" in explain_text:
@@ -269,11 +266,10 @@ Performance Impact:")
         
         Tests database connection pool under high concurrent load.
         Will likely FAIL because:
-        1. Connection pool may be too small
+            1. Connection pool may be too small
         2. Connection recycling may not work properly
         3. Connection leaks may occur
-        """
-    pass
+        """"
         config = get_unified_config()
         
         try:
@@ -326,7 +322,7 @@ Performance Impact:")
             
             async def db_operation(session_id: int):
                 """Perform database operation and await asyncio.sleep(0)
-    return connection info."""
+    return connection info.""""
                 try:
                     async with async_session() as session:
                         # Perform multiple operations to test connection reuse
@@ -354,7 +350,7 @@ Performance Impact:")
             
             # FAILURE EXPECTED HERE - connection pool scaling may not work
             assert success_rate >= 0.8, \
-                f"Connection pool scaling failed: {success_rate*100:.1f}% success rate. Failed: {failed_ops[:3]}"
+                f"Connection pool scaling failed: {success_rate*100:.1f]% success rate. Failed: {failed_ops[:3]]"
             
             # Test connection cleanup
             await engine.dispose()
@@ -368,15 +364,14 @@ Performance Impact:")
     @pytest.mark.asyncio
     async def test_33_memory_usage_agent_processing_fails(self, performance_monitor):
         """
-    pass
         Test 33: Memory Usage in Agent Processing (EXPECTED TO FAIL)
         
         Tests memory usage patterns during agent processing.
         Will likely FAIL because:
-        1. Memory leaks may occur during processing
+            1. Memory leaks may occur during processing
         2. Large objects may not be garbage collected
         3. Agent context may not be properly cleaned up
-        """
+        """"
         initial_memory = psutil.Process().memory_info().rss
         
         try:
@@ -480,11 +475,10 @@ Performance Impact:")
         
         Tests WebSocket connection handling under load.
         Will likely FAIL because:
-        1. Connection limits may not be enforced
+            1. Connection limits may not be enforced
         2. Connection cleanup may not work properly
         3. Memory usage may increase with connections
-        """
-    pass
+        """"
         try:
             import websocket
             import threading
@@ -589,15 +583,14 @@ Performance Impact:")
     @pytest.mark.asyncio  
     async def test_35_cache_invalidation_timing_fails(self, performance_monitor):
         """
-    pass
         Test 35: Cache Invalidation Timing (EXPECTED TO FAIL)
         
         Tests cache invalidation performance and timing.
         Will likely FAIL because:
-        1. Cache invalidation may be too slow
+            1. Cache invalidation may be too slow
         2. Stale data may be served
         3. Cache stampede may occur
-        """
+        """"
         try:
             # Try to get cache service
             try:
@@ -614,7 +607,7 @@ Performance Impact:")
                 cache_service.clear = clear_instance  # Initialize appropriate service
 
             # Test cache performance under load
-            cache_keys = [f"test_key_{i}" for i in range(100)]
+            cache_keys = [f"test_key_{i]" for i in range(100)]
             test_data = {key: f"test_data_{i}" * 100 for i, key in enumerate(cache_keys)}  # Large data
             
             # Test cache write performance
@@ -781,7 +774,6 @@ class RedTeamPerformanceTestUtils:
     @staticmethod
     def get_system_resources() -> Dict[str, Any]:
         """Get current system resource usage."""
-    pass
         process = psutil.Process()
         
         return {
@@ -812,7 +804,6 @@ class RedTeamPerformanceTestUtils:
     @staticmethod
     def analyze_performance_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze performance test results."""
-    pass
         successful = [r for r in results if not isinstance(r, Exception) and r.get('status') != 'error']
         failed = [r for r in results if isinstance(r, Exception) or r.get('status') == 'error']
         

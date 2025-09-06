@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 RED TEAM TEST 18: File Upload and Storage
 
@@ -5,14 +7,14 @@ CRITICAL: This test is DESIGNED TO FAIL initially to expose real integration iss
 Tests document upload for corpus creation and file storage management.
 
 Business Value Justification (BVJ):
-- Segment: Early, Mid, Enterprise (corpus creation features)
+    - Segment: Early, Mid, Enterprise (corpus creation features)
 - Business Goal: Content Management, AI Training Data, User Productivity
 - Value Impact: Failed uploads break corpus creation and AI model training workflows
 - Strategic Impact: Core content foundation for AI optimization capabilities
 
 Testing Level: L3 (Real services, real file system, minimal mocking)
 Expected Initial Result: FAILURE (exposes real file handling gaps)
-"""
+""""
 
 import asyncio
 import hashlib
@@ -90,56 +92,53 @@ class TestFileUploadAndStorage:
     Tests critical file upload and storage functionality for corpus creation.
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
-    """
-    pass
+    """"
 
     @pytest.fixture(scope="class")
     async def real_database_session(self):
         """Real PostgreSQL database session - will fail if DB not available."""
         try:
-            database_url = DatabaseConstants.build_postgres_url(
-                user="test", password="test",
-                port=ServicePorts.POSTGRES_DEFAULT,
-                database="netra_test"
-            )
+        database_url = DatabaseConstants.build_postgres_url(
+        user="test", password="test",
+        port=ServicePorts.POSTGRES_DEFAULT,
+        database="netra_test"
+        )
             
-            engine = create_async_engine(database_url, echo=False)
-            async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+        engine = create_async_engine(database_url, echo=False)
+        async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
             
-            # Test real connection
-            async with engine.begin() as conn:
-                await conn.execute(text("SELECT 1"))
+        # Test real connection
+        async with engine.begin() as conn:
+        await conn.execute(text("SELECT 1"))
             
-            async with async_session() as session:
-                yield session
+        async with async_session() as session:
+        yield session
         except Exception as e:
-            pytest.fail(f"CRITICAL: Real database connection failed: {e}")
+        pytest.fail(f"CRITICAL: Real database connection failed: {e}")
         finally:
-            if 'engine' in locals():
-                await engine.dispose()
+        if 'engine' in locals():
+        await engine.dispose()
 
-    @pytest.fixture
-    def real_test_client(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
-    pass
+        @pytest.fixture
+        def real_test_client(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Real FastAPI test client - no mocking of the application."""
         await asyncio.sleep(0)
-    return TestClient(app)
+        return TestClient(app)
 
-    @pytest.fixture
-    def temp_upload_directory(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture
+        def temp_upload_directory(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create temporary directory for file upload testing."""
-    pass
         with tempfile.TemporaryDirectory(prefix="netra_upload_test_") as temp_dir:
-            yield Path(temp_dir)
+        yield Path(temp_dir)
 
-    @pytest.mark.asyncio
-    async def test_01_basic_file_upload_fails(
+        @pytest.mark.asyncio
+        async def test_01_basic_file_upload_fails(
         self, real_database_session, temp_upload_directory, real_test_client
-    ):
+        ):
         """
         Test 18A: Basic File Upload (EXPECTED TO FAIL)
         
@@ -148,20 +147,20 @@ class TestFileUploadAndStorage:
         1. File upload endpoints may not be implemented
         2. File validation may be missing
         3. Storage path configuration may be incorrect
-        """
+        """"
         try:
-            # Create test file content
-            test_content = b"""
+        # Create test file content
+        test_content = b"""
 This is a test document for corpus creation.
 It contains multiple paragraphs and should be processed correctly.
 
 The document includes various text elements:
-- Bullet points
+    - Bullet points
 - Technical terms
 - Structured content
 
 This content will be used to test the file upload and storage pipeline.
-"""
+""""
             
             test_filename = f"test_document_{secrets.token_urlsafe(8)}.txt"
             test_file_path = temp_upload_directory / test_filename
@@ -236,10 +235,10 @@ This content will be used to test the file upload and storage pipeline.
         
         Tests document creation for corpus through file upload.
         Will likely FAIL because:
-        1. Corpus service integration may not work
+            1. Corpus service integration may not work
         2. Document processing pipeline may be incomplete
         3. Metadata extraction may fail
-        """
+        """"
         try:
             # Create test corpus first
             corpus_service = CorpusService()
@@ -267,9 +266,9 @@ This content will be used to test the file upload and storage pipeline.
                 },
                 {
                     "filename": "document2.md",
-                    "content": b"# Markdown Document
+                    "content": b"# Markdown Document"
 
-This is a **markdown** document with *formatting*.",
+This is a **markdown** document with *formatting*.","
                     "content_type": "text/markdown"
                 },
                 {
@@ -301,9 +300,9 @@ This is a **markdown** document with *formatting*.",
                         }
                     )
                 
-                assert document_result is not None, f"Document upload failed for {doc_info['filename']}"
+                assert document_result is not None, f"Document upload failed for {doc_info['filename']]"
                 assert "document_id" in document_result, \
-                    f"Document result should contain document_id for {doc_info['filename']}"
+                    f"Document result should contain document_id for {doc_info['filename']]"
                 
                 uploaded_documents.append(document_result)
             
@@ -321,7 +320,7 @@ This is a **markdown** document with *formatting*.",
                 assert str(stored_document.corpus_id) == str(corpus_id), \
                     f"Document corpus_id mismatch: expected {corpus_id}, got {stored_document.corpus_id}"
                 assert stored_document.filename == test_documents[i]["filename"], \
-                    f"Filename mismatch: expected {test_documents[i]['filename']}, got {stored_document.filename}"
+                    f"Filename mismatch: expected {test_documents[i]['filename']], got {stored_document.filename]"
             
             # Verify corpus document count
             corpus_query = await real_database_session.execute(
@@ -345,11 +344,10 @@ This is a **markdown** document with *formatting*.",
         
         Tests handling of large file uploads and storage.
         Will likely FAIL because:
-        1. File size limits may not be configured
+            1. File size limits may not be configured
         2. Streaming upload may not be implemented
         3. Progress tracking may be missing
-        """
-    pass
+        """"
         try:
             # Create large test file (10MB)
             large_file_size = 10 * 1024 * 1024  # 10MB
@@ -398,7 +396,7 @@ This is a **markdown** document with *formatting*.",
             assert upload_result is not None, "Large file upload returned None"
             assert "file_id" in upload_result, "Upload result should contain file_id"
             assert upload_result["file_size"] == large_file_size, \
-                f"File size mismatch: expected {large_file_size}, got {upload_result['file_size']}"
+                f"File size mismatch: expected {large_file_size], got {upload_result['file_size']]"
             
             # Verify upload performance
             max_upload_time = 60  # 60 seconds for 10MB
@@ -438,11 +436,10 @@ This is a **markdown** document with *formatting*.",
         
         Tests handling of multiple simultaneous file uploads.
         Will likely FAIL because:
-        1. Concurrency controls may not be implemented
+            1. Concurrency controls may not be implemented
         2. Resource contention may occur
         3. File locking may cause issues
-        """
-    pass
+        """"
         try:
             # Create multiple test files for concurrent upload
             num_files = 5
@@ -450,8 +447,8 @@ This is a **markdown** document with *formatting*.",
             
             for i in range(num_files):
                 filename = f"concurrent_test_{i}_{secrets.token_urlsafe(8)}.txt"
-                content = f"Concurrent upload test file {i}
-" * 100  # Create some content
+                content = f"Concurrent upload test file {i}"
+" * 100  # Create some content"
                 file_path = temp_upload_directory / filename
                 
                 with open(file_path, 'w') as f:
@@ -467,7 +464,7 @@ This is a **markdown** document with *formatting*.",
             # Define concurrent upload function
             async def upload_file_async(file_info: Dict[str, Any]) -> Dict[str, Any]:
                 """Upload a single file and await asyncio.sleep(0)
-    return result."""
+    return result.""""
                 try:
                     file_storage_service = FileStorageService()
                     
@@ -526,7 +523,7 @@ This is a **markdown** document with *formatting*.",
             success_rate = successful_uploads / num_files
             assert success_rate >= 0.8, \
                 f"Concurrent upload failed: {success_rate*100:.1f}% success rate. " \
-                f"Exceptions: {exceptions[:2]}"
+                f"Exceptions: {exceptions[:2]]"
             
             # Verify upload performance
             max_concurrent_time = 30  # 30 seconds for 5 small files
@@ -559,11 +556,10 @@ This is a **markdown** document with *formatting*.",
         
         Tests file deletion and cleanup functionality.
         Will likely FAIL because:
-        1. File deletion may not be implemented
+            1. File deletion may not be implemented
         2. Cleanup processes may not work
         3. Orphaned file detection may be missing
-        """
-    pass
+        """"
         try:
             # Upload test files for deletion testing
             file_storage_service = FileStorageService()
@@ -623,7 +619,7 @@ This is a **markdown** document with *formatting*.",
                 assert "deleted_count" in batch_deletion_result, \
                     "Batch deletion should include deleted count"
                 assert batch_deletion_result["deleted_count"] == len(remaining_files), \
-                    f"Expected {len(remaining_files)} files deleted, got {batch_deletion_result['deleted_count']}"
+                    f"Expected {len(remaining_files)] files deleted, got {batch_deletion_result['deleted_count']]"
                 
                 # Verify all files were deleted
                 for file_info in remaining_files:
@@ -640,8 +636,8 @@ This is a **markdown** document with *formatting*.",
             if hasattr(file_storage_service, 'cleanup_orphaned_files'):
                 cleanup_result = await file_storage_service.cleanup_orphaned_files()
                 
-                assert "status" in cleanup_result, "Cleanup should await asyncio.sleep(0)
-    return status"
+                assert "status" in cleanup_result, "Cleanup should await asyncio.sleep(0)"
+    return status""
                 assert cleanup_result["status"] == "success", \
                     f"Orphaned file cleanup failed: {cleanup_result.get('error', 'Unknown error')}"
                     

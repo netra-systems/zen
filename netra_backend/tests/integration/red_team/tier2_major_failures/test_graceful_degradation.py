@@ -5,14 +5,14 @@ CRITICAL: This test is DESIGNED TO FAIL initially to expose real integration iss
 Tests service behavior when dependencies are unavailable or degraded.
 
 Business Value Justification (BVJ):
-- Segment: Mid, Enterprise (high availability requirements)
+    - Segment: Mid, Enterprise (high availability requirements)
 - Business Goal: Platform Reliability, User Experience, Service Continuity
 - Value Impact: Poor degradation breaks user workflows when services are partially unavailable
 - Strategic Impact: Core resilience foundation for enterprise-grade platform availability
 
 Testing Level: L3 (Real services, real degradation scenarios, minimal mocking)
 Expected Initial Result: FAILURE (exposes real graceful degradation gaps)
-"""
+""""
 
 import asyncio
 import psutil
@@ -39,15 +39,15 @@ class TestGracefulDegradation:
     Tests service behavior when dependencies are unavailable.
     MUST use real services - NO MOCKS allowed.
     These tests WILL fail initially and that's the point.
-    """
+    """"
 
     @pytest.fixture
     def real_test_client(self):
         """Real FastAPI test client - no mocking of the application."""
         return TestClient(app)
 
-    @pytest.mark.asyncio
-    async def test_01_database_unavailable_degradation_fails(self, real_test_client):
+        @pytest.mark.asyncio
+        async def test_01_database_unavailable_degradation_fails(self, real_test_client):
         """
         Test 24A: Database Unavailable Degradation (EXPECTED TO FAIL)
         
@@ -56,44 +56,44 @@ class TestGracefulDegradation:
         1. Database fallback mechanisms may not exist
         2. Cached responses may not be implemented
         3. Graceful error responses may not be configured
-        """
+        """"
         try:
-            # FAILURE EXPECTED HERE - database degradation may not be implemented
-            degradation_manager = GracefulDegradationManager()
+        # FAILURE EXPECTED HERE - database degradation may not be implemented
+        degradation_manager = GracefulDegradationManager()
             
-            # Simulate database unavailability
-            await degradation_manager.simulate_service_unavailable("database")
+        # Simulate database unavailability
+        await degradation_manager.simulate_service_unavailable("database")
             
-            # Test endpoints that depend on database
-            database_dependent_endpoints = [
-                {"path": "/api/users/profile", "method": "GET"},
-                {"path": "/api/threads", "method": "GET"},
-                {"path": "/api/agents/history", "method": "GET"}
-            ]
+        # Test endpoints that depend on database
+        database_dependent_endpoints = [
+        {"path": "/api/users/profile", "method": "GET"},
+        {"path": "/api/threads", "method": "GET"},
+        {"path": "/api/agents/history", "method": "GET"}
+        ]
             
-            degradation_responses = []
+        degradation_responses = []
             
-            for endpoint in database_dependent_endpoints:
-                if endpoint["method"] == "GET":
-                    response = real_test_client.get(endpoint["path"])
+        for endpoint in database_dependent_endpoints:
+        if endpoint["method"] == "GET":
+        response = real_test_client.get(endpoint["path"])
                 
-                # Should return degraded but functional response
-                assert response.status_code in [200, 202, 503], \
-                    f"Database degradation should return 200/202/503, got {response.status_code}"
+        # Should return degraded but functional response
+        assert response.status_code in [200, 202, 503], \
+        f"Database degradation should return 200/202/503, got {response.status_code}"
                 
-                if response.status_code == 200:
-                    # Should indicate degraded mode
-                    data = response.json()
-                    assert "degraded_mode" in data or "fallback" in data, \
-                        "Response should indicate degraded mode"
+        if response.status_code == 200:
+        # Should indicate degraded mode
+        data = response.json()
+        assert "degraded_mode" in data or "fallback" in data, \
+        "Response should indicate degraded mode"
                         
         except ImportError as e:
-            pytest.fail(f"Graceful degradation components not available: {e}")
+        pytest.fail(f"Graceful degradation components not available: {e}")
         except Exception as e:
-            pytest.fail(f"Database unavailable degradation test failed: {e}")
+        pytest.fail(f"Database unavailable degradation test failed: {e}")
 
-    @pytest.mark.asyncio
-    async def test_02_external_service_degradation_fails(self):
+        @pytest.mark.asyncio
+        async def test_02_external_service_degradation_fails(self):
         """
         Test 24B: External Service Degradation (EXPECTED TO FAIL)
         
@@ -102,23 +102,23 @@ class TestGracefulDegradation:
         1. External service fallbacks may not exist
         2. Cached responses may not be available
         3. Alternative service routing may not work
-        """
+        """"
         try:
-            # FAILURE EXPECTED HERE - external service fallbacks may not be implemented
-            fallback_service = FallbackResponseService()
+        # FAILURE EXPECTED HERE - external service fallbacks may not be implemented
+        fallback_service = FallbackResponseService()
             
-            # Test LLM service fallback
-            llm_fallback = await fallback_service.get_llm_fallback_response(
-                prompt="Test prompt for fallback",
-                agent_type="supervisor"
-            )
+        # Test LLM service fallback
+        llm_fallback = await fallback_service.get_llm_fallback_response(
+        prompt="Test prompt for fallback",
+        agent_type="supervisor"
+        )
             
-            assert llm_fallback is not None, "LLM fallback should provide response"
-            assert "content" in llm_fallback, "Fallback should have content"
-            assert "fallback_mode" in llm_fallback, "Should indicate fallback mode"
+        assert llm_fallback is not None, "LLM fallback should provide response"
+        assert "content" in llm_fallback, "Fallback should have content"
+        assert "fallback_mode" in llm_fallback, "Should indicate fallback mode"
             
         except Exception as e:
-            pytest.fail(f"External service degradation test failed: {e}")
+        pytest.fail(f"External service degradation test failed: {e}")
 
 
 class TestMemoryAndResourceLeakDetection:
@@ -127,7 +127,7 @@ class TestMemoryAndResourceLeakDetection:
     
     Tests resource cleanup and leak detection.
     MUST use real services - NO MOCKS allowed.
-    """
+    """"
 
     @pytest.mark.asyncio
     async def test_01_memory_leak_detection_fails(self):
@@ -136,10 +136,10 @@ class TestMemoryAndResourceLeakDetection:
         
         Tests memory usage patterns for leaks.
         Will likely FAIL because:
-        1. Memory monitoring may not be implemented
+            1. Memory monitoring may not be implemented
         2. Leak detection thresholds may not be set
         3. Cleanup mechanisms may not work
-        """
+        """"
         try:
             initial_memory = psutil.Process().memory_info().rss
             
@@ -173,10 +173,10 @@ class TestMemoryAndResourceLeakDetection:
         
         Tests that resources are properly cleaned up.
         Will likely FAIL because:
-        1. Resource tracking may not exist
+            1. Resource tracking may not exist
         2. Cleanup on failure may not work
         3. File handle leaks may occur
-        """
+        """"
         try:
             initial_handles = len(psutil.Process().open_files())
             
