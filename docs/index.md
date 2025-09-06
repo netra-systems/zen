@@ -71,6 +71,7 @@
 
 ### 🚀 Performance & Optimization
 
+- **[Netra Optimization Breakdown](../NETRA_OPTIMIZATION_BREAKDOWN.md)** 🎯 - **CRITICAL**: System optimization architecture breakdown (AI-specific vs general optimization)
 - **[Performance Metrics User Guide](./PERFORMANCE_METRICS_USER_GUIDE.md)** 📊 - **NEW**: Comprehensive guide to performance timing and metrics collection
 - [Agent Performance Dependencies](./AGENT_PERFORMANCE_DEPENDENCIES_EXPLAINED.md)
 - [Agent Performance Real Issues](./AGENT_PERFORMANCE_REAL_ISSUES.md)
