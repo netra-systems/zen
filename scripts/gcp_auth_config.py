@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Centralized GCP Service Account Authentication Configuration
@@ -10,16 +9,33 @@ reducing authentication failures and improving deployment reliability.
 
 import os
 import sys
+
+# Fix Unicode encoding issues on Windows - MUST be done early
+if sys.platform == "win32":
+    import io
+    # Set UTF-8 for subprocess and all Python I/O
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ['PYTHONUTF8'] = '1'
+    
+    # Force Windows console to use UTF-8
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        kernel32.SetConsoleCP(65001)
+        kernel32.SetConsoleOutputCP(65001)
+    except Exception:
+        pass
+    
+    # Reconfigure stdout/stderr for UTF-8
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 import json
 import subprocess
 from pathlib import Path
 from typing import Optional, Dict, Any
-import io
 
-# Fix Unicode encoding issues on Windows
-if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+from shared.isolated_environment import get_env
 
 
 class GCPAuthConfig:

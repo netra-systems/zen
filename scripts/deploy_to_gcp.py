@@ -9,6 +9,10 @@ Use this script with appropriate flags for all GCP staging deployments.
 Quick Start:
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
+IMPORTANT for Claude Code users:
+    If running from Claude Code, use the wrapper script to avoid 2-minute timeout:
+    python scripts/deploy_gcp_with_timeout.py --project netra-staging --build-local
+
 See SPEC/gcp_deployment.xml for comprehensive deployment guidelines.
 """
 
@@ -33,18 +37,40 @@ from shared.isolated_environment import get_env
 # Import centralized secrets configuration
 from deployment.secrets_config import SecretConfig
 
-# Fix Unicode encoding issues on Windows
+# Fix Unicode encoding issues on Windows - MUST be done early
 if sys.platform == "win32":
     import io
+    # Set UTF-8 for subprocess and all Python I/O
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ['PYTHONUTF8'] = '1'
+    
+    # Force Windows console to use UTF-8
     try:
-        # Only wrap if not already wrapped
-        if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
-        if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        # Set console code page to UTF-8
+        kernel32.SetConsoleCP(65001)
+        kernel32.SetConsoleOutputCP(65001)
     except:
-        # If wrapping fails, continue with default encoding
         pass
+    
+    # Reconfigure stdout/stderr to use UTF-8
+    try:
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        if hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except:
+        # Fallback for older Python versions
+        try:
+            # Only wrap if not already wrapped
+            if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+            if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+        except:
+            # If wrapping fails, continue with default encoding
+            pass
 
 
 @dataclass
@@ -60,7 +86,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 600
+    timeout: int = 1800  # Increased to 30 minutes for staging deployments
 
 
 class GCPDeployer:
@@ -191,6 +217,8 @@ class GCPDeployer:
                 ["docker", "--version"],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 check=False,
                 shell=sys.platform == "win32"
             )
