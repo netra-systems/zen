@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from urllib.parse import urlparse
 
 from shared.config_builder_base import ConfigBuilderBase
+from shared.security_origins_config import SecurityOriginsConfig
 
 
 class CORSEnvironment(Enum):
@@ -162,13 +163,8 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
             if cors_origins_env:
                 return self._parse_cors_origins_env(cors_origins_env)
             
-            # Fallback to environment-specific defaults
-            if self.parent.environment == "production":
-                return self._get_production_origins()
-            elif self.parent.environment == "staging":
-                return self._get_staging_origins()
-            else:
-                return self._get_development_origins()
+            # Use SSOT SecurityOriginsConfig for origins
+            return SecurityOriginsConfig.get_cors_origins(self.parent.environment)
         
         def _parse_cors_origins_env(self, cors_origins_env: str) -> List[str]:
             """Parse CORS_ORIGINS environment variable."""
@@ -181,100 +177,29 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
             return origins if origins else self._get_development_origins()
         
         def _get_production_origins(self) -> List[str]:
-            """Get production CORS origins."""
-            return [
-                "https://netrasystems.ai",
-                "https://www.netrasystems.ai",
-                "https://app.netrasystems.ai",
-                "https://api.netrasystems.ai",
-                "https://auth.netrasystems.ai"
-            ]
+            """Get production CORS origins from SSOT."""
+            return SecurityOriginsConfig.get_cors_origins("production")
         
         def _get_staging_origins(self) -> List[str]:
-            """Get staging CORS origins."""
-            return [
-                # Staging domains - CRITICAL: Include all origins
-                "https://staging.netrasystems.ai",  # CRITICAL: Base staging domain
-                "https://app.staging.netrasystems.ai",  # Frontend app
-                "https://auth.staging.netrasystems.ai",  # Auth service
-                "https://api.staging.netrasystems.ai",  # API gateway
-                "https://backend.staging.netrasystems.ai",  # Backend service
-                
-                # Cloud Run patterns for staging
-                "https://netra-frontend-701982941522.us-central1.run.app",
-                "https://netra-backend-701982941522.us-central1.run.app",
-                
-                # Local development support for staging testing
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:8000",
-                "http://localhost:8080",
-                "http://localhost:8081",  # Auth service local port
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:3001",
-                "http://127.0.0.1:8000",
-                "http://127.0.0.1:8080",
-                "http://127.0.0.1:8081"  # Auth service local port
-            ]
+            """Get staging CORS origins from SSOT."""
+            return SecurityOriginsConfig.get_cors_origins("staging")
         
         def _get_development_origins(self) -> List[str]:
-            """Get development CORS origins with comprehensive localhost support."""
-            return [
-                # Standard localhost ports
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:3002",
-                "http://localhost:8000",
-                "http://localhost:8080",
-                "http://localhost:8081",
-                "http://localhost:5173",  # Vite
-                "http://localhost:4200",  # Angular
-                
-                # 127.0.0.1 variants
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:3001",
-                "http://127.0.0.1:3002",
-                "http://127.0.0.1:8000",
-                "http://127.0.0.1:8080",
-                "http://127.0.0.1:8081",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:4200",
-                
-                # HTTPS variants for local cert testing
-                "https://localhost:3000",
-                "https://localhost:3001",
-                "https://localhost:8000",
-                "https://localhost:8080",
-                "https://127.0.0.1:3000",
-                "https://127.0.0.1:3001",
-                "https://127.0.0.1:8000",
-                "https://127.0.0.1:8080",
-                
-                # 0.0.0.0 for Docker/container scenarios
-                "http://0.0.0.0:3000",
-                "http://0.0.0.0:8000",
-                "http://0.0.0.0:8080",
-                
-                # Docker service names
-                "http://frontend:3000",
-                "http://backend:8000",
-                "http://auth:8081",
-                "http://netra-frontend:3000",
-                "http://netra-backend:8000",
-                "http://netra-auth:8081",
-                
-                # Docker bridge network IP ranges
+            """Get development CORS origins from SSOT."""
+            origins = SecurityOriginsConfig.get_cors_origins("development")
+            # Add Docker bridge network IPs that aren't in SSOT
+            origins.extend([
                 "http://172.17.0.1:3000",
                 "http://172.17.0.1:8000",
                 "http://172.18.0.1:3000",
                 "http://172.18.0.1:8000",
-                
                 # IPv6 localhost
                 "http://[::1]:3000",
                 "http://[::1]:3001",
                 "http://[::1]:8000",
                 "http://[::1]:8080"
-            ]
+            ])
+            return origins
         
         def _is_localhost_origin(self, origin: str) -> bool:
             """Check if origin is from localhost."""

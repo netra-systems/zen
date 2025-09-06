@@ -4,6 +4,7 @@ Implements OWASP-compliant security headers for different environments.
 """
 
 from typing import Dict
+from shared.security_origins_config import SecurityOriginsConfig
 
 
 class SecurityHeadersConfig:
@@ -98,13 +99,26 @@ class SecurityHeadersConfig:
     @staticmethod
     def _get_production_base_directives() -> list:
         """Get base production CSP directives."""
+        # Get connect sources from SSOT
+        connect_sources = SecurityOriginsConfig.get_csp_connect_sources("production")
+        connect_src = f"connect-src {' '.join(connect_sources)}"
+        
+        # Get script sources from SSOT
+        script_sources = SecurityOriginsConfig.get_csp_script_sources("production")
+        script_src = f"script-src {' '.join(script_sources)}"
+        
+        # Get worker sources from SSOT
+        worker_sources = SecurityOriginsConfig.get_csp_worker_sources("production")
+        worker_src = f"worker-src {' '.join(worker_sources)}"
+        
         return [
             "default-src 'self'",
-            "script-src 'self' https://apis.google.com https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms",
+            script_src,
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https: https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms"
+            connect_src,
+            worker_src
         ]
     
     @staticmethod
@@ -125,13 +139,26 @@ class SecurityHeadersConfig:
     @staticmethod
     def _get_staging_base_directives() -> list:
         """Get base staging CSP directives."""
+        # Get connect sources from SSOT
+        connect_sources = SecurityOriginsConfig.get_csp_connect_sources("staging")
+        connect_src = f"connect-src {' '.join(connect_sources)}"
+        
+        # Get script sources from SSOT
+        script_sources = SecurityOriginsConfig.get_csp_script_sources("staging")
+        script_src = f"script-src {' '.join(script_sources)}"
+        
+        # Get worker sources from SSOT
+        worker_sources = SecurityOriginsConfig.get_csp_worker_sources("staging")
+        worker_src = f"worker-src {' '.join(worker_sources)}"
+        
         return [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://scripts.clarity.ms",
+            script_src,
             "style-src 'self' 'unsafe-inline' https:",
             "font-src 'self' https: data:",
             "img-src 'self' data: https: https://c.bing.com",
-            "connect-src 'self' https: wss:"
+            connect_src,
+            worker_src
         ]
     
     @staticmethod
@@ -149,13 +176,26 @@ class SecurityHeadersConfig:
     @staticmethod
     def _get_development_base_directives() -> list:
         """Get base development CSP directives."""
+        # Get connect sources from SSOT
+        connect_sources = SecurityOriginsConfig.get_csp_connect_sources("development")
+        connect_src = f"connect-src {' '.join(connect_sources)}"
+        
+        # Get script sources from SSOT
+        script_sources = SecurityOriginsConfig.get_csp_script_sources("development")
+        script_src = f"script-src {' '.join(script_sources)}"
+        
+        # Get worker sources from SSOT
+        worker_sources = SecurityOriginsConfig.get_csp_worker_sources("development")
+        worker_src = f"worker-src {' '.join(worker_sources)}"
+        
         return [
             "default-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http: https: https://scripts.clarity.ms",
+            script_src,
             "style-src 'self' 'unsafe-inline' http: https:",
             "font-src 'self' http: https: data:",
             "img-src 'self' data: http: https: https://c.bing.com",
-            "connect-src 'self' http: https: ws: wss:"
+            connect_src,
+            worker_src
         ]
     
     @staticmethod
