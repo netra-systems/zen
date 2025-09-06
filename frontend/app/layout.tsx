@@ -5,6 +5,7 @@ import { AppWithLayout } from '@/components/AppWithLayout';
 import { AuthProvider } from '@/auth';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { GTMProvider } from '@/providers/GTMProvider';
+import { SentryInit } from './sentry-init';
 import './globals.css';
 import '@/styles/glassmorphism.css';
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <SentryInit />
         <GTMProvider enabled={process.env.NEXT_PUBLIC_GTM_ENABLED !== 'false' && process.env.NODE_ENV !== 'test'}>
           <AuthProvider>
             <WebSocketProvider>
