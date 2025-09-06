@@ -4,7 +4,7 @@ Comprehensive unit tests for corpus_admin models.
 Business Value: Ensures data integrity and validation for corpus management models.
 These models are critical for enterprise clients and must be 100% reliable.
 Tests cover all validation scenarios, edge cases, and business rules.
-"""
+""""
 
 import pytest
 from datetime import datetime, timezone
@@ -269,7 +269,7 @@ class TestCorpusOperationRequest:
         )
         
         filters = {"document_type": "guide", "status": "published"}
-        content = {"documents": [{"title": "Test Doc", "content": "Test content"}]}
+        content = {"documents": [{"title": "Test Doc", "content": "Test content"]]]
         options = {"limit": 100, "include_metadata": True}
         
         request = CorpusOperationRequest(
@@ -334,7 +334,7 @@ class TestCorpusOperationRequest:
         assert request.content == "search query string"
 
         # Dict content
-        dict_content = {"documents": [], "metadata": {"source": "test"}}
+        dict_content = {"documents": [], "metadata": {"source": "test"]]
         request = CorpusOperationRequest(
             operation=CorpusOperation.IMPORT,
             corpus_metadata=metadata,
@@ -497,7 +497,7 @@ class TestCorpusOperationResult:
         )
         
         # List result data
-        list_data = [{"id": 1}, {"id": 2}, {"id": 3}]
+        list_data = [{"id": 1], {"id": 2], {"id": 3]]
         result = CorpusOperationResult(
             success=True,
             operation=CorpusOperation.SEARCH,
@@ -507,7 +507,7 @@ class TestCorpusOperationResult:
         assert result.result_data == list_data
 
         # Dict result data
-        dict_data = {"summary": {"total": 50}, "items": []}
+        dict_data = {"summary": {"total": 50], "items": []]
         result = CorpusOperationResult(
             success=True,
             operation=CorpusOperation.ANALYZE,
@@ -756,14 +756,14 @@ class TestCorpusStatistics:
         stats = CorpusStatistics(
             total_corpora=5,
             corpora_by_type={"docs": 3, "kb": 2},
-            recent_operations=[{"op": "test"}]
+            recent_operations=[{"op": "test"]]
         )
         
         # Test serialization
         data = stats.model_dump()
         assert isinstance(data, dict)
         assert data["total_corpora"] == 5
-        assert data["corpora_by_type"] == {"docs": 3, "kb": 2}
+        assert data["corpora_by_type"] == {"docs": 3, "kb": 2]
 
         # Test copy
         copy = stats.model_copy()
@@ -797,7 +797,7 @@ class TestModelIntegration:
             operation=request.operation,
             corpus_metadata=request.corpus_metadata,
             affected_documents=25,
-            result_data=[{"id": "doc1"}, {"id": "doc2"}]
+            result_data=[{"id": "doc1"], {"id": "doc2"]]
         )
         
         # Verify integration

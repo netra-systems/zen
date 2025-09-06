@@ -2,7 +2,7 @@
 Unit tests for suggestion_profiles
 Coverage Target: 90%
 Business Value: Revenue-critical component
-"""
+""""
 
 import pytest
 from netra_backend.app.agents.corpus_admin.suggestion_profiles import (
@@ -31,7 +31,6 @@ class TestSuggestionProfiles:
     
     def test_get_domain_profiles(self):
         """Test domain profiles retrieval"""
-    pass
         profiles = get_domain_profiles()
         assert isinstance(profiles, dict)
         assert "fintech" in profiles
@@ -48,7 +47,6 @@ class TestSuggestionProfiles:
     
     def test_get_parameter_dependencies(self):
         """Test parameter dependencies"""
-    pass
         deps = get_parameter_dependencies()
         assert isinstance(deps, dict)
         assert "batch_size" in deps
@@ -62,7 +60,6 @@ class TestSuggestionProfiles:
     
     def test_apply_domain_rules_fintech(self):
         """Test fintech domain rules"""
-    pass
         config = {}
         result = apply_domain_rules(config, "fintech")
         assert result["audit_logging"] is True
@@ -77,7 +74,6 @@ class TestSuggestionProfiles:
     
     def test_merge_domain_settings(self):
         """Test domain settings merge"""
-    pass
         config = {"existing": "value"}
         domain_settings = {"new": "setting", "existing": "ignored"}
         result = merge_domain_settings(config, domain_settings)
