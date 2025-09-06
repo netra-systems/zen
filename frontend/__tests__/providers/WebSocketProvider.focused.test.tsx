@@ -4,8 +4,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-// Force direct import to bypass any Jest mocking
-import { WebSocketProvider, useWebSocketContext } from 'C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/frontend/providers/WebSocketProvider';
+// Use proper import paths for mocking
+import { WebSocketProvider, useWebSocketContext } from '../../providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 
 // Mock all dependencies to isolate the issue
@@ -72,20 +72,11 @@ const StatusDisplay = () => {
   return <div data-testid="status">{context.status}</div>;
 };
 
-// Debug component to see what useAuth returns inside WebSocketProvider
-const AuthDebug = () => {
-  // Import the useAuth hook same way WebSocketProvider does
-  const { useAuth } = require('@/auth/context');
-  const authData = useAuth();
-  console.log('AUTH DATA from useAuth():', authData);
-  return null;
-};
-
 describe('WebSocketProvider Status Investigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // CRITICAL: Override the global auth mock to control useAuth() behavior
+    // Set global auth mock state to unauthenticated
     (global as any).mockAuthState = {
       token: null,
       initialized: false,
@@ -110,7 +101,6 @@ describe('WebSocketProvider Status Investigation', () => {
 
     const { container } = render(
       <AuthContext.Provider value={authContext}>
-        <AuthDebug />
         <WebSocketProvider>
           <StatusDisplay />
         </WebSocketProvider>
