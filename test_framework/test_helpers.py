@@ -213,16 +213,21 @@ def temporary_env_vars(**env_vars):
     env = get_env()
     for key, value in env_vars.items():
         original_values[key] = env.get(key)
-        os.environ[key] = value  # Still need to set os.environ for compatibility
+        env.set(key, value, 'test_helpers')
+        # Legacy compatibility: Some services still read os.environ directly
+        # TODO: Remove once all services use IsolatedEnvironment
+        os.environ[key] = value
         
     try:
         yield
     finally:
-        # Restore original values via IsolatedEnvironment
+        # Restore original values
         for key, original_value in original_values.items():
             if original_value is None:
                 os.environ.pop(key, None)
+                # Note: IsolatedEnvironment doesn't support removal yet
             else:
+                env.set(key, original_value, 'test_helpers_restore')
                 os.environ[key] = original_value
 
 

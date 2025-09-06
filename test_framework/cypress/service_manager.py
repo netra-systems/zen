@@ -6,10 +6,10 @@ ensuring all required services are available before running tests.
 
 import asyncio
 import logging
-import os
 from typing import Dict, List, Optional, Set
 import subprocess
 import time
+from shared.isolated_environment import get_env
 
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ class ServiceDependencyManager:
     
     def __init__(self):
         """Initialize service dependency manager."""
+        self.env = get_env()
         self.required_services = self._get_required_services()
         self.service_health = {}
         self.retry_count = 3
@@ -33,28 +34,28 @@ class ServiceDependencyManager:
         """
         return {
             "backend": {
-                "url": os.getenv("TEST_BACKEND_URL", "http://localhost:8000"),
+                "url": self.env.get("TEST_BACKEND_URL", "http://localhost:8000"),
                 "health_endpoint": "/health",
                 "required": True
             },
             "frontend": {
-                "url": os.getenv("TEST_FRONTEND_URL", "http://localhost:3000"),
+                "url": self.env.get("TEST_FRONTEND_URL", "http://localhost:3000"),
                 "health_endpoint": "/",
                 "required": True
             },
             "auth": {
-                "url": os.getenv("TEST_AUTH_URL", "http://localhost:8081"),
+                "url": self.env.get("TEST_AUTH_URL", "http://localhost:8081"),
                 "health_endpoint": "/health",
                 "required": False
             },
             "database": {
-                "host": os.getenv("TEST_DB_HOST", "localhost"),
-                "port": int(os.getenv("TEST_DB_PORT", "5434")),
+                "host": self.env.get("TEST_DB_HOST", "localhost"),
+                "port": int(self.env.get("TEST_DB_PORT", "5434")),
                 "required": True
             },
             "redis": {
-                "host": os.getenv("TEST_REDIS_HOST", "localhost"),
-                "port": int(os.getenv("TEST_REDIS_PORT", "6381")),
+                "host": self.env.get("TEST_REDIS_HOST", "localhost"),
+                "port": int(self.env.get("TEST_REDIS_PORT", "6381")),
                 "required": False
             }
         }

@@ -4,9 +4,9 @@ This module provides configuration management for LLM testing modes,
 allowing tests to use real or mock LLM services as needed.
 """
 
-import os
 from enum import Enum
 from typing import Dict, Optional
+from shared.isolated_environment import get_env
 
 
 class LLMTestMode(Enum):
@@ -21,6 +21,7 @@ class LLMConfigManager:
     
     def __init__(self):
         """Initialize LLM config manager."""
+        self.env = get_env()
         self.mode = self._detect_mode()
         self.config = self._get_default_config()
     
@@ -30,9 +31,9 @@ class LLMConfigManager:
         Returns:
             Detected LLM test mode
         """
-        if os.getenv("TEST_REAL_LLM", "false").lower() == "true":
+        if self.env.get("TEST_REAL_LLM", "false").lower() == "true":
             return LLMTestMode.REAL
-        elif os.getenv("TEST_FAST", "false").lower() == "true":
+        elif self.env.get("TEST_FAST", "false").lower() == "true":
             return LLMTestMode.FAST
         else:
             return LLMTestMode.MOCK
@@ -44,11 +45,11 @@ class LLMConfigManager:
             Default configuration dictionary
         """
         return {
-            "model": os.getenv("TEST_LLM_MODEL", "gemini-2.5-flash"),
-            "api_key": os.getenv("TEST_LLM_API_KEY"),
-            "timeout": int(os.getenv("TEST_LLM_TIMEOUT", "30")),
-            "max_tokens": int(os.getenv("TEST_LLM_MAX_TOKENS", "1000")),
-            "temperature": float(os.getenv("TEST_LLM_TEMPERATURE", "0.0"))
+            "model": self.env.get("TEST_LLM_MODEL", "gemini-2.5-flash"),
+            "api_key": self.env.get("TEST_LLM_API_KEY"),
+            "timeout": int(self.env.get("TEST_LLM_TIMEOUT", "30")),
+            "max_tokens": int(self.env.get("TEST_LLM_MAX_TOKENS", "1000")),
+            "temperature": float(self.env.get("TEST_LLM_TEMPERATURE", "0.0"))
         }
     
     def configure(self, mode: Optional[LLMTestMode] = None, **kwargs):

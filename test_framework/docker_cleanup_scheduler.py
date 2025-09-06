@@ -157,8 +157,16 @@ class DockerCleanupScheduler:
         self._post_cleanup_callbacks: List[Callable[[List[CleanupResult]], None]] = []
         
         # State persistence
-        self.state_file = Path("/tmp/docker_cleanup_scheduler.json") if os.name != 'nt' else \
-                         Path(os.environ.get('TEMP', '.')) / "docker_cleanup_scheduler.json"
+        if os.name != 'nt':
+            self.state_file = Path("/tmp/docker_cleanup_scheduler.json")
+        else:
+            # Windows: use TEMP directory, with IsolatedEnvironment if available
+            try:
+                from shared.isolated_environment import get_env
+                temp_dir = get_env().get('TEMP', '.')
+            except ImportError:
+                temp_dir = os.environ.get('TEMP', '.')
+            self.state_file = Path(temp_dir) / "docker_cleanup_scheduler.json"
         
         self._load_state()
         logger.info("DockerCleanupScheduler initialized")
