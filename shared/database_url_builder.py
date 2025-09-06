@@ -199,7 +199,7 @@ class DatabaseURLBuilder:
             user = quote(user, safe='') if user else ""
             password_part = f":{quote(password, safe='')}" if password else ""
             return (
-                f"postgresql://"
+                f"postgresql+asyncpg://"
                 f"{user}{password_part}"
                 f"@/{database}"
                 f"?host={host}"
@@ -296,7 +296,7 @@ class DatabaseURLBuilder:
         
         @property
         def async_url(self) -> Optional[str]:
-            """Async URL for TCP connection without SSL - compatible with direct asyncpg usage."""
+            """Async URL for TCP connection without SSL - for SQLAlchemy with asyncpg."""
             if not self.has_config:
                 return None
             
@@ -307,7 +307,7 @@ class DatabaseURLBuilder:
             user = quote(self.parent.postgres_user or 'postgres', safe='')
             password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
-                f"postgresql://"
+                f"postgresql+asyncpg://"
                 f"{user}{password_part}"
                 f"@{resolved_host}"
                 f":{self.parent.postgres_port}"
@@ -412,12 +412,12 @@ class DatabaseURLBuilder:
         
         @property
         def auto_url(self) -> str:
-            """Auto-select best URL for development - returns direct asyncpg-compatible format."""
+            """Auto-select best URL for development - returns SQLAlchemy async format."""
             # DATABASE_URL takes priority if set
             if self.parent.database_url:
-                # Ensure correct format for direct asyncpg usage (not SQLAlchemy)
-                if self.parent.database_url.startswith("postgresql+asyncpg://"):
-                    return self.parent.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+                # Ensure correct format for SQLAlchemy async usage
+                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
+                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
                 return self.parent.database_url
             # Try TCP config if no DATABASE_URL
             if self.parent.tcp.has_config:
@@ -475,6 +475,9 @@ class DatabaseURLBuilder:
             """Auto-select best URL for test."""
             # PRIORITY 1: Explicit DATABASE_URL takes precedence for tests
             if self.parent.database_url:
+                # Ensure correct format for SQLAlchemy async usage
+                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
+                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
                 return self.parent.database_url
             # PRIORITY 2: Use memory if explicitly requested
             if self.parent.env.get("USE_MEMORY_DB") == "true":

@@ -899,33 +899,161 @@ class ConfigDependencyMap:
             "validation_required": "validation" in deps
         }
     
+    # Central mapping from environment variable names to config object attributes
+    ENV_TO_CONFIG_MAPPING: Dict[str, str] = {
+        # Database configuration
+        "DATABASE_URL": "database_url",
+        "POSTGRES_HOST": "postgres.host",  # Nested under postgres config
+        "POSTGRES_PORT": "postgres.port",
+        "POSTGRES_DB": "postgres.database",
+        "POSTGRES_USER": "postgres.username",
+        "POSTGRES_PASSWORD": "postgres.password",
+        
+        # Authentication configuration
+        "JWT_SECRET_KEY": "jwt_secret_key",
+        "SECRET_KEY": "secret_key",
+        "FERNET_KEY": "fernet_key",
+        "SERVICE_SECRET": "service_secret",
+        
+        # OAuth configuration
+        "AUTH_REDIRECT_URI": "oauth_config.redirect_uri",
+        "AUTH_CALLBACK_URL": "oauth_config.callback_url",
+        "OAUTH_REDIRECT_URI": "oauth_config.redirect_uri",
+        "OAUTH_CALLBACK_URL": "oauth_config.callback_url",
+        "GOOGLE_OAUTH_CLIENT_ID": "google_cloud.client_id",
+        "GOOGLE_OAUTH_CLIENT_SECRET": "google_cloud.client_secret",
+        
+        # Service URLs
+        "FRONTEND_URL": "frontend_url",
+        "BACKEND_URL": "backend_url", 
+        "AUTH_SERVICE_URL": "auth_service_url",
+        
+        # Redis configuration
+        "REDIS_HOST": "redis.host",
+        "REDIS_PORT": "redis.port",
+        "REDIS_PASSWORD": "redis.password",
+        
+        # Environment
+        "ENVIRONMENT": "environment",
+    }
+    
     @classmethod
-    def check_config_consistency(cls, configs: Dict[str, Any]) -> List[str]:
+    def _get_config_value(cls, config_obj: Any, path: str) -> Any:
+        """Get a value from config object using dot notation path.
+        
+        Args:
+            config_obj: The configuration object
+            path: Dot-separated path like "postgres.host"
+            
+        Returns:
+            The value at the path or None if not found
+        """
+        parts = path.split(".")
+        current = config_obj
+        
+        for part in parts:
+            if hasattr(current, part):
+                current = getattr(current, part)
+            elif isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                return None
+        
+        return current
+    
+    @classmethod
+    def _check_config_from_environment(cls, env: Dict[str, Any]) -> List[str]:
+        """Check configuration directly from environment variables.
+        
+        This is used during early validation before config object is fully populated.
+        
+        Args:
+            env: Dictionary of environment variables
+            
+        Returns:
+            List of warning/error messages
+        """
+        issues = []
+        
+        # Check for missing critical configs in environment
+        for env_key, deps in cls.CRITICAL_DEPENDENCIES.items():
+            if not deps.get("fallback_allowed", False):
+                if env_key not in env or not env.get(env_key):
+                    # Check if this can be auto-constructed from components
+                    if deps.get("auto_construct") and env_key == "DATABASE_URL":
+                        # Check if components are present
+                        components_present = all(
+                            env.get(comp) for comp in deps.get("replacement", [])
+                        )
+                        if not components_present:
+                            issues.append(f"Config dependency: CRITICAL: Missing required config {env_key}")
+                    else:
+                        issues.append(f"Config dependency: CRITICAL: Missing required config {env_key}")
+        
+        return issues
+    
+    @classmethod
+    def check_config_consistency(cls, configs: Any) -> List[str]:
         """
         Check for configuration inconsistencies and missing paired configs.
+        
+        This method now handles both environment variable checking (for early validation)
+        and config object checking (for post-initialization validation).
+        
+        Args:
+            configs: Either a dict of environment variables OR a config object
         
         Returns:
             List of warning/error messages
         """
         issues = []
         
-        # Check for missing critical configs
-        for key, deps in cls.CRITICAL_DEPENDENCIES.items():
-            if not deps.get("fallback_allowed", False) and key not in configs:
-                issues.append(f"CRITICAL: Missing required config {key}")
+        # Handle different input types
+        if isinstance(configs, dict):
+            # Determine if we're checking environment variables or a config dict
+            # If it looks like raw environment variables (all uppercase keys), check directly
+            sample_keys = list(configs.keys())[:5] if configs else []
+            if sample_keys and all(isinstance(k, str) and k.isupper() for k in sample_keys):
+                # This is environment variable checking
+                return cls._check_config_from_environment(configs)
+        
+        # Otherwise, check the config object using proper attribute mapping
+        for env_key, deps in cls.CRITICAL_DEPENDENCIES.items():
+            if not deps.get("fallback_allowed", False):
+                # Map environment variable name to config attribute path
+                config_path = cls.ENV_TO_CONFIG_MAPPING.get(env_key)
+                if config_path:
+                    # Check if value exists in config object
+                    value = cls._get_config_value(configs, config_path) if not isinstance(configs, dict) else configs.get(config_path)
+                    if not value:
+                        # Special handling for auto-constructable configs
+                        if deps.get("auto_construct") and env_key == "DATABASE_URL":
+                            # Check if components are present
+                            components_paths = [cls.ENV_TO_CONFIG_MAPPING.get(comp, comp.lower()) for comp in deps.get("replacement", [])]
+                            components_present = all(
+                                cls._get_config_value(configs, path) if not isinstance(configs, dict) else configs.get(path)
+                                for path in components_paths
+                            )
+                            if not components_present:
+                                issues.append(f"Config dependency: CRITICAL: Missing required config {env_key}")
+                        else:
+                            issues.append(f"Config dependency: CRITICAL: Missing required config {env_key}")
+                else:
+                    # No mapping found, check using original key (backward compatibility)
+                    if env_key not in configs:
+                        issues.append(f"Config dependency: CRITICAL: Missing required config {env_key}")
         
         # Check for paired configs
         for key, deps in {**cls.SERVICE_SPECIFIC_DEPENDENCIES}.items():
-            if key in configs and "paired_with" in deps:
+            config_path = cls.ENV_TO_CONFIG_MAPPING.get(key, key.lower())
+            value = cls._get_config_value(configs, config_path) if not isinstance(configs, dict) else configs.get(config_path)
+            
+            if value and "paired_with" in deps:
                 for paired_key in deps["paired_with"]:
-                    if paired_key not in configs:
+                    paired_path = cls.ENV_TO_CONFIG_MAPPING.get(paired_key, paired_key.lower())
+                    paired_value = cls._get_config_value(configs, paired_path) if not isinstance(configs, dict) else configs.get(paired_path)
+                    if not paired_value:
                         issues.append(f"WARNING: {key} is present but paired config {paired_key} is missing")
-        
-        # Validate existing configs
-        for key, value in configs.items():
-            is_valid, message = cls.validate_config_value(key, value)
-            if not is_valid:
-                issues.append(f"VALIDATION ERROR: {key} - {message}")
         
         return issues
     
