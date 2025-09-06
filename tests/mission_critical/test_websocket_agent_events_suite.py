@@ -1220,7 +1220,6 @@ class TestWebSocketChaosAndResilience:
             
             # Simulate random disconnections and recovery attempts
             async def chaos_test_single_connection(context, connection_id):
-    pass
                 try:
                     # Send initial message
                     initial_msg = {
@@ -1259,7 +1258,7 @@ class TestWebSocketChaosAndResilience:
                         }
                         await context.send_message(recovery_msg)
                         await asyncio.sleep(0)
-    return {"success": True, "reconnection_time": reconnection_time}
+                        return {"success": True, "reconnection_time": reconnection_time}
                     else:
                         return {"success": False, "reconnection_time": reconnection_time, 
                                "error": "Reconnection too slow"}
@@ -1461,7 +1460,6 @@ class TestConcurrentUserIsolation:
             
             # Test user isolation with unique data
             async def test_user_isolation(context, user_index):
-    pass
                 user_validator = MissionCriticalEventValidator()
                 unique_data = f"user_{user_index}_unique_data_{uuid.uuid4().hex[:8]}"
                 
@@ -1510,7 +1508,7 @@ class TestConcurrentUserIsolation:
                     )
                     
                     await asyncio.sleep(0)
-    return {
+                    return {
                         "user_index": user_index,
                         "user_id": context.user_context.user_id,
                         "unique_data": unique_data,
@@ -1598,7 +1596,6 @@ class TestConcurrentUserIsolation:
             
             # Test performance under concurrent load
             async def measure_user_performance(context, user_index):
-    pass
                 user_start = time.time()
                 events_processed = 0
                 
@@ -1628,7 +1625,7 @@ class TestConcurrentUserIsolation:
                     user_duration = time.time() - user_start
                     
                     await asyncio.sleep(0)
-    return {
+                    return {
                         "user_index": user_index,
                         "events_processed": events_processed,
                         "duration": user_duration,
@@ -1787,7 +1784,7 @@ class TestRealWebSocketPerformance:
                         break
                 
                 await asyncio.sleep(0)
-    return messages_sent
+                return messages_sent
             
             # Run stability tests concurrently
             start_time = time.time()
@@ -2315,7 +2312,7 @@ async def test_real_websocket_concurrent_users():
                     logger.warning(f"User {user_index} interaction failed: {e}")
                     
                 await asyncio.sleep(0)
-    return messages_sent
+                return messages_sent
             
             # Execute all user interactions concurrently
             tasks = [user_interaction(context, i) for i, context in enumerate(user_contexts)]
@@ -2607,7 +2604,7 @@ class TestEnhancedWebSocketScenarios:
                     await asyncio.sleep(0.001)
                 
                 await asyncio.sleep(0)
-    return {
+                return {
                     "connection_id": connection_id,
                     "status": "completed",
                     "events_sent": events_per_connection,
@@ -2726,7 +2723,7 @@ class TestEnhancedWebSocketScenarios:
                     await asyncio.sleep(0.002)  # Small delay for realistic timing
                 
                 await asyncio.sleep(0)
-    return {
+                return {
                     "user_id": user_id,
                     "status": "isolation_test_completed",
                     "events_sent": events_per_user,
@@ -2784,19 +2781,16 @@ if __name__ == "__main__":
     # Run the comprehensive mission critical REAL WebSocket tests
     import sys
     
-    print("
-" + "=" * 80)
+    print("\n" + "=" * 80)
     print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST SUITE - ENHANCED")
     print("COMPREHENSIVE VALIDATION OF ALL 5 REQUIRED EVENTS + ISOLATION")
     print("=" * 80)
-    print("
-Business Value: $500K+ ARR - Core chat functionality")
+    print()
+    print("Business Value: $500K+ ARR - Core chat functionality")
     print("Testing: Individual events, sequences, timing, chaos, concurrency, isolation")
     print("Requirements: Latency < 100ms, Reconnection < 3s, 10+ concurrent users")
     print("Enhanced Coverage: 250+ concurrent users, extreme isolation tests")
-    print("
-Running with REAL WebSocket connections (NO MOCKS)...
-")
+    print("\nRunning with REAL WebSocket connections (NO MOCKS)...\n")
     
     # Run all comprehensive tests
     pytest.main([

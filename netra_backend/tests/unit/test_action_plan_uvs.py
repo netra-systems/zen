@@ -31,10 +31,9 @@ class TestActionPlanUVS:
     
     @pytest.fixture
     def user_context(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create UserExecutionContext for testing"""
-    pass
         context = UserExecutionContext(
             user_id="test_user_uvs",
             thread_id="test_thread_uvs",
@@ -46,10 +45,9 @@ class TestActionPlanUVS:
     
     @pytest.fixture
     def builder(self):
-    """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance."""
+        # TODO: Initialize real service
         """Create UVS ActionPlanBuilder instance"""
-    pass
         return ActionPlanBuilderUVS()
     
     # ============= CORE UVS PRINCIPLE TESTS =============
@@ -234,7 +232,6 @@ class TestActionPlanUVS:
     @pytest.mark.asyncio
     async def test_partial_data_template_builds_on_available(self, builder, user_context):
         """Test that partial data template leverages what's available"""
-    pass
         test_context = UserExecutionContext(
             user_id="test",
             thread_id="test",
@@ -356,7 +353,6 @@ class TestActionPlanUVS:
     
     def test_ultimate_fallback_never_fails(self, builder):
         """Test that ultimate fallback ALWAYS produces a valid plan"""
-    pass
         # This should never throw an exception
         result = builder._get_ultimate_fallback_plan("Catastrophic failure")
         
@@ -402,7 +398,6 @@ class TestActionPlanUVS:
     @pytest.mark.asyncio
     async def test_backward_compatible_with_base_builder(self, builder):
         """Test that UVS builder maintains backward compatibility"""
-    pass
         # Should still support base process_llm_response
         with patch.object(builder.json_parser, 'ensure_agent_response_is_json', return_value={
             'action_plan_summary': 'Test plan',
@@ -433,7 +428,6 @@ class TestActionPlanUVS:
     @pytest.mark.asyncio
     async def test_end_to_end_no_data_scenario(self, builder):
         """Test complete flow with no data available"""
-    pass
         context = UserExecutionContext(
             user_id="e2e_test",
             thread_id="e2e_thread",
@@ -490,7 +484,7 @@ class TestActionPlanUVS:
             
             result = await builder.generate_adaptive_plan(context)
             await asyncio.sleep(0)
-    return result
+            return result
         
         # Run multiple concurrent generations
         results = await asyncio.gather(
@@ -512,4 +506,3 @@ class TestActionPlanUVS:
         data_states = [r.metadata.custom_fields.get('data_state') for r in results]
         assert DataState.INSUFFICIENT.value in data_states
         assert data_states.count(DataState.INSUFFICIENT.value) == 3  # users 2, 4, 5
-    pass

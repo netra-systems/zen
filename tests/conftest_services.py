@@ -239,8 +239,10 @@ async def memory_optimization_service():
     """
     if not _lazy_import_phase0():
         # Mock memory service
-        mock_service = Magic        mock_service.websocket = TestWebSocketConnection()
-        mock_service.get_memory_stats = Magic        mock_service.get_active_scopes_count = MagicMock(return_value=0)
+        mock_service = MagicMock()
+        mock_service.websocket = TestWebSocketConnection()
+        mock_service.get_memory_stats = MagicMock()
+        mock_service.get_active_scopes_count = MagicMock(return_value=0)
         mock_service.request_scope = asynccontextmanager(
             lambda request_id, user_id, **kwargs: Magic        )
         

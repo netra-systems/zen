@@ -25,7 +25,7 @@ import time
 import uuid
 from typing import List, Dict, Any, Optional
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path

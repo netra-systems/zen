@@ -62,7 +62,6 @@ class TestUnifiedDataAgentFactory:
         
     def test_factory_cleanup(self):
         """Test factory cleanup of agents."""
-    pass
         factory = UnifiedDataAgentFactory()
         
         context = UserExecutionContext(
