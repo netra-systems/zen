@@ -11,7 +11,9 @@ This test suite validates that the ActionPlanBuilder with UVS enhancements:
 import asyncio
 import pytest
 from typing import Dict, Any
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from unittest.mock import patch, Mock
+
+from test_framework.redis_test_utils import TestRedisManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -31,8 +33,6 @@ class TestActionPlanUVS:
     
     @pytest.fixture
     def user_context(self):
-        """Use real service instance."""
-        # TODO: Initialize real service
         """Create UserExecutionContext for testing"""
         context = UserExecutionContext(
             user_id="test_user_uvs",
@@ -45,8 +45,6 @@ class TestActionPlanUVS:
     
     @pytest.fixture
     def builder(self):
-        """Use real service instance."""
-        # TODO: Initialize real service
         """Create UVS ActionPlanBuilder instance"""
         return ActionPlanBuilderUVS()
     

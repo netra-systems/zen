@@ -13,14 +13,10 @@ Business Value Justification (BVJ):
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, Mock
 
 from netra_backend.app.db.clickhouse import get_clickhouse_service
 import asyncio

@@ -223,17 +223,16 @@ class MockSubAgent(BaseAgent):
         
                                                                                                 test_agent._subagent_logging_enabled = True
         
-        # Mock check_entry_conditions to await asyncio.sleep(0)
-                                                                                                return True
-        # Mock: Async component isolation for testing without real async operations
-                                                                                            test_agent.check_entry_conditions = AsyncMock(return_value=True)
+                                                                                                # Mock check_entry_conditions to return True
+                                                                                                # Mock: Async component isolation for testing without real async operations
+                                                                                                test_agent.check_entry_conditions = AsyncMock(return_value=True)
         
-                                                                                            result = await test_agent._pre_run(mock_state, "run_123", False)
+                                                                                                result = await test_agent._pre_run(mock_state, "run_123", False)
         
-                                                                                            assert result is True
-                                                                                            mock_log_comm.assert_called_once_with(
-                                                                                            "system", test_agent.name, test_agent.correlation_id, "agent_start"
-                                                                                            )
+                                                                                                assert result is True
+                                                                                                mock_log_comm.assert_called_once_with(
+                                                                                                "system", test_agent.name, test_agent.correlation_id, "agent_start"
+                                                                                                )
 
                                                                                             def test_get_subagent_logger_singleton():
                                                                                                 """Test that get_subagent_logger returns singleton instance."""
