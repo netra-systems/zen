@@ -62,13 +62,13 @@ class ServiceConfig:
 class GCPDeployer:
     """Manages deployment of services to Google Cloud Platform."""
     
-    def __init__(self, project_id: str, region: str = "us-central1", service_account_path: Optional[str] = None, use_alpine: bool = False):
+    def __init__(self, project_id: str, region: str = "us-central1", service_account_path: Optional[str] = None, use_alpine: bool = True):
         self.project_id = project_id
         self.region = region
         self.project_root = Path(__file__).parent.parent
         self.registry = f"gcr.io/{project_id}"
         self.service_account_path = service_account_path
-        self.use_alpine = use_alpine  # Flag for Alpine-optimized images
+        self.use_alpine = use_alpine  # Default to Alpine-optimized images for performance
         
         # Use gcloud.cmd on Windows
         self.gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
@@ -1836,8 +1836,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Skip post-deployment authentication tests")
     parser.add_argument("--no-traffic", action="store_true",
                        help="Deploy without routing traffic to the new revision (useful for testing)")
-    parser.add_argument("--alpine", action="store_true",
-                       help="Use Alpine-optimized Docker images (78% smaller, 3x faster, 68% cost reduction)")
+    parser.add_argument("--no-alpine", action="store_true",
+                       help="Use regular Docker images instead of Alpine (NOT RECOMMENDED - Alpine is default)")
     parser.add_argument("--skip-validation", action="store_true",
                        help="Skip deployment configuration validation (NOT RECOMMENDED - use only in emergencies)")
     
@@ -1849,15 +1849,18 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
         print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local\n".format(args.project))
         time.sleep(2)
     
-    # Print Alpine optimization info
-    if args.alpine:
-        print("\n🚀 Using Alpine-optimized images:")
+    # Alpine is now the default - print info unless disabled
+    use_alpine = not args.no_alpine  # Alpine is default unless explicitly disabled
+    if use_alpine:
+        print("\n🚀 Using Alpine-optimized images (default):")
         print("   • 78% smaller images (150MB vs 350MB)")
         print("   • 3x faster startup times")
         print("   • 68% cost reduction ($205/month vs $650/month)")
         print("   • Optimized resource limits (512MB RAM vs 2GB)\n")
+    else:
+        print("\n⚠️ Using regular images (not recommended - consider using Alpine for better performance)\n")
     
-    deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account, use_alpine=args.alpine)
+    deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account, use_alpine=use_alpine)
     
     try:
         if args.cleanup:

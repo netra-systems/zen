@@ -296,7 +296,7 @@ class UnifiedDockerManager:
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
                  mode: ServiceMode = ServiceMode.DOCKER,
-                 use_alpine: bool = False,  # Add Alpine container support
+                 use_alpine: bool = True,  # Default to Alpine container support for performance
                  rebuild_images: bool = True,  # Rebuild images by default for freshness
                  rebuild_backend_only: bool = True,  # Only rebuild backend by default
                  pull_policy: str = "missing",  # Docker pull policy: always, never, missing (default)
@@ -1133,6 +1133,84 @@ class UnifiedDockerManager:
         # For other compose files, use service name as-is
         return service
     
+    def _recreate_service(self, service_name: str, container_name: str) -> bool:
+        """Recreate a service container when restart fails."""
+        try:
+            # Remove the failed container
+            self.docker_rate_limiter.execute_docker_command(
+                ["docker", "rm", "-f", container_name],
+                timeout=5
+            )
+            
+            # Recreate using docker-compose
+            compose_file = self._get_compose_file()
+            env = os.environ.copy()
+            env.update(self._get_service_environment_variables())
+            
+            recreate_result = self.docker_rate_limiter.execute_docker_command(
+                ["docker-compose", "-f", compose_file, "-p", self._get_project_name(),
+                 "up", "-d", "--force-recreate", service_name],
+                env=env,
+                timeout=30
+            )
+            
+            if recreate_result.returncode == 0:
+                logger.info(f"✅ Recreated {service_name}")
+                return True
+            else:
+                logger.error(f"Failed to recreate {service_name}: {recreate_result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"Error recreating {service_name}: {e}")
+            return False
+    
+    def _create_service(self, service_name: str) -> bool:
+        """Create a new service container."""
+        try:
+            compose_file = self._get_compose_file()
+            env = os.environ.copy()
+            env.update(self._get_service_environment_variables())
+            
+            create_result = self.docker_rate_limiter.execute_docker_command(
+                ["docker-compose", "-f", compose_file, "-p", self._get_project_name(),
+                 "up", "-d", service_name],
+                env=env,
+                timeout=30
+            )
+            
+            if create_result.returncode == 0:
+                logger.info(f"✅ Created {service_name}")
+                return True
+            else:
+                logger.error(f"Failed to create {service_name}: {create_result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"Error creating {service_name}: {e}")
+            return False
+    
+    def _get_service_environment_variables(self) -> Dict[str, str]:
+        """Get environment variables needed for services."""
+        env_vars = {}
+        
+        # Add database configuration
+        env_vars['POSTGRES_USER'] = 'netra_user'
+        env_vars['POSTGRES_PASSWORD'] = 'netra_password'
+        env_vars['POSTGRES_DB'] = 'netra_db'
+        
+        # Add test/dev specific ports based on environment
+        if self.environment_type == EnvironmentType.TEST:
+            env_vars['POSTGRES_PORT'] = '5434'
+            env_vars['REDIS_PORT'] = '6381'
+            env_vars['BACKEND_PORT'] = '8000'
+            env_vars['AUTH_PORT'] = '8081'
+        else:
+            env_vars['POSTGRES_PORT'] = '5432'
+            env_vars['REDIS_PORT'] = '6379'
+            env_vars['BACKEND_PORT'] = '8000'
+            env_vars['AUTH_PORT'] = '8081'
+        
+        return env_vars
+    
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
         # SSOT Docker Configuration - NO FALLBACKS
@@ -1815,15 +1893,54 @@ class UnifiedDockerManager:
             
             # Perform restart - try to find actual container name
             container_name = self._get_actual_container_name(env_name, service_name)
-            if not container_name:
-                logger.error(f"❌ Could not find container for service {service_name}")
-                return False
             
-            cmd = ["docker", "restart", container_name]
-            
-            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
-            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
-            success = result.returncode == 0
+            if container_name:
+                logger.info(f"🔄 Restarting {service_name} (container: {container_name})")
+                
+                # Try graceful restart with improved recovery logic
+                # First, try a simple restart command
+                restart_result = self.docker_rate_limiter.execute_docker_command(
+                    ["docker", "restart", "-t", "10", container_name],
+                    timeout=20
+                )
+                
+                success = restart_result.returncode == 0
+                
+                # If simple restart fails, try stop/start sequence
+                if not success:
+                    logger.warning(f"Simple restart failed for {service_name}, trying stop/start sequence...")
+                    
+                    # Stop with grace period
+                    stop_result = self.docker_rate_limiter.execute_docker_command(
+                        ["docker", "stop", "-t", "5", container_name],
+                        timeout=10
+                    )
+                    
+                    if stop_result.returncode != 0:
+                        logger.warning(f"Graceful stop failed, forcing...")
+                        self.docker_rate_limiter.execute_docker_command(
+                            ["docker", "kill", container_name],
+                            timeout=5
+                        )
+                    
+                    # Brief pause
+                    time.sleep(1)
+                    
+                    # Start the container
+                    start_result = self.docker_rate_limiter.execute_docker_command(
+                        ["docker", "start", container_name],
+                        timeout=10
+                    )
+                    
+                    success = start_result.returncode == 0
+                    
+                    # If still failing, try recreate
+                    if not success:
+                        logger.warning(f"Start failed for {service_name}, attempting recreate...")
+                        success = self._recreate_service(service_name, container_name)
+            else:
+                logger.warning(f"Container for {service_name} not found, attempting to create...")
+                success = self._create_service(service_name)
             
             # Update status
             state = self._load_state()
@@ -1869,8 +1986,14 @@ class UnifiedDockerManager:
         
         logger.info(f"⏳ Waiting for services to become healthy: {', '.join(services)}")
         
+        unhealthy_services = {}
+        restart_attempts = {}
+        max_restart_attempts = 2
+        last_status_print = 0
+        
         while time.time() - start_time < timeout:
             all_healthy = True
+            current_unhealthy = []
             
             # Monitor memory periodically during health checks
             if int(time.time() - start_time) % 10 == 0:  # Every 10 seconds
@@ -1878,10 +2001,31 @@ class UnifiedDockerManager:
                 if memory_snapshot and memory_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
                     logger.error("🚨 Emergency memory condition during health check - may cause failures")
             
+            # Check each service
             for service in services:
-                if not self._is_service_healthy(env_name, service):
+                is_healthy = self._is_service_healthy(env_name, service)
+                
+                if not is_healthy:
                     all_healthy = False
-                    break
+                    current_unhealthy.append(service)
+                    
+                    # Track unhealthy duration
+                    if service not in unhealthy_services:
+                        unhealthy_services[service] = time.time()
+                        logger.warning(f"⚠️ Service {service} is unhealthy")
+                else:
+                    # Service recovered
+                    if service in unhealthy_services:
+                        duration = time.time() - unhealthy_services[service]
+                        logger.info(f"✅ Service {service} recovered after {duration:.1f}s")
+                        unhealthy_services.pop(service, None)
+                        restart_attempts.pop(service, None)
+            
+            # Print status periodically
+            if time.time() - last_status_print > 5:
+                if current_unhealthy:
+                    logger.info(f"Waiting for services: {', '.join(current_unhealthy)}")
+                last_status_print = time.time()
             
             if all_healthy:
                 # Final memory check when all services are healthy
@@ -1890,6 +2034,25 @@ class UnifiedDockerManager:
                     logger.info(f"✅ All services healthy - Memory: {final_snapshot.system_memory.percentage:.1f}% "
                               f"({int(final_snapshot.docker_containers.current_usage)} containers)")
                 return True
+            
+            # Intelligent restart for persistently unhealthy services
+            for service in current_unhealthy:
+                if service in unhealthy_services:
+                    unhealthy_duration = time.time() - unhealthy_services[service]
+                    restart_count = restart_attempts.get(service, 0)
+                    
+                    # Restart if unhealthy for 15+ seconds and haven't exceeded max attempts
+                    if unhealthy_duration > 15 and restart_count < max_restart_attempts:
+                        # Only restart every 20 seconds to avoid restart storms
+                        if int(unhealthy_duration) % 20 == 15:
+                            logger.warning(f"🔄 Auto-restarting unhealthy {service} (attempt {restart_count + 1}/{max_restart_attempts})")
+                            
+                            if self.restart_service(service, force=True):
+                                restart_attempts[service] = restart_count + 1
+                                # Give service time to start
+                                time.sleep(5)
+                            else:
+                                logger.error(f"❌ Failed to restart {service}")
             
             time.sleep(2)
         

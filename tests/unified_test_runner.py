@@ -215,19 +215,19 @@ except ImportError:
     SafePortAllocator = None
     
 try:
-    from test_framework.unified_container_manager import (
-        UnifiedContainerManager, ContainerManagerMode
-    )
     from test_framework.unified_docker_manager import (
-        EnvironmentType, ServiceStatus
+        UnifiedDockerManager,
+        EnvironmentType, 
+        ServiceStatus,
+        ServiceMode
     )
     CENTRALIZED_DOCKER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_DOCKER_AVAILABLE = False
-    UnifiedContainerManager = None
-    ContainerManagerMode = None
+    UnifiedDockerManager = None
     EnvironmentType = None
     ServiceStatus = None
+    ServiceMode = None
 
 
 class UnifiedTestRunner:
@@ -592,7 +592,6 @@ class UnifiedTestRunner:
             print("[INFO] Using Podman runtime for container management")
         else:
             # Use Docker (existing UnifiedDockerManager)
-            from test_framework.unified_docker_manager import UnifiedDockerManager
             self.docker_manager = UnifiedDockerManager(
                 environment_type=env_type,
                 test_id=f"test_run_{int(time.time())}_{os.getpid()}",
@@ -635,23 +634,163 @@ class UnifiedTestRunner:
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print("\nSome services failed health checks. To fix:")
-            print("\nTo manually manage Docker services:")
-            print("  python scripts/docker.py start     # Start services")
-            print("  python scripts/docker.py status    # Check status")
-            print("  python scripts/docker.py help      # Get help\n")
+            # SSOT: Use UnifiedDockerManager's recovery mechanisms instead of manual scripts
+            print(f"\n⚠️ Docker initialization encountered an issue: {str(e)}")
+            print("\n🔄 Attempting graceful recovery with exponential backoff...")
+            
+            # Try recovery with exponential backoff
+            recovery_attempts = 3
+            backoff_seconds = [2, 5, 10]  # Exponential backoff
+            
+            for attempt in range(recovery_attempts):
+                print(f"\n  Attempt {attempt + 1}/{recovery_attempts}...")
+                time.sleep(backoff_seconds[attempt])
+                
+                try:
+                    # Check if containers exist but are unhealthy
+                    existing_containers = self.docker_manager._detect_existing_netra_containers()
+                    if existing_containers:
+                        print(f"  Found {len(existing_containers)} existing containers")
+                        
+                        # Try to restart unhealthy services
+                        print("  Attempting to restart unhealthy services...")
+                        for service in existing_containers.keys():
+                            try:
+                                self.docker_manager.restart_service(service)
+                            except Exception as restart_err:
+                                print(f"    Warning: Could not restart {service}: {restart_err}")
+                        
+                        # Wait for services with longer timeout
+                        print(f"  Waiting up to {30 + attempt * 10}s for services to become healthy...")
+                        if self.docker_manager.wait_for_services(timeout=30 + attempt * 10):
+                            print("\n✅ Docker services recovered successfully!")
+                            return  # Recovery successful
+                    
+                    # If no containers exist, try to start fresh
+                    else:
+                        print("  No existing containers found, attempting fresh start...")
+                        
+                        # Clean up any stale resources first
+                        try:
+                            self.docker_manager.cleanup_stale_resources()
+                        except Exception:
+                            pass  # Ignore cleanup errors
+                        
+                        # Try to start services again
+                        if env_type == "test":
+                            success = self.docker_manager.start_test_environment(
+                                use_alpine=use_alpine,
+                                rebuild=rebuild_images
+                            )
+                        else:
+                            success = self.docker_manager.start_dev_environment(
+                                rebuild=rebuild_images
+                            )
+                        
+                        if success:
+                            print("\n✅ Docker services started successfully on retry!")
+                            return  # Recovery successful
+                            
+                except Exception as recovery_err:
+                    print(f"    Recovery attempt failed: {recovery_err}")
+                    if attempt < recovery_attempts - 1:
+                        print(f"    Will retry in {backoff_seconds[attempt + 1]} seconds...")
+            
+            # All recovery attempts failed
+            print("\n" + "="*60)
+            print("❌ DOCKER RECOVERY FAILED")
+            print("="*60)
+            
+            # Provide diagnostic information
+            print("\n📊 Diagnostic Information:")
+            try:
+                # Check Docker daemon status
+                daemon_check = subprocess.run(
+                    ["docker", "version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if daemon_check.returncode != 0:
+                    print("  ❌ Docker daemon is not running or not accessible")
+                    print("     Please ensure Docker Desktop is running")
+                else:
+                    print("  ✅ Docker daemon is running")
+                    
+                    # Check for port conflicts
+                    port_conflicts = self._check_port_conflicts()
+                    if port_conflicts:
+                        print(f"  ⚠️ Port conflicts detected: {port_conflicts}")
+                        print("     Another application may be using required ports")
+                    
+                    # Check Docker resources
+                    resource_check = subprocess.run(
+                        ["docker", "system", "df"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if "100%" in resource_check.stdout:
+                        print("  ⚠️ Docker disk space may be full")
+                        print("     Run: docker system prune -a")
+                        
+            except Exception:
+                pass  # Ignore diagnostic errors
+            
+            print("\n🔧 Manual Recovery Options:")
+            print("  1. Restart Docker Desktop")
+            print("  2. Clean Docker resources: docker system prune -a")
+            print("  3. Check for port conflicts on 5432, 6379, 8000, 8081")
+            print("  4. Review logs: docker-compose logs")
             
             if running_e2e or args.real_services:
-                raise  # Re-raise for E2E/real service testing
+                raise RuntimeError(f"Docker services required but could not be started after {recovery_attempts} attempts")  # Re-raise for E2E/real service testing
                 
-            # Fall back to port discovery
+            # Fall back to port discovery for non-critical tests
             self.docker_manager = None
             self.docker_environment = None
             self.docker_ports = None
-            print("[WARNING] Docker initialization failed, continuing without Docker management")
-            # Continue without Docker - tests will use existing services if available
+            print("\n[WARNING] Continuing without Docker management for non-critical tests")
+            print("[INFO] Tests will attempt to use any existing services if available")
     
 
+    def _check_port_conflicts(self) -> List[int]:
+        """Check for port conflicts on required ports."""
+        import socket
+        conflicted_ports = []
+        required_ports = {
+            "postgres": [5432, 5434],
+            "redis": [6379, 6381],
+            "backend": [8000],
+            "auth": [8081]
+        }
+        
+        for service, ports in required_ports.items():
+            for port in ports:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    result = sock.connect_ex(('localhost', port))
+                    if result == 0:
+                        # Port is in use, check if it's our container
+                        check_cmd = subprocess.run(
+                            ["docker", "ps", "--filter", f"publish={port}", "--format", "{{.Names}}"],
+                            capture_output=True,
+                            text=True,
+                            timeout=2
+                        )
+                        if check_cmd.returncode == 0 and check_cmd.stdout.strip():
+                            # It's a Docker container, likely ours
+                            continue
+                        else:
+                            # Port is used by something else
+                            conflicted_ports.append(port)
+                except Exception:
+                    pass
+                finally:
+                    sock.close()
+        
+        return conflicted_ports
+    
     def cleanup_test_environment(self):
         """Comprehensive cleanup of test environment to prevent Docker resource accumulation.
         

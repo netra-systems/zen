@@ -431,15 +431,27 @@ python scripts/docker_manual.py restart --services backend auth
 
 The platform supports Alpine-based containers for dramatic performance improvements:
 
+**DEFAULT BEHAVIOR (as of current implementation):**
+- **Alpine containers**: Enabled by default for all test runs
+- **Image rebuilding**: Enabled by default to ensure fresh images
+- **Graceful startup**: Automatically reuses healthy containers when available
+- **Memory pre-flight checks**: Performed before starting services
+
 **Usage Examples:**
 
 ```bash
-# Enable Alpine containers for tests (DEFAULT behavior)
+# Default behavior - Alpine containers with rebuild
 python tests/unified_test_runner.py --real-services
-# Alpine automatically used via use_alpine=True
+# Automatically uses: use_alpine=True, rebuild_images=True
 
-# Force regular containers (if needed)
+# Disable Alpine (use regular containers)
 python tests/unified_test_runner.py --real-services --no-alpine
+
+# Disable image rebuilding (use cached images)
+python tests/unified_test_runner.py --real-services --no-rebuild
+
+# Rebuild all services (not just backend)
+python tests/unified_test_runner.py --real-services --rebuild-all
 
 # Manual Docker operations with Alpine
 python scripts/docker_manual.py start --alpine

@@ -30,22 +30,22 @@ def test_alpine_parameter_functionality():
     assert manager_alpine.use_alpine is True, f"Expected True, got {manager_alpine.use_alpine}"
     print("   ✅ Alpine parameter accepted and stored correctly")
     
-    # Test 2: Default value
+    # Test 2: Default value (Alpine is now default)
     print("2. Testing default value...")
     manager_default = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
     assert hasattr(manager_default, 'use_alpine'), "use_alpine attribute missing on default"
-    assert manager_default.use_alpine is False, f"Expected False default, got {manager_default.use_alpine}"
-    print("   ✅ Default value (False) working correctly")
+    assert manager_default.use_alpine is True, f"Expected True default (Alpine), got {manager_default.use_alpine}"
+    print("   ✅ Default value (True for Alpine) working correctly")
     
-    # Test 3: Compose file selection
+    # Test 3: Compose file selection (both should be Alpine since it's default)
     print("3. Testing compose file selection...")
     alpine_compose = manager_alpine._get_compose_file()
-    regular_compose = manager_default._get_compose_file()
+    default_compose = manager_default._get_compose_file()
     
     assert "alpine" in alpine_compose.lower(), f"Alpine compose should contain 'alpine': {alpine_compose}"
-    assert "alpine" not in regular_compose.lower(), f"Regular compose should not contain 'alpine': {regular_compose}"
+    assert "alpine" in default_compose.lower(), f"Default compose should also contain 'alpine' (Alpine is default): {default_compose}"
     print(f"   ✅ Alpine compose file: {alpine_compose}")
-    print(f"   ✅ Regular compose file: {regular_compose}")
+    print(f"   ✅ Default compose file (also Alpine): {default_compose}")
     
     # Test 4: Project name differentiation
     print("4. Testing project name isolation...")
