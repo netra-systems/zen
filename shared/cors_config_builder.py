@@ -269,7 +269,11 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
                 "Origin",
                 "Referer",
                 "X-Requested-With",
-                "X-Service-Name"
+                "X-Service-Name",
+                "X-Test-Type",
+                "X-Test-Environment",
+                "X-Test-Session",
+                "User-Agent"
             ]
         
         @property
