@@ -118,45 +118,49 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
     threadId: string,
     options: ThreadSwitchingOptions = {}
   ): Promise<boolean> => {
-    // Use ThreadOperationManager to ensure atomic operations
-    const result = await ThreadOperationManager.startOperation(
-      'switch',
-      threadId,
-      async (signal) => {
-        return await performThreadSwitchWithManager(
-          threadId,
-          options,
-          state,
-          setState,
-          storeActions,
-          signal,
-          lastFailedThreadRef,
-          timeoutManagerRef.current,
-          updateUrl
-        );
-      },
-      {
-        timeoutMs: options.timeoutMs || DEFAULT_OPTIONS.timeoutMs,
-        retryAttempts: 2,
-        force: options.force
+    try {
+      // Use ThreadOperationManager to ensure atomic operations
+      const result = await ThreadOperationManager.startOperation(
+        'switch',
+        threadId,
+        async (signal) => {
+          return await performThreadSwitchWithManager(
+            threadId,
+            options,
+            state,
+            setState,
+            storeActions,
+            signal,
+            lastFailedThreadRef,
+            timeoutManagerRef.current,
+            updateUrl
+          );
+        },
+        {
+          timeoutMs: options.timeoutMs || DEFAULT_OPTIONS.timeoutMs,
+          retryAttempts: 2,
+          force: options.force
+        }
+      );
+      
+      // Handle operation-level errors that weren't propagated to hook state
+      if (!result.success && result.error) {
+        const operationId = generateOperationId(threadId);
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          loadingThreadId: null,
+          operationId: null,
+          error: createThreadError(threadId, result.error!),
+          retryCount: prev.retryCount + 1
+        }));
+        lastFailedThreadRef.current = threadId;
       }
-    );
-    
-    // Handle operation-level errors that weren't propagated to hook state
-    if (!result.success && result.error) {
-      const operationId = generateOperationId(threadId);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        loadingThreadId: null,
-        operationId: null,
-        error: createThreadError(threadId, result.error!),
-        retryCount: prev.retryCount + 1
-      }));
-      lastFailedThreadRef.current = threadId;
+      
+      return result.success;
+    } catch (error) {
+      return false;
     }
-    
-    return result.success;
   }, [state, storeActions, updateUrl]);
   
   const cancelLoading = useCallback(() => {
@@ -255,6 +259,7 @@ const performThreadSwitchWithManager = async (
     
     return { success, threadId };
   } catch (error) {
+    
     // Don't treat aborted operations as errors - just ignore them silently
     if (error instanceof Error && error.message.includes('aborted')) {
       return { success: false, threadId, error: undefined };

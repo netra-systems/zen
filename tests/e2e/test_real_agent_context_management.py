@@ -162,11 +162,23 @@ class RealAgentContextManagementTester:
         email = user_data['email']
         
         # Generate JWT with context isolation permissions
-        token = self.jwt_helper.create_access_token(
-            user_id, 
-            email,
-            permissions=["agents:use", "context:isolate", "session:manage"]
-        )
+        # Use staging-specific token generation if in staging environment
+        if hasattr(self.config, 'environment') and self.config.environment == 'staging':
+            # Try to get staging token
+            token = await self.jwt_helper.get_staging_jwt_token(user_id, email)
+            if not token:
+                # Fall back to standard token creation
+                token = self.jwt_helper.create_access_token(
+                    user_id, 
+                    email,
+                    permissions=["agents:use", "context:isolate", "session:manage"]
+                )
+        else:
+            token = self.jwt_helper.create_access_token(
+                user_id, 
+                email,
+                permissions=["agents:use", "context:isolate", "session:manage"]
+            )
         
         # Create WebSocket connection from SSOT config
         ws_url = self.config.websocket_url

@@ -143,21 +143,30 @@ describe('Thread Switching Basic Tests', () => {
 
     const { result } = renderHook(() => useThreadSwitching());
 
-    // Start first switch
-    act(() => {
+    // Start first switch and wait for loading state
+    await act(async () => {
       result.current.switchToThread('thread-1');
+      // Give operation a chance to start
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(result.current.state.isLoading).toBe(true);
-    expect(result.current.state.loadingThreadId).toBe('thread-1');
+    // Wait for loading state to be set
+    await waitFor(() => {
+      expect(result.current.state.isLoading).toBe(true);
+      expect(result.current.state.loadingThreadId).toBe('thread-1');
+    });
 
     // Try second switch while first is loading - this should cancel the first
     await act(async () => {
       result.current.switchToThread('thread-2');
+      // Give operation a chance to start
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    // The loading thread should now be thread-2 
-    expect(result.current.state.loadingThreadId).toBe('thread-2');
+    // Wait for the loading thread to change to thread-2 
+    await waitFor(() => {
+      expect(result.current.state.loadingThreadId).toBe('thread-2');
+    });
 
     // Resolve the second switch
     await act(async () => {
@@ -172,8 +181,10 @@ describe('Thread Switching Basic Tests', () => {
     });
 
     // Should end up on thread-2
-    expect(result.current.state.lastLoadedThreadId).toBe('thread-2');
-    expect(useUnifiedChatStore.getState().activeThreadId).toBe('thread-2');
+    await waitFor(() => {
+      expect(result.current.state.lastLoadedThreadId).toBe('thread-2');
+      expect(useUnifiedChatStore.getState().activeThreadId).toBe('thread-2');
+    });
   });
 
   it('should clear messages when requested', async () => {

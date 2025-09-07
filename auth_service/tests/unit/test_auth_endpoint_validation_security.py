@@ -12,7 +12,6 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from auth_service.auth_core.routes.auth_routes import router as auth_router
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

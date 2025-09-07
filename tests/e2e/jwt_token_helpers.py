@@ -230,6 +230,52 @@ class JWTTestHelper:
                 pass
         return None
     
+    async def get_staging_jwt_token(self, user_id: str = None, email: str = None) -> Optional[str]:
+        """Get valid JWT token for staging environment.
+        
+        Attempts multiple strategies:
+        1. Use E2E bypass key if available
+        2. Use staging test API key if available
+        3. Fall back to properly formatted test token
+        """
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        
+        # Strategy 1: Try E2E bypass key for staging
+        bypass_key = env.get("E2E_BYPASS_KEY")
+        if bypass_key:
+            # Create token with bypass key as secret
+            payload = self.create_valid_payload()
+            if user_id:
+                payload[JWTConstants.SUBJECT] = user_id
+            if email:
+                payload[JWTConstants.EMAIL] = email
+            return self.create_token(payload, bypass_key)
+        
+        # Strategy 2: Try staging test API key
+        staging_api_key = env.get("STAGING_TEST_API_KEY")
+        if staging_api_key:
+            # Use API key as bearer token directly
+            return staging_api_key
+        
+        # Strategy 3: Try to get staging JWT secret from environment
+        staging_jwt_secret = env.get("STAGING_JWT_SECRET")
+        if staging_jwt_secret:
+            payload = self.create_valid_payload()
+            if user_id:
+                payload[JWTConstants.SUBJECT] = user_id
+            if email:
+                payload[JWTConstants.EMAIL] = email
+            return self.create_token(payload, staging_jwt_secret)
+        
+        # Strategy 4: Fall back to test token (will likely fail but worth trying)
+        payload = self.create_valid_payload()
+        if user_id:
+            payload[JWTConstants.SUBJECT] = user_id
+        if email:
+            payload[JWTConstants.EMAIL] = email
+        return self.create_token(payload)
+    
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
         """Test WebSocket connection with token."""
         try:

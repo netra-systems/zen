@@ -1,5 +1,0 @@
-ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]
-__main__.py: error: unrecognized arguments: --env staging
-  inifile: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini
-  rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-

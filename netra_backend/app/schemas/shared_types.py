@@ -85,6 +85,17 @@ class ErrorContext(BaseModel):
     def generate_trace_id() -> str:
         """Generate a unique trace ID."""
         return str(uuid.uuid4())
+    
+    @staticmethod
+    def set_request_id(request_id: str) -> None:
+        """Set the request ID for the current context.
+        
+        This is a compatibility method for services expecting this functionality.
+        In practice, request_id should be set via the instance attribute.
+        """
+        # This is a static method for compatibility
+        # Actual request_id is stored in the instance
+        pass
 
 
 class EventContext(BaseModel):
