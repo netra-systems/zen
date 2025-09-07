@@ -14,7 +14,7 @@ Business Value:
 from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
-    get_websocket_manager,
+    # SECURITY FIX: get_websocket_manager removed - caused multi-user data leakage
 )
 
 from netra_backend.app.websocket_core.unified_emitter import (

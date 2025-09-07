@@ -28,7 +28,8 @@ from netra_backend.app.error_handling import (
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.websocket_core import get_websocket_manager as get_manager
+# SECURITY FIX: Use factory pattern instead of singleton
+from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 
 logger = central_logger.get_logger(__name__)
 
@@ -66,9 +67,40 @@ class ExampleMessageHandler:
     """Handles example message processing workflow"""
     
     def __init__(self):
-        self.ws_manager = get_manager()
+        # SECURITY FIX: Use factory pattern for per-user WebSocket isolation
+        self.websocket_factory = WebSocketBridgeFactory()
         self.supervisor = get_example_message_supervisor()
         self.active_sessions: Dict[str, Dict[str, Any]] = {}
+        # Cache for user emitters (cleared on session end)
+        self._user_emitters: Dict[str, Any] = {}
+        
+    async def _get_user_emitter(self, user_id: str, message_id: str):
+        """Get or create per-user WebSocket emitter with complete isolation."""
+        if user_id not in self._user_emitters:
+            try:
+                # Create isolated WebSocket emitter for this specific user
+                thread_id = f"example_msg_{message_id}"
+                connection_id = f"conn_{user_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+                
+                emitter = await self.websocket_factory.create_user_emitter(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    connection_id=connection_id
+                )
+                
+                self._user_emitters[user_id] = emitter
+                logger.debug(f"Created isolated WebSocket emitter for user {user_id}")
+                
+            except Exception as e:
+                logger.warning(f"Failed to create WebSocket emitter for user {user_id}: {e}")
+                # Create fallback emitter that logs instead of failing
+                class FallbackEmitter:
+                    async def send_message(self, message):
+                        logger.info(f"WebSocket message for {user_id}: {message}")
+                
+                self._user_emitters[user_id] = FallbackEmitter()
+        
+        return self._user_emitters[user_id]
         
     async def handle_example_message(self, raw_message: Dict[str, Any]) -> ExampleMessageResponse:
         """Main handler for example messages"""
@@ -599,7 +631,9 @@ class ExampleMessageHandler:
             }
         }
         
-        await self.ws_manager.send_message_to_user(user_id, update_message)
+        # SECURITY FIX: Use isolated per-user emitter
+        emitter = await self._get_user_emitter(user_id, message_id)
+        await emitter.send_message(update_message)
 
     async def _send_processing_notification(
         self, 
@@ -640,7 +674,9 @@ class ExampleMessageHandler:
             }
         }
         
-        await self.ws_manager.send_message_to_user(user_id, completion_message)
+        # SECURITY FIX: Use isolated per-user emitter  
+        emitter = await self._get_user_emitter(user_id, message_id)
+        await emitter.send_message(completion_message)
 
     async def _send_error_notification(
         self, 
@@ -662,7 +698,9 @@ class ExampleMessageHandler:
             }
         }
         
-        await self.ws_manager.send_message_to_user(user_id, error_message)
+        # SECURITY FIX: Use isolated per-user emitter
+        emitter = await self._get_user_emitter(user_id, message_id or "error") 
+        await emitter.send_message(error_message)
 
     def _generate_business_insights(
         self, 

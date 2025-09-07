@@ -1682,26 +1682,32 @@ class UnifiedWebSocketManager:
 
 
 # SECURITY FIX: Replace singleton with factory pattern
-# Global instance removed to prevent multi-user data leakage
-# Use create_websocket_manager(user_context) instead
-
-# TEMPORARY: Global singleton for staging deployment only
-_temporary_singleton_manager = None
+# 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
+# Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
-    🚨 SECURITY DEPRECATED: This function is DEPRECATED and UNSAFE.
+    🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
     
-    This function has been DISABLED because it creates critical security vulnerabilities
-    in multi-user environments, causing user data leakage and authentication bypass.
+    This function created critical security vulnerabilities in multi-user environments,
+    causing user data leakage and authentication bypass.
     
-    REQUIRED MIGRATION:
-    - For authenticated WebSocket connections: Use create_websocket_manager(user_context)
-    - For factory patterns: Use WebSocketManagerFactory
-    - For testing: Create dedicated test instances with proper user context
+    REQUIRED MIGRATION (choose one):
+    1. For per-user WebSocket events: Use WebSocketBridgeFactory.create_user_emitter()
+    2. For authenticated connections: Use create_websocket_manager(user_context)
+    3. For testing: Create dedicated test instances with proper user context
     
-    SECURITY ISSUE: This function was creating shared state between users,
-    allowing User A to see User B's messages and data.
+    Example migration:
+    ```python
+    # OLD (UNSAFE):
+    manager = get_websocket_manager()
+    
+    # NEW (SAFE):
+    factory = WebSocketBridgeFactory()
+    emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
+    ```
+    
+    This function was causing User A to see User B's messages.
     """
     from netra_backend.app.logging_config import central_logger
     import inspect
@@ -1714,31 +1720,12 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     if frame and frame.f_back:
         caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
     
-    # Log warning about deprecated usage
-    warning_message = (
-        f"⚠️ SECURITY WARNING: get_websocket_manager() is DEPRECATED and UNSAFE. "
+    error_message = (
+        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been REMOVED for security. "
         f"Called from: {caller_info}. "
-        f"This creates multi-user security vulnerabilities. "
-        f"Migrate to create_websocket_manager(user_context) ASAP."
+        f"This function caused USER DATA LEAKAGE between different users. "
+        f"Migrate to WebSocketBridgeFactory or create_websocket_manager(user_context)."
     )
     
-    logger.warning(warning_message)
-    
-    # TEMPORARY: Allow in staging/dev/test environments only
-    import os
-    env = os.environ.get('ENV', 'dev')
-    if env not in ['staging', 'dev', 'test']:
-        error_message = (
-            f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() is DISABLED in {env}. "
-            f"This function causes USER DATA LEAKAGE between different users."
-        )
-        logger.critical(error_message)
-        raise RuntimeError(error_message)
-    
-    # Return a singleton instance (UNSAFE - TEMPORARY FOR STAGING)
-    global _temporary_singleton_manager
-    if _temporary_singleton_manager is None:
-        logger.warning("Creating TEMPORARY singleton WebSocket manager - THIS IS UNSAFE FOR PRODUCTION")
-        _temporary_singleton_manager = UnifiedWebSocketManager()
-    
-    return _temporary_singleton_manager
+    logger.critical(error_message)
+    raise RuntimeError(error_message)

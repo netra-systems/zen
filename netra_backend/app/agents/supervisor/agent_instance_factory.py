@@ -472,6 +472,32 @@ class AgentInstanceFactory:
         logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
         logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
     
+    def _agent_name_matches_class(self, agent_name: str, class_name: str) -> bool:
+        """
+        Check if an agent name matches a class name using flexible matching.
+        
+        Handles cases like:
+        - "optimization_core" matches "OptimizationsCoreSubAgent"
+        - "data" matches "DataSubAgent" 
+        """
+        # Normalize both names: lowercase, remove underscores, remove common suffixes
+        def normalize(name: str) -> str:
+            return name.lower().replace('_', '').replace('subagent', '').replace('agent', '')
+        
+        normalized_agent = normalize(agent_name)
+        normalized_class = normalize(class_name)
+        
+        # Try different matching strategies
+        return (
+            normalized_agent == normalized_class or
+            normalized_agent in normalized_class or  
+            normalized_class in normalized_agent or
+            # Handle "optimizations" vs "optimization" case
+            normalized_agent.replace('s', '') == normalized_class.replace('s', '') or
+            # Handle common word variations
+            any(word in normalized_class for word in normalized_agent.split() if len(word) > 2)
+        )
+    
     def _validate_agent_dependencies(self, agent_name: str) -> None:
         """
         Validate that all required dependencies for an agent are available.
@@ -485,15 +511,16 @@ class AgentInstanceFactory:
         # Check both agent name and class name
         dependencies = []
         
-        # Check by agent name
+        # Check by agent name (exact match first)
         if agent_name in self.AGENT_DEPENDENCIES:
             dependencies = self.AGENT_DEPENDENCIES[agent_name]
         
-        # Also check by class name (e.g., OptimizationsCoreSubAgent)
-        for class_name, deps in self.AGENT_DEPENDENCIES.items():
-            if agent_name.lower() in class_name.lower() or class_name.lower() in agent_name.lower():
-                dependencies = deps
-                break
+        # Also check by class name with flexible matching
+        if not dependencies:
+            for class_name, deps in self.AGENT_DEPENDENCIES.items():
+                if self._agent_name_matches_class(agent_name, class_name):
+                    dependencies = deps
+                    break
         
         # Validate each required dependency
         for dep in dependencies:
