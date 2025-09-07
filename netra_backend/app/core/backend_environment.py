@@ -29,7 +29,7 @@ class BackendEnvironment:
     def _validate_backend_config(self) -> None:
         """Validate backend-specific configuration on initialization."""
         # Core backend requirements
-        # Database URL is built from POSTGRES_* variables via DatabaseURLBuilder
+        # Database URL can come from DATABASE_URL directly or built from POSTGRES_* variables
         required_vars = [
             "JWT_SECRET_KEY",
             "SECRET_KEY"
@@ -43,10 +43,16 @@ class BackendEnvironment:
         if missing:
             logger.warning(f"Missing required backend environment variables: {missing}")
         
-        # Check if we can build a database URL (not required, just informational)
-        db_url = self.get_database_url()
-        if not db_url:
-            logger.info("Database URL will be built from POSTGRES_* environment variables")
+        # Check database configuration - DATABASE_URL takes priority
+        if self.env.get("DATABASE_URL"):
+            logger.info(f"Using DATABASE_URL for database connection")
+        else:
+            # Check if we can build a database URL from POSTGRES_* variables
+            db_url = self.get_database_url()
+            if not db_url:
+                logger.info("Database URL will be built from POSTGRES_* environment variables")
+            else:
+                logger.info("Built database URL from POSTGRES_* environment variables")
     
     # Authentication & Security
     def get_jwt_secret_key(self) -> str:

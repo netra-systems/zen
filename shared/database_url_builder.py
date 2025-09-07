@@ -81,8 +81,17 @@ class DatabaseURLBuilder:
             
             parsed = urlparse(clean_url)
             
+            # Handle Cloud SQL URLs where host is in query parameters
+            host = parsed.hostname or ""
+            if not host and parsed.query:
+                # Check for host parameter in query string (Cloud SQL format)
+                from urllib.parse import parse_qs
+                query_params = parse_qs(parsed.query)
+                if 'host' in query_params and query_params['host']:
+                    host = query_params['host'][0]
+            
             components = {
-                "host": parsed.hostname or "",
+                "host": host,
                 "port": str(parsed.port) if parsed.port else "5432",
                 "database": parsed.path.lstrip("/") if parsed.path else "",
                 "username": parsed.username or "",
