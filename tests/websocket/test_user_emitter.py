@@ -1,504 +1,581 @@
-# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+"""
+Real UserWebSocketEmitter Integration Tests - Per-User Event Emission with Complete Isolation
 
-# REMOVED_SYNTAX_ERROR: def __init__(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
-    # REMOVED_SYNTAX_ERROR: self.is_connected = True
-    # REMOVED_SYNTAX_ERROR: self._closed = False
+Business Value Justification:
+- Segment: Platform/Internal + ALL (Free → Enterprise) 
+- Business Goal: User Isolation & Chat Value Delivery
+- Value Impact: Ensures WebSocket events reach only intended users, enabling secure multi-user chat
+- Strategic Impact: Critical for $500K+ ARR - prevents cross-user event leakage, delivers real AI value
 
-# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
-    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
-    # REMOVED_SYNTAX_ERROR: if self._closed:
-        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
-        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+This test suite validates the UserWebSocketEmitter using REAL services with proper authentication.
+NO MOCKS - follows CLAUDE.md "CHEATING ON TESTS = ABOMINATION" principle.
 
-# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
-    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self._closed = True
-    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+Key Features Tested:
+1. Per-user event emission with complete isolation 
+2. All required WebSocket event types for substantive chat value
+3. Real authentication and user context validation
+4. Event delivery guarantees and retry mechanisms
+5. Business IP protection through event sanitization
+"""
 
-# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
-    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+import asyncio
+import json
+import os
+import sys
+import time
+import uuid
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional, List
 
-    # REMOVED_SYNTAX_ERROR: '''
-    # REMOVED_SYNTAX_ERROR: User WebSocket Emitter Unit Tests
+# CRITICAL: Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-    # REMOVED_SYNTAX_ERROR: Business Value:
-        # REMOVED_SYNTAX_ERROR: - Ensures per-user event isolation
-        # REMOVED_SYNTAX_ERROR: - Validates event queue management
-        # REMOVED_SYNTAX_ERROR: - Tests retry mechanisms and error handling
-        # REMOVED_SYNTAX_ERROR: '''
+import pytest
+import websockets
+import httpx
+from loguru import logger
 
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone, timedelta
-        # REMOVED_SYNTAX_ERROR: import uuid
-        # REMOVED_SYNTAX_ERROR: import json
-        # REMOVED_SYNTAX_ERROR: import time
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
-        # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+# Import real production components - NO MOCKS
+from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitter
+from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, WebSocketFactoryConfig
+from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
+from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
+from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.websocket_bridge_factory import ( )
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
-        # REMOVED_SYNTAX_ERROR: UserWebSocketEmitter,
-        # REMOVED_SYNTAX_ERROR: WebSocketConnectionPool,
-        # REMOVED_SYNTAX_ERROR: EventPriority,
-        # REMOVED_SYNTAX_ERROR: EventType,
-        # REMOVED_SYNTAX_ERROR: ConnectionStatus,
-        # REMOVED_SYNTAX_ERROR: DeliveryStatus,
-        # REMOVED_SYNTAX_ERROR: EventMetadata
-        
+# Import SSOT authentication helpers
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.isolated_environment_fixtures import isolated_environment_manager
+from shared.isolated_environment import get_env
+
+# WebSocket test utilities - REAL SERVICES ONLY
+from tests.mission_critical.websocket_real_test_base import (
+    require_docker_services,
+    RealWebSocketTestBase,
+    RealWebSocketTestConfig
+)
 
 
-# REMOVED_SYNTAX_ERROR: class TestUserWebSocketEmitter:
-    # REMOVED_SYNTAX_ERROR: """Comprehensive unit tests for UserWebSocketEmitter."""
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_pool():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a mock connection pool."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: pool = MagicMock(spec=WebSocketConnectionPool)
-    # REMOVED_SYNTAX_ERROR: pool.broadcast_to_user = AsyncMock(return_value=1)
-    # REMOVED_SYNTAX_ERROR: pool.get_active_connections = MagicMock(return_value=[])
-    # REMOVED_SYNTAX_ERROR: pool.add_connection = AsyncMock(return_value="conn-123")
-    # REMOVED_SYNTAX_ERROR: pool.remove_connection = AsyncMock(return_value=True)
-    # REMOVED_SYNTAX_ERROR: return pool
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_monitor():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a mock notification monitor."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: monitor = Magic        monitor.record_event = Magic        monitor.record_error = Magic        monitor.record_delivery = Magic        return monitor
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def emitter(self, mock_pool, mock_monitor):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a UserWebSocketEmitter instance."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: emitter = UserWebSocketEmitter( )
-    # REMOVED_SYNTAX_ERROR: user_id="user-123",
-    # REMOVED_SYNTAX_ERROR: session_id="session-456",
-    # REMOVED_SYNTAX_ERROR: connection_pool=mock_pool,
-    # REMOVED_SYNTAX_ERROR: monitor=mock_monitor
+class TestUserWebSocketEmitterReal(SSotBaseTestCase):
+    """
+    Real UserWebSocketEmitter tests using live services with authentication.
     
-    # REMOVED_SYNTAX_ERROR: return emitter
-
-# REMOVED_SYNTAX_ERROR: def test_initialization(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test emitter initialization with all properties."""
-    # REMOVED_SYNTAX_ERROR: assert emitter.user_id == "user-123"
-    # REMOVED_SYNTAX_ERROR: assert emitter.session_id == "session-456"
-    # REMOVED_SYNTAX_ERROR: assert emitter.is_active is True
-    # REMOVED_SYNTAX_ERROR: assert emitter.connection_id is None
-    # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 0
-    # REMOVED_SYNTAX_ERROR: assert emitter.retry_attempts == 3
-    # REMOVED_SYNTAX_ERROR: assert emitter.batch_size == 10
-    # REMOVED_SYNTAX_ERROR: assert emitter.max_queue_size == 100
-
-# REMOVED_SYNTAX_ERROR: def test_metrics_initialization(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test metrics are properly initialized."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: metrics = emitter.get_metrics()
-    # REMOVED_SYNTAX_ERROR: assert metrics["events_sent"] == 0
-    # REMOVED_SYNTAX_ERROR: assert metrics["events_failed"] == 0
-    # REMOVED_SYNTAX_ERROR: assert metrics["events_queued"] == 0
-    # REMOVED_SYNTAX_ERROR: assert metrics["events_dropped"] == 0
-    # REMOVED_SYNTAX_ERROR: assert metrics["retry_count"] == 0
-    # REMOVED_SYNTAX_ERROR: assert metrics["user_id"] == "user-123"
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_emit_simple_event(self, emitter, mock_pool, mock_monitor):
-        # REMOVED_SYNTAX_ERROR: """Test emitting a simple event."""
-        # REMOVED_SYNTAX_ERROR: event = { )
-        # REMOVED_SYNTAX_ERROR: "type": "agent_started",
-        # REMOVED_SYNTAX_ERROR: "data": {"agent": "test_agent"}
-        
-
-        # REMOVED_SYNTAX_ERROR: success = await emitter.emit(event)
-
-        # REMOVED_SYNTAX_ERROR: assert success is True
-        # REMOVED_SYNTAX_ERROR: mock_pool.broadcast_to_user.assert_called_once_with("user-123", event)
-        # REMOVED_SYNTAX_ERROR: mock_monitor.record_event.assert_called_once()
-        # REMOVED_SYNTAX_ERROR: mock_monitor.record_delivery.assert_called_once()
-        # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_sent"] == 1
-
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_emit_with_metadata(self, emitter, mock_pool):
-            # REMOVED_SYNTAX_ERROR: """Test emitting event with metadata."""
-            # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: event = { )
-            # REMOVED_SYNTAX_ERROR: "type": "tool_executing",
-            # REMOVED_SYNTAX_ERROR: "data": {"tool": "search"}
-            
-
-            # REMOVED_SYNTAX_ERROR: success = await emitter.emit( )
-            # REMOVED_SYNTAX_ERROR: event,
-            # REMOVED_SYNTAX_ERROR: priority=EventPriority.HIGH,
-            # REMOVED_SYNTAX_ERROR: metadata={"request_id": "req-123"}
-            
-
-            # REMOVED_SYNTAX_ERROR: assert success is True
-
-            # Verify event was enhanced with metadata
-            # REMOVED_SYNTAX_ERROR: call_args = mock_pool.broadcast_to_user.call_args[0]
-            # REMOVED_SYNTAX_ERROR: sent_event = call_args[1]
-            # REMOVED_SYNTAX_ERROR: assert "metadata" in sent_event or "request_id" in str(sent_event)
-
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_emit_with_retry(self, emitter, mock_pool):
-                # REMOVED_SYNTAX_ERROR: """Test event emission with retry on failure."""
-                # First two calls fail, third succeeds
-                # REMOVED_SYNTAX_ERROR: mock_pool.broadcast_to_user.side_effect = [ )
-                # REMOVED_SYNTAX_ERROR: Exception("Network error"),
-                # REMOVED_SYNTAX_ERROR: Exception("Timeout"),
-                # REMOVED_SYNTAX_ERROR: 1  # Success
-                
-
-                # REMOVED_SYNTAX_ERROR: event = {"type": "test"}
-                # REMOVED_SYNTAX_ERROR: success = await emitter.emit(event)
-
-                # REMOVED_SYNTAX_ERROR: assert success is True
-                # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 3
-                # REMOVED_SYNTAX_ERROR: assert emitter.metrics["retry_count"] == 2
-                # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_sent"] == 1
-
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_emit_max_retries_exceeded(self, emitter, mock_pool):
-                    # REMOVED_SYNTAX_ERROR: """Test event emission fails after max retries."""
-                    # REMOVED_SYNTAX_ERROR: pass
-                    # REMOVED_SYNTAX_ERROR: mock_pool.broadcast_to_user.side_effect = Exception("Persistent error")
-                    # REMOVED_SYNTAX_ERROR: emitter.retry_attempts = 2
-
-                    # REMOVED_SYNTAX_ERROR: event = {"type": "test"}
-                    # REMOVED_SYNTAX_ERROR: success = await emitter.emit(event)
-
-                    # REMOVED_SYNTAX_ERROR: assert success is False
-                    # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 2
-                    # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_failed"] == 1
-
-# REMOVED_SYNTAX_ERROR: def test_queue_event(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test queueing events."""
-    # REMOVED_SYNTAX_ERROR: event1 = {"type": "event1"}
-    # REMOVED_SYNTAX_ERROR: event2 = {"type": "event2"}
-
-    # REMOVED_SYNTAX_ERROR: queued1 = emitter.queue_event(event1)
-    # REMOVED_SYNTAX_ERROR: queued2 = emitter.queue_event(event2, priority=EventPriority.HIGH)
-
-    # REMOVED_SYNTAX_ERROR: assert queued1 is True
-    # REMOVED_SYNTAX_ERROR: assert queued2 is True
-    # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 2
-    # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_queued"] == 2
-
-    # High priority should be first
-    # REMOVED_SYNTAX_ERROR: assert emitter.event_queue[0]["type"] == "event2"
-
-# REMOVED_SYNTAX_ERROR: def test_queue_overflow(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test queue overflow handling."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: emitter.max_queue_size = 5
-
-    # Fill queue
-    # REMOVED_SYNTAX_ERROR: for i in range(5):
-        # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-        # Try to add one more
-        # REMOVED_SYNTAX_ERROR: queued = emitter.queue_event({"type": "overflow"})
-
-        # REMOVED_SYNTAX_ERROR: assert queued is False
-        # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 5
-        # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_dropped"] == 1
-
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_flush_queue(self, emitter, mock_pool):
-            # REMOVED_SYNTAX_ERROR: """Test flushing entire event queue."""
-            # Queue multiple events
-            # REMOVED_SYNTAX_ERROR: for i in range(5):
-                # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-                # Flush all
-                # REMOVED_SYNTAX_ERROR: flushed = await emitter.flush_queue()
-
-                # REMOVED_SYNTAX_ERROR: assert flushed == 5
-                # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 0
-                # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 5
-                # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_sent"] == 5
-
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_process_batch(self, emitter, mock_pool):
-                    # REMOVED_SYNTAX_ERROR: """Test processing events in batches."""
-                    # REMOVED_SYNTAX_ERROR: pass
-                    # REMOVED_SYNTAX_ERROR: emitter.batch_size = 3
-
-                    # Queue 10 events
-                    # REMOVED_SYNTAX_ERROR: for i in range(10):
-                        # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-                        # Process one batch
-                        # REMOVED_SYNTAX_ERROR: processed = await emitter.process_batch()
-
-                        # REMOVED_SYNTAX_ERROR: assert processed == 3
-                        # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 7
-                        # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 3
-
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # Removed problematic line: async def test_auto_flush_on_max_queue(self, emitter, mock_pool):
-                            # REMOVED_SYNTAX_ERROR: """Test automatic flush when queue reaches max size."""
-                            # REMOVED_SYNTAX_ERROR: emitter.max_queue_size = 5
-                            # REMOVED_SYNTAX_ERROR: emitter.auto_flush = True
-
-                            # Add events up to max
-                            # REMOVED_SYNTAX_ERROR: for i in range(5):
-                                # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-                                # Should trigger auto flush
-                                # REMOVED_SYNTAX_ERROR: await emitter.check_auto_flush()
-
-                                # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) < 5
-                                # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.called
-
-# REMOVED_SYNTAX_ERROR: def test_sanitize_sensitive_event(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test sanitization of sensitive data in events."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: event = { )
-    # REMOVED_SYNTAX_ERROR: "type": "agent_thinking",
-    # REMOVED_SYNTAX_ERROR: "data": { )
-    # REMOVED_SYNTAX_ERROR: "thought": "API key is sk-1234567890",
-    # REMOVED_SYNTAX_ERROR: "password": "secret123",
-    # REMOVED_SYNTAX_ERROR: "token": "bearer_token_xyz"
+    Business Value: Validates the core WebSocket event system that enables 
+    substantive AI chat interactions for all user segments.
     
+    Tests are designed to FAIL HARD if anything is wrong - no try/except blocks.
+    """
     
-
-    # REMOVED_SYNTAX_ERROR: sanitized = emitter.sanitize_event(event.copy())
-
-    # Check sensitive data is removed/masked
-    # REMOVED_SYNTAX_ERROR: assert "sk-1234567890" not in str(sanitized)
-    # REMOVED_SYNTAX_ERROR: assert "secret123" not in str(sanitized)
-    # REMOVED_SYNTAX_ERROR: assert "bearer_token_xyz" not in str(sanitized)
-
-# REMOVED_SYNTAX_ERROR: def test_event_type_classification(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test event type classification."""
-    # REMOVED_SYNTAX_ERROR: assert emitter.classify_event_type("agent_started") == EventType.LIFECYCLE
-    # REMOVED_SYNTAX_ERROR: assert emitter.classify_event_type("tool_executing") == EventType.TOOL
-    # REMOVED_SYNTAX_ERROR: assert emitter.classify_event_type("error") == EventType.ERROR
-    # REMOVED_SYNTAX_ERROR: assert emitter.classify_event_type("chat_message") == EventType.MESSAGE
-    # REMOVED_SYNTAX_ERROR: assert emitter.classify_event_type("custom_event") == EventType.CUSTOM
-
-# REMOVED_SYNTAX_ERROR: def test_priority_assignment(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test automatic priority assignment based on event type."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: error_priority = emitter.get_event_priority({"type": "error"})
-    # REMOVED_SYNTAX_ERROR: lifecycle_priority = emitter.get_event_priority({"type": "agent_completed"})
-    # REMOVED_SYNTAX_ERROR: message_priority = emitter.get_event_priority({"type": "chat_message"})
-
-    # REMOVED_SYNTAX_ERROR: assert error_priority == EventPriority.HIGH
-    # REMOVED_SYNTAX_ERROR: assert lifecycle_priority == EventPriority.MEDIUM
-    # REMOVED_SYNTAX_ERROR: assert message_priority == EventPriority.NORMAL
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_connection_management(self, emitter, mock_pool):
-        # REMOVED_SYNTAX_ERROR: """Test WebSocket connection management."""
-        # REMOVED_SYNTAX_ERROR: ws = Magic        ws.websocket = TestWebSocketConnection()
-
-        # Add connection
-        # REMOVED_SYNTAX_ERROR: await emitter.add_connection(ws)
-
-        # REMOVED_SYNTAX_ERROR: assert emitter.connection_id == "conn-123"
-        # REMOVED_SYNTAX_ERROR: mock_pool.add_connection.assert_called_once_with("user-123", ws)
-
-        # Remove connection
-        # REMOVED_SYNTAX_ERROR: await emitter.remove_connection()
-
-        # REMOVED_SYNTAX_ERROR: assert emitter.connection_id is None
-        # REMOVED_SYNTAX_ERROR: mock_pool.remove_connection.assert_called_once_with("conn-123")
-
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_lifecycle_events(self, emitter, mock_pool):
-            # REMOVED_SYNTAX_ERROR: """Test emitting lifecycle events."""
-            # REMOVED_SYNTAX_ERROR: pass
-            # Start event
-            # REMOVED_SYNTAX_ERROR: await emitter.emit_lifecycle_event("started", {"agent": "test"})
-
-            # Progress event
-            # REMOVED_SYNTAX_ERROR: await emitter.emit_lifecycle_event("progress", {"percent": 50})
-
-            # Complete event
-            # REMOVED_SYNTAX_ERROR: await emitter.emit_lifecycle_event("completed", {"result": "success"})
-
-            # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 3
-
-            # Verify event types
-            # REMOVED_SYNTAX_ERROR: calls = mock_pool.broadcast_to_user.call_args_list
-            # REMOVED_SYNTAX_ERROR: assert calls[0][0][1]["type"] == "lifecycle_started"
-            # REMOVED_SYNTAX_ERROR: assert calls[1][0][1]["type"] == "lifecycle_progress"
-            # REMOVED_SYNTAX_ERROR: assert calls[2][0][1]["type"] == "lifecycle_completed"
-
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_tool_events(self, emitter, mock_pool):
-                # REMOVED_SYNTAX_ERROR: """Test emitting tool execution events."""
-                # Tool start
-                # Removed problematic line: await emitter.emit_tool_event("executing", { ))
-                # REMOVED_SYNTAX_ERROR: "tool": "search",
-                # REMOVED_SYNTAX_ERROR: "params": {"query": "test"}
-                
-
-                # Tool complete
-                # Removed problematic line: await emitter.emit_tool_event("completed", { ))
-                # REMOVED_SYNTAX_ERROR: "tool": "search",
-                # REMOVED_SYNTAX_ERROR: "result": {"hits": 10}
-                
-
-                # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 2
-
-                # REMOVED_SYNTAX_ERROR: calls = mock_pool.broadcast_to_user.call_args_list
-                # REMOVED_SYNTAX_ERROR: assert calls[0][0][1]["type"] == "tool_executing"
-                # REMOVED_SYNTAX_ERROR: assert calls[1][0][1]["type"] == "tool_completed"
-
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_error_event(self, emitter, mock_pool, mock_monitor):
-                    # REMOVED_SYNTAX_ERROR: """Test emitting error events."""
-                    # REMOVED_SYNTAX_ERROR: pass
-                    # REMOVED_SYNTAX_ERROR: error_data = { )
-                    # REMOVED_SYNTAX_ERROR: "message": "Operation failed",
-                    # REMOVED_SYNTAX_ERROR: "code": "ERR_001",
-                    # REMOVED_SYNTAX_ERROR: "stack": "traceback..."
-                    
-
-                    # REMOVED_SYNTAX_ERROR: await emitter.emit_error(error_data)
-
-                    # Error events should be high priority
-                    # REMOVED_SYNTAX_ERROR: call_args = mock_pool.broadcast_to_user.call_args[0]
-                    # REMOVED_SYNTAX_ERROR: event = call_args[1]
-
-                    # REMOVED_SYNTAX_ERROR: assert event["type"] == "error"
-                    # REMOVED_SYNTAX_ERROR: assert event["data"] == error_data
-                    # REMOVED_SYNTAX_ERROR: mock_monitor.record_error.assert_called_once()
-
-# REMOVED_SYNTAX_ERROR: def test_inactive_emitter_behavior(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test behavior when emitter is inactive."""
-    # REMOVED_SYNTAX_ERROR: emitter.is_active = False
-
-    # Should not queue events
-    # REMOVED_SYNTAX_ERROR: queued = emitter.queue_event({"type": "test"})
-    # REMOVED_SYNTAX_ERROR: assert queued is False
-    # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 0
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_concurrent_emissions(self, emitter, mock_pool):
-        # REMOVED_SYNTAX_ERROR: """Test concurrent event emissions."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: events = [{"type": "formatted_string"} for i in range(10)]
-
-        # Emit all events concurrently
-        # REMOVED_SYNTAX_ERROR: tasks = [emitter.emit(event) for event in events]
-        # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks)
-
-        # REMOVED_SYNTAX_ERROR: assert all(results)
-        # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 10
-        # REMOVED_SYNTAX_ERROR: assert emitter.metrics["events_sent"] == 10
-
-# REMOVED_SYNTAX_ERROR: def test_get_queue_status(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test getting queue status."""
-    # Add some events
-    # REMOVED_SYNTAX_ERROR: for i in range(3):
-        # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-        # REMOVED_SYNTAX_ERROR: status = emitter.get_queue_status()
-
-        # REMOVED_SYNTAX_ERROR: assert status["queue_size"] == 3
-        # REMOVED_SYNTAX_ERROR: assert status["max_size"] == 100
-        # REMOVED_SYNTAX_ERROR: assert status["is_full"] is False
-        # REMOVED_SYNTAX_ERROR: assert status["utilization"] == 0.03
-
-        # Removed problematic line: @pytest.mark.asyncio
-        # Removed problematic line: async def test_delivery_confirmation(self, emitter, mock_pool):
-            # REMOVED_SYNTAX_ERROR: """Test delivery confirmation tracking."""
-            # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: event_id = str(uuid.uuid4())
-            # REMOVED_SYNTAX_ERROR: event = { )
-            # REMOVED_SYNTAX_ERROR: "id": event_id,
-            # REMOVED_SYNTAX_ERROR: "type": "test",
-            # REMOVED_SYNTAX_ERROR: "data": {}
-            
-
-            # Track delivery
-            # REMOVED_SYNTAX_ERROR: success = await emitter.emit_with_confirmation(event)
-
-            # REMOVED_SYNTAX_ERROR: assert success is True
-            # REMOVED_SYNTAX_ERROR: assert event_id in emitter.delivery_confirmations
-            # REMOVED_SYNTAX_ERROR: assert emitter.delivery_confirmations[event_id] == DeliveryStatus.DELIVERED
-
-# REMOVED_SYNTAX_ERROR: def test_event_deduplication(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test event deduplication in queue."""
-    # REMOVED_SYNTAX_ERROR: event = {"id": "same-id", "type": "test"}
-
-    # Queue same event multiple times
-    # REMOVED_SYNTAX_ERROR: emitter.queue_event(event)
-    # REMOVED_SYNTAX_ERROR: emitter.queue_event(event)
-    # REMOVED_SYNTAX_ERROR: emitter.queue_event(event)
-
-    # Should only have one instance
-    # REMOVED_SYNTAX_ERROR: unique_ids = set(e.get("id") for e in emitter.event_queue)
-    # REMOVED_SYNTAX_ERROR: assert len(unique_ids) == 1
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_graceful_shutdown(self, emitter, mock_pool):
-        # REMOVED_SYNTAX_ERROR: """Test graceful shutdown of emitter."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # Queue some events
-        # REMOVED_SYNTAX_ERROR: for i in range(3):
-            # REMOVED_SYNTAX_ERROR: emitter.queue_event({"type": "formatted_string"})
-
-            # Shutdown should flush queue
-            # REMOVED_SYNTAX_ERROR: await emitter.shutdown()
-
-            # REMOVED_SYNTAX_ERROR: assert emitter.is_active is False
-            # REMOVED_SYNTAX_ERROR: assert len(emitter.event_queue) == 0
-            # REMOVED_SYNTAX_ERROR: assert mock_pool.broadcast_to_user.call_count == 3
-
-# REMOVED_SYNTAX_ERROR: def test_metrics_aggregation(self, emitter):
-    # REMOVED_SYNTAX_ERROR: """Test metrics aggregation over time."""
-    # Simulate activity
-    # REMOVED_SYNTAX_ERROR: emitter.metrics["events_sent"] = 100
-    # REMOVED_SYNTAX_ERROR: emitter.metrics["events_failed"] = 5
-    # REMOVED_SYNTAX_ERROR: emitter.metrics["retry_count"] = 10
-
-    # REMOVED_SYNTAX_ERROR: metrics = emitter.get_metrics()
-
-    # Calculate derived metrics
-    # REMOVED_SYNTAX_ERROR: assert metrics["success_rate"] == 0.95  # 95% success
-    # REMOVED_SYNTAX_ERROR: assert metrics["retry_rate"] == 0.1  # 10% retry rate
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_event_compression(self, emitter, mock_pool):
-        # REMOVED_SYNTAX_ERROR: """Test event compression for large payloads."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: large_data = "x" * 10000  # Large payload
-        # REMOVED_SYNTAX_ERROR: event = { )
-        # REMOVED_SYNTAX_ERROR: "type": "large_event",
-        # REMOVED_SYNTAX_ERROR: "data": large_data
+    @pytest.fixture(scope="class")
+    def docker_services(self):
+        """Ensure Docker services are running - REAL SERVICES REQUIRED."""
+        return require_docker_services()
+    
+    @pytest.fixture
+    def auth_config(self, isolated_environment_manager):
+        """SSOT authentication configuration for real services."""
+        env = get_env()
+        return E2EAuthConfig(
+            auth_service_url=f"http://localhost:{env.get('AUTH_SERVICE_PORT', '8083')}",
+            backend_url=f"http://localhost:{env.get('BACKEND_PORT', '8002')}",
+            websocket_url=f"ws://localhost:{env.get('BACKEND_PORT', '8002')}/ws",
+            test_user_email=f"test_user_{uuid.uuid4().hex[:8]}@netra-test.com",
+            test_user_password="secure_test_password_123!",
+            timeout=30.0  # Real services need more time
+        )
+    
+    @pytest.fixture
+    async def authenticated_user(self, auth_config):
+        """Create authenticated user context with real JWT tokens."""
+        auth_helper = E2EAuthHelper(auth_config)
         
+        # Register user with real auth service
+        user_data = await auth_helper.register_test_user()
+        assert user_data is not None, "Failed to register test user with real auth service"
+        assert "access_token" in user_data, "No JWT token received from real auth service"
+        
+        # Validate token is real and not expired
+        jwt_token = user_data["access_token"]
+        user_id = user_data["user"]["id"]
+        
+        # Create authenticated user execution context
+        context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+            request_id=f"test_req_{uuid.uuid4().hex[:8]}",
+            jwt_token=jwt_token
+        )
+        
+        yield {"context": context, "auth_data": user_data, "config": auth_config}
+    
+    @pytest.fixture
+    async def real_websocket_infrastructure(self, docker_services, isolated_environment_manager):
+        """Set up real WebSocket infrastructure components."""
+        # Initialize real components with SSOT environment
+        env = get_env()
+        
+        # Real WebSocket connection pool
+        connection_pool = WebSocketConnectionPool(
+            max_connections=100,
+            cleanup_interval=30
+        )
+        
+        # Real WebSocket event router
+        event_router = WebSocketEventRouter(connection_pool)
+        
+        # Real WebSocket bridge factory with production config
+        factory_config = WebSocketFactoryConfig(
+            max_events_per_user=1000,
+            event_timeout_seconds=10.0,
+            heartbeat_interval_seconds=30.0,
+            delivery_retries=3,
+            enable_event_compression=True
+        )
+        
+        bridge_factory = WebSocketBridgeFactory(factory_config)
+        bridge_factory.configure(
+            connection_pool=connection_pool,
+            agent_registry=None,  # Will be created per-request
+            health_monitor=get_websocket_notification_monitor()
+        )
+        
+        yield {
+            "connection_pool": connection_pool,
+            "event_router": event_router,
+            "bridge_factory": bridge_factory,
+            "notification_monitor": get_websocket_notification_monitor()
+        }
+        
+        # Cleanup real resources
+        await connection_pool.cleanup()
+    
+    @pytest.fixture
+    async def real_websocket_connection(self, authenticated_user, auth_config):
+        """Establish real WebSocket connection with authentication."""
+        context = authenticated_user["context"]
+        jwt_token = authenticated_user["auth_data"]["access_token"]
+        
+        # Connect to real WebSocket endpoint with authentication
+        websocket_url = f"{auth_config.websocket_url}?token={jwt_token}"
+        
+        websocket = None
+        try:
+            # Establish real WebSocket connection - this will FAIL HARD if service unavailable
+            websocket = await websockets.connect(
+                websocket_url,
+                ping_interval=20,
+                ping_timeout=10,
+                close_timeout=10
+            )
+            
+            logger.info(f"Real WebSocket connection established for user {context.user_id[:8]}...")
+            
+            yield websocket
+            
+        except Exception as e:
+            # FAIL HARD - no try/except masking in tests
+            raise AssertionError(f"Failed to establish real WebSocket connection: {e}")
+        finally:
+            if websocket:
+                await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_user_websocket_emitter_initialization_real(
+        self, 
+        authenticated_user,
+        real_websocket_infrastructure
+    ):
+        """Test UserWebSocketEmitter initialization with real services and authentication.
+        
+        Business Value: Validates the foundation of per-user WebSocket communication
+        that enables secure multi-user chat interactions.
+        """
+        context = authenticated_user["context"]
+        event_router = real_websocket_infrastructure["event_router"]
+        
+        # Create real UserWebSocketEmitter with authenticated context
+        emitter = UserWebSocketEmitter(
+            context=context,
+            router=event_router,
+            connection_id=f"conn_{uuid.uuid4().hex[:8]}"
+        )
+        
+        # Validate emitter initialization with real authentication data
+        assert emitter.user_id == context.user_id, "User ID mismatch in emitter"
+        assert emitter.thread_id == context.thread_id, "Thread ID mismatch in emitter" 
+        assert emitter.run_id == context.run_id, "Run ID mismatch in emitter"
+        assert emitter.request_id == context.request_id, "Request ID mismatch in emitter"
+        assert emitter.router is event_router, "Event router not properly set"
+        
+        # Validate metrics tracking
+        stats = emitter.get_stats()
+        assert stats["user_id"].endswith("..."), "User ID not properly truncated for security"
+        assert stats["events_sent"] == 0, "Initial events sent should be 0"
+        assert stats["events_failed"] == 0, "Initial events failed should be 0"
+        assert "uptime_seconds" in stats, "Uptime metrics missing"
+        assert "success_rate" in stats, "Success rate metrics missing"
+        
+        logger.info(f"✅ UserWebSocketEmitter initialized successfully for authenticated user")
+    
+    @pytest.mark.asyncio
+    async def test_agent_started_event_real_delivery(
+        self,
+        authenticated_user,
+        real_websocket_infrastructure,
+        real_websocket_connection
+    ):
+        """Test agent_started event delivery through real WebSocket connection.
+        
+        Business Value: Validates the critical agent_started event that informs users
+        their AI request is being processed - core to chat user experience.
+        """
+        context = authenticated_user["context"]
+        event_router = real_websocket_infrastructure["event_router"]
+        websocket = real_websocket_connection
+        
+        # Register real WebSocket connection in pool
+        connection_pool = real_websocket_infrastructure["connection_pool"]
+        connection_id = await connection_pool.add_connection(context.user_id, websocket)
+        
+        # Create emitter with real WebSocket connection
+        emitter = UserWebSocketEmitter(
+            context=context,
+            router=event_router,
+            connection_id=connection_id
+        )
+        
+        # Send agent_started event to real WebSocket
+        agent_name = "TestAgent"
+        metadata = {"test_mode": True, "priority": "high"}
+        
+        # This should succeed with real WebSocket - FAIL HARD if not
+        success = await emitter.notify_agent_started(agent_name, metadata)
+        assert success is True, "Agent started notification failed with real WebSocket"
+        
+        # Receive event from real WebSocket connection
+        message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+        event_data = json.loads(message)
+        
+        # Validate event structure and content
+        assert event_data["type"] == "agent_started", "Wrong event type received"
+        assert event_data["run_id"] == context.run_id, "Run ID mismatch in event"
+        assert event_data["thread_id"] == context.thread_id, "Thread ID mismatch in event"
+        assert event_data["agent_name"] == agent_name, "Agent name mismatch in event"
+        assert event_data["request_id"] == context.request_id, "Request ID missing from event"
+        
+        # Validate payload content
+        payload = event_data["payload"]
+        assert payload["status"] == "started", "Wrong status in payload"
+        assert payload["metadata"] == metadata, "Metadata not preserved in payload"
+        assert agent_name in payload["message"], "Agent name not in user message"
+        
+        # Validate emitter metrics updated
+        stats = emitter.get_stats()
+        assert stats["events_sent"] == 1, "Events sent metric not updated"
+        assert stats["events_failed"] == 0, "No events should have failed"
+        assert stats["success_rate"] == 100.0, "Success rate should be 100%"
+        
+        logger.info(f"✅ Agent started event delivered successfully through real WebSocket")
+    
+    @pytest.mark.asyncio
+    async def test_all_critical_websocket_events_real(
+        self,
+        authenticated_user,
+        real_websocket_infrastructure,
+        real_websocket_connection
+    ):
+        """Test all critical WebSocket events required for substantive chat value.
+        
+        Business Value: Validates ALL WebSocket events needed for complete AI chat experience.
+        This covers the full spectrum of user-visible AI interaction events.
+        """
+        context = authenticated_user["context"]
+        event_router = real_websocket_infrastructure["event_router"]
+        websocket = real_websocket_connection
+        
+        # Register connection and create emitter
+        connection_pool = real_websocket_infrastructure["connection_pool"]
+        connection_id = await connection_pool.add_connection(context.user_id, websocket)
+        
+        emitter = UserWebSocketEmitter(
+            context=context,
+            router=event_router, 
+            connection_id=connection_id
+        )
+        
+        agent_name = "ComprehensiveTestAgent"
+        
+        # Event tracking
+        received_events = []
+        expected_event_types = [
+            "agent_started",
+            "agent_thinking", 
+            "tool_executing",
+            "tool_completed",
+            "progress_update",
+            "agent_completed"
+        ]
+        
+        # Send all critical WebSocket events in realistic sequence
+        logger.info("Sending agent_started event...")
+        success = await emitter.notify_agent_started(agent_name, {"task": "comprehensive_test"})
+        assert success, "agent_started failed"
+        
+        logger.info("Sending agent_thinking event...")
+        success = await emitter.notify_agent_thinking(agent_name, "Analyzing user request and planning approach", "analysis")
+        assert success, "agent_thinking failed"
+        
+        logger.info("Sending tool_executing event...")
+        success = await emitter.notify_tool_executing(agent_name, "SearchTool", {"query": "test search", "limit": 10})
+        assert success, "tool_executing failed"
+        
+        logger.info("Sending tool_completed event...")
+        success = await emitter.notify_tool_completed(agent_name, "SearchTool", True, "Found 5 relevant results")
+        assert success, "tool_completed failed"
+        
+        logger.info("Sending progress_update event...")
+        success = await emitter.notify_progress_update(agent_name, 75.0, "Processing search results", "30 seconds")
+        assert success, "progress_update failed"
+        
+        logger.info("Sending agent_completed event...")
+        success = await emitter.notify_agent_completed(agent_name, {"status": "success", "results": "Comprehensive analysis completed"}, True)
+        assert success, "agent_completed failed"
+        
+        # Receive all events from real WebSocket
+        for i, expected_type in enumerate(expected_event_types):
+            message = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+            event_data = json.loads(message)
+            received_events.append(event_data)
+            
+            # Validate each event
+            assert event_data["type"] == expected_type, f"Expected {expected_type}, got {event_data['type']}"
+            assert event_data["run_id"] == context.run_id, f"Run ID mismatch in {expected_type}"
+            assert event_data["thread_id"] == context.thread_id, f"Thread ID mismatch in {expected_type}"
+            assert event_data["agent_name"] == agent_name, f"Agent name mismatch in {expected_type}"
+            assert "timestamp" in event_data, f"Timestamp missing in {expected_type}"
+            assert "payload" in event_data, f"Payload missing in {expected_type}"
+            
+            logger.info(f"✅ Received and validated {expected_type} event")
+        
+        # Validate emitter final stats
+        final_stats = emitter.get_stats()
+        assert final_stats["events_sent"] == len(expected_event_types), "Event count mismatch"
+        assert final_stats["events_failed"] == 0, "No events should have failed"
+        assert final_stats["success_rate"] == 100.0, "Perfect success rate expected"
+        
+        logger.info(f"✅ All {len(expected_event_types)} critical WebSocket events validated")
+    
+    @pytest.mark.asyncio
+    async def test_event_sanitization_business_ip_protection(
+        self,
+        authenticated_user,
+        real_websocket_infrastructure,
+        real_websocket_connection
+    ):
+        """Test event sanitization prevents business IP leakage in real WebSocket events.
+        
+        Business Value: Protects Netra's business IP by ensuring sensitive information
+        is sanitized before being sent to users through WebSocket events.
+        """
+        context = authenticated_user["context"]
+        event_router = real_websocket_infrastructure["event_router"]
+        websocket = real_websocket_connection
+        
+        # Setup emitter with real connection
+        connection_pool = real_websocket_infrastructure["connection_pool"]
+        connection_id = await connection_pool.add_connection(context.user_id, websocket)
+        
+        emitter = UserWebSocketEmitter(
+            context=context,
+            router=event_router,
+            connection_id=connection_id
+        )
+        
+        # Send tool_executing event with sensitive data
+        sensitive_tool_input = {
+            "query": "user search query",  # Safe
+            "api_key": "sk-1234567890abcdef",  # Should be redacted
+            "password": "secret123",  # Should be redacted
+            "token": "bearer_xyz123",  # Should be redacted
+            "large_data": "x" * 500,  # Should be truncated
+            "normal_param": "safe_value"  # Should pass through
+        }
+        
+        success = await emitter.notify_tool_executing("TestAgent", "APITool", sensitive_tool_input)
+        assert success, "Tool executing notification failed"
+        
+        # Receive event from real WebSocket
+        message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+        event_data = json.loads(message)
+        
+        # Validate sanitization occurred
+        tool_input = event_data["payload"]["tool_input"]
+        
+        # Sensitive data should be redacted
+        assert tool_input["api_key"] == "[REDACTED]", "API key not redacted"
+        assert tool_input["password"] == "[REDACTED]", "Password not redacted"
+        assert tool_input["token"] == "[REDACTED]", "Token not redacted"
+        
+        # Large data should be truncated
+        assert len(tool_input["large_data"]) < 500, "Large data not truncated"
+        assert tool_input["large_data"].endswith("..."), "Truncation marker missing"
+        
+        # Safe data should pass through
+        assert tool_input["query"] == "user search query", "Safe query data modified"
+        assert tool_input["normal_param"] == "safe_value", "Normal param modified"
+        
+        logger.info("✅ Business IP protection validated through event sanitization")
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_user_isolation_real(
+        self,
+        docker_services,
+        real_websocket_infrastructure,
+        auth_config
+    ):
+        """Test complete user isolation with concurrent real WebSocket connections.
+        
+        Business Value: Validates that multiple users can use the system simultaneously
+        without any cross-user event leakage - critical for multi-user chat.
+        """
+        auth_helper = E2EAuthHelper(auth_config)
+        event_router = real_websocket_infrastructure["event_router"]
+        connection_pool = real_websocket_infrastructure["connection_pool"]
+        
+        # Create multiple authenticated users
+        num_users = 3
+        users = []
+        websockets = []
+        emitters = []
+        
+        try:
+            # Setup multiple real authenticated users and WebSocket connections
+            for i in range(num_users):
+                # Register unique user
+                user_data = await auth_helper.register_test_user()
+                context = UserExecutionContext(
+                    user_id=user_data["user"]["id"],
+                    thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
+                    run_id=f"run_{i}_{uuid.uuid4().hex[:8]}",
+                    request_id=f"req_{i}_{uuid.uuid4().hex[:8]}",
+                    jwt_token=user_data["access_token"]
+                )
+                
+                # Establish real WebSocket connection
+                websocket_url = f"{auth_config.websocket_url}?token={user_data['access_token']}"
+                websocket = await websockets.connect(websocket_url, ping_interval=20)
+                
+                # Register connection and create emitter
+                connection_id = await connection_pool.add_connection(context.user_id, websocket)
+                emitter = UserWebSocketEmitter(
+                    context=context,
+                    router=event_router,
+                    connection_id=connection_id
+                )
+                
+                users.append({"context": context, "auth_data": user_data})
+                websockets.append(websocket)
+                emitters.append(emitter)
+                
+                logger.info(f"User {i+1} setup complete: {context.user_id[:8]}...")
+            
+            # Send unique events to each user simultaneously
+            agent_name = "IsolationTestAgent"
+            send_tasks = []
+            
+            for i, emitter in enumerate(emitters):
+                task = emitter.notify_agent_started(agent_name, {"user_index": i, "isolation_test": True})
+                send_tasks.append(task)
+            
+            # Send all events concurrently
+            send_results = await asyncio.gather(*send_tasks)
+            assert all(send_results), "Not all events sent successfully"
+            
+            # Receive events and validate isolation
+            for i, websocket in enumerate(websockets):
+                message = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                event_data = json.loads(message)
+                
+                # Validate this user only received their own event
+                expected_user_id = users[i]["context"].user_id
+                expected_thread_id = users[i]["context"].thread_id
+                expected_user_index = i
+                
+                assert event_data["type"] == "agent_started", f"Wrong event type for user {i}"
+                assert event_data["thread_id"] == expected_thread_id, f"Thread ID mismatch for user {i}"
+                assert event_data["payload"]["metadata"]["user_index"] == expected_user_index, f"Wrong user data for user {i}"
+                
+                logger.info(f"✅ User {i+1} received only their own event")
+            
+            # Validate no additional events received (no cross-user leakage)
+            for i, websocket in enumerate(websockets):
+                with pytest.raises(asyncio.TimeoutError):
+                    # This should timeout - no additional events should be received
+                    await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                
+                logger.info(f"✅ User {i+1} received no additional events - isolation confirmed")
+                
+        finally:
+            # Cleanup all connections
+            for websocket in websockets:
+                if websocket:
+                    await websocket.close()
+        
+        logger.info(f"✅ Complete user isolation validated with {num_users} concurrent users")
+    
+    @pytest.mark.asyncio
+    async def test_websocket_error_handling_real_failure_scenarios(
+        self,
+        authenticated_user,
+        real_websocket_infrastructure
+    ):
+        """Test WebSocket error handling with real failure scenarios.
+        
+        Business Value: Validates error handling that prevents system failures
+        when WebSocket connections have issues - ensures chat reliability.
+        """
+        context = authenticated_user["context"]
+        event_router = real_websocket_infrastructure["event_router"]
+        
+        # Create emitter without real WebSocket connection (simulates connection failure)
+        emitter = UserWebSocketEmitter(
+            context=context,
+            router=event_router,
+            connection_id="nonexistent_connection"
+        )
+        
+        # Attempt to send event with no connection - should handle gracefully
+        success = await emitter.notify_agent_started("TestAgent", {"test": "error_handling"})
+        
+        # Should return False but not crash
+        assert success is False, "Should return False for failed event sending"
+        
+        # Validate error metrics updated
+        stats = emitter.get_stats()
+        assert stats["events_sent"] == 0, "No events should have been sent"
+        assert stats["events_failed"] == 1, "One event should have failed"
+        assert stats["success_rate"] == 0.0, "Success rate should be 0%"
+        
+        logger.info("✅ Error handling validated - system handles connection failures gracefully")
 
-        # Should compress large events
-        # REMOVED_SYNTAX_ERROR: success = await emitter.emit(event, compress=True)
 
-        # REMOVED_SYNTAX_ERROR: assert success is True
-        # REMOVED_SYNTAX_ERROR: call_args = mock_pool.broadcast_to_user.call_args[0]
-        # REMOVED_SYNTAX_ERROR: sent_event = call_args[1]
+# Test configuration and setup
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create event loop for async tests."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
-        # Event should be marked as compressed
-        # REMOVED_SYNTAX_ERROR: assert sent_event.get("compressed") is True or len(str(sent_event)) < len(large_data)
+
+# Mark all tests as requiring Docker services
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.integration, 
+    pytest.mark.websocket,
+    pytest.mark.real_services  # Custom marker for real service tests
+]
