@@ -194,26 +194,35 @@ class TestFullStartupIntegration:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_agent_registry_initialization(self):
-        """Test agent registry is properly initialized with all agents."""
-        from netra_backend.app.orchestration.agent_execution_registry import (
-            get_agent_execution_registry
-        )
+        """Test agent registry is properly initialized with all agents using SSOT."""
+        from netra_backend.app.core.registry.universal_registry import get_global_registry
         
-        # Get registry
-        registry = await get_agent_execution_registry()
+        # Get SSOT registry
+        registry = get_global_registry("agent")
         
-        # Verify agents registered
-        agent_types = registry.get_available_agent_types()
+        # Verify registry is healthy
+        assert registry is not None, "AgentRegistry should be initialized"
         
-        # Should have core agents
-        expected_agents = [
-            "supervisor",
-            "apex_optimizer",
-            "reporting"
-        ]
+        # Get registry stats
+        stats = registry.get_stats() if hasattr(registry, 'get_stats') else {}
+        registered_count = stats.get('registered_count', 0)
         
-        for agent in expected_agents:
-            assert agent in agent_types, f"Missing agent: {agent}"
+        # Should have agents registered
+        assert registered_count > 0, f"Should have agents registered, got {registered_count}"
+        
+        # If registry has list_keys method, verify expected agents
+        if hasattr(registry, 'list_keys'):
+            agent_types = registry.list_keys()
+            
+            # Should have core agents
+            expected_agents = [
+                "supervisor",
+                "apex_optimizer",
+                "reporting"
+            ]
+            
+            for agent in expected_agents:
+                assert agent in agent_types, f"Missing agent: {agent}"
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)

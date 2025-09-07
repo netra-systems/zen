@@ -260,24 +260,32 @@ class HealthMonitor:
             return HealthStatus.DEGRADED, f"Database check failed: {str(e)}", {"error": str(e)}
     
     async def _check_agents(self) -> tuple[HealthStatus, str, Dict[str, Any]]:
-        """Check agent system health."""
+        """Check agent system health using SSOT AgentRegistry."""
         try:
-            from netra_backend.app.orchestration.agent_execution_registry import AgentExecutionRegistry
+            # Use SSOT AgentRegistry from UniversalRegistry
+            from netra_backend.app.core.registry.universal_registry import get_global_registry
             
-            registry = AgentExecutionRegistry()
+            # Get the global agent registry instance
+            registry = get_global_registry("agent")
             
             # Check if registry is initialized
             if not registry:
-                return HealthStatus.UNHEALTHY, "AgentExecutionRegistry not initialized", {}
+                return HealthStatus.UNHEALTHY, "AgentRegistry not initialized", {}
             
-            # Check registered agents
-            agent_count = len(registry.registered_agents) if hasattr(registry, 'registered_agents') else 0
+            # Check registry health
+            if hasattr(registry, 'is_healthy') and not registry.is_healthy():
+                return HealthStatus.UNHEALTHY, "AgentRegistry is not healthy", {}
+            
+            # Get registry stats
+            stats = registry.get_stats() if hasattr(registry, 'get_stats') else {}
+            agent_count = stats.get('registered_count', 0)
             
             if agent_count == 0:
                 return HealthStatus.DEGRADED, "No agents registered", {"registered_agents": 0}
             
             return HealthStatus.HEALTHY, f"{agent_count} agents registered", {
-                "registered_agents": agent_count
+                "registered_agents": agent_count,
+                "registry_stats": stats
             }
             
         except Exception as e:

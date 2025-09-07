@@ -295,20 +295,30 @@ class StartupValidator:
             return False, f"Signature validation error: {str(e)}"
     
     def _validate_agent_registry(self) -> Tuple[bool, str]:
-        """Validate AgentExecutionRegistry."""
+        """Validate AgentRegistry using SSOT pattern."""
         try:
-            from netra_backend.app.orchestration.agent_execution_registry import AgentExecutionRegistry
+            # Use SSOT AgentRegistry from UniversalRegistry
+            from netra_backend.app.core.registry.universal_registry import get_global_registry
             
-            registry = AgentExecutionRegistry()
+            # Get the global agent registry instance
+            registry = get_global_registry("agent")
             
-            # Just validate it initializes
+            # Validate it's properly initialized
             if not registry:
-                return False, "AgentExecutionRegistry initialization failed"
+                return False, "AgentRegistry initialization failed"
             
-            return True, "AgentExecutionRegistry validated"
+            # Check if it's healthy
+            if hasattr(registry, 'is_healthy') and not registry.is_healthy():
+                return False, "AgentRegistry is not healthy"
+            
+            # Get stats for validation
+            stats = registry.get_stats() if hasattr(registry, 'get_stats') else {}
+            registered_count = stats.get('registered_count', 0)
+            
+            return True, f"AgentRegistry validated ({registered_count} agents registered)"
             
         except Exception as e:
-            return False, f"AgentExecutionRegistry error: {str(e)}"
+            return False, f"AgentRegistry error: {str(e)}"
     
     def _validate_configuration(self) -> Tuple[bool, str]:
         """Validate configuration is properly loaded."""
