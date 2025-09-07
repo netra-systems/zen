@@ -30,7 +30,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core import get_websocket_manager
-from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
