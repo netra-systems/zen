@@ -140,29 +140,24 @@ async def authenticate(session: aiohttp.ClientSession) -> str:
     register_url = f"{STAGING_CONFIG['auth_url']}/auth/register"
     
     # Try login first
-    try:
-        async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                print(f"{Fore.GREEN}✓ Authentication successful{Style.RESET_ALL}\n")
-                return data.get("access_token")
-    except Exception as e:
-        print(f"{Fore.YELLOW}Login attempt failed, will try registration: {e}{Style.RESET_ALL}")
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
+        if resp.status == 200:
+            data = await resp.json()
+            print(f"{Fore.GREEN}✓ Authentication successful{Style.RESET_ALL}\n")
+            return data.get("access_token")
         
     # If login fails, try to register
-    try:
-        async with session.post(register_url, json=STAGING_CONFIG["test_user"]) as resp:
-            if resp.status in [200, 201]:
-                data = await resp.json()
-                print(f"{Fore.GREEN}✓ Registration successful{Style.RESET_ALL}\n")
-                # Now login
-                async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        return data.get("access_token")
-    except Exception as e:
-        print(f"{Fore.RED}Authentication failed: {e}{Style.RESET_ALL}")
-        raise  # Re-raise to fail test if authentication completely fails
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    async with session.post(register_url, json=STAGING_CONFIG["test_user"]) as resp:
+        if resp.status in [200, 201]:
+            data = await resp.json()
+            print(f"{Fore.GREEN}✓ Registration successful{Style.RESET_ALL}\n")
+            # Now login
+            async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    return data.get("access_token")
         
     return None
 
@@ -182,60 +177,41 @@ async def run_agent_and_capture_events():
         print(f"{Fore.YELLOW}Connecting to WebSocket...{Style.RESET_ALL}")
         headers = {"Authorization": f"Bearer {token}"} if token != "anonymous" else {}
         
-        try:
-            async with websockets.connect(STAGING_CONFIG["ws_url"], extra_headers=headers) as websocket:
-                print(f"{Fore.GREEN}✓ WebSocket connected{Style.RESET_ALL}\n")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with websockets.connect(STAGING_CONFIG["ws_url"], extra_headers=headers) as websocket:
+            print(f"{Fore.GREEN}✓ WebSocket connected{Style.RESET_ALL}\n")
+            
+            # Send initial message to trigger agent
+            test_message = {
+                "type": "message",
+                "content": "Analyze the performance of my AI infrastructure",
+                "timestamp": time.time()
+            }
+            
+            print(f"{Fore.YELLOW}Sending test message: {test_message['content']}{Style.RESET_ALL}\n")
+            await websocket.send(json.dumps(test_message))
+            
+            capture.start_time = time.time()
+            
+            # Listen for events
+            print(f"{Fore.CYAN}Listening for WebSocket events...{Style.RESET_ALL}\n")
+            print("-"*80)
+            
+            timeout = 30  # 30 second timeout
+            start = time.time()
+            
+            while time.time() - start < timeout:
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                message = await asyncio.wait_for(websocket.recv(), timeout=1.0)
+                event = json.loads(message)
+                capture.print_event(event)
                 
-                # Send initial message to trigger agent
-                test_message = {
-                    "type": "message",
-                    "content": "Analyze the performance of my AI infrastructure",
-                    "timestamp": time.time()
-                }
-                
-                print(f"{Fore.YELLOW}Sending test message: {test_message['content']}{Style.RESET_ALL}\n")
-                await websocket.send(json.dumps(test_message))
-                
-                capture.start_time = time.time()
-                
-                # Listen for events
-                print(f"{Fore.CYAN}Listening for WebSocket events...{Style.RESET_ALL}\n")
-                print("-"*80)
-                
-                timeout = 30  # 30 second timeout
-                start = time.time()
-                
-                while time.time() - start < timeout:
-                    try:
-                        message = await asyncio.wait_for(websocket.recv(), timeout=1.0)
-                        event = json.loads(message)
-                        capture.print_event(event)
-                        
-                        # Check if agent completed
-                        if event.get("type") == "agent_completed":
-                            print(f"{Fore.GREEN}Agent execution completed!{Style.RESET_ALL}")
-                            break
-                            
-                    except asyncio.TimeoutError:
-                        # No message received, continue
-                        continue
-                    except websockets.exceptions.ConnectionClosed:
-                        print(f"{Fore.RED}WebSocket connection closed{Style.RESET_ALL}")
-                        break
-                    except json.JSONDecodeError as e:
-                        print(f"{Fore.RED}Invalid JSON received: {e}{Style.RESET_ALL}")
-                        # Continue to try to get more messages
-                        continue
-                    except Exception as e:
-                        print(f"{Fore.RED}Unexpected error receiving message: {e}{Style.RESET_ALL}")
-                        raise  # Re-raise unexpected errors to fail the test
-                        
-                capture.end_time = time.time()
-                
-        except Exception as e:
-            print(f"{Fore.RED}WebSocket connection failed: {e}{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}Make sure Docker services are running:{Style.RESET_ALL}")
-            print("  python scripts/docker_manual.py start")
+                # Check if agent completed
+                if event.get("type") == "agent_completed":
+                    print(f"{Fore.GREEN}Agent execution completed!{Style.RESET_ALL}")
+                    break
+                    
+            capture.end_time = time.time()
             
     # Print summary
     capture.print_summary()
@@ -252,57 +228,46 @@ async def test_multiple_concurrent_users():
         """Run a single user session"""
         print(f"{Fore.YELLOW}User {user_id}: Starting session...{Style.RESET_ALL}")
         
-        try:
-            async with aiohttp.ClientSession() as session:
-                # Each user gets unique credentials
-                user_config = {
-                    "email": f"user{user_id}@test.com",
-                    "password": f"pass{user_id}"
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with aiohttp.ClientSession() as session:
+            # Each user gets unique credentials
+            user_config = {
+                "email": f"user{user_id}@test.com",
+                "password": f"pass{user_id}"
+            }
+            
+            # Connect to WebSocket
+            async with websockets.connect(STAGING_CONFIG["ws_url"]) as websocket:
+                # Send message
+                message = {
+                    "type": "message",
+                    "content": f"User {user_id}: Test message",
+                    "user_id": user_id,
+                    "timestamp": time.time()
                 }
+                await websocket.send(json.dumps(message))
                 
-                # Connect to WebSocket
-                async with websockets.connect(STAGING_CONFIG["ws_url"]) as websocket:
-                    # Send message
-                    message = {
-                        "type": "message",
-                        "content": f"User {user_id}: Test message",
-                        "user_id": user_id,
-                        "timestamp": time.time()
-                    }
-                    await websocket.send(json.dumps(message))
+                # Collect some events
+                events = []
+                start = time.time()
+                while time.time() - start < 5:  # 5 second collection
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    msg = await asyncio.wait_for(websocket.recv(), timeout=0.5)
+                    event = json.loads(msg)
+                    events.append(event)
                     
-                    # Collect some events
-                    events = []
-                    start = time.time()
-                    while time.time() - start < 5:  # 5 second collection
-                        try:
-                            msg = await asyncio.wait_for(websocket.recv(), timeout=0.5)
-                            event = json.loads(msg)
-                            events.append(event)
+                    # Check for data leakage
+                    if "user_id" in str(event):
+                        other_user = None
+                        for uid in range(10):
+                            if uid != user_id and f"user{uid}" in str(event):
+                                other_user = uid
+                                break
+                        if other_user is not None:
+                            print(f"{Fore.RED}⚠ ISOLATION VIOLATION: User {user_id} received data from User {other_user}!{Style.RESET_ALL}")
                             
-                            # Check for data leakage
-                            if "user_id" in str(event):
-                                other_user = None
-                                for uid in range(10):
-                                    if uid != user_id and f"user{uid}" in str(event):
-                                        other_user = uid
-                                        break
-                                if other_user is not None:
-                                    print(f"{Fore.RED}⚠ ISOLATION VIOLATION: User {user_id} received data from User {other_user}!{Style.RESET_ALL}")
-                                    
-                        except asyncio.TimeoutError:
-                            continue
-                        except json.JSONDecodeError:
-                            # Skip invalid JSON and continue
-                            continue
-                            
-                    print(f"{Fore.GREEN}User {user_id}: Received {len(events)} events{Style.RESET_ALL}")
-                    return events
-                    
-        except Exception as e:
-            print(f"{Fore.RED}User {user_id}: Error - {e}{Style.RESET_ALL}")
-            # For multi-user tests, individual user failures shouldn't fail entire test
-            return []
+                print(f"{Fore.GREEN}User {user_id}: Received {len(events)} events{Style.RESET_ALL}")
+                return events
             
     # Run 10 concurrent users
     tasks = [run_user(i) for i in range(10)]

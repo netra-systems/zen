@@ -2416,7 +2416,9 @@ jest.mock('@/hooks/useThreadSwitching', () => {
         let shouldUseOperationManager = false;
         try {
           const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
-          shouldUseOperationManager = !!ThreadOperationManager;
+          // For certain operations (with specific options), prefer direct approach for more control
+          const hasSpecialOptions = options.clearMessages || options.updateUrl || options.skipUrlUpdate || options.force;
+          shouldUseOperationManager = !!ThreadOperationManager && !hasSpecialOptions;
         } catch (error) {
           // ThreadOperationManager not available, use direct approach
         }
@@ -2646,14 +2648,15 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               }
             }
             
-            // Handle URL update if requested
+            // Handle URL update if requested - look for mocked updateUrl
             if (options.updateUrl) {
               try {
                 const urlSyncModule = require('@/services/urlSyncService');
                 if (urlSyncModule && urlSyncModule.useURLSync) {
-                  const { updateUrl } = urlSyncModule.useURLSync();
-                  if (updateUrl) {
-                    updateUrl(threadId);
+                  const hooks = urlSyncModule.useURLSync();
+                  if (hooks && hooks.updateUrl) {
+                    console.log(`Direct approach: Calling updateUrl with ${threadId}`);
+                    hooks.updateUrl(threadId);
                   }
                 }
               } catch (error) {
@@ -2711,7 +2714,8 @@ jest.mock('@/hooks/useThreadSwitching', () => {
     
     const retryLastFailed = React.useCallback(async () => {
       if (globalHookState.error && globalHookState.error.threadId) {
-        return await switchToThread(globalHookState.error.threadId);
+        // Use force option to bypass operation mutex for retries
+        return await switchToThread(globalHookState.error.threadId, { force: true });
       }
       return false;
     }, [switchToThread]);

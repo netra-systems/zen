@@ -102,15 +102,9 @@ class MessageSimulator:
         failed = 0
         
         for client in clients:
-            try:
-                await client.send_json(message)
-                successful += 1
-            except (ConnectionError, asyncio.TimeoutError):
-                # Expected network errors during broadcast
-                failed += 1
-            except Exception as e:
-                # Unexpected errors should fail the test
-                pytest.fail(f"Unexpected error during broadcast: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await client.send_json(message)
+            successful += 1
         
         return {
             "successful": successful,
@@ -180,15 +174,11 @@ class TestWebSocketAuthHandshake:
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.side_effect = ValueError("Invalid token")
             
-            try:
-                await websocket.accept()
-                # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
-                pytest.fail("Expected ValueError was not raised for invalid token")
-            except ValueError as e:
-                return {"authenticated": False, "error": str(e)}
-            except Exception as e:
-                pytest.fail(f"Unexpected error during invalid token test: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await websocket.accept()
+            # Mock: Authentication service isolation for testing without real auth flows
+            await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
+            pytest.fail("Expected ValueError was not raised for invalid token")
 
 
 @pytest.mark.e2e
@@ -354,18 +344,10 @@ class TestWebSocketRateLimiting:
                 rate_limit_triggered = True
                 break
                 
-            try:
-                await client.send_json({"type": "test", "payload": {"count": i}})
-                messages_sent += 1
-                await asyncio.sleep(0.01)
-            except ConnectionError as e:
-                if "rate limit" in str(e).lower():
-                    rate_limit_triggered = True
-                    break
-                else:
-                    pytest.fail(f"Unexpected connection error: {e}")
-            except Exception as e:
-                pytest.fail(f"Unexpected error during rate limit test: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await client.send_json({"type": "test", "payload": {"count": i}})
+            messages_sent += 1
+            await asyncio.sleep(0.01)
         
         return {
             "messages_sent": messages_sent,

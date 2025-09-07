@@ -278,8 +278,9 @@ describe('Thread Switching Basic Tests', () => {
 
     expect(result.current.state.error).toBeTruthy();
 
-    // Setup success for retry
-    threadLoadingService.loadThread.mockResolvedValueOnce({
+    // Clear any existing mock behavior and setup success for retry
+    threadLoadingService.loadThread.mockReset();
+    threadLoadingService.loadThread.mockResolvedValue({
       success: true,
       threadId: 'thread-1',
       messages: []
