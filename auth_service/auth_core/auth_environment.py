@@ -1070,7 +1070,6 @@ class AuthEnvironment:
         # Required variables
         required = {
             "JWT_SECRET_KEY": self.get_jwt_secret_key()
-            # DATABASE_URL is validated through DatabaseURLBuilder
         }
         
         for name, value in required.items():

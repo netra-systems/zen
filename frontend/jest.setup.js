@@ -2708,13 +2708,15 @@ jest.mock('@/services/threadLoadingService', () => ({
   threadLoadingService: {
     loadThread: jest.fn(async (threadId) => {
       console.log(`threadLoadingService: loading thread ${threadId}`);
-      return {
+      const result = {
         success: true,
         threadId,
         messages: [
           { id: `msg-${threadId}-1`, content: `Message for ${threadId}`, timestamp: Date.now() }
         ]
       };
+      console.log(`threadLoadingService: returning result for ${threadId}:`, result);
+      return result;
     })
   }
 }));

@@ -11,6 +11,9 @@ import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import * as threadLoadingService from '@/services/threadLoadingService';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
+// DISABLE the global useThreadSwitching mock for this test
+jest.unmock('@/hooks/useThreadSwitching');
+
 // Mock the unified chat store and ThreadOperationManager
 jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-chat'));
 jest.mock('@/lib/thread-operation-manager', () => require('../../__mocks__/lib/thread-operation-manager'));
@@ -18,7 +21,11 @@ jest.mock('@/lib/thread-operation-manager', () => require('../../__mocks__/lib/t
 // Import the mocked store
 import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
 // Mock modules
-jest.mock('@/services/threadLoadingService');
+jest.mock('@/services/threadLoadingService', () => ({
+  threadLoadingService: {
+    loadThread: jest.fn()
+  }
+}));
 jest.mock('@/lib/retry-manager', () => ({
   executeWithRetry: jest.fn(async (fn) => {
     // Actually execute the function passed to it

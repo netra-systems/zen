@@ -380,7 +380,7 @@ const startLoadingState = (
     }
   };
   
-  // Perform atomic update
+  // Perform atomic update - this might trigger re-renders so should be wrapped in act() by tests
   atomicUpdate();
   
   // Start timeout tracking
@@ -441,7 +441,7 @@ const handleLoadingResult = (
       }
     };
     
-    // Perform atomic update
+    // Perform atomic update - this might trigger re-renders so should be wrapped in act() by tests
     atomicUpdate();
     
     const loadedEvent = createThreadLoadedEvent(threadId, result.messages);
@@ -512,7 +512,7 @@ const handleLoadingError = (
     }
   };
   
-  // Perform atomic update
+  // Perform atomic update - this might trigger re-renders so should be wrapped in act() by tests
   atomicUpdate();
   
   lastFailedThreadRef.current = threadId;
