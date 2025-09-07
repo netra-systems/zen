@@ -2710,6 +2710,103 @@ jest.mock('@/services/threadService', () => {
   };
 });
 
+// ============================================================================  
+// UNIFIED CHAT SIDEBAR HOOKS MOCK
+// ============================================================================
+// This ensures the ChatSidebar gets mock threads for tests
+jest.mock('@/components/chat/ChatSidebarHooks', () => {
+  const React = require('react');
+  
+  // Mock thread data matching our ThreadService mock
+  const mockThreads = [
+    {
+      id: 'thread-1',
+      title: 'First Thread',
+      created_at: Date.now() - 3600000, // 1 hour ago
+      updated_at: Date.now() - 1800000, // 30 minutes ago
+      metadata: {
+        title: 'First Thread',
+        last_message: 'Hello, this is the first thread'
+      }
+    },
+    {
+      id: 'thread-2', 
+      title: 'Second Thread',
+      created_at: Date.now() - 7200000, // 2 hours ago
+      updated_at: Date.now() - 900000, // 15 minutes ago
+      metadata: {
+        title: 'Second Thread',
+        last_message: 'This is the second thread'
+      }
+    },
+    {
+      id: 'thread-3',
+      title: 'Third Thread', 
+      created_at: Date.now() - 10800000, // 3 hours ago
+      updated_at: Date.now() - 600000, // 10 minutes ago
+      metadata: {
+        title: 'Third Thread',
+        last_message: 'This is the third thread'
+      }
+    }
+  ];
+  
+  return {
+    useChatSidebarState: () => ({
+      searchQuery: '',
+      setSearchQuery: jest.fn(),
+      isCreatingThread: false,
+      setIsCreatingThread: jest.fn(),
+      showAllThreads: false,
+      setShowAllThreads: jest.fn(),
+      filterType: 'all',
+      setFilterType: jest.fn(),
+      currentPage: 1,
+      setCurrentPage: jest.fn(),
+      isLoadingThreads: false,
+      setIsLoadingThreads: jest.fn(),
+      loadError: null,
+      setLoadError: jest.fn()
+    }),
+    
+    useThreadLoader: () => ({
+      threads: mockThreads,
+      isLoadingThreads: false,
+      loadError: null,
+      loadThreads: jest.fn(async () => {
+        console.log('useThreadLoader: loadThreads called');
+      })
+    }),
+    
+    useThreadFiltering: (threads, searchQuery, threadsPerPage, currentPage) => {
+      // Filter and paginate the provided threads
+      const filteredThreads = threads.filter(thread => {
+        if (!searchQuery) return true;
+        const title = thread.metadata?.title || thread.title || `Chat ${thread.created_at}`;
+        return title.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+      
+      const sortedThreads = filteredThreads.sort((a, b) => {
+        const aTime = a.updated_at || a.created_at;
+        const bTime = b.updated_at || b.created_at;
+        return bTime - aTime;
+      });
+      
+      const totalPages = Math.ceil(sortedThreads.length / threadsPerPage);
+      const paginatedThreads = sortedThreads.slice(
+        (currentPage - 1) * threadsPerPage,
+        currentPage * threadsPerPage
+      );
+      
+      return {
+        sortedThreads,
+        paginatedThreads,
+        totalPages
+      };
+    }
+  };
+});
+
 jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
   useMessageHistory: jest.fn(() => ({
     messageHistory: [],
