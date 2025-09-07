@@ -387,9 +387,14 @@ class TokenService:
     async def _is_refresh_token_used(self, refresh_token: str) -> bool:
         """Check if refresh token has been used."""
         try:
-            # Decode to get JTI
-            secret = self._get_jwt_secret()
-            payload = jwt.decode(refresh_token, secret, algorithms=['HS256'], options={"verify_exp": False})
+            # Decode to get JTI via auth service - SSOT compliant
+            from netra_backend.app.clients.auth_client_core import auth_client
+            validation_result = await auth_client.validate_token_jwt(refresh_token)
+            
+            if not validation_result:
+                return True  # Invalid token
+            
+            payload = validation_result.get('payload', {})
             jti = payload.get('jti')
             
             if not jti:
@@ -415,9 +420,14 @@ class TokenService:
     async def _mark_refresh_token_used(self, refresh_token: str) -> None:
         """Mark refresh token as used atomically."""
         try:
-            # Decode to get JTI
-            secret = self._get_jwt_secret()
-            payload = jwt.decode(refresh_token, secret, algorithms=['HS256'], options={"verify_exp": False})
+            # Decode to get JTI via auth service - SSOT compliant
+            from netra_backend.app.clients.auth_client_core import auth_client
+            validation_result = await auth_client.validate_token_jwt(refresh_token)
+            
+            if not validation_result:
+                return
+            
+            payload = validation_result.get('payload', {})
             jti = payload.get('jti')
             
             if not jti:

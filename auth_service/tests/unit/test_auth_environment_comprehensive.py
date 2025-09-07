@@ -81,7 +81,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_uses_unified_manager(self):
         """Test JWT secret key uses unified manager for consistency."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.return_value = "unified-jwt-secret"
             
             secret = self.env.get_jwt_secret_key()
@@ -91,7 +91,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_falls_back_on_unified_failure(self):
         """Test JWT secret falls back to local resolution if unified manager fails."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
