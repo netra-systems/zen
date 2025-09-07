@@ -22,7 +22,7 @@
             <frequency>Every deployment</frequency>
             <five-whys-chain>
                 <why level="1">Database credentials don't match Cloud SQL configuration</why>
-                <why level="2">Staging deployment uses outdated or incorrect DATABASE_URL secret</why>
+                <why level="2">Staging deployment uses outdated or incorrect #removed-legacysecret</why>
                 <why level="3">No systematic process for validating database credentials before deployment</why>
                 <why level="4">Deployment scripts focus on infrastructure but not credential verification</why>
                 <why level="5">Missing comprehensive pre-deployment validation framework</why>

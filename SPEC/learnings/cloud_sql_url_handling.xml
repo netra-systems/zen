@@ -200,7 +200,7 @@
     
     <note type="staging">
       Staging uses Cloud SQL with Unix socket connections.
-      DATABASE_URL should be in format: postgresql://user:pass@/db?host=/cloudsql/instance
+      #removed-legacyshould be in format: postgresql://user:pass@/db?host=/cloudsql/instance
     </note>
   </deployment_notes>
   

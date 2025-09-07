@@ -102,15 +102,15 @@
     <critical-methods>
         <method name="get_auth_database_url_async">
             <signature>@staticmethod def get_auth_database_url_async() -> str</signature>
-            <purpose>Convert DATABASE_URL environment variable to asyncpg-compatible format</purpose>
+            <purpose>Convert #removed-legacyenvironment variable to asyncpg-compatible format</purpose>
             <behavior>
-                - Reads DATABASE_URL from environment
+                - Reads #removed-legacyfrom environment
                 - Converts postgresql:// to postgresql+asyncpg://
                 - Converts postgres:// to postgresql+asyncpg://
                 - Converts sslmode=require to ssl=require for asyncpg compatibility
                 - Preserves Cloud SQL Unix socket format (/cloudsql/)
                 - Skips SSL parameter conversion for Cloud SQL connections
-                - Raises ValueError if DATABASE_URL not set
+                - Raises ValueError if #removed-legacynot set
             </behavior>
             <edge_cases>
                 <case>Cloud SQL Unix sockets: Preserves /cloudsql/ path without SSL conversion</case>
@@ -123,7 +123,7 @@
             <signature>@staticmethod def validate_auth_url(url: str = None) -> bool</signature>
             <purpose>Validate PostgreSQL database URL format</purpose>
             <behavior>
-                - Uses DATABASE_URL environment variable if url parameter is None
+                - Uses #removed-legacyenvironment variable if url parameter is None
                 - Accepts multiple PostgreSQL schemes: postgresql://, postgres://, postgresql+asyncpg://
                 - Validates URL has required netloc component
                 - Returns True for valid URLs, False for invalid ones
@@ -140,13 +140,13 @@
             <signature>@staticmethod def is_cloud_sql_environment() -> bool</signature>
             <purpose>Detect if running in Google Cloud SQL environment</purpose>
             <behavior>
-                - Checks DATABASE_URL for /cloudsql/ Unix socket path
+                - Checks #removed-legacyfor /cloudsql/ Unix socket path
                 - Checks K_SERVICE environment variable (set by Cloud Run)
                 - Returns True if either condition is met
                 - Returns False for standard PostgreSQL connections
             </behavior>
             <detection_strategies>
-                <strategy>DATABASE_URL contains "/cloudsql/" → Cloud SQL Unix socket</strategy>
+                <strategy>#removed-legacycontains "/cloudsql/" → Cloud SQL Unix socket</strategy>
                 <strategy>K_SERVICE environment variable present → Cloud Run environment</strategy>
             </detection_strategies>
         </method>
@@ -293,7 +293,7 @@
             <check>✓ is_test_environment() method exists and detects test environments</check>
             <check>✓ SSL parameter conversion works correctly (sslmode → ssl)</check>
             <check>✓ Cloud SQL Unix socket format preserved without SSL conversion</check>
-            <check>✓ Error handling for missing DATABASE_URL environment variable</check>
+            <check>✓ Error handling for missing #removed-legacyenvironment variable</check>
             <check>✓ Error handling for malformed URLs</check>
             <check>✓ Multiple environment detection strategies implemented</check>
             <check>✓ Thread safety for concurrent static method calls</check>

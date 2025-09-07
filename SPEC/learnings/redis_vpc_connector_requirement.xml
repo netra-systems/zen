@@ -39,10 +39,10 @@
             </cause>
             
             <cause id="environment-validator-checking-wrong-var">
-                <description>Environment validator checking DATABASE_URL instead of POSTGRES_* variables</description>
+                <description>Environment validator checking #removed-legacyinstead of POSTGRES_* variables</description>
                 <evidence>
-                    <finding>Backend constructs DATABASE_URL from POSTGRES_* environment variables</finding>
-                    <finding>Validator incorrectly required DATABASE_URL in staging/production</finding>
+                    <finding>Backend constructs #removed-legacyfrom POSTGRES_* environment variables</finding>
+                    <finding>Validator incorrectly required #removed-legacyin staging/production</finding>
                     <finding>This could mask configuration issues during deployment</finding>
                 </evidence>
             </cause>
@@ -149,7 +149,7 @@ resource "google_cloud_run_service" "backend" {
             <title>Environment Validation Must Match Actual Configuration</title>
             <description>
                 Validators must check the actual environment variables used by the service,
-                not legacy or constructed variables. DATABASE_URL is constructed from POSTGRES_*
+                not legacy or constructed variables. #removed-legacyis constructed from POSTGRES_*
                 variables in production configurations.
             </description>
         </takeaway>

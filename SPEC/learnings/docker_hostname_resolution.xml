@@ -52,7 +52,7 @@
         3. If in Docker and host is 'localhost' or '127.0.0.1':
            - Override with Docker service name ('postgres')
         4. Keep custom hostnames unchanged
-        5. DATABASE_URL takes precedence if set
+        5. #removed-legacytakes precedence if set
         6. Production/staging environments use explicit configuration only
       </logic>
       
@@ -127,7 +127,7 @@ return f"postgresql+asyncpg://{user}{password_part}@{resolved_host}:{port}/{db}"
       <case>Docker detection via /proc/self/cgroup docker references</case>
       <case>Non-Docker environment keeps original hostname</case>
       <case>Custom hostnames not overridden in Docker</case>
-      <case>DATABASE_URL precedence when set</case>
+      <case>#removed-legacyprecedence when set</case>
       <case>Docker hostname NOT applied in production environment</case>
       <case>Docker hostname NOT applied in staging environment</case>
     </test_cases>
@@ -148,7 +148,7 @@ return f"postgresql+asyncpg://{user}{password_part}@{resolved_host}:{port}/{db}"
       Log hostname resolution decisions for debugging
     </practice>
     <practice>
-      Provide DATABASE_URL override for special cases
+      Provide #removed-legacyoverride for special cases
     </practice>
   </best_practices>
 

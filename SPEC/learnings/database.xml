@@ -61,7 +61,7 @@
         </files_modified>
         <code_changes>
           - Modified get_base_database_url() to distinguish between pytest collection and test execution
-          - Added fallback to _get_default_database_url() for test execution when no DATABASE_URL is set
+          - Added fallback to _get_default_database_url() for test execution when no #removed-legacyis set
         </code_changes>
       </fix>
       
@@ -198,7 +198,7 @@
     <verification_steps>
       <step>Run migrations in Docker Compose: alembic upgrade head</step>
       <step>Deploy to staging and verify migrations run successfully</step>
-      <step>Check DATABASE_URL environment variable is properly set in each environment</step>
+      <step>Check #removed-legacyenvironment variable is properly set in each environment</step>
       <step>Verify DatabaseManager correctly detects environment and returns appropriate URL</step>
     </verification_steps>
   </alembic_configuration_learning>

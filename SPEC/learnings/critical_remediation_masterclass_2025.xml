@@ -655,7 +655,7 @@ subprocess.run(["command"], env=subprocess_env)
                     <problem>Deployment script missing critical secrets causing service failures</problem>
                     <solution>All required secrets must be available before deployment</solution>
                     <required_secrets>
-                        <secret>DATABASE_URL - PostgreSQL with correct credentials</secret>
+                        <secret>#removed-legacy- PostgreSQL with correct credentials</secret>
                         <secret>REDIS_URL - Redis connection for caching</secret>
                         <secret>CLICKHOUSE_HOST - ClickHouse hostname</secret>
                         <secret>CLICKHOUSE_PORT - ClickHouse port</secret>

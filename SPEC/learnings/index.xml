@@ -205,15 +205,15 @@
         <keywords>database-validation, config-architecture, gcp-deployment, postgres-components, database-url, cloud-sql, false-positive</keywords>
         <path>database_config_validation_architecture_fix_20250907.xml</path>
         <critical-takeaway>
-            GCP staging validation failed for DATABASE_* variables while database worked perfectly using DATABASE_URL + POSTGRES_* variables.
+            GCP staging validation failed for DATABASE_* variables while database worked perfectly using #removed-legacy+ POSTGRES_* variables.
             Root cause: architectural fragmentation between deployment patterns and validation logic. Fixed with smart pattern detection:
-            DATABASE_URL priority → POSTGRES_* components → DATABASE_* legacy. Prevents false positives where system works but validation fails.
+            #removed-legacypriority → POSTGRES_* components → DATABASE_* legacy. Prevents false positives where system works but validation fails.
             Critical insight: "error behind the error" - apparent config issues were actually architectural coordination failures.
         </critical-takeaway>
         <severity>CRITICAL</severity>
         <business-impact>False positive configuration failures blocking deployments and wasting engineering time</business-impact>
         <prevention>
-            Validation must understand equivalent configuration patterns. Check DATABASE_URL first for Cloud Run.
+            Validation must understand equivalent configuration patterns. Check #removed-legacyfirst for Cloud Run.
             Support both POSTGRES_* (GCP) and DATABASE_* (legacy) patterns. Architecture drift detection between systems.
             Integration tests validating deployment config against validator requirements.
         </prevention>
@@ -1583,7 +1583,7 @@
         </category>
         
         <category name="Configuration Issues 2025" path="SPEC/learnings/configuration_issues_2025.xml" keywords="DATABASE_URL, ClickHouse, Redis, Environment Detection, Import Paths, WebSocket">
-            <critical-takeaway>DATABASE_URL must use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
+            <critical-takeaway>#removed-legacymust use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
             <critical-takeaway>Redis fallback to localhost must be disabled in staging/production via REDIS_FALLBACK_ENABLED=false environment variable.</critical-takeaway>
             <critical-takeaway>Import paths: ClickHouseClient moved to data_sub_agent module, RedisClient is RedisManager, WebSocket imports use fastapi not starlette.</critical-takeaway>
         </category>
@@ -1914,9 +1914,9 @@
 
         <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy, Gunicorn, Workers">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
-            <critical-takeaway>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
+            <critical-takeaway>#removed-legacyin staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
             <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL (e.g., https://api.staging.netrasystems.ai) for proxy rewrites to work.</critical-takeaway>
-            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check DATABASE_URL and SSL settings.</critical-takeaway>
+            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check #removed-legacyand SSL settings.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain (e.g., auth.staging.netrasystems.ai) with proper CORS and callback URL configuration.</critical-takeaway>
             <critical-takeaway>Gunicorn workers require proper lifecycle hooks and tini for signal handling to prevent ProcessLookupError in containers.</critical-takeaway>
             <critical-takeaway>CRITICAL: USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service, even if OAUTH_PROXY_URL is correctly set.</critical-takeaway>
@@ -1960,7 +1960,7 @@
         </category>
         
         <category name="Configuration Issues Resolution [RESOLVED]" path="SPEC/learnings/configuration_fixes_20250825.xml" keywords="Configuration, Database URL, PostgreSQL, AsyncPG, Auth Service, Startup Import, WebSocket Deprecation">
-            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service DATABASE_URL configuration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service #removed-legacyconfiguration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
             <critical-takeaway>Auth service requires postgresql+asyncpg:// driver format for async operations, not plain postgresql://</critical-takeaway>
             <critical-takeaway>Database connectivity errors often manifest as "connection refused" when service configuration is correct but infrastructure (Docker PostgreSQL) is not running</critical-takeaway>
             <critical-takeaway>Fixed startup module import error: ErrorAggregator import from netra_backend.app.error_aggregator should be netra_backend.app.startup.error_aggregator</critical-takeaway>
@@ -2123,7 +2123,7 @@
         </category>
         
         <category name="Database/URLConsistency" path="SPEC/learnings/database_url_consistency.xml" keywords="Database URL, Secret Management, Cloud SQL Proxy, Service Consistency">
-            <critical-takeaway>All services MUST use the same DATABASE_URL secret for consistency</critical-takeaway>
+            <critical-takeaway>All services MUST use the same #removed-legacysecret for consistency</critical-takeaway>
             <critical-takeaway>When using Cloud SQL proxy, use Unix socket format not direct IP</critical-takeaway>
             <critical-takeaway>Verify IP addresses in secrets match actual Cloud SQL instances</critical-takeaway>
         </category>
@@ -2192,12 +2192,12 @@
             <critical-takeaway>WebSocket route registration mandatory for real-time functionality.</critical-takeaway>
             <critical-takeaway>CORS configuration must support dynamic development ports with service discovery.</critical-takeaway>
             <critical-takeaway>Frontend environment configuration must align with backend service discovery.</critical-takeaway>
-            <critical-takeaway>Staging deployment requires sslmode=require for DATABASE_URL and gunicorn with uvicorn workers.</critical-takeaway>
+            <critical-takeaway>Staging deployment requires sslmode=require for #removed-legacyand gunicorn with uvicorn workers.</critical-takeaway>
         </category>
         
         <category name="Deployment Staging" path="SPEC/learnings/deployment.xml" keywords="Staging, GCP, Cloud Run, SSL, OAuth, Health Checks">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run deployments for optimal performance.</critical-takeaway>
-            <critical-takeaway>DATABASE_URL MUST include sslmode=require parameter for Cloud SQL connections in staging/production.</critical-takeaway>
+            <critical-takeaway>#removed-legacyMUST include sslmode=require parameter for Cloud SQL connections in staging/production.</critical-takeaway>
             <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL for proxy rewrites to work.</critical-takeaway>
             <critical-takeaway>Health check /health/ready endpoint failures in staging usually indicate database connectivity issues.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain with proper CORS and callback URL configuration.</critical-takeaway>
@@ -2374,7 +2374,7 @@
         
         <category name="Staging Backend Service Failure Tests 2025" path="SPEC/learnings/staging_backend_service_failure_tests_2025.xml" keywords="Staging, Backend Service Failures, TDC, Test-Driven Correction, Infrastructure Validation, Configuration Audit, External Services">
             <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical-takeaway>
-            <critical-takeaway>Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
+            <critical-takeaway>Auth service #removed-legacyundefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
             <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical-takeaway>
             <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
             <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>

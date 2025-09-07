@@ -16,10 +16,10 @@
   <root_cause_analysis>
     <primary_cause>Configuration Architecture Fragmentation</primary_cause>
     <detailed_analysis>
-      <issue>Central configuration validator expected DATABASE_* variables but GCP deployment provides DATABASE_URL + POSTGRES_* variables</issue>
+      <issue>Central configuration validator expected DATABASE_* variables but GCP deployment provides #removed-legacy+ POSTGRES_* variables</issue>
       <timing>Database was working (logs show successful Cloud SQL connections) but validator failed during startup</timing>
       <architecture_drift>Three systems had different configuration expectations:
-        - Deployment: Sets DATABASE_URL + POSTGRES_* for Cloud SQL
+        - Deployment: Sets #removed-legacy+ POSTGRES_* for Cloud SQL
         - Backend Runtime: Uses DatabaseURLBuilder with both patterns  
         - Central Validator: Only validated DATABASE_* components (fixed)
       </architecture_drift>
@@ -49,10 +49,10 @@
   <solution_implemented>
     <approach>Smart Configuration Pattern Detection</approach>
     <implementation>
-      <database_url_priority>Check DATABASE_URL first - if present, validation passes (Cloud Run pattern)</database_url_priority>
+      <database_url_priority>Check #removed-legacyfirst - if present, validation passes (Cloud Run pattern)</database_url_priority>
       <component_fallback>Support both POSTGRES_* (GCP) and DATABASE_* (legacy) component patterns</component_fallback>
       <cloud_sql_support>Allow Cloud SQL Unix socket paths (/cloudsql/...)</cloud_sql_support>
-      <optional_components>Made POSTGRES_* rules OPTIONAL since DATABASE_URL can substitute</optional_components>
+      <optional_components>Made POSTGRES_* rules OPTIONAL since #removed-legacycan substitute</optional_components>
       <comprehensive_validation>Added _validate_database_configuration() for either/or validation logic</comprehensive_validation>
     </implementation>
     
@@ -61,7 +61,7 @@
       <changes>
         <change>Lines 214, 222: Made POSTGRES_PASSWORD and POSTGRES_HOST optional</change>
         <change>Lines 486-493: Added database configuration validation to validate_all_requirements()</change>
-        <change>Lines 514-559: Implemented _validate_database_configuration() with DATABASE_URL OR components logic</change>
+        <change>Lines 514-559: Implemented _validate_database_configuration() with #removed-legacyOR components logic</change>
         <change>Lines 565-579: Updated get_database_credentials() to prioritize DATABASE_URL</change>
         <change>Lines 583-605: Added dual-pattern support (POSTGRES_* OR DATABASE_*) with proper validation</change>
       </changes>

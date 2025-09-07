@@ -18,7 +18,7 @@
   <problem>
     <description>
       Cloud SQL proxy connections were failing because the GCP deployment script
-      was manually constructing DATABASE_URL instead of letting services use
+      was manually constructing #removed-legacyinstead of letting services use
       DatabaseURLBuilder (the SSOT for URL construction).
     </description>
     <symptoms>
@@ -34,15 +34,15 @@
   
   <solution>
     <summary>
-      Removed all DATABASE_URL construction from deployment script.
+      Removed all #removed-legacyconstruction from deployment script.
       Services now use DatabaseURLBuilder to construct URLs from POSTGRES_* variables.
     </summary>
     <changes>
       <change file="scripts/deploy_to_gcp.py">
-        Removed DATABASE_URL construction logic (lines 924-941)
+        Removed #removed-legacyconstruction logic (lines 924-941)
       </change>
       <change file="scripts/deploy_to_gcp.py">
-        Removed DATABASE_URL environment variable addition (lines 972-980)
+        Removed #removed-legacyenvironment variable addition (lines 972-980)
       </change>
     </changes>
     <verification>
@@ -71,7 +71,7 @@
   
   <prevention>
     <rule>Always use DatabaseURLBuilder for database URL construction</rule>
-    <rule>Never set DATABASE_URL in deployment scripts</rule>
+    <rule>Never set #removed-legacyin deployment scripts</rule>
     <rule>Provide POSTGRES_* variables and let services construct URLs</rule>
     <rule>Add regression tests for Cloud SQL proxy connections</rule>
   </prevention>
@@ -86,7 +86,7 @@
   
   <testing_requirements>
     <test>Verify Cloud SQL proxy URL construction with /cloudsql/ paths</test>
-    <test>Ensure no DATABASE_URL in deployment environment variables</test>
+    <test>Ensure no #removed-legacyin deployment environment variables</test>
     <test>Validate DatabaseURLBuilder handles all connection types</test>
     <test>Test staging deployment with Cloud SQL proxy</test>
   </testing_requirements>

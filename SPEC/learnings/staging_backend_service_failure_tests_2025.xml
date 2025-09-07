@@ -28,10 +28,10 @@
 
     <critical_issues_replicated>
         <auth_service_database_failure>
-            <title>Auth Service DATABASE_URL Not Configured - Complete Authentication Breakdown</title>
-            <issue>Auth service DATABASE_URL undefined causing complete auth service startup failure</issue>
+            <title>Auth Service #removed-legacyNot Configured - Complete Authentication Breakdown</title>
+            <issue>Auth service #removed-legacyundefined causing complete auth service startup failure</issue>
             <expected_behavior>Auth service connects to staging PostgreSQL database via Cloud SQL</expected_behavior>
-            <actual_behavior>DATABASE_URL missing or pointing to localhost/non-existent database</actual_behavior>
+            <actual_behavior>#removed-legacymissing or pointing to localhost/non-existent database</actual_behavior>
             <business_impact>100% authentication failure = 100% revenue loss</business_impact>
             <test_file>tests/e2e/test_staging_backend_service_failures.py</test_file>
             <test_methods>
@@ -129,7 +129,7 @@
             <description>Tests validate that staging does NOT allow silent fallbacks to development behavior</description>
             <examples>
                 <example>REDIS_FALLBACK_ENABLED should be false in staging</example>
-                <example>DATABASE_URL should not fallback to localhost</example>
+                <example>#removed-legacyshould not fallback to localhost</example>
                 <example>External services should be required, not optional</example>
             </examples>
             <business_risk>Silent fallbacks mask infrastructure issues causing production failures not caught in staging</business_risk>
@@ -163,7 +163,7 @@
         </staging_markers>
 
         <configuration_dependencies>
-            <database>DATABASE_URL with staging database and Cloud SQL configuration</database>
+            <database>#removed-legacywith staging database and Cloud SQL configuration</database>
             <redis>REDIS_URL pointing to staging Redis, REDIS_FALLBACK_ENABLED=false</redis>
             <clickhouse>CLICKHOUSE_HOST=clickhouse.staging.netrasystems.ai, CLICKHOUSE_PORT=8123</clickhouse>
             <environment>NETRA_ENVIRONMENT=staging for behavior enforcement</environment>
@@ -181,7 +181,7 @@
     <expected_vs_actual_behavior_documentation>
         <auth_service_database>
             <expected>Auth service connects to staging PostgreSQL via Cloud SQL with proper SSL configuration</expected>
-            <actual>DATABASE_URL undefined or misconfigured causing complete auth service startup failure</actual>
+            <actual>#removed-legacyundefined or misconfigured causing complete auth service startup failure</actual>
             <validation_method>Database connection test with staging credentials and SSL parameters</validation_method>
         </auth_service_database>
 
@@ -207,7 +207,7 @@
     <surgical_fix_guidance>
         <auth_service_database_fix>
             <area>Environment Configuration</area>
-            <fix_scope>Configure DATABASE_URL in GCP Secret Manager pointing to staging PostgreSQL</fix_scope>
+            <fix_scope>Configure #removed-legacyin GCP Secret Manager pointing to staging PostgreSQL</fix_scope>
             <validation>Run test_auth_service_database_url_not_configured_complete_failure to verify fix</validation>
         </auth_service_database_fix>
 
@@ -252,7 +252,7 @@
 
     <key_learnings>
         <critical_takeaway context="Test-Driven Correction">CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical_takeaway>
-        <critical_takeaway context="Auth Service Configuration">Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical_takeaway>
+        <critical_takeaway context="Auth Service Configuration">Auth service #removed-legacyundefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical_takeaway>
         <critical_takeaway context="ClickHouse Connectivity">ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical_takeaway>
         <critical_takeaway context="Redis Fallback Masking">REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical_takeaway>
         <critical_takeaway context="Environment Behavior Enforcement">Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical_takeaway>
@@ -284,10 +284,10 @@
 
     <business_impact_analysis>
         <authentication_breakdown>
-            <impact>100% authentication failure when auth service DATABASE_URL undefined</impact>
+            <impact>100% authentication failure when auth service #removed-legacyundefined</impact>
             <revenue_risk>Complete platform unavailability = 100% revenue loss</revenue_risk>
             <customer_impact>Users cannot log in, all authenticated features inaccessible</customer_impact>
-            <recovery_time>Service restart required after DATABASE_URL configuration</recovery_time>
+            <recovery_time>Service restart required after #removed-legacyconfiguration</recovery_time>
         </authentication_breakdown>
 
         <analytics_system_failure>

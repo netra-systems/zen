@@ -33,7 +33,7 @@
         In terraform-gcp/auth_service.tf:
         secret_data = var.DATABASE_URL
         
-        This expects DATABASE_URL as an input variable rather than dynamically generating it.
+        This expects #removed-legacyas an input variable rather than dynamically generating it.
       </evidence>
       <impact>
         Connection string must be manually updated when infrastructure changes.

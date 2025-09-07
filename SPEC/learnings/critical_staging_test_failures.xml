@@ -46,7 +46,7 @@
             <description>Configuration system shows better resilience than expected</description>
             <evidence>
                 <test_file>netra_backend/tests/test_configuration_resilience.py</test_file>
-                <test_result>PASSED - Missing DATABASE_URL handled gracefully</test_result>
+                <test_result>PASSED - Missing #removed-legacyhandled gracefully</test_result>
                 <behavior>System uses safe defaults and environment isolation</behavior>
             </evidence>
             <impact>Configuration system more robust than staging errors indicated</impact>

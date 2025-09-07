@@ -22,11 +22,11 @@
             <service>netra-backend-staging</service>
             <frequency>Every 60 seconds in health checks</frequency>
             <root_cause>
-                <primary>Database credentials mismatch between DATABASE_URL secret and Cloud SQL instance</primary>
+                <primary>Database credentials mismatch between #removed-legacysecret and Cloud SQL instance</primary>
                 <secondary>Lack of pre-deployment credential validation</secondary>
             </root_cause>
             <fix>
-                <action>Update DATABASE_URL secret with correct Cloud SQL credentials</action>
+                <action>Update #removed-legacysecret with correct Cloud SQL credentials</action>
                 <format>postgresql://USER:PASSWORD@/DATABASE?host=/cloudsql/PROJECT:REGION:INSTANCE</format>
                 <example>postgresql://postgres:ACTUAL_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres</example>
                 <note>Remove sslmode parameter for Unix socket connections</note>
@@ -120,7 +120,7 @@
         <task status="completed">Fix backend ClickHouse configuration fallback</task>
         <task status="completed">Verify frontend Node version</task>
         <task status="completed">Create staging secrets update script</task>
-        <task status="pending">Update DATABASE_URL with correct password</task>
+        <task status="pending">Update #removed-legacywith correct password</task>
         <task status="pending">Deploy updated services to staging</task>
         <task status="pending">Verify health checks pass</task>
     </implementation_checklist>

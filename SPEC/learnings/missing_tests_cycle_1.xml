@@ -17,7 +17,7 @@
         <name>Database Migration Concurrent Execution Protection</name>
         <description>
             Critical gap in dev launcher database migration idempotency and recovery state validation.
-            Affects all three microservices through shared DATABASE_URL causing cascade failures.
+            Affects all three microservices through shared #removed-legacycausing cascade failures.
         </description>
         <risk_category>existential</risk_category>
         <detection_method>multi-agent-architecture-analysis</detection_method>
@@ -86,7 +86,7 @@
         
         <challenge category="cross_service_coordination">
             <description>Database URL Sharing Across Services</description>
-            <details>Three services share DATABASE_URL creating implicit coupling</details>
+            <details>Three services share #removed-legacycreating implicit coupling</details>
             <impact>Migration failures cascade across all services</impact>
             <resolution_pattern>Service-specific migration coordination protocols</resolution_pattern>
         </challenge>
