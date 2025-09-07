@@ -1147,7 +1147,6 @@ def get_env() -> IsolatedEnvironment:
             f"Singleton inconsistency detected in get_env(): "
             f"_env_instance={id(_env_instance)} != "
             f"IsolatedEnvironment._instance={id(IsolatedEnvironment._instance)}"
-        )
         # Force consistency by returning the class instance (which is more authoritative)
         _env_instance = IsolatedEnvironment._instance
         logger.info("Forced singleton consistency in get_env() - updated _env_instance")
