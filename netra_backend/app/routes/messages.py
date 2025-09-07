@@ -130,7 +130,7 @@ def _get_thread_messages(thread_id: str, limit: int = 50, offset: int = 0) -> Li
 
 # API Endpoints
 
-@router.get("/api/messages", response_model=MessagesListResponse)
+@router.get("/messages", response_model=MessagesListResponse)
 async def list_messages(
     thread_id: Optional[str] = Query(None, description="Filter messages by thread ID"),
     limit: int = Query(50, ge=1, le=100, description="Number of messages to return"),
@@ -178,7 +178,7 @@ async def list_messages(
             detail="Failed to retrieve messages"
         )
 
-@router.post("/api/messages", response_model=MessageCreateResponse)
+@router.post("/messages", response_model=MessageCreateResponse)
 async def create_message(
     request: MessageCreateRequest,
     current_user: str = Depends(get_current_user_from_jwt)
@@ -230,7 +230,7 @@ async def create_message(
             detail="Failed to create message"
         )
 
-@router.get("/api/messages/{message_id}", response_model=MessageResponse)
+@router.get("/messages/{message_id}", response_model=MessageResponse)
 async def get_message(
     message_id: str,
     current_user: str = Depends(get_current_user_from_jwt)
@@ -269,7 +269,7 @@ async def get_message(
             detail="Failed to retrieve message"
         )
 
-@router.delete("/api/messages/{message_id}")
+@router.delete("/messages/{message_id}")
 async def delete_message(
     message_id: str,
     current_user: str = Depends(get_current_user_from_jwt)
@@ -323,7 +323,7 @@ async def delete_message(
         )
 
 # Health check for messages API
-@router.get("/api/messages/health")
+@router.get("/messages/health")
 async def messages_health() -> Dict[str, Any]:
     """Health check for messages API."""
     return {
