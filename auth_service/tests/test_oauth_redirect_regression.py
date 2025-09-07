@@ -69,49 +69,49 @@ def test_redirect_uri_always_set_in_token_exchange(oauth_provider_factory):
     to Google's token endpoint, even if get_redirect_uri() hasn't been called before.
     """
     oauth_provider = oauth_provider_factory(environment="test")
-        
-        # Mock the requests.post call to capture what's sent to Google
-        with patch('requests.post') as mock_post:
-            mock_response = MagicMock()
-            mock_response.json.return_value = {"access_token": "test-token"}
-            mock_response.raise_for_status = MagicMock()
-            mock_post.return_value = mock_response
+    
+    # Mock the requests.post call to capture what's sent to Google
+    with patch('requests.post') as mock_post:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": "test-token"}
+        mock_response.raise_for_status = MagicMock()
+        mock_post.return_value = mock_response
 
-            # Mock user info request
-            with patch('requests.get') as mock_get:
-                mock_user_response = MagicMock()
-                mock_user_response.json.return_value = {
-                    "email": "test@example.com",
-                    "name": "Test User", 
-                    "id": "12345"
-                }
-                mock_user_response.raise_for_status = MagicMock()
-                mock_get.return_value = mock_user_response
+        # Mock user info request
+        with patch('requests.get') as mock_get:
+            mock_user_response = MagicMock()
+            mock_user_response.json.return_value = {
+                "email": "test@example.com",
+                "name": "Test User", 
+                "id": "12345"
+            }
+            mock_user_response.raise_for_status = MagicMock()
+            mock_get.return_value = mock_user_response
 
-                # Call exchange_code_for_user_info WITHOUT calling get_redirect_uri() first
-                # This simulates the bug condition
-                result = oauth_provider.exchange_code_for_user_info("test-auth-code", "test-state")
+            # Call exchange_code_for_user_info WITHOUT calling get_redirect_uri() first
+            # This simulates the bug condition
+            result = oauth_provider.exchange_code_for_user_info("test-auth-code", "test-state")
 
-                # Verify the token exchange request was made
-                mock_post.assert_called_once()
+            # Verify the token exchange request was made
+            mock_post.assert_called_once()
 
-                # Get the data sent to Google's token endpoint
-                call_args = mock_post.call_args
-                token_params = call_args[1]['data']
+            # Get the data sent to Google's token endpoint
+            call_args = mock_post.call_args
+            token_params = call_args[1]['data']
 
-                # CRITICAL ASSERTION: redirect_uri must not be None
-                assert token_params['redirect_uri'] is not None, \
-                    "redirect_uri was None in token exchange - REGRESSION DETECTED!"
+            # CRITICAL ASSERTION: redirect_uri must not be None
+            assert token_params['redirect_uri'] is not None, \
+                "redirect_uri was None in token exchange - REGRESSION DETECTED!"
 
-                # Verify the redirect_uri has the correct format for test environment
-                assert token_params['redirect_uri'] == "http://localhost:8081/auth/callback", \
-                    f"Unexpected redirect_uri: {token_params['redirect_uri']}"
+            # Verify the redirect_uri has the correct format for test environment
+            assert token_params['redirect_uri'] == "http://localhost:8081/auth/callback", \
+                f"Unexpected redirect_uri: {token_params['redirect_uri']}"
 
-                # Verify all required parameters are present
-                assert token_params['code'] == "test-auth-code"
-                assert token_params['client_id'] == "test-client-id"
-                assert token_params['client_secret'] == "test-client-secret"
-                assert token_params['grant_type'] == "authorization_code"
+            # Verify all required parameters are present
+            assert token_params['code'] == "test-auth-code"
+            assert token_params['client_id'] == "test-client-id"
+            assert token_params['client_secret'] == "test-client-secret"
+            assert token_params['grant_type'] == "authorization_code"
 def test_redirect_uri_consistent_across_calls(oauth_provider_factory):
     """
     Ensure redirect_uri is consistent between authorization URL and token exchange.
@@ -120,42 +120,42 @@ def test_redirect_uri_consistent_across_calls(oauth_provider_factory):
     request and the token exchange request.
     """
     oauth_provider = oauth_provider_factory(environment="test")
-        
-        # Get authorization URL
-        auth_url = oauth_provider.get_authorization_url("test-state")
+    
+    # Get authorization URL
+    auth_url = oauth_provider.get_authorization_url("test-state")
 
-        # Extract redirect_uri from auth URL
-        parsed_url = urlparse(auth_url)
-        query_params = parse_qs(parsed_url.query)
-        auth_redirect_uri = query_params.get('redirect_uri', [None])[0]
+    # Extract redirect_uri from auth URL
+    parsed_url = urlparse(auth_url)
+    query_params = parse_qs(parsed_url.query)
+    auth_redirect_uri = query_params.get('redirect_uri', [None])[0]
 
-        # Now test token exchange
-        with patch('requests.post') as mock_post:
-            mock_response = MagicMock()
-            mock_response.json.return_value = {"access_token": "test-token"}
-            mock_response.raise_for_status = MagicMock()
-            mock_post.return_value = mock_response
+    # Now test token exchange
+    with patch('requests.post') as mock_post:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": "test-token"}
+        mock_response.raise_for_status = MagicMock()
+        mock_post.return_value = mock_response
 
-            with patch('requests.get') as mock_get:
-                mock_user_response = MagicMock()
-                mock_user_response.json.return_value = {
-                    "email": "test@example.com",
-                    "name": "Test User",
-                    "id": "12345"
-                }
-                mock_user_response.raise_for_status = MagicMock()
-                mock_get.return_value = mock_user_response
+        with patch('requests.get') as mock_get:
+            mock_user_response = MagicMock()
+            mock_user_response.json.return_value = {
+                "email": "test@example.com",
+                "name": "Test User",
+                "id": "12345"
+            }
+            mock_user_response.raise_for_status = MagicMock()
+            mock_get.return_value = mock_user_response
 
-                # Exchange code
-                oauth_provider.exchange_code_for_user_info("test-auth-code", "test-state")
+            # Exchange code
+            oauth_provider.exchange_code_for_user_info("test-auth-code", "test-state")
 
-                # Get the redirect_uri from token exchange
-                token_params = mock_post.call_args[1]['data']
-                token_redirect_uri = token_params['redirect_uri']
+            # Get the redirect_uri from token exchange
+            token_params = mock_post.call_args[1]['data']
+            token_redirect_uri = token_params['redirect_uri']
 
-                # CRITICAL: Both redirect_uris must match exactly
-                assert auth_redirect_uri == token_redirect_uri, \
-                    f"Redirect URI mismatch: auth={auth_redirect_uri}, token={token_redirect_uri}"
+            # CRITICAL: Both redirect_uris must match exactly
+            assert auth_redirect_uri == token_redirect_uri, \
+                f"Redirect URI mismatch: auth={auth_redirect_uri}, token={token_redirect_uri}"
 def test_redirect_uri_uses_ssot_path(oauth_provider_factory):
     """
     Verify that redirect URI always uses the SSOT path: /auth/callback
@@ -164,17 +164,17 @@ def test_redirect_uri_uses_ssot_path(oauth_provider_factory):
     or /oauth/callback which would cause authentication failures.
     """
     oauth_provider = oauth_provider_factory(environment="test")
-        redirect_uri = oauth_provider.get_redirect_uri()
+    redirect_uri = oauth_provider.get_redirect_uri()
 
-        # CRITICAL: Must use the standardized path
-        assert redirect_uri.endswith("/auth/callback"), \
-            f"Redirect URI not using SSOT path: {redirect_uri}"
+    # CRITICAL: Must use the standardized path
+    assert redirect_uri.endswith("/auth/callback"), \
+        f"Redirect URI not using SSOT path: {redirect_uri}"
 
-        # Ensure it doesn't use deprecated paths
-        assert "/auth/oauth/callback" not in redirect_uri, \
-            f"Using deprecated path /auth/oauth/callback: {redirect_uri}"
-        assert not redirect_uri.endswith("/oauth/callback"), \
-            f"Using incorrect path /oauth/callback: {redirect_uri}"
+    # Ensure it doesn't use deprecated paths
+    assert "/auth/oauth/callback" not in redirect_uri, \
+        f"Using deprecated path /auth/oauth/callback: {redirect_uri}"
+    assert not redirect_uri.endswith("/oauth/callback"), \
+        f"Using incorrect path /oauth/callback: {redirect_uri}"
 def test_redirect_uri_environment_specific(oauth_provider_factory):
     """
     Test that redirect URI changes based on environment.
