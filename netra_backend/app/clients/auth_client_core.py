@@ -32,6 +32,195 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
+# Exception Classes for Auth Service Operations
+class AuthServiceError(Exception):
+    """Base exception for auth service operations."""
+    pass
+
+
+class AuthServiceConnectionError(AuthServiceError):
+    """Exception raised when auth service connection fails."""
+    pass
+
+
+class AuthServiceNotAvailableError(AuthServiceError):
+    """Exception raised when auth service is not available."""
+    pass
+
+
+class AuthServiceValidationError(AuthServiceError):
+    """Exception raised when auth service validation fails."""
+    pass
+
+
+class AuthTokenExchangeError(AuthServiceError):
+    """Exception raised when token exchange fails."""
+    pass
+
+
+class CircuitBreakerError(AuthServiceError):
+    """Exception raised when circuit breaker is open."""
+    pass
+
+
+class EnvironmentDetectionError(Exception):
+    """Exception raised when environment detection fails."""
+    pass
+
+
+class OAuthError(Exception):
+    """Base exception for OAuth operations."""
+    pass
+
+
+class OAuthConfigError(OAuthError):
+    """Exception raised when OAuth configuration fails."""
+    pass
+
+
+class OAuthInvalidCredentialsError(OAuthError):
+    """Exception raised when OAuth credentials are invalid."""
+    pass
+
+
+class OAuthInvalidGrantError(OAuthError):
+    """Exception raised when OAuth grant is invalid."""
+    pass
+
+
+class OAuthInvalidRequestError(OAuthError):
+    """Exception raised when OAuth request is invalid."""
+    pass
+
+
+class OAuthInvalidScopeError(OAuthError):
+    """Exception raised when OAuth scope is invalid."""
+    pass
+
+
+class OAuthRedirectMismatchError(OAuthError):
+    """Exception raised when OAuth redirect URI mismatches."""
+    pass
+
+
+class OAuthServerError(OAuthError):
+    """Exception raised when OAuth server encounters an error."""
+    pass
+
+
+class OAuthUnavailableError(OAuthError):
+    """Exception raised when OAuth service is unavailable."""
+    pass
+
+
+# Data Classes and Type Definitions
+class AuthServiceHealthStatus:
+    """Health status of auth service."""
+    def __init__(self, healthy: bool = True, message: str = "OK"):
+        self.healthy = healthy
+        self.message = message
+
+
+class TokenStatus:
+    """Token status information."""
+    def __init__(self, valid: bool, expired: bool = False):
+        self.valid = valid
+        self.expired = expired
+
+
+class ClientCredentials:
+    """Client credentials for OAuth."""
+    def __init__(self, client_id: str, client_secret: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+
+
+class ServiceCredentials:
+    """Service credentials for inter-service auth."""
+    def __init__(self, service_id: str, service_secret: str):
+        self.service_id = service_id
+        self.service_secret = service_secret
+
+
+class AuthTokenRequest:
+    """Request for auth token."""
+    def __init__(self, token: str, token_type: str = "access"):
+        self.token = token
+        self.token_type = token_type
+
+
+class AuthTokenResponse:
+    """Response for auth token operations."""
+    def __init__(self, valid: bool, user_id: str = None, email: str = None, permissions: list = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.email = email
+        self.permissions = permissions or []
+
+
+class TokenValidationRequest:
+    """Request for token validation."""
+    def __init__(self, token: str, service_name: str = None):
+        self.token = token
+        self.service_name = service_name
+
+
+class TokenValidationResponse:
+    """Response for token validation."""
+    def __init__(self, valid: bool, user_id: str = None, permissions: list = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.permissions = permissions or []
+
+
+class UserAuthRequest:
+    """Request for user authentication."""
+    def __init__(self, email: str, password: str, provider: str = "local"):
+        self.email = email
+        self.password = password
+        self.provider = provider
+
+
+class UserAuthResponse:
+    """Response for user authentication."""
+    def __init__(self, access_token: str, refresh_token: str = None, user_id: str = None):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.user_id = user_id
+
+
+class OAuth2Request:
+    """Request for OAuth2 operations."""
+    def __init__(self, client_id: str, redirect_uri: str, scope: str = None):
+        self.client_id = client_id
+        self.redirect_uri = redirect_uri
+        self.scope = scope
+
+
+class OAuth2Response:
+    """Response for OAuth2 operations."""
+    def __init__(self, access_token: str, token_type: str = "Bearer", expires_in: int = 3600):
+        self.access_token = access_token
+        self.token_type = token_type
+        self.expires_in = expires_in
+
+
+# Helper functions expected by tests
+def get_auth_service_client():
+    """Get the global auth service client instance."""
+    return auth_client
+
+
+def handle_auth_service_error(error: Exception):
+    """Handle auth service errors."""
+    if isinstance(error, AuthServiceConnectionError):
+        logger.error(f"Auth service connection error: {error}")
+    elif isinstance(error, AuthServiceError):
+        logger.error(f"Auth service error: {error}")
+    else:
+        logger.error(f"Unexpected auth error: {error}")
+
+
 class AuthOperationType(Enum):
     """Types of authentication operations for resilience handling."""
     TOKEN_VALIDATION = "token_validation"
