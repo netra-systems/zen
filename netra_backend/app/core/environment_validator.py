@@ -60,7 +60,7 @@ class EnvironmentValidator:
     ]
     
     # Required variables for each environment
-    # Note: DATABASE_URL is constructed from POSTGRES_* variables in staging/production
+    # Note: #removed-legacyis constructed from POSTGRES_* variables in staging/production
     REQUIRED_VARS = {
         "production": [
             "JWT_SECRET_PRODUCTION",  # Production uses JWT_SECRET_PRODUCTION

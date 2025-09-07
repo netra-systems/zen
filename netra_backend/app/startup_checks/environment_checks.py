@@ -53,7 +53,7 @@ class EnvironmentChecker:
         if self.environment == "development":
             return []  # Allow defaults in development
         # In production/staging, require explicit configuration
-        # DATABASE_URL is built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # #removed-legacyis built from individual POSTGRES_* variables via DatabaseURLBuilder
         return ["SECRET_KEY"]
     
     def _get_optional_vars(self) -> List[str]:
@@ -97,7 +97,7 @@ class EnvironmentChecker:
         if self.environment == "development":
             return  # Skip validation, allow defaults
         config = unified_config_manager.get_config()
-        # DATABASE_URL is now built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # #removed-legacyis now built from individual POSTGRES_* variables via DatabaseURLBuilder
         # Check that we can construct a database URL (the backend_environment handles this)
         from netra_backend.app.core.backend_environment import get_backend_env
         db_url = get_backend_env().get_database_url()

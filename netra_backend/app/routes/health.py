@@ -225,7 +225,7 @@ async def _check_postgres_connection(db: AsyncSession) -> None:
         from shared.isolated_environment import get_env
         env_name = get_env().get("ENVIRONMENT", "development")
         if env_name not in ["testing", "development"]:
-            raise ValueError("DATABASE_URL is not configured")
+            raise ValueError("#removed-legacyis not configured")
 
 async def _check_clickhouse_connection() -> None:
     """Check ClickHouse database connection (non-blocking for readiness)."""

@@ -162,7 +162,7 @@ async def validate_configuration(
         db_url = env.get("DATABASE_URL")
         if db_url:
             if not db_url.startswith(("postgresql://", "postgres://")):
-                errors.append("DATABASE_URL must be a PostgreSQL connection string")
+                errors.append("#removed-legacymust be a PostgreSQL connection string")
         
         # Check for development mode warnings
         if env.get("ENVIRONMENT") == "development":

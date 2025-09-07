@@ -349,7 +349,7 @@ def run_database_migrations(logger: logging.Logger) -> None:
     fast_startup = config.fast_startup_mode.lower() == "true"
     skip_migrations = config.skip_migrations.lower() == "true"
     
-    # Check if database is in mock mode by examining DATABASE_URL or service config
+    # Check if database is in mock mode by examining #removed-legacyor service config
     database_url = config.database_url or ""
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     
@@ -497,7 +497,7 @@ async def setup_database_connections(app: FastAPI) -> None:
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
-    # Check if database is in mock mode by examining DATABASE_URL or service config
+    # Check if database is in mock mode by examining #removed-legacyor service config
     database_url = config.database_url or ""
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     

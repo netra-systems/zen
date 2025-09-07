@@ -240,7 +240,7 @@ class EnvironmentDetector:
         if env_config.ssl_required:
             db_url = get_env().get("DATABASE_URL", "")
             if db_url and "sslmode=" not in db_url and "ssl=" not in db_url:
-                issues.append(f"SSL required for {env_config.environment.value} but DATABASE_URL has no SSL config")
+                issues.append(f"SSL required for {env_config.environment.value} but #removed-legacyhas no SSL config")
         
         # Validate service requirements
         if env_config.clickhouse_required:

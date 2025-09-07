@@ -29,7 +29,7 @@ class BackendEnvironment:
     def _validate_backend_config(self) -> None:
         """Validate backend-specific configuration on initialization."""
         # Core backend requirements
-        # Database URL can come from DATABASE_URL directly or built from POSTGRES_* variables
+        # Database URL can come from #removed-legacydirectly or built from POSTGRES_* variables
         required_vars = [
             "JWT_SECRET_KEY",
             "SECRET_KEY"
@@ -282,7 +282,7 @@ class BackendEnvironment:
         issues = []
         warnings = []
         
-        # Required variables (DATABASE_URL is built dynamically, not required as env var)
+        # Required variables (#removed-legacyis built dynamically, not required as env var)
         required = {
             "JWT_SECRET_KEY": self.get_jwt_secret_key(),
             "SECRET_KEY": self.get_secret_key()

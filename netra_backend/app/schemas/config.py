@@ -738,7 +738,7 @@ class ProductionConfig(AppConfig):
             raise ValueError(
                 "DatabaseURLBuilder failed to construct URL for production environment. "
                 "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                "or DATABASE_URL is provided."
+                "or #removed-legacyis provided."
             )
     
     def __init__(self, **data):
@@ -1153,7 +1153,7 @@ class StagingConfig(AppConfig):
             raise ValueError(
                 "DatabaseURLBuilder failed to construct URL for staging environment. "
                 "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                "or DATABASE_URL is provided."
+                "or #removed-legacyis provided."
             )
     
 
@@ -1177,7 +1177,7 @@ class NetraTestingConfig(AppConfig):
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env.as_dict())
         
-        # Get URL for test environment - uses test.auto_url which handles DATABASE_URL or test defaults
+        # Get URL for test environment - uses test.auto_url which handles #removed-legacyor test defaults
         database_url = builder.test.auto_url
         
         if database_url:
