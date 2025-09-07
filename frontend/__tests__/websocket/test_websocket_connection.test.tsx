@@ -535,17 +535,26 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
     });
 
     test('should stop retrying after max attempts reached', async () => {
+      // FIXED: Use unified WebSocket mock with consistent failure
       let connectionAttempts = 0;
-      const originalWebSocket = global.WebSocket;
-
-      // Mock WebSocket that always fails
-      global.WebSocket = class FailingWebSocket extends originalWebSocket {
-        constructor(url) {
-          super(url);
+      
+      // Create custom config that always fails
+      const alwaysFailConfig = {
+        autoConnect: true,
+        simulateNetworkDelay: false,
+        enableErrorSimulation: true,
+        errorDelay: 10
+      };
+      
+      // Override the mock to track connection attempts
+      const FailingMockClass = class extends UnifiedWebSocketMock {
+        constructor(url, protocols) {
           connectionAttempts++;
-          setTimeout(() => this.onerror && this.onerror(new ErrorEvent('error')), 10);
+          super(url, protocols, alwaysFailConfig);
         }
       };
+      
+      global.WebSocket = FailingMockClass as any;
 
       render(
         <MockWebSocketConnection
@@ -568,8 +577,7 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
       // Should not exceed max retries
       expect(connectionAttempts).toBeLessThanOrEqual(3); // Initial + 2 retries
 
-      // Restore original WebSocket
-      global.WebSocket = originalWebSocket;
+      console.log('✅ Max retry attempts test completed successfully');
     });
   });
 
@@ -595,21 +603,8 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
     });
 
     test('should send queued messages after reconnection', async () => {
-      let mockWs = null;
-      let sentMessages = [];
-      const originalWebSocket = global.WebSocket;
-
-      global.WebSocket = class TestWebSocket extends originalWebSocket {
-        constructor(url) {
-          super(url);
-          mockWs = this;
-          // Don't auto-connect initially
-        }
-        
-        send(data) {
-          sentMessages.push(data);
-        }
-      };
+      // FIXED: Use unified WebSocket mock with manual control
+      setupUnifiedWebSocketMock(WebSocketMockConfigs.manual);
 
       render(
         <MockWebSocketConnection
@@ -627,11 +622,27 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
 
       expect(screen.getByTestId('message-queue-size')).toHaveTextContent('1');
 
-      // Connect
+      // FIXED: Connect and wait for connection establishment
       await act(async () => {
         await userEvent.click(connectButton);
-        if (mockWs && mockWs.onopen) {
-          mockWs.onopen({});
+      });
+
+      // Get the WebSocket instance and manually trigger connection
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
+
+      // Manually trigger connection success
+      await act(async () => {
+        if (activeWs && activeWs.simulateConnectionSuccess) {
+          activeWs.readyState = UnifiedWebSocketMock.OPEN;
+          if (activeWs.onopen) {
+            activeWs.onopen(new Event('open'));
+          }
         }
       });
 
@@ -640,24 +651,16 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('message-queue-size')).toHaveTextContent('0');
       });
 
-      // Restore original WebSocket
-      global.WebSocket = originalWebSocket;
+      console.log('✅ Message queuing after reconnection test completed successfully');
     });
   });
 
   describe('Error Handling and Recovery', () => {
     test('should handle WebSocket network errors gracefully', async () => {
       const onError = jest.fn();
-      let mockWs = null;
-      const originalWebSocket = global.WebSocket;
-
-      global.WebSocket = class TestWebSocket extends originalWebSocket {
-        constructor(url) {
-          super(url);
-          mockWs = this;
-          setTimeout(() => this.onopen && this.onopen({}), 10);
-        }
-      };
+      
+      // FIXED: Use unified WebSocket mock with network simulation
+      setupUnifiedWebSocketMock(WebSocketMockConfigs.networkSimulation);
       
       render(
         <MockWebSocketConnection
@@ -677,10 +680,19 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       });
 
-      // Simulate network error
+      // FIXED: Get active WebSocket instance and simulate network error
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
+
+      // FIXED: Simulate network error using unified mock method
       await act(async () => {
-        if (mockWs && mockWs.onerror) {
-          mockWs.onerror(new ErrorEvent('error', { error: new Error('Network error') }));
+        if (activeWs && activeWs.simulateError) {
+          activeWs.simulateError(new Error('Network error'));
         }
       });
 
@@ -689,8 +701,7 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(onError).toHaveBeenCalledTimes(1);
       });
 
-      // Restore original WebSocket
-      global.WebSocket = originalWebSocket;
+      console.log('✅ Network error handling test completed successfully');
     });
 
     test('should maintain connection stability with rapid events', async () => {

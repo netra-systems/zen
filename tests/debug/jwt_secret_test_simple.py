@@ -13,7 +13,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, project_root)
 
 
-def main():
+async def main():  # CRITICAL FIX: Made async
     print("WEBSOCKET JWT SECRET MISMATCH DIAGNOSIS")
     print("=" * 60)
     
@@ -80,7 +80,7 @@ def main():
                 print(f"\nCreated JWT token: {test_token[:50]}...")
                 
                 # Validate with backend
-                decoded_payload = extractor.validate_and_decode_jwt(test_token)
+                decoded_payload = await extractor.validate_and_decode_jwt(test_token)  # CRITICAL FIX: Added await
                 if decoded_payload:
                     print("SUCCESS: JWT validation passed")
                     return True
@@ -103,4 +103,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())  # CRITICAL FIX: Added asyncio.run

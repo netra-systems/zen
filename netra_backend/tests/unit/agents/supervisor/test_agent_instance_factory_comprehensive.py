@@ -116,9 +116,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     ISOLATION_ENABLED = True
     AUTO_CLEANUP = True
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with clean state."""
-        super().setUp()
+        super().setup_method(method)
         
         # Reset singleton for clean tests
         import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
@@ -154,12 +154,12 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         # Configure mock DB session
         self.mock_db_session.close = AsyncMock()
         
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up test environment."""
         # Reset singleton
         import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
         factory_module._factory_instance = None
-        super().tearDown()
+        super().teardown_method(method)
 
     # =========================================================================
     # SINGLETON PATTERN TESTS

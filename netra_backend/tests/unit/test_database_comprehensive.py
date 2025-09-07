@@ -1247,7 +1247,7 @@ class TestDatabaseErrorHandlingAndRecovery(BaseIntegrationTest):
                  patch.object(db, '_ensure_initialized') as mock_ensure_init:
                 
                 with pytest.raises(Exception, match="database connection pool failed"):
-                    await db.execute_with_retry("SELECT 1", max_retries=1)
+                    await db.execute_with_retry("SELECT 1", max_retries=2)  # Use 2 retries so re-initialization is attempted
                 
                 # Should attempt re-initialization on connection errors with "connection" or "pool" keywords
                 # The code in execute_with_retry checks for these strings in error messages

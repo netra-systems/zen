@@ -377,11 +377,14 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
         # Setup environment for integration testing
         self.env = get_env()
         
-        # Initialize test utilities
+        # Initialize test utilities immediately (CRITICAL: mock_llm needed for business value tests)
         self.websocket_util = None
         self.agent_helper = None
         self.mock_db = None
-        self.mock_llm = None
+        
+        # CRITICAL FIX: Initialize MockLLMManager immediately to prevent NoneType errors
+        # Business value tests require LLM client for agent execution simulation
+        self.mock_llm = MockLLMManager()
         
         # Test configuration
         self.test_timeout = 30.0
@@ -406,8 +409,8 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
         # Setup mock database with business data
         self.mock_db = MockDatabaseConnection()
         
-        # Setup mock LLM manager
-        self.mock_llm = MockLLMManager()
+        # NOTE: mock_llm is already initialized in setup_method() to prevent NoneType errors
+        # This ensures business value tests can access LLM functionality immediately
         
         logger.info("Enhanced integration test async setup completed")
         
@@ -647,7 +650,7 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
         
         try:
             # Mock agent execution with realistic business outcomes
-            with patch('netra_backend.app.services.llm.llm_manager.LLMManager.ask_llm', 
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm', 
                       side_effect=self.mock_llm.ask_llm):
                 
                 # Simulate agent execution time based on complexity

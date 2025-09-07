@@ -63,8 +63,46 @@ global.clearInterval = function(id) {
   return originalClearInterval.call(this, id);
 };
 
+// IMPROVED: React warning detection for test failures
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+let reactWarnings = [];
+let reactErrors = [];
+
+console.warn = (...args) => {
+  const message = args.join(' ');
+  
+  // Detect React key warnings
+  if (message.includes('Warning: Encountered two children with the same key') ||
+      message.includes('Warning: Each child in a list should have a unique "key" prop')) {
+    reactWarnings.push(message);
+    
+    // Fail tests on React key warnings (per CLAUDE.md)
+    throw new Error(`REACT KEY WARNING DETECTED: ${message}`);
+  }
+  
+  // Allow other warnings to pass through
+  originalConsoleWarn.apply(console, args);
+};
+
+console.error = (...args) => {
+  const message = args.join(' ');
+  
+  // Track React errors but don't automatically fail (some tests expect errors)
+  if (message.includes('Warning:') || message.includes('Error:')) {
+    reactErrors.push(message);
+  }
+  
+  originalConsoleError.apply(console, args);
+};
+
 // Clean up all timers after each test - more aggressive cleanup
 afterEach(() => {
+  // Clear React warning/error tracking
+  reactWarnings.length = 0;
+  reactErrors.length = 0;
+  
   // Clear all tracked timers
   for (const id of timeoutIds) {
     originalClearTimeout(id);

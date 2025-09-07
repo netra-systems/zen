@@ -428,22 +428,9 @@ def validate_test_environment():
 
 
 # =============================================================================
-# LEGACY COMPATIBILITY FUNCTIONS
+# LEGACY COMPATIBILITY FUNCTIONS REMOVED
+# Use ensure_test_isolation() and setup_test_security_environment() directly
 # =============================================================================
-
-def setup_test_environment():
-    """Legacy function for setting up test environment."""
-    ensure_test_isolation()
-    setup_test_security_environment()
-    logger.debug("Legacy test environment setup completed")
-
-
-def teardown_test_environment():
-    """Legacy function for tearing down test environment."""
-    manager = get_test_env_manager()
-    manager.restore_env_vars()
-    manager.disable_isolation()
-    logger.debug("Legacy test environment teardown completed")
 
 
 # =============================================================================
@@ -471,8 +458,8 @@ __all__ = [
     'setup_test_security_environment',
     
     # Legacy compatibility
-    'setup_test_environment',
-    'teardown_test_environment',
+    # 'setup_test_environment', # Legacy compatibility removed
+    # 'teardown_test_environment', # Legacy compatibility removed
     
     # Validation
     'validate_test_environment',

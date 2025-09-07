@@ -24,14 +24,8 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { jest } from '@jest/globals';
 
-// Unique ID generator to prevent React key collisions
-let messageIdCounter = 0;
-const generateUniqueMessageId = (prefix: string): string => {
-  const timestamp = Date.now();
-  const counter = ++messageIdCounter;
-  const random = Math.random().toString(36).substr(2, 9);
-  return `${prefix}-${timestamp}-${counter}-${random}`;
-};
+// FIXED: Use SSOT unique ID generator to prevent React key collisions
+import { generateUniqueMessageId } from '../../utils/unique-id-generator';
 
 // Define simplified agent types for testing
 type AgentStatus = 'idle' | 'running' | 'completed' | 'error';

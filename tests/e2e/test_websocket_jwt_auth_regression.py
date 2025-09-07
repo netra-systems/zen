@@ -67,7 +67,7 @@ class TestJWTSecretMismatch:
         
         # Validation should fail with wrong secret
         extractor.jwt_secret_key = validation_secret
-        decoded = extractor.validate_and_decode_jwt(extracted_token)
+        decoded = await extractor.validate_and_decode_jwt(extracted_token)  # CRITICAL FIX: Added await
         assert decoded is None, "Should fail validation with wrong secret"
         
     @pytest.mark.asyncio
@@ -120,7 +120,7 @@ class TestJWTSecretMismatch:
         extractor.jwt_secret_key = secret
         
         # Validation should succeed
-        decoded = extractor.validate_and_decode_jwt(token)
+        decoded = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
         assert decoded is not None, "Should validate successfully with correct secret"
         assert decoded["sub"] == "user_456"
         assert decoded["session_id"] == "session_789"
@@ -162,7 +162,7 @@ class TestJWTSecretMismatch:
             
             # Extract user context
             try:
-                user_context, auth_info = extractor.extract_user_context_from_websocket(websocket)
+                user_context, auth_info = await extractor.extract_user_context_from_websocket(websocket)  # CRITICAL FIX: Added await
                 
                 # Verify user context
                 assert user_context.user_id == user_id
@@ -245,7 +245,7 @@ class TestJWTSecretMismatch:
             
             # This should raise with clear error message
             with pytest.raises(HTTPException) as exc_info:
-                extractor.extract_user_context_from_websocket(websocket)
+                await extractor.extract_user_context_from_websocket(websocket)  # CRITICAL FIX: Added await
             
             # The error should indicate "Invalid or expired" not "No JWT found"
             # This is what needs to be fixed - the error message is misleading

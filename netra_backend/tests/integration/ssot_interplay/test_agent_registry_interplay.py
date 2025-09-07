@@ -269,11 +269,15 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         
         registry.register_factory("cleanup_agent", cleanup_test_factory, tags=["test"])
         
-        # Create multiple agents
+        # Create multiple agents - register each agent type first
         agents = []
         for i in range(3):
+            agent_type = f"cleanup_agent_{i}"
+            # Register factory for this specific agent type
+            registry.register_factory(agent_type, cleanup_test_factory, tags=["test"])
+            
             agent = await registry.create_agent_for_user(
-                self.test_user_id, f"cleanup_agent_{i}", user_context
+                self.test_user_id, agent_type, user_context
             )
             agents.append(agent)
         
@@ -424,6 +428,13 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         mock_websocket_manager.emit_agent_event = mock_emit_agent_event
         registry.set_websocket_manager(mock_websocket_manager)
         
+        # Register factory for event agent before creating it
+        async def event_agent_factory(context: UserExecutionContext, websocket_bridge=None):
+            tool_dispatcher = await self._mock_tool_dispatcher_factory(context, websocket_bridge)
+            return MockAgentForTesting("event_agent", context, tool_dispatcher, websocket_bridge)
+        
+        registry.register_factory("event_agent", event_agent_factory, tags=["test"])
+        
         # Create agent with event coordination
         agent = await registry.create_agent_for_user(
             self.test_user_id, "event_agent", user_context, mock_websocket_manager
@@ -481,14 +492,23 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         mock_websocket_manager.emit_agent_event = sequence_tracking_emit
         registry.set_websocket_manager(mock_websocket_manager)
         
-        # Create agents for multiple users
+        # Create agents for multiple users - register each agent type first
         users = [f"user_{i}" for i in range(3)]
         agents = {}
         
+        # Register factory for sequence agents (reusable for all users)
+        async def sequence_agent_factory(context: UserExecutionContext, websocket_bridge=None):
+            tool_dispatcher = await self._mock_tool_dispatcher_factory(context, websocket_bridge)
+            return MockAgentForTesting(f"sequence_agent_{context.user_id}", context, tool_dispatcher, websocket_bridge)
+        
         for user_id in users:
+            # Register factory for this specific agent type
+            agent_type = f"sequence_agent_{user_id}"
+            registry.register_factory(agent_type, sequence_agent_factory, tags=["test"])
+            
             user_context = self._create_user_context(user_id)
             agent = await registry.create_agent_for_user(
-                user_id, f"sequence_agent_{user_id}", user_context, mock_websocket_manager
+                user_id, agent_type, user_context, mock_websocket_manager
             )
             agents[user_id] = agent
         
