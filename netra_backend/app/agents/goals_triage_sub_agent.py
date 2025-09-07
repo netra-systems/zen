@@ -17,7 +17,7 @@ from enum import Enum
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-# DatabaseSessionManager removed - use SSOT database module get_db() instead
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
     JSONErrorFixer,
@@ -571,7 +571,7 @@ class GoalsTriageSubAgent(BaseAgent):
         self.logger.info(f"GoalsTriageSubAgent executing for user {context.user_id}, run {context.run_id}")
         
         # Create database session manager from context
-        session_manager = DatabaseSessionManager(context)
+        session_manager = DatabaseSessionManager()
         
         try:
             # Validate preconditions

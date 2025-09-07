@@ -84,16 +84,16 @@ def test_e2e_header_detection():
         expected = test_case["expected"]
         
         if is_e2e == expected:
-            print(f"✅ {test_case['name']}: E2E detected = {is_e2e}")
+            print(f"PASS {test_case['name']}: E2E detected = {is_e2e}")
         else:
-            print(f"❌ {test_case['name']}: Expected {expected}, got {is_e2e}")
+            print(f"FAIL {test_case['name']}: Expected {expected}, got {is_e2e}")
             all_passed = False
     
     return all_passed
 
 def test_auth_helper_headers():
     """Test that E2E auth helper generates correct headers."""
-    print("\n🔑 Testing E2E auth helper header generation...")
+    print("\nTesting E2E auth helper header generation...")
     
     # This would normally import from the actual helper, but for validation
     # we'll test the header structure directly
