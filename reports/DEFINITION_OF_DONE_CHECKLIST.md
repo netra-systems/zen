@@ -104,6 +104,10 @@
 ---
 
 ### 🔴 AUTHENTICATION MODULE (SHARED SERVICE)
+**⚠️ CRITICAL SSOT REQUIREMENT:** Auth service MUST be the ONLY source for JWT operations  
+**See:** [`reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md`](reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md)  
+**Compliance Check:** `python scripts/check_auth_ssot_compliance.py`
+
 **Primary Files:**
 - [ ] `/netra_backend/app/auth_integration/auth.py` (MANDATORY for all auth)
 - [ ] `/auth_service/auth_core/core/jwt_handler.py`
@@ -128,6 +132,7 @@
 - [ ] `SPEC/learnings/auth_race_conditions_critical.xml`
 - [ ] `SPEC/learnings/auth_initialization_complete_learnings.md`
 - [ ] `SPEC/jwt_configuration_standard.xml`
+- [ ] `SPEC/learnings/auth_ssot_implementation_20250107.xml` (JWT decoding removal)
 - [ ] `SPEC/oauth_port_configuration.xml`
 
 ---
