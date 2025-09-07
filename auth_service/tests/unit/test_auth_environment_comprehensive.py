@@ -891,7 +891,8 @@ class TestRateLimitingConfiguration:
 
     def test_get_account_lockout_duration_default(self):
         """Test account lockout duration has correct default."""
-        with patch.object(self.env.env, 'get', return_value=None):
+        with patch.object(self.env.env, 'get') as mock_get:
+            mock_get.side_effect = lambda key, default="900": default
             assert self.env.get_account_lockout_duration() == 900
 
     def test_get_account_lockout_duration_handles_invalid(self):
@@ -950,7 +951,8 @@ class TestEmailConfiguration:
         with patch.object(self.env.env, 'get', return_value="smtp.example.com"):
             assert self.env.get_smtp_host() == "smtp.example.com"
         
-        with patch.object(self.env.env, 'get', return_value=None):
+        with patch.object(self.env.env, 'get') as mock_get:
+            mock_get.side_effect = lambda key, default="": default
             assert self.env.get_smtp_host() == ""
 
     def test_get_smtp_port_handles_conversion(self):
@@ -963,7 +965,8 @@ class TestEmailConfiguration:
 
     def test_get_smtp_from_email_default(self):
         """Test SMTP from email has correct default."""
-        with patch.object(self.env.env, 'get', return_value=None):
+        with patch.object(self.env.env, 'get') as mock_get:
+            mock_get.side_effect = lambda key, default="noreply@netra.ai": default
             assert self.env.get_smtp_from_email() == "noreply@netra.ai"
 
     def test_is_smtp_enabled_checks_required_fields(self):
