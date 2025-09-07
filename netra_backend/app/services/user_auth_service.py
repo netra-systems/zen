@@ -14,7 +14,9 @@ class UserAuthService:
     async def authenticate(username: str, password: str) -> Optional[Dict[str, Any]]:
         """Authenticate user through auth service."""
         try:
-            result = await _auth_client.authenticate(username, password)
+            # FIX: Call the correct method - login() instead of authenticate()
+            # AuthServiceClient has login() method, not authenticate()
+            result = await _auth_client.login(username, password)
             return result
         except Exception as e:
             return None

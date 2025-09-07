@@ -262,49 +262,13 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
         logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
         
-        # CRITICAL FIX: Wait for startup to complete before proceeding in staging/production
-        # This prevents race condition where WebSocket connections are attempted before services are ready
+        # Log startup state for debugging but don't block on it
+        # The auth validation system should work regardless of startup state
         startup_complete = getattr(websocket.app.state, 'startup_complete', False)
         startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
         
-        if not startup_complete and environment in ["staging", "production"]:
-            logger.warning(f"WebSocket accessed before startup complete in {environment} - waiting for startup")
-            
-            # Wait for startup to complete (max 10 seconds)
-            max_wait = 10.0
-            wait_interval = 0.1
-            waited = 0.0
-            
-            while waited < max_wait:
-                if getattr(websocket.app.state, 'startup_complete', False):
-                    logger.info(f"Startup completed after {waited:.1f}s wait")
-                    break
-                
-                if getattr(websocket.app.state, 'startup_failed', False):
-                    error_msg = getattr(websocket.app.state, 'startup_error', 'Startup failed')
-                    logger.error(f"Startup failed: {error_msg}")
-                    error_response = create_error_message(
-                        "STARTUP_FAILED",
-                        "Service initialization failed. Please try again later.",
-                        {"reason": error_msg}
-                    )
-                    await safe_websocket_send(websocket, error_response.model_dump())
-                    await safe_websocket_close(websocket, code=1011, reason="Startup failed")
-                    return
-                
-                await asyncio.sleep(wait_interval)
-                waited += wait_interval
-            
-            if waited >= max_wait:
-                logger.error(f"Startup did not complete within {max_wait}s")
-                error_response = create_error_message(
-                    "STARTUP_TIMEOUT",
-                    "Service initialization timeout. Please try again later.",
-                    {"waited": waited}
-                )
-                await safe_websocket_send(websocket, error_response.model_dump())
-                await safe_websocket_close(websocket, code=1011, reason="Startup timeout")
-                return
+        if not startup_complete:
+            logger.debug(f"WebSocket connection during startup (complete={startup_complete}, in_progress={startup_in_progress})")
         
         # CRITICAL FIX: Create missing dependencies in staging environment with robust error handling
         # This fixes the staging issue where agent_supervisor and thread_service are not initialized

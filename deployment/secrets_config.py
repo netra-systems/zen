@@ -85,7 +85,8 @@ class SecretConfig:
             "oauth": [
                 "GOOGLE_OAUTH_CLIENT_ID_STAGING",  # Auth uses environment-specific names
                 "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
-                "OAUTH_HMAC_SECRET"
+                "OAUTH_HMAC_SECRET",
+                "E2E_OAUTH_SIMULATION_KEY"  # CRITICAL: Required for E2E testing in staging
             ],
             "redis": [
                 "REDIS_HOST",
@@ -128,6 +129,7 @@ class SecretConfig:
         "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
         "OAUTH_HMAC_SECRET": "oauth-hmac-secret-staging",
+        "E2E_OAUTH_SIMULATION_KEY": "e2e-oauth-simulation-key-staging",
         
         # Redis
         "REDIS_HOST": "redis-host-staging",

@@ -1,116 +1,104 @@
 # Staging Test Run - Iteration 1
-**Date**: 2025-09-07 09:00:37
-**Environment**: GCP Staging
+**Date:** 2025-09-07 09:10  
+**Focus:** WebSocket Authentication Issues  
+**Environment:** GCP Staging (api.staging.netrasystems.ai)
 
-## Test Results Summary
+## Test Execution Summary
 
-### Overall Statistics
-- **Total Tests Run**: 153
-- **Total Passed**: 147 (96.1%)
-- **Total Failed**: 6 (3.9%)
+### Overall Results (Top 10 Agent Test Modules)
+- **Total Test Modules:** 10  
+- **Passed Modules:** 8 (80%)  
+- **Failed Modules:** 2 (20%)  
+- **Skipped:** 0  
+- **Total Time:** 51.61 seconds  
 
-### Test Suite Breakdown
+### Failed Test Details
 
-#### Priority 1 Critical Tests (25 tests)
-- **PASSED**: 24/25 (96%)
-- **FAILED**: 1/25 (4%)
+#### 1. test_1_websocket_events_staging (3 passed, 2 failed)
+**Failed Tests:**
+- `test_concurrent_websocket_real`: server rejected WebSocket connection: HTTP 403
+- `test_websocket_event_flow_real`: server rejected WebSocket connection: HTTP 403
 
-#### Priority 2 High Tests (10 tests)  
-- **PASSED**: 10/10 (100%)
-- **FAILED**: 0/10 (0%)
+**Root Cause:** WebSocket authentication is being rejected with HTTP 403, indicating JWT token validation failure in staging environment.
 
-#### Priority 3-6 Tests (60 tests)
-- **PASSED**: 60/60 (100%)
-- **FAILED**: 0/60 (0%)
+#### 2. test_3_agent_pipeline_staging (3 passed, 3 failed)  
+**Failed Tests:**
+- `test_real_agent_lifecycle_monitoring`: server rejected WebSocket connection: HTTP 403
+- `test_real_agent_pipeline_execution`: server rejected WebSocket connection: HTTP 403  
+- `test_real_pipeline_error_handling`: server rejected WebSocket connection: HTTP 403
 
-#### Core Staging Tests 1-5 (28 tests)
-- **PASSED**: 23/28 (82.1%)
-- **FAILED**: 5/28 (17.9%)
+**Root Cause:** Same WebSocket authentication issue - all WebSocket connections failing with 403.
 
-#### Core Staging Tests 6-10 (30 tests)
-- **PASSED**: 30/30 (100%)
-- **FAILED**: 0/30 (0%)
+### Passed Test Modules (8/10)
+1. **test_2_message_flow_staging** - All 5 tests passed
+2. **test_4_agent_orchestration_staging** - All 6 tests passed  
+3. **test_5_response_streaming_staging** - All 6 tests passed
+4. **test_6_failure_recovery_staging** - All 6 tests passed
+5. **test_7_startup_resilience_staging** - All 6 tests passed
+6. **test_8_lifecycle_events_staging** - All 6 tests passed
+7. **test_9_coordination_staging** - All 6 tests passed
+8. **test_10_critical_path_staging** - All 6 tests passed
 
-### Test Execution Details
+## Key Observations
 
-#### PASSED Tests (24):
-1. ✅ test_001_websocket_connection_real
-2. ✅ test_003_websocket_message_send_real
-3. ✅ test_004_websocket_concurrent_connections_real
-4. ✅ test_005_agent_discovery_real
-5. ✅ test_006_agent_configuration_real
-6. ✅ test_007_agent_execution_endpoints_real
-7. ✅ test_008_agent_streaming_capabilities_real
-8. ✅ test_009_agent_status_monitoring_real
-9. ✅ test_010_tool_execution_endpoints_real
-10. ✅ test_011_agent_performance_real
-11. ✅ test_012_message_persistence_real
-12. ✅ test_013_thread_creation_real
-13. ✅ test_014_thread_switching_real
-14. ✅ test_015_thread_history_real
-15. ✅ test_016_user_context_isolation_real
-16. ✅ test_017_concurrent_users_real
-17. ✅ test_018_rate_limiting_real
-18. ✅ test_019_error_handling_real
-19. ✅ test_020_connection_resilience_real
-20. ✅ test_021_session_persistence_real
-21. ✅ test_022_agent_lifecycle_management_real
-22. ✅ test_023_streaming_partial_results_real
-23. ✅ test_024_message_ordering_real
-24. ✅ test_025_critical_event_delivery_real
+### 1. Authentication Issues
+- **E2E_OAUTH_SIMULATION_KEY** not configured for staging environment
+- Fallback JWT tokens being created but rejected by staging (hash: 70610b56526d0480)
+- All WebSocket connections failing with HTTP 403 "Forbidden"
+- Regular API endpoints working when they don't require auth
 
-#### FAILED Tests (1):
-1. ❌ **test_002_websocket_authentication_real**
-   - **Error**: websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
-   - **Location**: tests\e2e\staging\test_priority1_critical.py:136
-   - **Cause**: WebSocket authentication with token is being rejected with 403
-   - **Impact**: WebSocket auth flow broken
+### 2. Working Components
+- Health checks: ✅ Working
+- MCP configuration: ✅ Available  
+- Service discovery: ✅ Functional
+- API endpoints (non-auth): ✅ Accessible
+- Agent orchestration logic: ✅ Working
+- Response streaming logic: ✅ Working
+- Failure recovery patterns: ✅ Working
 
-### Failed Tests Summary (6 failures)
+### 3. Failed Components  
+- WebSocket authentication: ❌ All connections rejected with 403
+- Agent lifecycle monitoring: ❌ Requires WebSocket
+- Agent pipeline execution: ❌ Requires WebSocket
+- Real-time event flow: ❌ Requires WebSocket
 
-1. **test_002_websocket_authentication_real** (P1 Critical)
-   - Error: HTTP 403 on WebSocket auth
-   - Location: test_priority1_critical.py:136
-   
-2. **test_websocket_event_flow_real** (Core Staging)
-   - Error: WebSocket connection rejected
-   - Location: test_1_websocket_events_staging.py:222
-   
-3. **test_concurrent_websocket_real** (Core Staging)
-   - Error: Multiple WebSocket connections failing
-   - Location: test_1_websocket_events_staging.py:376
-   
-4. **test_real_agent_pipeline_execution** (Core Staging)
-   - Error: Agent execution via WebSocket failing
-   - Location: test_3_agent_pipeline_staging.py:204
-   
-5. **test_real_agent_lifecycle_monitoring** (Core Staging)
-   - Error: Agent lifecycle WebSocket events failing
-   - Location: test_3_agent_pipeline_staging.py:357
-   
-6. **test_real_pipeline_error_handling** (Core Staging)
-   - Error: Pipeline error recovery via WebSocket failing
-   - Location: test_3_agent_pipeline_staging.py:450
+## Error Analysis
 
-### Root Cause Analysis
-All 6 failures are WebSocket authentication related:
-- **Common Pattern**: All failures involve WebSocket connections with authentication
-- **Error Type**: HTTP 403 Forbidden responses
-- **Impact**: Complete WebSocket functionality broken for authenticated users
+### Primary Error Pattern
+```
+[WARNING] SSOT staging auth bypass failed: E2E_OAUTH_SIMULATION_KEY not provided
+[INFO] Falling back to direct JWT creation for development environments
+[FALLBACK] Created direct JWT token (hash: 70610b56526d0480)
+[WARNING] This may fail in staging due to user validation requirements
+[DEBUG] WebSocket InvalidStatus error: server rejected WebSocket connection: HTTP 403
+```
 
-### Business Impact Assessment
-- **MRR at Risk**: ~$50K (Core chat functionality broken)
-- **User Impact**: Users cannot use real-time chat features
-- **Priority**: P1 CRITICAL - Must fix immediately
-- **Business Functions Affected**:
-  - Real-time agent responses
-  - Live streaming of results
-  - Multi-user collaboration
-  - Agent execution monitoring
+### Impact Assessment
+- **5 tests failing** out of approximately 61 tests run in first 10 modules
+- **All failures are WebSocket-related** with same root cause
+- **Non-WebSocket tests passing** at 100% rate
+- **Business Impact:** Real-time features unavailable (chat, live updates, agent monitoring)
 
-## Next Steps
-1. Analyze WebSocket auth configuration on GCP staging
-2. Check JWT token validation in WebSocket upgrade
-3. Review OAuth flow for WebSocket connections
-4. Fix authentication and redeploy
-5. Re-run all 466 tests
+## Configuration Issues Found
+
+1. Missing `E2E_OAUTH_SIMULATION_KEY` in staging environment
+2. JWT tokens created locally not valid for staging user validation
+3. Possible mismatch between local JWT generation and staging JWT validation
+
+## Test Coverage Analysis
+
+From initial 10 modules (61 tests):
+- **API Tests:** 100% passing
+- **WebSocket Tests:** 0% passing  
+- **Configuration Tests:** 100% passing
+- **Orchestration Tests:** 100% passing
+- **Recovery Tests:** 100% passing
+
+**Estimated Total Failing:** ~80-100 tests (all WebSocket-related) out of 466 total tests
+
+## Next Steps for Fix
+
+### Immediate Action Required
+1. Fix WebSocket authentication in staging
+2. Configure E2E_OAUTH_SIMULATION_KEY for staging
+3. Ensure JWT validation works in staging environment

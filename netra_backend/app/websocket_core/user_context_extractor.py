@@ -144,10 +144,10 @@ class UserContextExtractor:
     
     async def validate_and_decode_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """
-        Validate and decode JWT token using the same validation logic as REST middleware.
+        Validate and decode JWT token using UNIFIED JWT validation logic.
         
-        CRITICAL FIX: This now uses the same validate_token_with_resilience() function
-        that the REST middleware uses, ensuring consistent JWT secret resolution and
+        CRITICAL FIX: This now uses direct JWT validation with the SAME unified JWT secret
+        that REST middleware uses, ensuring consistent JWT secret resolution and
         preventing the 403 WebSocket authentication failures in staging.
         
         Args:
@@ -157,85 +157,118 @@ class UserContextExtractor:
             Decoded JWT payload if valid, None otherwise
         """
         import hashlib
+        import jwt
         from shared.isolated_environment import get_env
+        from shared.jwt_secret_manager import get_unified_jwt_secret, get_unified_jwt_algorithm
         
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
         
         # Enhanced diagnostic logging for staging
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Starting resilient token validation in {environment}")
+        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Starting UNIFIED token validation in {environment}")
         logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token length: {len(token) if token else 0}")
         logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
         
-        # CRITICAL FIX: Use same validation logic as REST middleware
+        # CRITICAL FIX: Use SAME JWT secret resolution as REST middleware
+        try:
+            # Get the unified JWT secret - same as REST middleware
+            jwt_secret = get_unified_jwt_secret()
+            jwt_algorithm = get_unified_jwt_algorithm()
+            
+            # Debug logging to confirm secret consistency
+            secret_hash = hashlib.md5(jwt_secret.encode()).hexdigest()[:16]
+            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Using UNIFIED JWT secret (hash: {secret_hash})")
+            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Using algorithm: {jwt_algorithm}")
+            logger.info("🔍 WEBSOCKET JWT VALIDATION - Same secret resolution as REST middleware!")
+            
+            # Decode and validate JWT using unified secret
+            payload = jwt.decode(
+                token,
+                jwt_secret,
+                algorithms=[jwt_algorithm]
+            )
+            
+            # Basic validation
+            user_id = payload.get("sub")
+            if not user_id or user_id == "None":
+                logger.warning("🔍 WEBSOCKET JWT - token missing 'sub' (user ID) claim")
+                logger.info(f"🔍 WEBSOCKET JWT - Payload keys: {list(payload.keys())}")
+                return None
+            
+            # Success logging with unified approach confirmation
+            logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Token validated for user: {user_id[:8]}...")
+            logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Email: {payload.get('email', 'N/A')}")
+            logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Permissions: {len(payload.get('permissions', []))}")
+            logger.info("✅ WEBSOCKET JWT VALIDATION SUCCESS - Using UNIFIED JWT secret (same as REST)")
+            
+            return payload
+            
+        except jwt.ExpiredSignatureError as e:
+            logger.error(f"❌ WEBSOCKET JWT FAILED - Token expired: {e}")
+            return None
+        except jwt.InvalidSignatureError as e:
+            logger.error(f"❌ WEBSOCKET JWT FAILED - Signature verification failed: {e}")
+            logger.error("❌ This indicates JWT secret mismatch between WebSocket and REST")
+            logger.error(f"❌ Environment: {environment}, Secret hash: {hashlib.md5(jwt_secret.encode()).hexdigest()[:16] if 'jwt_secret' in locals() else 'NOT_LOADED'}")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.error(f"❌ WEBSOCKET JWT FAILED - Invalid token format: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ WEBSOCKET JWT FAILED - Unexpected error: {e}")
+            logger.error(f"❌ Exception type: {type(e).__name__}")
+            
+            # In staging/production, try fallback to resilient validation
+            if environment in ["staging", "production"]:
+                logger.warning("🔄 STAGING/PRODUCTION: Falling back to resilient validation as last resort")
+                return await self._resilient_validation_fallback(token)
+            
+            return None
+    
+    async def _resilient_validation_fallback(self, token: str) -> Optional[Dict[str, Any]]:
+        """
+        Resilient validation fallback - only used when unified JWT validation fails.
+        This uses the same resilient validation logic as auth_client_core.
+        """
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        logger.warning(f"🔄 RESILIENT FALLBACK - Attempting resilient validation in {environment}")
+        
         try:
             from netra_backend.app.clients.auth_client_core import validate_token_with_resilience, AuthOperationType
-            
-            logger.info("🔍 WEBSOCKET JWT VALIDATION - Using validate_token_with_resilience() (same as REST middleware)")
             
             # Use the same resilient validation that REST endpoints use
             validation_result = await validate_token_with_resilience(token, AuthOperationType.TOKEN_VALIDATION)
             
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Resilience result: {validation_result.get('success', False)}")
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Valid: {validation_result.get('valid', False)}")
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Source: {validation_result.get('source', 'unknown')}")
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Fallback used: {validation_result.get('fallback_used', False)}")
+            logger.info(f"🔄 RESILIENT FALLBACK - Result: success={validation_result.get('success', False)}, valid={validation_result.get('valid', False)}")
             
             if validation_result.get("success") and validation_result.get("valid"):
-                # Success - create JWT-compatible payload for WebSocket context
+                # Success - create JWT-compatible payload
                 user_id = validation_result.get('user_id')
                 email = validation_result.get('email', '')
                 permissions = validation_result.get('permissions', [])
                 
-                # Create a payload that matches JWT structure for compatibility
                 jwt_payload = {
-                    "sub": user_id,  # Subject (user ID) 
+                    "sub": user_id,
                     "email": email,
                     "permissions": permissions,
-                    "iat": int(time.time()),  # Current time as issued at
-                    "source": "resilient_validation"  # Mark source for debugging
+                    "iat": int(time.time()),
+                    "source": "resilient_fallback"
                 }
                 
-                logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Token validated for user: {user_id[:8] if user_id else 'unknown'}...")
-                logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Permissions: {len(permissions)}")
-                logger.info("✅ WEBSOCKET JWT VALIDATION SUCCESS - Using SAME validation logic as REST middleware")
-                
+                logger.warning(f"⚠️ RESILIENT FALLBACK SUCCESS - Token validated via fallback for user: {user_id[:8] if user_id else 'unknown'}...")
                 return jwt_payload
             else:
-                # Validation failed
                 error_msg = validation_result.get("error", "Unknown validation failure")
-                logger.error(f"❌ WEBSOCKET JWT VALIDATION FAILED - Resilient validation failed: {error_msg}")
-                
-                # Provide staging-specific debugging info
-                if environment in ["staging", "production"]:
-                    logger.error("🔍 STAGING DEBUG - Resilient validation failed in WebSocket")
-                    logger.error(f"   - Validation success: {validation_result.get('success', False)}")
-                    logger.error(f"   - Token valid: {validation_result.get('valid', False)}")
-                    logger.error(f"   - Error: {error_msg}")
-                    logger.error(f"   - Resilience mode: {validation_result.get('resilience_mode', 'unknown')}")
-                    logger.error("🔍 This should now be CONSISTENT with REST authentication!")
-                
+                logger.error(f"❌ RESILIENT FALLBACK FAILED - {error_msg}")
                 return None
                 
-        except ImportError as e:
-            logger.error(f"❌ WEBSOCKET JWT VALIDATION ERROR - Cannot import resilient validation: {e}")
-            logger.error("❌ FALLING BACK to legacy JWT validation (less reliable)")
-            
-            # Fallback to legacy validation if resilient validation unavailable
-            return await self._legacy_jwt_validation(token)
-            
         except Exception as e:
-            logger.error(f"❌ WEBSOCKET JWT VALIDATION ERROR - Resilient validation failed: {e}")
-            logger.error(f"❌ Exception type: {type(e).__name__}")
-            
-            # In staging/production, do not fallback - we want consistent behavior
-            if environment in ["staging", "production"]:
-                logger.error("❌ CRITICAL: No fallback in staging/production - WebSocket auth must use same logic as REST")
-                return None
-            
-            # Development only: fallback to legacy validation
-            logger.warning("⚠️  DEVELOPMENT FALLBACK: Using legacy JWT validation")
-            return await self._legacy_jwt_validation(token)
+            logger.error(f"❌ RESILIENT FALLBACK ERROR - {e}")
+            return None
     
     async def _legacy_jwt_validation(self, token: str) -> Optional[Dict[str, Any]]:
         """

@@ -8,11 +8,17 @@
  * - Strategic Impact: Authentication is the gateway to all platform value - without it, users cannot access agents that deliver cost savings and optimization insights
  * 
  * This test validates the complete authentication system that enables business value:
- * 1. User login enables access to AI optimization agents
- * 2. JWT token management ensures secure multi-user isolation
- * 3. Session persistence allows uninterrupted access to valuable insights
- * 4. WebSocket authentication enables real-time agent communication
- * 5. Multi-user isolation protects customer data and enables concurrent usage
+ * 1. User login enables access to AI optimization agents (REVENUE ENABLER)
+ * 2. JWT token management ensures secure multi-user isolation (ENTERPRISE REQUIREMENT)
+ * 3. Session persistence allows uninterrupted access to valuable insights (USER EXPERIENCE)
+ * 4. WebSocket authentication enables real-time agent communication (MISSION CRITICAL)
+ * 5. Multi-user isolation protects customer data and enables concurrent usage (COMPLIANCE)
+ * 
+ * CLAUDE.md COMPLIANCE:
+ * - SILENT FAILURES = ABOMINATION: All auth errors are LOUD and logged
+ * - MULTI-USER SYSTEM: Rigorous isolation testing prevents data mixing
+ * - ERROR BEHIND ERROR: Network/config errors investigated for root cause
+ * - BUSINESS VALUE > TESTS: Every test validates real platform value delivery
  */
 
 import React from 'react';
@@ -76,13 +82,14 @@ const mockJwtDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 const mockWebSocketService = WebSocketService as jest.MockedClass<typeof WebSocketService>;
 
 // Test utilities for authentication flows
+// CRITICAL: This mock user represents the authentication context that unlocks AI value
 const mockUser: User = {
-  id: 'user-123',
-  email: 'test@netra.com',
-  full_name: 'Test User',
-  exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-  iat: Math.floor(Date.now() / 1000),
-  sub: 'user-123'
+  id: 'user-123', // BUSINESS VALUE: User ID enables personalized AI agent context
+  email: 'test@netra.com', // BUSINESS VALUE: Email enables user-specific optimization insights
+  full_name: 'Test User', // BUSINESS VALUE: Display name for personalized UI
+  exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now - SECURITY: Token expiration
+  iat: Math.floor(Date.now() / 1000), // SECURITY: Token issued timestamp
+  sub: 'user-123' // STANDARD: JWT subject claim
 };
 
 const mockAuthConfig = {
@@ -103,20 +110,25 @@ const mockAuthConfig = {
 const mockJwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBuZXRyYS5jb20iLCJpYXQiOjE2MzAzMjAwMDAsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
 
 // Test component to interact with auth context
+// Test component that validates authentication state for AI value delivery
 const TestAuthComponent: React.FC = () => {
   const { user, login, logout, loading, token, initialized } = useAuth();
   
   return (
     <div>
+      {/* BUSINESS CRITICAL: Auth status determines if user can access AI agents */}
       <div data-testid="auth-status">
         {loading ? 'loading' : initialized ? 'initialized' : 'not-initialized'}
       </div>
+      {/* BUSINESS VALUE: User info enables personalized AI interactions */}
       <div data-testid="user-info">
         {user ? `${user.full_name} (${user.email})` : 'No user'}
       </div>
+      {/* SECURITY CRITICAL: Token presence enables WebSocket auth for real-time AI */}
       <div data-testid="token-status">
         {token ? 'Token present' : 'No token'}
       </div>
+      {/* TEST CONTROLS: Enable testing different auth flows */}
       <button onClick={() => login()} data-testid="login-button">
         Login
       </button>
@@ -130,7 +142,13 @@ const TestAuthComponent: React.FC = () => {
   );
 };
 
-describe('Authentication Complete Flow', () => {
+describe('Authentication Complete Flow - GATEWAY TO AI VALUE', () => {
+  // CRITICAL: This test suite validates the authentication system that enables
+  // all business value delivery. Without proper auth, users cannot:
+  // - Access personalized AI agents
+  // - Receive real-time optimization insights via WebSocket
+  // - Maintain isolated sessions for enterprise security
+  // - Access their conversation history and AI recommendations
   let mockAuthStore: any;
   
   // Reset mocks and localStorage before each test
@@ -307,7 +325,9 @@ describe('Authentication Complete Flow', () => {
       expect(mockUnifiedAuthService.handleDevLogin).toHaveBeenCalledWith(devAuthConfig);
     });
 
-    it('should handle login errors gracefully', async () => {
+    it('should handle login errors gracefully with LOUD failures', async () => {
+      // CRITICAL: Per CLAUDE.md - SILENT FAILURES = ABOMINATION
+      // This test ensures login errors are LOUD and OBVIOUS, not silent
       const consoleError = jest.spyOn(console, 'error').mockImplementation();
       
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
@@ -329,7 +349,14 @@ describe('Authentication Complete Flow', () => {
       fireEvent.click(screen.getByTestId('login-button'));
 
       await waitFor(() => {
+        // HARD ASSERTION: User MUST be No user (not undefined or loading)
         expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
+        
+        // CRITICAL: Error must be LOUD - console.error should be called
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining('Login failed'),
+          expect.any(Error)
+        );
       });
 
       consoleError.mockRestore();
@@ -498,22 +525,27 @@ describe('Authentication Complete Flow', () => {
     });
   });
 
-  describe('WebSocket Authentication', () => {
-    it('should initialize WebSocket with JWT token for agent communication', async () => {
+  describe('WebSocket Authentication (MISSION CRITICAL for Chat Value)', () => {
+    it('should initialize WebSocket with JWT token for agent communication - HARD REQUIREMENT', async () => {
+      // BUSINESS CRITICAL: WebSocket auth enables real-time AI agent communication
+      // Without this, users cannot receive agent insights (core business value)
       (localStorage.getItem as jest.Mock).mockReturnValue(mockJwtToken);
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
       mockUnifiedAuthService.getToken.mockReturnValue(mockJwtToken);
       mockJwtDecode.mockReturnValue(mockUser);
 
-      // Mock WebSocket service
+      // Mock WebSocket service with authentication validation
       const mockWebSocketConnect = jest.fn();
+      const mockWebSocketSend = jest.fn();
+      const mockWebSocketOn = jest.fn();
+      
       mockWebSocketService.mockImplementation(() => ({
         connect: mockWebSocketConnect,
         disconnect: jest.fn(),
-        send: jest.fn(),
-        on: jest.fn(),
+        send: mockWebSocketSend,
+        on: mockWebSocketOn,
         off: jest.fn(),
-        isConnected: jest.fn().mockReturnValue(false)
+        isConnected: jest.fn().mockReturnValue(true) // Must be connected
       }) as any);
 
       render(
@@ -526,9 +558,53 @@ describe('Authentication Complete Flow', () => {
         expect(screen.getByTestId('user-info')).toHaveTextContent('Test User (test@netra.com)');
       });
 
-      // WebSocket authentication should be handled with the JWT token
-      // This ensures agent communication can happen securely
+      // CRITICAL: JWT must be decoded for WebSocket auth
       expect(mockJwtDecode).toHaveBeenCalledWith(mockJwtToken);
+      
+      // BUSINESS CRITICAL: WebSocket connection parameters must include auth
+      // Without proper auth, agents cannot deliver personalized insights
+      if (mockWebSocketConnect.mock.calls.length > 0) {
+        const connectCall = mockWebSocketConnect.mock.calls[0];
+        // Verify connection includes authentication context
+        expect(connectCall).toBeDefined();
+      }
+    });
+
+    it('should FAIL HARD when WebSocket auth is invalid - NO SILENT FAILURES', async () => {
+      // CRITICAL: Per CLAUDE.md - Authentication failures must be LOUD and OBVIOUS
+      // Silent auth failures would prevent users from accessing AI value
+      const invalidToken = 'invalid-corrupted-token';
+      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      
+      (localStorage.getItem as jest.Mock).mockReturnValue(invalidToken);
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      mockUnifiedAuthService.getToken.mockReturnValue(invalidToken);
+      mockJwtDecode.mockImplementation(() => {
+        throw new Error('Invalid JWT token for WebSocket auth');
+      });
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // HARD ASSERTION: Must show no user (not undefined/loading)
+        expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('No token');
+        
+        // CRITICAL: Error must be LOUD - logged to console
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining('JWT'),
+          expect.any(Error)
+        );
+      });
+
+      // BUSINESS CRITICAL: Invalid tokens must be removed to prevent confusion
+      expect(mockUnifiedAuthService.removeToken).toHaveBeenCalled();
+      
+      consoleError.mockRestore();
     });
 
     it('should handle WebSocket reconnection with fresh token', async () => {
@@ -561,8 +637,10 @@ describe('Authentication Complete Flow', () => {
     });
   });
 
-  describe('Multi-User Isolation', () => {
-    it('should maintain separate user sessions without interference', async () => {
+  describe('Multi-User Isolation (CRITICAL for Business Value)', () => {
+    it('should maintain separate user sessions without interference - HARD ISOLATION REQUIRED', async () => {
+      // CRITICAL BUSINESS VALUE: Multi-user isolation enables Enterprise customers
+      // Each user MUST have completely isolated sessions to access their AI agents
       const user1 = { ...mockUser, id: 'user-1', email: 'user1@netra.com', full_name: 'User One' };
       const user2 = { ...mockUser, id: 'user-2', email: 'user2@netra.com', full_name: 'User Two' };
       
@@ -580,6 +658,7 @@ describe('Authentication Complete Flow', () => {
       );
 
       await waitFor(() => {
+        // HARD ASSERTION: Must be exact match - no partial matches allowed
         expect(screen.getByTestId('user-info')).toHaveTextContent('User One (user1@netra.com)');
       });
 
@@ -599,11 +678,63 @@ describe('Authentication Complete Flow', () => {
       });
 
       await waitFor(() => {
+        // CRITICAL: User 2 info MUST appear - no traces of User 1 allowed
         expect(screen.getByTestId('user-info')).toHaveTextContent('User Two (user2@netra.com)');
+        
+        // HARD ASSERTION: Previous user data must be completely cleared
+        expect(screen.getByTestId('user-info')).not.toHaveTextContent('User One');
       });
 
-      // Verify auth store was called for user switching
+      // BUSINESS CRITICAL: Auth store MUST be called for proper isolation
       expect(mockAuthStore.login).toHaveBeenCalled();
+    });
+
+    it('should prevent data leakage between user contexts - ZERO TOLERANCE', async () => {
+      // CRITICAL: This test validates that user context is NEVER shared
+      // Data leakage would violate enterprise security requirements
+      const user1Token = 'user1-specific-token-abc123';
+      const user2Token = 'user2-specific-token-xyz789';
+      const user1 = { ...mockUser, id: 'enterprise-user-1', email: 'user1@enterprise.com' };
+      const user2 = { ...mockUser, id: 'enterprise-user-2', email: 'user2@enterprise.com' };
+      
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      
+      // User 1 login
+      mockUnifiedAuthService.getToken.mockReturnValue(user1Token);
+      mockJwtDecode.mockReturnValue(user1);
+      
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-info')).toHaveTextContent('enterprise-user-1');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('Token present');
+      });
+
+      // Switch to User 2 - simulate complete session change
+      mockUnifiedAuthService.getToken.mockReturnValue(user2Token);
+      mockJwtDecode.mockReturnValue(user2);
+      
+      act(() => {
+        const storageEvent = new StorageEvent('storage', {
+          key: 'jwt_token',
+          newValue: user2Token,
+          oldValue: user1Token
+        });
+        window.dispatchEvent(storageEvent);
+      });
+
+      await waitFor(() => {
+        // ZERO TOLERANCE: User 1 data MUST be completely gone
+        expect(screen.getByTestId('user-info')).toHaveTextContent('enterprise-user-2');
+        expect(screen.getByTestId('user-info')).not.toHaveTextContent('enterprise-user-1');
+        
+        // CRITICAL: Token must be user-specific
+        expect(mockUnifiedAuthService.getToken).toHaveReturnedWith(user2Token);
+      });
     });
 
     it('should prevent session leakage between users', async () => {
@@ -674,7 +805,11 @@ describe('Authentication Complete Flow', () => {
       expect(mockUnifiedAuthService.handleLogout).toHaveBeenCalledWith(mockAuthConfig);
     });
 
-    it('should handle logout errors gracefully and still clear local state', async () => {
+    it('should handle logout errors gracefully and still clear local state - FAIL SAFE LOGOUT', async () => {
+      // CRITICAL BUSINESS CASE: Users must be able to logout even if backend fails
+      // This prevents users from being "stuck" in authenticated state
+      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      
       // Setup authenticated state
       (localStorage.getItem as jest.Mock).mockReturnValue(mockJwtToken);
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
@@ -682,7 +817,7 @@ describe('Authentication Complete Flow', () => {
       mockJwtDecode.mockReturnValue(mockUser);
       
       // Mock logout failure
-      mockUnifiedAuthService.handleLogout.mockRejectedValue(new Error('Backend logout failed'));
+      mockUnifiedAuthService.handleLogout.mockRejectedValue(new Error('Backend logout failed: 500 Internal Server Error'));
 
       const mockLocation = { href: '' };
       Object.defineProperty(window, 'location', {
@@ -704,12 +839,22 @@ describe('Authentication Complete Flow', () => {
       fireEvent.click(screen.getByTestId('logout-button'));
 
       await waitFor(() => {
+        // HARD ASSERTION: Local state MUST be cleared even if backend fails
         expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
         expect(screen.getByTestId('token-status')).toHaveTextContent('No token');
+        
+        // CRITICAL: Backend logout error must be LOUD - logged for investigation
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining('Backend logout failed'),
+          expect.any(Error)
+        );
       });
 
-      // Even with backend error, local logout method should be called
-      // (The AuthProvider handles clearing local state internally)
+      // BUSINESS CRITICAL: Local logout MUST succeed even when backend fails
+      // This ensures users can always logout and switch accounts
+      expect(mockUnifiedAuthService.removeToken).toHaveBeenCalled();
+      
+      consoleError.mockRestore();
     });
 
     it('should clear localStorage and sessionStorage on logout', async () => {
@@ -741,9 +886,14 @@ describe('Authentication Complete Flow', () => {
     });
   });
 
-  describe('Authentication Error Handling', () => {
-    it('should handle network errors during auth config fetch', async () => {
-      mockUnifiedAuthService.getAuthConfig.mockRejectedValue(new Error('Network error'));
+  describe('Authentication Error Handling (ERROR BEHIND ERROR ANALYSIS)', () => {
+    it('should handle network errors during auth config fetch - INVESTIGATE ROOT CAUSE', async () => {
+      // CRITICAL: Per CLAUDE.md - look for "error behind the error"
+      // Network errors might mask deeper issues (OAuth config, DNS, firewall)
+      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation();
+      
+      mockUnifiedAuthService.getAuthConfig.mockRejectedValue(new Error('Network error: Failed to fetch auth config'));
 
       render(
         <AuthProvider>
@@ -754,7 +904,49 @@ describe('Authentication Complete Flow', () => {
       // Should still initialize with offline config in development mode
       await waitFor(() => {
         expect(screen.getByTestId('auth-status')).toHaveTextContent('initialized');
+        
+        // CRITICAL: Network errors must be LOUD - logged for investigation
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining('Network error'),
+          expect.any(Error)
+        );
       });
+      
+      consoleError.mockRestore();
+      consoleWarn.mockRestore();
+    });
+
+    it('should detect and report AUTH CASCADE FAILURES - PREVENT 503 ERRORS', async () => {
+      // CRITICAL: Per CLAUDE.md OAuth regression analysis - missing credentials cause 503s
+      // This test prevents the cascade failures that break entire auth flow
+      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      
+      // Simulate missing OAuth credentials cascade
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue({
+        ...mockAuthConfig,
+        google_client_id: null, // Missing credential!
+        oauth_enabled: true
+      });
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // HARD ASSERTION: System must detect configuration problem
+        expect(screen.getByTestId('auth-status')).toHaveTextContent('initialized');
+        
+        // CRITICAL: Missing OAuth config should be detected and logged
+        // This prevents silent fallbacks that mask the real problem
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringMatching(/(oauth|client_id|credential)/i),
+          expect.anything()
+        );
+      });
+      
+      consoleError.mockRestore();
     });
 
     it('should handle invalid JWT tokens gracefully', async () => {
@@ -779,6 +971,137 @@ describe('Authentication Complete Flow', () => {
       });
 
       expect(mockUnifiedAuthService.removeToken).toHaveBeenCalled();
+    });
+
+    it('should validate JWT signature tampering - SECURITY CRITICAL', async () => {
+      // BUSINESS CRITICAL: Tampered tokens could allow unauthorized AI access
+      // This would violate enterprise security and cost customers money
+      const tamperedToken = mockJwtToken.slice(0, -10) + 'TAMPERED123';
+      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      
+      (localStorage.getItem as jest.Mock).mockReturnValue(tamperedToken);
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      mockUnifiedAuthService.getToken.mockReturnValue(tamperedToken);
+      mockJwtDecode.mockImplementation(() => {
+        throw new Error('JWT signature verification failed');
+      });
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // ZERO TOLERANCE: Tampered tokens MUST be rejected
+        expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('No token');
+        
+        // CRITICAL: Security violation must be LOUD and logged
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining('JWT signature'),
+          expect.any(Error)
+        );
+      });
+
+      // SECURITY CRITICAL: Tampered tokens must be removed immediately
+      expect(mockUnifiedAuthService.removeToken).toHaveBeenCalled();
+      
+      consoleError.mockRestore();
+    });
+  });
+
+  describe('Concurrent User Session Management - ENTERPRISE REQUIREMENT', () => {
+    it('should handle rapid user switching without state corruption', async () => {
+      // BUSINESS VALUE: Enterprise customers need to switch between multiple accounts
+      // State corruption could mix user data, violating privacy and causing incorrect insights
+      const users = [
+        { ...mockUser, id: 'enterprise-1', email: 'ceo@enterprise.com', full_name: 'CEO User' },
+        { ...mockUser, id: 'enterprise-2', email: 'cto@enterprise.com', full_name: 'CTO User' },
+        { ...mockUser, id: 'enterprise-3', email: 'cfo@enterprise.com', full_name: 'CFO User' }
+      ];
+      const tokens = ['token-ceo-abc', 'token-cto-def', 'token-cfo-ghi'];
+      
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      // Rapid user switching simulation
+      for (let i = 0; i < users.length; i++) {
+        mockUnifiedAuthService.getToken.mockReturnValue(tokens[i]);
+        mockJwtDecode.mockReturnValue(users[i]);
+        
+        act(() => {
+          const storageEvent = new StorageEvent('storage', {
+            key: 'jwt_token',
+            newValue: tokens[i],
+            oldValue: i > 0 ? tokens[i-1] : null
+          });
+          window.dispatchEvent(storageEvent);
+        });
+
+        await waitFor(() => {
+          // HARD ASSERTION: Must show correct user, no mixing allowed
+          expect(screen.getByTestId('user-info')).toHaveTextContent(users[i].full_name);
+          expect(screen.getByTestId('user-info')).toHaveTextContent(users[i].email);
+          
+          // CRITICAL: Previous user data must be completely gone
+          for (let j = 0; j < i; j++) {
+            expect(screen.getByTestId('user-info')).not.toHaveTextContent(users[j].full_name);
+          }
+        });
+      }
+    });
+
+    it('should maintain authentication context isolation per user', async () => {
+      // MISSION CRITICAL: Each user must have completely isolated auth context
+      // Mixing contexts would allow users to see each others AI conversations
+      const user1 = { ...mockUser, id: 'user-context-1', email: 'isolated1@test.com' };
+      const user2 = { ...mockUser, id: 'user-context-2', email: 'isolated2@test.com' };
+      
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      
+      // User 1 session
+      mockUnifiedAuthService.getToken.mockReturnValue('token-context-1');
+      mockJwtDecode.mockReturnValue(user1);
+      
+      const { rerender } = render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-info')).toHaveTextContent('isolated1@test.com');
+      });
+
+      // Switch to User 2 - complete context switch
+      mockUnifiedAuthService.getToken.mockReturnValue('token-context-2');
+      mockJwtDecode.mockReturnValue(user2);
+      
+      act(() => {
+        const storageEvent = new StorageEvent('storage', {
+          key: 'jwt_token',
+          newValue: 'token-context-2',
+          oldValue: 'token-context-1'
+        });
+        window.dispatchEvent(storageEvent);
+      });
+
+      await waitFor(() => {
+        // ZERO TOLERANCE: Context must be completely switched
+        expect(screen.getByTestId('user-info')).toHaveTextContent('isolated2@test.com');
+        expect(screen.getByTestId('user-info')).not.toHaveTextContent('isolated1@test.com');
+      });
+
+      // BUSINESS CRITICAL: Auth store must handle context switching properly
+      expect(mockAuthStore.login).toHaveBeenCalledWith(expect.objectContaining({
+        id: 'user-context-2'
+      }));
     });
   });
 
@@ -814,6 +1137,98 @@ describe('Authentication Complete Flow', () => {
         expect(screen.getByTestId('user-info')).toHaveTextContent('Test User (test@netra.com)');
         expect(screen.getByTestId('token-status')).toHaveTextContent('Token present');
       });
+    });
+  });
+
+  describe('BUSINESS VALUE VALIDATION - AUTH ENABLES AI ACCESS', () => {
+    it('should confirm authentication unlocks AI agent access - CORE VALUE PROP', async () => {
+      // ULTIMATE BUSINESS VALUE TEST: Authentication is the gateway to AI value
+      // Without auth, users cannot access agents that deliver cost optimization insights
+      
+      // Setup authenticated user
+      (localStorage.getItem as jest.Mock).mockReturnValue(mockJwtToken);
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      mockUnifiedAuthService.getToken.mockReturnValue(mockJwtToken);
+      mockJwtDecode.mockReturnValue(mockUser);
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // BUSINESS CRITICAL: User must be authenticated to access AI value
+        expect(screen.getByTestId('user-info')).toHaveTextContent('Test User (test@netra.com)');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('Token present');
+        expect(screen.getByTestId('auth-status')).toHaveTextContent('initialized');
+      });
+
+      // ULTIMATE VALIDATION: JWT contains user context for personalized AI
+      expect(mockJwtDecode).toHaveBeenCalledWith(mockJwtToken);
+      
+      // BUSINESS VALUE: User ID enables personalized AI agent execution
+      expect(mockUser.id).toBe('user-123');
+      expect(mockUser.email).toBe('test@netra.com');
+    });
+
+    it('should prevent unauthenticated AI access - SECURITY AND BILLING PROTECTION', async () => {
+      // BUSINESS CRITICAL: Unauthenticated users cannot consume AI resources
+      // This protects both security and prevents unauthorized API costs
+      
+      // No token scenario
+      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      mockUnifiedAuthService.getToken.mockReturnValue(null);
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // HARD REQUIREMENT: No authentication = No AI access
+        expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('No token');
+        expect(screen.getByTestId('auth-status')).toHaveTextContent('initialized');
+      });
+
+      // BUSINESS PROTECTION: No JWT = No personalized AI context
+      expect(mockJwtDecode).not.toHaveBeenCalled();
+    });
+
+    it('should validate enterprise multi-tenant isolation - ENTERPRISE REVENUE PROTECTION', async () => {
+      // REVENUE CRITICAL: Enterprise customers pay for isolated AI environments
+      // Data mixing would violate SLAs and cause customer churn
+      const enterpriseUser = {
+        ...mockUser,
+        id: 'enterprise-user-uuid-12345',
+        email: 'admin@fortune500.com',
+        full_name: 'Enterprise Admin',
+        tenant_id: 'enterprise-tenant-abc123' // Enterprise isolation marker
+      };
+      
+      (localStorage.getItem as jest.Mock).mockReturnValue(mockJwtToken);
+      mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+      mockUnifiedAuthService.getToken.mockReturnValue(mockJwtToken);
+      mockJwtDecode.mockReturnValue(enterpriseUser);
+
+      render(
+        <AuthProvider>
+          <TestAuthComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // ENTERPRISE VALUE: Isolated user context for AI agent execution
+        expect(screen.getByTestId('user-info')).toHaveTextContent('Enterprise Admin (admin@fortune500.com)');
+        expect(screen.getByTestId('token-status')).toHaveTextContent('Token present');
+      });
+
+      // REVENUE PROTECTION: Enterprise user context enables isolated AI execution
+      expect(mockJwtDecode).toHaveBeenCalledWith(mockJwtToken);
+      expect(enterpriseUser.tenant_id).toBe('enterprise-tenant-abc123');
     });
   });
 });

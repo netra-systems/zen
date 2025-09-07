@@ -53,31 +53,38 @@ class WebSocketAuthenticator:
         
         try:
             # Use the existing auth client for JWT validation with circuit breaker protection
-            # The auth client now has built-in circuit breaker that will handle failures gracefully
+            # The auth client has built-in circuit breaker that handles failures gracefully
+            # SSOT ENFORCEMENT: WebSocket MUST use auth service for ALL token validation
             validation_result = await self.auth_client.validate_token_jwt(clean_token)
             
             if not validation_result:
+                # SSOT ENFORCEMENT: No local validation fallback - auth service is required
                 # Check if auth service is unavailable (circuit breaker open)
                 from netra_backend.app.clients.circuit_breaker import CircuitState
                 if hasattr(self.auth_client, 'circuit_breaker') and self.auth_client.circuit_breaker.state == CircuitState.OPEN:
-                    logger.warning("WebSocket authentication: Auth service unavailable (circuit open) - using local validation")
-                    # Try local JWT validation as fallback when auth service is down
-                    try:
-                        local_result = await self.auth_client._local_validate(clean_token)
-                        if local_result and local_result.get("valid", False):
-                            logger.info("WebSocket authentication: Successfully used local JWT validation fallback")
-                            return local_result
-                    except Exception as local_err:
-                        logger.error(f"WebSocket authentication: Local validation also failed: {local_err}")
+                    logger.error("WebSocket authentication: Auth service unavailable (circuit breaker open) - authentication failed")
+                    logger.error("SSOT ENFORCEMENT: WebSocket authentication requires auth service - no local fallback allowed")
+                else:
+                    logger.warning("WebSocket authentication: Token validation returned None from auth service")
                 
-                logger.warning("WebSocket authentication: Token validation returned None")
                 self._failed_auths += 1
                 return None
             
             # Check if validation was successful
             if not validation_result.get("valid", False):
                 error_msg = validation_result.get("error", "Token validation failed")
-                logger.warning(f"WebSocket authentication: Token validation failed - {error_msg}")
+                error_details = validation_result.get("details", "")
+                
+                # Enhanced error logging for auth service failures
+                if "auth_service_required" in error_msg or "unavailable" in error_msg:
+                    logger.error(f"WebSocket authentication: Auth service required but unavailable - {error_msg}")
+                    logger.error("SSOT ENFORCEMENT: WebSocket authentication requires functional auth service")
+                else:
+                    logger.warning(f"WebSocket authentication: Token validation failed - {error_msg}")
+                
+                if error_details:
+                    logger.debug(f"WebSocket authentication error details: {error_details}")
+                
                 self._failed_auths += 1
                 return None
             
@@ -159,11 +166,22 @@ class WebSocketAuthenticator:
         
         if not auth_result or not auth_result.get("authenticated", False):
             error_detail = "Invalid or expired authentication token"
+            
             if auth_result:
                 # Include more specific error information if available
                 error_info = auth_result.get("error", "")
-                if error_info:
+                error_details = auth_result.get("details", "")
+                
+                # Provide specific error messages for auth service issues
+                if "auth_service_required" in error_info or "unavailable" in error_info:
+                    error_detail = "Authentication service temporarily unavailable. Please try again later."
+                    logger.error(f"WebSocket authentication failed: Auth service unavailable - {error_info}")
+                    raise HTTPException(status_code=503, detail=error_detail)
+                elif error_info:
                     error_detail = f"Authentication failed: {error_info}"
+                
+                if error_details:
+                    logger.debug(f"WebSocket authentication error details: {error_details}")
             
             logger.warning(f"WebSocket authentication failed: {error_detail}")
             raise HTTPException(status_code=401, detail=error_detail)

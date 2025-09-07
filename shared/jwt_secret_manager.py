@@ -34,9 +34,13 @@ class JWTSecretManager:
     
     def __init__(self):
         """Initialize JWT secret manager."""
-        self.env = get_env()
+        # Don't cache the environment - always get fresh environment for staging tests
         self._cached_secret: Optional[str] = None
         self._cached_algorithm: Optional[str] = None
+    
+    def _get_env(self):
+        """Get current environment - always fresh for staging test compatibility."""
+        return get_env()
         
     def get_jwt_secret(self) -> str:
         """
@@ -62,18 +66,19 @@ class JWTSecretManager:
             return self._cached_secret
             
         try:
-            environment = self.env.get("ENVIRONMENT", "development").lower()
+            env = self._get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
             
             # 1. Try environment-specific secret first (highest priority)
             env_specific_key = f"JWT_SECRET_{environment.upper()}"
-            jwt_secret = self.env.get(env_specific_key)
+            jwt_secret = env.get(env_specific_key)
             if jwt_secret:
                 logger.info(f"Using environment-specific JWT secret: {env_specific_key}")
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
             # 2. Try generic JWT_SECRET_KEY (second priority)
-            jwt_secret = self.env.get("JWT_SECRET_KEY")
+            jwt_secret = env.get("JWT_SECRET_KEY")
             if jwt_secret:
                 logger.info("Using generic JWT_SECRET_KEY")
                 self._cached_secret = jwt_secret.strip()
@@ -121,11 +126,12 @@ class JWTSecretManager:
         """
         if self._cached_algorithm:
             return self._cached_algorithm
-            
-        environment = self.env.get("ENVIRONMENT", "development").lower()
+        
+        env = self._get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
         
         # Check for explicit algorithm configuration
-        algorithm = self.env.get("JWT_ALGORITHM")
+        algorithm = env.get("JWT_ALGORITHM")
         if algorithm:
             self._cached_algorithm = algorithm
             return algorithm
@@ -151,7 +157,8 @@ class JWTSecretManager:
         Returns:
             Dict with validation results and diagnostics
         """
-        environment = self.env.get("ENVIRONMENT", "development").lower()
+        env = self._get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
         issues = []
         warnings = []
         info = {}
@@ -175,7 +182,7 @@ class JWTSecretManager:
             # Environment-specific checks
             if environment in ["staging", "production"]:
                 env_specific_key = f"JWT_SECRET_{environment.upper()}"
-                if not self.env.get(env_specific_key) and not self.env.get("JWT_SECRET_KEY"):
+                if not env.get(env_specific_key) and not env.get("JWT_SECRET_KEY"):
                     issues.append(f"No environment-specific JWT secret configured for {environment}")
                     
         except Exception as e:
@@ -213,18 +220,19 @@ class JWTSecretManager:
         Returns:
             Dict with debug information (sanitized - no actual secrets)
         """
-        environment = self.env.get("ENVIRONMENT", "development").lower()
+        env = self._get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
         env_specific_key = f"JWT_SECRET_{environment.upper()}"
         
         return {
             "environment": environment,
             "environment_specific_key": env_specific_key,
-            "has_env_specific": bool(self.env.get(env_specific_key)),
-            "has_generic_key": bool(self.env.get("JWT_SECRET_KEY")),
-            "has_legacy_key": bool(self.env.get("JWT_SECRET")),
+            "has_env_specific": bool(env.get(env_specific_key)),
+            "has_generic_key": bool(env.get("JWT_SECRET_KEY")),
+            "has_legacy_key": bool(env.get("JWT_SECRET")),
             "available_keys": [
                 key for key in [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
-                if self.env.get(key)
+                if env.get(key)
             ],
             "algorithm": self.get_jwt_algorithm()
         }

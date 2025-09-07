@@ -18,6 +18,17 @@ from netra_backend.app.services.token_service import TokenService
 from netra_backend.app.middleware.fastapi_auth_middleware import FastAPIAuthMiddleware
 
 
+def reset_jwt_secret_singletons():
+    """Reset JWT secret manager singleton instances for clean test isolation."""
+    # Reset JWT secret manager singleton
+    import shared.jwt_secret_manager
+    shared.jwt_secret_manager._jwt_secret_manager = None
+    
+    # Reset unified secrets manager singleton 
+    import netra_backend.app.core.configuration.unified_secrets
+    netra_backend.app.core.configuration.unified_secrets._secrets_manager = None
+
+
 class TestJWTSecretSSOTCompliance:
     """Test JWT secret SSOT compliance across all components."""
     
@@ -67,10 +78,11 @@ class TestJWTSecretSSOTCompliance:
         """Test that TokenService._get_jwt_secret() delegates to canonical method."""
         test_secret = "token-service-ssot-test-32-chars"
         
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": test_secret
-        }, clear=False):
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
+        
+        # Mock the unified JWT secret function directly to bypass environment issues
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             token_service = TokenService()
             
             # Verify TokenService uses the canonical method
@@ -84,6 +96,9 @@ class TestJWTSecretSSOTCompliance:
     def test_middleware_delegates_to_ssot_when_no_explicit_secret(self):
         """Test that middleware delegates to SSOT when no explicit secret provided."""
         test_secret = "middleware-ssot-test-secret-32-chars"
+        
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
         
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development",
@@ -120,6 +135,9 @@ class TestJWTSecretSSOTCompliance:
         assert secret == test_explicit_secret
         
         # Test SSOT fallback
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
+        
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development",
             "JWT_SECRET_KEY": test_ssot_secret
@@ -131,6 +149,9 @@ class TestJWTSecretSSOTCompliance:
     def test_all_components_return_same_secret_for_same_environment(self):
         """Integration test: All components return same secret in same environment."""
         test_secret = "integration-test-secret-32-chars"
+        
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
         
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development", 
@@ -159,6 +180,9 @@ class TestJWTSecretSSOTCompliance:
         test_secret_with_whitespace = "  test-secret-with-whitespace-32-chars  "
         expected_secret = "test-secret-with-whitespace-32-chars"
         
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
+        
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development",
             "JWT_SECRET_KEY": test_secret_with_whitespace
@@ -170,6 +194,9 @@ class TestJWTSecretSSOTCompliance:
     def test_unified_secret_manager_instance_method(self):
         """Test that UnifiedSecretManager instance method works correctly."""
         test_secret = "unified-manager-test-secret-32-chars"
+        
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
         
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development",
@@ -219,6 +246,9 @@ class TestJWTSecretSSOTIntegration:
         # should delegate to this canonical method.
         
         test_secret = "ssot-integration-test-secret-32-chars"
+        
+        # CRITICAL: Reset singleton instances to prevent test framework interference
+        reset_jwt_secret_singletons()
         
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development",
