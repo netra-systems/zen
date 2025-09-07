@@ -89,7 +89,7 @@ class TestWebSocket403Fix:
         except Exception as e:
             pytest.fail(f"JWT validation failed: {e}")
     
-    def test_websocket_jwt_extraction_and_validation(self):
+    async def test_websocket_jwt_extraction_and_validation(self):
         """Test WebSocket JWT extraction and validation pipeline."""
         # Create test WebSocket mock with JWT in Authorization header
         mock_websocket = MagicMock()
@@ -119,8 +119,8 @@ class TestWebSocket403Fix:
         assert extracted_token == test_token
         print(f"[SUCCESS] JWT token extracted from WebSocket headers")
         
-        # Validate JWT token
-        validated_payload = extractor.validate_and_decode_jwt(extracted_token)
+        # Validate JWT token - CRITICAL FIX: Added await for async method
+        validated_payload = await extractor.validate_and_decode_jwt(extracted_token)
         assert validated_payload is not None
         assert validated_payload["sub"] == "websocket_test_user"
         print(f"[SUCCESS] JWT token validated successfully")
@@ -219,7 +219,7 @@ class TestWebSocket403Fix:
 class TestWebSocketAuthenticationPipeline:
     """Integration tests for the complete WebSocket authentication pipeline."""
     
-    def test_end_to_end_websocket_auth_pipeline(self):
+    async def test_end_to_end_websocket_auth_pipeline(self):
         """Test complete end-to-end WebSocket authentication pipeline."""
         # This test requires both services to be using unified JWT secrets
         
@@ -249,8 +249,8 @@ class TestWebSocketAuthenticationPipeline:
         extractor = UserContextExtractor()
         
         try:
-            # Extract user context (this does JWT validation internally)
-            user_context, auth_info = extractor.extract_user_context_from_websocket(mock_websocket)
+            # Extract user context (this does JWT validation internally) - CRITICAL FIX: Added await for async method
+            user_context, auth_info = await extractor.extract_user_context_from_websocket(mock_websocket)
             
             # Verify extraction was successful
             assert user_context.user_id == "e2e_test_user"
@@ -268,34 +268,38 @@ class TestWebSocketAuthenticationPipeline:
 if __name__ == "__main__":
     # Run tests directly
     import sys
+    import asyncio
     
-    print("=" * 60)
-    print("WebSocket 403 Fix Validation Tests")
-    print("=" * 60)
-    
-    test_instance = TestWebSocket403Fix()
-    test_instance.setup_method()
-    
-    try:
-        test_instance.test_unified_jwt_secret_consistency()
-        test_instance.test_jwt_token_generation_and_validation() 
-        test_instance.test_websocket_jwt_extraction_and_validation()
-        test_instance.test_environment_specific_jwt_secret_resolution()
-        test_instance.test_jwt_configuration_validation()
-        test_instance.test_reproduce_websocket_403_scenario_before_fix()
-        test_instance.test_staging_environment_configuration()
-        
-        # Integration test
-        integration_test = TestWebSocketAuthenticationPipeline()
-        integration_test.test_end_to_end_websocket_auth_pipeline()
-        
-        print("\n" + "=" * 60)
-        print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!")
-        print("[ROCKET] $50K MRR WebSocket functionality restored")
+    async def run_tests():
+        print("=" * 60)
+        print("WebSocket 403 Fix Validation Tests")
         print("=" * 60)
         
-    except Exception as e:
-        print(f"\n[FAILED] TEST FAILED: {e}")
-        sys.exit(1)
-    finally:
-        test_instance.teardown_method()
+        test_instance = TestWebSocket403Fix()
+        test_instance.setup_method()
+        
+        try:
+            test_instance.test_unified_jwt_secret_consistency()
+            test_instance.test_jwt_token_generation_and_validation() 
+            await test_instance.test_websocket_jwt_extraction_and_validation()  # CRITICAL FIX: Added await
+            test_instance.test_environment_specific_jwt_secret_resolution()
+            test_instance.test_jwt_configuration_validation()
+            test_instance.test_reproduce_websocket_403_scenario_before_fix()
+            test_instance.test_staging_environment_configuration()
+            
+            # Integration test
+            integration_test = TestWebSocketAuthenticationPipeline()
+            await integration_test.test_end_to_end_websocket_auth_pipeline()  # CRITICAL FIX: Added await
+            
+            print("\n" + "=" * 60)
+            print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!")
+            print("[ROCKET] $50K MRR WebSocket functionality restored")
+            print("=" * 60)
+            
+        except Exception as e:
+            print(f"\n[FAILED] TEST FAILED: {e}")
+            sys.exit(1)
+        finally:
+            test_instance.teardown_method()
+    
+    asyncio.run(run_tests())

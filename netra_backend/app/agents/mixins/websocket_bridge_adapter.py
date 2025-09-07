@@ -67,8 +67,20 @@ class WebSocketBridgeAdapter:
     async def emit_agent_started(self, message: Optional[str] = None) -> None:
         """Emit agent started event."""
         if not self.has_websocket_bridge():
-            logger.warning(f"❌ No WebSocket bridge for agent_started event - agent={self._agent_name}, bridge={self._bridge is not None}, run_id={self._run_id}")
-            return
+            error_msg = (
+                f"CRITICAL: Agent {self._agent_name} missing WebSocket bridge - "
+                f"agent_started event will be lost! Users will not see AI working. "
+                f"Bridge={self._bridge is not None}, Run_ID={self._run_id}"
+            )
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+            
+            # HARD FAILURE: Raise exception instead of silent return
+            # Per CLAUDE.MD Section 6: WebSocket events are MISSION CRITICAL for chat value
+            raise RuntimeError(
+                f"Missing WebSocket bridge for agent_started event. "
+                f"Agent: {self._agent_name}, Bridge: {self._bridge is not None}, Run_ID: {self._run_id}. "
+                f"This violates SSOT requirement for mandatory WebSocket notifications."
+            )
         
         try:
             context = {"message": message} if message else {}
@@ -83,7 +95,20 @@ class WebSocketBridgeAdapter:
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None) -> None:
         """Emit agent thinking event for real-time reasoning visibility."""
         if not self.has_websocket_bridge():
-            return
+            error_msg = (
+                f"CRITICAL: Agent {self._agent_name} missing WebSocket bridge - "
+                f"agent_thinking event will be lost! Users will not see real-time reasoning. "
+                f"Bridge={self._bridge is not None}, Run_ID={self._run_id}"
+            )
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+            
+            # HARD FAILURE: Raise exception instead of silent return
+            # Per CLAUDE.MD Section 6: Real-time reasoning visibility is MISSION CRITICAL
+            raise RuntimeError(
+                f"Missing WebSocket bridge for agent_thinking event. "
+                f"Agent: {self._agent_name}, Bridge: {self._bridge is not None}, Run_ID: {self._run_id}. "
+                f"This violates SSOT requirement for mandatory WebSocket notifications."
+            )
         
         try:
             await self._bridge.notify_agent_thinking(
@@ -130,8 +155,20 @@ class WebSocketBridgeAdapter:
     async def emit_agent_completed(self, result: Optional[Dict[str, Any]] = None) -> None:
         """Emit agent completed event."""
         if not self.has_websocket_bridge():
-            logger.warning(f"❌ No WebSocket bridge for agent_completed event - agent={self._agent_name}, bridge={self._bridge is not None}, run_id={self._run_id}")
-            return
+            error_msg = (
+                f"CRITICAL: Agent {self._agent_name} missing WebSocket bridge - "
+                f"agent_completed event will be lost! Users will not know when valuable response is ready. "
+                f"Bridge={self._bridge is not None}, Run_ID={self._run_id}"
+            )
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+            
+            # HARD FAILURE: Raise exception instead of silent return
+            # Per CLAUDE.MD Section 6: Users must know when valuable response is ready
+            raise RuntimeError(
+                f"Missing WebSocket bridge for agent_completed event. "
+                f"Agent: {self._agent_name}, Bridge: {self._bridge is not None}, Run_ID: {self._run_id}. "
+                f"This violates SSOT requirement for mandatory WebSocket notifications."
+            )
         
         try:
             await self._bridge.notify_agent_completed(

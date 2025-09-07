@@ -170,9 +170,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         factory1 = get_agent_instance_factory()
         factory2 = get_agent_instance_factory()
         
-        self.assertIs(factory1, factory2)
-        self.assertIsInstance(factory1, AgentInstanceFactory)
-        self.assertIsInstance(factory2, AgentInstanceFactory)
+        assert factory1 is factory2
+        assert isinstance(factory1, AgentInstanceFactory)
+        assert isinstance(factory2, AgentInstanceFactory)
         
     def test_singleton_pattern_across_modules(self):
         """Test 2: Singleton works across different module imports."""

@@ -940,7 +940,6 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.websocket_core import get_websocket_manager
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
