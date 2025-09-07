@@ -505,7 +505,7 @@ class TestUnifiedWebSocketManagerComprehensive:
         - Error recovery and user notifications
         """
         # Test environment detection and retry configuration
-        self.get_env().set("ENVIRONMENT", "staging", "test_critical_events")
+        self.env.set("ENVIRONMENT", "staging", "test_critical_events")
         
         connection = self.create_mock_connection(self.test_user_id, self.test_connection_id)
         await self.manager.add_connection(connection)
