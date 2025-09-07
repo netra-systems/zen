@@ -29,7 +29,7 @@ class BackendEnvironment:
     def _validate_backend_config(self) -> None:
         """Validate backend-specific configuration on initialization."""
         # Core backend requirements
-        # DATABASE_URL is built from POSTGRES_* variables via DatabaseURLBuilder
+        # Database URL is built from POSTGRES_* variables via DatabaseURLBuilder
         required_vars = [
             "JWT_SECRET_KEY",
             "SECRET_KEY"
@@ -69,11 +69,6 @@ class BackendEnvironment:
             sync: If True, return synchronous URL (for Alembic, etc.)
         """
         from shared.database_url_builder import DatabaseURLBuilder
-        
-        # First check if DATABASE_URL is explicitly set
-        database_url = self.env.get("DATABASE_URL", "")
-        if database_url:
-            return database_url
         
         # Use DatabaseURLBuilder to construct URL from components
         builder = DatabaseURLBuilder(self.env.as_dict())

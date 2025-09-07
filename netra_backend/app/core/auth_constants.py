@@ -121,7 +121,6 @@ class CredentialConstants:
     GEMINI_API_KEY: Final[str] = "GEMINI_API_KEY"
     
     # Database credentials
-    DATABASE_URL: Final[str] = "DATABASE_URL"
     REDIS_URL: Final[str] = "REDIS_URL"
     REDIS_PASSWORD: Final[str] = "REDIS_PASSWORD"
     

@@ -582,14 +582,6 @@ class ConfigurationValidator:
         default_rules = [
             # Database configurations
             ValidationRule(
-                name="DATABASE_URL",
-                config_type=ConfigType.URL,
-                required=True,
-                description="Primary database connection URL",
-                example="postgresql://user:pass@localhost:5432/dbname"
-            ),
-            
-            ValidationRule(
                 name="REDIS_URL", 
                 config_type=ConfigType.URL,
                 required=False,

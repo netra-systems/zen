@@ -84,7 +84,6 @@ class EnvironmentVariables:
     KUBERNETES_SERVICE_HOST = "KUBERNETES_SERVICE_HOST"  # Kubernetes
     
     # Database environment variables
-    DATABASE_URL = "DATABASE_URL"
     CLICKHOUSE_HOST = "CLICKHOUSE_HOST"
     CLICKHOUSE_PORT = "CLICKHOUSE_PORT"
     CLICKHOUSE_USER = "CLICKHOUSE_USER"
