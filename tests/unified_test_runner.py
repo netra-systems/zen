@@ -3027,6 +3027,35 @@ def main():
     # This ensures environment isolation respects real services flag from the start
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
                   (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
+    
+    # WINDOWS SAFETY: Detect Windows and use safe runner for e2e tests
+    import platform
+    if platform.system() == 'Windows' and running_e2e:
+        print("[WARNING] Windows detected with e2e tests - using safe runner to prevent Docker crash")
+        print("[INFO] See tests/e2e/WINDOWS_SAFE_TESTING_GUIDE.md for details")
+        
+        # Use the safe runner script for e2e tests on Windows
+        import subprocess
+        safe_runner = PROJECT_ROOT / 'tests' / 'e2e' / 'run_safe_windows.py'
+        if safe_runner.exists():
+            # Build command for safe runner
+            cmd = [sys.executable, str(safe_runner)]
+            if args.category == 'e2e':
+                # Run all e2e tests safely
+                pass  # Default behavior
+            elif args.categories and 'e2e' in args.categories:
+                # Run specific e2e tests
+                pass  # Will handle all e2e tests
+            
+            print(f"[INFO] Executing: {' '.join(cmd)}")
+            result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+            sys.exit(result.returncode)
+        else:
+            print("[WARNING] Safe runner not found, proceeding with caution...")
+            # Set safety environment variables
+            env.set('PYTEST_XDIST_WORKER_COUNT', '1', 'windows_safety')
+            env.set('PYTEST_TIMEOUT', '120', 'windows_safety')
+            env.set('PYTHONDONTWRITEBYTECODE', '1', 'windows_safety')
                   
     if args.env in ['staging', 'dev'] or args.real_services or running_e2e:
         env.set('USE_REAL_SERVICES', 'true', 'main_early_setup')

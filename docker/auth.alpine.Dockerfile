@@ -19,7 +19,9 @@ WORKDIR /build
 COPY auth_service/requirements.txt .
 RUN pip install --no-cache-dir --user \
     --no-warn-script-location \
-    -r requirements.txt
+    -r requirements.txt && \
+    find /root/.local -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true && \
+    find /root/.local -type d -name 'tests' -exec rm -rf {} + 2>/dev/null || true
 
 # Production stage - minimal Alpine image
 FROM python:3.11-alpine3.19

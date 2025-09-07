@@ -54,7 +54,11 @@ services:
       dockerfile: docker/backend.alpine.Dockerfile
     environment:
       ENVIRONMENT: development
-      DATABASE_URL: postgresql://netra:local_dev_password@dev-postgres:5432/netra_apex
+      POSTGRES_HOST: dev-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: netra_apex
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: local_dev_password
       REDIS_URL: redis://dev-redis:6379/0
       CLICKHOUSE_HOST: dev-clickhouse
       CLICKHOUSE_PORT: 9000
@@ -82,7 +86,11 @@ services:
       dockerfile: docker/auth.alpine.Dockerfile
     environment:
       ENVIRONMENT: development
-      DATABASE_URL: postgresql://netra:local_dev_password@dev-postgres:5432/netra_apex
+      POSTGRES_HOST: dev-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: netra_apex
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: local_dev_password
       REDIS_URL: redis://dev-redis:6379/1
       CORS_ORIGINS: http://localhost:3000,http://localhost:3001
     volumes:

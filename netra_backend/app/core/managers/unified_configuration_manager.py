@@ -406,7 +406,6 @@ class UnifiedConfigurationManager:
         # Map environment variables to configuration keys
         env_mapping = {
             # Database
-            "DATABASE_URL": "database.url",
             "DATABASE_POOL_SIZE": "database.pool_size",
             "DATABASE_MAX_OVERFLOW": "database.max_overflow",
             "DATABASE_POOL_TIMEOUT": "database.pool_timeout",

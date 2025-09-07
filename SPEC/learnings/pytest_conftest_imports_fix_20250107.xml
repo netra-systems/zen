@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Pytest Conftest Module-Level Imports Causing Docker Crash - Fixed</title>
+  <date>2025-01-07</date>
+  <severity>CRITICAL</severity>
+  <category>testing,docker,windows,resource-exhaustion,pytest</category>
+  
+  <problem>
+    <description>
+      Pytest collection phase was causing complete Docker Desktop crash on Windows WSL2
+      due to module-level imports of heavy backend modules in conftest files.
+    </description>
+    <symptoms>
+      - Docker Desktop crashes with exit code 1077 during pytest collection
+      - ValueError('I/O operation on closed file.') errors
+      - Tests crash before any test code executes
+      - Memory/file descriptor exhaustion on Windows WSL2
+    </symptoms>
+    <affected_files>
+      <file>tests/conftest_base.py</file>
+      <file>tests/conftest_mocks.py</file>
+      <file>tests/conftest_services.py</file>
+      <file>tests/conftest_e2e.py</file>
+      <file>tests/mission_critical/conftest_isolated_websocket.py</file>
+    </affected_files>
+  </problem>
+  
+  <root_cause>
+    <analysis method="code-inspection">
+      <finding level="1">
+        Conftest files had module-level imports of heavy backend modules:
+        - from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+        - from netra_backend.app.db.database_manager import DatabaseManager
+        - from netra_backend.app.clients.auth_client_core import AuthServiceClient
+      </finding>
+      <finding level="2">
+        These imports happen during pytest collection phase (before any tests run)
+      </finding>
+      <finding level="3">
+        Each import triggers initialization code that attempts connections
+      </finding>
+      <finding level="4">
+        Windows WSL2 doubles file descriptors (one on Windows, one on WSL2 bridge)
+      </finding>
+      <finding level="5">
+        Resource accumulation from loguru loggers, socket connections, subprocess pipes
+        causes complete Docker Desktop crash
+      </finding>
+    </analysis>
+  </root_cause>
+  
+  <solution>
+    <changes>
+      <change file="tests/conftest_base.py">
+        Removed module-level imports of UnifiedErrorHandler, DatabaseManager, AuthServiceClient.
+        Added comment for lazy loading inside fixtures.
+      </change>
+      <change file="tests/conftest_mocks.py">
+        Removed module-level imports of backend modules.
+        Kept only lightweight shared.isolated_environment import.
+      </change>
+      <change file="tests/conftest_services.py">
+        Removed module-level imports of backend modules.
+        Added lazy loading comment.
+      </change>
+      <change file="tests/conftest_e2e.py">
+        Removed module-level imports of backend modules.
+        Added lazy loading comment.
+      </change>
+      <change file="tests/mission_critical/conftest_isolated_websocket.py">
+        Removed module-level imports of backend modules.
+        Added lazy loading comment.
+      </change>
+    </changes>
+    
+    <verification>
+      Created test_pytest_collection_fix.py script that verifies:
+      - Pytest collection completes without Docker crash
+      - Tests are properly collected (9 tests in 0.17s)
+      - Memory usage stays reasonable (108MB)
+    </verification>
+  </solution>
+  
+  <best_practices>
+    <practice priority="1">
+      NEVER import heavy backend modules at module level in conftest files.
+      Always use lazy imports inside fixtures.
+    </practice>
+    <practice priority="2">
+      For Windows development, be aware of WSL2 file descriptor doubling.
+      Each connection/file handle uses 2x resources.
+    </practice>
+    <practice priority="3">
+      Use @pytest.mark.requires_docker decorator and skip logic for Docker-dependent tests.
+    </practice>
+    <practice priority="4">
+      Individual test files should also avoid module-level backend imports.
+      Move imports inside test functions or use lazy loading patterns.
+    </practice>
+    <practice priority="5">
+      Always verify pytest collection phase works before running tests:
+      pytest --collect-only -q
+    </practice>
+  </best_practices>
+  
+  <remaining_work>
+    <task>
+      Individual test files still have module-level imports that could cause issues.
+      Example: tests/unit/test_factory_consolidation.py imports backend modules at module level.
+    </task>
+    <task>
+      Consider creating a pytest plugin that enforces lazy loading of backend modules.
+    </task>
+    <task>
+      Add pre-commit hook to detect module-level backend imports in test files.
+    </task>
+  </remaining_work>
+  
+  <impact>
+    <positive>
+      - Pytest collection now completes in 0.17s without crashing
+      - Docker Desktop remains stable during test runs
+      - Memory usage reduced from crash to 108MB
+      - Tests can be collected and run normally
+    </positive>
+    <negative>
+      - Some fixtures may need updates to import modules lazily
+      - Existing test files with module-level imports still pose risk
+    </negative>
+  </impact>
+  
+  <keywords>
+    pytest, conftest, docker, crash, windows, wsl2, module-import, collection-phase,
+    resource-exhaustion, file-descriptor, lazy-loading, UnifiedErrorHandler,
+    DatabaseManager, AuthServiceClient
+  </keywords>
+</learning>

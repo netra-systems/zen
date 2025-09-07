@@ -24,7 +24,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user \
     --no-warn-script-location \
     --disable-pip-version-check \
-    -r requirements.txt
+    -r requirements.txt && \
+    find /root/.local -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true && \
+    find /root/.local -type d -name 'tests' -exec rm -rf {} + 2>/dev/null || true && \
+    find /root/.local -type d -name 'test' -exec rm -rf {} + 2>/dev/null || true
 
 # Production stage - minimal Alpine image
 FROM python:3.11-alpine3.19
@@ -62,6 +65,14 @@ COPY --chown=netra:netra shared /app/shared
 # Copy application code LAST (changes most frequently)
 # This ensures maximum cache hit rate for builds
 COPY --chown=netra:netra netra_backend /app/netra_backend
+
+# Clean up unnecessary files from application
+RUN find /app -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true && \
+    find /app -type d -name '.pytest_cache' -exec rm -rf {} + 2>/dev/null || true && \
+    find /app -type f -name '*.pyc' -delete && \
+    find /app -type f -name '*.pyo' -delete && \
+    find /app -type f -name '*.md' -delete && \
+    rm -rf /app/netra_backend/tests /app/netra_backend/test_* /app/netra_backend/reports /app/netra_backend/SPEC 2>/dev/null || true
 
 # Set environment variables
 ENV PATH=/home/netra/.local/bin:$PATH \

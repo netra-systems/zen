@@ -77,7 +77,7 @@ def _setup_environment_files() -> None:
     
     # Check if critical environment variables are already set
     # This handles cases where env vars are set directly without dev launcher
-    critical_vars = ['LLM_MODE', 'DATABASE_URL', 'GEMINI_API_KEY']
+    critical_vars = ['LLM_MODE', 'POSTGRES_HOST', 'GEMINI_API_KEY']
     vars_already_set = sum(1 for var in critical_vars if env_manager.get(var))
     
     # If most critical vars are already set, assume external loading

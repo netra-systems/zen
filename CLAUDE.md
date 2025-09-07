@@ -31,7 +31,7 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
 
-> **⚠️ MANDATORY READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+> **⚠️ MANDATORY READING**: The **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
 
 Recent issues to be extra aware of:
 1. Race conditions. Plan ahead and think about race conditions in all aspects of your code and refactors.
@@ -40,7 +40,7 @@ The system has a lot of async, websockets, and other patterns that require heavy
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
 5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
-6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./CONFIG_REGRESSION_PREVENTION_PLAN.md)
+6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./reports/auth/OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
 Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
@@ -64,10 +64,10 @@ Especially when dealing with apparent regression issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
 
 ### Related Architecture Documents:
-- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
 - **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
-- [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
-- [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
+- [Tool Dispatcher Migration Guide](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
+- [WebSocket Modernization Report](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
 
 Expect everything to fail. Add conditional error logging by default whenever possible.
@@ -124,7 +124,7 @@ CRITICAL: Develop a globally coherent and modular architecture.
 
   * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
   * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
-    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
+    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
     - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
     - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
     - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
@@ -294,7 +294,7 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 
 The `SPEC/*.xml` files are the **living source of truth** for system architecture and learnings.
 
-  * **Navigation:** Read [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
+  * **Navigation:** Read [`LLM_MASTER_INDEX.md`](reports/LLM_MASTER_INDEX.md) before searching for files or functionality.
   * **Iterative Discovery:** Specs must evolve. If analysis reveals a better solution, propose a spec improvement.
   * **Update Timing:** Review specs before work and update them immediately after validation.
   * **Learnings vs. Reports:** Learnings in `SPEC/*.xml` are permanent knowledge. Reports (`*.md`) are ephemeral work logs.
@@ -384,7 +384,6 @@ The following events MUST be sent during agent execution to enable meaningful AI
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
 - See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
 - See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
-- See [`AGENT_EXECUTION_ORDER_REASONING.md`](AGENT_EXECUTION_ORDER_REASONING.md) - Why execution order matters for business value
 
 -----
 
@@ -498,7 +497,7 @@ python scripts/refresh_dev_services.py logs --services backend -f
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
-**See [`TEST_CREATION_GUIDE.md`](TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
+**See [`TEST_CREATION_GUIDE.md`](reports/testing/TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
 **See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**
@@ -543,8 +542,8 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
 
-  * [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
-  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
+  * [`MASTER_WIP_STATUS.md`](reports/MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
+  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
   * Review these reports first and regenerate status after your work is complete.
 
 ** YOU MUST USE A **CHECKLIST** EVERYTIME.
@@ -558,7 +557,7 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
 2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
     - **SPECIAL ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
-3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
+3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
 6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).

@@ -39,8 +39,6 @@ class DatabaseURLBuilder:
         self.postgres_user = env_vars.get("POSTGRES_USER", "")
         self.postgres_password = env_vars.get("POSTGRES_PASSWORD", "")
         
-        # Parse other variables
-        self.database_url = env_vars.get("DATABASE_URL", "")
         
         # Initialize sub-builders
         self.cloud_sql = self.CloudSQLBuilder(self)
@@ -126,53 +124,9 @@ class DatabaseURLBuilder:
             if self.parent.postgres_host is not None and "/cloudsql/" in self.parent.postgres_host:
                 return True
             
-            # Also check DATABASE_URL for Cloud SQL pattern
-            if self.parent.database_url and "/cloudsql/" in self.parent.database_url:
-                return True
             
             return False
         
-        def _parse_database_url_components(self):
-            """Parse user, password, host, and database from DATABASE_URL for Cloud SQL."""
-            if not self.parent.database_url or "/cloudsql/" not in self.parent.database_url:
-                return None, None, None, None
-            
-            try:
-                from urllib.parse import urlparse
-                parsed = urlparse(self.parent.database_url)
-                
-                # Extract user and password
-                user = parsed.username or ""
-                password = parsed.password or ""
-                
-                # Extract database name from path
-                database = parsed.path.lstrip('/') if parsed.path else ""
-                
-                # Extract Cloud SQL socket path from host or query params
-                if "/cloudsql/" in parsed.path:
-                    # Format: postgresql://user:pass@host/cloudsql/project:region:instance/db
-                    # Extract the cloudsql path from the path
-                    import re
-                    path_match = re.search(r'/cloudsql/[^/]+', parsed.path)
-                    if path_match:
-                        cloudsql_host = path_match.group(0)
-                        # Extract database name after cloudsql path
-                        db_match = re.search(r'/cloudsql/[^/]+/(.+)', parsed.path)
-                        if db_match:
-                            database = db_match.group(1)
-                        return user, password, cloudsql_host, database
-                elif "host=" in (parsed.query or ""):
-                    # Format: postgresql://user:pass@/db?host=/cloudsql/project:region:instance
-                    import re
-                    query_match = re.search(r'host=([^&]+)', parsed.query)
-                    if query_match:
-                        cloudsql_host = query_match.group(1)
-                        return user, password, cloudsql_host, database
-                
-            except Exception:
-                pass
-            
-            return None, None, None, None
         
         @property
         def async_url(self) -> Optional[str]:
@@ -186,14 +140,6 @@ class DatabaseURLBuilder:
             database = self.parent.postgres_db
             host = self.parent.postgres_host
             
-            # If individual components aren't available, parse from DATABASE_URL
-            if not user or not host or not database:
-                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
-                if parsed_user is not None:
-                    user = user or parsed_user
-                    password = password or parsed_password
-                    host = host or parsed_host
-                    database = database or parsed_database
             
             # URL encode user and password for safety
             user = quote(user, safe='') if user else ""
@@ -217,14 +163,6 @@ class DatabaseURLBuilder:
             database = self.parent.postgres_db
             host = self.parent.postgres_host
             
-            # If individual components aren't available, parse from DATABASE_URL
-            if not user or not host or not database:
-                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
-                if parsed_user is not None:
-                    user = user or parsed_user
-                    password = password or parsed_password
-                    host = host or parsed_host
-                    database = database or parsed_database
             
             # URL encode user and password for safety
             user = quote(user, safe='') if user else ""
@@ -248,14 +186,6 @@ class DatabaseURLBuilder:
             database = self.parent.postgres_db
             host = self.parent.postgres_host
             
-            # If individual components aren't available, parse from DATABASE_URL
-            if not user or not host or not database:
-                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
-                if parsed_user is not None:
-                    user = user or parsed_user
-                    password = password or parsed_password
-                    host = host or parsed_host
-                    database = database or parsed_database
             
             # URL encode user and password for safety
             user = quote(user, safe='') if user else ""
@@ -413,13 +343,7 @@ class DatabaseURLBuilder:
         @property
         def auto_url(self) -> str:
             """Auto-select best URL for development - returns SQLAlchemy async format."""
-            # DATABASE_URL takes priority if set
-            if self.parent.database_url:
-                # Ensure correct format for SQLAlchemy async usage
-                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
-                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-                return self.parent.database_url
-            # Try TCP config if no DATABASE_URL
+            # Try TCP config
             if self.parent.tcp.has_config:
                 return self.parent.tcp.async_url
             # Fall back to default
@@ -428,13 +352,7 @@ class DatabaseURLBuilder:
         @property
         def auto_sync_url(self) -> str:
             """Auto-select best sync URL for development."""
-            # DATABASE_URL takes priority if set
-            if self.parent.database_url:
-                # Ensure sync format
-                if "postgresql+asyncpg://" in self.parent.database_url:
-                    return self.parent.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
-                return self.parent.database_url
-            # Try TCP config if no DATABASE_URL
+            # Try TCP config
             if self.parent.tcp.has_config:
                 return self.parent.tcp.sync_url
             # Fall back to default
@@ -473,19 +391,13 @@ class DatabaseURLBuilder:
         @property
         def auto_url(self) -> str:
             """Auto-select best URL for test."""
-            # PRIORITY 1: Explicit DATABASE_URL takes precedence for tests
-            if self.parent.database_url:
-                # Ensure correct format for SQLAlchemy async usage
-                if self.parent.database_url.startswith("postgresql://") and not self.parent.database_url.startswith("postgresql+"):
-                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-                return self.parent.database_url
-            # PRIORITY 2: Use memory if explicitly requested
+            # PRIORITY 1: Use memory if explicitly requested
             if self.parent.env.get("USE_MEMORY_DB") == "true":
                 return self.memory_url
-            # PRIORITY 3: Try PostgreSQL config only if DATABASE_URL not set
+            # PRIORITY 2: Try PostgreSQL config
             if self.postgres_url:
                 return self.postgres_url
-            # PRIORITY 4: Default to memory
+            # PRIORITY 3: Default to memory
             return self.memory_url
     
     class DockerBuilder:

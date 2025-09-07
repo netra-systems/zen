@@ -176,7 +176,7 @@ class DatabaseConnectionValidator:
                     'error': 'Could not construct database URL from configuration'
                 }
                 postgresql_result['recommendations'].append(
-                    "Verify DATABASE_URL or POSTGRES_* environment variables are properly set"
+                    "Verify POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD environment variables are properly set"
                 )
                 
         except Exception as e:

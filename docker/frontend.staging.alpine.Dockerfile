@@ -42,15 +42,24 @@ COPY frontend/eslint.config.mjs ./
 COPY frontend/tailwind.config.ts ./
 COPY frontend/postcss.config.mjs ./
 COPY frontend/components.json ./
+COPY frontend/middleware.ts ./
+COPY frontend/config.ts ./
+COPY frontend/global.d.ts ./
+COPY frontend/next-env.d.ts ./
 
 # Copy public assets (changes less frequently)
 COPY frontend/public ./public
 
 # Copy source code LAST (changes most frequently)
+COPY frontend/@types ./@types
 COPY frontend/app ./app
+COPY frontend/auth ./auth
 COPY frontend/components ./components
+COPY frontend/config ./config
 COPY frontend/lib ./lib
+COPY frontend/providers ./providers
 COPY frontend/services ./services
+COPY frontend/store ./store
 COPY frontend/hooks ./hooks
 COPY frontend/styles ./styles
 COPY frontend/types ./types

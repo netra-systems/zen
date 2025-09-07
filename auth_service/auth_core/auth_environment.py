@@ -31,7 +31,7 @@ class AuthEnvironment:
         # Core auth requirements
         required_vars = [
             "JWT_SECRET_KEY"
-            # DATABASE_URL is now built from components, not required directly
+            # Database URL is now built from components, not required directly
         ]
         
         missing = []
@@ -266,8 +266,7 @@ class AuthEnvironment:
             "POSTGRES_PORT": self.env.get("POSTGRES_PORT"),
             "POSTGRES_DB": self.env.get("POSTGRES_DB"),
             "POSTGRES_USER": self.env.get("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD"),
-            "DATABASE_URL": self.env.get("DATABASE_URL")  # For backward compatibility
+            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD")
         }
         
         # Create URL builder
@@ -286,14 +285,14 @@ class AuthEnvironment:
             if env == "production" or env == "staging":
                 raise ValueError(
                     f"DatabaseURLBuilder failed to construct URL for {env} environment. "
-                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                    f"or DATABASE_URL is provided. Debug info: {debug_info}"
+                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set. "
+                    f"Debug info: {debug_info}"
                 )
             else:
                 # For development/test, still fail but with more helpful message
                 raise ValueError(
                     f"DatabaseURLBuilder failed to construct URL for {env} environment. "
-                    f"For development, ensure DATABASE_URL is set or use default localhost configuration. "
+                    f"For development, ensure POSTGRES_* variables are set or use default localhost configuration. "
                     f"Debug info: {debug_info}"
                 )
         

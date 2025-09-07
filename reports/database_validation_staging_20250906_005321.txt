@@ -1,0 +1,28 @@
+================================================================================
+DATABASE CONNECTION VALIDATION REPORT
+Environment: STAGING
+Timestamp: 2025-09-06T00:53:04.988511
+Overall Status: FAILED
+================================================================================
+
+POSTGRESQL
+Status: FAILED
+[FAILED] Connection failed: Connection timeout (10s)
+
+REDIS
+Status: FAILED
+[FAILED] Connection failed: Connection timeout (5s)
+
+CLICKHOUSE
+Status: FAILED
+Staging Issues:
+  WARNING: INFO: Using ClickHouse Cloud for staging - verify credentials and connectivity
+  WARNING: INFO: Using secure ClickHouse port 8443
+[FAILED] Connection failed: clickhouse://default:staging_clickhouse_password@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1/?query=SELECT%20version()
+
+RECOMMENDATIONS
+1. Check database credentials and network connectivity
+2. Check Redis connection settings and network connectivity
+3. Check ClickHouse connection settings and network connectivity
+
+================================================================================

@@ -26,9 +26,10 @@ from test_framework.environment_isolation import (
     setup_test_environment,
     teardown_test_environment
 )
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
+
+# CRITICAL: Do NOT import heavy backend modules at module level
+# This causes Docker to crash on Windows during pytest collection
+# These will be imported lazily when needed inside fixtures
 
 # Memory profiling decorator
 def memory_profile(description: str = ""):

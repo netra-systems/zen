@@ -40,8 +40,8 @@ class StagingDatabaseValidator:
         if not url:
             return {
                 "valid": False,
-                "error": "DATABASE_URL is empty",
-                "recommendations": ["Set DATABASE_URL environment variable"]
+                "error": "Database URL is empty",
+                "recommendations": ["Set POSTGRES_* environment variables"]
             }
         
         results = {
@@ -260,13 +260,16 @@ class StagingDatabaseValidator:
         """Comprehensive pre-deployment validation for auth service.
         
         Args:
-            database_url: Optional URL to validate, uses DATABASE_URL env var if None
+            database_url: Optional URL to validate, builds from POSTGRES_* vars if None
             
         Returns:
             Complete validation report
         """
         if database_url is None:
-            database_url = get_env().get("DATABASE_URL", "")
+            from shared.database_url_builder import DatabaseURLBuilder
+            from shared.isolated_environment import get_env
+            builder = DatabaseURLBuilder(get_env().as_dict())
+            database_url = builder.get_url_for_environment(sync=False) or ""
         
         report = {
             "overall_status": "unknown",

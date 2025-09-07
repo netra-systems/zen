@@ -38,6 +38,43 @@
         </prevention>
     </learning>
     
+    <learning id="service-authentication-mismatch-fix-2025-01-07">
+        <title>Service Authentication Mismatch Between Backend and Auth Service</title>
+        <category>Authentication/Service-to-Service/Configuration</category>
+        <keywords>service-authentication, SERVICE_ID, SERVICE_SECRET, X-Service-ID, X-Service-Secret, netra-backend, auth-service</keywords>
+        <path>service_authentication_mismatch_fix_20250107.xml</path>
+        <critical-takeaway>
+            Backend service was using "backend" as service_id while auth service expected "netra-backend",
+            causing all service-to-service authentication to fail. Fixed by updating default service_id
+            and ensuring SERVICE_ID and SERVICE_SECRET are properly configured in environment.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete authentication failure blocking all user operations</business-impact>
+        <prevention>
+            Always use "netra-backend" as SERVICE_ID. Ensure SERVICE_SECRET is set (min 32 chars).
+            Run regression test: tests/regression/test_service_authentication_regression.py
+        </prevention>
+    </learning>
+    
+    <learning id="docker-crash-pytest-collection-windows-2025-01-07">
+        <title>Docker Desktop Crash During Pytest Collection on Windows WSL2</title>
+        <category>Testing/Docker/Windows/ResourceExhaustion/CriticalFailure</category>
+        <keywords>docker-crash, pytest-collection, windows-wsl2, resource-exhaustion, file-descriptors, e2e-tests</keywords>
+        <path>docker_crash_pytest_collection_windows_20250107.xml</path>
+        <critical-takeaway>
+            Pytest collection phase causes Docker Desktop crash on Windows due to resource exhaustion.
+            Root cause: Heavy module imports with side effects + Windows/WSL2 file descriptor doubling
+            + pytest parallel collection = connection storm that crashes Docker (exit code 1077).
+            NEVER initialize connections at import time. Use lazy loading and fixture-scoped init.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete development environment failure - blocks all testing</business-impact>
+        <prevention>
+            Use lazy initialization. Remove import-time side effects. Add Docker health checks.
+            Windows: Use run_safe_windows.py script. Set PYTEST_XDIST_WORKER_COUNT=1.
+        </prevention>
+    </learning>
+    
     <learning id="fake-staging-tests-critical-failure-2025-09-05">
         <title>🚨 CRITICAL: Fake Staging Tests Creating False Confidence</title>
         <category>Testing/Staging/FakeTests/CriticalFailure/Abomination</category>
@@ -3020,6 +3057,51 @@
             <learning-ref>agent_execution_order_fix_20250904.xml</learning-ref>
             <learning-ref>../USER_CONTEXT_ARCHITECTURE.md</learning-ref>
             <learning-ref>../../docs/GOLDEN_AGENT_INDEX.md</learning-ref>
+        </related-learnings>
+    </learning>
+
+    <learning id="docker-alpine-optimization-2025-09-07">
+        <title>Docker Alpine Container Size Optimization and SSOT Architecture</title>
+        <category>Docker/Infrastructure/Optimization</category>
+        <keywords>docker, alpine, container-size, optimization, ssot, migrations, python-packages, ai-ml-containers</keywords>
+        <path>docker_alpine_optimization_20250907.xml</path>
+        <critical-takeaway>
+            Alpine containers with AI/ML libraries are NORMALLY 500-900MB. Not a sign of poor optimization.
+            Python packages (pandas, numpy, langchain) account for 520MB+ in backend containers.
+            Solution: Separate migration service, remove SPEC/docs from runtime, clean test dirs.
+            CRITICAL: Always use --no-cache when testing Dockerfile changes, Docker aggressively caches layers.
+            Achieved SSOT: One Dockerfile per service (backend, auth, frontend, migration).
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Container size affects deployment speed, cold starts, and infrastructure costs</business-impact>
+        <prevention>
+            Accept that AI/ML containers are large. Focus on removing unnecessary files not core dependencies.
+            Always rebuild with --no-cache when optimizing. Create separate services for migrations/jobs.
+            Use docker history and du -sh to analyze before assuming bloat.
+        </prevention>
+        <documentation>docs/docker_architecture_diagrams.md</documentation>
+    </learning>
+    
+    <learning id="frontend-dockerfile-missing-directories-2025-01-07">
+        <title>Frontend Dockerfile Missing Directories and Cloud Run CPU Fix</title>
+        <category>Docker/Deployment/Frontend/CloudRun</category>
+        <keywords>dockerfile, frontend, next.js, alpine, cloud-run, cpu-limit, missing-directories, deployment-failure</keywords>
+        <path>frontend_dockerfile_missing_directories_fix_20250107.xml</path>
+        <critical-takeaway>
+            Frontend Alpine Dockerfile was missing critical directories (auth, store, config, providers)
+            and TypeScript declaration files causing build failures. Also, Cloud Run requires CPU >= 1
+            when concurrency > 1, but Alpine config had CPU=0.5. Fixed by adding all required directories
+            and files to Dockerfile, setting CPU=1. Achieved 78% smaller images with 3x faster startup.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Frontend deployment failures block all user access to the application</business-impact>
+        <prevention>
+            Always verify tsconfig.json paths are included in Dockerfile. Check Cloud Run CPU requirements.
+            Test Docker builds locally before deployment. Include all TypeScript declaration files.
+            Maintain comprehensive list of required vs excluded directories for production builds.
+        </prevention>
+        <related-learnings>
+            <learning-ref>docker_alpine_optimization_20250907.xml</learning-ref>
         </related-learnings>
     </learning>
 </specification>

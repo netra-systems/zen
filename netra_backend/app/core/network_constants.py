@@ -97,7 +97,6 @@ class DatabaseConstants:
     """
     
     # Environment variable names
-    DATABASE_URL: Final[str] = "DATABASE_URL"
     REDIS_URL: Final[str] = "REDIS_URL" 
     CLICKHOUSE_URL: Final[str] = "CLICKHOUSE_URL"
     

@@ -118,13 +118,28 @@ class AuthServiceClient:
         if self.service_id and self.service_secret:
             headers["X-Service-ID"] = self.service_id
             headers["X-Service-Secret"] = self.service_secret
+            logger.debug(f"Service auth headers configured for service ID: '{self.service_id}'")
         else:
             # Log detailed diagnostic info when service auth is missing
-            logger.warning(f"Service auth headers not set - ID: {bool(self.service_id)}, Secret: {bool(self.service_secret)}")
+            missing_parts = []
             if not self.service_id:
-                logger.warning("SERVICE_ID is missing - using default 'netra-backend'")
+                missing_parts.append("SERVICE_ID")
+                logger.error(
+                    "SERVICE_ID is not configured. Set SERVICE_ID=netra-backend in environment. "
+                    "Auth service will reject requests without proper service ID."
+                )
             if not self.service_secret:
-                logger.error("SERVICE_SECRET is missing - auth service calls will fail")
+                missing_parts.append("SERVICE_SECRET")
+                logger.error(
+                    "SERVICE_SECRET is not configured. This is required for service-to-service authentication. "
+                    "Set SERVICE_SECRET to a secure value (min 32 chars) that matches the auth service configuration."
+                )
+            
+            if missing_parts:
+                logger.error(
+                    f"Missing service authentication configuration: {', '.join(missing_parts)}. "
+                    f"Auth service calls will fail. Current service_id='{self.service_id or 'NOT SET'}'"
+                )
         return headers
     
     def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:

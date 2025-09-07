@@ -33,30 +33,6 @@ class ConfigDependencyMap:
     
     # Core dependencies that MUST exist for system operation
     CRITICAL_DEPENDENCIES: Dict[str, Dict[str, Any]] = {
-        "DATABASE_URL": {
-            "required_by": [
-                "session_service",
-                "state_persistence", 
-                "auth_service",
-                "user_service",
-                "agent_registry",
-                "corpus_admin"
-            ],
-            "fallback_allowed": False,
-            "impact_level": ConfigImpactLevel.CRITICAL,
-            "deletion_requires": ["migration_plan", "approval", "staged_rollout"],
-            "deletion_impact": "CRITICAL - All database operations will fail",
-            "alternatives": [],
-            "validation": lambda x: x and x.startswith(("postgresql://", "postgres://")),
-            # Legacy information
-            "legacy_status": "DEPRECATED",
-            "deprecation_date": "2025-12-01",
-            "removal_version": "2.0.0",
-            "replacement": ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"],
-            "migration_guide": "Use component-based database configuration (POSTGRES_*) instead of single DATABASE_URL. System will construct URL internally from components.",
-            "auto_construct": True
-        },
-        
         "JWT_SECRET_KEY": {
             "required_by": [
                 "auth_service",
@@ -973,16 +949,7 @@ class ConfigDependencyMap:
             if not deps.get("fallback_allowed", False):
                 value = env.get(env_key)
                 if not value:
-                    # Check if this can be auto-constructed from components
-                    if deps.get("auto_construct") and env_key == "DATABASE_URL":
-                        # Check if components are present
-                        components_present = all(
-                            env.get(comp) for comp in deps.get("replacement", [])
-                        )
-                        if not components_present:
-                            issues.append(f"CRITICAL: Missing required config {env_key}")
-                    else:
-                        issues.append(f"CRITICAL: Missing required config {env_key}")
+                    issues.append(f"CRITICAL: Missing required config {env_key}")
         
         return (len(issues) == 0, issues)
     
