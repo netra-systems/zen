@@ -33,7 +33,7 @@ from contextlib import asynccontextmanager
 import pytest
 import httpx
 import websockets
-from websockets.exceptions import ConnectionClosed, ConnectionClosedError, InvalidStatusCode, InvalidStatus
+from websockets import ConnectionClosed, ConnectionClosedError, InvalidStatusCode, InvalidStatus
 
 from tests.e2e.staging_test_config import get_staging_config, StagingConfig
 

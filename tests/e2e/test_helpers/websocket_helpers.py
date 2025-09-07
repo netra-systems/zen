@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from typing import Any, Callable, Dict, List, Optional
 
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 logger = logging.getLogger(__name__)
 

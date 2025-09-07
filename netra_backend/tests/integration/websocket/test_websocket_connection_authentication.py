@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 # SSOT imports following CLAUDE.md absolute import requirements
 from test_framework.base_integration_test import BaseIntegrationTest

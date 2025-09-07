@@ -161,4 +161,46 @@ websocket_validation: Connection failed
 4. **Fix Staging Issues**: If found, deploy fixes to staging
 5. **Re-run Tests**: Validate fixes with another test execution
 
-**STATUS**: INVESTIGATING STAGING ENVIRONMENT ISSUES
+---
+
+## 🔄 UPDATE #2 - ROOT CAUSE IDENTIFIED: DOCKER CACHE ISSUE
+
+**Date**: 2025-09-07 (1 hour after initial report)  
+**Status**: DEPLOYING FIX - Clean rebuild in progress  
+
+### ✅ ROOT CAUSE IDENTIFIED: Docker Layer Caching
+**Issue**: WebSocket manager fixes were implemented locally but NOT deployed to staging
+- Docker build used cached layers (stages 7-15 cached)
+- Latest WebSocket manager startup fixes were not included in the container image
+- Staging service still running old code with import-time initialization violations
+
+### 🔍 EVIDENCE FROM GCP LOGS
+**Service Status**: Container exiting with code 3 due to startup failures
+**Critical Error**: `WebSocket manager creation requires valid UserExecutionContext. Import-time initialization is prohibited.`
+**Validation Failures**: FINALIZE phase failing despite other phases completing successfully
+
+### 📋 COMPLETED ACTIONS
+1. ✅ **Git Commit**: All WebSocket manager fixes committed (commit 19d714b3b)
+2. ✅ **Force Rebuild**: Initiated clean rebuild with `--force-rebuild` flag
+3. ✅ **Deployment**: Clean rebuild deployment running in background (ID: 213ba4)
+
+### 🚀 IN PROGRESS: FORCE REBUILD DEPLOYMENT
+- **Command**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local --service backend --force-rebuild`
+- **Status**: Background deployment running with 10-minute timeout
+- **Expected**: Docker will rebuild all layers with latest WebSocket manager fixes
+
+### 📊 BUSINESS IMPACT RECOVERY TIMELINE
+- **Original Issue**: P1 Critical tests failing - $120K+ MRR at risk
+- **Fix Implementation**: 45 minutes (Missing class + WebSocket manager fixes)
+- **Docker Cache Discovery**: 15 minutes (Identified deployment cache issue)
+- **Clean Rebuild Deployment**: 10-15 minutes (In progress)
+- **Expected Total Resolution Time**: ~75 minutes for complete staging environment recovery
+
+### 🎯 NEXT VALIDATION STEPS
+Once deployment completes:
+1. Test basic health endpoint: `curl https://netra-backend-staging-701982941522.us-central1.run.app/health`
+2. Re-run first time user journey tests
+3. Validate WebSocket connections work properly
+4. Confirm all P1 Critical tests pass
+
+**STATUS**: DEPLOYING CLEAN REBUILD WITH WEBSOCKET MANAGER FIXES

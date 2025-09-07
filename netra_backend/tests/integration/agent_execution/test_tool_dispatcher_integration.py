@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
-from netra_backend.app.agents.tools.base_tool import BaseTool
+from netra_backend.app.schemas.tool import BaseTool
 from netra_backend.tests.integration.agent_execution.base_agent_execution_test import BaseAgentExecutionTest
 
 

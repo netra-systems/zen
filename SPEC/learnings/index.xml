@@ -199,6 +199,26 @@
         </prevention>
     </learning>
     
+    <learning id="database-config-validation-architecture-fix-2025-09-07">
+        <title>Database Configuration Validation Architecture Fix - Smart Pattern Detection</title>
+        <category>Configuration/Database/ValidationArchitecture</category>
+        <keywords>database-validation, config-architecture, gcp-deployment, postgres-components, database-url, cloud-sql, false-positive</keywords>
+        <path>database_config_validation_architecture_fix_20250907.xml</path>
+        <critical-takeaway>
+            GCP staging validation failed for DATABASE_* variables while database worked perfectly using DATABASE_URL + POSTGRES_* variables.
+            Root cause: architectural fragmentation between deployment patterns and validation logic. Fixed with smart pattern detection:
+            DATABASE_URL priority → POSTGRES_* components → DATABASE_* legacy. Prevents false positives where system works but validation fails.
+            Critical insight: "error behind the error" - apparent config issues were actually architectural coordination failures.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>False positive configuration failures blocking deployments and wasting engineering time</business-impact>
+        <prevention>
+            Validation must understand equivalent configuration patterns. Check DATABASE_URL first for Cloud Run.
+            Support both POSTGRES_* (GCP) and DATABASE_* (legacy) patterns. Architecture drift detection between systems.
+            Integration tests validating deployment config against validator requirements.
+        </prevention>
+    </learning>
+    
     <learning id="orchestration-data-handling-patterns-2025-09-04">
         <title>Orchestration Data Handling Patterns - Partial and Insufficient Data</title>
         <category>Agent/Orchestration/DataHandling</category>

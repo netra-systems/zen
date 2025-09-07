@@ -64,8 +64,12 @@ class MockUserExecutionContext:
             self.db_session = Mock()
 
 
-class TestableBaseAgent(BaseAgent):
-    """Testable BaseAgent implementation for comprehensive testing."""
+class MockableBaseAgent(BaseAgent):
+    """Mockable BaseAgent implementation for comprehensive testing.
+    
+    Note: Renamed from MockableBaseAgent to avoid pytest collection issues.
+    Class names starting with 'Test' are automatically collected by pytest.
+    """
     
     def __init__(self, *args, **kwargs):
         # Extract test configuration
@@ -125,7 +129,7 @@ class TestBaseAgentInitialization:
         
         COVERAGE: __init__ method, basic attribute assignment, default configurations.
         """
-        agent = TestableBaseAgent(name="BasicTestAgent", description="Test agent")
+        agent = MockableBaseAgent(name="BasicTestAgent", description="Test agent")
         
         # Verify core attributes
         assert agent is not None
@@ -147,7 +151,7 @@ class TestBaseAgentInitialization:
         
         COVERAGE: _init_unified_reliability_infrastructure method, reliability manager setup.
         """
-        agent = TestableBaseAgent(
+        agent = MockableBaseAgent(
             name="ReliabilityAgent",
             enable_reliability=True,
             enable_execution_engine=True
@@ -173,7 +177,7 @@ class TestBaseAgentInitialization:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            agent = TestableBaseAgent(
+            agent = MockableBaseAgent(
                 name="LegacyAgent",
                 tool_dispatcher=mock_tool_dispatcher
             )
@@ -194,7 +198,7 @@ class TestBaseAgentInitialization:
         """
         mock_context = MockUserExecutionContext()
         
-        agent = TestableBaseAgent(
+        agent = MockableBaseAgent(
             name="ContextAgent",
             user_context=mock_context
         )
@@ -208,7 +212,7 @@ class TestBaseAgentInitialization:
         COVERAGE: _validate_session_isolation method.
         """
         # Should not raise exception for properly isolated agent
-        agent = TestableBaseAgent(name="IsolatedAgent")
+        agent = MockableBaseAgent(name="IsolatedAgent")
         assert agent is not None
         
         # Validation happens in __init__ - if we get here, it passed
@@ -224,7 +228,7 @@ class TestBaseAgentStateManagement:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test agent for state management testing."""
-        self.agent = TestableBaseAgent(name="StateTestAgent")
+        self.agent = MockableBaseAgent(name="StateTestAgent")
         
     def test_initial_state_is_pending(self):
         """Test agent initializes in PENDING state.
@@ -326,7 +330,7 @@ class TestBaseAgentWebSocketBridge:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent with WebSocket bridge for testing."""
-        self.agent = TestableBaseAgent(name="WebSocketTestAgent")
+        self.agent = MockableBaseAgent(name="WebSocketTestAgent")
         self.mock_bridge = Mock()
         self.mock_context = MockUserExecutionContext()
         
@@ -504,7 +508,7 @@ class TestBaseAgentTokenManagement:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent for token management testing."""
-        self.agent = TestableBaseAgent(name="TokenTestAgent")
+        self.agent = MockableBaseAgent(name="TokenTestAgent")
         self.mock_context = MockUserExecutionContext()
         
     def test_track_llm_usage_creates_enhanced_context(self):
@@ -645,7 +649,7 @@ class TestBaseAgentSessionIsolation:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent for session isolation testing."""
-        self.agent = TestableBaseAgent(name="SessionTestAgent")
+        self.agent = MockableBaseAgent(name="SessionTestAgent")
         
     @patch('netra_backend.app.database.session_manager.validate_agent_session_isolation')
     def test_validate_session_isolation_success(self, mock_validate):
@@ -722,7 +726,7 @@ class TestBaseAgentReliabilityInfrastructure:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent with reliability features for testing."""
-        self.agent = TestableBaseAgent(
+        self.agent = MockableBaseAgent(
             name="ReliabilityTestAgent",
             enable_reliability=True,
             enable_execution_engine=True
@@ -865,7 +869,7 @@ class TestBaseAgentReliabilityInfrastructure:
         
         COVERAGE: get_circuit_breaker_status method with disabled reliability.
         """
-        disabled_agent = TestableBaseAgent(
+        disabled_agent = MockableBaseAgent(
             name="DisabledReliabilityAgent",
             enable_reliability=False
         )
@@ -886,7 +890,7 @@ class TestBaseAgentHealthStatus:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent with full infrastructure for health testing."""
-        self.agent = TestableBaseAgent(
+        self.agent = MockableBaseAgent(
             name="HealthTestAgent",
             enable_reliability=True,
             enable_execution_engine=True
@@ -974,7 +978,7 @@ class TestBaseAgentExecutionPatterns:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent for execution testing."""
-        self.agent = TestableBaseAgent(name="ExecutionTestAgent")
+        self.agent = MockableBaseAgent(name="ExecutionTestAgent")
         self.mock_context = MockUserExecutionContext()
         
     @pytest.mark.asyncio
@@ -1015,7 +1019,7 @@ class TestBaseAgentExecutionPatterns:
         
         COVERAGE: Error handling in execution methods.
         """
-        failing_agent = TestableBaseAgent(
+        failing_agent = MockableBaseAgent(
             name="FailingAgent",
             execution_should_succeed=False
         )
@@ -1168,12 +1172,12 @@ class TestBaseAgentFactoryPatterns:
         
         COVERAGE: create_agent_with_context class method.
         """
-        agent = TestableBaseAgent.create_agent_with_context(self.mock_context)
+        agent = MockableBaseAgent.create_agent_with_context(self.mock_context)
         
         assert agent is not None
-        assert isinstance(agent, TestableBaseAgent)
+        assert isinstance(agent, MockableBaseAgent)
         assert agent._user_execution_context is self.mock_context
-        assert agent.name == "TestableBaseAgent"
+        assert agent.name == "MockableBaseAgent"
         
 
 class TestBaseAgentValidationAndMigration:
@@ -1186,7 +1190,7 @@ class TestBaseAgentValidationAndMigration:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent for validation testing."""
-        self.agent = TestableBaseAgent(name="ValidationTestAgent")
+        self.agent = MockableBaseAgent(name="ValidationTestAgent")
         
     def test_validate_modern_implementation_compliant_agent(self):
         """Test validate_modern_implementation for compliant agent.
@@ -1273,7 +1277,7 @@ class TestBaseAgentResetAndShutdown:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent for lifecycle testing."""
-        self.agent = TestableBaseAgent(
+        self.agent = MockableBaseAgent(
             name="LifecycleTestAgent",
             enable_reliability=True,
             enable_execution_engine=True
@@ -1361,7 +1365,7 @@ class TestBaseAgentMetadataStorage:
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up agent and context for metadata testing."""
-        self.agent = TestableBaseAgent(name="MetadataTestAgent")
+        self.agent = MockableBaseAgent(name="MetadataTestAgent")
         self.mock_context = MockUserExecutionContext()
         
     def test_store_metadata_result_with_serialization(self):

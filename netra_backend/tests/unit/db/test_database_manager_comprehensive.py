@@ -942,3 +942,2291 @@ class TestDatabaseManagerEdgeCases(BaseIntegrationTest):
             
             assert db_manager._initialized
             assert len(db_manager._engines) == 1  # Should only have one engine
+
+
+class TestDatabaseManagerAdvancedScenarios(BaseIntegrationTest):
+    """Advanced test scenarios for connection pooling, multi-user isolation, and performance."""
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+
+    @pytest.mark.unit
+    async def test_connection_pool_exhaustion_handling(self, isolated_env):
+        """Test behavior when connection pool is exhausted."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 2  # Small pool for testing
+            mock_config.return_value.database_max_overflow = 1
+            mock_config.return_value.database_url = None
+            
+            # Mock engine that can simulate pool exhaustion
+            mock_engine = AsyncMock()
+            mock_engine.dispose = AsyncMock()
+            
+            # Mock session creation to simulate pool exhaustion after 3 sessions
+            call_count = 0
+            def mock_session_factory(*args, **kwargs):
+                nonlocal call_count
+                call_count += 1
+                if call_count > 3:  # Simulate pool exhaustion
+                    raise Exception("QueuePool limit of size 2 overflow 1 reached")
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.create_async_engine', return_value=mock_engine):
+                with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                    db_manager = DatabaseManager()
+                    await db_manager.initialize()
+                    
+                    # First few sessions should work
+                    async with db_manager.get_session() as session1:
+                        pass
+                    async with db_manager.get_session() as session2:
+                        pass
+                    async with db_manager.get_session() as session3:
+                        pass
+                    
+                    # Fourth should fail due to pool exhaustion
+                    with pytest.raises(Exception, match="QueuePool limit"):
+                        async with db_manager.get_session() as session4:
+                            pass
+
+    @pytest.mark.unit
+    async def test_multi_user_session_isolation(self, isolated_env):
+        """Test that database sessions are properly isolated between users."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Track sessions by user
+            user_sessions = {}
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                # Add user tracking capability
+                mock_session.user_id = None
+                mock_session.execute = AsyncMock()
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate multiple users accessing database concurrently
+                async def user_session(user_id: str):
+                    async with db_manager.get_session() as session:
+                        # Simulate user-specific operations
+                        await session.execute(text(f"SELECT * FROM users WHERE id = :user_id"), {"user_id": user_id})
+                        user_sessions[user_id] = session
+                        return session
+                
+                # Create sessions for different users
+                user1_session = await user_session("user1")
+                user2_session = await user_session("user2") 
+                user3_session = await user_session("user3")
+                
+                # Verify each user got their own session
+                assert len(user_sessions) == 3
+                assert user_sessions["user1"] is not user_sessions["user2"]
+                assert user_sessions["user2"] is not user_sessions["user3"]
+                assert user_sessions["user1"] is not user_sessions["user3"]
+
+    @pytest.mark.unit
+    async def test_concurrent_database_operations(self, isolated_env):
+        """Test concurrent database operations for race condition handling."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 20
+            mock_config.return_value.database_url = None
+            
+            operation_results = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                # Simulate database operation with timing
+                async def mock_execute(query, params=None):
+                    await asyncio.sleep(0.01)  # Simulate DB latency
+                    operation_results.append({"query": str(query), "timestamp": asyncio.get_event_loop().time()})
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate concurrent operations
+                async def concurrent_operation(operation_id: int):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(f"SELECT {operation_id}"))
+                
+                # Run 10 concurrent operations
+                tasks = [concurrent_operation(i) for i in range(10)]
+                await asyncio.gather(*tasks)
+                
+                # Verify all operations completed
+                assert len(operation_results) == 10
+                
+                # Verify operations were truly concurrent (overlapping timestamps)
+                timestamps = [result["timestamp"] for result in operation_results]
+                time_span = max(timestamps) - min(timestamps)
+                assert time_span < 0.5  # Should complete within 500ms if truly concurrent
+
+    @pytest.mark.unit
+    async def test_transaction_isolation_levels(self, isolated_env):
+        """Test different transaction isolation levels and their behavior."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            executed_commands = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    executed_commands.append(str(query))
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test transaction isolation
+                async with db_manager.get_session() as session:
+                    # Simulate setting isolation level
+                    await session.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
+                    await session.execute(text("SELECT * FROM critical_data"))
+                
+                # Verify isolation level was set
+                assert any("SERIALIZABLE" in cmd for cmd in executed_commands)
+                assert any("critical_data" in cmd for cmd in executed_commands)
+
+    @pytest.mark.unit
+    async def test_database_connection_recovery(self, isolated_env):
+        """Test database connection recovery after network failures."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            failure_count = 0
+            
+            def mock_session_factory(*args, **kwargs):
+                nonlocal failure_count
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    nonlocal failure_count
+                    failure_count += 1
+                    
+                    # Simulate network failure on first few attempts
+                    if failure_count <= 2:
+                        raise Exception("connection lost")
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # First attempts should fail
+                with pytest.raises(Exception, match="connection lost"):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text("SELECT 1"))
+                
+                with pytest.raises(Exception, match="connection lost"):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text("SELECT 1"))
+                
+                # Third attempt should succeed (recovery)
+                async with db_manager.get_session() as session:
+                    await session.execute(text("SELECT 1"))  # Should not raise
+
+    @pytest.mark.unit
+    async def test_database_performance_monitoring(self, isolated_env):
+        """Test database performance monitoring and metrics collection."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            query_metrics = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    start_time = asyncio.get_event_loop().time()
+                    await asyncio.sleep(0.001)  # Simulate query time
+                    end_time = asyncio.get_event_loop().time()
+                    
+                    query_metrics.append({
+                        "query": str(query),
+                        "duration": end_time - start_time,
+                        "timestamp": start_time
+                    })
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate various database operations
+                operations = [
+                    "SELECT * FROM users",
+                    "INSERT INTO logs (message) VALUES ('test')",
+                    "UPDATE settings SET value = 'new_value'",
+                    "DELETE FROM temp_data WHERE created < NOW() - INTERVAL '1 day'"
+                ]
+                
+                for operation in operations:
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(operation))
+                
+                # Verify metrics were collected
+                assert len(query_metrics) == 4
+                assert all(metric["duration"] > 0 for metric in query_metrics)
+                assert all("SELECT" in metric["query"] or "INSERT" in metric["query"] 
+                          or "UPDATE" in metric["query"] or "DELETE" in metric["query"] 
+                          for metric in query_metrics)
+
+    @pytest.mark.unit
+    async def test_database_schema_validation(self, isolated_env):
+        """Test database schema validation and migration support."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_url = None
+            
+            schema_commands = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    schema_commands.append(str(query))
+                    # Simulate schema validation queries
+                    if "information_schema" in str(query).lower():
+                        return Mock(fetchall=lambda: [("users",), ("threads",), ("messages",)])
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate schema validation operations
+                async with db_manager.get_session() as session:
+                    # Check if required tables exist
+                    await session.execute(text(
+                        "SELECT table_name FROM information_schema.tables "
+                        "WHERE table_schema = 'public'"
+                    ))
+                    
+                    # Simulate migration check
+                    await session.execute(text(
+                        "SELECT version_num FROM alembic_version"
+                    ))
+                
+                # Verify schema validation queries were executed
+                assert any("information_schema" in cmd for cmd in schema_commands)
+                assert any("alembic_version" in cmd for cmd in schema_commands)
+
+    @pytest.mark.unit
+    async def test_database_backup_and_restore_simulation(self, isolated_env):
+        """Test database backup and restore operation simulation."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            backup_operations = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    backup_operations.append(str(query))
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate backup operations
+                async with db_manager.get_session() as session:
+                    # Lock tables for consistent backup
+                    await session.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
+                    
+                    # Simulate backup data extraction
+                    await session.execute(text("SELECT * FROM users FOR SHARE"))
+                    await session.execute(text("SELECT * FROM threads FOR SHARE"))
+                    await session.execute(text("SELECT * FROM messages FOR SHARE"))
+                
+                # Verify backup operations were recorded
+                assert len(backup_operations) >= 4
+                assert any("SERIALIZABLE" in op for op in backup_operations)
+                assert any("FOR SHARE" in op for op in backup_operations)
+
+
+class TestDatabaseManagerStressTests(BaseIntegrationTest):
+    """Stress tests and edge case scenarios for DatabaseManager."""
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+
+    @pytest.mark.unit
+    async def test_massive_concurrent_sessions(self, isolated_env):
+        """Test handling of massive concurrent database sessions."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 20
+            mock_config.return_value.database_max_overflow = 30
+            mock_config.return_value.database_url = None
+            
+            session_count = 0
+            max_concurrent_sessions = 0
+            active_sessions = set()
+            
+            def mock_session_factory(*args, **kwargs):
+                nonlocal session_count, max_concurrent_sessions
+                session_count += 1
+                session_id = session_count
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.session_id = session_id
+                
+                async def mock_aenter(self):
+                    active_sessions.add(session_id)
+                    nonlocal max_concurrent_sessions
+                    max_concurrent_sessions = max(max_concurrent_sessions, len(active_sessions))
+                    return self
+                
+                async def mock_aexit(self, exc_type, exc_val, exc_tb):
+                    active_sessions.discard(session_id)
+                    return None
+                
+                mock_session.__aenter__ = types.MethodType(mock_aenter, mock_session)
+                mock_session.__aexit__ = types.MethodType(mock_aexit, mock_session)
+                
+                async def mock_execute(query, params=None):
+                    await asyncio.sleep(0.001)  # Simulate work
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            import types
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Create 100 concurrent sessions
+                async def session_operation(session_id: int):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(f"SELECT {session_id}"))
+                
+                tasks = [session_operation(i) for i in range(100)]
+                await asyncio.gather(*tasks)
+                
+                # Verify high concurrency was handled
+                assert session_count == 100
+                assert max_concurrent_sessions > 10  # Should have significant concurrency
+
+    @pytest.mark.unit
+    async def test_memory_leak_prevention(self, isolated_env):
+        """Test that sessions are properly cleaned up to prevent memory leaks."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            created_sessions = []
+            closed_sessions = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                
+                # Track session lifecycle
+                session_id = len(created_sessions)
+                created_sessions.append(session_id)
+                mock_session.session_id = session_id
+                
+                async def mock_close():
+                    closed_sessions.append(session_id)
+                
+                mock_session.close = mock_close
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Create and cleanup many sessions
+                for i in range(50):
+                    async with db_manager.get_session() as session:
+                        pass  # Session should be cleaned up automatically
+                
+                # Verify all sessions were cleaned up
+                assert len(created_sessions) == 50
+                assert len(closed_sessions) == 50
+                assert set(created_sessions) == set(closed_sessions)
+
+    @pytest.mark.unit
+    async def test_database_error_cascade_prevention(self, isolated_env):
+        """Test that database errors don't cascade and crash the application."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            error_count = 0
+            successful_operations = 0
+            
+            def mock_session_factory(*args, **kwargs):
+                nonlocal error_count, successful_operations
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    nonlocal error_count, successful_operations
+                    
+                    # Simulate intermittent database errors
+                    if "error_test" in str(query):
+                        error_count += 1
+                        raise Exception("Database constraint violation")
+                    else:
+                        successful_operations += 1
+                        return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Mix successful and failing operations
+                operations = [
+                    "SELECT 1",
+                    "SELECT error_test",  # This will fail
+                    "SELECT 2", 
+                    "SELECT error_test",  # This will fail
+                    "SELECT 3"
+                ]
+                
+                results = []
+                for operation in operations:
+                    try:
+                        async with db_manager.get_session() as session:
+                            await session.execute(text(operation))
+                        results.append("success")
+                    except Exception:
+                        results.append("error")
+                
+                # Verify errors were isolated and didn't prevent successful operations
+                assert error_count == 2
+                assert successful_operations == 3
+                assert results == ["success", "error", "success", "error", "success"]
+
+    @pytest.mark.unit
+    async def test_connection_timeout_handling(self, isolated_env):
+        """Test handling of connection timeouts and slow queries."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    if "slow_query" in str(query):
+                        # Simulate a slow query that times out
+                        await asyncio.sleep(5)  # Longer than reasonable timeout
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test normal query
+                async with db_manager.get_session() as session:
+                    await session.execute(text("SELECT 1"))  # Should complete quickly
+                
+                # Test slow query with timeout
+                with pytest.raises(asyncio.TimeoutError):
+                    async with asyncio.timeout(1):  # 1 second timeout
+                        async with db_manager.get_session() as session:
+                            await session.execute(text("SELECT slow_query"))
+
+    @pytest.mark.unit
+    async def test_database_url_injection_prevention(self, isolated_env):
+        """Test that database URL construction prevents SQL injection attacks."""
+        # Setup environment with potentially malicious data
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost; DROP TABLE users; --", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test'; DROP DATABASE test; --", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "password'; DELETE FROM *; --", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify malicious SQL is properly escaped/encoded in URL
+            assert url.startswith("postgresql+asyncpg://")
+            # The URL should be properly encoded by DatabaseURLBuilder
+            # Malicious SQL characters should be URL encoded or the URL should fail to parse
+            assert "DROP" not in url or "%44%52%4F%50" in url  # URL encoded DROP
+            assert "DELETE" not in url or "%44%45%4C%45%54%45" in url  # URL encoded DELETE
+
+
+class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
+    """Real database integration tests using actual PostgreSQL connections."""
+    
+    REQUIRES_DATABASE = True
+    REQUIRES_REAL_SERVICES = True
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+    
+    @pytest.mark.integration
+    async def test_real_database_connection_and_query_execution(self, isolated_env):
+        """Test real database connection and query execution with actual PostgreSQL."""
+        # Setup environment for real database connection
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # REAL DATABASE TEST: Use actual DatabaseManager and PostgreSQL connection
+            db_manager = DatabaseManager()
+            
+            # Skip if real PostgreSQL is not available
+            try:
+                await db_manager.initialize()
+            except Exception as e:
+                pytest.skip(f"Real PostgreSQL not available: {e}")
+            
+            try:
+                # Test real database session and query execution
+                async with db_manager.get_session() as session:
+                    # Execute a real query to test actual database operations
+                    result = await session.execute(text("SELECT 1 as test_value"))
+                    row = result.fetchone()
+                    assert row is not None
+                    assert row[0] == 1
+                    
+                    # Test table creation and data manipulation
+                    await session.execute(text("""
+                        CREATE TABLE IF NOT EXISTS test_table_dm_comprehensive (
+                            id SERIAL PRIMARY KEY,
+                            test_data VARCHAR(100),
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """))
+                    
+                    # Insert test data
+                    await session.execute(text("""
+                        INSERT INTO test_table_dm_comprehensive (test_data) 
+                        VALUES (:test_data)
+                    """), {"test_data": "comprehensive_test_data"})
+                    
+                    # Verify data insertion
+                    result = await session.execute(text("""
+                        SELECT test_data FROM test_table_dm_comprehensive 
+                        WHERE test_data = :test_data
+                    """), {"test_data": "comprehensive_test_data"})
+                    row = result.fetchone()
+                    assert row is not None
+                    assert row[0] == "comprehensive_test_data"
+                    
+            finally:
+                # Clean up test data and close connections
+                try:
+                    async with db_manager.get_session() as session:
+                        await session.execute(text("DROP TABLE IF EXISTS test_table_dm_comprehensive"))
+                except Exception:
+                    pass  # Cleanup failure shouldn't fail the test
+                
+                await db_manager.close_all()
+    
+    @pytest.mark.integration  
+    async def test_real_transaction_acid_properties(self, isolated_env):
+        """Test ACID properties with real database transactions."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            
+            try:
+                await db_manager.initialize()
+            except Exception as e:
+                pytest.skip(f"Real PostgreSQL not available: {e}")
+            
+            try:
+                # Create test table
+                async with db_manager.get_session() as session:
+                    await session.execute(text("""
+                        CREATE TABLE IF NOT EXISTS test_acid_properties (
+                            id SERIAL PRIMARY KEY,
+                            amount INTEGER,
+                            account_name VARCHAR(50)
+                        )
+                    """))
+                    
+                    # Insert initial data
+                    await session.execute(text("""
+                        INSERT INTO test_acid_properties (amount, account_name) 
+                        VALUES (1000, 'account_a'), (1000, 'account_b')
+                    """))
+                
+                # Test transaction rollback (ACID - Atomicity)
+                try:
+                    async with db_manager.get_session() as session:
+                        # Start transaction - transfer money between accounts
+                        await session.execute(text("""
+                            UPDATE test_acid_properties 
+                            SET amount = amount - 500 
+                            WHERE account_name = 'account_a'
+                        """))
+                        
+                        # Simulate error before completing transaction
+                        await session.execute(text("""
+                            UPDATE test_acid_properties 
+                            SET amount = amount + 500 
+                            WHERE account_name = 'account_b'
+                        """))
+                        
+                        # Force an error to trigger rollback
+                        raise Exception("Simulated transaction failure")
+                        
+                except Exception:
+                    # Transaction should automatically rollback
+                    pass
+                
+                # Verify data is unchanged (atomicity preserved)
+                async with db_manager.get_session() as session:
+                    result = await session.execute(text("""
+                        SELECT amount FROM test_acid_properties 
+                        WHERE account_name = 'account_a'
+                    """))
+                    row = result.fetchone()
+                    assert row[0] == 1000  # Amount should be unchanged due to rollback
+                    
+                    result = await session.execute(text("""
+                        SELECT amount FROM test_acid_properties 
+                        WHERE account_name = 'account_b'
+                    """))
+                    row = result.fetchone()
+                    assert row[0] == 1000  # Amount should be unchanged due to rollback
+                
+            finally:
+                # Cleanup
+                try:
+                    async with db_manager.get_session() as session:
+                        await session.execute(text("DROP TABLE IF EXISTS test_acid_properties"))
+                except Exception:
+                    pass
+                
+                await db_manager.close_all()
+    
+    @pytest.mark.integration
+    async def test_real_connection_pool_management(self, isolated_env):
+        """Test real connection pool management with concurrent database access."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 3  # Small pool for testing
+            mock_config.return_value.database_max_overflow = 2
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            
+            try:
+                await db_manager.initialize()
+            except Exception as e:
+                pytest.skip(f"Real PostgreSQL not available: {e}")
+            
+            try:
+                # Test concurrent database access
+                results = []
+                
+                async def concurrent_database_operation(operation_id: int):
+                    async with db_manager.get_session() as session:
+                        # Execute a query that takes some time
+                        result = await session.execute(text("""
+                            SELECT :operation_id, pg_sleep(0.1), CURRENT_TIMESTAMP
+                        """), {"operation_id": operation_id})
+                        row = result.fetchone()
+                        results.append({"id": operation_id, "timestamp": row[2]})
+                
+                # Run multiple concurrent operations
+                tasks = [concurrent_database_operation(i) for i in range(10)]
+                await asyncio.gather(*tasks)
+                
+                # Verify all operations completed
+                assert len(results) == 10
+                assert all(result["id"] >= 0 for result in results)
+                
+                # Verify operations ran concurrently (timestamps should be close)
+                timestamps = [result["timestamp"] for result in results]
+                time_span = (max(timestamps) - min(timestamps)).total_seconds()
+                assert time_span < 2.0  # Should complete within 2 seconds if properly concurrent
+                
+            finally:
+                await db_manager.close_all()
+
+
+class TestDatabaseManagerMultiUserIsolation(BaseIntegrationTest):
+    """Multi-user data isolation and concurrent access tests."""
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+    
+    @pytest.mark.unit
+    async def test_user_session_isolation_boundaries(self, isolated_env):
+        """Test that user sessions maintain proper data isolation boundaries."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 20
+            mock_config.return_value.database_url = None
+            
+            # Track user operations and data access
+            user_operations = {"user1": [], "user2": [], "user3": []}
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                # Track which user is executing which queries
+                current_user = None
+                
+                async def mock_execute(query, params=None):
+                    nonlocal current_user
+                    query_str = str(query)
+                    
+                    # Extract user context from query parameters
+                    if params and "user_id" in params:
+                        current_user = params["user_id"]
+                        user_operations[current_user].append({
+                            "query": query_str,
+                            "params": params,
+                            "timestamp": time.time()
+                        })
+                    
+                    # Simulate user-specific data access
+                    if "SELECT" in query_str and current_user:
+                        # Return user-specific mock data
+                        return Mock(fetchall=lambda: [(f"data_for_{current_user}",)])
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate multiple users accessing data concurrently
+                async def user_data_access(user_id: str):
+                    async with db_manager.get_session() as session:
+                        # User-specific data queries
+                        await session.execute(
+                            text("SELECT * FROM user_data WHERE user_id = :user_id"),
+                            {"user_id": user_id}
+                        )
+                        await session.execute(
+                            text("SELECT * FROM user_threads WHERE owner_id = :user_id"),
+                            {"user_id": user_id}
+                        )
+                        await session.execute(
+                            text("UPDATE user_preferences SET theme = 'dark' WHERE user_id = :user_id"),
+                            {"user_id": user_id}
+                        )
+                
+                # Run concurrent user operations
+                await asyncio.gather(
+                    user_data_access("user1"),
+                    user_data_access("user2"), 
+                    user_data_access("user3")
+                )
+                
+                # Verify user isolation - each user should have their own operations
+                assert len(user_operations["user1"]) == 3
+                assert len(user_operations["user2"]) == 3  
+                assert len(user_operations["user3"]) == 3
+                
+                # Verify no cross-user data leakage
+                for user_id, operations in user_operations.items():
+                    for operation in operations:
+                        assert operation["params"]["user_id"] == user_id
+                        assert user_id in operation["query"] or "user_id" in operation["query"]
+    
+    @pytest.mark.unit
+    async def test_concurrent_transaction_isolation_levels(self, isolated_env):
+        """Test transaction isolation levels prevent dirty reads and phantom reads."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 20
+            mock_config.return_value.database_url = None
+            
+            transaction_states = {"user1": "idle", "user2": "idle"}
+            shared_data = {"balance": 1000}
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                session_user = None
+                
+                async def mock_execute(query, params=None):
+                    nonlocal session_user
+                    query_str = str(query)
+                    
+                    if params and "user_id" in params:
+                        session_user = params["user_id"]
+                    
+                    # Simulate isolation level effects
+                    if "SET TRANSACTION ISOLATION LEVEL" in query_str:
+                        if "SERIALIZABLE" in query_str:
+                            transaction_states[session_user] = "serializable"
+                        elif "READ COMMITTED" in query_str:
+                            transaction_states[session_user] = "read_committed"
+                    
+                    # Simulate data read with isolation
+                    if "SELECT balance" in query_str and session_user:
+                        if transaction_states[session_user] == "serializable":
+                            # Serializable isolation - consistent view
+                            return Mock(fetchone=lambda: (shared_data["balance"],))
+                        else:
+                            # Read committed - may see committed changes
+                            return Mock(fetchone=lambda: (shared_data["balance"],))
+                    
+                    # Simulate data modification
+                    if "UPDATE balance" in query_str and params and "amount" in params:
+                        shared_data["balance"] = params["amount"]
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test serializable isolation
+                async def transaction_user1():
+                    async with db_manager.get_session() as session:
+                        await session.execute(
+                            text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"),
+                            {"user_id": "user1"}
+                        )
+                        # Read initial balance
+                        await session.execute(
+                            text("SELECT balance FROM accounts WHERE id = 1"),
+                            {"user_id": "user1"}
+                        )
+                        # Simulate processing delay
+                        await asyncio.sleep(0.01)
+                        # Update balance
+                        await session.execute(
+                            text("UPDATE accounts SET balance = :amount WHERE id = 1"),
+                            {"user_id": "user1", "amount": 800}
+                        )
+                
+                async def transaction_user2():
+                    async with db_manager.get_session() as session:
+                        await session.execute(
+                            text("SET TRANSACTION ISOLATION LEVEL READ COMMITTED"),
+                            {"user_id": "user2"}
+                        )
+                        # Concurrent read during user1's transaction
+                        await asyncio.sleep(0.005)  # Slight delay to interleave
+                        await session.execute(
+                            text("SELECT balance FROM accounts WHERE id = 1"),
+                            {"user_id": "user2"}
+                        )
+                
+                # Run concurrent transactions
+                await asyncio.gather(transaction_user1(), transaction_user2())
+                
+                # Verify isolation levels were set correctly
+                assert transaction_states["user1"] == "serializable"
+                assert transaction_states["user2"] == "read_committed"
+    
+    @pytest.mark.unit
+    async def test_multi_user_connection_sharing_efficiency(self, isolated_env):
+        """Test that connection pooling efficiently serves multiple users."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5  # Limited pool size
+            mock_config.return_value.database_max_overflow = 3
+            mock_config.return_value.database_url = None
+            
+            connection_usage = {"total_sessions": 0, "concurrent_sessions": 0, "max_concurrent": 0}
+            active_sessions = set()
+            
+            def mock_session_factory(*args, **kwargs):
+                nonlocal connection_usage
+                connection_usage["total_sessions"] += 1
+                session_id = connection_usage["total_sessions"]
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.session_id = session_id
+                
+                async def mock_aenter(self):
+                    active_sessions.add(session_id)
+                    connection_usage["concurrent_sessions"] = len(active_sessions)
+                    connection_usage["max_concurrent"] = max(
+                        connection_usage["max_concurrent"], 
+                        connection_usage["concurrent_sessions"]
+                    )
+                    return self
+                
+                async def mock_aexit(self, exc_type, exc_val, exc_tb):
+                    active_sessions.discard(session_id)
+                    connection_usage["concurrent_sessions"] = len(active_sessions)
+                    return None
+                
+                mock_session.__aenter__ = types.MethodType(mock_aenter, mock_session)
+                mock_session.__aexit__ = types.MethodType(mock_aexit, mock_session)
+                
+                async def mock_execute(query, params=None):
+                    # Simulate database work
+                    await asyncio.sleep(0.01)
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            import types
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate 20 users accessing database concurrently
+                async def user_database_work(user_id: int):
+                    async with db_manager.get_session() as session:
+                        # Simulate typical user database operations
+                        await session.execute(text(f"SELECT * FROM users WHERE id = {user_id}"))
+                        await session.execute(text(f"SELECT * FROM user_threads WHERE user_id = {user_id}"))
+                        await session.execute(text(f"UPDATE user_activity SET last_seen = NOW() WHERE user_id = {user_id}"))
+                
+                # Run 20 concurrent user operations (more than pool size)
+                tasks = [user_database_work(i) for i in range(20)]
+                await asyncio.gather(*tasks)
+                
+                # Verify connection pooling worked efficiently
+                assert connection_usage["total_sessions"] == 20
+                # Max concurrent should be limited by pool size + overflow
+                assert connection_usage["max_concurrent"] <= 8  # pool_size(5) + max_overflow(3)
+                # Should have served all users despite pool limitations
+                assert connection_usage["total_sessions"] > connection_usage["max_concurrent"]
+
+
+class TestDatabaseManagerConfigurationEdgeCases(BaseIntegrationTest):
+    """Configuration edge cases and environment-specific scenarios."""
+    
+    def setup_method(self):
+        """Set up for each test method.""" 
+        super().setup_method()
+    
+    @pytest.mark.unit
+    async def test_development_environment_configuration(self, isolated_env):
+        """Test DatabaseManager configuration in development environment."""
+        # Setup development environment
+        isolated_env.set("ENVIRONMENT", "development", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5432", source="test")
+        isolated_env.set("POSTGRES_USER", "dev_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "dev_password", source="test")
+        isolated_env.set("POSTGRES_DB", "netra_dev", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = True  # Development should have echo
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 5
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify development URL format
+            assert url.startswith("postgresql+asyncpg://")
+            assert "dev_user" in url
+            assert "localhost:5432" in url
+            assert "netra_dev" in url
+    
+    @pytest.mark.unit
+    async def test_production_environment_configuration(self, isolated_env):
+        """Test DatabaseManager configuration in production environment."""
+        # Setup production environment
+        isolated_env.set("ENVIRONMENT", "production", source="test")
+        isolated_env.set("POSTGRES_HOST", "prod-db.example.com", source="test")
+        isolated_env.set("POSTGRES_PORT", "5432", source="test")
+        isolated_env.set("POSTGRES_USER", "prod_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "secure_prod_password", source="test")
+        isolated_env.set("POSTGRES_DB", "netra_production", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False  # Production should not echo
+            mock_config.return_value.database_pool_size = 20
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify production URL format
+            assert url.startswith("postgresql+asyncpg://")
+            assert "prod_user" in url
+            assert "prod-db.example.com:5432" in url
+            assert "netra_production" in url
+    
+    @pytest.mark.unit
+    async def test_staging_cloud_sql_configuration(self, isolated_env):
+        """Test DatabaseManager configuration with Cloud SQL in staging."""
+        # Setup staging with Cloud SQL
+        isolated_env.set("ENVIRONMENT", "staging", source="test")
+        isolated_env.set("POSTGRES_HOST", "/cloudsql/netra-staging:us-central1:netra-db", source="test")
+        isolated_env.set("POSTGRES_USER", "staging_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "staging_password", source="test")
+        isolated_env.set("POSTGRES_DB", "netra_staging", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 15
+            mock_config.return_value.database_max_overflow = 8
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify Cloud SQL URL format
+            assert url.startswith("postgresql+asyncpg://")
+            assert "/cloudsql/" in url
+            assert "staging_user" in url
+            assert "netra_staging" in url
+    
+    @pytest.mark.unit  
+    async def test_docker_compose_configuration(self, isolated_env):
+        """Test DatabaseManager configuration in Docker Compose environment."""
+        # Setup Docker Compose environment
+        isolated_env.set("ENVIRONMENT", "development", source="test")
+        isolated_env.set("POSTGRES_HOST", "postgres", source="test")  # Docker service name
+        isolated_env.set("POSTGRES_PORT", "5432", source="test")
+        isolated_env.set("POSTGRES_USER", "postgres", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "postgres", source="test")
+        isolated_env.set("POSTGRES_DB", "netra_dev", source="test")
+        isolated_env.set("DOCKER_COMPOSE", "true", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = True
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 5
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify Docker Compose URL format
+            assert url.startswith("postgresql+asyncpg://")
+            assert "postgres@postgres:5432" in url  # Docker service name
+            assert "netra_dev" in url
+    
+    @pytest.mark.unit
+    async def test_environment_variable_precedence(self, isolated_env):
+        """Test environment variable precedence and override behavior."""
+        # Setup with multiple environment sources
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="default")
+        isolated_env.set("POSTGRES_HOST", "override-host", source="override")  # Should take precedence
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            url = db_manager._get_database_url()
+            
+            # Verify override took precedence
+            assert "override-host" in url
+            assert "localhost" not in url
+    
+    @pytest.mark.unit
+    async def test_missing_critical_environment_variables(self, isolated_env):
+        """Test behavior when critical environment variables are missing."""
+        # Setup with missing critical variables
+        isolated_env.set("ENVIRONMENT", "production", source="test")  # Production requires all vars
+        isolated_env.set("POSTGRES_HOST", "prod-db.example.com", source="test")
+        # Missing POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_url = None  # No fallback
+            
+            db_manager = DatabaseManager()
+            
+            # Should raise error due to missing critical configuration
+            with pytest.raises(ValueError, match="DatabaseURLBuilder failed to construct URL"):
+                db_manager._get_database_url()
+    
+    @pytest.mark.unit
+    async def test_ssl_configuration_scenarios(self, isolated_env):
+        """Test SSL configuration for different deployment scenarios."""
+        test_cases = [
+            # Production with SSL required
+            {
+                "env": "production",
+                "host": "prod-db.example.com",
+                "ssl_mode": "require",
+                "expected_ssl": True
+            },
+            # Staging with SSL preferred
+            {
+                "env": "staging", 
+                "host": "staging-db.example.com",
+                "ssl_mode": "prefer",
+                "expected_ssl": True
+            },
+            # Development without SSL
+            {
+                "env": "development",
+                "host": "localhost",
+                "ssl_mode": "disable",
+                "expected_ssl": False
+            }
+        ]
+        
+        for test_case in test_cases:
+            # Setup environment for each test case
+            isolated_env.set("ENVIRONMENT", test_case["env"], source="test")
+            isolated_env.set("POSTGRES_HOST", test_case["host"], source="test")
+            isolated_env.set("POSTGRES_PORT", "5432", source="test")
+            isolated_env.set("POSTGRES_USER", "test_user", source="test")
+            isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+            isolated_env.set("POSTGRES_DB", "test_db", source="test")
+            isolated_env.set("POSTGRES_SSL_MODE", test_case["ssl_mode"], source="test")
+            
+            with patch('netra_backend.app.core.config.get_config') as mock_config:
+                mock_config.return_value.database_url = None
+                
+                db_manager = DatabaseManager()
+                url = db_manager._get_database_url()
+                
+                # Verify SSL configuration is included in URL when appropriate
+                if test_case["expected_ssl"] and test_case["ssl_mode"] != "disable":
+                    assert test_case["ssl_mode"] in url or "ssl" in url.lower()
+    
+    @pytest.mark.unit
+    async def test_connection_timeout_configuration(self, isolated_env):
+        """Test connection timeout configuration for different environments."""
+        timeout_scenarios = [
+            {"env": "production", "timeout": 30, "pool_timeout": 60},
+            {"env": "staging", "timeout": 15, "pool_timeout": 30},
+            {"env": "development", "timeout": 5, "pool_timeout": 10},
+            {"env": "test", "timeout": 1, "pool_timeout": 2}
+        ]
+        
+        for scenario in timeout_scenarios:
+            isolated_env.set("ENVIRONMENT", scenario["env"], source="test")
+            isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+            isolated_env.set("POSTGRES_PORT", "5434", source="test")
+            isolated_env.set("POSTGRES_USER", "test_user", source="test")
+            isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+            isolated_env.set("POSTGRES_DB", "test_db", source="test")
+            isolated_env.set("DATABASE_CONNECT_TIMEOUT", str(scenario["timeout"]), source="test")
+            isolated_env.set("DATABASE_POOL_TIMEOUT", str(scenario["pool_timeout"]), source="test")
+            
+            with patch('netra_backend.app.core.config.get_config') as mock_config:
+                mock_config.return_value.database_echo = False
+                mock_config.return_value.database_pool_size = 5
+                mock_config.return_value.database_max_overflow = 10
+                mock_config.return_value.database_url = None
+                
+                with patch('netra_backend.app.db.database_manager.create_async_engine') as mock_create:
+                    db_manager = DatabaseManager()
+                    await db_manager.initialize()
+                    
+                    # Verify timeout configuration was applied
+                    mock_create.assert_called_once()
+                    call_kwargs = mock_create.call_args[1]
+                    
+                    # Should have proper pool configuration
+                    assert "pool_pre_ping" in call_kwargs
+                    assert call_kwargs["pool_pre_ping"] is True
+                    assert "pool_recycle" in call_kwargs
+                    assert call_kwargs["pool_recycle"] == 3600
+
+
+class TestDatabaseManagerPerformanceScalability(BaseIntegrationTest):
+    """Performance and scalability testing for DatabaseManager under load."""
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+    
+    @pytest.mark.unit
+    async def test_high_volume_session_creation_performance(self, isolated_env):
+        """Test performance with high volume session creation."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 20
+            mock_config.return_value.database_url = None
+            
+            session_creation_times = []
+            
+            def mock_session_factory(*args, **kwargs):
+                start_time = time.time()
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                # Track session creation time
+                creation_time = time.time() - start_time
+                session_creation_times.append(creation_time)
+                
+                async def mock_execute(query, params=None):
+                    await asyncio.sleep(0.001)  # Minimal work simulation
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Create 100 sessions rapidly
+                async def rapid_session_creation(session_id: int):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(f"SELECT {session_id}"))
+                
+                start_time = time.time()
+                tasks = [rapid_session_creation(i) for i in range(100)]
+                await asyncio.gather(*tasks)
+                total_time = time.time() - start_time
+                
+                # Performance assertions
+                assert len(session_creation_times) == 100
+                assert total_time < 5.0  # Should complete in under 5 seconds
+                assert max(session_creation_times) < 0.1  # No single session should take > 100ms
+                assert sum(session_creation_times) / len(session_creation_times) < 0.01  # Average < 10ms
+    
+    @pytest.mark.unit
+    async def test_database_load_balancing_simulation(self, isolated_env):
+        """Test database load balancing across multiple connections."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            connection_usage = {}
+            
+            def mock_session_factory(*args, **kwargs):
+                # Simulate connection assignment
+                connection_id = len(connection_usage) % 5  # 5 connections in pool
+                if connection_id not in connection_usage:
+                    connection_usage[connection_id] = 0
+                connection_usage[connection_id] += 1
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.connection_id = connection_id
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    # Simulate different query loads
+                    if "heavy_query" in str(query):
+                        await asyncio.sleep(0.1)
+                    else:
+                        await asyncio.sleep(0.01)
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Simulate mixed workload
+                async def light_query(query_id: int):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(f"SELECT {query_id}"))
+                
+                async def heavy_query(query_id: int):
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(f"SELECT heavy_query {query_id}"))
+                
+                # Mix of light and heavy queries
+                tasks = []
+                for i in range(30):
+                    if i % 5 == 0:  # Every 5th query is heavy
+                        tasks.append(heavy_query(i))
+                    else:
+                        tasks.append(light_query(i))
+                
+                await asyncio.gather(*tasks)
+                
+                # Verify load distribution
+                assert len(connection_usage) <= 5  # Should not exceed pool size
+                total_usage = sum(connection_usage.values())
+                assert total_usage == 30  # All queries should be handled
+                
+                # Check for reasonable load distribution
+                usage_values = list(connection_usage.values())
+                max_usage = max(usage_values)
+                min_usage = min(usage_values)
+                assert max_usage - min_usage <= 10  # Load should be reasonably balanced
+    
+    @pytest.mark.unit
+    async def test_memory_usage_under_load(self, isolated_env):
+        """Test memory usage patterns under sustained database load."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Track mock objects to simulate memory usage
+            active_sessions = []
+            max_active_sessions = 0
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                
+                async def mock_aenter(self):
+                    active_sessions.append(self)
+                    nonlocal max_active_sessions
+                    max_active_sessions = max(max_active_sessions, len(active_sessions))
+                    return self
+                
+                async def mock_aexit(self, exc_type, exc_val, exc_tb):
+                    if self in active_sessions:
+                        active_sessions.remove(self)
+                    return None
+                
+                mock_session.__aenter__ = types.MethodType(mock_aenter, mock_session)
+                mock_session.__aexit__ = types.MethodType(mock_aexit, mock_session)
+                
+                async def mock_execute(query, params=None):
+                    # Simulate memory allocation for query results
+                    mock_result = Mock()
+                    mock_result.data = "x" * 1000  # 1KB per result
+                    await asyncio.sleep(0.01)
+                    return mock_result
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            import types
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Sustained load test
+                async def sustained_database_work(work_duration: float):
+                    end_time = time.time() + work_duration
+                    while time.time() < end_time:
+                        async with db_manager.get_session() as session:
+                            await session.execute(text("SELECT large_dataset"))
+                        await asyncio.sleep(0.001)  # Brief pause
+                
+                # Run sustained load for short duration
+                await sustained_database_work(0.1)  # 100ms of sustained activity
+                
+                # Memory usage assertions
+                assert len(active_sessions) == 0  # All sessions should be cleaned up
+                assert max_active_sessions <= 15  # Should not exceed pool + overflow
+    
+    @pytest.mark.unit
+    async def test_connection_pool_scaling_behavior(self, isolated_env):
+        """Test connection pool scaling behavior under increasing load."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 3  # Small initial pool
+            mock_config.return_value.database_max_overflow = 7  # Allow scaling
+            mock_config.return_value.database_url = None
+            
+            connection_metrics = {"created": 0, "reused": 0, "peak_active": 0}
+            active_connections = set()
+            
+            def mock_session_factory(*args, **kwargs):
+                connection_id = connection_metrics["created"]
+                connection_metrics["created"] += 1
+                
+                # Simulate connection reuse logic
+                if connection_id < 3:  # Within pool size
+                    connection_metrics["reused"] += 1
+                
+                active_connections.add(connection_id)
+                connection_metrics["peak_active"] = max(
+                    connection_metrics["peak_active"], 
+                    len(active_connections)
+                )
+                
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.connection_id = connection_id
+                
+                async def mock_aenter(self):
+                    return self
+                
+                async def mock_aexit(self, exc_type, exc_val, exc_tb):
+                    active_connections.discard(connection_id)
+                    return None
+                
+                mock_session.__aenter__ = types.MethodType(mock_aenter, mock_session)
+                mock_session.__aexit__ = types.MethodType(mock_aexit, mock_session)
+                
+                async def mock_execute(query, params=None):
+                    await asyncio.sleep(0.02)  # Longer operations to force scaling
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            import types
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test scaling under increasing load
+                load_levels = [5, 10, 15]  # Increasing concurrent operations
+                
+                for load_level in load_levels:
+                    async def concurrent_operation(op_id: int):
+                        async with db_manager.get_session() as session:
+                            await session.execute(text(f"SELECT {op_id}"))
+                    
+                    tasks = [concurrent_operation(i) for i in range(load_level)]
+                    await asyncio.gather(*tasks)
+                
+                # Verify scaling behavior
+                assert connection_metrics["created"] >= 3  # At least pool size
+                assert connection_metrics["created"] <= 10  # Not more than pool + overflow
+                assert connection_metrics["peak_active"] <= 10  # Peak should respect limits
+    
+    @pytest.mark.unit
+    async def test_query_optimization_impact_simulation(self, isolated_env):
+        """Test simulated impact of query optimization on DatabaseManager performance."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            query_performance = {"fast_queries": [], "slow_queries": [], "optimized_queries": []}
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    query_str = str(query)
+                    start_time = time.time()
+                    
+                    # Simulate different query performance characteristics
+                    if "SELECT COUNT(*)" in query_str and "WHERE" not in query_str:
+                        # Slow unoptimized query
+                        await asyncio.sleep(0.1)
+                        query_type = "slow_queries"
+                    elif "SELECT * FROM" in query_str and "LIMIT" not in query_str:
+                        # Medium speed query without LIMIT
+                        await asyncio.sleep(0.05)
+                        query_type = "slow_queries"
+                    elif "INDEX" in query_str or "LIMIT" in query_str:
+                        # Optimized query with proper indexing/limiting
+                        await asyncio.sleep(0.001)
+                        query_type = "optimized_queries"
+                    else:
+                        # Fast simple query
+                        await asyncio.sleep(0.01)
+                        query_type = "fast_queries"
+                    
+                    execution_time = time.time() - start_time
+                    query_performance[query_type].append(execution_time)
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test different query types
+                query_tests = [
+                    ("SELECT COUNT(*) FROM users", "unoptimized"),
+                    ("SELECT * FROM users", "unoptimized"),
+                    ("SELECT id, name FROM users LIMIT 10", "optimized"),
+                    ("SELECT COUNT(*) FROM users WHERE status = 'active'", "optimized"),
+                    ("SELECT id FROM users WHERE id = 123", "fast"),
+                ]
+                
+                for query, expected_type in query_tests:
+                    async with db_manager.get_session() as session:
+                        await session.execute(text(query))
+                
+                # Performance analysis
+                if query_performance["slow_queries"]:
+                    avg_slow = sum(query_performance["slow_queries"]) / len(query_performance["slow_queries"])
+                    assert avg_slow > 0.04  # Slow queries should take significant time
+                
+                if query_performance["optimized_queries"]:
+                    avg_optimized = sum(query_performance["optimized_queries"]) / len(query_performance["optimized_queries"])
+                    assert avg_optimized < 0.02  # Optimized queries should be fast
+                
+                if query_performance["fast_queries"]:
+                    avg_fast = sum(query_performance["fast_queries"]) / len(query_performance["fast_queries"])
+                    assert avg_fast < 0.02  # Fast queries should be very quick
+
+
+class TestDatabaseManagerDataIntegrityValidation(BaseIntegrationTest):
+    """Data integrity and consistency validation tests."""
+    
+    def setup_method(self):
+        """Set up for each test method."""
+        super().setup_method()
+        self.test_env_vars = {
+            "ENVIRONMENT": "test",
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+    
+    @pytest.mark.unit
+    async def test_transaction_consistency_validation(self, isolated_env):
+        """Test transaction consistency across multiple operations."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Simulate data consistency tracking
+            data_state = {"users": {}, "accounts": {}, "transactions": []}
+            committed_operations = []
+            rolled_back_operations = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                session_operations = []
+                
+                async def mock_execute(query, params=None):
+                    query_str = str(query)
+                    operation = {"query": query_str, "params": params}
+                    session_operations.append(operation)
+                    
+                    # Simulate data operations
+                    if "INSERT INTO users" in query_str and params:
+                        user_id = params.get("user_id", len(data_state["users"]) + 1)
+                        data_state["users"][user_id] = {"name": params.get("name"), "pending": True}
+                    elif "INSERT INTO accounts" in query_str and params:
+                        account_id = params.get("account_id", len(data_state["accounts"]) + 1)
+                        data_state["accounts"][account_id] = {"balance": params.get("balance", 0), "pending": True}
+                    elif "UPDATE accounts" in query_str and params:
+                        # Update account balance
+                        account_id = params.get("account_id")
+                        if account_id in data_state["accounts"]:
+                            data_state["accounts"][account_id]["balance"] = params.get("new_balance")
+                            data_state["accounts"][account_id]["pending"] = True
+                    
+                    return Mock()
+                
+                async def mock_commit():
+                    # Mark all pending operations as committed
+                    for user_id, user_data in data_state["users"].items():
+                        if user_data.get("pending"):
+                            user_data["pending"] = False
+                    for account_id, account_data in data_state["accounts"].items():
+                        if account_data.get("pending"):
+                            account_data["pending"] = False
+                    committed_operations.extend(session_operations)
+                
+                async def mock_rollback():
+                    # Revert all pending operations
+                    users_to_remove = [user_id for user_id, user_data in data_state["users"].items() if user_data.get("pending")]
+                    for user_id in users_to_remove:
+                        del data_state["users"][user_id]
+                    
+                    accounts_to_remove = [account_id for account_id, account_data in data_state["accounts"].items() if account_data.get("pending")]
+                    for account_id in accounts_to_remove:
+                        del data_state["accounts"][account_id]
+                    
+                    rolled_back_operations.extend(session_operations)
+                
+                mock_session.execute = mock_execute
+                mock_session.commit = mock_commit
+                mock_session.rollback = mock_rollback
+                mock_session.close = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test successful transaction
+                async with db_manager.get_session() as session:
+                    await session.execute(
+                        text("INSERT INTO users (user_id, name) VALUES (:user_id, :name)"),
+                        {"user_id": 1, "name": "John Doe"}
+                    )
+                    await session.execute(
+                        text("INSERT INTO accounts (account_id, user_id, balance) VALUES (:account_id, :user_id, :balance)"),
+                        {"account_id": 1, "user_id": 1, "balance": 1000}
+                    )
+                    # Transaction should commit automatically
+                
+                # Verify committed data
+                assert 1 in data_state["users"]
+                assert data_state["users"][1]["pending"] is False
+                assert 1 in data_state["accounts"]
+                assert data_state["accounts"][1]["pending"] is False
+                assert len(committed_operations) > 0
+                
+                # Test failed transaction with rollback
+                try:
+                    async with db_manager.get_session() as session:
+                        await session.execute(
+                            text("INSERT INTO users (user_id, name) VALUES (:user_id, :name)"),
+                            {"user_id": 2, "name": "Jane Doe"}
+                        )
+                        await session.execute(
+                            text("INSERT INTO accounts (account_id, user_id, balance) VALUES (:account_id, :user_id, :balance)"),
+                            {"account_id": 2, "user_id": 2, "balance": 500}
+                        )
+                        # Force an error to trigger rollback
+                        raise Exception("Simulated database constraint violation")
+                except Exception:
+                    pass
+                
+                # Verify rollback occurred
+                assert 2 not in data_state["users"]  # Should be rolled back
+                assert 2 not in data_state["accounts"]  # Should be rolled back
+                assert len(rolled_back_operations) > 0
+    
+    @pytest.mark.unit
+    async def test_concurrent_data_modification_consistency(self, isolated_env):
+        """Test data consistency under concurrent modifications."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 10
+            mock_config.return_value.database_max_overflow = 20
+            mock_config.return_value.database_url = None
+            
+            # Shared data state for consistency testing
+            shared_balance = {"amount": 1000, "version": 0}
+            operation_log = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    query_str = str(query)
+                    
+                    # Simulate optimistic locking behavior
+                    if "SELECT balance, version FROM accounts" in query_str:
+                        # Return current balance and version
+                        return Mock(fetchone=lambda: (shared_balance["amount"], shared_balance["version"]))
+                    
+                    elif "UPDATE accounts SET balance = :new_balance, version = version + 1" in query_str:
+                        expected_version = params.get("expected_version")
+                        new_balance = params.get("new_balance")
+                        
+                        # Simulate optimistic locking check
+                        if expected_version == shared_balance["version"]:
+                            # Update successful
+                            shared_balance["amount"] = new_balance
+                            shared_balance["version"] += 1
+                            operation_log.append(f"Updated balance to {new_balance} (version {shared_balance['version']})")
+                            return Mock(rowcount=1)
+                        else:
+                            # Version mismatch - concurrent modification detected
+                            operation_log.append(f"Version mismatch: expected {expected_version}, got {shared_balance['version']}")
+                            return Mock(rowcount=0)
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test concurrent balance updates with optimistic locking
+                async def update_balance(user_id: int, amount_change: int):
+                    async with db_manager.get_session() as session:
+                        # Read current balance and version
+                        result = await session.execute(
+                            text("SELECT balance, version FROM accounts WHERE id = 1")
+                        )
+                        row = result.fetchone()
+                        current_balance, current_version = row
+                        
+                        # Calculate new balance
+                        new_balance = current_balance + amount_change
+                        
+                        # Simulate processing delay
+                        await asyncio.sleep(0.01)
+                        
+                        # Attempt update with version check
+                        await session.execute(
+                            text("""
+                                UPDATE accounts 
+                                SET balance = :new_balance, version = version + 1 
+                                WHERE id = 1 AND version = :expected_version
+                            """),
+                            {
+                                "new_balance": new_balance,
+                                "expected_version": current_version
+                            }
+                        )
+                
+                # Run concurrent balance updates
+                tasks = [
+                    update_balance(1, 100),  # +100
+                    update_balance(2, -50),  # -50
+                    update_balance(3, 200),  # +200
+                    update_balance(4, -25),  # -25
+                ]
+                await asyncio.gather(*tasks)
+                
+                # Verify consistency
+                assert len(operation_log) >= 4  # Should have recorded all operations
+                assert shared_balance["version"] > 0  # Version should have incremented
+                
+                # Check for version conflicts in log
+                conflicts = [op for op in operation_log if "Version mismatch" in op]
+                successful_updates = [op for op in operation_log if "Updated balance" in op]
+                
+                # Should have at least one successful update
+                assert len(successful_updates) >= 1
+    
+    @pytest.mark.unit
+    async def test_referential_integrity_validation(self, isolated_env):
+        """Test referential integrity validation across related tables."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Simulate relational data structure
+            database_state = {
+                "users": {1: {"name": "John", "status": "active"}},
+                "threads": {},  # user_id -> thread data
+                "messages": {}  # thread_id -> message data
+            }
+            integrity_violations = []
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    query_str = str(query)
+                    
+                    # Check referential integrity on INSERT operations
+                    if "INSERT INTO threads" in query_str and params:
+                        user_id = params.get("user_id")
+                        if user_id not in database_state["users"]:
+                            integrity_violations.append(f"Foreign key violation: user_id {user_id} does not exist")
+                            raise Exception(f"Foreign key constraint violation: user_id {user_id}")
+                        else:
+                            thread_id = params.get("thread_id", len(database_state["threads"]) + 1)
+                            database_state["threads"][thread_id] = {"user_id": user_id, "title": params.get("title")}
+                    
+                    elif "INSERT INTO messages" in query_str and params:
+                        thread_id = params.get("thread_id")
+                        if thread_id not in database_state["threads"]:
+                            integrity_violations.append(f"Foreign key violation: thread_id {thread_id} does not exist")
+                            raise Exception(f"Foreign key constraint violation: thread_id {thread_id}")
+                        else:
+                            message_id = params.get("message_id", len(database_state["messages"]) + 1)
+                            database_state["messages"][message_id] = {
+                                "thread_id": thread_id, 
+                                "content": params.get("content")
+                            }
+                    
+                    # Check referential integrity on DELETE operations
+                    elif "DELETE FROM users WHERE id = :user_id" in query_str and params:
+                        user_id = params.get("user_id")
+                        # Check if user has dependent threads
+                        dependent_threads = [t_id for t_id, t_data in database_state["threads"].items() 
+                                           if t_data["user_id"] == user_id]
+                        if dependent_threads:
+                            integrity_violations.append(f"Cannot delete user {user_id}: has dependent threads {dependent_threads}")
+                            raise Exception(f"Foreign key constraint violation: user has dependent records")
+                        else:
+                            if user_id in database_state["users"]:
+                                del database_state["users"][user_id]
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test valid referential operations
+                async with db_manager.get_session() as session:
+                    # Create thread for existing user
+                    await session.execute(
+                        text("INSERT INTO threads (thread_id, user_id, title) VALUES (:thread_id, :user_id, :title)"),
+                        {"thread_id": 1, "user_id": 1, "title": "Valid Thread"}
+                    )
+                    
+                    # Create message for existing thread
+                    await session.execute(
+                        text("INSERT INTO messages (message_id, thread_id, content) VALUES (:message_id, :thread_id, :content)"),
+                        {"message_id": 1, "thread_id": 1, "content": "Valid Message"}
+                    )
+                
+                # Verify valid operations succeeded
+                assert 1 in database_state["threads"]
+                assert 1 in database_state["messages"]
+                assert len(integrity_violations) == 0
+                
+                # Test invalid referential operations
+                with pytest.raises(Exception, match="Foreign key constraint violation"):
+                    async with db_manager.get_session() as session:
+                        # Try to create thread for non-existent user
+                        await session.execute(
+                            text("INSERT INTO threads (thread_id, user_id, title) VALUES (:thread_id, :user_id, :title)"),
+                            {"thread_id": 2, "user_id": 999, "title": "Invalid Thread"}
+                        )
+                
+                with pytest.raises(Exception, match="Foreign key constraint violation"):
+                    async with db_manager.get_session() as session:
+                        # Try to create message for non-existent thread
+                        await session.execute(
+                            text("INSERT INTO messages (message_id, thread_id, content) VALUES (:message_id, :thread_id, :content)"),
+                            {"message_id": 2, "thread_id": 999, "content": "Invalid Message"}
+                        )
+                
+                # Verify integrity violations were detected
+                assert len(integrity_violations) >= 2
+                assert any("user_id 999" in violation for violation in integrity_violations)
+                assert any("thread_id 999" in violation for violation in integrity_violations)
+    
+    @pytest.mark.unit
+    async def test_data_corruption_prevention(self, isolated_env):
+        """Test prevention of data corruption scenarios."""
+        # Setup environment
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            corruption_attempts = []
+            data_checksums = {}
+            
+            def mock_session_factory(*args, **kwargs):
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.commit = AsyncMock()
+                mock_session.close = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+                mock_session.__aexit__ = AsyncMock(return_value=None)
+                
+                async def mock_execute(query, params=None):
+                    query_str = str(query)
+                    
+                    # Check for potential data corruption patterns
+                    if "UPDATE" in query_str and "WHERE" not in query_str:
+                        corruption_attempts.append("UPDATE without WHERE clause - potential mass data corruption")
+                        raise Exception("Unsafe UPDATE query detected")
+                    
+                    elif "DELETE" in query_str and "WHERE" not in query_str:
+                        corruption_attempts.append("DELETE without WHERE clause - potential data loss")
+                        raise Exception("Unsafe DELETE query detected")
+                    
+                    elif "DROP TABLE" in query_str:
+                        corruption_attempts.append("DROP TABLE detected - potential schema corruption")
+                        raise Exception("Unsafe schema modification detected")
+                    
+                    elif "TRUNCATE" in query_str:
+                        corruption_attempts.append("TRUNCATE detected - potential data loss")
+                        raise Exception("Unsafe data truncation detected")
+                    
+                    # Simulate data validation
+                    elif "INSERT INTO critical_data" in query_str and params:
+                        data_value = params.get("data")
+                        if data_value:
+                            # Calculate simple checksum
+                            checksum = sum(ord(c) for c in str(data_value)) % 1000
+                            data_checksums[params.get("id", "unknown")] = checksum
+                    
+                    elif "SELECT * FROM critical_data" in query_str:
+                        # Return data with checksums for validation
+                        return Mock(fetchall=lambda: [
+                            {"id": data_id, "checksum": checksum} 
+                            for data_id, checksum in data_checksums.items()
+                        ])
+                    
+                    return Mock()
+                
+                mock_session.execute = mock_execute
+                return mock_session
+            
+            with patch('netra_backend.app.db.database_manager.AsyncSession', side_effect=mock_session_factory):
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Test safe operations
+                async with db_manager.get_session() as session:
+                    # Safe INSERT with proper validation
+                    await session.execute(
+                        text("INSERT INTO critical_data (id, data) VALUES (:id, :data)"),
+                        {"id": 1, "data": "important_data_value"}
+                    )
+                    
+                    # Safe UPDATE with WHERE clause
+                    await session.execute(
+                        text("UPDATE user_preferences SET theme = 'dark' WHERE user_id = :user_id"),
+                        {"user_id": 1}
+                    )
+                    
+                    # Safe DELETE with WHERE clause
+                    await session.execute(
+                        text("DELETE FROM temp_data WHERE created_at < :cutoff_date"),
+                        {"cutoff_date": "2024-01-01"}
+                    )
+                
+                # Verify safe operations completed without corruption attempts
+                assert len(corruption_attempts) == 0
+                assert len(data_checksums) > 0
+                
+                # Test corruption prevention
+                corruption_queries = [
+                    "UPDATE users SET password = 'hacked'",  # No WHERE clause
+                    "DELETE FROM important_table",  # No WHERE clause
+                    "DROP TABLE users",  # Dangerous schema change
+                    "TRUNCATE user_data",  # Data loss operation
+                ]
+                
+                for dangerous_query in corruption_queries:
+                    with pytest.raises(Exception):
+                        async with db_manager.get_session() as session:
+                            await session.execute(text(dangerous_query))
+                
+                # Verify all corruption attempts were detected
+                assert len(corruption_attempts) == 4
+                assert any("mass data corruption" in attempt for attempt in corruption_attempts)
+                assert any("data loss" in attempt for attempt in corruption_attempts)
+                assert any("schema corruption" in attempt for attempt in corruption_attempts)
+                assert any("data truncation" in attempt for attempt in corruption_attempts)

@@ -90,50 +90,28 @@ async def test_database():
         # FIXED: return in generator
     pass
 
-    async def create_test_user_with_oauth(db_setup):
-        pass
-
-        """Create test user with OAuth credentials"""
-
-        user = User(
-
+async def create_test_user_with_oauth(db_setup):
+    """Create test user with OAuth credentials"""
+    user = User(
         id=str(uuid.uuid4()),
-
         email="test@example.com",
-
         oauth_provider="google",
-
         is_active=True
-
-        )
-
-        db_setup["session"].add(user)
-
-        await db_setup["session"].commit()
-
-        await asyncio.sleep(0)
-        return user
-
-    async def setup_circuit_breakers_for_chain(service_chain):
-        pass
-
-        """Setup circuit breakers for each service"""
-
-        breakers = {}
-
-    for service_name in service_chain:
-        pass
-
-        breakers[service_name] = CircuitBreaker(
-
-    failure_threshold=3,
-
-    recovery_timeout=30,
-
-    expected_exception=Exception
-
     )
+    db_setup["session"].add(user)
+    await db_setup["session"].commit()
+    await asyncio.sleep(0)
+    return user
 
+async def setup_circuit_breakers_for_chain(service_chain):
+    """Setup circuit breakers for each service"""
+    breakers = {}
+    for service_name in service_chain:
+        breakers[service_name] = CircuitBreaker(
+            failure_threshold=3,
+            recovery_timeout=30,
+            expected_exception=Exception
+        )
     await asyncio.sleep(0)
     return breakers
 

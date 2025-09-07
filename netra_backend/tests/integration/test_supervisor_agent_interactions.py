@@ -497,11 +497,22 @@ class TestSupervisorAgentInteractions(BaseIntegrationTest):
     ):
         """Test SupervisorAgent handles concurrent users safely without context leakage."""
         
-        # Create multiple supervisors for concurrent testing
-        supervisors = [
-            SupervisorAgent.create(mock_llm_manager, mock_websocket_bridge)
-            for _ in range(3)
-        ]
+        # Create a mock registry with some test agents for concurrent testing
+        mock_registry = MagicMock(spec=AgentClassRegistry)
+        mock_registry.__len__ = MagicMock(return_value=5)  # Simulate 5 agent classes
+        
+        # Mock agent instance factory 
+        mock_factory = MagicMock()
+        mock_factory.configure = MagicMock()
+        
+        # Create multiple supervisors for concurrent testing with proper mocks
+        supervisors = []
+        with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_class_registry', return_value=mock_registry):
+            with patch('netra_backend.app.agents.supervisor_consolidated.get_agent_instance_factory', return_value=mock_factory):
+                supervisors = [
+                    SupervisorAgent.create(mock_llm_manager, mock_websocket_bridge)
+                    for _ in range(3)
+                ]
         
         # Create different user contexts 
         user_contexts = []

@@ -945,7 +945,7 @@ class TestRepositoryBoundaryConditionsAndErrorHandling:
         """Test operations with special JSON characters in audit details"""
         user_id = str(uuid.uuid4())
         special_details = {
-            "message": 'Contains "quotes" and \backslashes\ and \n newlines',
+            "message": 'Contains "quotes" and \\backslashes\\ and \\n newlines',
             "json": '{"nested": "json"}',
             "unicode": "Special: ñáéíóú"
         }

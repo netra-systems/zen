@@ -46,7 +46,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, call
 import gc
 import threading
 
-from test_framework.ssot.base import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import the classes under test
 from netra_backend.app.agents.supervisor.agent_registry import (

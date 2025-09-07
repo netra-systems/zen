@@ -23,10 +23,11 @@ from unittest.mock import patch, AsyncMock
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
-from netra_backend.app.config import BackendConfig
-from netra_backend.app.services.auth_integration_service import AuthIntegrationService
+from netra_backend.app.config import get_config
+# from netra_backend.app.services.auth_integration_service import AuthIntegrationService
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
-from netra_backend.app.database import get_database
+from netra_backend.app.services.user_auth_service import UserAuthService
+from netra_backend.app.database import get_db
 from netra_backend.app.models import User, Thread, Message
 
 
@@ -40,14 +41,13 @@ class TestBackendAuthIntegration(BaseIntegrationTest):
         self.auth_helper = E2EAuthHelper(environment="test")
         
         # Use real backend configuration
-        self.backend_config = BackendConfig()
+        self.backend_config = get_config()
         
         # Real service instances
-        self.auth_integration_service = AuthIntegrationService(self.backend_config)
-        self.auth_middleware = AuthMiddleware(self.auth_integration_service)
+        self.auth_service = UserAuthService()
+        self.auth_middleware = AuthMiddleware()
         
-        # Real database connection
-        self.db = get_database()
+        # Real database connection (context manager, use as needed)
         
         # Test configuration
         self.auth_service_url = "http://localhost:8081"  # Test auth service

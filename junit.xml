@@ -1,401 +1,120 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="40" failures="0" skipped="1" tests="41" time="10.132" timestamp="2025-09-07T11:41:22.104674-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_error_handling_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_error_handling_integration.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="9" failures="0" skipped="1" tests="10" time="6.584" timestamp="2025-09-07T12:04:35.667636-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_error_handling_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_error_handling_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_error_handling_integration.py:27: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_health_check_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_health_check_integration.py'.
+auth_service\tests\integration\test_auth_error_handling_integration.py:28: in &lt;module&gt;
+    from auth_service.services.user_service import UserService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_health_check_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_health_check_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_health_check_integration.py:26: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_jwt_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_jwt_integration.py'.
+auth_service\tests\integration\test_auth_health_check_integration.py:27: in &lt;module&gt;
+    from auth_service.services.health_check_service import HealthCheckService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_jwt_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_jwt_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_jwt_integration.py:26: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_multi_user_isolation_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_multi_user_isolation_integration.py'.
+auth_service\tests\integration\test_auth_jwt_integration.py:27: in &lt;module&gt;
+    from auth_service.services.jwt_service import JWTService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_multi_user_isolation_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_multi_user_isolation_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:26: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_oauth_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_oauth_integration.py'.
+auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:27: in &lt;module&gt;
+    from auth_service.services.user_service import UserService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_oauth_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_oauth_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_oauth_integration.py:27: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_registration_login_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_registration_login_integration.py'.
+auth_service\tests\integration\test_auth_oauth_integration.py:28: in &lt;module&gt;
+    from auth_service.services.oauth_service import OAuthService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_registration_login_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_registration_login_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_registration_login_integration.py:27: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_session_persistence" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_session_persistence.py'.
+auth_service\tests\integration\test_auth_registration_login_integration.py:28: in &lt;module&gt;
+    from auth_service.services.user_service import UserService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_session_persistence" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_session_persistence.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_session_persistence.py:25: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.integration.test_auth_token_refresh_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_token_refresh_integration.py'.
+auth_service\tests\integration\test_auth_session_persistence.py:26: in &lt;module&gt;
+    from auth_service.services.redis_service import RedisService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.integration.test_auth_token_refresh_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_token_refresh_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_token_refresh_integration.py:26: in &lt;module&gt;
-    from auth_service.config import AuthConfig
-E   ModuleNotFoundError: No module named 'auth_service.config'</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigCore" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigCore' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigEnvironment" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigEnvironment' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigOAuth" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigOAuth' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigJWT" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigJWT' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigService" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigService' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigURLs" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigURLs' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigDatabase" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigDatabase' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigRedis" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigRedis' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigSecurity" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigSecurity' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigCORS" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigCORS' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigLogging" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigLogging' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigErrorHandling" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigErrorHandling' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigDeprecatedMethods" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigDeprecatedMethods' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigIntegration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigIntegration' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_config_comprehensive" name="TestAuthConfigBusinessValue" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthConfigBusinessValue' because it has a __init__ constructor (from: tests/unit/test_config_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderInitialization" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderInitialization' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderConfiguration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderConfiguration' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderRedirectURI" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderRedirectURI' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderAuthorizationURL" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderAuthorizationURL' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderCodeExchange" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderCodeExchange' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderSelfCheck" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderSelfCheck' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderSecurity" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderSecurity' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_google_oauth_comprehensive" name="TestGoogleOAuthProviderPerformance" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestGoogleOAuthProviderPerformance' because it has a __init__ constructor (from: tests/unit/test_google_oauth_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerInitialization" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerInitialization' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerProviderManagement" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerProviderManagement' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerProviderStatus" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerProviderStatus' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerErrorHandling" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerErrorHandling' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerIntegration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerIntegration' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerConfiguration" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerConfiguration' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerSecurity" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerSecurity' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="tests.unit.test_oauth_manager_comprehensive" name="TestOAuthManagerPerformance" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestOAuthManagerPerformance' because it has a __init__ constructor (from: tests/unit/test_oauth_manager_comprehensive.py)</error></testcase><testcase classname="" name="tests.unit.test_repository_core_comprehensive" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:177: in exec_module
-    source_stat, co = _rewrite_test(fn, self.config)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:357: in _rewrite_test
-    tree = ast.parse(source, filename=strfn)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\miniconda3\Lib\ast.py:52: in parse
-    return compile(source, filename, mode, flags,
-E     File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\test_repository_core_comprehensive.py", line 948
-E       "message": 'Contains "quotes" and \backslashes\ and \n newlines',
-E                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   SyntaxError: invalid escape sequence '\ '</error></testcase></testsuite></testsuites>
+auth_service\tests\integration\test_auth_token_refresh_integration.py:27: in &lt;module&gt;
+    from auth_service.services.jwt_service import JWTService
+E   ModuleNotFoundError: No module named 'auth_service.services'</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="pytest" name="internal" time="0.000"><error message="internal error">Traceback (most recent call last):
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 289, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 342, in _main
+    config.hook.pytest_collection(session=session)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 167, in _multicall
+    raise exception
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\logging.py", line 788, in pytest_collection
+    return (yield)
+            ^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\warnings.py", line 99, in pytest_collection
+    return (yield)
+            ^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py", line 1450, in pytest_collection
+    return (yield)
+            ^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 353, in pytest_collection
+    session.perform_collect()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 823, in perform_collect
+    hook.pytest_collection_finish(session=self)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 167, in _multicall
+    raise exception
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\terminal.py", line 892, in pytest_collection_finish
+    self._printcollecteditems(session.items)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\terminal.py", line 922, in _printcollecteditems
+    self._tw.line(f"{indent}{col}")
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\_io\terminalwriter.py", line 180, in line
+    self.write(s, **markup)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\_io\terminalwriter.py", line 165, in write
+    self._file.write(msg)
+OSError: [Errno 22] Invalid argument</error></testcase></testsuite></testsuites>

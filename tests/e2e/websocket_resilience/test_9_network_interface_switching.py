@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
 

@@ -54,7 +54,6 @@ class TestMiddlewareChain:
         async def timeout_endpoint():
             raise TimeoutError("Request timeout")
 
-        await asyncio.sleep(0)
         return app
 
     @pytest.fixture

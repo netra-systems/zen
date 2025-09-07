@@ -24,7 +24,7 @@ import aiohttp
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
-from auth_service.config import AuthConfig
+from auth_service.auth_core.config import AuthConfig
 from auth_service.services.user_service import UserService
 from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService

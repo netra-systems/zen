@@ -119,26 +119,29 @@ class SSotBaseTestCase:
     CRITICAL: This replaces ALL existing BaseTestCase implementations.
     """
     
-    def __init__(self):
-        """Initialize the SSOT base test case."""
-        # Core components
-        self._env: IsolatedEnvironment = get_env()
-        self._metrics: SsotTestMetrics = SsotTestMetrics()
-        self._test_context: Optional[SsotTestContext] = None
-        self._cleanup_callbacks: List[Callable] = []
-        
-        # Test state
-        self._test_started = False
-        self._test_completed = False
-        self._original_env_state: Optional[Dict[str, str]] = None
-    
     def setup_method(self, method=None):
         """
         Setup method run before each test method.
         
-        CRITICAL: This method ensures proper environment isolation and
+        Initialize SSOT base test case components and ensure proper environment isolation.
         test context initialization for every test.
         """
+        # Initialize core components if not already initialized
+        if not hasattr(self, '_env'):
+            self._env: IsolatedEnvironment = get_env()
+        if not hasattr(self, '_metrics'):
+            self._metrics: SsotTestMetrics = SsotTestMetrics()
+        if not hasattr(self, '_test_context'):
+            self._test_context: Optional[SsotTestContext] = None
+        if not hasattr(self, '_cleanup_callbacks'):
+            self._cleanup_callbacks: List[Callable] = []
+        if not hasattr(self, '_test_started'):
+            self._test_started = False
+        if not hasattr(self, '_test_completed'):
+            self._test_completed = False
+        if not hasattr(self, '_original_env_state'):
+            self._original_env_state: Optional[Dict[str, str]] = None
+        
         # Start timing
         self._metrics.start_timing()
         

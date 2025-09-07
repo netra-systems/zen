@@ -206,24 +206,25 @@ class CentralConfigurationValidator:
         ),
         
         # Database Configuration (CRITICAL) 
-        # Note: Support POSTGRES_* variables (GCP/DatabaseURLBuilder SSOT) instead of DATABASE_*
-        # This aligns with actual deployment patterns and DatabaseURLBuilder implementation
+        # CRITICAL FIX: Support DATABASE_URL OR component-based configuration
+        # This aligns with actual GCP deployment patterns where DATABASE_URL is provided
+        # No hard requirements for individual components if DATABASE_URL is present
         ConfigRule(
             env_var="POSTGRES_PASSWORD",
-            requirement=ConfigRequirement.REQUIRED_SECURE,
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since DATABASE_URL can be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=8,
             forbidden_values={"", "password", "postgres", "admin"},
-            error_message="POSTGRES_PASSWORD required for Cloud SQL connection in staging/production. Must be 8+ characters and not use common defaults."
+            error_message="POSTGRES_PASSWORD (if provided) must be 8+ characters and not use common defaults. Alternative: Use DATABASE_URL for Cloud SQL connections."
         ),
         ConfigRule(
             env_var="POSTGRES_HOST",
-            requirement=ConfigRequirement.REQUIRED,
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since DATABASE_URL can be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
             # Note: Cloud SQL Unix socket paths are valid (e.g., /cloudsql/project:region:instance)
             # These should NOT be treated as localhost violations
             forbidden_values={"localhost", "127.0.0.1"},  # Removed empty string check for Cloud SQL
-            error_message="POSTGRES_HOST required for Cloud SQL connection in staging/production. Cannot be localhost/127.0.0.1 (Cloud SQL Unix sockets are allowed)."
+            error_message="POSTGRES_HOST (if provided) cannot be localhost/127.0.0.1 in staging/production. Cloud SQL Unix sockets (/cloudsql/...) are allowed. Alternative: Use DATABASE_URL for Cloud SQL connections."
         ),
         
         # Redis Configuration (CRITICAL)
@@ -483,6 +484,15 @@ class CentralConfigurationValidator:
                     validation_errors.append(str(e))
                     logger.error(f"❌ {rule.env_var} validation failed: {e}")
         
+        # CRITICAL: Additional validation for database configuration in staging/production
+        if environment in [Environment.STAGING, Environment.PRODUCTION]:
+            try:
+                self._validate_database_configuration(environment)
+                logger.debug("✅ Database configuration validation passed")
+            except ValueError as e:
+                validation_errors.append(str(e))
+                logger.error(f"❌ Database configuration validation failed: {e}")
+        
         # HARD STOP: If any validation fails, prevent startup
         if validation_errors:
             error_msg = f"Configuration validation failed for {environment.value} environment:\n" + "\n".join(f"  - {err}" for err in validation_errors)
@@ -510,6 +520,53 @@ class CentralConfigurationValidator:
             # Check forbidden values
             if rule.forbidden_values and value.strip() in rule.forbidden_values:
                 raise ValueError(f"{rule.env_var} cannot use forbidden value in {environment.value}")
+    
+    def _validate_database_configuration(self, environment: Environment) -> None:
+        """
+        Validate that database configuration is sufficient for the environment.
+        
+        CRITICAL: Ensure we have EITHER DATABASE_URL OR component-based configuration.
+        This prevents false positives where GCP provides DATABASE_URL but validator
+        expects individual components.
+        """
+        database_url = self.env_getter("DATABASE_URL")
+        
+        # If DATABASE_URL is provided, that's sufficient (GCP Cloud Run pattern)
+        if database_url and database_url.strip():
+            logger.info(f"Database configuration: Using DATABASE_URL for {environment.value} environment")
+            return
+        
+        # Otherwise, require component-based configuration
+        # Check for either POSTGRES_* (GCP/modern) or DATABASE_* (legacy) variables
+        host = self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST")
+        password = self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD")
+        
+        if not host:
+            raise ValueError(
+                f"Database host required in {environment.value} environment. "
+                f"Provide either DATABASE_URL or POSTGRES_HOST/DATABASE_HOST"
+            )
+        
+        if not password:
+            raise ValueError(
+                f"Database password required in {environment.value} environment. "
+                f"Provide either DATABASE_URL or POSTGRES_PASSWORD/DATABASE_PASSWORD"
+            )
+        
+        # Validate host (allow Cloud SQL sockets)
+        if host in {"localhost", "127.0.0.1"}:
+            raise ValueError(
+                f"Database host cannot be localhost in {environment.value} environment. "
+                f"Use Cloud SQL socket (/cloudsql/...) or external host"
+            )
+        
+        # Validate password security
+        if len(password) < 8 or password in {"", "password", "postgres", "admin"}:
+            raise ValueError(
+                f"Database password must be 8+ characters and not use common defaults in {environment.value} environment"
+            )
+        
+        logger.info(f"Database configuration: Using component-based configuration for {environment.value} environment")
     
     def get_validated_config(self, config_name: str) -> str:
         """
@@ -555,26 +612,62 @@ class CentralConfigurationValidator:
         Get validated database credentials for the current environment.
         
         SSOT for database configuration requirements.
+        
+        CRITICAL FIX: Support both DATABASE_* (legacy) and POSTGRES_* (GCP/Cloud SQL) patterns.
+        This aligns validator with actual deployment patterns used by GCP Cloud Run.
         """
         environment = self.get_environment()
         
         if environment in [Environment.STAGING, Environment.PRODUCTION]:
-            # Hard requirements for staging/production
+            # CRITICAL: Check for DATABASE_URL first (Cloud Run deployment pattern)
+            database_url = self.env_getter("DATABASE_URL")
+            if database_url:
+                # DATABASE_URL is sufficient - no need to validate individual components
+                # This is how GCP Cloud Run deployments work
+                logger.info(f"Using DATABASE_URL for {environment.value} database configuration")
+                # Return minimal config - the actual connection uses DATABASE_URL directly
+                return {
+                    "url": database_url,
+                    "host": "cloud-sql",  # Placeholder for Cloud SQL
+                    "port": "5432",
+                    "database": "netra_staging" if environment == Environment.STAGING else "netra_prod",
+                    "username": "postgres",
+                    "password": "***"  # Handled by DATABASE_URL
+                }
+            
+            # Fallback: Check for component-based configuration (POSTGRES_* or DATABASE_*)
+            # Try POSTGRES_* first (modern GCP pattern), then DATABASE_* (legacy pattern)
+            host = self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST")
+            password = self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD")
+            
+            # Validate that we have at least host and password for component-based config
+            if not host:
+                raise ValueError(f"Database host required in {environment.value}. Set DATABASE_URL or POSTGRES_HOST/DATABASE_HOST")
+            if not password:
+                raise ValueError(f"Database password required in {environment.value}. Set DATABASE_URL or POSTGRES_PASSWORD/DATABASE_PASSWORD")
+            
+            # Additional validation for component-based config
+            if host in {"localhost", "127.0.0.1"} and not host.startswith("/cloudsql/"):
+                raise ValueError(f"Database host cannot be localhost in {environment.value} (Cloud SQL sockets like /cloudsql/... are allowed)")
+            
+            if len(password) < 8 or password in {"", "password", "postgres", "admin"}:
+                raise ValueError(f"Database password must be 8+ characters and not use common defaults in {environment.value}")
+            
             return {
-                "host": self.get_validated_config("DATABASE_HOST"),
-                "port": self.env_getter("DATABASE_PORT") or "5432",
-                "database": self.env_getter("DATABASE_NAME") or "netra_dev",
-                "username": self.env_getter("DATABASE_USER") or "postgres",
-                "password": self.get_validated_config("DATABASE_PASSWORD")
+                "host": host,
+                "port": self.env_getter("POSTGRES_PORT") or self.env_getter("DATABASE_PORT") or "5432",
+                "database": self.env_getter("POSTGRES_DB") or self.env_getter("DATABASE_NAME") or "netra_dev",
+                "username": self.env_getter("POSTGRES_USER") or self.env_getter("DATABASE_USER") or "postgres",
+                "password": password
             }
         else:
-            # Development/test can use defaults
+            # Development/test can use defaults - support both patterns
             return {
-                "host": self.env_getter("DATABASE_HOST", "localhost"),
-                "port": self.env_getter("DATABASE_PORT", "5432"),
-                "database": self.env_getter("DATABASE_NAME", "netra_dev"),
-                "username": self.env_getter("DATABASE_USER", "postgres"),
-                "password": self.env_getter("DATABASE_PASSWORD", "")
+                "host": self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST", "localhost"),
+                "port": self.env_getter("POSTGRES_PORT") or self.env_getter("DATABASE_PORT", "5432"),
+                "database": self.env_getter("POSTGRES_DB") or self.env_getter("DATABASE_NAME", "netra_dev"),
+                "username": self.env_getter("POSTGRES_USER") or self.env_getter("DATABASE_USER", "postgres"),
+                "password": self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD", "")
             }
     
     def get_redis_credentials(self) -> Dict[str, str]:

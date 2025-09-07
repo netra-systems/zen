@@ -380,6 +380,17 @@ class AppConfig(BaseModel):
     startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
     startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
     
+    # Compatibility properties for uppercase attribute access (SSOT pattern)
+    @property
+    def API_BASE_URL(self) -> str:
+        """Compatibility alias for api_base_url."""
+        return self.api_base_url
+    
+    @property
+    def SECRET_KEY(self) -> str:
+        """Compatibility alias for secret_key."""
+        return self.secret_key
+    
     @field_validator('secret_key')
     @classmethod
     def validate_secret_key(cls, v):
@@ -503,17 +514,6 @@ class DevelopmentConfig(AppConfig):
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
-    
-    # Compatibility aliases for uppercase attribute access
-    @property
-    def SECRET_KEY(self) -> str:
-        """Compatibility alias for secret_key."""
-        return self.secret_key
-    
-    @property 
-    def API_BASE_URL(self) -> str:
-        """Compatibility alias for api_base_url."""
-        return self.api_base_url
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(

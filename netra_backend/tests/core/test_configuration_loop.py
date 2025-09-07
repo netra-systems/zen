@@ -6,7 +6,7 @@ import unittest
 import logging
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 
 
 class TestConfigurationLoop(unittest.TestCase):

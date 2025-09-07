@@ -28,7 +28,7 @@ import threading
 import websocket
 import random
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode, InvalidHandshake
+from websockets import ConnectionClosedError, InvalidStatusCode, InvalidHandshake
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -453,7 +453,7 @@ class TestFirstMessageExperience:
                                 logger.info(f"Received event: {event.get('type', 'unknown')}")
                             except json.JSONDecodeError as e:
                                 logger.warning(f"Failed to parse WebSocket message: {message[:100]}... Error: {e}")
-                except (ConnectionClosedError, websockets.exceptions.ConnectionClosed):
+                except (ConnectionClosedError, websockets.ConnectionClosed):
                     logger.info("WebSocket connection closed by server")
                 except asyncio.TimeoutError:
                     logger.info("WebSocket receive timeout")

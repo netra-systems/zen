@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import IsolatedEnvironment
 

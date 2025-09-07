@@ -166,11 +166,15 @@ class SupervisorAgent(BaseAgent):
                 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 
                 # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
-                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                # Get the actual WebSocketManager from the bridge
+                websocket_manager = self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                if not websocket_manager:
+                    raise RuntimeError("WebSocket manager not available from bridge")
+                
+                websocket_emitter = IsolatedWebSocketEventEmitter(
+                    manager=websocket_manager,
                     user_id=context.user_id,
-                    thread_id=context.thread_id,
-                    run_id=context.run_id,
-                    websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                    context=context
                 )
                 
                 # Get the actual WebSocketManager to pass to ToolDispatcher
@@ -198,7 +202,7 @@ class SupervisorAgent(BaseAgent):
                 )
                 
                 logger.info(f"✅ UserContext-based tool system created for {context.user_id}")
-                logger.info(f"   - Registry: {tool_system['registry'].registry_id}")
+                logger.info(f"   - Registry: {tool_system['registry'].name}")
                 logger.info(f"   - Tools: {len(tool_system['tools'])}")
                 logger.info(f"   - Dispatcher: {tool_system['dispatcher'].dispatcher_id}")
                 

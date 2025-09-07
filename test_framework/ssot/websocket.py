@@ -27,7 +27,7 @@ from enum import Enum
 import pytest
 import websocket
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode, WebSocketException
+from websockets import ConnectionClosed, InvalidStatusCode, WebSocketException
 
 # Import SSOT environment management
 from shared.isolated_environment import get_env
