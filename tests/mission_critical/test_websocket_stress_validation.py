@@ -47,7 +47,7 @@ from loguru import logger
 # Import test infrastructure
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
-from tests.mission_critical.websocket_real_test_base import requires_docker, is_docker_available
+from tests.mission_critical.websocket_real_test_base import requires_docker, require_docker_services
 from tests.mission_critical.websocket_monitoring_utils import (
     WebSocketMonitoringOrchestrator, EventMetrics, RealTimeEventMonitor
 )
@@ -651,8 +651,8 @@ class TestWebSocketStressValidation:
     @pytest.fixture(scope="class")
     def docker_manager(self):
         """Docker manager for stress testing."""
-        if not is_docker_available():
-            pytest.skip("Docker not available - skipping stress tests")
+        # CRITICAL: Require Docker - no fallback per CLAUDE.md
+        require_docker_services()
         
         manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         manager.start_services(["backend", "auth", "db", "redis"])

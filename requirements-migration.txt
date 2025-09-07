@@ -1,0 +1,5 @@
+# Minimal requirements for database migrations
+sqlalchemy>=2.0.43
+alembic>=1.16.4
+psycopg2-binary>=2.9.10
+pydantic>=2.11.7

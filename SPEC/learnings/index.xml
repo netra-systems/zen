@@ -2788,6 +2788,23 @@
         <prevention>Always use UnifiedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
     </learning>
     
+    <learning id="docker-scripts-prohibition-critical-2025-01-06">
+        <title>CRITICAL: Never Copy Scripts Folder into Docker Containers</title>
+        <category>Infrastructure/Docker/Security</category>
+        <keywords>docker, dockerfile, scripts, security, container-size, COPY, runtime, production, deployment</keywords>
+        <path>docker_scripts_prohibition_critical.xml</path>
+        <critical-takeaway>
+            NEVER copy entire scripts/ folder into Docker containers. This causes security vulnerabilities,
+            100MB+ container bloat, and deployment credential exposure. Only copy SPECIFIC runtime-required
+            scripts (e.g., wait_for_db.py). Scripts folder contains dev-only tools, test runners, and
+            deployment scripts that MUST NOT be in production containers. Use multi-stage builds or inline
+            scripts instead.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Security vulnerability exposure, 3x slower deployments, potential credential leakage, increased attack surface</business-impact>
+        <prevention>Never use "COPY scripts/ ./scripts/". Only copy specific needed files. Audit all Dockerfiles for script copying patterns. Verify containers don't have /app/scripts/ directory.</prevention>
+    </learning>
+    
     <learning id="playwright-testing-advantages-2025-09-01">
         <title>Playwright Testing Advantages and Adoption Strategy</title>
         <category>Testing Infrastructure</category>

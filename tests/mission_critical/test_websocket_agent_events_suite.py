@@ -48,25 +48,18 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Import WebSocket test utilities - automatically chooses real or mock based on Docker availability
+# Import WebSocket test utilities - REAL SERVICES ONLY per CLAUDE.md
 from tests.mission_critical.websocket_real_test_base import (
-    is_docker_available,  # Docker availability checker
+    require_docker_services,  # Enforces real Docker services - no mocks
+    RealWebSocketTestBase,  # Real WebSocket test base only
     RealWebSocketTestConfig,
     assert_agent_events_received,
     send_test_agent_request
 )
 
-# Get the appropriate test base class (real if Docker available, mock otherwise)
-def get_test_base_class():
-    """Get the appropriate test base class based on Docker availability."""
-    if is_docker_available():
-        from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBase
-        return RealWebSocketTestBase
-    else:
-        from tests.mission_critical.websocket_real_test_base import MockWebSocketTestBase
-        return MockWebSocketTestBase
-
-WebSocketTestBase = get_test_base_class()
+# CRITICAL: Always use real WebSocket connections - NO MOCKS per CLAUDE.md
+# Tests will fail if Docker services are not available (expected behavior)
+WebSocketTestBase = RealWebSocketTestBase
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 

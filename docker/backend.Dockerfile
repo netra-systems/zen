@@ -45,7 +45,7 @@ COPY --chown=netra:netra netra_backend/ ./netra_backend/
 COPY --chown=netra:netra shared/ ./shared/
 # test_framework is excluded in .dockerignore for production builds
 # It's not needed in production containers - only for testing
-COPY --chown=netra:netra scripts/ ./scripts/
+# CRITICAL: Never copy entire scripts/ folder - see SPEC/learnings/docker_scripts_prohibition_critical.xml
 COPY --chown=netra:netra SPEC/ ./SPEC/
 # Copy Python files if they exist
 # Removed problematic COPY command that uses shell redirection

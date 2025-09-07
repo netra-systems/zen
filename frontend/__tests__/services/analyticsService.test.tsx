@@ -32,7 +32,7 @@ describe('Analytics Service', () => {
       trackConversion: jest.fn()
     };
     (useGTM as jest.Mock).mockReturnValue({
-      events: () => mockGTMEvents
+      events: mockGTMEvents
     });
   });
 

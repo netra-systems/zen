@@ -83,12 +83,12 @@ COPY --chown=netra:netra netra_backend /app/netra_backend
 
 # Set optimized environment variables
 ENV PATH=/home/netra/.local/bin:$PATH \
-    PYTHONPATH=/app:$PYTHONPATH \
+    PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     RUNNING_IN_DOCKER=true \
     ENVIRONMENT=${ENVIRONMENT} \
-    BUILD_ENV=${BUILD_ENV} \
+    BUILD_ENV=staging \
     PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
     # Staging-specific optimizations
