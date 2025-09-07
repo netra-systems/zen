@@ -435,41 +435,9 @@ async def service_lifecycle_manager():
 
 
 # =============================================================================
-# LEGACY COMPATIBILITY HELPERS
+# LEGACY COMPATIBILITY HELPERS REMOVED
+# Use unified configuration management and app factory patterns instead
 # =============================================================================
-
-class _ConfigManagerHelper:
-    """Helper class for configuration management in tests."""
-    
-    def __init__(self):
-        self.config = {}
-    
-    def get_config(self, key: str, default: Any = None) -> Any:
-        """Get configuration value."""
-        return self.config.get(key, default)
-    
-    def set_config(self, key: str, value: Any):
-        """Set configuration value."""
-        self.config[key] = value
-    
-    def reset_config(self):
-        """Reset configuration."""
-        self.config.clear()
-
-
-def create_test_app():
-    """Create test application instance."""
-    try:
-        from fastapi import FastAPI
-        app = FastAPI(title="Test App", version="1.0.0")
-        return app
-    except ImportError:
-        # Return mock app if FastAPI not available
-        from unittest.mock import MagicMock
-        mock_app = MagicMock()
-        mock_app.title = "Test App"
-        mock_app.version = "1.0.0"
-        return mock_app
 
 
 # =============================================================================

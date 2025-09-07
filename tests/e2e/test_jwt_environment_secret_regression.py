@@ -104,7 +104,7 @@ class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
         auth_token = jwt.encode(payload, auth_secret, algorithm="HS256")
         
         # Backend validates token
-        decoded = backend_extractor.validate_and_decode_jwt(auth_token)
+        decoded = await backend_extractor.validate_and_decode_jwt(auth_token)  # CRITICAL FIX: Added await
         
         self.assertIsNotNone(decoded, "Backend failed to validate auth service token!")
         self.assertEqual(decoded["sub"], "staging-user-123")
@@ -169,7 +169,7 @@ class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
         
         # Extract user context (this was failing with 401)
         extractor = UserContextExtractor()
-        user_context, auth_info = extractor.extract_user_context_from_websocket(mock_websocket)
+        user_context, auth_info = await extractor.extract_user_context_from_websocket(mock_websocket)  # CRITICAL FIX: Added await
         
         # Verify extraction succeeded
         self.assertEqual(user_context.user_id, "websocket-user-789")
@@ -397,7 +397,7 @@ class TestCrossServiceJWTFlow(UnifiedTestBase):
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
         
         extractor = UserContextExtractor()
-        decoded = extractor.validate_and_decode_jwt(token)
+        decoded = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
         
         self.assertIsNotNone(decoded)
         self.assertEqual(decoded["sub"], "real-test-user")
