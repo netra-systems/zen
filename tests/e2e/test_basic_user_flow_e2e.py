@@ -192,11 +192,12 @@ class TestBasicUserFlowE2Eer:
         headers = {"Authorization": f"Bearer {self.jwt_token}"}
         
         try:
-            self.websocket_connection = await websockets.connect(
-                WEBSOCKET_URL,
-                additional_headers=headers,
-                open_timeout=10
-            )
+            # Use asyncio.timeout for Python 3.12 compatibility
+            async with asyncio.timeout(10):
+                self.websocket_connection = await websockets.connect(
+                    WEBSOCKET_URL,
+                    additional_headers=headers
+                )
             
             # Wait for connection acknowledgment
             welcome_message = await asyncio.wait_for(

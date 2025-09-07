@@ -111,9 +111,10 @@ export const useUnifiedChatStore = Object.assign(
   {
     setState: (newState: any) => {
       if (typeof newState === 'function') {
-        mockState = { ...mockState, ...newState(mockState) };
+        const updates = newState(mockState);
+        Object.assign(mockState, updates);
       } else {
-        mockState = { ...mockState, ...newState };
+        Object.assign(mockState, newState);
       }
     },
     getState: () => mockState,

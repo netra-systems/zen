@@ -125,6 +125,10 @@ class TestCriticalWebSocket:
                 auth_enforced = True
         except Exception as e:
             print(f"Auth test error: {e}")
+            # Check if the error message indicates HTTP 403/401 (authentication required)
+            error_str = str(e).lower()
+            if "403" in error_str or "401" in error_str or "unauthorized" in error_str or "forbidden" in error_str:
+                auth_enforced = True
         
         duration = time.time() - start_time
         print(f"Test duration: {duration:.3f}s")

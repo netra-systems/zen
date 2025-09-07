@@ -352,11 +352,12 @@ class RealFirstTimeUserTester(BaseE2ETest):
             headers = {"Authorization": f"Bearer {journey.jwt_token}"}
             
             try:
-                self.websocket_connection = await websockets.connect(
-                    self.WEBSOCKET_URL,
-                    additional_headers=headers,
-                    open_timeout=10
-                )
+                # Use asyncio.timeout for Python 3.12 compatibility
+                async with asyncio.timeout(10):
+                    self.websocket_connection = await websockets.connect(
+                        self.WEBSOCKET_URL,
+                        additional_headers=headers
+                    )
             except Exception as ws_error:
                 # Fallback to mock WebSocket for test completion
                 logger.warning(f"Real WebSocket failed: {ws_error}, using mock for test completion")
