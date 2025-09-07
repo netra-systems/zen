@@ -276,7 +276,7 @@ Auth Service startup ABORTED.
     # Initialize single database connection
     from auth_service.auth_core.database.connection import auth_db
     
-    # Initialize auth database (uses the same DATABASE_URL as main app)
+    # Initialize auth database (builds URL from POSTGRES_* variables)
     try:
         await auth_db.initialize()
         logger.info("🔌 AUTH DATABASE: Connection initialized")

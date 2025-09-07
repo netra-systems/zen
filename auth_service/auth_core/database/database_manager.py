@@ -57,8 +57,7 @@ class AuthDatabaseManager:
             "POSTGRES_PORT": env.get("POSTGRES_PORT"),
             "POSTGRES_DB": env.get("POSTGRES_DB"),
             "POSTGRES_USER": env.get("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": env.get("POSTGRES_PASSWORD"),
-            "DATABASE_URL": env.get("DATABASE_URL")
+            "POSTGRES_PASSWORD": env.get("POSTGRES_PASSWORD")
         }
         
         # Create URL builder
@@ -86,7 +85,7 @@ class AuthDatabaseManager:
             logger.error(f"No database URL generated for {environment} environment. Debug info: {debug_info}")
             raise ValueError(
                 f"DatabaseURLBuilder failed to generate URL for {environment} environment. "
-                f"Ensure DATABASE_URL is set or proper POSTGRES_* environment variables are configured. "
+                f"Ensure proper POSTGRES_* environment variables are configured. "
                 f"Debug info: {debug_info}"
             )
         
