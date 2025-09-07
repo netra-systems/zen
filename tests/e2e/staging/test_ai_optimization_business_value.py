@@ -70,8 +70,52 @@ class TestAIOptimizationBusinessValue:
 
     async def _get_auth_token(self, user_id: str) -> str:
         """Get authentication token for staging environment."""
-        # In staging, we use test tokens or actual auth flow
-        return f"staging_jwt_token_{user_id}_{int(time.time())}"
+        # Use proper staging authentication with multiple fallback strategies
+        from tests.e2e.jwt_token_helpers import JWTTestHelper
+        
+        try:
+            # Primary approach: Use JWTTestHelper for staging authentication
+            jwt_helper = JWTTestHelper(environment="staging")
+            token = await jwt_helper.get_staging_jwt_token(
+                user_id=user_id, 
+                email=f"{user_id}@test.netrasystems.ai"
+            )
+            if token:
+                logger.info(f"✓ Generated staging JWT token for user {user_id}")
+                return token
+        except Exception as e:
+            logger.warning(f"JWTTestHelper failed: {e}")
+        
+        try:
+            # Fallback: Try staging config token generation
+            test_token = self.config.create_test_jwt_token()
+            if test_token:
+                logger.info(f"✓ Generated staging config token for user {user_id}")
+                return test_token
+        except Exception as e:
+            logger.warning(f"Config token generation failed: {e}")
+        
+        # Final fallback with clear error message
+        error_msg = (
+            f"Unable to create valid staging authentication token for user {user_id}. "
+            f"Please set one of: E2E_BYPASS_KEY, STAGING_TEST_API_KEY, or STAGING_JWT_SECRET"
+        )
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
+    async def _create_authenticated_websocket_client(self, user_id: str) -> WebSocketTestClient:
+        """Create WebSocket client with proper staging authentication."""
+        token = await self._get_auth_token(user_id)
+        auth_headers = {"Authorization": f"Bearer {token}", "X-User-ID": user_id}
+        client = await self.ws_utility.create_test_client(user_id=user_id, headers=auth_headers)
+        
+        # Connect with retry logic for staging
+        connected = await client.connect(timeout=15.0)
+        if not connected:
+            raise RuntimeError(f"Failed to establish WebSocket connection to staging for user {user_id}")
+        
+        logger.info(f"✓ WebSocket connected successfully for user {user_id}")
+        return client
 
     async def _verify_backend_health(self, max_retries: int = 3) -> bool:
         """Verify backend is healthy with retry logic."""
@@ -255,11 +299,11 @@ class TestAIOptimizationBusinessValue:
         # Verify backend health first
         assert await self._verify_backend_health(), "Backend not healthy"
         
-        # Create authenticated client
+        # Create authenticated client with proper staging authentication
         user_id = f"test_user_001_{self.test_id}"
-        token = await self._get_auth_token(user_id)
+        client = await self._create_authenticated_websocket_client(user_id)
         
-        async with self.ws_utility.connected_client(user_id=user_id) as client:
+        try:
             # Send optimization request
             await client.send_message(
                 WebSocketEventType.MESSAGE_CREATED,
@@ -302,6 +346,13 @@ class TestAIOptimizationBusinessValue:
             response_text = str(response).lower()
             assert any(word in response_text for word in ["cost", "savings", "optimization", "recommend"]), \
                 "Response missing optimization keywords"
+                
+        finally:
+            # Ensure client is properly disconnected
+            try:
+                await client.disconnect()
+            except Exception as e:
+                logger.warning(f"Error disconnecting WebSocket client: {e}")
 
     @pytest.mark.timeout(90)
     async def test_002_multi_turn_optimization_conversation(self):
@@ -319,7 +370,8 @@ class TestAIOptimizationBusinessValue:
         user_id = f"test_user_002_{self.test_id}"
         thread_id = f"thread_002_{self.test_id}"
         
-        async with self.ws_utility.connected_client(user_id=user_id) as client:
+        client = await self._create_authenticated_websocket_client(user_id)
+        try:
             # Turn 1: Initial request
             await client.send_message(
                 WebSocketEventType.MESSAGE_CREATED,
@@ -389,6 +441,13 @@ class TestAIOptimizationBusinessValue:
             ])
             
             assert has_context, "Multi-turn conversation lost context"
+            
+        finally:
+            # Ensure client is properly disconnected
+            try:
+                await client.disconnect()
+            except Exception as e:
+                logger.warning(f"Error disconnecting WebSocket client: {e}")
 
     @pytest.mark.timeout(120)
     async def test_003_concurrent_user_isolation(self):
