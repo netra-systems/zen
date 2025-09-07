@@ -158,6 +158,15 @@ class TestExecutionEngineConstruction(AsyncBaseTestCase):
         self.assertIn("Direct ExecutionEngine instantiation is no longer supported", str(cm.exception))
         self.assertIn("create_request_scoped_engine", str(cm.exception))
         
+    def test_direct_construction_error_message_details(self):
+        """Test detailed error message for direct construction."""
+        with self.assertRaises(RuntimeError) as cm:
+            ExecutionEngine(self.registry, self.websocket_bridge, None)
+            
+        error_msg = str(cm.exception)
+        self.assertIn("user isolation", error_msg)
+        self.assertIn("concurrent execution safety", error_msg)
+        
     def test_factory_construction_requires_user_context(self):
         """Test that factory method requires UserExecutionContext."""
         user_context = UserExecutionContext.from_request(
@@ -176,6 +185,16 @@ class TestExecutionEngineConstruction(AsyncBaseTestCase):
         self.assertIsNotNone(engine)
         self.assertEqual(engine.user_context.user_id, "test_user")
         
+    def test_factory_construction_with_invalid_user_context(self):
+        """Test factory method with invalid user context."""
+        # Test with None user_context
+        with self.assertRaises(Exception):  # May raise different types based on implementation
+            create_request_scoped_engine(
+                user_context=None,
+                registry=self.registry,
+                websocket_bridge=self.websocket_bridge
+            )
+            
     def test_factory_init_from_factory_creates_engine(self):
         """Test internal _init_from_factory method."""
         user_context = UserExecutionContext.from_request(
@@ -194,6 +213,27 @@ class TestExecutionEngineConstruction(AsyncBaseTestCase):
         self.assertEqual(engine.user_context.user_id, "factory_user")
         self.assertEqual(engine.registry, self.registry)
         self.assertEqual(engine.websocket_bridge, self.websocket_bridge)
+        
+    def test_factory_init_creates_unique_instances(self):
+        """Test that factory creates unique instances for different users."""
+        context1 = UserExecutionContext.from_request("user1", "thread1", "run1")
+        context2 = UserExecutionContext.from_request("user2", "thread2", "run2")
+        
+        engine1 = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=self.websocket_bridge,
+            user_context=context1
+        )
+        
+        engine2 = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=self.websocket_bridge,
+            user_context=context2
+        )
+        
+        # Should be different instances
+        self.assertIsNot(engine1, engine2)
+        self.assertNotEqual(engine1.user_context.user_id, engine2.user_context.user_id)
         
     def test_websocket_bridge_validation(self):
         """Test WebSocket bridge validation during construction."""
@@ -223,6 +263,24 @@ class TestExecutionEngineConstruction(AsyncBaseTestCase):
                 user_context=user_context
             )
         self.assertIn("websocket_bridge must be AgentWebSocketBridge instance", str(cm.exception))
+        
+    def test_websocket_bridge_security_validation(self):
+        """Test WebSocket bridge security validation prevents fallbacks."""
+        user_context = UserExecutionContext.from_request("sec_user", "sec_thread", "sec_run")
+        
+        # Create bridge with missing security features
+        insecure_bridge = MagicMock()
+        insecure_bridge.notify_agent_started = MagicMock()  # Has method but not secure
+        
+        # Should still validate that it's proper AgentWebSocketBridge instance
+        with self.assertRaises(RuntimeError) as cm:
+            ExecutionEngine._init_from_factory(
+                registry=self.registry,
+                websocket_bridge=insecure_bridge,
+                user_context=user_context
+            )
+        error_msg = str(cm.exception)
+        self.assertIn("No fallback paths allowed", error_msg)
 
 
 class TestExecutionEngineInitialization(AsyncBaseTestCase):

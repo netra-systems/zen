@@ -266,8 +266,22 @@ class ConnectionHandler:
         Returns:
             bool: True if event sent successfully
         """
-        if not self.context.is_authenticated or not self.emitter:
-            logger.warning(f"🚫 Cannot send event to unauthenticated connection {self.connection_id}")
+        # SECURITY FIX: Handle events before thread association is complete
+        if not self.context.is_authenticated:
+            # If user is not authenticated but we have a valid user connection, buffer the event
+            if (self.context.user_id and 
+                event.get("user_id") == self.context.user_id and 
+                self.context.add_to_buffer(event)):
+                logger.debug(f"📦 Buffered event for connection {self.connection_id} "
+                           f"waiting for authentication")
+                return True
+            else:
+                logger.warning(f"🚫 Cannot buffer event for unauthenticated connection {self.connection_id}")
+                return False
+        
+        # Check if emitter is available
+        if not self.emitter:
+            logger.warning(f"🚫 No emitter available for connection {self.connection_id}")
             return False
         
         # CRITICAL: Validate event is for this user
