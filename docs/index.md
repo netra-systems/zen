@@ -4,8 +4,8 @@
 
 ### 🏗️ Core Architecture (Start Here)
 
-- **[SSOT Index](../SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
-- **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
+- **[SSOT Index](../reports/ssot-compliance/SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
+- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
 - **[UVS Triage Architecture Transition](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** 🆕 - **NEW**: Unified Validation System with intelligent data sufficiency states and 2-agent model
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** 🎯 - **ESSENTIAL**: Clarifies agent workflow architecture, relationships between components, and common confusion points
 - [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Complete agent execution pipeline documentation
@@ -13,19 +13,19 @@
 
 ### 🔄 Migration Guides
 
-- **[SSOT Consolidation Status Report](../SSOT_CONSOLIDATION_STATUS_20250904.md)** ⭐ - **NEW**: Complete status of SSOT consolidations (91% code reduction)
-- **[Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md)** - Migrate from singleton to request-scoped dispatchers
+- **[SSOT Consolidation Status Report](../reports/ssot-compliance/SSOT_CONSOLIDATION_STATUS_20250904.md)** ⭐ - **NEW**: Complete status of SSOT consolidations (91% code reduction)
+- **[Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md)** - Migrate from singleton to request-scoped dispatchers
 - [Tool Dispatcher Consolidation Complete](../TOOL_DISPATCHER_CONSOLIDATION_COMPLETE.md) - Tool dispatcher SSOT success
-- [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
+- [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Agent Registry Split Migration](./AGENT_REGISTRY_SPLIT_MIGRATION_GUIDE.md) - Agent registry refactoring
 
 ### 📚 System Components
 
 #### Execution & Isolation
-- **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution engines
+- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution engines
 - [3-Tier Persistence Architecture](./3tier_persistence_architecture.md) - Database layer design
 - [Agent Golden Pattern Guide](./agent_golden_pattern_guide.md) - Best practices for agent development
-- [Critical Bug Fix Documentation](./critical_bug_fixes/) - Documented fixes and audit reports
+- [Critical Bug Fix Documentation](../reports/bug-fixes/) - Documented fixes and audit reports
 
 #### Agents & Tools
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Comprehensive disambiguation of agent components
@@ -37,14 +37,14 @@
 
 #### WebSocket & Real-time
 - [Actions Agent WebSocket Flow](./actions_agent_websocket_flow.md) - WebSocket event patterns
-- [WebSocket Bridge State Handling](./websocket_bridge_state_handling.md) - State management
+- [WebSocket Bridge State Handling](../reports/websocket/WEBSOCKET_V2_MIGRATION_GUIDE.md) - State management
 
 #### Frontend Architecture
 - **[Frontend Architecture Diagrams](../frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** 📊 - Comprehensive Mermaid diagrams of frontend components, loading flows, and state management
 - [Frontend README](../frontend/README.md) - Frontend setup and structure
 
 #### Testing Infrastructure
-- **[Test Creation Guide](../TEST_CREATION_GUIDE.md)** 🆕 - **AUTHORITATIVE**: Complete guide for creating tests with SSOT patterns
+- **[Test Creation Guide](../reports/testing/TEST_CREATION_GUIDE.md)** 🆕 - **AUTHORITATIVE**: Complete guide for creating tests with SSOT patterns
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
 - [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
 - **[Docker Architecture Diagrams](./docker_architecture_diagrams.md)** 🐳 - **NEW**: Comprehensive Docker build, caching, and deployment diagrams
@@ -52,7 +52,7 @@
 
 ### 🔒 Security & Compliance
 
-- **[Critical Security Implementation](../CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)** - Security boundaries and isolation
+- **[Critical Security Implementation](../reports/archived/CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)** - Security boundaries and isolation
 - [API Dual Channel Explanation](./API_DUAL_CHANNEL_EXPLANATION.md) - API security patterns
 - [Go-Live Acceptance Criteria](./ACCEPTANCE_CRITERIA_GO_LIVE_CHECKLIST.md) - Production readiness
 
@@ -65,8 +65,8 @@
 
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** 📊 - **COMPREHENSIVE**: Complete visual guide to test infrastructure, layers, and execution flows
 - [Agent Testing Root Cause Summary](./agents/AGENT_TESTING_ROOT_CAUSE_SUMMARY.md)
-- [Phase 0 Completion Report](../PHASE_0_COMPLETION_REPORT.md)
-- [Docker Backend Five Whys Report](../DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md)
+- [Phase 0 Completion Report](../reports/archived/PHASE_0_COMPLETION_REPORT.md)
+- [Docker Backend Five Whys Report](../reports/archived/DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md)
 - [WebSocket Thread Association Tests](../tests/mission_critical/test_websocket_thread_association.py) - Verification tests for thread routing
 
 ### 🚀 Performance & Optimization
@@ -145,12 +145,12 @@ The system uses factory patterns extensively:
 
 ## 📖 Essential Reading Order
 
-1. **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview
+1. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview
 2. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
 3. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
 4. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
-5. [Tool Dispatcher Migration Guide](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Learn isolation patterns
-6. [WebSocket Modernization Report](../WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+5. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
+6. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
 7. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
 
 ## 🛠️ Development Guidelines
@@ -160,7 +160,7 @@ When working with the system:
 2. Pass `UserExecutionContext` through all layers
 3. Use factories to create isolated components
 4. Ensure proper cleanup in finally blocks
-5. Review the **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** before making changes
+5. Review the **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** before making changes
 
 ## 📊 Monitoring & Metrics
 
@@ -174,11 +174,11 @@ Access metrics via: `GET /api/metrics`
 
 ## 🆘 Getting Help
 
-1. Review the **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** first
+1. Review the **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** first
 2. Check relevant migration guides
 3. Consult the quick reference guides
 4. Contact the development team
 
 ---
 
-> **Remember**: The **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide for understanding the system's isolation and factory patterns. Always refer to it when working with execution engines, WebSocket events, or tool dispatchers.
+> **Remember**: The **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide for understanding the system's isolation and factory patterns. Always refer to it when working with execution engines, WebSocket events, or tool dispatchers.
