@@ -31,8 +31,9 @@ class WebSocketAuthenticator:
     def __init__(self):
         """Initialize WebSocket authenticator with auth client."""
         # Import here to avoid circular imports
-        from netra_backend.app.clients.auth_client_core import auth_client
-        self.auth_client = auth_client
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        # Create a new instance instead of using singleton to ensure circuit breaker is initialized
+        self.auth_client = AuthServiceClient()
         self._auth_attempts = 0
         self._successful_auths = 0
         self._failed_auths = 0
@@ -51,10 +52,24 @@ class WebSocketAuthenticator:
         logger.info(f"WebSocket authentication attempt for token: {clean_token[:20]}...")
         
         try:
-            # Use the existing auth client for JWT validation
+            # Use the existing auth client for JWT validation with circuit breaker protection
+            # The auth client now has built-in circuit breaker that will handle failures gracefully
             validation_result = await self.auth_client.validate_token_jwt(clean_token)
             
             if not validation_result:
+                # Check if auth service is unavailable (circuit breaker open)
+                from netra_backend.app.clients.circuit_breaker import CircuitState
+                if hasattr(self.auth_client, 'circuit_breaker') and self.auth_client.circuit_breaker.state == CircuitState.OPEN:
+                    logger.warning("WebSocket authentication: Auth service unavailable (circuit open) - using local validation")
+                    # Try local JWT validation as fallback when auth service is down
+                    try:
+                        local_result = await self.auth_client._local_validate(clean_token)
+                        if local_result and local_result.get("valid", False):
+                            logger.info("WebSocket authentication: Successfully used local JWT validation fallback")
+                            return local_result
+                    except Exception as local_err:
+                        logger.error(f"WebSocket authentication: Local validation also failed: {local_err}")
+                
                 logger.warning("WebSocket authentication: Token validation returned None")
                 self._failed_auths += 1
                 return None

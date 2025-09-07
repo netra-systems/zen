@@ -129,15 +129,19 @@ def _import_extended_router_modules() -> tuple:
     from netra_backend.app.routes.websocket_isolated import (
         router as websocket_isolated_router,
     )
-    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router
+    from netra_backend.app.routes.circuit_breaker_status import (
+        router as circuit_breaker_router,
+    )
+    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router, circuit_breaker_router
 
 
 def _create_extended_router_dict(router_imports: tuple) -> dict:
     """Create extended router dictionary from imports."""
-    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router = router_imports
+    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router, circuit_breaker_router = router_imports
     return {"health_extended_router": health_extended_router,
         "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router,
-        "websocket_router": websocket_router, "websocket_isolated_router": websocket_isolated_router}
+        "websocket_router": websocket_router, "websocket_isolated_router": websocket_isolated_router,
+        "circuit_breaker_router": circuit_breaker_router}
 
 
 def _import_test_routers() -> dict:

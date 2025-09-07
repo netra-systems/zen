@@ -1,8 +1,9 @@
 ---
-allowed-tools: ["Bash", "Task"]
-description: "Audit GCP Cloud Run logs with automatic Five Whys debugging"
+description: "LOOP Audit GCP Cloud Run logs with automatic Five Whys debugging"
 argument-hint: "<service> [hours]"
 ---
+
+You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT
 
 # 🌐 GCP Logs Audit with Auto-Debug
 
@@ -10,26 +11,24 @@ Audit Google Cloud Platform logs for staging/production services with automatic 
 
 ## Configuration
 - **Service:** ${1:-all}
-- **Time Range:** ${2:-1} hours
+- **Time Range:** ${2:-15} minutes
 - **Project:** netra-staging
 - **Region:** us-central1
 - **Auto-Debug:** Enabled with Five Whys
 
+
+STEPS: 
+
 ## Authentication Check
 
-### 1. Verify GCP Authentication
-!echo "🔐 GCP Authentication Status:"
-!gcloud auth list --filter=status:ACTIVE --format="value(account)" || echo "❌ Not authenticated - run: gcloud auth login"
-!echo ""
-!gcloud config get-value project || echo "No project set"
 
 ## Log Collection & Analysis
 
-### 2. Service Status Overview
+### 1. Service Status Overview
 !echo "\n📡 Cloud Run Services Status:"
 !gcloud run services list --region us-central1 --format="table(SERVICE,REGION,LAST_DEPLOYED_AT,SERVING_REVISION)"
 
-### 3. Collect Logs by Service
+### 2. Collect Logs by Service
 if [[ "${1:-all}" == "all" ]]; then
     !echo "\n🔍 Collecting logs from ALL services (last ${2:-1} hours)..."
     !for service in backend-staging auth-staging frontend-staging; do
@@ -43,7 +42,7 @@ else
     !gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=$1" --limit 100 --format="table(timestamp,severity,textPayload)" --freshness=${2:-1}h
 fi
 
-### 4. Error Collection & Analysis
+Error Collection & Analysis
 !echo "\n⚠️ ERROR ANALYSIS & COLLECTION:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -80,7 +79,7 @@ else
     echo "WARNINGS_FOUND=false" >> /tmp/gcp_error_status.env
 fi
 
-### 5. Performance & HTTP Error Analysis
+### 3. Performance & HTTP Error Analysis
 !echo "\n📈 PERFORMANCE & HTTP ERRORS:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -98,7 +97,7 @@ fi
 !echo "\n⏱️ Request Latencies (>1s):"
 !gcloud logging read "resource.type=cloud_run_revision AND httpRequest.latency>\"1s\"" --limit 10 --format="table(timestamp,resource.labels.service_name,httpRequest.latency,httpRequest.requestUrl)" --freshness=${2:-1}h || echo "✅ No slow requests"
 
-### 6. Memory & Resource Issues
+### 4. Memory & Resource Issues
 !echo "\n💾 RESOURCE ANALYSIS:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -108,14 +107,7 @@ fi
 !echo "\n🌡️ Cold Start Events:"
 !gcloud logging read "resource.type=cloud_run_revision AND textPayload:\"Cold start\"" --limit 10 --format="table(timestamp,resource.labels.service_name)" --freshness=${2:-1}h || echo "✅ No recent cold starts"
 
-### 7. Security & Authentication
-!echo "\n🔒 SECURITY ANALYSIS:"
-!echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-!echo "\n🚫 Authentication Failures:"
-!gcloud logging read "resource.type=cloud_run_revision AND (httpRequest.status=401 OR httpRequest.status=403)" --limit 10 --format="table(timestamp,resource.labels.service_name,httpRequest.status,httpRequest.requestUrl)" --freshness=${2:-1}h || echo "✅ No auth failures"
-
-### 8. Error Prioritization & Selection
+### 5. Error Prioritization & Selection
 !echo "\n🎯 ERROR PRIORITIZATION:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -150,7 +142,7 @@ else
     echo "GCP_ERRORS_FOUND=false" > /tmp/gcp_debug_trigger.env
 fi
 
-### 9. Automatic Error Debugging Trigger
+### 6. Automatic Error Debugging Trigger
 
 # Check if errors need debugging
 !source /tmp/gcp_debug_trigger.env 2>/dev/null || true
@@ -165,19 +157,14 @@ fi
     echo "🤖 Invoking /debug-error command for deep analysis..."
 fi
 
-### 10. Conditional Debug-Error Invocation
+### 7. Conditional Debug-Error Invocation
 
 @Task: Automatically debug GCP Cloud Run errors if found
 If critical errors, 5xx errors, or frequent errors were detected in GCP logs:
 1. Read /tmp/gcp_primary_error.txt to get the error description
 2. Invoke the /debug-error slash command with that error
 3. Use Five Whys methodology to find root cause
-4. Dynamically allocate specialist agents based on error type:
-   - For 5xx errors: HTTPErrorSpecialist agent
-   - For async errors: AsyncPythonExpert agent
-   - For memory issues: PerformanceEngineer agent
-   - For auth failures: SecurityAuditor agent
-   - For deployment issues: DevOpsSpecialist agent
+4. Dynamically allocate specialist agents based on error type
 5. Implement fix with 80% consensus threshold
 
 The debug-error command should be invoked as:
@@ -185,7 +172,7 @@ The debug-error command should be invoked as:
 
 Where GCP_ERROR_FROM_LOGS is the content from /tmp/gcp_primary_error.txt
 
-### 11. Audit Summary & Recommendations
+### 8. Audit Summary & Recommendations
 !echo "\n📋 AUDIT SUMMARY:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 !echo "Timestamp: $(date)"
@@ -209,7 +196,7 @@ else
     echo "3. 📈 Review performance metrics"
 fi
 
-### 12. Export Options
+### 9. Export Options
 !echo "\n💾 To export full logs for analysis:"
 !echo "gcloud logging read 'resource.type=cloud_run_revision' --format=json --freshness=${2:-1}h > gcp_logs_$(date +%Y%m%d_%H%M%S).json"
 
@@ -225,3 +212,8 @@ fi
 - **Five Whys Integration** - Deep root cause analysis when errors found
 - **Dynamic Agent Allocation** - Cloud/deployment expertise for GCP issues
 - **Production-Ready** - Safe for staging/production environments
+
+
+### 10. Redeploy staging and repeat steps 1-10
+
+You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT

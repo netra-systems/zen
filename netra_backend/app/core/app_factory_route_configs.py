@@ -90,6 +90,7 @@ def _get_monitoring_business_configs(modules: dict) -> dict:
     """Get monitoring and corpus business route configurations."""
     return {"monitoring": (modules["monitoring_router"], "/api", ["database-monitoring"]),
             "gcp_monitoring": (modules["gcp_monitoring_router"], "/api", ["gcp-error-monitoring"]),
+            "circuit_breaker": (modules["circuit_breaker_router"], "", ["circuit-breaker-monitoring"]),
             "corpus": (modules["corpus"].router, "/api/corpus", ["corpus"])}
 
 

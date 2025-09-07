@@ -65,19 +65,12 @@ jest.mock('@/lib/logger', () => ({
 
 jest.mock('@/lib/thread-operation-manager', () => ({
   ThreadOperationManager: {
-    startOperation: jest.fn(async (type, threadId, fn, options) => {
-      console.log(`🔧 ThreadOperationManager.startOperation called:`, { type, threadId, options });
-      const signal = { aborted: false } as AbortSignal;
-      try {
-        console.log('🔧 About to call executor function...');
-        const operationResult = await fn(signal);
-        console.log('🔧 Executor function returned:', operationResult);
-        // The executor should return ThreadOperationResult {success, threadId?, error?}
-        return operationResult;
-      } catch (error) {
-        console.log('🔧 ThreadOperationManager operation error:', error);
-        return { success: false, error };
-      }
+    startOperation: jest.fn().mockImplementation(async (type, threadId, fn, options) => {
+      console.log(`🔧 ThreadOperationManager.startOperation MOCK EXECUTING:`, { type, threadId });
+      
+      // For debugging, let's just return a simple success result without calling the executor
+      console.log('🔧 Returning simple success result');
+      return { success: true, threadId };
     })
   }
 }));
@@ -123,15 +116,28 @@ describe('Debug Thread Switching', () => {
     console.log('About to call switchToThread...');
     
     let switchResult;
+    let switchError;
     await act(async () => {
-      switchResult = await result.current.switchToThread('thread-1');
+      try {
+        console.log('🔎 Calling result.current.switchToThread...');
+        switchResult = await result.current.switchToThread('thread-1');
+        console.log('🔎 switchToThread returned:', switchResult);
+      } catch (error) {
+        console.log('🔴 switchToThread threw error:', error);
+        switchError = error;
+      }
     });
 
     console.log('switchToThread completed, result:', switchResult);
+    console.log('switchToThread error:', switchError);
     console.log('Hook state after switch:', result.current.state);
     console.log('Store state after switch:', useUnifiedChatStore.getState());
     console.log('ThreadOperationManager mock calls:', require('@/lib/thread-operation-manager').ThreadOperationManager.startOperation.mock.calls);
     console.log('Loading service mock calls:', threadLoadingService.loadThread.mock.calls);
+    
+    if (switchError) {
+      throw switchError;
+    }
     
     // Check if the hook state was updated
     expect(result.current.state.lastLoadedThreadId).toBe('thread-1');

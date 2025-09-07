@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <date>2025-09-07</date>
+        <category>websocket_testing</category>
+        <severity>high</severity>
+        <status>resolved</status>
+    </metadata>
+    
+    <title>WebSocket Authentication Test Failure Due to asyncio.timeout() Exception Masking</title>
+    
+    <problem>
+        <description>
+            WebSocket authentication test `test_002_websocket_authentication_real` was failing in 
+            `tests/e2e/staging/test_priority1_critical.py` but passing in the duplicate 
+            `test_priority1_critical_REAL.py` file.
+        </description>
+        
+        <root_cause>
+            The failing test used `async with asyncio.timeout(10):` wrapper around WebSocket 
+            connection code, which was interfering with the specific exception handling needed 
+            to detect authentication enforcement (websockets.exceptions.InvalidStatusCode).
+            
+            The asyncio.timeout() context manager was masking the actual authentication 
+            errors (HTTP 403/401) that should have been caught by the exception handlers.
+        </root_cause>
+        
+        <impact>
+            - Test suite reported false failures (98.3% pass rate instead of 100%)
+            - Duplicate test files violated SSOT principles  
+            - Confusion about which version was correct
+        </impact>
+    </problem>
+    
+    <solution>
+        <approach>
+            1. Removed `asyncio.timeout()` wrappers from WebSocket connection code
+            2. Enhanced exception handling to properly detect HTTP 403/401 errors
+            3. Consolidated duplicate files by fixing main file and removing duplicate
+            4. Applied consistent pattern across all WebSocket tests
+        </approach>
+        
+        <changes>
+            <file path="tests/e2e/staging/test_priority1_critical.py">
+                <change>Removed asyncio.timeout() wrappers from WebSocket tests</change>
+                <change>Enhanced exception handling for authentication errors</change>
+                <change>Fixed test_003 to properly handle 403 authentication errors</change>
+            </file>
+            <file path="tests/e2e/staging/test_priority1_critical_REAL.py">
+                <change>Removed duplicate file to maintain SSOT</change>
+            </file>
+        </changes>
+        
+        <verification>
+            All WebSocket tests now pass consistently:
+            - test_001_websocket_connection_real: PASS
+            - test_002_websocket_authentication_real: PASS  
+            - test_003_websocket_message_send_real: PASS
+            - test_004_websocket_concurrent_connections_real: PASS
+        </verification>
+    </solution>
+    
+    <prevention>
+        <guidelines>
+            1. Avoid using asyncio.timeout() wrappers around WebSocket connection code 
+               that needs specific exception handling
+            2. Test authentication by examining specific exceptions (InvalidStatusCode)
+               rather than relying on timeout wrappers
+            3. When creating "fixed" versions of tests, consolidate back to single SSOT file
+            4. Always verify that exception handling logic isn't being masked by outer wrappers
+        </guidelines>
+        
+        <pattern>
+            <!-- GOOD: Direct WebSocket connection with proper exception handling -->
+            try:
+                async with websockets.connect(url) as ws:
+                    # test logic here
+            except websockets.exceptions.InvalidStatusCode as e:
+                if e.status_code in [401, 403]:
+                    auth_enforced = True
+            except Exception as e:
+                if "403" in str(e) or "HTTP 403" in str(e):
+                    auth_enforced = True
+            
+            <!-- BAD: asyncio.timeout wrapper that masks exceptions -->
+            try:
+                async with asyncio.timeout(10):
+                    async with websockets.connect(url) as ws:
+                        # exception handling may not work as expected
+            except websockets.exceptions.InvalidStatusCode as e:
+                # This may never be reached due to timeout wrapper
+        </pattern>
+    </prevention>
+    
+    <related_files>
+        <file>tests/e2e/staging/test_priority1_critical.py</file>
+        <file>tests/e2e/staging_test_config.py</file>
+    </related_files>
+    
+    <tags>
+        <tag>websocket</tag>
+        <tag>authentication</tag>
+        <tag>testing</tag>
+        <tag>asyncio</tag>
+        <tag>exception_handling</tag>
+        <tag>ssot</tag>
+    </tags>
+</learning>

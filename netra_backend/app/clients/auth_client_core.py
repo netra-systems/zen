@@ -14,6 +14,11 @@ from netra_backend.app.clients.auth_client_cache import (
     AuthServiceSettings,
     AuthTokenCache,
 )
+from netra_backend.app.clients.circuit_breaker import (
+    get_circuit_breaker,
+    CircuitBreakerConfig,
+    CircuitBreakerOpen,
+)
 from netra_backend.app.clients.auth_client_config import (
     EnvironmentDetector,
     OAuthConfig,
@@ -58,6 +63,19 @@ class AuthServiceClient:
         self.oauth_generator = OAuthConfigGenerator()
         self.tracing_manager = TracingManager()
         self._client = None
+        
+        # Initialize circuit breaker for auth service calls
+        self.circuit_breaker = get_circuit_breaker(
+            name="auth_service",
+            config=CircuitBreakerConfig(
+                failure_threshold=3,  # Open after 3 consecutive failures
+                success_threshold=2,  # Close after 2 consecutive successes in half-open
+                timeout=30.0,  # Try half-open after 30 seconds
+                call_timeout=5.0,  # Individual call timeout
+                failure_rate_threshold=0.5,  # Open if 50% of calls fail
+                min_calls_for_rate=5  # Need at least 5 calls to calculate failure rate
+            )
+        )
         # Load service authentication credentials
         from netra_backend.app.core.configuration import get_configuration
         config = get_configuration()
@@ -337,7 +355,7 @@ class AuthServiceClient:
         return await self._cache_validation_result(token, result)
     
     async def _execute_token_validation(self, token: str) -> Optional[Dict]:
-        """Execute token validation with error handling."""
+        """Execute token validation with error handling and circuit breaker."""
         # PERFORMANCE FIX: Try local JWT validation first for efficiency and reliability
         # This reduces latency and eliminates dependency on auth service HTTP calls
         try:
@@ -349,13 +367,30 @@ class AuthServiceClient:
             logger.debug(f"Local validation failed, falling back to remote: {e}")
         
         # Fallback to remote validation if local validation fails
+        # Use circuit breaker to protect against auth service failures
         try:
-            result = await self._try_validation_steps(token)
-            if result is None:
-                logger.warning("Token validation returned None - auth service may have rejected the token")
-                # Try fallback when auth service rejects token
+            # Define the validation function for circuit breaker
+            async def validate_with_service():
+                result = await self._try_validation_steps(token)
+                if result is None:
+                    # Auth service rejected token - this is not a circuit breaker failure
+                    logger.warning("Token validation returned None - auth service rejected the token")
+                    raise ValueError("Token rejected by auth service")
+                return result
+            
+            # Execute through circuit breaker
+            try:
+                result = await self.circuit_breaker.call(validate_with_service)
+                return result
+            except CircuitBreakerOpen:
+                logger.warning("Circuit breaker is OPEN - using cached validation fallback")
+                # Circuit is open, use fallback validation
+                return await self._handle_validation_error(token, Exception("Auth service unavailable (circuit open)"))
+            except ValueError as e:
+                # Token was rejected (not a service failure)
+                logger.debug(f"Token rejected: {e}")
                 return await self._local_validate(token)
-            return result
+                
         except Exception as e:
             return await self._handle_validation_error(token, e)
     
