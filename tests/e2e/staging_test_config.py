@@ -89,11 +89,42 @@ class StagingConfig:
         elif self.test_api_key:
             headers["Authorization"] = f"Bearer {self.test_api_key}"
         else:
-            # For testing purposes, include a test token header
-            # This will still get rejected but allows us to test the auth flow
-            headers["X-Test-Auth"] = "test-token-for-staging"
+            # Create a test JWT token for staging WebSocket auth
+            test_token = self.create_test_jwt_token()
+            if test_token:
+                headers["Authorization"] = f"Bearer {test_token}"
+            else:
+                # For testing purposes, include a test token header
+                # This will still get rejected but allows us to test the auth flow
+                headers["X-Test-Auth"] = "test-token-for-staging"
             
         return headers
+    
+    def create_test_jwt_token(self) -> Optional[str]:
+        """Create a test JWT token for staging authentication"""
+        try:
+            import jwt
+            from datetime import datetime, timedelta, timezone
+            import uuid
+            
+            # Use staging JWT secret - must match the JWT_SECRET_STAGING from config/staging.env
+            secret = os.environ.get("JWT_SECRET_STAGING", os.environ.get("STAGING_JWT_SECRET", "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"))
+            
+            payload = {
+                "sub": f"test-user-{uuid.uuid4().hex[:8]}",
+                "email": "test@netrasystems.ai",
+                "permissions": ["read", "write"],
+                "iat": int(datetime.now(timezone.utc).timestamp()),
+                "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+                "token_type": "access",
+                "iss": "netra-auth-service",
+                "jti": str(uuid.uuid4())
+            }
+            
+            return jwt.encode(payload, secret, algorithm="HS256")
+        except Exception as e:
+            print(f"Failed to create test JWT token: {e}")
+            return None
 
 
 # Global instance

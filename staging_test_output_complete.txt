@@ -1,0 +1,21 @@
+======================================================================
+STAGING E2E TEST SUITE - TOP 10 AGENT TESTS
+======================================================================
+Running 10 test modules against staging environment
+
+Traceback (most recent call last):
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\run_staging_tests.py", line 244, in <module>
+    sys.exit(asyncio.run(run_all_tests()))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\run_staging_tests.py", line 93, in run_all_tests
+    from tests.e2e.staging_test_config import is_staging_available
+ModuleNotFoundError: No module named 'tests.e2e'

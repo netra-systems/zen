@@ -104,17 +104,40 @@ initializeMockFunctions(mockState);
 export const useUnifiedChatStore = Object.assign(
   (selector?: (state: any) => any) => {
     if (selector) {
-      return selector(mockState);
+      try {
+        const result = selector(mockState);
+        // Ensure we never return undefined - provide sensible defaults
+        return result !== undefined ? result : null;
+      } catch (error) {
+        console.warn('Selector failed, returning null:', error);
+        return null;
+      }
     }
     return mockState;
   },
   {
     setState: (newState: any) => {
       if (typeof newState === 'function') {
-        const updates = newState(mockState);
-        Object.assign(mockState, updates);
-      } else {
-        Object.assign(mockState, newState);
+        try {
+          const updates = newState(mockState);
+          if (updates && typeof updates === 'object') {
+            // Deep merge to preserve nested objects and arrays
+            Object.keys(updates).forEach(key => {
+              if (updates[key] !== undefined) {
+                mockState[key] = updates[key];
+              }
+            });
+          }
+        } catch (error) {
+          console.error('setState function failed:', error);
+        }
+      } else if (newState && typeof newState === 'object') {
+        // Direct object merge
+        Object.keys(newState).forEach(key => {
+          if (newState[key] !== undefined) {
+            mockState[key] = newState[key];
+          }
+        });
       }
     },
     getState: () => mockState,

@@ -3,7 +3,7 @@ description: "LOOP Audit GCP Cloud Run logs with automatic Five Whys debugging"
 argument-hint: "<service> [hours]"
 ---
 
-You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT
+IMPORTANT: You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT
 
 # 🌐 GCP Logs Audit with Auto-Debug
 
@@ -24,11 +24,11 @@ STEPS:
 
 ## Log Collection & Analysis
 
-### 1. Service Status Overview
+### Step 1. Service Status Overview
 !echo "\n📡 Cloud Run Services Status:"
 !gcloud run services list --region us-central1 --format="table(SERVICE,REGION,LAST_DEPLOYED_AT,SERVING_REVISION)"
 
-### 2. Collect Logs by Service
+### Step 2. Collect Logs by Service
 if [[ "${1:-all}" == "all" ]]; then
     !echo "\n🔍 Collecting logs from ALL services (last ${2:-1} hours)..."
     !for service in backend-staging auth-staging frontend-staging; do
@@ -46,7 +46,7 @@ Error Collection & Analysis
 !echo "\n⚠️ ERROR ANALYSIS & COLLECTION:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Collect critical errors
+### Collect critical errors
 !echo "\n🔴 Critical/Emergency Errors:"
 !gcloud logging read "resource.type=cloud_run_revision AND (severity>=CRITICAL)" --limit 20 --format="value(textPayload)" --freshness=${2:-1}h > /tmp/gcp_critical_errors.log 2>/dev/null
 !if [ -s /tmp/gcp_critical_errors.log ]; then
@@ -57,7 +57,7 @@ else
     echo "CRITICAL_ERRORS_FOUND=false" > /tmp/gcp_error_status.env
 fi
 
-# Collect standard errors
+### Collect standard errors
 !echo "\n🟠 Standard Errors:"
 !gcloud logging read "resource.type=cloud_run_revision AND severity=ERROR" --limit 50 --format="value(textPayload)" --freshness=${2:-1}h > /tmp/gcp_standard_errors.log 2>/dev/null
 !if [ -s /tmp/gcp_standard_errors.log ]; then
@@ -68,7 +68,7 @@ else
     echo "STANDARD_ERRORS_FOUND=false" >> /tmp/gcp_error_status.env
 fi
 
-# Collect warnings
+### Collect warnings
 !echo "\n🟡 Warnings:"
 !gcloud logging read "resource.type=cloud_run_revision AND severity=WARNING" --limit 20 --format="value(textPayload)" --freshness=${2:-1}h > /tmp/gcp_warnings.log 2>/dev/null
 !if [ -s /tmp/gcp_warnings.log ]; then
@@ -79,11 +79,11 @@ else
     echo "WARNINGS_FOUND=false" >> /tmp/gcp_error_status.env
 fi
 
-### 3. Performance & HTTP Error Analysis
+## Step  3. Performance & HTTP Error Analysis
 !echo "\n📈 PERFORMANCE & HTTP ERRORS:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Collect 5xx errors
+#### Collect 5xx errors
 !echo "\n🔄 5xx Status Codes:"
 !gcloud logging read "resource.type=cloud_run_revision AND httpRequest.status>=500" --limit 20 --format="value(timestamp,httpRequest.status,httpRequest.requestUrl,textPayload)" --freshness=${2:-1}h > /tmp/gcp_5xx_errors.log 2>/dev/null
 !if [ -s /tmp/gcp_5xx_errors.log ]; then
@@ -97,7 +97,7 @@ fi
 !echo "\n⏱️ Request Latencies (>1s):"
 !gcloud logging read "resource.type=cloud_run_revision AND httpRequest.latency>\"1s\"" --limit 10 --format="table(timestamp,resource.labels.service_name,httpRequest.latency,httpRequest.requestUrl)" --freshness=${2:-1}h || echo "✅ No slow requests"
 
-### 4. Memory & Resource Issues
+### Step  4. Memory & Resource Issues
 !echo "\n💾 RESOURCE ANALYSIS:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -107,7 +107,7 @@ fi
 !echo "\n🌡️ Cold Start Events:"
 !gcloud logging read "resource.type=cloud_run_revision AND textPayload:\"Cold start\"" --limit 10 --format="table(timestamp,resource.labels.service_name)" --freshness=${2:-1}h || echo "✅ No recent cold starts"
 
-### 5. Error Prioritization & Selection
+### Step  5. Error Prioritization & Selection
 !echo "\n🎯 ERROR PRIORITIZATION:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
@@ -142,7 +142,7 @@ else
     echo "GCP_ERRORS_FOUND=false" > /tmp/gcp_debug_trigger.env
 fi
 
-### 6. Automatic Error Debugging Trigger
+### Step  6. Automatic Error Debugging Trigger
 
 # Check if errors need debugging
 !source /tmp/gcp_debug_trigger.env 2>/dev/null || true
@@ -157,7 +157,7 @@ fi
     echo "🤖 Invoking /debug-error command for deep analysis..."
 fi
 
-### 7. Conditional Debug-Error Invocation
+### Step 7. Conditional Debug-Error Invocation
 
 @Task: Automatically debug GCP Cloud Run errors if found
 If critical errors, 5xx errors, or frequent errors were detected in GCP logs:
@@ -172,7 +172,7 @@ The debug-error command should be invoked as:
 
 Where GCP_ERROR_FROM_LOGS is the content from /tmp/gcp_primary_error.txt
 
-### 8. Audit Summary & Recommendations
+### Step  8. Audit Summary & Recommendations
 !echo "\n📋 AUDIT SUMMARY:"
 !echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 !echo "Timestamp: $(date)"
@@ -196,7 +196,7 @@ else
     echo "3. 📈 Review performance metrics"
 fi
 
-### 9. Export Options
+### Step  9. Export Options
 !echo "\n💾 To export full logs for analysis:"
 !echo "gcloud logging read 'resource.type=cloud_run_revision' --format=json --freshness=${2:-1}h > gcp_logs_$(date +%Y%m%d_%H%M%S).json"
 
@@ -214,6 +214,7 @@ fi
 - **Production-Ready** - Safe for staging/production environments
 
 
-### 10. Redeploy staging and repeat steps 1-10
+### Step  10. Redeploy staging and repeat steps 1-10
 
+CRITICAL:
 You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT

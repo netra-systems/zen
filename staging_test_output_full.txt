@@ -1,7 +1,7 @@
 
 ======================================================================
 STAGING E2E TEST SESSION STARTED
-Time: 2025-09-07 00:15:02
+Time: 2025-09-07 00:23:35
 ======================================================================
 ============================= test session starts =============================
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -11,30 +11,28 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
 configfile: pytest.ini
 plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-timeout: 30.0s
+timeout: 120.0s
 timeout method: thread
 timeout func_only: False
-collecting ... collected 233 items
+collecting ... collected 95 items
 
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_basic_functionality PASSED [  0%]
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_api_endpoints PASSED [  0%]
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_end_to_end_message_flow PASSED [  1%]
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_performance_targets PASSED [  1%]
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_error_handling PASSED [  2%]
-tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_business_critical_features PASSED [  2%]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_health_check PASSED [  3%]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection PASSED [  3%]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_api_endpoints_for_agents PASSED [  3%]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real PASSED [  4%]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real PASSED [  4%]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_message_endpoints PASSED [  5%]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_message_api_endpoints PASSED [  5%]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow PASSED [  6%]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_thread_management PASSED [  6%]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow PASSED [  6%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_discovery PASSED [  7%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_configuration PASSED [  7%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution PASSED [  8%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_lifecycle_monitoring PASSED [  8%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_error_handling PASSED [  9%]
-tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_metrics 
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_001_websocket_connection_real PASSED [  1%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_002_websocket_authentication_real PASSED [  2%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_003_websocket_message_send_real PASSED [  3%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_004_websocket_concurrent_connections_real PASSED [  4%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_005_agent_discovery_real PASSED [  5%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_006_agent_configuration_real PASSED [  6%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_007_agent_execution_endpoints_real PASSED [  7%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_008_agent_streaming_capabilities_real PASSED [  8%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_009_agent_status_monitoring_real PASSED [  9%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_010_tool_execution_endpoints_real PASSED [ 10%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_011_agent_performance_real PASSED [ 11%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_012_message_persistence_real PASSED [ 12%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_013_thread_creation_real PASSED [ 13%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_014_thread_switching_real PASSED [ 14%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_015_thread_history_real PASSED [ 15%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_016_user_context_isolation_real PASSED [ 16%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_017_concurrent_users_real PASSED [ 17%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_018_rate_limiting_real PASSED [ 18%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_019_error_handling_real PASSED [ 20%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_020_connection_resilience_real 

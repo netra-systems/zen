@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>Test Import Pattern Compliance Fix</title>
+        <date>2025-09-07</date>
+        <category>Testing Infrastructure</category>
+        <severity>Medium</severity>
+        <business_impact>Security Test Validation</business_impact>
+    </metadata>
+    
+    <problem_statement>
+        Test file `tests/unit/test_env_file_staging_protection.py` had missing import for `patch` from `unittest.mock`, 
+        causing all 4 test functions to fail with `NameError: name 'patch' is not defined`.
+    </problem_statement>
+    
+    <root_cause_analysis>
+        <immediate_cause>Missing import statement `from unittest.mock import patch`</immediate_cause>
+        <deeper_cause>Inconsistent test creation patterns across codebase</deeper_cause>
+        <prevention>Need standardized test templates with required imports</prevention>
+    </root_cause_analysis>
+    
+    <solution_implemented>
+        <fix>Added `from unittest.mock import patch` to imports section of test file</fix>
+        <location>tests/unit/test_env_file_staging_protection.py line 11</location>
+        <verification>All 4 tests now pass successfully</verification>
+    </solution_implemented>
+    
+    <test_validation>
+        <tests_affected>
+            <test>test_env_file_not_loaded_in_staging</test>
+            <test>test_env_file_not_loaded_in_production</test>
+            <test>test_env_file_is_loaded_in_development</test>
+            <test>test_env_file_does_not_override_existing_vars</test>
+        </tests_affected>
+        <validation_result>All tests passing - 4/4 success</validation_result>
+        <critical_functionality>Environment file protection for staging/production security</critical_functionality>
+    </test_validation>
+    
+    <system_wide_impact>
+        <similar_files_found>20+ files using patch.dict pattern</similar_files_found>
+        <audit_recommendation>
+            Systematic audit recommended for files using patch.dict without proper imports:
+            - database_scripts/test_create_auth.py
+            - auth_service/tests/test_auth_port_configuration.py
+            - Various other test files identified
+        </audit_recommendation>
+        <import_pattern_standard>
+            Standard import pattern for unittest.mock:
+            `from unittest.mock import patch, MagicMock, Mock`
+        </import_pattern_standard>
+    </system_wide_impact>
+    
+    <compliance_checklist>
+        <item status="complete">Missing import added</item>
+        <item status="complete">All tests passing</item>
+        <item status="complete">Environment protection validated</item>
+        <item status="complete">No regressions introduced</item>
+        <item status="complete">Bug fix report documented</item>
+    </compliance_checklist>
+    
+    <future_prevention>
+        <recommendation>Create test template with standard unittest.mock imports</recommendation>
+        <recommendation>Add import validation to test creation guidelines</recommendation>
+        <recommendation>Consider automated linting to catch missing imports</recommendation>
+    </future_prevention>
+    
+    <business_value_protected>
+        These tests validate critical security behavior preventing development secrets 
+        from leaking to staging/production environments. Ensuring they pass maintains 
+        our security posture and compliance requirements.
+    </business_value_protected>
+</learning_document>

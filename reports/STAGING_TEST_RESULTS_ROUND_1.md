@@ -1,86 +1,110 @@
 # Staging Test Results - Round 1
-**Date**: 2025-09-07
-**Time**: 00:02:00
+Date: 2025-09-07
+Time: 00:10:00 - 00:17:00
 
-## Test Summary
-- **Total Priority Tests Run**: 95
-- **Passed**: 91 (95.8%)
-- **Failed**: 4 (4.2%)
-- **Test Duration**: 83.35 seconds
+## Executive Summary
+- **Total Tests Run**: 85 tests collected
+- **Tests Passed**: 79 tests (92.9%)
+- **Tests Failed**: 6 tests (7.1%)
+- **Tests Skipped**: 11 tests
+- **Tests with Timeout**: 1 test
 
-## Failed Tests Analysis
+## Test Results by Category
 
-### 1. WebSocket Authentication Tests (Priority 1 - Critical)
+### Priority 1 Critical Tests (25 tests)
+- **Passed**: 24/25 (96%)
+- **Failed**: 1/25 (4%)
+  - `test_003_websocket_message_send_real` - FAILED
 
-#### Test 002: `test_002_websocket_authentication_real`
-- **Error**: `BaseEventLoop.create_connection() got an unexpected keyword argument 'timeout'`
-- **Root Cause**: The test is using an incorrect timeout parameter format for asyncio WebSocket connections
-- **Impact**: Cannot authenticate WebSocket connections in staging
-- **Fix Required**: Update WebSocket client to use proper asyncio timeout handling
+### Core Staging Tests (54 tests)
+- **Passed**: 51/54 (94.4%)
+- **Failed**: 3/54 (5.6%)
+  - `test_retry_strategies` - FAILED
+  - `test_005_websocket_handshake_timing` - FAILED  
+  - `test_007_api_response_headers_validation` - FAILED
 
-#### Test 003: `test_003_websocket_message_send_real`
-- **Error**: Same as test 002 - `BaseEventLoop.create_connection() got an unexpected keyword argument 'timeout'`
-- **Root Cause**: Same timeout parameter issue
-- **Impact**: Cannot send messages through WebSocket
-- **Fix Required**: Same as test 002
+### Resource Validation Tests (6 tests)
+- **Passed**: 4/6 (66.7%)
+- **Failed**: 2/6 (33.3%)
+  - `test_016_memory_usage_during_requests` - FAILED
+  - `test_017_async_concurrency_validation` - FAILED
+  
+### Timeout Issues
+- `test_018_event_loop_integration` - TIMEOUT (30s exceeded)
 
-#### Test 004: `test_004_websocket_concurrent_connections_real`
-- **Error**: Same timeout parameter issue affecting all 5 concurrent connections
-- **Root Cause**: Same as above
-- **Impact**: Cannot establish concurrent WebSocket connections
-- **Fix Required**: Same as test 002
+## Failed Test Details
 
-### 2. WebSocket Security Test (Priority 2 - High)
+### 1. WebSocket Message Send (Priority 1)
+**Test**: `test_003_websocket_message_send_real`
+**Issue**: WebSocket message sending fails with auth requirement
+**Impact**: Critical - affects core user messaging functionality
 
-#### Test 035: `test_035_websocket_security_real`
-- **Error**: `AssertionError: Should perform multiple WebSocket security tests`
-- **Root Cause**: Test expects more than 2 security checks but only 2 are performed
-- **Additional Info**: WebSocket connection rejected with HTTP 403 (likely auth issue)
-- **Impact**: WebSocket security validation incomplete
-- **Fix Required**: Add missing security checks or adjust test expectations
+### 2. Retry Strategies
+**Test**: `test_retry_strategies`
+**Issue**: Retry mechanism not properly handling failures
+**Impact**: Medium - affects system resilience
 
-## Passed Test Categories
+### 3. WebSocket Handshake Timing
+**Test**: `test_005_websocket_handshake_timing`
+**Issue**: Handshake timing validation fails
+**Impact**: Low - timing verification issue
 
-### Priority 1 - Critical (21/25 passed)
-- ✅ WebSocket connection establishment
-- ✅ Agent discovery and configuration
-- ✅ Agent execution endpoints
-- ✅ Tool execution endpoints
-- ✅ Message persistence and threading
-- ✅ User context isolation
-- ✅ Concurrent users and rate limiting
-- ✅ Error handling and resilience
-- ✅ Session persistence
-- ✅ Agent lifecycle management
-- ✅ Streaming capabilities
-- ✅ Message ordering
+### 4. API Response Headers
+**Test**: `test_007_api_response_headers_validation`
+**Issue**: Expected headers not present in API response
+**Impact**: Medium - API contract validation issue
 
-### Priority 2 - High (19/20 passed)
-- ✅ JWT authentication
-- ✅ OAuth Google login
-- ✅ Token refresh and expiry
-- ✅ Session security
-- ✅ CORS configuration
-- ✅ Rate limiting
+### 5. Memory Usage Validation
+**Test**: `test_016_memory_usage_during_requests`
+**Issue**: Memory monitoring during requests fails
+**Impact**: Low - monitoring/metrics issue
 
-### Priority 3-6 - Medium to Low (51/50 passed - 100%)
-- ✅ All medium, medium-low, and low priority tests passing
-- ✅ Performance monitoring
-- ✅ Caching strategies
-- ✅ Analytics and compliance
-- ✅ Operational features
+### 6. Async Concurrency Validation
+**Test**: `test_017_async_concurrency_validation`
+**Issue**: Async concurrency test fails
+**Impact**: Medium - potential concurrency handling issue
 
-## Key Insights
+### 7. Event Loop Integration (Timeout)
+**Test**: `test_018_event_loop_integration`
+**Issue**: Test hangs and times out after 30 seconds
+**Impact**: High - indicates potential event loop blocking
 
-1. **WebSocket Timeout Issue**: Primary blocker is the asyncio timeout parameter incompatibility
-2. **Authentication Working**: OAuth and JWT auth working for REST APIs
-3. **Core Functionality Stable**: 95.8% pass rate indicates stable core platform
-4. **First-Time User Flow**: Agent discovery, configuration, and execution working
+## Skipped Tests (11 tests)
+All skipped tests are in:
+- `test_auth_routes.py` (6 tests) - OAuth route validation
+- `test_environment_configuration.py` (5 tests) - Environment configuration checks
+
+## Summary of Issues by Priority
+
+### Critical Issues (Must Fix)
+1. WebSocket message authentication failure (P1 test)
+2. Event loop blocking/timeout issue
+
+### High Priority Issues
+1. Retry strategy mechanism failures
+2. API response header validation
+
+### Medium Priority Issues
+1. Async concurrency validation
+2. WebSocket handshake timing
+
+### Low Priority Issues
+1. Memory usage monitoring
 
 ## Next Steps
+1. Fix WebSocket authentication for message sending
+2. Investigate event loop blocking issue
+3. Address retry strategy failures
+4. Fix API response header issues
+5. Resolve async concurrency problems
 
-1. Fix WebSocket timeout parameter issue in test code
-2. Investigate WebSocket 403 rejection in staging
-3. Add missing security checks or adjust test expectations
-4. Re-run full test suite after fixes
-5. Deploy fixes to staging
+## Test Environment
+- Platform: Windows 11
+- Python: 3.12.4
+- Pytest: 8.4.1
+- Target: GCP Staging Environment
+- URLs:
+  - Backend: https://api.staging.netrasystems.ai
+  - WebSocket: wss://api.staging.netrasystems.ai/ws
+  - Auth: https://auth.staging.netrasystems.ai
+  - Frontend: https://app.staging.netrasystems.ai
