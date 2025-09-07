@@ -6,7 +6,7 @@ import pytest
 from datetime import datetime, UTC
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.services.auth_service import AuthService

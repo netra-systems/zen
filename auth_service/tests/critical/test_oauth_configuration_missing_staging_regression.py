@@ -23,7 +23,7 @@ FIXED VERSION: Bypasses database initialization to focus purely on OAuth configu
 import os
 import pytest
 from typing import Dict, Any, List
-from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
+from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 # Removed non-existent AuthManager import - using OAuthManager instead
 from shared.isolated_environment import IsolatedEnvironment
 

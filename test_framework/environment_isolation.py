@@ -142,18 +142,18 @@ class EnvironmentWrapper:
 # GLOBAL INSTANCE
 # =============================================================================
 
-_test_env_manager: Optional[TestEnvironmentManager] = None
+_test_env_manager: Optional[EnvironmentTestManager] = None
 _manager_lock = threading.Lock()
 
 
-def get_test_env_manager() -> TestEnvironmentManager:
+def get_test_env_manager() -> EnvironmentTestManager:
     """Get or create the global test environment manager."""
     global _test_env_manager
     
     if _test_env_manager is None:
         with _manager_lock:
             if _test_env_manager is None:
-                _test_env_manager = TestEnvironmentManager()
+                _test_env_manager = EnvironmentTestManager()
     
     return _test_env_manager
 
@@ -242,7 +242,7 @@ def isolated_test_session(session_id: str = None) -> Generator[IsolatedSession, 
 
 
 @contextmanager
-def isolated_test_env(**env_vars) -> Generator[TestEnvironmentManager, None, None]:
+def isolated_test_env(**env_vars) -> Generator[EnvironmentTestManager, None, None]:
     """
     Create an isolated environment for a single test.
     
@@ -250,7 +250,7 @@ def isolated_test_env(**env_vars) -> Generator[TestEnvironmentManager, None, Non
         **env_vars: Environment variables to set for the test
         
     Yields:
-        TestEnvironmentManager: The environment manager
+        EnvironmentTestManager: The environment manager
     """
     manager = get_test_env_manager()
     manager.enable_isolation()
@@ -452,7 +452,7 @@ def teardown_test_environment():
 
 __all__ = [
     # Main classes
-    'TestEnvironmentManager',
+    'EnvironmentTestManager',
     'EnvironmentWrapper',
     'IsolatedSession',
     

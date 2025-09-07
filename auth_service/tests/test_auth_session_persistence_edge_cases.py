@@ -8,8 +8,8 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch, MagicMock
-from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager as RedisTestManager
+from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager as RedisTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 

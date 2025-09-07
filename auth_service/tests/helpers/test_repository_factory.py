@@ -4,7 +4,7 @@ Provides repository instances for testing without direct database access
 """
 import asyncio
 from typing import AsyncGenerator, Optional
-from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
+from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 # Removed non-existent AuthManager import - using AuthDatabaseManager instead
 from shared.isolated_environment import IsolatedEnvironment
 
