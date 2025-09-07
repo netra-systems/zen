@@ -1478,10 +1478,20 @@ class StartupOrchestrator:
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")
             
-            # 5. Initialize FactoryAdapter for backward compatibility
+            # 5. Configure ExecutionEngineFactory with WebSocket bridge
+            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+                configure_execution_engine_factory
+            )
+            execution_engine_factory = await configure_execution_engine_factory(
+                websocket_bridge=self.app.state.agent_websocket_bridge
+            )
+            self.app.state.execution_engine_factory = execution_engine_factory
+            self.logger.info("    ✓ ExecutionEngineFactory configured with WebSocket bridge")
+            
+            # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
-                execution_engine_factory=execution_factory,
+                execution_engine_factory=execution_engine_factory,
                 websocket_bridge_factory=websocket_factory,
                 config=adapter_config
             )
@@ -1493,7 +1503,7 @@ class StartupOrchestrator:
             
             self.app.state.factory_adapter = factory_adapter
             
-            # 6. Enable factories for select routes (gradual migration)
+            # 7. Enable factories for select routes (gradual migration)
             critical_routes = [
                 "/api/agents/run_agent_v2",
                 "/api/agents/v2/{run_id}/status",
