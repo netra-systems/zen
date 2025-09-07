@@ -399,8 +399,7 @@ class AgentPipelineInfrastructure:
         from pathlib import Path
         self.project_root = Path(__file__).parent.parent.parent  # Go up to netra-core-generation-1
         self.docker_manager = UnifiedDockerManager(
-            environment="e2e-test",
-            environment_type=EnvironmentType.DEDICATED
+            environment_type=EnvironmentType.TEST
         )
         self.test_sessions: List[Dict] = []
         self.services_ready = False
