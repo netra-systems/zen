@@ -16,44 +16,44 @@ class TestOperationsCrud:
     """Test suite for CorpusCRUDOperations"""
 
     @pytest.fixture
-    def real_tool_dispatcher():
+    def real_tool_dispatcher(self):
         """Use real service instance."""
         # TODO: Initialize real service
         """Create mock tool dispatcher"""
         return Mock()  # TODO: Use real service instance
 
     @pytest.fixture
-    def instance(self, mock_tool_dispatcher):
+    def instance(self, real_tool_dispatcher):
         """Use real service instance."""
         # TODO: Initialize real service
         """Create test instance"""
-        return CorpusCRUDOperations(mock_tool_dispatcher)
+        return CorpusCRUDOperations(real_tool_dispatcher)
 
     def test_initialization(self, instance):
         """Test proper initialization"""
         assert instance is not None
         # Add initialization assertions
 
-        def test_crud_operation_mapping(self, instance):
-            """Test CRUD operation mapping"""
-            mapping = instance._get_crud_operation_mapping()
-            assert "create" in mapping
-            assert "search" in mapping
-            assert "update" in mapping
-            assert "delete" in mapping
+    def test_crud_operation_mapping(self, instance):
+        """Test CRUD operation mapping"""
+        mapping = instance._get_crud_operation_mapping()
+        assert "create" in mapping
+        assert "search" in mapping
+        assert "update" in mapping
+        assert "delete" in mapping
 
-            def test_base_result_creation(self, instance):
-                """Test base result creation"""
+    def test_base_result_creation(self, instance):
+        """Test base result creation"""
         # This would require mocking CorpusOperationRequest
         # For now, just test that the method exists
-                assert hasattr(instance, '_create_base_result')
+        assert hasattr(instance, '_create_base_result')
 
-                def test_edge_cases(self, instance):
-                    """Test boundary conditions"""
+    def test_edge_cases(self, instance):
+        """Test boundary conditions"""
         # Test with None, empty, extreme values
+        pass
 
-                    def test_validation(self, instance):
-                        """Test input validation"""
+    def test_validation(self, instance):
+        """Test input validation"""
         # Test validation logic
-
-                        pass
+        pass
