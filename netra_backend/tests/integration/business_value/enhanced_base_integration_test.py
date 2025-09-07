@@ -171,7 +171,7 @@ class MockLLMManager:
         self.setup_business_value_responses()
         
     def setup_business_value_responses(self):
-        """Setup realistic business value responses."""
+        """Setup realistic business value responses for all agent types."""
         self.responses = {
             "cost_optimization": {
                 "recommendations": [
@@ -211,31 +211,96 @@ class MockLLMManager:
                     }
                 },
                 "recommendation": "Use Claude-3 for customer support, save $3000/month"
+            },
+            "risk_assessment": {
+                "risks_identified": [
+                    "Excessive spend on premium models for basic tasks",
+                    "Data privacy concerns with cloud AI services",
+                    "Vendor lock-in risk with single provider"
+                ],
+                "risk_scores": {"high": 2, "medium": 4, "low": 1},
+                "mitigation_strategies": [
+                    "Implement multi-provider strategy",
+                    "Review data classification policies",
+                    "Establish cost monitoring alerts"
+                ],
+                "compliance_status": "92% compliant"
+            },
+            "resource_optimization": {
+                "current_utilization": {"cpu": 65, "memory": 78, "storage": 45},
+                "optimization_opportunities": [
+                    "Right-size GPU instances for 25% cost reduction",
+                    "Implement auto-scaling for variable workloads"
+                ],
+                "projected_efficiency": "+40%"
+            },
+            "compliance_reporting": {
+                "compliance_score": 94.5,
+                "areas_reviewed": ["data protection", "model governance", "audit trails"],
+                "violations_found": 2,
+                "remediation_actions": [
+                    "Update data retention policies",
+                    "Implement model version tracking"
+                ],
+                "certification_status": "SOC2 compliant"
+            },
+            "data_analysis": {
+                "insights": [
+                    "Token usage patterns show 40% inefficiency",
+                    "Peak usage hours: 9-11 AM, 2-4 PM EST"
+                ],
+                "data_quality": "85% high quality",
+                "recommendations": ["Implement data governance framework"],
+                "processing_time": "2.3 seconds avg"
+            },
+            "triage_analysis": {
+                "priority": "high",
+                "complexity": "medium",
+                "estimated_effort": "4-6 hours",
+                "recommended_agents": ["data_agent", "optimization_agent"],
+                "urgency_score": 8.5
             }
         }
     
     async def ask_llm(self, prompt: str, model: str = "gpt-4", **kwargs) -> str:
-        """Mock LLM response with business value content."""
+        """Mock LLM response with business value content tailored to context."""
         self.call_count += 1
         
         # Analyze prompt to determine response type
         prompt_lower = prompt.lower()
         
-        if "cost" in prompt_lower or "optimize" in prompt_lower:
+        # Agent-specific responses based on prompt content
+        if "cost" in prompt_lower or "optimize" in prompt_lower or "saving" in prompt_lower:
             response_data = self.responses["cost_optimization"]
-        elif "performance" in prompt_lower or "bottleneck" in prompt_lower:
+        elif "performance" in prompt_lower or "bottleneck" in prompt_lower or "latency" in prompt_lower:
             response_data = self.responses["performance_analysis"]
-        elif "compare" in prompt_lower or "model" in prompt_lower:
+        elif "compare" in prompt_lower or "model" in prompt_lower or "benchmark" in prompt_lower:
             response_data = self.responses["model_comparison"]
+        elif "risk" in prompt_lower or "compliance" in prompt_lower or "audit" in prompt_lower:
+            response_data = self.responses["risk_assessment"]
+        elif "resource" in prompt_lower or "utilization" in prompt_lower or "capacity" in prompt_lower:
+            response_data = self.responses["resource_optimization"]
+        elif "compliance" in prompt_lower or "report" in prompt_lower or "governance" in prompt_lower:
+            response_data = self.responses["compliance_reporting"]
+        elif "data" in prompt_lower or "analysis" in prompt_lower or "insight" in prompt_lower:
+            response_data = self.responses["data_analysis"]
+        elif "triage" in prompt_lower or "priority" in prompt_lower or "urgency" in prompt_lower:
+            response_data = self.responses["triage_analysis"]
         else:
-            # Generic business value response
+            # Generic business value response for any unlisted scenarios
             response_data = {
-                "analysis": "Comprehensive analysis completed",
-                "insights": ["Key insight 1", "Key insight 2"],
-                "confidence": 0.8
+                "analysis": "Comprehensive AI-powered analysis completed",
+                "insights": [
+                    "System optimizations identified",
+                    "Efficiency improvements recommended",
+                    "Cost reduction opportunities found"
+                ],
+                "confidence": 0.87,
+                "business_value": "High impact recommendations generated",
+                "next_steps": ["Implement optimization", "Monitor results", "Report savings"]
             }
             
-        # Return JSON string as LLM would
+        # Return JSON string as LLM would in production
         return json.dumps(response_data, indent=2)
 
 
