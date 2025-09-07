@@ -172,11 +172,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.close(code=1008, reason="Authentication required")
                 return
             
-            # Validate JWT token
-            jwt_payload = await extractor.validate_and_decode_jwt(jwt_token)
-            if not jwt_payload:
-                logger.warning(f"WebSocket connection rejected in {environment}: Invalid JWT token")
-                await websocket.close(code=1008, reason="Invalid authentication")
+            # Validate JWT token with proper error handling
+            try:
+                jwt_payload = await extractor.validate_and_decode_jwt(jwt_token)
+                if not jwt_payload:
+                    logger.warning(f"WebSocket connection rejected in {environment}: Invalid JWT token")
+                    await websocket.close(code=1008, reason="Invalid authentication")
+                    return
+            except Exception as jwt_error:
+                logger.error(f"JWT validation error in {environment}: {jwt_error}", exc_info=True)
+                await websocket.close(code=1008, reason="Authentication error")
                 return
                 
             logger.info(f"Pre-connection JWT validation successful in {environment} for user: {jwt_payload.get('sub', 'unknown')[:8]}...")
@@ -205,13 +210,15 @@ async def websocket_endpoint(websocket: WebSocket):
         # Extract user context from WebSocket connection (JWT authentication)
         # CRITICAL SECURITY FIX: No fallbacks allowed in staging/production
         try:
-            user_context, auth_info = await extract_websocket_user_context(websocket)
+            user_context, extracted_auth_info = await extract_websocket_user_context(websocket)
             logger.info(f"Extracted user context for WebSocket: {user_context}")
+            # Store auth_info for later use in factory pattern
+            auth_info = extracted_auth_info
             # Create isolated WebSocket manager for this user context
             ws_manager = create_websocket_manager(user_context)
             logger.info(f"Created isolated WebSocket manager for user {user_context.user_id[:8]}... (manager_id: {id(ws_manager)})")
         except Exception as e:
-            logger.error(f"AUTHENTICATION FAILED: Failed to extract user context from WebSocket: {e}")
+            logger.error(f"AUTHENTICATION FAILED: Failed to extract user context from WebSocket: {e}", exc_info=True)
             
             # CRITICAL SECURITY FIX: Check environment to determine if fallback is allowed
             # Only allow insecure fallbacks in development/testing - NEVER in staging/production
@@ -500,12 +507,13 @@ async def websocket_endpoint(websocket: WebSocket):
             # Register with security manager
             if 'user_context' in locals():
                 # Factory pattern: Create auth_info from user_context and extracted auth_info
+                # auth_info was extracted and stored earlier, now use it properly
                 factory_auth_info = type('AuthInfo', (), {
                     'user_id': user_id,
-                    'permissions': auth_info.get('permissions', []),
-                    'roles': auth_info.get('roles', []),
-                    'token_expires_at': auth_info.get('token_expires_at'),
-                    'session_id': auth_info.get('session_id')
+                    'permissions': auth_info.get('permissions', []) if auth_info else [],
+                    'roles': auth_info.get('roles', []) if auth_info else [],
+                    'token_expires_at': auth_info.get('token_expires_at') if auth_info else None,
+                    'session_id': auth_info.get('session_id') if auth_info else None
                 })()
                 security_manager.register_connection(connection_id, factory_auth_info, websocket)
             else:

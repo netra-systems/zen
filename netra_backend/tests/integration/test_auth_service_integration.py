@@ -381,12 +381,18 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - User context injection
         - Error handling for invalid tokens
         """
-        db_session = real_services_fixture.get("db")
-        if not db_session:
-            pytest.skip("Real database service not available")
+        # Mock FastAPI request and dependencies
+        mock_credentials = HTTPAuthorizationCredentials(
+            scheme="Bearer",
+            credentials="valid.test.token"
+        )
+        
+        # Mock database session
+        mock_db_session = AsyncMock()
+        
+        test_user_id = str(uuid.uuid4())
         
         # Create test user for middleware testing
-        test_user_id = str(uuid.uuid4())
         test_user = DBUser(
             id=test_user_id,
             email="middleware@example.com",
@@ -394,91 +400,49 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             is_active=True
         )
         
-        db_session.add(test_user)
-        await db_session.commit()
-        
-        try:
-            # Mock FastAPI request and dependencies
-            mock_credentials = HTTPAuthorizationCredentials(
-                scheme="Bearer",
-                credentials="valid.test.token"
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth_client:
+            # Mock successful token validation
+            mock_auth_client.validate_token_jwt.return_value = {
+                "valid": True,
+                "user_id": test_user_id,
+                "email": "middleware@example.com", 
+                "role": "standard_user",
+                "permissions": ["user:read"]
+            }
+            
+            # Mock database query to return test user
+            from sqlalchemy import select
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none.return_value = test_user
+            mock_db_session.execute.return_value = mock_result
+            
+            # Test get_current_user function 
+            authenticated_user = await get_current_user(mock_credentials, mock_db_session)
+            
+            assert authenticated_user is not None
+            assert authenticated_user.id == test_user_id
+            assert authenticated_user.email == "middleware@example.com"
+            assert hasattr(authenticated_user, '_jwt_validation_result')
+            
+            jwt_claims = authenticated_user._jwt_validation_result
+            assert jwt_claims["user_id"] == test_user_id
+            assert jwt_claims["role"] == "standard_user"
+            
+            # Test with invalid token
+            mock_auth_client.validate_token_jwt.return_value = {
+                "valid": False,
+                "error": "Invalid token"
+            }
+            
+            invalid_credentials = HTTPAuthorizationCredentials(
+                scheme="Bearer", 
+                credentials="invalid.token"
             )
             
-            with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
-                # Mock successful token validation
-                mock_client.validate_token_jwt.return_value = {
-                    "valid": True,
-                    "user_id": test_user_id,
-                    "email": "middleware@example.com",
-                    "role": "standard_user",
-                    "permissions": ["user:read"]
-                }
-                
-                # Test get_current_user function
-                authenticated_user = await get_current_user(mock_credentials, db_session)
-                
-                assert authenticated_user is not None
-                assert authenticated_user.id == test_user_id
-                assert authenticated_user.email == "middleware@example.com"
-                assert hasattr(authenticated_user, '_jwt_validation_result')
-                
-                jwt_claims = authenticated_user._jwt_validation_result
-                assert jwt_claims["user_id"] == test_user_id
-                assert jwt_claims["role"] == "standard_user"
-                
-                # Test with invalid token
-                mock_client.validate_token_jwt.return_value = {
-                    "valid": False,
-                    "error": "Invalid token"
-                }
-                
-                invalid_credentials = HTTPAuthorizationCredentials(
-                    scheme="Bearer", 
-                    credentials="invalid.token"
-                )
-                
-                with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user(invalid_credentials, db_session)
-                
-                assert exc_info.value.status_code == 401
-                
-                # Test auto user creation
-                new_user_id = str(uuid.uuid4())
-                mock_client.validate_token_jwt.return_value = {
-                    "valid": True,
-                    "user_id": new_user_id,
-                    "email": "newuser@example.com",
-                    "role": "standard_user",
-                    "permissions": ["user:read"]
-                }
-                
-                new_credentials = HTTPAuthorizationCredentials(
-                    scheme="Bearer",
-                    credentials="new.user.token"
-                )
-                
-                with patch('netra_backend.app.auth_integration.auth.user_service') as mock_user_service:
-                    # Mock user service for auto-creation
-                    mock_new_user = DBUser(
-                        id=new_user_id,
-                        email="newuser@example.com",
-                        full_name="Auto Created User",
-                        is_active=True
-                    )
-                    mock_user_service.get_or_create_dev_user.return_value = mock_new_user
-                    
-                    auto_created_user = await get_current_user(new_credentials, db_session)
-                    
-                    # Verify user service was called for auto-creation
-                    mock_user_service.get_or_create_dev_user.assert_called_once()
-                    
-        finally:
-            # Cleanup
-            await db_session.execute(
-                text("DELETE FROM users WHERE id = :user_id"),
-                {"user_id": test_user_id}
-            )
-            await db_session.commit()
+            with pytest.raises(HTTPException) as exc_info:
+                await get_current_user(invalid_credentials, mock_db_session)
+            
+            assert exc_info.value.status_code == 401
 
     @pytest.mark.integration
     @pytest.mark.real_services

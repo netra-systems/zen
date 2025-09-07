@@ -526,9 +526,30 @@ class IsolatedWebSocketManager:
                 connection = self._connections.get(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # Check if WebSocket is still connected before sending
+                        from fastapi.websockets import WebSocketState
+                        if hasattr(connection.websocket, 'client_state'):
+                            if connection.websocket.client_state != WebSocketState.CONNECTED:
+                                logger.warning(f"WebSocket {conn_id} not in CONNECTED state")
+                                failed_connections.append(conn_id)
+                                continue
+                        
+                        # Send with timeout to prevent hanging
+                        await asyncio.wait_for(
+                            connection.websocket.send_json(message),
+                            timeout=5.0
+                        )
                         successful_sends += 1
                         logger.debug(f"Sent message to connection {conn_id}")
+                        
+                    except asyncio.TimeoutError:
+                        logger.error(
+                            f"Timeout sending message to connection {conn_id} "
+                            f"for user {self.user_context.user_id[:8]}..."
+                        )
+                        failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
                         
                     except Exception as e:
                         logger.error(
@@ -536,6 +557,8 @@ class IsolatedWebSocketManager:
                             f"for user {self.user_context.user_id[:8]}...: {e}"
                         )
                         failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
                 else:
                     logger.warning(f"Invalid connection {conn_id} - removing from manager")
                     failed_connections.append(conn_id)
