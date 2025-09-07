@@ -182,8 +182,7 @@ class UserContextExtractor:
             logger.info("🔍 WEBSOCKET JWT VALIDATION - Same secret resolution as REST middleware!")
             
             # SSOT COMPLIANCE: Use auth service for JWT validation
-            from netra_backend.app.clients.auth_client_core import AuthClientCore
-            auth_client = AuthClientCore()
+            from netra_backend.app.clients.auth_client_core import auth_client
             
             validation_result = await auth_client.validate_token(token)
             if not validation_result or not validation_result.get('valid'):
@@ -303,8 +302,7 @@ class UserContextExtractor:
         
         try:
             # SSOT COMPLIANCE: Use auth service for JWT validation - no local decode
-            from netra_backend.app.clients.auth_client_core import AuthClientCore
-            auth_client = AuthClientCore()
+            from netra_backend.app.clients.auth_client_core import auth_client
             
             validation_result = await auth_client.validate_token(token)
             if not validation_result or not validation_result.get('valid'):

@@ -252,8 +252,7 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
             TokenExpiredError: If token is expired
         """
         try:
-            from netra_backend.app.clients.auth_client_core import AuthClientCore
-            auth_client = AuthClientCore()
+            from netra_backend.app.clients.auth_client_core import auth_client
             
             # Use auth service for token validation - SSOT pattern
             validation_result = await auth_client.validate_token(token)
