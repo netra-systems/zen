@@ -222,6 +222,29 @@ class WebSocketTestSession:
 # WEBSOCKET ASSERTION HELPERS
 # =============================================================================
 
+def assert_websocket_events(events: List[Dict[str, Any]], expected_event_types: List[str]):
+    """
+    Assert that WebSocket events contain all expected event types.
+    
+    This function validates the 5 MISSION CRITICAL WebSocket events that enable
+    chat business value: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed.
+    
+    Args:
+        events: List of WebSocket event dictionaries
+        expected_event_types: List of expected event type strings
+        
+    Raises:
+        AssertionError: If any expected event type is missing
+    """
+    actual_event_types = [event.get("type", "unknown") for event in events]
+    
+    for expected_type in expected_event_types:
+        assert expected_type in actual_event_types, (
+            f"Missing expected WebSocket event type: {expected_type}. "
+            f"Actual events: {actual_event_types}"
+        )
+
+
 def assert_websocket_message_received(
     client: WebSocketTestClient, 
     message_type: str,
@@ -375,6 +398,7 @@ __all__ = [
     'WebSocketTestSession',
     
     # Assertion helpers
+    'assert_websocket_events',
     'assert_websocket_message_received',
     'assert_websocket_message_sent',
     'wait_for_websocket_connection',
