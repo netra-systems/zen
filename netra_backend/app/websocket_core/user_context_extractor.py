@@ -79,14 +79,34 @@ class UserContextExtractor:
         Raises:
             RuntimeError: If JWT secret is not configured
         """
+        import hashlib
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
         try:
             # Use the unified JWT secret manager for consistency
             from shared.jwt_secret_manager import get_unified_jwt_secret
             secret = get_unified_jwt_secret()
+            
+            # CRITICAL DIAGNOSTIC LOGGING for staging authentication debugging
+            secret_hash = hashlib.md5(secret.encode()).hexdigest()[:16] if secret else "NO_SECRET"
+            logger.info(f"🔍 WEBSOCKET AUTH DEBUG - Environment: {environment}")
+            logger.info(f"🔍 WEBSOCKET AUTH DEBUG - JWT Secret Source: unified_jwt_secret_manager")
+            logger.info(f"🔍 WEBSOCKET AUTH DEBUG - JWT Secret Hash: {secret_hash}")
+            logger.info(f"🔍 WEBSOCKET AUTH DEBUG - JWT Secret Length: {len(secret) if secret else 0}")
+            
+            # Additional diagnostic info for staging
+            if environment in ["staging", "production"]:
+                logger.info(f"🔍 WEBSOCKET AUTH DEBUG - ENV JWT_SECRET_STAGING available: {bool(env.get('JWT_SECRET_STAGING'))}")
+                logger.info(f"🔍 WEBSOCKET AUTH DEBUG - ENV JWT_SECRET_KEY available: {bool(env.get('JWT_SECRET_KEY'))}")
+                logger.info(f"🔍 WEBSOCKET AUTH DEBUG - ENV JWT_SECRET available: {bool(env.get('JWT_SECRET'))}")
+            
             logger.debug("Using unified JWT secret manager for consistent secret resolution")
             return secret
         except Exception as e:
-            logger.error(f"Failed to use unified JWT secret manager: {e}")
+            logger.error(f"❌ WEBSOCKET AUTH ERROR - Failed to use unified JWT secret manager: {e}")
             logger.warning("Falling back to local JWT secret resolution (less secure)")
             
             try:
@@ -195,6 +215,21 @@ class UserContextExtractor:
         Returns:
             Decoded JWT payload if valid, None otherwise
         """
+        import hashlib
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Enhanced diagnostic logging for staging
+        logger.info(f"🔍 JWT VALIDATION DEBUG - Starting token validation in {environment}")
+        logger.info(f"🔍 JWT VALIDATION DEBUG - Token length: {len(token) if token else 0}")
+        logger.info(f"🔍 JWT VALIDATION DEBUG - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
+        
+        secret_hash = hashlib.md5(self.jwt_secret_key.encode()).hexdigest()[:16] if self.jwt_secret_key else "NO_SECRET"
+        logger.info(f"🔍 JWT VALIDATION DEBUG - Using secret hash: {secret_hash}")
+        logger.info(f"🔍 JWT VALIDATION DEBUG - Algorithm: {self.jwt_algorithm}")
+        
         try:
             # Decode and validate JWT
             payload = jwt.decode(
@@ -205,26 +240,45 @@ class UserContextExtractor:
             
             # Basic validation
             if not payload.get("sub"):  # Subject (user ID)
-                logger.warning("JWT token missing 'sub' (user ID) claim")
+                logger.warning("🔍 JWT token missing 'sub' (user ID) claim")
+                logger.info(f"🔍 JWT VALIDATION DEBUG - Payload keys: {list(payload.keys())}")
                 return None
             
-            # Check expiration (jwt library handles this automatically)
-            logger.debug(f"JWT token decoded successfully for user: {payload.get('sub', 'unknown')[:8]}...")
+            # Success logging
+            user_id = payload.get('sub', 'unknown')
+            logger.info(f"✅ JWT VALIDATION SUCCESS - Token decoded for user: {user_id[:8]}...")
+            logger.info(f"✅ JWT VALIDATION SUCCESS - Token issued at: {payload.get('iat', 'unknown')}")
+            logger.info(f"✅ JWT VALIDATION SUCCESS - Token expires at: {payload.get('exp', 'unknown')}")
+            
             return payload
             
-        except jwt.ExpiredSignatureError:
-            logger.warning("JWT token has expired")
+        except jwt.ExpiredSignatureError as e:
+            logger.error(f"❌ JWT VALIDATION FAILED - Token expired: {e}")
+            logger.info(f"🔍 JWT VALIDATION DEBUG - Check token expiration time vs current time")
             return None
-        except jwt.InvalidSignatureError:
+        except jwt.InvalidSignatureError as e:
             # This is the most common error when secrets don't match
-            logger.error("JWT signature verification failed - likely JWT secret mismatch between services")
-            logger.debug(f"Using JWT secret from environment: {self.jwt_secret_key[:10]}..." if self.jwt_secret_key else "NO SECRET")
+            logger.error(f"❌ JWT VALIDATION FAILED - Signature verification failed: {e}")
+            logger.error("❌ CRITICAL: This indicates JWT secret mismatch between auth service and WebSocket service")
+            logger.info(f"🔍 JWT VALIDATION DEBUG - WebSocket using secret hash: {secret_hash}")
+            logger.info(f"🔍 JWT VALIDATION DEBUG - Secret length: {len(self.jwt_secret_key) if self.jwt_secret_key else 0}")
+            
+            # Try to provide more diagnostic info in staging
+            if environment in ["staging", "production"]:
+                logger.error("🔍 STAGING DEBUG - JWT secret sources to check:")
+                logger.error(f"   - JWT_SECRET_STAGING: {bool(env.get('JWT_SECRET_STAGING'))}")
+                logger.error(f"   - JWT_SECRET_KEY: {bool(env.get('JWT_SECRET_KEY'))}")  
+                logger.error(f"   - JWT_SECRET: {bool(env.get('JWT_SECRET'))}")
+                logger.error("🔍 This signature mismatch is blocking all WebSocket connections in staging!")
+            
             return None
         except jwt.InvalidTokenError as e:
-            logger.warning(f"Invalid JWT token: {e}")
+            logger.error(f"❌ JWT VALIDATION FAILED - Invalid token format: {e}")
+            logger.info(f"🔍 JWT VALIDATION DEBUG - Token may be malformed or corrupted")
             return None
         except Exception as e:
-            logger.error(f"Error decoding JWT token: {e}")
+            logger.error(f"❌ JWT VALIDATION FAILED - Unexpected error: {e}")
+            logger.error(f"🔍 JWT VALIDATION DEBUG - Exception type: {type(e).__name__}")
             return None
     
     def create_user_context_from_jwt(
