@@ -59,15 +59,15 @@ class TestDatabasePhaseComprehensive(BaseIntegrationTest):
         super().setup_method()
         self.logger.info("Setting up DATABASE phase integration test")
         
-        # Get test environment configuration
-        self.env = get_env()
-        self.backend_env = BackendEnvironment()
-        
         # Store original environment for cleanup
         self.original_env = dict(os.environ)
         
-        # Configure test database connection (port 5434 for test environment)
+        # Configure test database connection (port 5434 for test environment) FIRST
         self._setup_test_database_config()
+        
+        # Get test environment configuration AFTER setting env vars
+        self.env = get_env()
+        self.backend_env = BackendEnvironment()
         
         # Initialize test database manager
         self.database_manager = DatabaseManager()

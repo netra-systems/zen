@@ -238,13 +238,20 @@ variable "redis_version" {
 variable "backend_timeout_sec" {
   description = "Backend service timeout in seconds for WebSocket support"
   type        = number
-  default     = 3600  # 1 hour for WebSocket connections
+  default     = 86400  # CRITICAL FIX: Increase to 24 hours for WebSocket connections
 }
 
 variable "session_affinity_ttl_sec" {
   description = "Session affinity cookie TTL in seconds"
   type        = number
-  default     = 3600  # 1 hour
+  default     = 86400  # CRITICAL FIX: Increase to 24 hours
+}
+
+# WebSocket Configuration
+variable "websocket_timeout_sec" {
+  description = "WebSocket connection timeout in seconds for long-lived connections"
+  type        = number
+  default     = 86400  # 24 hours for WebSocket connections
 }
 
 variable "force_https_enabled" {

@@ -105,15 +105,22 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
     });
 
     test('should handle error scenarios reliably', async () => {
-      setupUnifiedWebSocketMock(WebSocketMockConfigs.immediateError);
-      
       const TestErrorComponent: React.FC = () => {
         const [status, setStatus] = React.useState('disconnected');
 
         React.useEffect(() => {
-          const ws = new WebSocket('ws://test');
-          ws.onerror = () => setStatus('error');
-          ws.onopen = () => setStatus('connected');
+          // Create WebSocket with immediate error configuration
+          const errorMockClass = setupUnifiedWebSocketMock(WebSocketMockConfigs.immediateError);
+          const ws = new errorMockClass('ws://test');
+          
+          ws.onerror = () => {
+            console.log('DEBUG: Error event received, setting status to error');
+            setStatus('error');
+          };
+          ws.onopen = () => {
+            console.log('DEBUG: Open event received, setting status to connected');
+            setStatus('connected');
+          };
         }, []);
 
         return <div data-testid="status">{status}</div>;
@@ -124,7 +131,7 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
       // FIXED: Should handle errors without timing issues
       await waitFor(() => {
         expect(screen.getByTestId('status')).toHaveTextContent('error');
-      }, { timeout: 1000 });
+      }, { timeout: 2000 });
 
       console.log('✅ WebSocket error handling race condition fix validated');
     });

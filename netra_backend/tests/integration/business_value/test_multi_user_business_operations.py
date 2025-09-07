@@ -70,7 +70,8 @@ class TestMultiUserBusinessOperations(EnhancedBaseIntegrationTest):
                     agent_name="triage_agent",
                     state=user_ctx["context"],
                     expected_business_outcomes=["user_request_addressed", "category_assigned"],
-                    timeout=20.0
+                    timeout=20.0,
+                    ws_context=ws_context
                 )
                 
                 return {
@@ -183,7 +184,8 @@ class TestMultiUserBusinessOperations(EnhancedBaseIntegrationTest):
                         "confidential_data_processed",
                         "compliance_verified"
                     ],
-                    timeout=30.0
+                    timeout=30.0,
+                    ws_context=ws_context
                 )
                 
                 return {
@@ -265,7 +267,8 @@ class TestMultiUserBusinessOperations(EnhancedBaseIntegrationTest):
                     agent_name="comprehensive_analysis_agent",
                     state=state,
                     expected_business_outcomes=["analysis_completed", "recommendations_provided"],
-                    timeout=40.0
+                    timeout=40.0,
+                    ws_context=ws_context
                 )
                 
                 return {
@@ -385,7 +388,8 @@ class TestMultiUserBusinessOperations(EnhancedBaseIntegrationTest):
                         agent_name="feature_access_agent", 
                         state=state,
                         expected_business_outcomes=["feature_access_checked"],
-                        timeout=15.0
+                        timeout=15.0,
+                        ws_context=ws_context
                     )
                     
                     access_granted = result["business_outcomes"].get("feature_access_granted", False)
@@ -492,7 +496,8 @@ class TestMultiUserBusinessOperations(EnhancedBaseIntegrationTest):
                         agent_name="usage_tracking_agent",
                         state=state,
                         expected_business_outcomes=["operation_tracked", "usage_recorded"],
-                        timeout=10.0
+                        timeout=10.0,
+                        ws_context=ws_context
                     )
                     
                     operation_end = datetime.now()
