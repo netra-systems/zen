@@ -511,7 +511,7 @@ async def get_health_config() -> Dict[str, Any]:
             "cache_ttl_seconds": health_manager._cache_ttl,
             "max_response_time_samples": health_manager._max_samples,
             "services_configured": {
-                "postgresql": bool(env_dict.get("POSTGRES_HOST") or env_dict.get("DATABASE_URL")),
+                "postgresql": bool(env_dict.get("POSTGRES_HOST")),
                 "redis": bool(env_dict.get("REDIS_HOST") or env_dict.get("REDIS_URL")),
                 "clickhouse": bool(env_dict.get("CLICKHOUSE_HOST") or env_dict.get("CLICKHOUSE_URL"))
             },
