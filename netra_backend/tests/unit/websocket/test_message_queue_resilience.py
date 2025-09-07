@@ -352,28 +352,30 @@ class TestMessageQueueResilience:
         message_queue._start_message_processing = AsyncMock()
         message_queue._complete_message_processing = AsyncMock()
         message_queue._update_message_status = AsyncMock()
+        message_queue._handle_failed_message = AsyncMock()
         
         # Test successful processing
         await message_queue._process_message(sample_message)
         
-        # Should record success in circuit breaker
-        message_queue.message_circuit.record_success.assert_called_once()
+        # Should complete successfully (handler was called)
         test_handler.assert_called_once_with(sample_message.user_id, sample_message.payload)
+        message_queue._complete_message_processing.assert_called_once()
+        # Circuit breaker success is recorded in _complete_message_processing
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_prevents_processing(self, message_queue, sample_message):
-        """Test circuit breaker preventing message processing"""
+        """Test circuit breaker preventing retry processing"""
         # Circuit breaker is open
         message_queue.message_circuit.can_execute.return_value = False
         
-        message_queue._handle_failed_message = AsyncMock()
+        # Mock the reschedule method
+        message_queue._reschedule_retry = AsyncMock()
         
-        await message_queue._process_message(sample_message)
+        # Test that retry is prevented by circuit breaker
+        await message_queue._retry_message(sample_message)
         
-        # Should handle as failed due to circuit breaker
-        message_queue._handle_failed_message.assert_called_once()
-        call_args = message_queue._handle_failed_message.call_args
-        assert "circuit breaker" in call_args[0][1].lower()
+        # Should reschedule for later due to circuit breaker
+        message_queue._reschedule_retry.assert_called_once_with(sample_message)
 
     @pytest.mark.asyncio
     async def test_comprehensive_error_logging(self, message_queue, sample_message):

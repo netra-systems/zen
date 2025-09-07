@@ -24,7 +24,7 @@ async def main():
         token = await helper.get_staging_jwt_token("fix-test-user", "test@netrasystems.ai")
         
         if token:
-            print("✅ STAGING TOKEN CREATION: SUCCESS")
+            print("[SUCCESS] STAGING TOKEN CREATION: SUCCESS")
             print(f"   Token length: {len(token)}")
             print(f"   Token prefix: {token[:50]}...")
             
@@ -36,19 +36,19 @@ async def main():
             import jwt as jwt_lib
             try:
                 payload = jwt_lib.decode(token, expected_secret, algorithms=["HS256"])
-                print(f"✅ TOKEN VALIDATION: SUCCESS with staging secret (hash: {expected_hash})")
+                print(f"[SUCCESS] TOKEN VALIDATION: SUCCESS with staging secret (hash: {expected_hash})")
                 print(f"   User: {payload.get('sub', 'unknown')}")
                 print(f"   Email: {payload.get('email', 'unknown')}")
-                print("✅ FIX VERIFIED: Test tokens now use correct staging secret")
+                print("[SUCCESS] FIX VERIFIED: Test tokens now use correct staging secret")
             except Exception as e:
-                print(f"❌ TOKEN VALIDATION: FAILED - {e}")
-                print("❌ Fix may not be working correctly")
+                print(f"[FAILED] TOKEN VALIDATION: FAILED - {e}")
+                print("[FAILED] Fix may not be working correctly")
                 
         else:
-            print("❌ STAGING TOKEN CREATION: FAILED")
+            print("[FAILED] STAGING TOKEN CREATION: FAILED")
             
     except Exception as e:
-        print(f"❌ JWT HELPER TEST: FAILED - {e}")
+        print(f"[FAILED] JWT HELPER TEST: FAILED - {e}")
     
     # Test the staging config token creation too
     print("\n" + "-" * 40)
@@ -59,7 +59,7 @@ async def main():
         token = config.create_test_jwt_token()
         
         if token:
-            print("✅ STAGING CONFIG TOKEN: SUCCESS")
+            print("[SUCCESS] STAGING CONFIG TOKEN: SUCCESS")
             print(f"   Token length: {len(token)}")
             
             # Verify it also uses the correct secret
@@ -69,17 +69,17 @@ async def main():
             import jwt as jwt_lib
             try:
                 payload = jwt_lib.decode(token, expected_secret, algorithms=["HS256"])
-                print(f"✅ CONFIG TOKEN VALIDATION: SUCCESS with staging secret (hash: {expected_hash})")
+                print(f"[SUCCESS] CONFIG TOKEN VALIDATION: SUCCESS with staging secret (hash: {expected_hash})")
                 print(f"   User: {payload.get('sub', 'unknown')}")
-                print("✅ BOTH TOKEN SOURCES NOW USE CORRECT STAGING SECRET")
+                print("[SUCCESS] BOTH TOKEN SOURCES NOW USE CORRECT STAGING SECRET")
             except Exception as e:
-                print(f"❌ CONFIG TOKEN VALIDATION: FAILED - {e}")
+                print(f"[FAILED] CONFIG TOKEN VALIDATION: FAILED - {e}")
                 
         else:
-            print("❌ STAGING CONFIG TOKEN: FAILED")
+            print("[FAILED] STAGING CONFIG TOKEN: FAILED")
             
     except Exception as e:
-        print(f"❌ STAGING CONFIG TEST: FAILED - {e}")
+        print(f"[FAILED] STAGING CONFIG TEST: FAILED - {e}")
     
     print("\n" + "=" * 60)
     print("VALIDATION COMPLETE")

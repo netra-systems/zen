@@ -26,18 +26,40 @@ from dataclasses import dataclass
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from tests.e2e.jwt_token_helpers import JWTTestHelper
+from tests.e2e.staging_config import StagingTestConfig, staging_urls
 
 
 @dataclass
 class E2EAuthConfig:
     """Configuration for E2E authentication."""
-    auth_service_url: str = "http://localhost:8083"  # Test auth service
-    backend_url: str = "http://localhost:8002"       # Test backend
-    websocket_url: str = "ws://localhost:8002/ws"    # Test WebSocket
+    auth_service_url: str = "http://localhost:8083"  # Default test auth service
+    backend_url: str = "http://localhost:8002"       # Default test backend
+    websocket_url: str = "ws://localhost:8002/ws"    # Default test WebSocket
     test_user_email: str = "e2e_test@example.com"
     test_user_password: str = "test_password_123"
     jwt_secret: str = "test-jwt-secret-key-unified-testing-32chars"
     timeout: float = 10.0
+    
+    @classmethod
+    def for_staging(cls) -> "E2EAuthConfig":
+        """Create configuration for staging environment using centralized config."""
+        staging_config = StagingTestConfig()
+        return cls(
+            auth_service_url=staging_config.urls.auth_url,
+            backend_url=staging_config.urls.backend_url,
+            websocket_url=staging_config.urls.websocket_url,
+            test_user_email=staging_config.test_user_email,
+            test_user_password="staging_test_password_123",
+            jwt_secret="staging-jwt-secret-key",  # Will be overridden from env
+            timeout=staging_config.timeout
+        )
+    
+    @classmethod
+    def for_environment(cls, environment: str = "test") -> "E2EAuthConfig":
+        """Create configuration for specified environment."""
+        if environment == "staging":
+            return cls.for_staging()
+        return cls()  # Default to test/local configuration
 
 
 class E2EAuthHelper:
@@ -54,11 +76,32 @@ class E2EAuthHelper:
     CRITICAL: All e2e tests MUST use this helper for authentication.
     """
     
-    def __init__(self, config: Optional[E2EAuthConfig] = None):
-        """Initialize E2E authentication helper."""
-        self.config = config or E2EAuthConfig()
+    def __init__(self, config: Optional[E2EAuthConfig] = None, environment: Optional[str] = None):
+        """Initialize E2E authentication helper.
+        
+        Args:
+            config: Optional E2EAuthConfig to use
+            environment: Optional environment name ('test', 'staging', etc.)
+                        If not provided, detects from ENV or defaults to 'test'
+        """
         self.env = get_env()
-        self.jwt_helper = JWTTestHelper(environment="test")
+        
+        # Determine environment
+        if environment is None:
+            environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        
+        # Use provided config or create based on environment
+        if config is None:
+            self.config = E2EAuthConfig.for_environment(environment)
+        else:
+            self.config = config
+            
+        # Override JWT secret from environment if available
+        env_jwt_secret = self.env.get("JWT_SECRET_KEY")
+        if env_jwt_secret:
+            self.config.jwt_secret = env_jwt_secret
+            
+        self.jwt_helper = JWTTestHelper(environment=environment)
         self._cached_token: Optional[str] = None
         self._token_expiry: Optional[datetime] = None
         
@@ -269,6 +312,10 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
     """
     Extended helper specifically for WebSocket authentication in E2E tests.
     """
+    
+    def __init__(self, config: Optional[E2EAuthConfig] = None, environment: Optional[str] = None):
+        """Initialize WebSocket auth helper with proper environment config."""
+        super().__init__(config=config, environment=environment)
     
     async def get_authenticated_websocket_url(self, token: Optional[str] = None) -> str:
         """
