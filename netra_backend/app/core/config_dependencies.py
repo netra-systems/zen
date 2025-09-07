@@ -898,13 +898,16 @@ class ConfigDependencyMap:
         
         try:
             # Use central validator - the SSOT for configuration validation
-            env = get_env()
-            validator = CentralConfigurationValidator(env_getter_func=lambda key, default=None: env.get(key, default))
+            # CRITICAL FIX: Use the global validator instance instead of creating a new one
+            # This ensures consistent OAuth test credential handling during test contexts
+            from shared.configuration.central_config_validator import get_central_validator
+            validator = get_central_validator()
             
             # Attempt validation
             validator.validate_all_requirements()
             
             # Check for legacy configurations
+            env = get_env()
             env_dict = env.as_dict() if hasattr(env, 'as_dict') else dict(env)
             legacy_warnings = LegacyConfigMarker.check_legacy_usage(env_dict)
             issues.extend(legacy_warnings)
