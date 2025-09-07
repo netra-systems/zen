@@ -153,7 +153,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_execution_with_real_database_operations(self, execution_engine_factory, agent_registry, database_manager):
+    async def test_agent_execution_with_real_database_operations(self, execution_engine_factory_test_initialized, agent_registry, database_manager):
         """Test agent execution performs real database operations.
         
         BVJ: Validates agents can persist and retrieve data - core to business intelligence value.
@@ -173,7 +173,8 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         db_session = await database_manager.get_async_session()
         test_ctx.database_session = db_session
         
-        # Create execution engine
+        # Create execution engine using the properly initialized factory
+        execution_engine_factory = execution_engine_factory_test_initialized
         engine = await execution_engine_factory.create_for_user(exec_ctx)
         
         # Verify engine has database access
