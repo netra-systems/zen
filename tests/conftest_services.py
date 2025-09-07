@@ -42,10 +42,11 @@ from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 import pytest
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
+
+# CRITICAL: Do NOT import heavy backend modules at module level
+# This causes Docker to crash on Windows during pytest collection
+# These will be imported lazily when needed inside fixtures
 
 # Lazy import flag - prevents heavy imports during collection
 _SQLALCHEMY_IMPORTS_LOADED = False
