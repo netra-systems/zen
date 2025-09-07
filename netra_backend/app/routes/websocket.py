@@ -167,24 +167,47 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
         
+        # CRITICAL SECURITY FIX: Check environment early for security decisions
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        is_testing = get_env().get("TESTING", "0") == "1"
+        
         # CRITICAL SECURITY FIX: Use factory pattern instead of singleton
         # This eliminates the security vulnerabilities in the singleton pattern
         from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         
         # Extract user context from WebSocket connection (JWT authentication)
+        # CRITICAL SECURITY FIX: No fallbacks allowed in staging/production
         try:
             user_context, auth_info = extract_websocket_user_context(websocket)
             logger.info(f"Extracted user context for WebSocket: {user_context}")
-        except Exception as e:
-            logger.error(f"Failed to extract user context from WebSocket: {e}")
-            # Use legacy fallback with warning for backward compatibility during migration
-            logger.warning("MIGRATION: Falling back to singleton pattern - this is insecure!")
-            ws_manager = get_websocket_manager()
-        else:
             # Create isolated WebSocket manager for this user context
             ws_manager = create_websocket_manager(user_context)
             logger.info(f"Created isolated WebSocket manager for user {user_context.user_id[:8]}... (manager_id: {id(ws_manager)})")
+        except Exception as e:
+            logger.error(f"AUTHENTICATION FAILED: Failed to extract user context from WebSocket: {e}")
+            
+            # CRITICAL SECURITY FIX: Check environment to determine if fallback is allowed
+            # Only allow insecure fallbacks in development/testing - NEVER in staging/production
+            if environment in ["staging", "production"]:
+                logger.critical(f"❌ Authentication failed in {environment} - REJECTING CONNECTION (no fallbacks allowed)")
+                
+                # Send authentication error and close connection immediately
+                auth_error = create_error_message(
+                    "AUTH_REQUIRED",
+                    "Authentication failed: Valid JWT token required for WebSocket connection",
+                    {"environment": environment, "error": str(e)}
+                )
+                await safe_websocket_send(websocket, auth_error.model_dump())
+                await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
+                await safe_websocket_close(websocket, code=1008, reason="Authentication failed")
+                return
+                
+            else:
+                # Development/testing only: Use legacy fallback with warning
+                logger.warning(f"DEVELOPMENT ONLY: Using insecure singleton fallback in {environment}")
+                ws_manager = get_websocket_manager()
         
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
@@ -201,10 +224,7 @@ async def websocket_endpoint(websocket: WebSocket):
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
         
-        # Check environment to determine if fallback is allowed
-        from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        is_testing = get_env().get("TESTING", "0") == "1"
+        # Environment already determined earlier for security checks
         
         # Log dependency status for debugging
         logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
