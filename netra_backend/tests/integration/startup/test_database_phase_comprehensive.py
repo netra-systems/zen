@@ -41,7 +41,8 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.database import get_db, get_system_db, get_database_url, get_engine, get_sessionmaker, DatabaseManager, database_manager
 from netra_backend.app.core.backend_environment import BackendEnvironment
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
-from netra_backend.app.db.models import User, Thread, Message
+from netra_backend.app.db.models_postgres import Thread, Message
+from netra_backend.app.db.models_user import User
 from netra_backend.app.services.database.health_checker import ConnectionHealthChecker
 
 

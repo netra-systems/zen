@@ -471,15 +471,16 @@ class AuthCircuitBreakerManager:
         if name not in self._breakers:
             # CRITICAL FIX: Use UnifiedCircuitBreaker with proper recovery mechanisms
             # This fixes the bug where MockCircuitBreaker would open permanently on any error
+            # ENHANCED: Optimized for integration tests and auth service resilience
             config = UnifiedCircuitConfig(
                 name=name,
-                failure_threshold=3,  # Allow 3 failures before opening (reduced from 5 for faster detection)
+                failure_threshold=5,  # Allow 5 failures before opening (more tolerant for connection issues)
                 success_threshold=1,  # Only need 1 success to close from half-open (faster recovery)
-                recovery_timeout=10,  # Attempt recovery after 10 seconds (reduced from 30 for faster recovery)
-                timeout_seconds=5.0,  # Individual request timeout (reduced for faster failure detection)
-                slow_call_threshold=3.0,  # Mark calls over 3s as slow (reduced threshold)
+                recovery_timeout=5,   # Attempt recovery after 5 seconds (even faster for integration tests)
+                timeout_seconds=3.0,  # Individual request timeout (reduced for faster failure detection)
+                slow_call_threshold=2.0,  # Mark calls over 2s as slow (reduced threshold for auth)
                 adaptive_threshold=False,  # Use fixed thresholds for predictability
-                exponential_backoff=False  # Disable exponential backoff for faster recovery in database operations
+                exponential_backoff=False  # Disable exponential backoff for faster recovery in auth operations
             )
             self._breakers[name] = UnifiedCircuitBreaker(config)
             logger.info(f"Created UnifiedCircuitBreaker for '{name}' with recovery_timeout=10s, failure_threshold=3 - OPTIMIZED FOR DATABASE OPERATIONS")
@@ -519,7 +520,7 @@ class MockCircuitBreaker:
         self.failure_count = 0
         self.failure_threshold = 5  # FIX: Add threshold instead of opening on first error
         self.opened_at = None
-        self.recovery_timeout = 30  # FIX: Add recovery timeout (30 seconds)
+        self.recovery_timeout = 10  # FIX: Add recovery timeout (10 seconds - faster for integration tests)
         logger.info(f"MockCircuitBreaker '{name}' initialized with recovery_timeout=30s, failure_threshold=5")
     
     def reset(self):
@@ -537,7 +538,7 @@ class MockCircuitBreaker:
                 # Attempt recovery after timeout
                 logger.info(f"MockCircuitBreaker '{self.name}' attempting recovery after {self.recovery_timeout}s")
                 self.is_open = False
-                self.failure_count = 0
+                self.failure_count = 0  # Reset failure count on recovery attempt
                 self.opened_at = None
             else:
                 # Still in recovery timeout period

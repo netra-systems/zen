@@ -715,6 +715,14 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
         execution_start = time.time()
         
         try:
+            # Generate WebSocket event: agent_started
+            await self._send_websocket_event(ws_context, WebSocketEventType.AGENT_STARTED, {
+                "agent": agent_name,
+                "timestamp": datetime.now().isoformat(),
+                "user_id": state.user_id,
+                "run_id": state.run_id
+            })
+            
             # Mock agent execution with realistic business outcomes
             with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm', 
                       side_effect=self.mock_llm.ask_llm):
@@ -728,7 +736,42 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                     "data": 5.0
                 }.get(agent_name.lower().split('_')[0], 5.0)
                 
-                await asyncio.sleep(execution_time / 10)  # Accelerated for testing
+                # Generate WebSocket event: agent_thinking (early phase)
+                await self._send_websocket_event(ws_context, WebSocketEventType.AGENT_THINKING, {
+                    "agent": agent_name,
+                    "status": f"Initializing {agent_name} analysis...",
+                    "phase": "initialization"
+                })
+                
+                await asyncio.sleep(execution_time / 20)  # Accelerated for testing
+                
+                # Generate WebSocket event: tool_executing (if applicable)
+                if any(tool in agent_name.lower() for tool in ['optimization', 'performance', 'analysis', 'resource']):
+                    tool_name = f"{agent_name.lower().split('_')[0]}_analysis_tool"
+                    await self._send_websocket_event(ws_context, WebSocketEventType.TOOL_EXECUTING, {
+                        "agent": agent_name,
+                        "tool": tool_name,
+                        "purpose": f"Business analysis for {agent_name}"
+                    })
+                    
+                    await asyncio.sleep(execution_time / 20)
+                    
+                    # Generate WebSocket event: tool_completed
+                    await self._send_websocket_event(ws_context, WebSocketEventType.TOOL_COMPLETED, {
+                        "agent": agent_name,
+                        "tool": tool_name,
+                        "result": "success",
+                        "insights_found": True
+                    })
+                
+                # Generate WebSocket event: agent_thinking (analysis phase)
+                await self._send_websocket_event(ws_context, WebSocketEventType.AGENT_THINKING, {
+                    "agent": agent_name,
+                    "status": f"Analyzing business requirements with {agent_name}...",
+                    "phase": "analysis"
+                })
+                
+                await asyncio.sleep(execution_time / 20)
                 
                 # Generate realistic business outcomes
                 business_outcomes = self._generate_business_outcomes(agent_name, state)
@@ -751,6 +794,15 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                     self.business_metrics.add_warning(
                         f"Missing expected outcomes: {missing_outcomes}"
                     )
+                
+                # Generate WebSocket event: agent_completed
+                await self._send_websocket_event(ws_context, WebSocketEventType.AGENT_COMPLETED, {
+                    "agent": agent_name,
+                    "result": "success",
+                    "business_outcomes": list(business_outcomes.keys()),
+                    "execution_time": actual_duration,
+                    "timestamp": datetime.now().isoformat()
+                })
                     
                 return {
                     "success": True,

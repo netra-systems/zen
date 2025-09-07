@@ -560,7 +560,10 @@ class TestUnifiedTestRunnerProper(SSotBaseTestCase):
             verbose=False, 
             fast_fail=False,
             pattern=None,
-            workers=4
+            workers=4,
+            category=None,
+            categories=None,
+            service=None
         )
         
         # This should handle unknown service gracefully

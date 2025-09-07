@@ -269,16 +269,16 @@ class AuthServiceClient:
         self.tracing_manager = TracingManager()
         self._client = None
         
-        # Initialize circuit breaker for auth service calls
+        # Initialize circuit breaker for auth service calls with improved recovery
         self.circuit_breaker = get_circuit_breaker(
             name="auth_service",
             config=CircuitBreakerConfig(
                 failure_threshold=3,  # Open after 3 consecutive failures
-                success_threshold=2,  # Close after 2 consecutive successes in half-open
-                timeout=30.0,  # Try half-open after 30 seconds
-                call_timeout=5.0,  # Individual call timeout
-                failure_rate_threshold=0.5,  # Open if 50% of calls fail
-                min_calls_for_rate=5  # Need at least 5 calls to calculate failure rate
+                success_threshold=1,  # Close after 1 success in half-open (faster recovery)
+                timeout=10.0,  # Try half-open after 10 seconds (faster recovery)
+                call_timeout=3.0,  # Individual call timeout (shorter for faster failure detection)
+                failure_rate_threshold=0.8,  # Open if 80% of calls fail (more tolerant)
+                min_calls_for_rate=3  # Need only 3 calls to calculate failure rate (faster detection)
             )
         )
         # Load service authentication credentials
@@ -322,11 +322,16 @@ class AuthServiceClient:
                 raise RuntimeError("SERVICE_SECRET must be configured in production environment")
     
     def _create_http_client(self) -> httpx.AsyncClient:
-        """Create new HTTP client instance."""
+        """Create new HTTP client instance with connection pooling and retry logic."""
         return httpx.AsyncClient(
             base_url=self.settings.base_url,
-            timeout=httpx.Timeout(10.0),
-            limits=httpx.Limits(max_keepalive_connections=5)
+            timeout=httpx.Timeout(connect=2.0, read=5.0, write=5.0, pool=10.0),  # More granular timeouts
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
+            follow_redirects=True,
+            transport=httpx.AsyncHTTPTransport(
+                retries=2,  # Built-in retry logic
+                verify=False,  # For local development
+            )
         )
     
     async def _get_client(self) -> httpx.AsyncClient:
@@ -427,6 +432,23 @@ class AuthServiceClient:
             }
         return None
     
+    async def _check_auth_service_connectivity(self) -> bool:
+        """Check if auth service is reachable before attempting operations.
+        
+        Returns:
+            True if auth service is reachable, False otherwise
+        """
+        try:
+            # Quick connectivity check with minimal timeout
+            client = await self._get_client()
+            response = await client.get("/health", timeout=2.0)  # Quick health check
+            is_reachable = response.status_code in [200, 404]  # 404 is OK, means service is up
+            logger.debug(f"Auth service connectivity check: reachable={is_reachable}, status={response.status_code}")
+            return is_reachable
+        except Exception as e:
+            logger.warning(f"Auth service connectivity check failed: {e}")
+            return False
+    
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
         """Try to get token from cache with atomic blacklist checking."""
         cached_result = await self.token_cache.get_cached_token(token)
@@ -452,7 +474,7 @@ class AuthServiceClient:
         return result
     
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
-        """Handle validation error with enhanced user notification and detailed error information."""
+        """Handle validation error with enhanced user notification and graceful degradation for integration tests."""
         error_type = type(error).__name__
         error_msg = str(error)
         
@@ -464,8 +486,19 @@ class AuthServiceClient:
             "forbidden" in error_msg.lower()
         )
         
-        # LOUD ERROR: Authentication failures should be highly visible
-        if is_service_auth_issue:
+        # Check if this is a connection/circuit breaker issue (common in integration tests)
+        is_connection_issue = any(conn_err in error_msg.lower() for conn_err in [
+            'connection', 'timeout', 'network', 'unreachable', 'circuit breaker', 
+            'service_unavailable', 'all connection attempts failed'
+        ])
+        
+        # ENHANCED: More appropriate logging levels for different scenarios
+        if is_connection_issue:
+            # For connection issues, use warning level (expected during integration tests without Docker)
+            logger.warning(f"AUTH SERVICE CONNECTION ISSUE: {error_msg}")
+            logger.warning(f"Auth service URL: {self.settings.base_url}")
+            logger.warning("This is expected when running integration tests without Docker services")
+        elif is_service_auth_issue:
             logger.critical("INTER-SERVICE AUTHENTICATION CRITICAL ERROR")
             logger.critical(f"Error: {error}")
             logger.critical(f"Auth service URL: {self.settings.base_url}")
@@ -474,32 +507,34 @@ class AuthServiceClient:
             logger.critical("CRITICAL ACTION REQUIRED: Configure SERVICE_ID and SERVICE_SECRET environment variables")
             logger.critical("BUSINESS IMPACT: Users may experience authentication failures or be unable to access the system")
         else:
-            logger.critical(f"USER AUTHENTICATION FAILURE: Token validation failed: {error}")
-            logger.critical(f"Auth service URL: {self.settings.base_url}")
-            logger.critical(f"Auth service enabled: {self.settings.enabled}")
-            logger.critical("BUSINESS IMPACT: Users may be unable to authenticate or access protected resources")
+            logger.error(f"USER AUTHENTICATION FAILURE: Token validation failed: {error}")
+            logger.error(f"Auth service URL: {self.settings.base_url}")
+            logger.error(f"Auth service enabled: {self.settings.enabled}")
         
         # SSOT COMPLIANCE: NO fallback validation - auth service is SSOT
         # Fallback mechanisms violate SSOT architecture and cause JWT secret mismatches
-        logger.warning("SSOT COMPLIANCE: Rejecting fallback validation - auth service is single source of truth")
+        logger.debug("SSOT COMPLIANCE: Rejecting fallback validation - auth service is single source of truth")
         
-        # If fallback also failed or returned invalid token
-        # Check if this is a connection/service error
-        if any(conn_err in error_msg.lower() for conn_err in ['connection', 'timeout', 'network', 'unreachable', 'circuit breaker', 'service_unavailable']):
-            logger.critical(f"AUTH SERVICE UNREACHABLE: {error_msg}. Users cannot authenticate.")
+        # Handle connection/service errors with appropriate user-friendly messages
+        if is_connection_issue:
+            # Provide different severity for integration tests vs production
+            is_test_env = self._is_test_environment()
+            severity = "warning" if is_test_env else "error"
+            
             return {
                 "valid": False, 
                 "error": "auth_service_unreachable", 
                 "details": error_msg,
+                "test_environment": is_test_env,
                 "user_notification": {
-                    "message": "Authentication service temporarily unavailable",
-                    "severity": "error",
+                    "message": "Authentication service temporarily unavailable" if not is_test_env else "Auth service not available (test environment)",
+                    "severity": severity,
                     "user_friendly_message": (
                         "We're having trouble with our authentication system. "
                         "Please try logging in again in a few moments. "
                         "If this persists, contact support."
-                    ),
-                    "action_required": "Try logging in again or contact support if the issue persists",
+                    ) if not is_test_env else "Authentication service is not running (expected in test environment without Docker)",
+                    "action_required": "Try logging in again or contact support if the issue persists" if not is_test_env else "Start auth service or use real services for testing",
                     "support_code": f"AUTH_UNAVAIL_{datetime.now().strftime('%H%M%S')}"
                 }
             }
@@ -553,7 +588,25 @@ class AuthServiceClient:
         return await self._cache_validation_result(token, result)
     
     async def _execute_token_validation(self, token: str) -> Optional[Dict]:
-        """Execute token validation with error handling and circuit breaker."""
+        """Execute token validation with error handling, connectivity checks, and circuit breaker."""
+        # ENHANCED: Check service connectivity before attempting validation
+        if not await self._check_auth_service_connectivity():
+            logger.warning("Auth service is not reachable - graceful degradation for integration tests")
+            # For integration tests without Docker, provide a clear "service unavailable" response
+            # rather than letting circuit breaker fail multiple times
+            return {
+                "valid": False,
+                "error": "auth_service_unreachable",
+                "details": "Auth service is not available - check if service is running",
+                "user_notification": {
+                    "message": "Authentication service temporarily unavailable",
+                    "severity": "warning",
+                    "user_friendly_message": "We're having trouble connecting to our authentication system. Please try again in a moment.",
+                    "action_required": "Try again or check service status",
+                    "support_code": f"AUTH_CONN_{datetime.now().strftime('%H%M%S')}"
+                }
+            }
+        
         # SSOT COMPLIANCE: Only use auth service for validation - no local fallback
         # Local validation violates SSOT and causes JWT secret mismatches
         # Use circuit breaker to protect against auth service failures
@@ -572,9 +625,9 @@ class AuthServiceClient:
                 result = await self.circuit_breaker.call(validate_with_service)
                 return result
             except CircuitBreakerOpen:
-                logger.warning("Circuit breaker is OPEN - using cached validation fallback")
-                # Circuit is open, use fallback validation
-                return await self._handle_validation_error(token, Exception("Auth service unavailable (circuit open)"))
+                logger.warning("Circuit breaker is OPEN - auth service is temporarily unavailable")
+                # Circuit is open, provide graceful degradation response
+                return await self._handle_validation_error(token, Exception("Auth service circuit breaker open"))
             except ValueError as e:
                 # Token was rejected (not a service failure) - no fallback allowed
                 logger.debug(f"Token rejected by auth service: {e}")

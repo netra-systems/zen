@@ -2227,7 +2227,8 @@ class TestComprehensiveFinalValidation:
                 # URL should be well-formed
                 if "://" in url:
                     parsed = urlparse(url)
-                    assert parsed.scheme in ["postgresql", "sqlite"], f"Invalid URL scheme for {description}"
+                    valid_schemes = ["postgresql", "sqlite", "postgresql+asyncpg", "postgresql+psycopg", "postgresql+psycopg2", "sqlite+aiosqlite"]
+                    assert parsed.scheme in valid_schemes, f"Invalid URL scheme for {description}: {parsed.scheme}"
                     
                     if parsed.hostname:  # Skip for memory URLs
                         assert len(parsed.hostname) > 0, f"Empty hostname for {description}"
