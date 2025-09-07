@@ -346,54 +346,7 @@ def mock_staging_env():
                 env.set(key, original_value, source='mock_staging')
 
 
-# Compatibility layer for gradual migration
-@pytest.fixture
-def mock_os_environ(monkeypatch):
-    """
-    DEPRECATED: Compatibility fixture for tests still using monkeypatch.
-    
-    This fixture provides backward compatibility for tests that haven't
-    been migrated yet. NEW TESTS SHOULD USE isolated_test_env or mock_env_vars.
-    
-    Usage (DEPRECATED):
-        def test_old_style(mock_os_environ):
-            mock_os_environ.setenv('TEST_VAR', 'value')
-    """
-    import warnings
-    warnings.warn(
-        "mock_os_environ is deprecated. Use isolated_test_env or mock_env_vars instead.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    class EnvPatcher:
-        def __init__(self):
-            self.env = get_env()
-            self.original_values = {}
-        
-        def setenv(self, key: str, value: str):
-            if key not in self.original_values:
-                self.original_values[key] = self.env.get(key)
-            self.env.set(key, value, source='mock_os_environ')
-        
-        def delenv(self, key: str):
-            if key not in self.original_values:
-                self.original_values[key] = self.env.get(key)
-            self.env.delete(key, source='mock_os_environ')
-        
-        def cleanup(self):
-            for key, original_value in self.original_values.items():
-                if original_value is None:
-                    self.env.delete(key, source='mock_os_environ')
-                else:
-                    self.env.set(key, original_value, source='mock_os_environ')
-    
-    patcher = EnvPatcher()
-    
-    try:
-        yield patcher
-    finally:
-        patcher.cleanup()
+# Backward compatibility removed - use isolated_test_env or mock_env_vars instead
 
 
 def replace_patch_dict_with_isolated_env(test_func):
