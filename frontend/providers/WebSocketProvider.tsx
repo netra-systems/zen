@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 import { chatStatePersistence } from '../services/chatStatePersistence';
+import { generateMessageId, generateTemporaryId } from '../utils/unique-id-generator';
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
@@ -92,7 +93,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         const chatMessages = updatedMessages
           .filter(msg => ['user_message', 'assistant_message', 'agent_completed', 'final_report'].includes(msg.type))
           .map(msg => ({
-            id: msg.payload?.message_id || `msg_${Date.now()}`,
+            id: msg.payload?.message_id || generateMessageId(),
             content: msg.payload?.content || msg.payload?.result || '',
             role: msg.type === 'user_message' ? 'user' : 'assistant',
             timestamp: msg.payload?.timestamp || Date.now()
@@ -427,7 +428,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const sendOptimisticMessage = useCallback((messageContent: string, messageType: 'user' | 'assistant' = 'user') => {
     // Create optimistic message for immediate UI update
     const optimisticMsg = reconciliationService.addOptimisticMessage({
-      id: `temp_${Date.now()}`,
+      id: generateTemporaryId('message'),
       content: messageContent,
       role: messageType,
       timestamp: Date.now()

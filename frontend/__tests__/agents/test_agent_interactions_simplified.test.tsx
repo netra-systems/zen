@@ -24,6 +24,15 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { jest } from '@jest/globals';
 
+// Unique ID generator to prevent React key collisions
+let messageIdCounter = 0;
+const generateUniqueMessageId = (prefix: string): string => {
+  const timestamp = Date.now();
+  const counter = ++messageIdCounter;
+  const random = Math.random().toString(36).substr(2, 9);
+  return `${prefix}-${timestamp}-${counter}-${random}`;
+};
+
 // Define simplified agent types for testing
 type AgentStatus = 'idle' | 'running' | 'completed' | 'error';
 
@@ -93,7 +102,7 @@ const SimpleAgentInterface: React.FC<{
     
     // Add user message
     const userMsg = {
-      id: `user-${Date.now()}`,
+      id: generateUniqueMessageId('user'),
       content: userMessage,
       role: 'user' as const,
       timestamp: new Date().toISOString()
@@ -113,7 +122,7 @@ const SimpleAgentInterface: React.FC<{
     
     // Complete execution with business value
     const assistantMsg = {
-      id: `assistant-${Date.now()}`,
+      id: generateUniqueMessageId('assistant'),
       content: businessValue.response,
       role: 'assistant' as const,
       timestamp: new Date().toISOString(),
