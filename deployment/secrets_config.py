@@ -38,11 +38,12 @@ class SecretConfig:
                 "POSTGRES_PASSWORD"
             ],
             "authentication": [
-                "JWT_SECRET_STAGING",
-                "JWT_SECRET_KEY",
-                "SECRET_KEY",  # CRITICAL: Backend requires SECRET_KEY
+                "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
+                "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
+                "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
+                "SECRET_KEY",          # CRITICAL: Backend requires SECRET_KEY
                 "SERVICE_SECRET",
-                "SERVICE_ID",  # CRITICAL: Required for inter-service auth with auth service
+                "SERVICE_ID",          # CRITICAL: Required for inter-service auth with auth service
                 "FERNET_KEY"
             ],
             "oauth": [
@@ -76,9 +77,10 @@ class SecretConfig:
                 "POSTGRES_PASSWORD"
             ],
             "authentication": [
-                "JWT_SECRET_STAGING",
-                "JWT_SECRET_KEY",
-                "SECRET_KEY",  # CRITICAL: Auth service requires SECRET_KEY
+                "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
+                "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
+                "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
+                "SECRET_KEY",          # CRITICAL: Auth service requires SECRET_KEY
                 "SERVICE_SECRET",
                 "SERVICE_ID"
             ],
@@ -112,11 +114,12 @@ class SecretConfig:
         "POSTGRES_PASSWORD": "postgres-password-staging",
         
         # Authentication & JWT
-        # CRITICAL FIX: Both JWT_SECRET_STAGING and JWT_SECRET_KEY must map to the same secret
+        # CRITICAL FIX: All JWT secret names must map to the same secret for consistency
         # This ensures WebSocket authentication works correctly in staging
-        "JWT_SECRET_STAGING": "jwt-secret-staging",
-        "JWT_SECRET_KEY": "jwt-secret-staging",  # CRITICAL: Same as JWT_SECRET_STAGING for consistency
-        "SECRET_KEY": "secret-key-staging",  # CRITICAL: Maps to secret-key-staging
+        "JWT_SECRET": "jwt-secret-staging",         # CRITICAL: Base JWT secret
+        "JWT_SECRET_KEY": "jwt-secret-staging",     # CRITICAL: Same as JWT_SECRET for consistency
+        "JWT_SECRET_STAGING": "jwt-secret-staging", # CRITICAL: Environment-specific name
+        "SECRET_KEY": "secret-key-staging",         # CRITICAL: Maps to secret-key-staging
         "SERVICE_SECRET": "service-secret-staging",
         "SERVICE_ID": "service-id-staging",
         "FERNET_KEY": "fernet-key-staging",
@@ -150,15 +153,17 @@ class SecretConfig:
     # If any of these are missing, deployment should fail
     CRITICAL_SECRETS: Dict[str, List[str]] = {
         "backend": [
-            "SECRET_KEY",  # CRITICAL: Required for encryption
-            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens
+            "SECRET_KEY",      # CRITICAL: Required for encryption
+            "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
+            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
-            "SERVICE_ID",  # CRITICAL: Required for inter-service auth
+            "SERVICE_ID",      # CRITICAL: Required for inter-service auth
             "POSTGRES_PASSWORD",  # CRITICAL: Required for database
         ],
         "auth": [
-            "SECRET_KEY",  # CRITICAL: Required for auth service
-            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens
+            "SECRET_KEY",      # CRITICAL: Required for auth service
+            "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
+            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
             "POSTGRES_PASSWORD",  # CRITICAL: Required for database
         ]

@@ -113,36 +113,42 @@ class AuthStartupValidator:
         return len(critical_failures) == 0, self.validation_results
     
     async def _validate_jwt_secret(self) -> None:
-        """Validate JWT secret configuration."""
+        """Validate JWT secret configuration using SSOT JWT manager."""
         result = AuthValidationResult(component=AuthComponent.JWT_SECRET, valid=False)
         
         try:
-            # Get JWT secret, explicitly ignoring any default values  
-            jwt_secret = self.env.get('JWT_SECRET')
-            jwt_secret_key = self.env.get('JWT_SECRET_KEY')
+            # Use SSOT JWT secret manager for consistent validation
+            from shared.jwt_secret_manager import get_jwt_secret_manager
+            jwt_manager = get_jwt_secret_manager()
             
-            # Check if either is a real secret (not a default test value)
-            is_default_secret = (
-                jwt_secret in [None, '', 'your-secret-key', 'test-secret', 'secret'] or
-                jwt_secret_key in [None, '', 'your-secret-key', 'test-secret', 'secret']
-            )
+            # Get JWT secret through SSOT resolver
+            jwt_secret = jwt_manager.get_jwt_secret()
             
-            if is_default_secret or (not jwt_secret and not jwt_secret_key):
-                result.error = "No JWT secret configured (JWT_SECRET or JWT_SECRET_KEY)"
+            # Check if it's a real secret (not a default test value)
+            is_default_secret = jwt_secret in [
+                None, '', 'your-secret-key', 'test-secret', 'secret', 
+                'emergency_jwt_secret_please_configure_properly',
+                'fallback_jwt_secret_for_emergency_only'
+            ]
+            
+            if is_default_secret or not jwt_secret:
+                result.error = "No JWT secret configured (JWT_SECRET, JWT_SECRET_KEY, or JWT_SECRET_STAGING)"
+                debug_info = jwt_manager.get_debug_info()
                 result.details = {
-                    "jwt_secret_present": bool(jwt_secret),
-                    "jwt_secret_key_present": bool(jwt_secret_key),
-                    "environment": self.environment
+                    "environment": self.environment,
+                    "debug_info": debug_info
                 }
-            elif jwt_secret and len(jwt_secret) < 32:
+            elif len(jwt_secret) < 32:
                 result.error = f"JWT secret too short ({len(jwt_secret)} chars, minimum 32)"
                 result.details = {"length": len(jwt_secret), "minimum": 32}
             else:
                 result.valid = True
-                logger.info(f"  ✓ JWT secret validated (length: {len(jwt_secret or jwt_secret_key)})")
+                logger.info(f"  ✓ JWT secret validated (length: {len(jwt_secret)})")
+                logger.info(f"  ✓ Using SSOT JWT secret resolution for {self.environment}")
         
         except Exception as e:
             result.error = f"JWT validation error: {e}"
+            logger.error(f"  ❌ JWT validation failed: {e}")
         
         self.validation_results.append(result)
     
