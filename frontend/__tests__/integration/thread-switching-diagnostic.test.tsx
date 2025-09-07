@@ -176,16 +176,11 @@ describe('Thread Switching Diagnostics', () => {
       
       // Set up the mock using require to get the mocked module
       const { threadLoadingService } = require('@/services/threadLoadingService');
-      console.log('Test: threadLoadingService is:', threadLoadingService);
-      console.log('Test: threadLoadingService.loadThread is:', threadLoadingService.loadThread);
-      
       threadLoadingService.loadThread.mockResolvedValue({
         success: true,
         threadId: 'thread-1',
         messages: [{ id: 'msg-1', content: 'Test message' }]
       });
-      
-      console.log('Test: Mock set up, threadLoadingService.loadThread is now:', threadLoadingService.loadThread);
 
       // Wait for the thread switch to complete
       await act(async () => {
