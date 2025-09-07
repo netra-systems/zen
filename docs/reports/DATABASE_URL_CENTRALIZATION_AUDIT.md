@@ -115,7 +115,7 @@ These are acceptable because they:
 - Consider adding integration test to verify all services use DatabaseURLBuilder
 
 ### 3. Monitoring
-- Add runtime checks to ensure DATABASE_URL is always constructed via DatabaseURLBuilder
+- Add runtime checks to ensure #removed-legacyis always constructed via DatabaseURLBuilder
 - Consider adding telemetry to track URL construction patterns
 
 ## Conclusion

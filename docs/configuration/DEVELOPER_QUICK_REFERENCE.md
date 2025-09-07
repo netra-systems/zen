@@ -193,7 +193,7 @@ if os.environ["TESTING"]:
 # ❌ WRONG - Timing issues
 # At module level:
 config = get_unified_config()  # DON'T DO THIS
-DATABASE_URL = config.database.url  # DON'T DO THIS
+#removed-legacy= config.database.url  # DON'T DO THIS
 ```
 
 ### DON'T: Configuration Mutation

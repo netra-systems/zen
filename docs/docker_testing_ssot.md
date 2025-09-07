@@ -75,7 +75,7 @@ TESTING = "1"
 TEST_USE_SHARED_DOCKER = "false"  # Use dedicated containers
 
 # Database connections
-DATABASE_URL = "postgresql://test_user:test_pass@localhost:5434/netra_test"
+#removed-legacy= "postgresql://test_user:test_pass@localhost:5434/netra_test"
 REDIS_URL = "redis://localhost:6381/1"
 CLICKHOUSE_URL = "http://localhost:8125"
 

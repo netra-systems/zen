@@ -43,14 +43,14 @@ separator = "&" if "?" in base_url else "?"
 return f"{base_url}{separator}sslmode=require"
 ```
 
-### 2. Direct DATABASE_URL References (Legacy)
+### 2. Direct #removed-legacyReferences (Legacy)
 
-Found direct DATABASE_URL environment variable access in:
-1. `dev_launcher/config.py:556` - Still checking for DATABASE_URL in environment
-2. `dev_launcher/auth_starter.py:154-158` - Setting DATABASE_URL directly
-3. `dev_launcher/launcher.py:856` - Requiring DATABASE_URL in required_vars
-4. `dev_launcher/migration_runner.py:124,263-264` - Using DATABASE_URL directly
-5. Multiple test files - Using DATABASE_URL for test configuration
+Found direct #removed-legacyenvironment variable access in:
+1. `dev_launcher/config.py:556` - Still checking for #removed-legacyin environment
+2. `dev_launcher/auth_starter.py:154-158` - Setting #removed-legacydirectly
+3. `dev_launcher/launcher.py:856` - Requiring #removed-legacyin required_vars
+4. `dev_launcher/migration_runner.py:124,263-264` - Using #removed-legacydirectly
+5. Multiple test files - Using #removed-legacyfor test configuration
 
 ### 3. XML Learnings Updates Needed
 
@@ -83,11 +83,11 @@ def _add_query_param(url: str, param: str, value: str) -> str:
     return f"{url}{separator}{param}={value}"
 ```
 
-### 2. Migration Strategy for Direct DATABASE_URL Usage
+### 2. Migration Strategy for Direct #removed-legacyUsage
 
 1. **Phase 1**: Update dev_launcher to use DatabaseURLBuilder
 2. **Phase 2**: Update test configurations to use builder
-3. **Phase 3**: Mark all direct DATABASE_URL access as legacy with warnings
+3. **Phase 3**: Mark all direct #removed-legacyaccess as legacy with warnings
 
 ### 3. Testing Requirements
 
@@ -104,7 +104,7 @@ Create comprehensive tests for:
 2. **CRITICAL**: Fix SSL parameter addition logic
 3. **HIGH**: Update dev_launcher to use DatabaseURLBuilder
 4. **MEDIUM**: Update XML learnings to reference new builder
-5. **LOW**: Add deprecation warnings for direct DATABASE_URL usage
+5. **LOW**: Add deprecation warnings for direct #removed-legacyusage
 
 ## Validation Checklist
 

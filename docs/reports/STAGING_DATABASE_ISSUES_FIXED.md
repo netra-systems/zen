@@ -31,7 +31,7 @@ Fixed critical staging database issues identified in logs from 2025-08-24 17:16:
   - POSTGRES_PASSWORD
 - Automatically constructs database URL from individual variables
 - Properly handles Cloud SQL Unix socket connections (/cloudsql/...)
-- Falls back to DATABASE_URL if individual variables not set
+- Falls back to #removed-legacyif individual variables not set
 
 ### 3. Added Sync URL Support (database.py:397-441)
 - New `get_sync_postgres_url()` method for migrations
@@ -56,7 +56,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<actual_password>
 ```
 
-Or maintain the single DATABASE_URL in the correct format:
+Or maintain the single #removed-legacyin the correct format:
 ```
 postgresql://postgres:<url_encoded_password>@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres
 ```

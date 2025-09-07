@@ -33,7 +33,7 @@ The Netra platform implements a sophisticated multi-layered configuration manage
 - Because os.environ is a global mutable state that any code can modify at any time, and Python's import system caches modules, keeping stale configuration values.
 
 **Why #4: Why is global mutable state problematic for configuration?**
-- Because we can't track who changed what, when, or why. Without isolation, a test that sets DATABASE_URL affects all subsequent tests, and debugging becomes impossible.
+- Because we can't track who changed what, when, or why. Without isolation, a test that sets #removed-legacyaffects all subsequent tests, and debugging becomes impossible.
 
 **Why #5: Why do we need to track configuration changes?**
 - Because configuration errors cause 60% of production outages (per Google SRE data), and without traceability, we lose $12K MRR from configuration-related incidents.

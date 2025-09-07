@@ -844,7 +844,7 @@ class ConfigurationValidator:
         
         # Database URL validation
         if not self._validate_database_url(config.get('DATABASE_URL')):
-            errors.append("Invalid DATABASE_URL format")
+            errors.append("Invalid #removed-legacyformat")
         
         # Security validation
         if config.get('ENVIRONMENT') == 'production':

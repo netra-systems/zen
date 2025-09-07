@@ -385,7 +385,7 @@ export API_KEY_ROTATION=true
 pg_isready -h localhost -p 5432
 
 # Verify connection string
-psql $DATABASE_URL -c "SELECT 1"
+psql $#removed-legacy-c "SELECT 1"
 
 # Use connection pooling
 export DB_POOL_SIZE=5

@@ -34,7 +34,7 @@ The following scripts were updated to use DatabaseURLBuilder instead of manual U
    - Properly handles Cloud SQL vs TCP connections
 
 5. **environment_validator_database.py**
-   - Previously: Manual parsing of DATABASE_URL string
+   - Previously: Manual parsing of #removed-legacystring
    - Now: Uses `DatabaseURLBuilder` for parsing and URL construction
    - Better handling of different connection types
 
@@ -78,7 +78,7 @@ The following scripts appear to be redundant or outdated:
 The main deployment script (`deploy_to_gcp.py`) correctly:
 - Does not construct database URLs directly
 - Relies on services to fetch URLs from secret manager
-- Only checks for localhost in DATABASE_URL as a warning
+- Only checks for localhost in #removed-legacyas a warning
 
 ## Recommendations
 
