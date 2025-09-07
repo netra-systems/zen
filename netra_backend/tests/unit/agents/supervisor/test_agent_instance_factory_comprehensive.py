@@ -37,7 +37,7 @@ from dataclasses import dataclass
 from contextlib import asynccontextmanager
 
 # Import SSOT test framework
-from test_framework.ssot.base import BaseTestCase
+from test_framework.ssot.base_test_case import SSotSSotBaseTestCase
 
 # Import the class under test and dependencies
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
@@ -108,7 +108,7 @@ class MockNoParamAgent(BaseAgent):
         self._websocket_adapter.set_websocket_bridge = Mock()
 
 
-class TestAgentInstanceFactoryComprehensive(BaseTestCase):
+class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     """Comprehensive test suite for AgentInstanceFactory - MISSION CRITICAL."""
     
     # Test requires real services for integration validation
@@ -1135,7 +1135,7 @@ class TestAgentInstanceFactoryComprehensive(BaseTestCase):
 # WEBSOCKET EMITTER SPECIFIC TESTS
 # =========================================================================
 
-class TestUserWebSocketEmitterComprehensive(BaseTestCase):
+class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
     """Comprehensive tests for UserWebSocketEmitter component."""
     
     def setUp(self):
@@ -1238,7 +1238,7 @@ class TestUserWebSocketEmitterComprehensive(BaseTestCase):
 # PERFORMANCE OPTIMIZATION TESTS
 # =========================================================================
 
-class TestAgentInstanceFactoryPerformance(BaseTestCase):
+class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
     """Performance-focused tests for AgentInstanceFactory optimizations."""
     
     def setUp(self):
