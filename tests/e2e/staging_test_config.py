@@ -101,44 +101,33 @@ class StagingConfig:
         return headers
     
     def create_test_jwt_token(self) -> Optional[str]:
-        """Create a test JWT token for staging authentication using SSOT E2E OAuth simulation
+        """Create a test JWT token for staging authentication using SSOT E2E Auth Helper
         
-        CRITICAL FIX: Now uses the existing SSOT staging auth bypass method instead of
-        creating fabricated JWT tokens. This ensures the token represents a REAL USER
-        in the staging database, which is required for WebSocket authentication.
-        
-        The previous approach created JWT tokens with fake user IDs that don't exist
-        in staging database, causing HTTP 403 errors during user validation.
+        CRITICAL FIX: Uses the SSOT E2EAuthHelper for proper async-safe token generation.
+        This avoids the asyncio.run() error and ensures proper staging authentication.
         """
         try:
-            # CRITICAL FIX: Ensure E2E_OAUTH_SIMULATION_KEY is available for testing
+            # Use SSOT E2E Auth Helper for staging
+            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
+            
+            # Ensure E2E_OAUTH_SIMULATION_KEY is set for staging
             import os
-            env_key = os.environ.get("E2E_OAUTH_SIMULATION_KEY")
-            if not env_key:
-                # Set appropriate bypass key based on environment
-                # In staging tests, we need to use a compatible key
-                bypass_key = "staging-e2e-test-bypass-key-2025"
-                os.environ["E2E_OAUTH_SIMULATION_KEY"] = bypass_key
+            if not os.environ.get("E2E_OAUTH_SIMULATION_KEY"):
+                os.environ["E2E_OAUTH_SIMULATION_KEY"] = "staging-e2e-test-bypass-key-2025"
                 print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for staging testing")
             
-            # CRITICAL FIX: Use existing SSOT staging auth bypass instead of fabricated tokens
-            from tests.e2e.staging_auth_bypass import get_staging_auth
+            # Create staging config
+            staging_config = E2EAuthConfig.for_staging()
+            auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             
-            # Get authenticated token from staging auth service
-            # This creates a REAL USER in the staging database for E2E testing
-            staging_auth = get_staging_auth()
-            
-            # Use staging auth service to create real user token
-            # This token will represent an actual user record in staging database
-            token = staging_auth.get_sync_token(
-                email="e2e-websocket-test@staging.netrasystems.ai",
-                name="E2E WebSocket Test User",
-                permissions=["read", "write"]
+            # Create test JWT token synchronously (safe for non-async context)
+            token = auth_helper.create_test_jwt_token(
+                user_id="staging-test-user-" + str(os.getpid()),
+                email="e2e-websocket-test@staging.netrasystems.ai"
             )
             
-            print(f"[SUCCESS] STAGING AUTH BYPASS TOKEN CREATED using SSOT method")
-            print(f"[SUCCESS] Token represents REAL USER in staging database")
-            print(f"[SUCCESS] This fixes WebSocket 403 authentication failures")
+            print(f"[SUCCESS] Created staging test JWT using SSOT E2EAuthHelper")
+            print(f"[INFO] This avoids asyncio.run() conflicts in async test contexts")
             
             return token
                 

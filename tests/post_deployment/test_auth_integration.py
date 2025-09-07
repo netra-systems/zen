@@ -17,14 +17,18 @@ import sys
 import time
 from typing import Dict, Optional
 from urllib.parse import urlparse
-from shared.isolated_environment import IsolatedEnvironment
+
+# Add project root to path BEFORE imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from shared.isolated_environment import get_env
 
 import httpx
 import jwt
 import pytest
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Initialize environment instance
+env = get_env()
 
 from test_framework.environment_markers import staging_only, prod_safe
 

@@ -385,6 +385,9 @@ def setup_test_security_environment():
         "ENCRYPTION_KEY": "test-encryption-key-32-chars-long",
         "GOOGLE_CLIENT_ID": "test-google-client-id",
         "GOOGLE_CLIENT_SECRET": "test-google-client-secret",
+        # OAuth Test Environment Credentials (required by CentralConfigurationValidator)
+        "GOOGLE_OAUTH_CLIENT_ID_TEST": "test-oauth-client-id-for-automated-testing",
+        "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test-oauth-client-secret-for-automated-testing",
         "GEMINI_API_KEY": "test-gemini-api-key",
         "GOOGLE_API_KEY": "test-google-api-key",
         "ANTHROPIC_API_KEY": "test-anthropic-api-key",
