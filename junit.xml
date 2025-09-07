@@ -1,18 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.348" timestamp="2025-09-07T10:45:59.152210-07:00" hostname="Anthony"><testcase classname="" name="" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py:512: in __call__
-    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py:120: in _hookexec
-    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:883: in pytest_make_collect_report
-    out, err = self.read_global_capture()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:803: in read_global_capture
-    return self._global_capturing.readouterr()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:706: in readouterr
-    out = self.out.snap() if self.out else ""
-          ^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:591: in snap
-    self.tmpfile.seek(0)
-E   ValueError: I/O operation on closed file.</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="3.200" timestamp="2025-09-07T10:46:30.560559-07:00" hostname="Anthony"><testcase classname="" name="tests.unit.test_database_models_comprehensive" time="0.000"><error message="collection failure">'real_services' not found in `markers` configuration option</error></testcase></testsuite></testsuites>

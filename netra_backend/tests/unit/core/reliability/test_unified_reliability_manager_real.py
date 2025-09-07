@@ -324,7 +324,7 @@ class TestFallbackMechanisms:
     @pytest.mark.asyncio
     async def test_fallback_after_all_retries_fail(self):
         """Test fallback execution after all retries fail."""
-        service_name = "fallback_service"
+        service_name = "llm_fallback_service"  # Name contains "llm" to trigger LLM fallback
         config = ReliabilityConfig(
             max_retries=1,
             circuit_breaker_enabled=False,
@@ -356,14 +356,14 @@ class TestFallbackMechanisms:
     @pytest.mark.asyncio
     async def test_different_fallback_types_by_service(self):
         """Test different fallback responses based on service types."""
-        # Test database service fallback
-        self.manager.register_service("db_service", "database", 
+        # Test database service fallback (service name contains "database")
+        self.manager.register_service("database_service", "database", 
                                     ReliabilityConfig(max_retries=0, circuit_breaker_enabled=False, fallback_enabled=True))
         
         async def db_fail():
             raise Exception("DB down")
         
-        result = await self.manager.execute_with_reliability("db_service", db_fail)
+        result = await self.manager.execute_with_reliability("database_service", db_fail)
         assert result.success is True
         assert result.result == []  # Database fallback is empty list
         
@@ -446,7 +446,7 @@ class TestCircuitBreakerIntegration:
     @pytest.mark.asyncio  
     async def test_circuit_breaker_with_fallback_when_open(self):
         """Test circuit breaker uses fallback when open."""
-        service_name = "circuit_fallback_service"
+        service_name = "llm_circuit_fallback_service"  # Name contains "llm" for correct fallback
         config = ReliabilityConfig(circuit_breaker_enabled=True, fallback_enabled=True)
         self.manager.register_service(service_name, "llm", config)
         

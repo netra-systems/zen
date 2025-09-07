@@ -64,9 +64,44 @@ class ConnectionContext:
     last_activity: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     _is_cleaned: bool = False
     
+    # SECURITY FIX: Event buffering to prevent race conditions
+    _event_buffer: List[Dict[str, Any]] = field(default_factory=list)
+    _buffer_enabled: bool = True
+    _max_buffer_size: int = 50
+    
     async def update_activity(self):
         """Update last activity timestamp."""
         self.last_activity = datetime.now(timezone.utc)
+    
+    def add_to_buffer(self, event: Dict[str, Any]) -> bool:
+        """Add event to buffer if buffering is enabled.
+        
+        Returns:
+            bool: True if event was buffered, False if buffer is full or disabled
+        """
+        if not self._buffer_enabled:
+            return False
+            
+        if len(self._event_buffer) >= self._max_buffer_size:
+            logger.warning(f"Event buffer full for connection {self.connection_id}, dropping oldest events")
+            # Drop oldest events to make room
+            self._event_buffer = self._event_buffer[-(self._max_buffer_size//2):]
+        
+        self._event_buffer.append(event)
+        logger.debug(f"Buffered event for connection {self.connection_id}, buffer size: {len(self._event_buffer)}")
+        return True
+    
+    def get_buffered_events(self) -> List[Dict[str, Any]]:
+        """Get and clear all buffered events."""
+        events = self._event_buffer.copy()
+        self._event_buffer.clear()
+        self._buffer_enabled = False  # Disable buffering after first flush
+        logger.debug(f"Flushed {len(events)} buffered events for connection {self.connection_id}")
+        return events
+    
+    def is_thread_associated(self) -> bool:
+        """Check if thread_id has been properly associated."""
+        return self.thread_id is not None and self.is_authenticated
     
     async def cleanup(self):
         """Clean up connection resources."""
@@ -74,6 +109,10 @@ class ConnectionContext:
             return
         
         logger.info(f"🧹 Cleaning up ConnectionContext for user {self.user_id} connection {self.connection_id}")
+        # Clear any remaining buffered events
+        if self._event_buffer:
+            logger.warning(f"Discarding {len(self._event_buffer)} unbuffered events for {self.connection_id}")
+            self._event_buffer.clear()
         self._is_cleaned = True
 
 
