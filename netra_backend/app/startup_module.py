@@ -894,12 +894,17 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
             raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
         
-        # Validate WebSocket manager is available for per-request enhancement
-        from netra_backend.app.websocket_core import get_websocket_manager
-        ws_manager = get_websocket_manager()
-        if not ws_manager:
-            logger.error("🚨 CRITICAL: WebSocket manager not available - per-request tool dispatcher enhancement will fail!")
-            raise RuntimeError("WebSocket manager must be available for tool dispatcher enhancement")
+        # Validate WebSocket manager factory is available for per-request enhancement
+        from netra_backend.app.websocket_core import get_websocket_manager_factory
+        try:
+            factory = get_websocket_manager_factory()
+            if not factory:
+                logger.error("🚨 CRITICAL: WebSocket manager factory not available - per-request tool dispatcher enhancement will fail!")
+                raise RuntimeError("WebSocket manager factory must be available for tool dispatcher enhancement")
+            logger.debug("✅ WebSocket manager factory available for per-request enhancement")
+        except Exception as e:
+            logger.error(f"🚨 CRITICAL: Failed to get WebSocket manager factory: {e}")
+            raise RuntimeError(f"WebSocket manager factory initialization failed: {e}")
         
         _setup_agent_state(app, supervisor)
         
@@ -993,15 +998,15 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     
     try:
         from netra_backend.app.websocket_core import (
-            get_websocket_manager,
-            WebSocketManager,
+            get_websocket_manager_factory,
+            WebSocketManagerFactory,
         )
-        # Get the consolidated WebSocket manager instance
-        manager = get_websocket_manager()
+        # Initialize the WebSocket manager factory for per-request use
+        factory = get_websocket_manager_factory()
         
-        # Initialize if the manager has an initialize method
-        if hasattr(manager, 'initialize'):
-            await manager.initialize()
+        # Factory is initialized on creation - no additional initialization needed
+        # Individual managers are created per-request with UserExecutionContext
+        logger.debug("WebSocket factory initialized for per-request manager creation")
         
         logger.debug("WebSocket components initialized")
     except Exception as e:

@@ -462,10 +462,17 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_id = await ws_manager.connect_user(user_id, websocket)
                 logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
-            # Small delay to ensure connection is fully propagated
-            # This is especially important in Cloud Run where there may be additional latency
+            # CRITICAL FIX: Enhanced delay to ensure connection is fully propagated in Cloud Run
+            # This addresses GCP WebSocket timing issues where messages sent too early are lost
             if environment in ["staging", "production"]:
-                await asyncio.sleep(0.05)  # 50ms delay for Cloud Run environments
+                await asyncio.sleep(0.1)  # Increased to 100ms delay for Cloud Run stability
+                
+                # Additional connection validation for Cloud Run
+                if websocket.client_state != WebSocketState.CONNECTED:
+                    logger.warning(f"WebSocket not in CONNECTED state after registration: {websocket.client_state}")
+                    await asyncio.sleep(0.05)  # Additional 50ms if not connected
+            elif environment == "testing":
+                await asyncio.sleep(0.01)  # Minimal delay for tests
             
             # Register with security manager
             if 'user_context' in locals():
@@ -514,9 +521,19 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, welcome_msg.model_dump())
             
+            # CRITICAL FIX: Additional delay after connection confirmation in Cloud Run
+            # This ensures the client has time to process the connection_established message
+            if environment in ["staging", "production"]:
+                await asyncio.sleep(0.05)  # 50ms after welcome message
+            
             # CRITICAL FIX: Log successful connection establishment for debugging
             security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
             logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
+            
+            # CRITICAL FIX: Verify WebSocket is still connected after setup
+            if not is_websocket_connected(websocket):
+                logger.error(f"WebSocket connection lost during setup for user {user_id}")
+                raise WebSocketDisconnect(code=1006, reason="Connection lost during setup")
             
             logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
             
