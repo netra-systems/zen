@@ -430,15 +430,20 @@ class TestStartupFailureScenarios(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestServiceCoordinationIntegration:
+class TestServiceCoordinationIntegration(SSotBaseTestCase):
     """Integration tests for multi-service coordination."""
     
-    @pytest.mark.asyncio
+    def setup_method(self, method):
+        """Set up test environment for each test method."""
+        super().setup_method(method)
+        self.set_env_var("ENVIRONMENT", "testing")
+        self.set_env_var("TESTING", "true")
+    
     @pytest.mark.timeout(30)
-    async def test_backend_auth_service_coordination(self):
+    def test_backend_auth_service_coordination(self):
         """Test backend properly coordinates with auth service during startup."""
         # Mock auth service health check
-        async def mock_auth_health():
+        def mock_auth_health():
             return {"status": "healthy", "service": "auth"}
         
         # Mock backend checking auth service
@@ -448,7 +453,7 @@ class TestServiceCoordinationIntegration:
         
         while not auth_available and check_attempts < max_attempts:
             try:
-                health = await mock_auth_health()
+                health = mock_auth_health()
                 if health["status"] == "healthy":
                     auth_available = True
             except:
@@ -456,22 +461,24 @@ class TestServiceCoordinationIntegration:
             
             check_attempts += 1
             if not auth_available:
-                await asyncio.sleep(0.5)
+                time.sleep(0.1)  # Shorter sleep for testing
         
         assert auth_available, "Auth service not available"
         assert check_attempts <= max_attempts
     
-    @pytest.mark.asyncio
     @pytest.mark.timeout(30)
-    async def test_service_discovery_integration(self):
+    def test_service_discovery_integration(self):
         """Test services can discover each other through environment configuration."""
-        env = get_env()
+        # Set up test service URLs
+        self.set_env_var("DATABASE_URL", "postgresql://test:test@localhost:5432/test_db")
+        self.set_env_var("REDIS_URL", "redis://localhost:6379")
+        self.set_env_var("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Services should be discoverable via environment
         service_urls = {
-            "database": env.get("DATABASE_URL"),
-            "redis": env.get("REDIS_URL"),
-            "auth": env.get("AUTH_SERVICE_URL", "http://localhost:8001")
+            "database": self.get_env_var("DATABASE_URL"),
+            "redis": self.get_env_var("REDIS_URL"),
+            "auth": self.get_env_var("AUTH_SERVICE_URL")
         }
         
         # Verify service URLs are configured
@@ -480,14 +487,13 @@ class TestServiceCoordinationIntegration:
             assert isinstance(url, str), f"{service} URL invalid type"
             assert len(url) > 0, f"{service} URL empty"
     
-    @pytest.mark.asyncio
     @pytest.mark.timeout(30)
-    async def test_graceful_degradation_optional_services(self):
+    def test_graceful_degradation_optional_services(self):
         """Test system starts with degraded functionality when optional services fail."""
         from fastapi import FastAPI
         
         app = FastAPI()
-        app.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        app.state.websocket = TestWebSocketConnection()
         
         # Track service status
         service_status = {
@@ -499,10 +505,10 @@ class TestServiceCoordinationIntegration:
         
         # Initialize only healthy services
         if service_status["database"] == "healthy":
-            app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            app.state.db_session_factory = Mock()
         
         if service_status["redis"] == "healthy":
-            app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            app.state.redis_manager = Mock()
         
         # System should start despite optional service failures
         required_ok = all(

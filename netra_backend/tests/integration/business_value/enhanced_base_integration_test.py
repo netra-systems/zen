@@ -842,19 +842,60 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                 "actionable_recommendations": 3,
                 "implementation_complexity": "medium"
             })
+        elif "performance" in agent_name.lower():
+            base_outcomes.update({
+                "bottlenecks_identified": True,
+                "performance_metrics_analyzed": True,
+                "expected_improvement": "45% latency reduction",
+                "root_causes_identified": 3,
+                "optimization_recommendations": 2
+            })
+        elif "resource" in agent_name.lower():
+            base_outcomes.update({
+                "utilization_analysis": True,
+                "resource_waste_identified": True,
+                "cost_reduction_estimate": "$3,200/month",
+                "optimization_plan": "3-phase implementation",
+                "efficiency_improvements": 4
+            })
+        elif "risk" in agent_name.lower():
+            base_outcomes.update({
+                "risk_categories_identified": True,
+                "impact_assessment": "medium-high",
+                "mitigation_strategies": 5,
+                "compliance_gaps": 2,
+                "business_continuity_plan": True
+            })
+        elif "compliance" in agent_name.lower():
+            base_outcomes.update({
+                "report_generated": True,
+                "executive_summary": True,
+                "compliance_metrics": 12,
+                "audit_trail": True,
+                "board_presentation_ready": True
+            })
         elif "action" in agent_name.lower():
             base_outcomes.update({
                 "action_plan_created": True,
                 "timeline_provided": True,
                 "resource_requirements_defined": True,
-                "success_metrics_established": True
+                "success_metrics_established": True,
+                "implementation_phases": "3-phase approach"
             })
         elif "report" in agent_name.lower():
             base_outcomes.update({
                 "report_generated": True,
                 "executive_summary_included": True,
+                "executive_summary": True,
                 "data_visualizations": 2,
                 "actionable_insights": 4
+            })
+        elif "data" in agent_name.lower():
+            base_outcomes.update({
+                "cost_breakdown": "$15,000/month current",
+                "data_collection_complete": True,
+                "metrics_baseline": True,
+                "usage_patterns_analyzed": True
             })
         else:
             # Generic business value

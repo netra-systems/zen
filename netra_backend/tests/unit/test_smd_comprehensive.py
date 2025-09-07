@@ -123,10 +123,11 @@ class TestDeterministicStartupError(BaseTestCase):
     def test_deterministic_startup_error_with_cause(self):
         """Test error chaining for root cause analysis."""
         original_error = ValueError("Database connection failed")
-        startup_error = DeterministicStartupError("Startup failed") from original_error
-        
-        self.assertEqual(startup_error.__cause__, original_error)
-        self.assertIsInstance(startup_error.__cause__, ValueError)
+        try:
+            raise DeterministicStartupError("Startup failed") from original_error
+        except DeterministicStartupError as startup_error:
+            self.assertEqual(startup_error.__cause__, original_error)
+            self.assertIsInstance(startup_error.__cause__, ValueError)
 
 
 class TestStartupOrchestratorInitialization(BaseTestCase):
