@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 10:14:55
+**Generated:** 2025-09-07 10:39:11
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 2 (100.0%)
 - **Skipped:** 0
-- **Duration:** 7.25 seconds
+- **Duration:** 2.44 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,14 +19,14 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_websocket_auth_with_ssot_helper | FAIL failed | 4.338s | test_websocket_auth_ssot_fix.py |
-| test_ssot_auth_flow_complete | FAIL failed | 0.143s | test_websocket_auth_ssot_fix.py |
+| test_websocket_auth_with_ssot_helper | FAIL failed | 0.899s | test_websocket_auth_ssot_fix.py |
+| test_ssot_auth_flow_complete | FAIL failed | 0.134s | test_websocket_auth_ssot_fix.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_websocket_auth_with_ssot_helper
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_auth_ssot_fix.py
-- **Duration:** 4.338s
+- **Duration:** 0.899s
 - **Error:** tests\e2e\staging\test_websocket_auth_ssot_fix.py:49: in test_websocket_auth_with_ssot_helper
     ws = await auth_helper.connect_authenticated_websocket(timeout=10.0)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,7 +39,7 @@ test_framework\ssot\e2e_auth_helper.py:409: in connect_authenticated_websocket
 
 ### FAILED: test_ssot_auth_flow_complete
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_auth_ssot_fix.py
-- **Duration:** 0.143s
+- **Duration:** 0.134s
 - **Error:** tests\e2e\staging\test_websocket_auth_ssot_fix.py:117: in test_ssot_auth_flow_complete
     assert success, "Complete WebSocket auth flow should succeed"
 E   AssertionError: Complete WebSocket auth flow should succeed
@@ -52,7 +52,7 @@ test_websocket_auth_ssot_fix.py::test_websocket_auth_with_ssot_helper FAILED
 test_websocket_auth_ssot_fix.py::test_ssot_auth_flow_complete FAILED
 
 ==================================================
-0 passed, 2 failed in 7.25s
+0 passed, 2 failed in 2.44s
 ```
 
 ## Test Coverage Matrix

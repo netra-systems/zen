@@ -7,6 +7,7 @@
 - [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete cross-system navigation with health metrics
 - [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Detailed integration points and data flows
 - [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) - Complete system context
+- **[`reports/archived/USER_CONTEXT_ARCHITECTURE.md`](reports/archived/USER_CONTEXT_ARCHITECTURE.md) - ⭐ CRITICAL: Authoritative Factory-based isolation guide**
 - [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Real-time system health and compliance
 - **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for ALL module changes**
 
