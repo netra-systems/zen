@@ -1207,10 +1207,15 @@ class TestDebugInfoAndLogging:
                 None,
                 "NOT SET"
             ),
-            # Unknown format
+            # Unknown format with credentials
+            (
+                "unknown://user:pass@something",
+                "unknown://***@something"
+            ),
+            # Unknown format without credentials
             (
                 "unknown://something",
-                "unknown://**********"
+                "unknown://something"  # No credentials to mask, returns original
             )
         ]
         

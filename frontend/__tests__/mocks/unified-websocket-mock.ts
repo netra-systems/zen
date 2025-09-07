@@ -167,17 +167,21 @@ export class UnifiedWebSocketMock {
    * FIXES: Race condition between mock events and React handler setup
    */
   private simulateConnection(): void {
-    const delay = this.config.simulateNetworkDelay ? this.config.networkDelayMs! : 10;
-    
-    setTimeout(() => {
-      if (this.isDisposed || this.readyState !== UnifiedWebSocketMock.CONNECTING) return;
-
-      if (this.config.enableErrorSimulation) {
+    if (this.config.enableErrorSimulation) {
+      // For error simulation, use error delay (can be 0 for immediate)
+      const errorDelay = this.config.errorDelay || 0;
+      setTimeout(() => {
+        if (this.isDisposed || this.readyState !== UnifiedWebSocketMock.CONNECTING) return;
         this.simulateConnectionError();
-      } else {
+      }, errorDelay);
+    } else {
+      // For normal connection, use network delay
+      const delay = this.config.simulateNetworkDelay ? this.config.networkDelayMs! : 10;
+      setTimeout(() => {
+        if (this.isDisposed || this.readyState !== UnifiedWebSocketMock.CONNECTING) return;
         this.simulateConnectionSuccess();
-      }
-    }, delay);
+      }, delay);
+    }
   }
 
   /**

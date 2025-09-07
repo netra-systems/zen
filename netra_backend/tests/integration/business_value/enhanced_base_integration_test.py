@@ -697,7 +697,8 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                                                    agent_name: str,
                                                    state: DeepAgentState,
                                                    expected_business_outcomes: List[str],
-                                                   timeout: float = 30.0) -> Dict[str, Any]:
+                                                   timeout: float = 30.0,
+                                                   ws_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Execute agent with comprehensive business value validation.
         
