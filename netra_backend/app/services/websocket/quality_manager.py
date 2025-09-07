@@ -23,7 +23,6 @@ from netra_backend.app.services.websocket.quality_validation_handler import (
     QualityValidationHandler,
 )
 from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -86,6 +85,7 @@ class QualityMessageHandler:
     async def _handle_unknown_message(self, user_id: str, message_type: str) -> None:
         """Handle unknown message type."""
         logger.warning(f"Unknown message type: {message_type}")
+        manager = get_websocket_manager()
         await manager.send_error(user_id, f"Unknown message type: {message_type}")
     
     async def broadcast_quality_update(self, update: Dict[str, Any]) -> None:
@@ -98,6 +98,7 @@ class QualityMessageHandler:
         """Send quality update to a subscriber."""
         try:
             message = self._build_update_message(update)
+            manager = get_websocket_manager()
             await manager.send_message(user_id, message)
         except Exception as e:
             logger.error(f"Error broadcasting to {user_id}: {str(e)}")
@@ -116,6 +117,7 @@ class QualityMessageHandler:
         """Send quality alert to a single subscriber."""
         try:
             alert_message = self._build_alert_message(alert)
+            manager = get_websocket_manager()
             await manager.send_message(user_id, alert_message)
         except Exception as e:
             logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")

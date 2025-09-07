@@ -12,7 +12,6 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -56,6 +55,7 @@ class QualityMetricsHandler(BaseMessageHandler):
     async def _send_metrics_response(self, user_id: str, report: Dict[str, Any]) -> None:
         """Send quality metrics response to user."""
         message = self._build_metrics_message(report)
+        manager = get_websocket_manager()
         await manager.send_message(user_id, message)
 
     def _build_metrics_message(self, report: Dict[str, Any]) -> Dict[str, Any]:
@@ -66,4 +66,5 @@ class QualityMetricsHandler(BaseMessageHandler):
         """Handle quality metrics request error."""
         logger.error(f"Error getting quality metrics: {str(error)}")
         error_message = f"Failed to get quality metrics: {str(error)}"
+        manager = get_websocket_manager()
         await manager.send_error(user_id, error_message)

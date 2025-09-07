@@ -24,7 +24,7 @@ from contextlib import asynccontextmanager
 # Core imports for business value testing
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType
-from test_framework.fixtures.agent_fixtures import AgentTestHelper
+from test_framework.agent_test_helpers import AgentTestHelper
 from shared.isolated_environment import get_env
 
 # Agent and service imports

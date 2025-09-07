@@ -61,7 +61,7 @@ IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter
 
 # Legacy function compatibility
-websocket_manager = get_websocket_manager()
+# Removed import-time initialization - use get_websocket_manager() when needed
 
 def get_manager():
     """Legacy compatibility function."""
@@ -112,7 +112,6 @@ __all__ = [
     # Functions
     "get_websocket_manager",
     "get_manager",
-    "websocket_manager",
     "create_websocket_emitter",
     "create_isolated_emitter",
     "get_emitter_pool",

@@ -13,7 +13,6 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -98,6 +97,7 @@ class QualityReportHandler(BaseMessageHandler):
         """Send formatted report response to user."""
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
+        manager = get_websocket_manager()
         await manager.send_message(user_id, message)
 
     def _build_report_payload(self, markdown_report: str, report_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -112,6 +112,7 @@ class QualityReportHandler(BaseMessageHandler):
         """Handle report generation error."""
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
+        manager = get_websocket_manager()
         await manager.send_error(user_id, error_message)
     
     def _format_quality_report(self, data: Dict[str, Any], report_type: str) -> str:

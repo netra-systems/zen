@@ -12,7 +12,6 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -49,17 +48,20 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle subscribe action for quality alerts."""
         await self.monitoring_service.subscribe_to_updates(user_id)
         message = self._build_subscription_message("subscribed")
+        manager = get_websocket_manager()
         await manager.send_message(user_id, message)
 
     async def _handle_unsubscribe_action(self, user_id: str) -> None:
         """Handle unsubscribe action for quality alerts."""
         await self.monitoring_service.unsubscribe_from_updates(user_id)
         message = self._build_subscription_message("unsubscribed")
+        manager = get_websocket_manager()
         await manager.send_message(user_id, message)
 
     async def _handle_invalid_action(self, user_id: str, action: str) -> None:
         """Handle invalid subscription action."""
         error_message = f"Invalid action: {action}. Use 'subscribe' or 'unsubscribe'"
+        manager = get_websocket_manager()
         await manager.send_error(user_id, error_message)
 
     def _build_subscription_message(self, status: str) -> Dict[str, Any]:
@@ -74,4 +76,5 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle quality alert subscription error."""
         logger.error(f"Error handling quality alert subscription: {str(error)}")
         error_message = f"Failed to handle subscription: {str(error)}"
+        manager = get_websocket_manager()
         await manager.send_error(user_id, error_message)
