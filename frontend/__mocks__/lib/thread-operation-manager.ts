@@ -108,9 +108,11 @@ class MockThreadOperationManagerImpl {
         return { success: false, error: new Error('Operation aborted during execution') };
       }
       
-      // CRITICAL: Check if this operation is outdated (a newer one already completed)
-      if (result.success && operation.startTime < this.lastCompletedOperationTime) {
-        console.log(`Operation for ${threadId} completed but is outdated (started ${operation.startTime} < last completed ${this.lastCompletedOperationTime}), not updating state`);
+      // CRITICAL: Check if this operation is outdated by sequence, not just time
+      // Allow the most recently started operation to win, not necessarily the one that finishes first
+      const mostRecentOperation = this.operationHistory[0]; // Most recent is at index 0
+      if (result.success && mostRecentOperation && mostRecentOperation.id !== operationId && mostRecentOperation.startTime > operation.startTime) {
+        console.log(`Operation for ${threadId} completed but is outdated (${operationId} started ${operation.startTime} < most recent ${mostRecentOperation.startTime}), not updating state`);
         this.updateOperation(operationId, { 
           status: 'cancelled',
           error: new Error('Operation superseded by newer operation')

@@ -1,0 +1,642 @@
+[
+  {
+    "insertId": "68bd94cc000bbcb951f4206f",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T14:21:00.768823+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:21:00.973069090Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:21:00.769209Z"
+  },
+  {
+    "insertId": "68bd94cc000bbc53fc362242",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "labels": {
+        "function": "validate_and_decode_jwt",
+        "line": "216",
+        "module": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "message": "Invalid JWT=REDACTED audience",
+      "timestamp": "2025-09-07T14:21:00.768515+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:21:00.973069090Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:21:00.769107Z"
+  },
+  {
+    "insertId": "68bd947f000506dfcb4a8d06",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T14:19:43.328993+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:43.421418884Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:19:43.329439Z"
+  },
+  {
+    "insertId": "68bd947f000506564985ac3b",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "labels": {
+        "function": "validate_and_decode_jwt",
+        "line": "216",
+        "module": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "message": "Invalid JWT=REDACTED enough segments",
+      "timestamp": "2025-09-07T14:19:43.328716+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:43.421418884Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:19:43.329302Z"
+  },
+  {
+    "insertId": "68bd947f00001e1c93745325",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:19:43.006986+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:43.088328053Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:19:43.007708Z"
+  },
+  {
+    "insertId": "68bd947000081d9ff2742123",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.core.unified_error_handler"
+      },
+      "labels": {
+        "function": "_log_error",
+        "line": "574",
+        "module": "netra_backend.app.core.unified_error_handler"
+      },
+      "message": "api_request: 401: Authentication failed",
+      "timestamp": "2025-09-07T14:19:28.531572+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:28.767593723Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T14:19:28.531871Z"
+  },
+  {
+    "insertId": "68bd947000081a698011c050",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.messages"
+      },
+      "labels": {
+        "function": "get_current_user_from_jwt",
+        "line": "88",
+        "module": "netra_backend.app.routes.messages"
+      },
+      "message": "JWT=REDACTED failed: 401: Invalid or expired JWT=REDACTED",
+      "timestamp": "2025-09-07T14:19:28.530547+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:28.767593723Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T14:19:28.531049Z"
+  },
+  {
+    "insertId": "68bd947000081a3e19bcc3b0",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "labels": {
+        "function": "validate_and_decode_jwt",
+        "line": "216",
+        "module": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "message": "Invalid JWT=REDACTED enough segments",
+      "timestamp": "2025-09-07T14:19:28.530228+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:28.767593723Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:19:28.531006Z"
+  },
+  {
+    "insertId": "68bd946c000cde4fc54a4de3",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/websocket/events | Status: 404 | Duration: 2.16ms | Trace: e56dd322-0bf9-4a11-9bb5-0d7e23d7190b",
+      "timestamp": "2025-09-07T14:19:24.842380+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:19:25.107388886Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T14:19:24.843343Z"
+  },
+  {
+    "insertId": "68bd944c0004c4448fd26848",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:52.311227+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:52.471525990Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:52.312388Z"
+  },
+  {
+    "insertId": "68bd944c0004c42a3055b5b7",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:52.309388+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:52.471525990Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:52.312362Z"
+  },
+  {
+    "insertId": "68bd944c0004a4f9bb65323f",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:52.303938+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:52.471525990Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:52.304377Z"
+  },
+  {
+    "insertId": "68bd944c00048161aa9bdc4d",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:52.294326+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:52.471525990Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:52.295265Z"
+  },
+  {
+    "insertId": "68bd944c0003d62f4cadd177",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:52.250619+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:52.471525990Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:52.251439Z"
+  },
+  {
+    "insertId": "68bd944b0003345496b03a07",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:51.208878+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:51.471069755Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:51.210004Z"
+  },
+  {
+    "insertId": "68bd944b0003344b6a9b4111",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "labels": {
+        "function": "validate_and_decode_jwt",
+        "line": "212",
+        "module": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "message": "JWT=REDACTED verification failed - likely JWT=REDACTED between services",
+      "timestamp": "2025-09-07T14:18:51.208594+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:51.471069755Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T14:18:51.209995Z"
+  },
+  {
+    "insertId": "68bd944a000d2ed723605d90",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:50.863193+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:51.135551769Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:50.863959Z"
+  },
+  {
+    "insertId": "68bd944a000d2da0d93843d1",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "labels": {
+        "function": "validate_and_decode_jwt",
+        "line": "212",
+        "module": "netra_backend.app.websocket_core.user_context_extractor"
+      },
+      "message": "JWT=REDACTED verification failed - likely JWT=REDACTED between services",
+      "timestamp": "2025-09-07T14:18:50.862891+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:51.135551769Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T14:18:50.863648Z"
+  },
+  {
+    "insertId": "68bd944a0007a763d548a035",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:50.500954+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:50.805106831Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:50.501603Z"
+  },
+  {
+    "insertId": "68bd944a000200878142fad5",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T14:18:50.130569+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a98837157f2b52bd26dceba4e6fb96c237399b3cc096882450e72218720beb7c428582b5def1937e25ec7c39c727693d986f46ecd9b637fb21b8cc50071c8dd1e5ebc3013176247b690c24"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T14:18:50.136931423Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00087-t8z",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T14:18:50.131207Z"
+  }
+]

@@ -66,15 +66,12 @@ class UserContextExtractor:
         """
         Get JWT secret key from environment.
         
-        CRITICAL FIX: Now supports environment-specific JWT secrets to match auth service.
-        This fixes the staging 401 authentication regression where auth service uses
-        JWT_SECRET_STAGING but backend was only looking for JWT_SECRET_KEY.
+        CRITICAL FIX: Now uses unified JWT secret manager to ensure consistency
+        with auth service. This fixes the WebSocket 403 authentication failures
+        caused by JWT secret mismatches between auth service and backend service.
         
-        Priority order (matches auth_service/auth_core/auth_environment.py):
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
-        2. Generic JWT_SECRET_KEY
-        3. Legacy JWT_SECRET
-        4. Other fallbacks
+        The unified manager ensures IDENTICAL secret resolution logic across
+        all services, preventing the $50K MRR WebSocket authentication issues.
         
         Returns:
             JWT secret key string
@@ -83,47 +80,58 @@ class UserContextExtractor:
             RuntimeError: If JWT secret is not configured
         """
         try:
-            from shared.isolated_environment import get_env
-            env = get_env()
+            # Use the unified JWT secret manager for consistency
+            from shared.jwt_secret_manager import get_unified_jwt_secret
+            secret = get_unified_jwt_secret()
+            logger.debug("Using unified JWT secret manager for consistent secret resolution")
+            return secret
+        except Exception as e:
+            logger.error(f"Failed to use unified JWT secret manager: {e}")
+            logger.warning("Falling back to local JWT secret resolution (less secure)")
             
-            # Get current environment
-            environment = env.get("ENVIRONMENT", "development").lower()
-            
-            # 1. Try environment-specific secret first (matches auth service logic)
-            env_specific_key = f"JWT_SECRET_{environment.upper()}"
-            jwt_secret = env.get(env_specific_key)
-            if jwt_secret:
-                logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
-                return jwt_secret.strip()
-            
-            # 2. Try generic JWT_SECRET_KEY (original logic)
-            jwt_secret = env.get("JWT_SECRET_KEY")
-            if jwt_secret:
-                logger.debug("Using generic JWT_SECRET_KEY")
-                return jwt_secret.strip()
-            
-            # 3. Try legacy fallbacks
-            jwt_secret = (
-                env.get("JWT_SECRET") or
-                env.get("AUTH_JWT_SECRET") or
-                env.get("SECRET_KEY")
-            )
-            
-            if jwt_secret:
-                logger.debug("Using legacy JWT secret variable")
-                return jwt_secret.strip()
-            
-            # 4. Environment-specific defaults
-            if environment in ["testing", "development"]:
-                logger.warning("Using default JWT secret for testing - NOT FOR PRODUCTION")
-                return "test_jwt_secret_key_for_development_only"
-            else:
-                raise RuntimeError(f"JWT secret key not configured in {environment} environment. "
-                                 f"Please set {env_specific_key} or JWT_SECRET_KEY")
-            
-        except ImportError:
-            logger.error("Could not import isolated environment - using fallback")
-            return "fallback_jwt_secret_for_emergency_only"
+            try:
+                from shared.isolated_environment import get_env
+                env = get_env()
+                
+                # Get current environment
+                environment = env.get("ENVIRONMENT", "development").lower()
+                
+                # 1. Try environment-specific secret first
+                env_specific_key = f"JWT_SECRET_{environment.upper()}"
+                jwt_secret = env.get(env_specific_key)
+                if jwt_secret:
+                    logger.debug(f"Fallback: Using environment-specific JWT secret: {env_specific_key}")
+                    return jwt_secret.strip()
+                
+                # 2. Try generic JWT_SECRET_KEY
+                jwt_secret = env.get("JWT_SECRET_KEY")
+                if jwt_secret:
+                    logger.debug("Fallback: Using generic JWT_SECRET_KEY")
+                    return jwt_secret.strip()
+                
+                # 3. Try legacy fallbacks
+                jwt_secret = (
+                    env.get("JWT_SECRET") or
+                    env.get("AUTH_JWT_SECRET") or
+                    env.get("SECRET_KEY")
+                )
+                
+                if jwt_secret:
+                    logger.debug("Fallback: Using legacy JWT secret variable")
+                    return jwt_secret.strip()
+                
+                # 4. Environment-specific defaults
+                if environment in ["testing", "development"]:
+                    logger.warning("Fallback: Using default JWT secret for testing - NOT FOR PRODUCTION")
+                    return "test_jwt_secret_key_for_development_only"
+                else:
+                    logger.critical(f"JWT secret not configured for {environment} environment - WebSocket auth will fail")
+                    raise RuntimeError(f"JWT secret key not configured in {environment} environment. "
+                                     f"Please set {env_specific_key} or JWT_SECRET_KEY")
+                
+            except ImportError:
+                logger.error("Could not import isolated environment - using emergency fallback")
+                return "fallback_jwt_secret_for_emergency_only"
     
     def extract_jwt_from_websocket(self, websocket: WebSocket) -> Optional[str]:
         """

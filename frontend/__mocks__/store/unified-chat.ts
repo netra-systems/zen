@@ -155,19 +155,58 @@ mockStoreFunction.subscribe = jest.fn((selector: any, listener: any) => {
   // Track the initial value
   let lastValue = selector ? selector(mockState) : mockState;
   
-  // Create an interval to check for changes
-  const interval = setInterval(() => {
+  // For immediate state change detection, we'll monkey-patch key setter methods
+  const originalSetThreadLoading = mockState.setThreadLoading;
+  const originalStartThreadLoading = mockState.startThreadLoading;
+  const originalCompleteThreadLoading = mockState.completeThreadLoading;
+  const originalSetActiveThread = mockState.setActiveThread;
+  
+  const checkAndNotify = () => {
     const currentValue = selector ? selector(mockState) : mockState;
     if (currentValue !== lastValue) {
       lastValue = currentValue;
       if (listener) {
-        listener(currentValue);
+        setTimeout(() => listener(currentValue), 0); // Async notification
       }
     }
-  }, 10); // Check every 10ms
+  };
   
-  // Return unsubscribe function that clears the interval
-  return () => clearInterval(interval);
+  // Patch methods to notify immediately
+  mockState.setThreadLoading = jest.fn((isLoading) => {
+    const result = originalSetThreadLoading(isLoading);
+    checkAndNotify();
+    return result;
+  });
+  
+  mockState.startThreadLoading = jest.fn((threadId) => {
+    const result = originalStartThreadLoading(threadId);
+    checkAndNotify();
+    return result;
+  });
+  
+  mockState.completeThreadLoading = jest.fn((threadId, messages) => {
+    const result = originalCompleteThreadLoading(threadId, messages);
+    checkAndNotify();
+    return result;
+  });
+  
+  mockState.setActiveThread = jest.fn((threadId) => {
+    const result = originalSetActiveThread(threadId);
+    checkAndNotify();
+    return result;
+  });
+  
+  // Also add a fallback interval as a safety net
+  const interval = setInterval(checkAndNotify, 10); // Check every 10ms
+  
+  // Return unsubscribe function that restores original methods and clears interval
+  return () => {
+    clearInterval(interval);
+    mockState.setThreadLoading = originalSetThreadLoading;
+    mockState.startThreadLoading = originalStartThreadLoading;
+    mockState.completeThreadLoading = originalCompleteThreadLoading;
+    mockState.setActiveThread = originalSetActiveThread;
+  };
 });
 
 export const useUnifiedChatStore = mockStoreFunction;

@@ -2405,7 +2405,8 @@ jest.mock('@/hooks/useThreadSwitching', () => {
     error: null,
     lastLoadedThreadId: null,
     operationId: null,
-    retryCount: 0
+    retryCount: 0,
+    currentOperationId: null
   };
   
   // Track operation sequence to prevent out-of-order updates
@@ -2420,7 +2421,8 @@ jest.mock('@/hooks/useThreadSwitching', () => {
       error: null,
       lastLoadedThreadId: null,
       operationId: null,
-      retryCount: 0
+      retryCount: 0,
+      currentOperationId: null
     };
     operationSequence = 0;
     lastValidOperationSequence = 0;
@@ -2440,9 +2442,31 @@ jest.mock('@/hooks/useThreadSwitching', () => {
       setState({ ...globalHookState });
     }, []);
     
+    // Cleanup effect that mimics the real hook's unmount cleanup
+    React.useEffect(() => {
+      return () => {
+        // Cleanup currentOperationId if it exists during unmount
+        if (globalHookState.currentOperationId) {
+          // Mock the globalCleanupManager call
+          try {
+            const { globalCleanupManager } = require('@/lib/operation-cleanup');
+            if (globalCleanupManager && globalCleanupManager.cleanupThread) {
+              globalCleanupManager.cleanupThread(globalHookState.currentOperationId);
+            }
+          } catch (error) {
+            // Ignore if module not available
+          }
+        }
+      };
+    }, []);
+    
     // Mock switchToThread with proper state management
     const switchToThread = React.useCallback(async (threadId, options = {}) => {
       console.log(`useThreadSwitching: switchToThread called with ${threadId}, options:`, JSON.stringify(options));
+      
+      // Track operation for cleanup (using mock variable to avoid scope issues)
+      const mockCurrentOperationId = `switch_${threadId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      globalHookState.currentOperationId = mockCurrentOperationId;
       
       try {
         // Check if we should use ThreadOperationManager (for tests that expect it)
@@ -2463,6 +2487,16 @@ jest.mock('@/hooks/useThreadSwitching', () => {
           // Assign sequence number to this operation
           const currentSequence = ++operationSequence;
           console.log(`Operation ${threadId} assigned sequence ${currentSequence}`);
+          
+          // Emit WebSocket event for loading start
+          const { useUnifiedChatStore } = require('@/store/unified-chat');
+          const store = useUnifiedChatStore.getState();
+          if (store.handleWebSocketEvent) {
+            store.handleWebSocketEvent({ 
+              type: 'thread_loading', 
+              threadId: threadId 
+            });
+          }
           
           const result = await ThreadOperationManager.startOperation(
             'switch',
@@ -2576,6 +2610,21 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                 }
                 
                 console.log(`useThreadSwitching: Successfully switched to ${threadId} via ThreadOperationManager`);
+                
+                // Emit WebSocket events for successful operation
+                const { useUnifiedChatStore } = require('@/store/unified-chat');
+                const store = useUnifiedChatStore.getState();
+                if (store.handleWebSocketEvent) {
+                  // Emit thread_loaded event
+                  store.handleWebSocketEvent({ 
+                    type: 'thread_loaded', 
+                    threadId: threadId, 
+                    messages: loadResult.messages || []
+                  });
+                }
+                
+                // Clear operation tracking on success
+                globalHookState.currentOperationId = null;
                 return { success: true, threadId };
               } else {
                 // Preserve original error message if available
@@ -2605,15 +2654,25 @@ jest.mock('@/hooks/useThreadSwitching', () => {
             updateHookState(errorUpdates);
             setState(prev => ({ ...prev, ...errorUpdates }));
             
-            // CRITICAL: Reset store's activeThreadId to null on error
+            // CRITICAL: Only reset store's activeThreadId to null on REAL errors, not on cancellation/superseded operations
             const { useUnifiedChatStore } = require('@/store/unified-chat');
             const store = useUnifiedChatStore.getState();
-            if (store.setActiveThread) {
+            const isRaceConditionCancel = result.error.message && (
+              result.error.message.includes('superseded') || 
+              result.error.message.includes('aborted') ||
+              result.error.message.includes('Operation superseded')
+            );
+            
+            if (!isRaceConditionCancel && store.setActiveThread) {
+              // Only reset to null for real errors, not race condition cancellations
               store.setActiveThread(null);
             }
             if (store.setThreadLoading) {
               store.setThreadLoading(false);
             }
+            
+            // Clear operation tracking on error
+            globalHookState.currentOperationId = null;
           }
           
           return result.success;

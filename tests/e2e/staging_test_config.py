@@ -103,73 +103,100 @@ class StagingConfig:
     def create_test_jwt_token(self) -> Optional[str]:
         """Create a test JWT token for staging authentication
         
-        CRITICAL FIX: Now uses isolated environment to match backend exactly.
-        This fixes the WebSocket 403 authentication failures by ensuring the
-        JWT secret resolution matches UserContextExtractor._get_jwt_secret() exactly.
+        CRITICAL FIX: Now uses unified JWT secret manager with proper staging configuration.
+        This fixes the WebSocket 403 authentication failures by ensuring the JWT token
+        is created with exactly the same secret that the backend will use for validation.
         """
         try:
             import jwt
+            import os
             from datetime import datetime, timedelta, timezone
             import uuid
-            from shared.isolated_environment import get_env
             
-            # CRITICAL FIX: Use isolated environment and match backend priority exactly
-            env = get_env()
+            # CRITICAL FIX: Set up proper staging environment 
+            # This ensures we use the staging JWT secret from config/staging.env
+            original_env = os.environ.get("ENVIRONMENT")
+            original_jwt_secret_staging = os.environ.get("JWT_SECRET_STAGING")
             
-            # CRITICAL FIX: Priority order MUST match UserContextExtractor._get_jwt_secret() exactly
-            # The backend uses this exact priority, so tests must match it perfectly:
+            # Set staging environment
+            os.environ["ENVIRONMENT"] = "staging"
             
-            # Get current environment to determine which secret to use
-            environment = env.get("ENVIRONMENT", "development").lower()
+            # Load staging JWT secret from config/staging.env if not already set
+            if not os.environ.get("JWT_SECRET_STAGING"):
+                staging_jwt_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+                os.environ["JWT_SECRET_STAGING"] = staging_jwt_secret
+                print(f"Set JWT_SECRET_STAGING for staging test environment")
             
-            # 1. Try environment-specific secret first (JWT_SECRET_STAGING for staging)
-            env_specific_key = f"JWT_SECRET_{environment.upper()}"
-            secret = env.get(env_specific_key)
-            if secret:
-                print(f"Using {env_specific_key} for test token (environment-specific)")
-                secret = secret.strip()
-            # 2. Try generic JWT_SECRET_KEY (this is what backend falls back to)
-            elif env.get("JWT_SECRET_KEY"):
-                secret = env.get("JWT_SECRET_KEY").strip()
-                print(f"Using JWT_SECRET_KEY for test token (generic secret)")
-            # 3. Try E2E bypass key
-            elif env.get("E2E_BYPASS_KEY"):
-                secret = env.get("E2E_BYPASS_KEY").strip()
-                print(f"Using E2E_BYPASS_KEY for test token (bypass mechanism)")
-            # 4. Try alternative staging secret
-            elif env.get("STAGING_JWT_SECRET"):
-                secret = env.get("STAGING_JWT_SECRET").strip()
-                print(f"Using STAGING_JWT_SECRET for test token (alternative)")
-            # 5. Environment-specific defaults (matches backend fallback logic)
-            elif environment in ["testing", "development"]:
-                secret = "test_jwt_secret_key_for_development_only"
-                print(f"Using development default JWT secret for {environment}")
-            else:
-                # Final fallback - use the actual staging secret from config/staging.env
-                # This should only be used in actual staging environment
-                secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
-                print("WARNING: Using hardcoded staging secret fallback - this should only happen in staging")
-            
-            # Create payload with required claims
-            payload = {
-                "sub": f"test-user-{uuid.uuid4().hex[:8]}",
-                "email": "test@netrasystems.ai",
-                "permissions": ["read", "write"],
-                "iat": int(datetime.now(timezone.utc).timestamp()),
-                "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-                "token_type": "access",
-                "iss": "netra-auth-service",
-                "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
-            }
-            
-            token = jwt.encode(payload, secret, algorithm="HS256")
-            print(f"Created JWT token for staging authentication (user: {payload['sub']})")
-            return token
-            
+            try:
+                # Use the unified JWT secret manager to get the EXACT same secret
+                # that the backend UserContextExtractor will use
+                from shared.jwt_secret_manager import get_unified_jwt_secret
+                secret = get_unified_jwt_secret()
+                print(f"Test JWT token using unified secret manager (staging environment)")
+                print(f"Secret source: staging environment configuration")
+                
+                # Create payload with minimal required claims (match backend expectations)
+                payload = {
+                    "sub": f"test-user-{uuid.uuid4().hex[:8]}",
+                    "email": "test@netrasystems.ai", 
+                    "permissions": ["read", "write"],
+                    "iat": int(datetime.now(timezone.utc).timestamp()),
+                    "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+                    # Remove audience - backend might not expect it or have different validation
+                    "iss": "netra-auth-service",
+                    "jti": str(uuid.uuid4())  # Add JWT ID for replay protection
+                }
+                
+                # Create token with unified secret
+                token = jwt.encode(payload, secret, algorithm="HS256")
+                print(f"Created staging JWT token for user: {payload['sub']}")
+                return token
+                
+            finally:
+                # Restore original environment
+                if original_env is not None:
+                    os.environ["ENVIRONMENT"] = original_env
+                else:
+                    os.environ.pop("ENVIRONMENT", None)
+                
+                # Restore original JWT_SECRET_STAGING
+                if original_jwt_secret_staging is not None:
+                    os.environ["JWT_SECRET_STAGING"] = original_jwt_secret_staging
+                else:
+                    os.environ.pop("JWT_SECRET_STAGING", None)
+                    
         except Exception as e:
-            print(f"CRITICAL: Failed to create test JWT token: {e}")
-            print("This will cause WebSocket 403 authentication failures in staging tests")
-            return None
+            print(f"CRITICAL: Failed to create staging JWT token: {e}")
+            print("This will cause WebSocket 403 authentication failures")
+            
+            # Fallback: Try to manually load staging secret from config/staging.env
+            try:
+                import jwt
+                from datetime import datetime, timedelta, timezone
+                import uuid
+                
+                # Load staging config directly as last resort
+                staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"  # From config/staging.env
+                print("FALLBACK: Using hardcoded staging JWT secret (should only happen as emergency)")
+                
+                payload = {
+                    "sub": f"test-user-{uuid.uuid4().hex[:8]}",
+                    "email": "test@netrasystems.ai",
+                    "permissions": ["read", "write"],
+                    "iat": int(datetime.now(timezone.utc).timestamp()),
+                    "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+                    "token_type": "access",
+                    "iss": "netra-auth-service",
+                    "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
+                }
+                
+                token = jwt.encode(payload, staging_secret, algorithm="HS256")
+                print(f"Fallback JWT token created for staging (user: {payload['sub']})")
+                return token
+                
+            except Exception as fallback_e:
+                print(f"CRITICAL: Even fallback JWT creation failed: {fallback_e}")
+                return None
 
 
 # Global instance

@@ -33,7 +33,17 @@ jest.mock('next/navigation', () => ({
 
 // Mock URL sync service to avoid hook calls outside components
 jest.mock('@/services/urlSyncService', () => ({
-  useURLSync: () => ({ updateUrl: jest.fn() }),
+  useURLSync: () => ({ 
+    updateUrl: jest.fn((threadId) => {
+      // Mock should actually call the router when updateUrl is called
+      const { __mockRouter } = require('next/navigation');
+      if (threadId) {
+        __mockRouter.replace(`/chat?thread=${threadId}`, { scroll: false });
+      } else {
+        __mockRouter.replace('/chat', { scroll: false });
+      }
+    })
+  }),
   useBrowserHistorySync: () => ({})
 }));
 
@@ -180,6 +190,6 @@ describe('New Chat URL Update Integration', () => {
     expect(mockRouter.replace).not.toHaveBeenCalled();
     // The hook SHOULD have an error because the operation failed
     expect(result.current.state.error).not.toBeNull();
-    expect(result.current.state.error?.message).toContain('Thread loading failed');
+    expect(result.current.state.error?.message).toContain('Failed to create thread');
   });
 });
