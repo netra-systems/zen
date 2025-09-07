@@ -203,12 +203,15 @@ Before coding, conduct a rigorous analysis.
   * **Modular Implementation:** Delegate tasks to Implementation Agents one module at a time.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
-  CRITICAL: Mocks = Abomination
+  CRITICAL: Mocks in E2E or Integration = Abomination  (Allowed in Unit tests if needed and not cheating)
   * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) for auth flow examples.
   * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ULTRA THINK DEEPLY ALL THE TIME.
+
+CRITICAL: ALWAYS SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM.
+NEVER "bypass" a greater good intention for narrow success like passing a single test.
 
 ### 3.4. Multi-Environment Validation
 
@@ -285,26 +288,8 @@ CHEATING ON TESTS = ABOMINATION
     - [ ] Integration tests pass for all inheritance scenarios
     - [ ] Performance regression tests pass (inheritance lookup overhead)
 
-**Example MRO Report Structure:**
-```markdown
-# MRO Analysis: [Module Name]
-## Current Hierarchy
-- BaseClass
-  - IntermediateA (overrides: method1, method2)
-    - ConcreteA1 (overrides: method2)
-    - ConcreteA2 (overrides: method1, method3)
-  - IntermediateB (overrides: method1, method3)
-    - ConcreteB1 (overrides: method3)
-
-## Method Resolution Paths
-- ConcreteA1.method1 → IntermediateA.method1
-- ConcreteA1.method2 → ConcreteA1.method2 (local override)
-- ConcreteA1.method3 → BaseClass.method3
-
-## Refactoring Impact
-- Breaking: method1 signature change affects 12 consumers
-- Safe: method2 internal refactor, interface preserved
-```
+CHEATING ON TESTS = ABOMINATION
+YOU MUST ULTRA THINK DEEPLY
 
 **Cross-Reference Learnings:**
 - SSOT violations: [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
@@ -372,6 +357,10 @@ for the simple "pip package test" to determine what belongs in `/shared`.
   * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
 
 -----
+
+CHEATING ON TESTS = ABOMINATION
+ULTRA THINK DEEPLY
+SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM
 
 ## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
 
@@ -471,7 +460,7 @@ python scripts/refresh_dev_services.py logs --services backend -f
 ### 7.3. Unified Test Runner
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
-MOCKS are FORBIDDEN in dev, staging or production.
+MOCKS are FORBIDDEN in dev, staging or production.  (Except limited cases for unit tests if you can prove it's needed)
 FAKE TESTS ARE BAD
 
 **🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py) for SSOT auth patterns.
@@ -498,6 +487,8 @@ FAKE TESTS ARE BAD
   * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
 -----
 
+DO THE RIGHT THING - NOT JUST THE FASTEST THING.
+
 ## 8\. Detailed Specifications Reference
 
 This is a non-exhaustive list of mission-critical specs.
@@ -517,6 +508,8 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 
 -----
 
+YOU DO YOUR BEST WORK.
+
 ## 8\. System Status and Compliance Tracking
 
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
@@ -528,6 +521,8 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 ** YOU MUST USE A **CHECKLIST** EVERYTIME.
 If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
 -----
+
+YOU ARE VERY SMART AND PRACTICAL.
 
 ## 9\. Execution Checklist
 

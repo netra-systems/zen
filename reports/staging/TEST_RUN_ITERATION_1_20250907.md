@@ -102,3 +102,27 @@ From initial 10 modules (61 tests):
 1. Fix WebSocket authentication in staging
 2. Configure E2E_OAUTH_SIMULATION_KEY for staging
 3. Ensure JWT validation works in staging environment
+
+## Iteration 2 Results (After Deployment)
+
+### After SERVICE_ID Fix Deployment
+- **Backend deployed:** netra-backend-staging-00098-bks
+- **Auth deployed:** netra-auth-service-00063-xxx  
+- **Result:** WebSocket connections now timing out instead of 403
+- **Issue:** Tests hang on WebSocket connection attempts
+- **Status:** Service is running but WebSocket endpoint not responding
+
+### Test Results After Fix
+- test_001_websocket_connection_real: FAILED (timeout)
+- test_002_websocket_authentication_real: FAILED (timeout)
+- test_003_websocket_message_send_real: FAILED (timeout)
+- test_004_websocket_concurrent_connections_real: PASSED
+- test_005_agent_discovery_real: FAILED
+- test_006_agent_configuration_real: PASSED
+- test_007_agent_execution_endpoints_real: FAILED
+- Tests timed out after 5 minutes
+
+### Analysis
+- WebSocket connections are timing out entirely
+- SERVICE_ID issue is fixed but new WebSocket connectivity issue emerged
+- Need to investigate WebSocket endpoint availability in Cloud Run

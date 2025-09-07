@@ -28,6 +28,7 @@
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
 | **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
 | **Auth problems** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | Auth learnings |
+| **Auth SSOT** | [`reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md`](reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md) | JWT SSOT violations audit |
 | **Database issues** | [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) | DB patterns |
 | **Telemetry/Tracing** | [`SPEC/learnings/opentelemetry_otlp_implementation.xml`](SPEC/learnings/opentelemetry_otlp_implementation.xml) | OpenTelemetry implementation |
 
@@ -48,6 +49,7 @@
 python tests/mission_critical/test_websocket_agent_events_suite.py        # WebSocket chat delivery
 python tests/mission_critical/test_no_ssot_violations.py                  # SSOT compliance
 python tests/mission_critical/test_orchestration_integration.py           # Docker orchestration
+python scripts/check_auth_ssot_compliance.py                              # Auth SSOT enforcement
 python tests/mission_critical/test_docker_stability_suite.py             # Docker stability
 ```
 
