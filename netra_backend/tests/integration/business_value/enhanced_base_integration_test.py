@@ -374,14 +374,28 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
     def teardown_method(self):
         """Enhanced teardown with business value cleanup."""
         try:
-            # Run async cleanup
-            if asyncio.get_event_loop().is_running():
+            # Run async cleanup with proper event loop handling
+            try:
+                # Try to get the current event loop
+                loop = asyncio.get_running_loop()
+                # If we're in an async context, create a task
                 asyncio.create_task(self.async_teardown())
-            else:
-                asyncio.run(self.async_teardown())
+            except RuntimeError:
+                # No running event loop, safe to create new one
+                try:
+                    asyncio.run(self.async_teardown())
+                except Exception as async_error:
+                    logger.warning(f"Async teardown failed, using sync fallback: {async_error}")
+                    # Fallback to sync cleanup
+                    self.sync_fallback_teardown()
                 
         except Exception as e:
             logger.error(f"Error during enhanced teardown: {e}")
+            # Always try sync fallback on any error
+            try:
+                self.sync_fallback_teardown()
+            except Exception as fallback_error:
+                logger.error(f"Sync fallback teardown also failed: {fallback_error}")
         finally:
             super().teardown_method()
             
@@ -404,6 +418,25 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
             logger.error(f"Error during async teardown: {e}")
         finally:
             await super().async_teardown()
+            
+    def sync_fallback_teardown(self):
+        """Sync fallback teardown when async teardown fails."""
+        try:
+            # Clear any stored references
+            if hasattr(self, 'websocket_util'):
+                self.websocket_util = None
+            if hasattr(self, 'mock_db'):
+                # Try sync cleanup if available
+                if hasattr(self.mock_db, 'close'):
+                    self.mock_db.close()
+                self.mock_db = None
+            
+            # Log business metrics if available  
+            if hasattr(self, 'business_metrics') and self.business_metrics:
+                logger.info(f"Business value metrics (sync fallback): {self.business_metrics.to_dict()}")
+                
+        except Exception as e:
+            logger.error(f"Error during sync fallback teardown: {e}")
             
     # ========== Business Value Testing Utilities ==========
     
@@ -449,17 +482,18 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
             run_id=run_id,
             user_request=request,
             user_id=user["id"],
-            chat_thread_id=thread_id,
-            # Add realistic context
-            user_context={
-                "subscription_tier": user["subscription_tier"],
-                "monthly_spend": user["monthly_spend"],
-                "timezone": "UTC",
-                "preferences": {
-                    "cost_sensitivity": "high" if user["subscription_tier"] in ["early", "mid"] else "medium"
-                }
-            }
+            chat_thread_id=thread_id
         )
+        
+        # Set user context in context_tracking field after instantiation
+        state.context_tracking["user_context"] = {
+            "subscription_tier": user["subscription_tier"],
+            "monthly_spend": user["monthly_spend"],
+            "timezone": "UTC",
+            "preferences": {
+                "cost_sensitivity": "high" if user["subscription_tier"] in ["early", "mid"] else "medium"
+            }
+        }
         
         return state
         

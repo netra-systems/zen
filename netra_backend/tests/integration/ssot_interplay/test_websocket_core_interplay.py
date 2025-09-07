@@ -44,7 +44,7 @@ import threading
 import pytest
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.conftest_real_services import real_services_fixture, with_test_database
+from test_framework.conftest_real_services import real_services_function, real_postgres
 from test_framework.fixtures.websocket_test_helpers import WebSocketTestClient, assert_websocket_events
 from netra_backend.app.websocket_core import (
     UnifiedWebSocketManager, 
@@ -52,7 +52,7 @@ from netra_backend.app.websocket_core import (
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.types import MessageType, WebSocketEvent
+from netra_backend.app.websocket_core.types import MessageType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession  
 from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext, ExecutionStatus
 from netra_backend.app.agents.base_agent import BaseAgent

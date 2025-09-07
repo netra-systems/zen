@@ -105,10 +105,22 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         # Clean up all created registries
         for registry in self._created_registries:
             try:
-                # Use async cleanup in sync context
-                asyncio.run(self._cleanup_registry(registry))
+                # Use sync cleanup to avoid event loop conflicts
+                if hasattr(registry, 'cleanup'):
+                    # Try sync cleanup first
+                    try:
+                        registry.cleanup()
+                    except TypeError:
+                        # If cleanup is async, skip it here
+                        pass
+                # Clear the registry state directly
+                if hasattr(registry, '_agents'):
+                    registry._agents.clear()
+                if hasattr(registry, '_agent_instances'):
+                    registry._agent_instances.clear()
             except Exception as e:
                 logger.warning(f"Error cleaning up registry: {e}")
+        self._created_registries.clear()
         super().teardown_method()
     
     def _create_mock_llm_manager(self) -> LLMManager:

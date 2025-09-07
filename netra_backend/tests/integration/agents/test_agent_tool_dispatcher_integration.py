@@ -61,17 +61,15 @@ from netra_backend.app.agents.unified_tool_execution import (
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.unified_tool_registry import (
     UnifiedToolRegistry,
-    ToolDefinition,
-    ToolPermission
+    UnifiedTool,
 )
+from netra_backend.app.schemas.tool_permission import PermissionLevel
 
 # WebSocket integration for tool events
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
-# Tool implementations for testing
-from netra_backend.app.agents.tools.data_analyzer import DataAnalyzerTool
-from netra_backend.app.agents.tools.cost_optimizer import CostOptimizerTool
+# Tool implementations are registered dynamically in tests
 
 
 @dataclass
@@ -103,37 +101,35 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
     async def tool_registry(self):
         """Real unified tool registry for testing."""
         registry = UnifiedToolRegistry()
-        await registry.initialize()
         
         # Register test tools
-        await registry.register_tool(
-            "data_analyzer",
-            ToolDefinition(
-                name="data_analyzer",
-                description="Analyze user data and provide insights",
-                parameters={
-                    "data_source": {"type": "string", "required": True},
-                    "analysis_type": {"type": "string", "required": False}
-                },
-                permissions=[ToolPermission.READ_USER_DATA, ToolPermission.EXECUTE]
-            )
+        data_analyzer_tool = UnifiedTool(
+            id="data_analyzer",
+            name="data_analyzer",
+            description="Analyze user data and provide insights",
+            category="analysis",
+            permissions_required=["READ_USER_DATA", "EXECUTE"],
+            input_schema={
+                "data_source": {"type": "string", "required": True},
+                "analysis_type": {"type": "string", "required": False}
+            }
         )
+        registry.register_tool(data_analyzer_tool)
         
-        await registry.register_tool(
-            "cost_optimizer",
-            ToolDefinition(
-                name="cost_optimizer",
-                description="Optimize costs based on usage patterns",
-                parameters={
-                    "time_period": {"type": "string", "required": True},
-                    "optimization_level": {"type": "string", "required": False}
-                },
-                permissions=[ToolPermission.READ_USER_DATA, ToolPermission.EXECUTE]
-            )
+        cost_optimizer_tool = UnifiedTool(
+            id="cost_optimizer",
+            name="cost_optimizer",
+            description="Optimize costs based on usage patterns",
+            category="optimization",
+            permissions_required=["READ_USER_DATA", "EXECUTE"],
+            input_schema={
+                "time_period": {"type": "string", "required": True},
+                "optimization_level": {"type": "string", "required": False}
+            }
         )
+        registry.register_tool(cost_optimizer_tool)
         
         yield registry
-        await registry.cleanup()
     
     @pytest.fixture
     async def tool_dispatcher_factory(self, tool_registry):
@@ -505,15 +501,15 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         tool_dispatcher = await tool_dispatcher_factory.create_dispatcher(exec_ctx)
         
         # Register restricted tool that requires ADMIN permission
-        await tool_registry.register_tool(
-            "admin_tool",
-            ToolDefinition(
-                name="admin_tool",
-                description="Administrative tool requiring special permissions",
-                parameters={"admin_action": {"type": "string", "required": True}},
-                permissions=[ToolPermission.ADMIN, ToolPermission.EXECUTE]
-            )
+        admin_tool = UnifiedTool(
+            id="admin_tool",
+            name="admin_tool",
+            description="Administrative tool requiring special permissions",
+            category="system",
+            permissions_required=["ADMIN", "EXECUTE"],
+            input_schema={"admin_action": {"type": "string", "required": True}}
         )
+        tool_registry.register_tool(admin_tool)
         
         # Test that user can execute allowed tools
         allowed_result = await tool_dispatcher.execute_tool(
@@ -613,18 +609,18 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         tool_dispatcher = await tool_dispatcher_factory.create_dispatcher(exec_ctx)
         
         # Register error-prone tool for testing
-        await tool_registry.register_tool(
-            "error_tool",
-            ToolDefinition(
-                name="error_tool",
-                description="Tool that can produce errors for testing",
-                parameters={
-                    "error_type": {"type": "string", "required": True},
-                    "should_fail": {"type": "boolean", "required": False}
-                },
-                permissions=[ToolPermission.EXECUTE]
-            )
+        error_tool = UnifiedTool(
+            id="error_tool",
+            name="error_tool",
+            description="Tool that can produce errors for testing",
+            category="testing",
+            permissions_required=["EXECUTE"],
+            input_schema={
+                "error_type": {"type": "string", "required": True},
+                "should_fail": {"type": "boolean", "required": False}
+            }
         )
+        tool_registry.register_tool(error_tool)
         
         # Test tool execution with invalid parameters
         invalid_params_result = await tool_dispatcher.execute_tool(

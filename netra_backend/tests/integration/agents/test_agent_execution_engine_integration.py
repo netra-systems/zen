@@ -59,9 +59,8 @@ from netra_backend.app.agents.base_agent import BaseAgent
 
 # Database models for testing
 from netra_backend.app.db.models import Base
-from netra_backend.app.db.models.threads import ThreadModel
-from netra_backend.app.db.models.messages import MessageModel
-from netra_backend.app.db.models.users import UserModel
+from netra_backend.app.db.models_agent import Thread, Message
+from netra_backend.app.db.models_user import User
 
 # Agent execution tracking
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
@@ -93,13 +92,23 @@ class AgentInfrastructureTestContext:
 class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
     """CRITICAL integration tests for agent execution engine with real database/Redis."""
     
+    def setup_method(self, method=None):
+        """Setup method for proper base class initialization."""
+        # Call the sync base setup method directly to avoid async issues
+        from test_framework.ssot.base_test_case import SSotBaseTestCase
+        SSotBaseTestCase.setup_method(self, method)
+        
+        # Initialize test-specific attributes
+        self.test_context = None
+        self.execution_results = []
+    
     @pytest.fixture
     async def database_manager(self):
         """Real database session manager for testing."""
         db_manager = DatabaseSessionManager()
-        await db_manager.initialize()
+        # DatabaseSessionManager is a stub - no initialization needed
         yield db_manager
-        await db_manager.close()
+        # No cleanup needed for stub implementation
     
     @pytest.fixture
     async def redis_manager(self):
@@ -107,26 +116,32 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         redis_mgr = RedisManager()
         await redis_mgr.initialize()
         yield redis_mgr
-        await redis_mgr.close()
+        await redis_mgr.shutdown()
     
     @pytest.fixture
-    async def execution_engine_factory(self, database_manager, redis_manager):
-        """Real execution engine factory with database and Redis."""
-        factory = get_execution_engine_factory()
-        factory.set_database_manager(database_manager)
-        factory.set_redis_manager(redis_manager)
+    async def execution_engine_factory(self):
+        """Real execution engine factory."""
+        factory = await get_execution_engine_factory()
         yield factory
-        await factory.cleanup_all_contexts()
+        # The factory has built-in cleanup handling
     
     @pytest.fixture
-    async def agent_registry(self, database_manager, redis_manager):
-        """Real agent registry with infrastructure."""
-        registry = AgentRegistry()
-        registry.set_database_manager(database_manager)
-        registry.set_redis_manager(redis_manager)
-        await registry.initialize()
+    def llm_manager(self):
+        """Mock LLM manager for agent registry."""
+        from unittest.mock import MagicMock, AsyncMock
+        mock_llm = MagicMock()
+        mock_llm.ask_llm = AsyncMock(return_value="Mock LLM response for testing")
+        mock_llm.ask_llm_structured = AsyncMock(return_value={"mock": "structured_response"})
+        mock_llm.get_available_models = AsyncMock(return_value=["gpt-4", "gpt-3.5-turbo"])
+        return mock_llm
+    
+    @pytest.fixture
+    async def agent_registry(self, llm_manager):
+        """Real agent registry with mock LLM."""
+        registry = AgentRegistry(llm_manager)
         yield registry
-        await registry.cleanup()
+        # Use the correct cleanup method
+        await registry.reset_all_agents()
     
     def create_infrastructure_test_context(self, test_name: str) -> AgentInfrastructureTestContext:
         """Create test context for infrastructure integration."""
@@ -150,24 +165,24 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         # Create user execution context
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
+            run_id=test_ctx.session_id,  # Use session_id as run_id
             thread_id=test_ctx.thread_id
         )
         test_ctx.execution_context = exec_ctx
         
-        # Get database session
-        db_session = await database_manager.get_session()
+        # Get database session (stub returns None)
+        db_session = await database_manager.get_async_session()
         test_ctx.database_session = db_session
         
         # Create execution engine
-        engine = await execution_engine_factory.create_execution_engine(exec_ctx)
+        engine = await execution_engine_factory.create_for_user(exec_ctx)
         
         # Verify engine has database access
         assert hasattr(engine, "database_session_manager"), "Engine must have database session manager"
         assert engine.database_session_manager is not None, "Database session manager must be initialized"
         
         # Create test user record in database
-        user_model = UserModel(
+        user_model = User(
             id=test_ctx.user_id,
             email=f"{test_ctx.user_id}@test.com",
             name=f"Test User {test_ctx.user_id}",
@@ -183,7 +198,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         })
         
         # Create thread record for agent execution
-        thread_model = ThreadModel(
+        thread_model = Thread(
             id=test_ctx.thread_id,
             user_id=test_ctx.user_id,
             title=f"Agent Test Thread {test_ctx.test_id}",
@@ -224,9 +239,9 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         
         # Verify database operations occurred during agent execution
         # Query for messages created during agent execution
-        messages_query = sa.select(MessageModel).where(
-            MessageModel.thread_id == test_ctx.thread_id
-        ).order_by(MessageModel.created_at)
+        messages_query = sa.select(Message).where(
+            Message.thread_id == test_ctx.thread_id
+        ).order_by(Message.created_at)
         
         messages_result = await db_session.execute(messages_query)
         messages = messages_result.scalars().all()
@@ -248,7 +263,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         try:
             # Start a transaction that will fail
             async with db_session.begin():
-                invalid_message = MessageModel(
+                invalid_message = Message(
                     thread_id=test_ctx.thread_id,
                     user_id=test_ctx.user_id,
                     role="test",
@@ -287,7 +302,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         # Create execution context
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
+            run_id=test_ctx.session_id,  # Use session_id as run_id
             thread_id=test_ctx.thread_id
         )
         test_ctx.execution_context = exec_ctx
@@ -297,7 +312,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         test_ctx.redis_client = redis_client
         
         # Create execution engine
-        engine = await execution_engine_factory.create_execution_engine(exec_ctx)
+        engine = await execution_engine_factory.create_for_user(exec_ctx)
         
         # Verify engine has Redis access
         assert hasattr(engine, "redis_manager"), "Engine must have Redis manager"
@@ -451,7 +466,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
             
             try:
                 # Create execution engine
-                engine = await execution_engine_factory.create_execution_engine(exec_ctx)
+                engine = await execution_engine_factory.create_for_user(exec_ctx)
                 
                 # Get database session
                 db_session = await database_manager.get_session()
@@ -462,7 +477,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
                 ctx.redis_client = redis_client
                 
                 # Create user record in database
-                user_model = UserModel(
+                user_model = User(
                     id=ctx.user_id,
                     email=f"{ctx.user_id}@concurrent-test.com",
                     name=f"Concurrent User {agent_index}",
@@ -499,8 +514,8 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
                 })
                 
                 # Verify data isolation in database
-                messages_query = sa.select(MessageModel).where(
-                    MessageModel.user_id == ctx.user_id
+                messages_query = sa.select(Message).where(
+                    Message.user_id == ctx.user_id
                 )
                 messages_result = await db_session.execute(messages_query)
                 user_messages = messages_result.scalars().all()
@@ -588,12 +603,12 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
+            run_id=test_ctx.session_id,  # Use session_id as run_id
             thread_id=test_ctx.thread_id
         )
         
         # Create execution engine
-        engine = await execution_engine_factory.create_execution_engine(exec_ctx)
+        engine = await execution_engine_factory.create_for_user(exec_ctx)
         
         # Test database connection error recovery
         original_db_manager = engine.database_session_manager
@@ -673,12 +688,12 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
+            run_id=test_ctx.session_id,  # Use session_id as run_id
             thread_id=test_ctx.thread_id
         )
         
         # Create execution engine
-        engine = await execution_engine_factory.create_execution_engine(exec_ctx)
+        engine = await execution_engine_factory.create_for_user(exec_ctx)
         
         # Perform multiple agent executions to measure performance
         execution_times = []
@@ -693,7 +708,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
             db_session = await database_manager.get_session()
             
             # Simple database operation
-            user_query = sa.select(UserModel).where(UserModel.id == test_ctx.user_id)
+            user_query = sa.select(User).where(User.id == test_ctx.user_id)
             await db_session.execute(user_query)
             await database_manager.close_session(db_session)
             
@@ -755,9 +770,11 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         self.record_metric("avg_redis_operation_time_seconds", avg_redis_time)
         self.record_metric("performance_sla_met", avg_execution_time < 10.0)
         
-    async def teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up test resources."""
-        await super().teardown_method(method)
+        # Call the sync base teardown method directly to avoid async issues
+        from test_framework.ssot.base_test_case import SSotBaseTestCase
+        SSotBaseTestCase.teardown_method(self, method)
         
         # Log test metrics for monitoring
         metrics = self.get_all_metrics()
