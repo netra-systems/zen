@@ -1996,12 +1996,12 @@ class TestComprehensiveFinalValidation:
             log_message = builder.get_safe_log_message()
             assert builder.environment in log_message, f"Log message should contain environment for {env_scenario['name']}"
             
-            # Verify no sensitive data in log
+            # Verify no sensitive credential data in log (skip "postgres" as it's in protocol name)
             sensitive_fields = ["password", "secret", "key"]
             for field in sensitive_fields:
                 field_value = env_scenario["config"].get(f"POSTGRES_{field.upper()}")
-                if field_value and len(field_value) > 3:
-                    assert field_value not in log_message, f"Sensitive data leaked in log for {env_scenario['name']}"
+                if field_value and len(field_value) > 3 and field_value != "postgres":
+                    assert field_value not in log_message, f"Sensitive data leaked in log for {env_scenario['name']}: {field_value}"
     
     def test_all_url_types_generated_correctly(self):
         """Test that all URL types are generated with correct formats."""

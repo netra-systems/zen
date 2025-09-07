@@ -42,7 +42,7 @@ from netra_backend.app.database import get_db, get_system_db, get_database_url, 
 from netra_backend.app.core.backend_environment import BackendEnvironment
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from netra_backend.app.db.models import User, Thread, Message
-from netra_backend.app.services.database.health_checker import DatabaseHealthChecker
+from netra_backend.app.services.database.health_checker import ConnectionHealthChecker
 
 
 class TestDatabasePhaseComprehensive(BaseIntegrationTest):
