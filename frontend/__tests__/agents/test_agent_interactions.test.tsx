@@ -25,6 +25,7 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
+import { generateUniqueId, generateMessageId, generateAgentRunId, resetIdCounter } from '../../utils/unique-id-generator';
 
 // React Testing Library's act for state updates
 
@@ -361,7 +362,7 @@ const AgentChatInterface: React.FC<{
 
     // Add user message to chat
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
+      id: generateMessageId('user'),
       content,
       role: 'user',
       timestamp: new Date().toISOString()
@@ -376,7 +377,7 @@ const AgentChatInterface: React.FC<{
         message: content,
         context: {
           user_id: 'test-user',
-          session_id: `test-session-${Date.now()}`,
+          session_id: generateUniqueId('session'),
           preferred_response_format: 'detailed_with_recommendations'
         }
       }
