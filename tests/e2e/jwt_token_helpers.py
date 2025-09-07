@@ -233,48 +233,50 @@ class JWTTestHelper:
     async def get_staging_jwt_token(self, user_id: str = None, email: str = None) -> Optional[str]:
         """Get valid JWT token for staging environment.
         
-        Attempts multiple strategies:
-        1. Use E2E bypass key if available
-        2. Use staging test API key if available
-        3. Fall back to properly formatted test token
+        CRITICAL FIX: Updated to match UserContextExtractor._get_jwt_secret() exactly.
+        This fixes WebSocket 403 authentication failures by ensuring perfect alignment
+        between test token creation and backend validation.
+        
+        Priority order matches backend exactly:
+        1. JWT_SECRET_STAGING (environment-specific secret for staging)
+        2. E2E_BYPASS_KEY (bypass key for E2E testing)  
+        3. STAGING_JWT_SECRET (alternative staging secret)
+        4. Hardcoded fallback (must match backend's fallback)
         """
         env_manager = get_test_env_manager()
         env = env_manager.env
         
-        # Strategy 1: Try E2E bypass key for staging
-        bypass_key = env.get("E2E_BYPASS_KEY")
-        if bypass_key:
-            # Create token with bypass key as secret
-            payload = self.create_valid_payload()
-            if user_id:
-                payload[JWTConstants.SUBJECT] = user_id
-            if email:
-                payload[JWTConstants.EMAIL] = email
-            return self.create_token(payload, bypass_key)
+        # CRITICAL FIX: Match UserContextExtractor._get_jwt_secret() priority exactly
+        secrets_to_try = [
+            ("JWT_SECRET_STAGING", env.get("JWT_SECRET_STAGING")),
+            ("E2E_BYPASS_KEY", env.get("E2E_BYPASS_KEY")),
+            ("STAGING_JWT_SECRET", env.get("STAGING_JWT_SECRET")),
+            ("HARDCODED_FALLBACK", "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A")
+        ]
         
-        # Strategy 2: Try staging test API key
-        staging_api_key = env.get("STAGING_TEST_API_KEY")
-        if staging_api_key:
-            # Use API key as bearer token directly
-            return staging_api_key
+        for secret_name, secret_value in secrets_to_try:
+            if secret_value:
+                print(f"Using {secret_name} for staging JWT token creation")
+                
+                # Create payload with proper structure
+                payload = self.create_valid_payload()
+                if user_id:
+                    payload[JWTConstants.SUBJECT] = user_id
+                if email:
+                    payload[JWTConstants.EMAIL] = email
+                
+                # Ensure secret is properly stripped
+                clean_secret = secret_value.strip() if isinstance(secret_value, str) else secret_value
+                token = self.create_token(payload, clean_secret)
+                
+                print(f"Created staging JWT token using {secret_name} (user: {payload[JWTConstants.SUBJECT]})")
+                return token
         
-        # Strategy 3: Try to get staging JWT secret from environment
-        staging_jwt_secret = env.get("STAGING_JWT_SECRET")
-        if staging_jwt_secret:
-            payload = self.create_valid_payload()
-            if user_id:
-                payload[JWTConstants.SUBJECT] = user_id
-            if email:
-                payload[JWTConstants.EMAIL] = email
-            return self.create_token(payload, staging_jwt_secret)
+        # This should never happen given the hardcoded fallback
+        raise RuntimeError("CRITICAL: No JWT secret available for staging token creation - this should never occur!")
         
-        # Strategy 4: Fall back to test token (will likely fail but worth trying)
-        payload = self.create_valid_payload()
-        if user_id:
-            payload[JWTConstants.SUBJECT] = user_id
-        if email:
-            payload[JWTConstants.EMAIL] = email
-        return self.create_token(payload)
+        # NOTE: Removed the staging API key strategy as it doesn't create proper JWT tokens
+        # API keys are different from JWT tokens and won't work with JWT validation
     
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
         """Test WebSocket connection with token."""
