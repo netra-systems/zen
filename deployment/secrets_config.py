@@ -111,8 +111,10 @@ class SecretConfig:
         "POSTGRES_PASSWORD": "postgres-password-staging",
         
         # Authentication & JWT
+        # CRITICAL FIX: Both JWT_SECRET_STAGING and JWT_SECRET_KEY must map to the same secret
+        # This ensures WebSocket authentication works correctly in staging
         "JWT_SECRET_STAGING": "jwt-secret-staging",
-        "JWT_SECRET_KEY": "jwt-secret-key-staging",
+        "JWT_SECRET_KEY": "jwt-secret-staging",  # CRITICAL: Same as JWT_SECRET_STAGING for consistency
         "SECRET_KEY": "secret-key-staging",  # CRITICAL: Maps to secret-key-staging
         "SERVICE_SECRET": "service-secret-staging",
         "SERVICE_ID": "service-id-staging",

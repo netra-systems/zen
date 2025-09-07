@@ -893,9 +893,11 @@ CMD ["npm", "start"]
                         print(f"      ⚠️ Missing {env_name} - deployment may fail")
             
             # Critical authentication secrets
+            # CRITICAL FIX: JWT_SECRET_KEY and JWT_SECRET_STAGING must both map to jwt-secret-staging
+            # This ensures WebSocket authentication works correctly
             auth_mappings = {
-                "JWT_SECRET_KEY": "jwt-secret-staging",
-                "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names for compatibility
+                "JWT_SECRET_KEY": "jwt-secret-staging",      # CRITICAL: Same secret as JWT_SECRET_STAGING
+                "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names use same secret for consistency
                 "SECRET_KEY": "secret-key-staging",
                 "SERVICE_SECRET": "service-secret-staging",
                 "SERVICE_ID": "service-id-staging"
