@@ -71,7 +71,8 @@ class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
                 agent_name="optimization_agent",
                 state=state,
                 expected_business_outcomes=expected_outcomes,
-                timeout=30.0
+                timeout=30.0,
+                ws_context=ws_context
             )
             
             # Business Value Assertions
@@ -141,7 +142,8 @@ class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
                 agent_name="performance_agent",
                 state=state, 
                 expected_business_outcomes=expected_outcomes,
-                timeout=25.0
+                timeout=25.0,
+                ws_context=ws_context
             )
             
             # Business Value Assertions
@@ -220,7 +222,8 @@ class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
                 agent_name="resource_optimization_agent",
                 state=state,
                 expected_business_outcomes=expected_outcomes,
-                timeout=35.0
+                timeout=35.0,
+                ws_context=ws_context
             )
             
             # Business Value Assertions
@@ -307,7 +310,8 @@ class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
                 agent_name="risk_assessment_agent",
                 state=state,
                 expected_business_outcomes=expected_outcomes, 
-                timeout=40.0
+                timeout=40.0,
+                ws_context=ws_context
             )
             
             # Business Value Assertions
@@ -397,7 +401,8 @@ class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
                 agent_name="compliance_reporting_agent",
                 state=state,
                 expected_business_outcomes=expected_outcomes,
-                timeout=30.0
+                timeout=30.0,
+                ws_context=ws_context
             )
             
             # Business Value Assertions

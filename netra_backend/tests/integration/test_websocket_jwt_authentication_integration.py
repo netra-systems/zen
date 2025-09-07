@@ -66,6 +66,10 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         self.test_email = "test@netrasystems.ai"
         self.jwt_algorithm = "HS256"
         
+        # Auth service integration helper for graceful degradation
+        from test_framework.auth_service_integration_helpers import get_auth_service_helper
+        self.auth_helper = get_auth_service_helper()
+        
         # Test JWT payloads for different scenarios
         self.valid_jwt_payload = {
             "sub": self.test_user_id,

@@ -338,6 +338,29 @@ export class UnifiedWebSocketMock {
   }
 
   /**
+   * Manually trigger connection success (for manual testing)
+   * Used by tests that need explicit control over connection timing
+   */
+  public simulateConnectionSuccess(): void {
+    if (this.isDisposed || this.hasErrored) return;
+    
+    this.readyState = UnifiedWebSocketMock.OPEN;
+    const openEvent = new Event('open');
+    this.triggerEventHandler('onopen', openEvent);
+  }
+
+  /**
+   * Manually start connection process (for manual testing)
+   * Used when autoConnect is false
+   */
+  public connect(): void {
+    if (this.readyState === UnifiedWebSocketMock.OPEN) return;
+    
+    this.readyState = UnifiedWebSocketMock.CONNECTING;
+    this.simulateConnection();
+  }
+
+  /**
    * Cleanup method for proper resource management
    * FIXES: Memory leaks and hanging test issues
    */
