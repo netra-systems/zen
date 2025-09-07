@@ -670,12 +670,12 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             end_time = time.time()
             
             # Assert - Should handle high volume efficiently
-            self.assertTrue(all(results), "All events should be processed successfully")
-            self.assertEqual(mock_emit.call_count, num_events)
+            assert all(results), "All events should be processed successfully"
+            assert mock_emit.call_count == num_events
             
             # Performance assertion - should complete within reasonable time
             execution_time = end_time - start_time
-            self.assertLess(execution_time, 5.0, f"Should process {num_events} events in < 5 seconds")
+            assert execution_time < 5.0, f"Should process {num_events} events in < 5 seconds"
 
     # ========================================================================
     # Legacy Compatibility Tests
@@ -694,9 +694,9 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         bridge2 = AgentWebSocketBridge()
         
         # Assert - Should be different instances
-        self.assertIsNot(bridge1, bridge2, "Should create different instances")
-        self.assertTrue(bridge1._initialized)
-        self.assertTrue(bridge2._initialized)
+        assert bridge1 is not bridge2, "Should create different instances"
+        assert bridge1._initialized
+        assert bridge2._initialized
 
     async def test_emit_agent_event_core_method(self):
         """
@@ -723,19 +723,19 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert - Core method should work
-            self.assertTrue(result)
+            assert result
             self.mock_websocket_manager.emit_to_run.assert_called_once()
             
             # Verify call arguments
             call_args = self.mock_websocket_manager.emit_to_run.call_args
-            self.assertEqual(call_args[0][0], self.test_run_id)  # run_id
-            self.assertEqual(call_args[0][1], "custom_event")   # event_type
+            assert call_args[0][0] == self.test_run_id  # run_id
+            assert call_args[0][1] == "custom_event"   # event_type
             
             # Verify data includes timestamp
             event_data = call_args[0][2]
-            self.assertEqual(event_data["agent_name"], self.test_agent_name)
-            self.assertEqual(event_data["custom_field"], "test_value")
-            self.assertIn("timestamp", event_data)
+            assert event_data["agent_name"] == self.test_agent_name
+            assert event_data["custom_field"] == "test_value"
+            assert "timestamp" in event_data
 
     # ========================================================================
     # Integration with UnifiedWebSocketManager Tests  
@@ -772,19 +772,19 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             self.mock_websocket_manager.is_healthy.return_value = True
             
             health = await self.bridge._check_websocket_manager_health()
-            self.assertTrue(health)
+            assert health
         
         # Test unhealthy manager
         with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
             self.mock_websocket_manager.is_healthy.return_value = False
             
             health = await self.bridge._check_websocket_manager_health()
-            self.assertFalse(health)
+            assert not health
         
         # Test missing manager
         with patch.object(self.bridge, '_get_websocket_manager', return_value=None):
             health = await self.bridge._check_websocket_manager_health()
-            self.assertFalse(health)
+            assert not health
 
 
 if __name__ == '__main__':
