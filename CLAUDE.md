@@ -42,7 +42,7 @@ The system has a lot of async, websockets, and other patterns that require heavy
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
 5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
-6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./reports/auth/OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
+6. **CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./reports/auth/OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
 Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
@@ -531,7 +531,7 @@ YOU ARE VERY SMART AND PRACTICAL.
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
 2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
-    - **SPECIAL ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
+    - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
 3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
