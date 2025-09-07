@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="8" failures="0" skipped="1" tests="9" time="10.335" timestamp="2025-09-07T13:01:27.369306-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_error_handling_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_error_handling_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_error_handling_integration.py:30: in &lt;module&gt;
-    from auth_service.auth_core.database.connection import ConnectionManager as RedisService
-E   ImportError: cannot import name 'ConnectionManager' from 'auth_service.auth_core.database.connection' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\database\connection.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_health_check_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_health_check_integration.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.681" timestamp="2025-09-07T16:12:14.608994-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_health_check_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_health_check_integration.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
@@ -14,80 +6,4 @@ Traceback:
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 auth_service\tests\integration\test_auth_health_check_integration.py:27: in &lt;module&gt;
     from auth_service.services.health_check_service import HealthCheckService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_jwt_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_jwt_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_jwt_integration.py:28: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_multi_user_isolation_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_multi_user_isolation_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:29: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_oauth_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_oauth_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_oauth_integration.py:28: in &lt;module&gt;
-    from auth_service.services.oauth_service import OAuthService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_registration_login_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_registration_login_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_registration_login_integration.py:29: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_session_persistence" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_session_persistence.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_session_persistence.py:26: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.integration.test_auth_token_refresh_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_token_refresh_integration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_token_refresh_integration.py:28: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\__init__.py:11: in &lt;module&gt;
-    from auth_service.services.redis_service import RedisService
-auth_service\services\redis_service.py:10: in &lt;module&gt;
-    from auth_service.auth_core.redis_manager import RedisManager
-E   ImportError: cannot import name 'RedisManager' from 'auth_service.auth_core.redis_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\redis_manager.py)</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 50, 'Skipped: Test framework functions have been removed')</skipped></testcase></testsuite></testsuites>
+E   ModuleNotFoundError: No module named 'auth_service.services.health_check_service'</error></testcase></testsuite></testsuites>
