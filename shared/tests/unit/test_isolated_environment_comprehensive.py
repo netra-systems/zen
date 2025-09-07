@@ -45,12 +45,13 @@ from shared.isolated_environment import (
     get_subprocess_env,
     load_secrets,
     SecretLoader,
-    EnvironmentValidator
+    EnvironmentValidator,
+    get_environment_manager
 )
 
 # Import test framework SSOT patterns
-from test_framework.ssot.isolated_test_helper import isolated_env
 from test_framework.isolated_environment_fixtures import STANDARD_TEST_CONFIG
+# Note: isolated_test_helper import skipped - not critical for comprehensive unit tests
 
 
 class TestIsolatedEnvironmentSingleton:
@@ -1265,6 +1266,28 @@ class TestValidationResult:
         assert "Missing required variable: DATABASE_URL" in result.errors
         
         env.reset()
+    
+    def test_validation_with_standard_test_config(self):
+        """Test validation using STANDARD_TEST_CONFIG from SSOT test fixtures."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        
+        # Load standard test configuration
+        env.update(STANDARD_TEST_CONFIG, source="standard_test_config")
+        
+        # Verify key test variables are set correctly
+        assert env.get("TESTING") == "true"
+        assert env.get("ENVIRONMENT") == "test"
+        assert env.get("DATABASE_URL").startswith("postgresql://")
+        assert env.get("JWT_SECRET_KEY") is not None
+        assert len(env.get("JWT_SECRET_KEY")) >= 32  # Minimum length requirement
+        
+        # Validation should pass with standard config
+        result = env.validate_all()
+        assert result.is_valid == True, f"Validation failed with standard config: {result.errors}"
+        
+        env.reset()
 
 
 class TestLegacyCompatibilityClasses:
@@ -1392,6 +1415,16 @@ class TestErrorHandling:
         assert result == True
         assert env.get("EMPTY_TEST") == ""
         
+        # Test with numeric values (should be converted to string)
+        result = env.set("NUMERIC_TEST", 12345, source="test")
+        assert result == True
+        assert env.get("NUMERIC_TEST") == "12345"
+        
+        # Test with boolean values
+        result = env.set("BOOL_TEST", True, source="test")
+        assert result == True
+        assert env.get("BOOL_TEST") == "True"
+        
         env.reset()
     
     def test_file_loading_edge_cases(self):
@@ -1419,6 +1452,248 @@ class TestErrorHandling:
                 os.unlink(temp_file)
             except (OSError, PermissionError) as e:
                 print(f"Warning: Could not delete temp file {temp_file}: {e}")
+        
+        env.reset()
+
+
+class TestAdvancedScenarios:
+    """Test advanced scenarios and edge cases for comprehensive coverage."""
+    
+    def test_singleton_consistency_detection(self):
+        """Test singleton consistency issue detection and repair."""
+        # This tests the singleton consistency check in get_env()
+        env = get_env()
+        env.reset()
+        
+        # Access the module to create inconsistency
+        import shared.isolated_environment as ie_module
+        
+        # Manually create inconsistency (backup original first)
+        original_instance = ie_module._env_instance
+        original_class_instance = IsolatedEnvironment._instance
+        
+        try:
+            # Create a fake instance to simulate inconsistency
+            fake_instance = object()
+            ie_module._env_instance = fake_instance
+            
+            # Now call get_env() - should detect and fix inconsistency
+            corrected_env = get_env()
+            
+            # Should have forced consistency by using the class instance
+            assert ie_module._env_instance is corrected_env
+            assert corrected_env is IsolatedEnvironment._instance
+            
+        finally:
+            # Restore original state
+            ie_module._env_instance = original_instance
+            IsolatedEnvironment._instance = original_class_instance
+    
+    def test_auto_load_env_disabled_scenarios(self):
+        """Test auto-loading disabled in various scenarios."""
+        env = get_env()
+        env.reset()
+        
+        # Test with DISABLE_SECRETS_LOADING flag
+        with patch.dict(os.environ, {'DISABLE_SECRETS_LOADING': 'true'}):
+            # Create temp .env file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                f.write("AUTO_LOAD_TEST=should_not_load\n")
+                env_file_path = f.name
+            
+            try:
+                # Call auto-load method directly
+                env._auto_load_env_file()
+                
+                # Should not have loaded the variable
+                assert env.get("AUTO_LOAD_TEST") is None
+                
+            finally:
+                try:
+                    os.unlink(env_file_path)
+                except (OSError, PermissionError):
+                    pass
+        
+        # Test disabled in staging/production environments
+        for env_name in ['staging', 'production']:
+            with patch.dict(os.environ, {'ENVIRONMENT': env_name}):
+                # Create temp .env file
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write(f"{env_name.upper()}_TEST=should_not_load\n")
+                    env_file_path = f.name
+                
+                try:
+                    # Call auto-load method
+                    env._auto_load_env_file()
+                    
+                    # Should not have loaded the variable
+                    assert env.get(f"{env_name.upper()}_TEST") is None
+                    
+                finally:
+                    try:
+                        os.unlink(env_file_path)
+                    except (OSError, PermissionError):
+                        pass
+                        
+        env.reset()
+    
+    def test_shell_expansion_error_conditions(self):
+        """Test shell expansion timeout and error handling."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        
+        # Mock subprocess to simulate timeout
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            # Simulate timeout
+            from subprocess import TimeoutExpired
+            mock_run.side_effect = TimeoutExpired('test', 5)
+            
+            # Should handle timeout gracefully
+            result = env._expand_shell_commands("test_$(whoami)_test")
+            # Should return original value on timeout
+            assert result == "test_$(whoami)_test"
+        
+        # Test command failure
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            mock_run.return_value.returncode = 1
+            mock_run.return_value.stderr = "Command failed"
+            
+            result = env._expand_shell_commands("test_$(invalid_command)_test")
+            # Should return original value on failure
+            assert result == "test_$(invalid_command)_test"
+        
+        # Test exception during execution
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            mock_run.side_effect = Exception("Test exception")
+            
+            result = env._expand_shell_commands("test_$(whoami)_test")
+            # Should return original value on exception
+            assert result == "test_$(whoami)_test"
+            
+        env.reset()
+    
+    def test_test_context_detection_edge_cases(self):
+        """Test edge cases in test context detection."""
+        env = get_env()
+        env.reset()
+        
+        # Test various test environment values
+        test_cases = [
+            ('TESTING', 'true'),
+            ('TESTING', '1'),
+            ('TESTING', 'yes'),
+            ('TESTING', 'on'),
+            ('TEST_MODE', 'true'),
+            ('ENVIRONMENT', 'test'),
+            ('ENVIRONMENT', 'testing')
+        ]
+        
+        for var_name, var_value in test_cases:
+            with patch.dict(os.environ, {var_name: var_value}):
+                assert env._is_test_context(), f"Failed to detect test context with {var_name}={var_value}"
+    
+    def test_legacy_get_environment_manager_function(self):
+        """Test legacy get_environment_manager function."""
+        # Test with isolation_mode parameter
+        manager1 = get_environment_manager(isolation_mode=True)
+        assert manager1.is_isolated() == True
+        
+        manager2 = get_environment_manager(isolation_mode=False)
+        assert manager2.is_isolated() == False
+        
+        # Test with None (no change)
+        manager3 = get_environment_manager(isolation_mode=None)
+        # Should return the same instance
+        assert manager3 is manager2
+        
+        # Reset for other tests
+        manager3.reset()
+    
+    def test_database_url_sanitization_error_handling(self):
+        """Test database URL sanitization error handling."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        
+        # Test with malformed URL that causes parsing errors
+        malformed_url = "not_a_url_at_all_just_text"
+        env.set("DATABASE_URL", malformed_url, source="test")
+        
+        # Should fall back to generic sanitization
+        result = env.get("DATABASE_URL")
+        assert result == malformed_url  # Should be unchanged
+        
+        env.reset()
+    
+    def test_preserved_variables_deletion(self):
+        """Test edge cases with preserved variables."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        
+        # Test deleting preserved variables
+        preserved_var = list(env.PRESERVE_IN_OS_ENVIRON)[0]
+        
+        # Set the preserved variable
+        env.set(preserved_var, "test_value", source="test")
+        
+        # Should be in both places
+        assert env.get(preserved_var) == "test_value"
+        assert os.environ.get(preserved_var) == "test_value"
+        
+        # Delete it
+        env.delete(preserved_var, source="test")
+        
+        # Should be removed from os.environ too
+        assert preserved_var not in os.environ
+        
+        env.reset()
+    
+    def test_disable_isolation_with_restore_original(self):
+        """Test disabling isolation with restore_original=True."""
+        env = get_env()
+        env.reset()
+        
+        # Capture original state
+        original_keys = set(os.environ.keys())
+        
+        # Enable isolation with backup
+        env.enable_isolation(backup_original=True)
+        
+        # Make changes
+        env.set("RESTORE_TEST", "test_value", source="test")
+        
+        # Disable with restore
+        env.disable_isolation(restore_original=True)
+        
+        # Should be back to original state
+        # The test variable should not be in os.environ
+        assert "RESTORE_TEST" not in os.environ
+        
+        env.reset()
+    
+    def test_get_all_with_prefix_unset_variables(self):
+        """Test get_all_with_prefix with explicitly unset variables."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        
+        # Set up variables including some that will be explicitly unset
+        env.set("PREFIX_NORMAL", "normal", source="test")
+        env.set("PREFIX_TO_UNSET", "will_be_unset", source="test")
+        env.set("OTHER_VAR", "other", source="test")
+        
+        # Explicitly unset one variable
+        env.delete("PREFIX_TO_UNSET", source="test")
+        
+        # Get prefixed variables
+        result = env.get_all_with_prefix("PREFIX_")
+        
+        # Should only include non-unset prefixed variables
+        assert "PREFIX_NORMAL" in result
+        assert "PREFIX_TO_UNSET" not in result
+        assert "OTHER_VAR" not in result
         
         env.reset()
 

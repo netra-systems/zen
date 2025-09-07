@@ -16,19 +16,29 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
 try:
     from netra_backend.app.services.message_handlers import MessageHandlerService
     from netra_backend.app.services.thread_service import ThreadService
-    from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
+    from netra_backend.app.websocket_core import create_websocket_manager
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
-manager = get_unified_manager()
+
+@pytest.fixture
+async def websocket_manager():
+    """Create WebSocket manager with proper UserExecutionContext for testing."""
+    user_context = UserExecutionContext(
+        user_id="test-user-123",
+        thread_id="test-thread-456",
+        run_id="test-run-789",
+        request_id="test-request-789"
+    )
+    return create_websocket_manager(user_context)
 
 @pytest.mark.asyncio
-async def test_user_joins_thread_room_on_message():
+async def test_user_joins_thread_room_on_message(websocket_manager):
     """Test that users join thread room when sending message with thread_id."""
     # Setup
     # Mock: Generic component isolation for controlled unit testing
@@ -136,8 +146,9 @@ async def test_switch_thread_requires_thread_id():
         # Verify error was sent through WebSocket manager
         mock_manager.send_to_user.assert_called_once_with({"type": "error", "message": "Thread ID required"})
 @pytest.mark.asyncio
-async def test_websocket_broadcasts_to_thread_room():
+async def test_websocket_broadcasts_to_thread_room(websocket_manager):
     """Test that WebSocket messages are broadcast to thread room members."""
+    manager = websocket_manager
     thread_id = "test-thread-123"
     user1_id = "user-1"
     user2_id = "user-2"
@@ -159,8 +170,9 @@ async def test_websocket_broadcasts_to_thread_room():
         # Since it broadcasts to all connected users, verify the call was made
         assert send_mock.call_count >= 0  # May vary based on implementation
 @pytest.mark.asyncio
-async def test_thread_room_isolation():
+async def test_thread_room_isolation(websocket_manager):
     """Test that messages to one thread don't reach users in other threads."""
+    manager = websocket_manager
     thread1_id = "thread-1"
     thread2_id = "thread-2"
     user1_id = "user-1"

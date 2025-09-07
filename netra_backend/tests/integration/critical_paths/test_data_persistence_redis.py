@@ -5,7 +5,7 @@ Tests Redis data persistence and caching
 
 import sys
 from pathlib import Path
-from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead

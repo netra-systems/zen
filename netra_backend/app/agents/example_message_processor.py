@@ -34,7 +34,7 @@ class ExampleMessageProcessor(BaseAgent):
             name="ExampleMessageProcessor",
             description="Processes example optimization messages with real-time updates"
         )
-        self.ws_manager = get_manager()
+        self.ws_manager = None  # Lazy initialization to avoid import-time WebSocket manager creation
         self.processing_strategies = {
             'cost-optimization': self._process_cost_optimization,
             'latency-optimization': self._process_latency_optimization,
@@ -42,6 +42,12 @@ class ExampleMessageProcessor(BaseAgent):
             'scaling': self._process_scaling_analysis,
             'advanced': self._process_advanced_optimization
         }
+    
+    def _get_websocket_manager(self):
+        """Lazy initialization of WebSocket manager to avoid import-time creation."""
+        if self.ws_manager is None:
+            self.ws_manager = get_manager()
+        return self.ws_manager
         
     async def execute(self, state: AgentStateProtocol, run_id: str, stream_updates: bool = False) -> TypedAgentResult:
         """Execute the example message processor with agent state interface."""
@@ -630,7 +636,7 @@ class ExampleMessageProcessor(BaseAgent):
     async def _send_update(self, update_type: str, content: Dict[str, Any]) -> None:
         """Send real-time updates via WebSocket"""
         
-        if not self.user_id or not self.ws_manager:
+        if not self.user_id:
             return
             
         message = {
@@ -643,7 +649,8 @@ class ExampleMessageProcessor(BaseAgent):
         }
         
         try:
-            await self.ws_manager.send_message_to_user(self.user_id, message)
+            ws_manager = self._get_websocket_manager()
+            await ws_manager.send_message_to_user(self.user_id, message)
         except Exception as e:
             logger.error(f"Failed to send WebSocket update: {e}")
 

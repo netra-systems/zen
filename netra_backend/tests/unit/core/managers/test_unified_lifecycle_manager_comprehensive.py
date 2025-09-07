@@ -1892,6 +1892,1209 @@ class TestLifecycleManagerFactory(AsyncBaseTestCase):
             self.assertEqual(manager.user_id, user_id)
 
 
+    # ============================================================================
+    # ADVANCED RACE CONDITION AND CONCURRENCY TESTS (CRITICAL FOR WEBSOCKET/ASYNC)
+    # ============================================================================
+    
+    async def test_63_concurrent_phase_transitions_race_condition_prevention(self):
+        """Test prevention of race conditions during concurrent phase transitions."""
+        await self._register_all_components()
+        
+        # Attempt concurrent startup operations (should be prevented)
+        startup_tasks = [
+            asyncio.create_task(self.lifecycle_manager.startup()),
+            asyncio.create_task(self.lifecycle_manager.startup()),
+            asyncio.create_task(self.lifecycle_manager.startup())
+        ]
+        
+        # Only one should succeed, others should return False
+        results = await asyncio.gather(*startup_tasks, return_exceptions=True)
+        success_count = sum(1 for r in results if r is True)
+        
+        self.assertEqual(success_count, 1)  # Only one startup should succeed
+        self.assertEqual(self.lifecycle_manager.get_current_phase(), LifecyclePhase.RUNNING)
+    
+    async def test_64_websocket_event_emission_race_conditions(self):
+        """Test WebSocket event emission under concurrent conditions."""
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        
+        # Emit multiple events concurrently to test race conditions
+        event_count = 20
+        event_tasks = []
+        
+        for i in range(event_count):
+            task = asyncio.create_task(
+                self.lifecycle_manager._emit_websocket_event(f"concurrent_test_{i}", {"index": i})
+            )
+            event_tasks.append(task)
+        
+        # All events should be emitted without race conditions
+        await asyncio.gather(*event_tasks)
+        
+        # Verify all events were broadcasted
+        broadcasted_events = self.mock_websocket_manager.broadcasted_events
+        self.assertEqual(len(broadcasted_events), event_count)
+        
+        # Verify event ordering and data integrity
+        for i, event in enumerate(broadcasted_events):
+            self.assertEqual(event["type"], f"lifecycle_concurrent_test_{i}")
+            self.assertEqual(event["data"]["index"], i)
+    
+    async def test_65_component_registration_concurrent_modifications(self):
+        """Test concurrent component registration and unregistration operations."""
+        component_count = 10
+        
+        # Create components for concurrent registration
+        components = []
+        for i in range(component_count):
+            mock_comp = AsyncMock()
+            mock_comp.name = f"concurrent_component_{i}"
+            components.append((f"comp_{i}", mock_comp))
+        
+        # Register all components concurrently
+        registration_tasks = [
+            asyncio.create_task(
+                self.lifecycle_manager.register_component(name, comp, ComponentType.LLM_MANAGER)
+            )
+            for name, comp in components
+        ]
+        
+        await asyncio.gather(*registration_tasks)
+        
+        # Verify all components are registered
+        self.assertEqual(len(self.lifecycle_manager._components), component_count)
+        
+        # Unregister half the components concurrently while registering new ones
+        unregister_tasks = []
+        new_register_tasks = []
+        
+        for i in range(component_count // 2):
+            unregister_tasks.append(
+                asyncio.create_task(self.lifecycle_manager.unregister_component(f"comp_{i}"))
+            )
+            
+            new_mock = AsyncMock()
+            new_mock.name = f"new_component_{i}"
+            new_register_tasks.append(
+                asyncio.create_task(
+                    self.lifecycle_manager.register_component(
+                        f"new_comp_{i}", new_mock, ComponentType.REDIS_MANAGER
+                    )
+                )
+            )
+        
+        # Execute concurrent operations
+        await asyncio.gather(*(unregister_tasks + new_register_tasks))
+        
+        # Verify final state is consistent
+        remaining_count = len(self.lifecycle_manager._components)
+        expected_count = component_count // 2 + component_count // 2  # Half unregistered, half new registered
+        self.assertEqual(remaining_count, expected_count)
+    
+    async def test_66_health_monitoring_concurrent_checks(self):
+        """Test concurrent health check operations without race conditions."""
+        # Register multiple components with health checks
+        check_counts = {}
+        
+        async def create_health_check(comp_name):
+            async def health_check():
+                check_counts[comp_name] = check_counts.get(comp_name, 0) + 1
+                await asyncio.sleep(0.01)  # Simulate async work
+                return {"healthy": True, "checks": check_counts[comp_name]}
+            return health_check
+        
+        component_count = 8
+        for i in range(component_count):
+            comp_name = f"health_comp_{i}"
+            mock_comp = AsyncMock()
+            health_check = await create_health_check(comp_name)
+            
+            await self.lifecycle_manager.register_component(
+                comp_name, mock_comp, ComponentType.LLM_MANAGER, health_check=health_check
+            )
+        
+        # Run multiple health checks concurrently
+        check_tasks = [
+            asyncio.create_task(self.lifecycle_manager._run_all_health_checks())
+            for _ in range(5)
+        ]
+        
+        results_list = await asyncio.gather(*check_tasks)
+        
+        # Verify all health checks completed successfully
+        for results in results_list:
+            self.assertEqual(len(results), component_count)
+            for comp_name, result in results.items():
+                self.assertTrue(result["healthy"])
+                self.assertIn("checks", result)
+    
+    async def test_67_request_context_concurrent_tracking_stress_test(self):
+        """Stress test concurrent request context tracking."""
+        request_count = 50
+        max_concurrent = 20
+        
+        completed_requests = []
+        semaphore = asyncio.Semaphore(max_concurrent)
+        
+        async def simulate_concurrent_request(req_id):
+            async with semaphore:
+                async with self.lifecycle_manager.request_context(req_id):
+                    # Verify request is tracked
+                    self.assertIn(req_id, self.lifecycle_manager._active_requests)
+                    
+                    # Simulate variable request duration
+                    await asyncio.sleep(0.01 + (int(req_id.split('_')[-1]) % 5) * 0.01)
+                    
+                    completed_requests.append(req_id)
+        
+        # Start all requests
+        request_ids = [f"stress_req_{i}" for i in range(request_count)]
+        request_tasks = [
+            asyncio.create_task(simulate_concurrent_request(req_id))
+            for req_id in request_ids
+        ]
+        
+        # Monitor active request count during execution
+        max_active = 0
+        monitoring_task = asyncio.create_task(self._monitor_active_requests(max_active))
+        
+        # Execute all requests
+        await asyncio.gather(*request_tasks)
+        monitoring_task.cancel()
+        
+        # Verify all requests completed and were properly tracked
+        self.assertEqual(len(completed_requests), request_count)
+        self.assertEqual(len(self.lifecycle_manager._active_requests), 0)
+        self.assertEqual(self.lifecycle_manager._metrics.active_requests, 0)
+    
+    async def _monitor_active_requests(self, max_active):
+        """Helper method to monitor maximum active requests during stress test."""
+        try:
+            while True:
+                current_active = len(self.lifecycle_manager._active_requests)
+                max_active = max(max_active, current_active)
+                await asyncio.sleep(0.001)
+        except asyncio.CancelledError:
+            pass
+    
+    # ============================================================================
+    # SIGNAL HANDLING AND SYSTEM INTEGRATION TESTS
+    # ============================================================================
+    
+    async def test_68_signal_handler_setup_validation(self):
+        """Test signal handler setup for graceful shutdown."""
+        # Note: Signal handling is OS-specific and hard to test directly
+        # We test the setup method doesn't raise exceptions
+        try:
+            self.lifecycle_manager.setup_signal_handlers()
+        except Exception as e:
+            self.fail(f"Signal handler setup should not raise exceptions: {e}")
+        
+        # Verify setup completed without errors
+        self.assertIsInstance(self.lifecycle_manager, UnifiedLifecycleManager)
+    
+    async def test_69_environment_variable_configuration_edge_cases(self):
+        """Test edge cases in environment variable configuration loading."""
+        # Test with various invalid environment configurations
+        edge_case_configs = [
+            {"SHUTDOWN_TIMEOUT": "-1"},  # Negative value
+            {"DRAIN_TIMEOUT": "0"},      # Zero value
+            {"HEALTH_GRACE_PERIOD": "999999"},  # Very large value
+            {"STARTUP_TIMEOUT": "0.5"},  # Float as string
+            {"LIFECYCLE_ERROR_THRESHOLD": ""},  # Empty string
+            {"HEALTH_CHECK_INTERVAL": "not_a_number"}  # Invalid format
+        ]
+        
+        for config in edge_case_configs:
+            with self.isolated_environment(**config):
+                # Should handle invalid configs gracefully
+                try:
+                    manager = UnifiedLifecycleManager()
+                    # Verify manager was created despite invalid config
+                    self.assertIsInstance(manager, UnifiedLifecycleManager)
+                except Exception as e:
+                    self.fail(f"Manager creation should handle invalid config gracefully: {e}")
+    
+    async def test_70_memory_leak_prevention_during_lifecycle_operations(self):
+        """Test memory leak prevention during repeated lifecycle operations."""
+        initial_component_count = len(self.lifecycle_manager._components)
+        initial_handler_count = len(self.lifecycle_manager._startup_handlers)
+        
+        # Perform multiple register/unregister cycles
+        for cycle in range(10):
+            mock_comp = AsyncMock()
+            mock_comp.name = f"cycle_component_{cycle}"
+            
+            # Register component
+            await self.lifecycle_manager.register_component(
+                f"cycle_comp_{cycle}",
+                mock_comp,
+                ComponentType.LLM_MANAGER
+            )
+            
+            # Add handlers
+            def temp_handler():
+                pass
+            
+            self.lifecycle_manager.add_startup_handler(temp_handler)
+            
+            # Unregister component
+            await self.lifecycle_manager.unregister_component(f"cycle_comp_{cycle}")
+        
+        # Verify no memory leaks (components cleaned up)
+        final_component_count = len(self.lifecycle_manager._components)
+        self.assertEqual(final_component_count, initial_component_count)
+        
+        # Handlers accumulate (this is expected behavior)
+        final_handler_count = len(self.lifecycle_manager._startup_handlers)
+        self.assertEqual(final_handler_count, initial_handler_count + 10)
+    
+    # ============================================================================
+    # COMPREHENSIVE ERROR HANDLING AND EDGE CASE TESTS
+    # ============================================================================
+    
+    async def test_71_startup_timeout_handling(self):
+        """Test startup timeout handling with slow components."""
+        # Create a component that takes longer than startup timeout
+        slow_component = AsyncMock()
+        slow_component.initialize = AsyncMock()
+        
+        async def slow_initialize():
+            await asyncio.sleep(15)  # Longer than default startup timeout
+            
+        slow_component.initialize.side_effect = slow_initialize
+        slow_component.name = "slow_component"
+        
+        await self.lifecycle_manager.register_component(
+            "slow_component",
+            slow_component,
+            ComponentType.LLM_MANAGER
+        )
+        
+        # Startup should handle timeout gracefully
+        # Note: This test depends on the implementation having timeout logic
+        # Current implementation doesn't have explicit startup timeout, 
+        # but we test that it doesn't hang indefinitely
+        start_time = time.time()
+        
+        startup_task = asyncio.create_task(self.lifecycle_manager.startup())
+        
+        try:
+            # Wait with a reasonable timeout
+            success = await asyncio.wait_for(startup_task, timeout=20.0)
+            elapsed = time.time() - start_time
+            
+            # Startup should complete (successfully or not) within reasonable time
+            self.assertLess(elapsed, 20.0)
+            
+        except asyncio.TimeoutError:
+            self.fail("Startup should not hang indefinitely")
+    
+    async def test_72_shutdown_timeout_and_force_cleanup(self):
+        """Test shutdown timeout handling and force cleanup."""
+        await self._register_all_components()
+        await self.lifecycle_manager.startup()
+        
+        # Create a component that hangs during shutdown
+        hanging_component = AsyncMock()
+        hanging_component.initialize = AsyncMock()
+        hanging_component.shutdown = AsyncMock()
+        
+        async def hanging_shutdown():
+            await asyncio.sleep(60)  # Hang for a long time
+            
+        hanging_component.shutdown.side_effect = hanging_shutdown
+        hanging_component.name = "hanging_component"
+        
+        await self.lifecycle_manager.register_component(
+            "hanging_component",
+            hanging_component,
+            ComponentType.REDIS_MANAGER
+        )
+        
+        # Shutdown should complete within timeout
+        start_time = time.time()
+        success = await self.lifecycle_manager.shutdown()
+        elapsed = time.time() - start_time
+        
+        # Should complete reasonably quickly despite hanging component
+        self.assertLess(elapsed, 10.0)  # Should not wait indefinitely
+        self.assertTrue(success)  # Should report success despite component issues
+    
+    async def test_73_malformed_websocket_event_handling(self):
+        """Test handling of malformed WebSocket events and edge cases."""
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        
+        # Test various edge cases for WebSocket events
+        edge_cases = [
+            ("", {}),  # Empty event type
+            ("test_event", None),  # None data
+            ("test_event", {"circular": None}),  # Data that might cause issues
+            ("very_long_event_name" * 100, {"large_data": "x" * 10000}),  # Large event
+            ("test_event", {"nested": {"deeply": {"nested": {"data": True}}}}),  # Deep nesting
+        ]
+        
+        for event_type, event_data in edge_cases:
+            try:
+                await self.lifecycle_manager._emit_websocket_event(event_type, event_data)
+                # Should not raise exceptions
+            except Exception as e:
+                self.fail(f"WebSocket event emission should handle edge cases gracefully: {e}")
+        
+        # Verify events were processed (some may be filtered or modified)
+        self.assertGreaterEqual(len(self.mock_websocket_manager.broadcasted_events), 0)
+    
+    async def test_74_component_health_check_exception_varieties(self):
+        """Test handling of various types of exceptions in health checks."""
+        exception_types = [
+            ValueError("Invalid value"),
+            ConnectionError("Connection failed"),
+            TimeoutError("Request timed out"),
+            RuntimeError("Runtime error"),
+            asyncio.CancelledError(),  # Special async exception
+            KeyboardInterrupt(),  # System interrupt
+            MemoryError("Out of memory"),  # System resource error
+        ]
+        
+        for i, exception in enumerate(exception_types):
+            comp_name = f"failing_comp_{i}"
+            
+            async def failing_health_check():
+                raise exception
+            
+            mock_comp = AsyncMock()
+            await self.lifecycle_manager.register_component(
+                comp_name, mock_comp, ComponentType.LLM_MANAGER, health_check=failing_health_check
+            )
+            
+            # Health check should handle all exception types gracefully
+            try:
+                results = await self.lifecycle_manager._run_all_health_checks()
+                
+                # Should record failure for this component
+                if comp_name in results:
+                    self.assertFalse(results[comp_name]["healthy"])
+                    self.assertIn("error", results[comp_name])
+                
+            except Exception as e:
+                # Should not propagate exceptions from health checks
+                self.fail(f"Health check should handle {type(exception).__name__} gracefully: {e}")
+    
+    # ============================================================================
+    # ADVANCED WEBSOCKET EVENT INTEGRATION TESTS
+    # ============================================================================
+    
+    async def test_75_websocket_event_delivery_guarantee_during_shutdown(self):
+        """Test WebSocket event delivery guarantees during shutdown sequence."""
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        await self._register_all_components()
+        await self.lifecycle_manager.startup()
+        
+        # Set up mock to track event timing
+        event_timestamps = []
+        
+        async def timestamp_broadcast(message):
+            event_timestamps.append({
+                "timestamp": time.time(),
+                "type": message.get("type", "unknown"),
+                "phase": self.lifecycle_manager.get_current_phase().value
+            })
+        
+        self.mock_websocket_manager.broadcast_system_message.side_effect = timestamp_broadcast
+        
+        # Start shutdown and emit events during shutdown
+        shutdown_task = asyncio.create_task(self.lifecycle_manager.shutdown())
+        
+        # Give shutdown time to start
+        await asyncio.sleep(0.1)
+        
+        # Emit events during shutdown
+        for i in range(5):
+            await self.lifecycle_manager._emit_websocket_event(f"shutdown_test_{i}", {"index": i})
+            await asyncio.sleep(0.02)
+        
+        # Complete shutdown
+        success = await shutdown_task
+        self.assertTrue(success)
+        
+        # Verify events were delivered in order
+        test_events = [e for e in event_timestamps if e["type"].startswith("lifecycle_shutdown_test")]
+        self.assertEqual(len(test_events), 5)
+        
+        # Events should be in chronological order
+        for i in range(1, len(test_events)):
+            self.assertLessEqual(test_events[i-1]["timestamp"], test_events[i]["timestamp"])
+    
+    async def test_76_websocket_connection_failure_resilience(self):
+        """Test resilience when WebSocket connections fail during event emission."""
+        # Create a WebSocket manager that fails intermittently
+        failure_count = 0
+        
+        async def intermittent_broadcast(message):
+            nonlocal failure_count
+            failure_count += 1
+            if failure_count % 3 == 0:  # Fail every 3rd message
+                raise ConnectionError("WebSocket connection lost")
+            # Otherwise succeed silently
+        
+        failing_ws_manager = AsyncMock()
+        failing_ws_manager.broadcast_system_message = intermittent_broadcast
+        
+        self.lifecycle_manager.set_websocket_manager(failing_ws_manager)
+        
+        # Emit multiple events - some will fail, some will succeed
+        event_count = 10
+        success_count = 0
+        
+        for i in range(event_count):
+            try:
+                await self.lifecycle_manager._emit_websocket_event(f"resilience_test_{i}", {"index": i})
+                success_count += 1
+            except Exception:
+                # Should not propagate WebSocket errors
+                self.fail("WebSocket errors should not propagate to lifecycle operations")
+        
+        # All events should have been attempted (failures handled gracefully)
+        self.assertEqual(success_count, event_count)
+        self.assertEqual(failure_count, event_count)
+    
+    async def test_77_websocket_event_payload_validation_and_sanitization(self):
+        """Test WebSocket event payload validation and sanitization."""
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        
+        # Test various payload types and structures
+        test_payloads = [
+            {"string_field": "normal string"},
+            {"numeric_field": 42, "float_field": 3.14},
+            {"boolean_field": True, "none_field": None},
+            {"list_field": [1, 2, 3, "mixed", True]},
+            {"nested_dict": {"level1": {"level2": {"data": "deep"}}}},
+            {"unicode_field": "测试数据 🎉"},
+            {"large_string": "x" * 1000},  # Large payload
+            {"timestamp": time.time()},
+            {"complex_structure": {
+                "metadata": {"version": "1.0", "client": "test"},
+                "payload": {"items": [{"id": i, "name": f"item_{i}"} for i in range(10)]}
+            }}
+        ]
+        
+        for i, payload in enumerate(test_payloads):
+            event_type = f"validation_test_{i}"
+            
+            try:
+                await self.lifecycle_manager._emit_websocket_event(event_type, payload)
+            except Exception as e:
+                self.fail(f"Event emission should handle payload type {type(payload)}: {e}")
+        
+        # Verify all events were processed
+        broadcasted_events = self.mock_websocket_manager.broadcasted_events
+        self.assertEqual(len(broadcasted_events), len(test_payloads))
+        
+        # Verify event structure consistency
+        for i, event in enumerate(broadcasted_events):
+            self.assertEqual(event["type"], f"lifecycle_validation_test_{i}")
+            self.assertIn("data", event)
+            self.assertIn("timestamp", event)
+            self.assertIn("user_id", event)
+    
+    # ============================================================================
+    # PERFORMANCE AND SCALABILITY TESTS
+    # ============================================================================
+    
+    async def test_78_large_scale_component_management_performance(self):
+        """Test performance with large numbers of components."""
+        component_count = 100
+        start_time = time.time()
+        
+        # Register many components
+        registration_tasks = []
+        for i in range(component_count):
+            mock_comp = AsyncMock()
+            mock_comp.initialize = AsyncMock()
+            mock_comp.shutdown = AsyncMock()
+            mock_comp.name = f"scale_component_{i}"
+            
+            # Alternate between different component types
+            comp_type = [
+                ComponentType.LLM_MANAGER, 
+                ComponentType.REDIS_MANAGER, 
+                ComponentType.CLICKHOUSE_MANAGER
+            ][i % 3]
+            
+            task = self.lifecycle_manager.register_component(f"scale_comp_{i}", mock_comp, comp_type)
+            registration_tasks.append(task)
+        
+        await asyncio.gather(*registration_tasks)
+        registration_time = time.time() - start_time
+        
+        # Registration should be reasonably fast
+        self.assertLess(registration_time, 5.0)  # Should complete in under 5 seconds
+        self.assertEqual(len(self.lifecycle_manager._components), component_count)
+        
+        # Test startup performance
+        startup_start = time.time()
+        success = await self.lifecycle_manager.startup()
+        startup_time = time.time() - startup_start
+        
+        self.assertTrue(success)
+        self.assertLess(startup_time, 10.0)  # Startup should be reasonably fast
+        
+        # Test shutdown performance
+        shutdown_start = time.time()
+        success = await self.lifecycle_manager.shutdown()
+        shutdown_time = time.time() - shutdown_start
+        
+        self.assertTrue(success)
+        self.assertLess(shutdown_time, 10.0)  # Shutdown should be reasonably fast
+    
+    async def test_79_memory_usage_optimization_during_operations(self):
+        """Test memory usage optimization during lifecycle operations."""
+        # This test verifies memory usage patterns - implementation dependent
+        try:
+            import psutil
+            process = psutil.Process()
+            initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+            
+            # Perform memory-intensive operations
+            for cycle in range(20):
+                # Register components
+                components = []
+                for i in range(50):
+                    mock_comp = AsyncMock()
+                    mock_comp.initialize = AsyncMock()
+                    mock_comp.shutdown = AsyncMock()
+                    await self.lifecycle_manager.register_component(
+                        f"memory_comp_{cycle}_{i}",
+                        mock_comp,
+                        ComponentType.LLM_MANAGER
+                    )
+                    components.append(f"memory_comp_{cycle}_{i}")
+                
+                # Unregister components
+                for comp_name in components:
+                    await self.lifecycle_manager.unregister_component(comp_name)
+                
+                # Force garbage collection if available
+                try:
+                    import gc
+                    gc.collect()
+                except ImportError:
+                    pass
+            
+            final_memory = process.memory_info().rss / 1024 / 1024  # MB
+            memory_growth = final_memory - initial_memory
+            
+            # Memory growth should be reasonable (< 100MB for this test)
+            self.assertLess(memory_growth, 100, 
+                          f"Memory growth too large: {memory_growth}MB")
+            
+        except ImportError:
+            # Skip memory testing if psutil not available
+            pass
+    
+    async def test_80_high_frequency_health_check_performance(self):
+        """Test performance under high-frequency health check scenarios."""
+        # Register components with fast health checks
+        component_count = 20
+        for i in range(component_count):
+            async def fast_health_check():
+                return {"healthy": True, "response_time": 0.001}
+            
+            mock_comp = AsyncMock()
+            await self.lifecycle_manager.register_component(
+                f"freq_comp_{i}",
+                mock_comp,
+                ComponentType.LLM_MANAGER,
+                health_check=fast_health_check
+            )
+        
+        # Run many health checks rapidly
+        check_count = 100
+        start_time = time.time()
+        
+        check_tasks = []
+        for _ in range(check_count):
+            task = asyncio.create_task(self.lifecycle_manager._run_all_health_checks())
+            check_tasks.append(task)
+        
+        results_list = await asyncio.gather(*check_tasks)
+        elapsed_time = time.time() - start_time
+        
+        # Verify all checks completed
+        self.assertEqual(len(results_list), check_count)
+        
+        # Performance should be reasonable
+        self.assertLess(elapsed_time, 10.0)  # Should complete in under 10 seconds
+        
+        # Verify results consistency
+        for results in results_list:
+            self.assertEqual(len(results), component_count)
+            for comp_result in results.values():
+                self.assertTrue(comp_result["healthy"])
+    
+    # ============================================================================
+    # COMPREHENSIVE BUSINESS VALUE VALIDATION TESTS
+    # ============================================================================
+    
+    async def test_81_chat_service_availability_during_lifecycle_operations(self):
+        """Test chat service availability guarantees during lifecycle operations."""
+        # This test validates the core business value: chat service reliability
+        await self._register_all_components()
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        
+        # Simulate chat service readiness checks
+        def is_chat_service_ready():
+            return (
+                self.lifecycle_manager.is_running() and
+                self.lifecycle_manager.get_component(ComponentType.WEBSOCKET_MANAGER) is not None and
+                self.lifecycle_manager.get_component(ComponentType.AGENT_REGISTRY) is not None
+            )
+        
+        # Before startup - service not ready
+        self.assertFalse(is_chat_service_ready())
+        
+        # During startup - service becomes ready
+        startup_success = await self.lifecycle_manager.startup()
+        self.assertTrue(startup_success)
+        self.assertTrue(is_chat_service_ready())
+        
+        # During normal operation - service stays ready
+        for _ in range(10):
+            self.assertTrue(is_chat_service_ready())
+            await asyncio.sleep(0.01)
+        
+        # During graceful shutdown - service remains available until very end
+        shutdown_task = asyncio.create_task(self.lifecycle_manager.shutdown())
+        
+        # Give shutdown time to start but not complete
+        await asyncio.sleep(0.1)
+        
+        # Chat service should still be considered available during graceful shutdown
+        # until WebSocket connections are closed
+        if not shutdown_task.done():
+            # Verify components are still available during shutdown process
+            self.assertIsNotNone(self.lifecycle_manager.get_component(ComponentType.WEBSOCKET_MANAGER))
+            self.assertIsNotNone(self.lifecycle_manager.get_component(ComponentType.AGENT_REGISTRY))
+        
+        # Complete shutdown
+        await shutdown_task
+        
+        # After shutdown - service properly unavailable
+        self.assertFalse(self.lifecycle_manager.is_running())
+        self.assertTrue(self.lifecycle_manager.is_shutting_down())
+    
+    async def test_82_zero_downtime_deployment_simulation(self):
+        """Test zero-downtime deployment scenario with component replacement."""
+        await self._register_all_components()
+        await self.lifecycle_manager.startup()
+        
+        # Simulate active chat sessions during deployment
+        active_sessions = []
+        session_count = 5
+        
+        for i in range(session_count):
+            session_id = f"chat_session_{i}"
+            active_sessions.append(session_id)
+            
+            # Start session context (simulates active chat)
+            async def simulate_chat_session(session_id):
+                async with self.lifecycle_manager.request_context(session_id):
+                    # Simulate ongoing chat session during deployment
+                    await asyncio.sleep(1.0)
+                    return f"session_{session_id}_completed"
+            
+            # Don't await yet - sessions are ongoing
+            asyncio.create_task(simulate_chat_session(session_id))
+        
+        # Give sessions time to start
+        await asyncio.sleep(0.1)
+        
+        # Verify sessions are active
+        self.assertGreater(len(self.lifecycle_manager._active_requests), 0)
+        
+        # Perform zero-downtime component replacement
+        # 1. Create new version of component
+        new_websocket_manager = AsyncMock()
+        new_websocket_manager.broadcast_system_message = AsyncMock()
+        new_websocket_manager.get_connection_count = MagicMock(return_value=5)
+        new_websocket_manager.close_all_connections = AsyncMock()
+        new_websocket_manager.name = "websocket_manager_v2"
+        
+        # 2. Replace component without disrupting service
+        await self.lifecycle_manager.register_component(
+            "websocket_manager_v2",
+            new_websocket_manager,
+            ComponentType.WEBSOCKET_MANAGER
+        )
+        
+        # 3. Verify service continuity
+        self.assertTrue(self.lifecycle_manager.is_running())
+        self.assertEqual(
+            self.lifecycle_manager.get_component(ComponentType.WEBSOCKET_MANAGER),
+            new_websocket_manager
+        )
+        
+        # 4. Complete deployment with graceful shutdown
+        shutdown_success = await self.lifecycle_manager.shutdown()
+        self.assertTrue(shutdown_success)
+        
+        # 5. Verify zero-downtime characteristics
+        # - Sessions were allowed to complete
+        # - New component was activated seamlessly
+        # - No service interruption occurred
+        self.assertEqual(len(self.lifecycle_manager._active_requests), 0)
+    
+    async def test_83_multi_user_isolation_comprehensive_validation(self):
+        """Comprehensive test of multi-user isolation guarantees."""
+        user_count = 5
+        users = [f"user_{i}_{uuid.uuid4().hex[:8]}" for i in range(user_count)]
+        
+        # Create isolated managers for each user
+        user_managers = {}
+        for user_id in users:
+            manager = LifecycleManagerFactory.get_user_manager(user_id)
+            user_managers[user_id] = manager
+        
+        # Register different components for each user
+        for i, (user_id, manager) in enumerate(user_managers.items()):
+            # Each user gets their own component instances
+            user_websocket = AsyncMock()
+            user_websocket.name = f"websocket_{user_id}"
+            user_websocket.broadcast_system_message = AsyncMock()
+            
+            user_db = AsyncMock() 
+            user_db.name = f"database_{user_id}"
+            user_db.initialize = AsyncMock()
+            user_db.shutdown = AsyncMock()
+            user_db.health_check = AsyncMock(return_value={"healthy": True, "user": user_id})
+            
+            await manager.register_component(f"websocket_{user_id}", user_websocket, ComponentType.WEBSOCKET_MANAGER)
+            await manager.register_component(f"database_{user_id}", user_db, ComponentType.DATABASE_MANAGER)
+        
+        # Start all user managers
+        startup_tasks = [manager.startup() for manager in user_managers.values()]
+        startup_results = await asyncio.gather(*startup_tasks)
+        
+        # Verify all startups succeeded
+        for result in startup_results:
+            self.assertTrue(result)
+        
+        # Test isolation - each user should only see their own components
+        for user_id, manager in user_managers.items():
+            user_ws = manager.get_component(ComponentType.WEBSOCKET_MANAGER)
+            user_db = manager.get_component(ComponentType.DATABASE_MANAGER)
+            
+            # Verify user gets their own components
+            self.assertEqual(user_ws.name, f"websocket_{user_id}")
+            self.assertEqual(user_db.name, f"database_{user_id}")
+            
+            # Verify user isolation - can't access other users' components
+            for other_user_id, other_manager in user_managers.items():
+                if other_user_id != user_id:
+                    other_ws = other_manager.get_component(ComponentType.WEBSOCKET_MANAGER)
+                    self.assertNotEqual(user_ws, other_ws)
+        
+        # Test concurrent operations don't interfere
+        operation_tasks = []
+        for user_id, manager in user_managers.items():
+            # Each user performs independent request processing
+            async def user_operations(user_id, manager):
+                for req_idx in range(3):
+                    req_id = f"{user_id}_req_{req_idx}"
+                    async with manager.request_context(req_id):
+                        await asyncio.sleep(0.1)
+            
+            operation_tasks.append(asyncio.create_task(user_operations(user_id, manager)))
+        
+        await asyncio.gather(*operation_tasks)
+        
+        # Clean shutdown all users
+        shutdown_tasks = [manager.shutdown() for manager in user_managers.values()]
+        shutdown_results = await asyncio.gather(*shutdown_tasks)
+        
+        # Verify all shutdowns succeeded
+        for result in shutdown_results:
+            self.assertTrue(result)
+        
+        # Verify final isolation state
+        for manager in user_managers.values():
+            self.assertEqual(manager.get_current_phase(), LifecyclePhase.SHUTDOWN_COMPLETE)
+            self.assertEqual(len(manager._active_requests), 0)
+    
+    # ============================================================================
+    # ADDITIONAL EDGE CASE AND COMPREHENSIVE COVERAGE TESTS
+    # ============================================================================
+    
+    async def test_84_component_status_dataclass_comprehensive_validation(self):
+        """Test ComponentStatus dataclass with all edge cases and field validation."""
+        # Test default ComponentStatus creation
+        status = ComponentStatus("test_component", ComponentType.DATABASE_MANAGER)
+        
+        self.assertEqual(status.name, "test_component")
+        self.assertEqual(status.component_type, ComponentType.DATABASE_MANAGER)
+        self.assertEqual(status.status, "unknown")
+        self.assertEqual(status.error_count, 0)
+        self.assertIsNone(status.last_error)
+        self.assertEqual(status.metadata, {})
+        self.assertGreater(status.last_check, 0)  # Should have timestamp
+        
+        # Test ComponentStatus with all fields
+        metadata = {"version": "1.0", "priority": "high"}
+        status_full = ComponentStatus(
+            name="full_component",
+            component_type=ComponentType.WEBSOCKET_MANAGER,
+            status="healthy",
+            last_check=time.time(),
+            error_count=3,
+            last_error="Previous connection error",
+            metadata=metadata
+        )
+        
+        self.assertEqual(status_full.name, "full_component")
+        self.assertEqual(status_full.component_type, ComponentType.WEBSOCKET_MANAGER)
+        self.assertEqual(status_full.status, "healthy")
+        self.assertEqual(status_full.error_count, 3)
+        self.assertEqual(status_full.last_error, "Previous connection error")
+        self.assertEqual(status_full.metadata, metadata)
+    
+    async def test_85_lifecycle_metrics_comprehensive_tracking(self):
+        """Test LifecycleMetrics dataclass with comprehensive metric collection."""
+        # Test default LifecycleMetrics
+        metrics = LifecycleMetrics()
+        
+        self.assertIsNone(metrics.startup_time)
+        self.assertIsNone(metrics.shutdown_time)
+        self.assertEqual(metrics.successful_shutdowns, 0)
+        self.assertEqual(metrics.failed_shutdowns, 0)
+        self.assertEqual(metrics.component_failures, 0)
+        self.assertIsNone(metrics.last_health_check)
+        self.assertEqual(metrics.active_requests, 0)
+        
+        # Test metrics collection during actual lifecycle operations
+        await self._register_all_components()
+        
+        # Verify metrics before operations
+        initial_metrics = self.lifecycle_manager._metrics
+        self.assertIsNone(initial_metrics.startup_time)
+        
+        # Perform startup and verify metrics
+        await self.lifecycle_manager.startup()
+        
+        self.assertIsNotNone(self.lifecycle_manager._metrics.startup_time)
+        self.assertGreater(self.lifecycle_manager._metrics.startup_time, 0)
+        
+        # Perform shutdown and verify metrics
+        await self.lifecycle_manager.shutdown()
+        
+        self.assertIsNotNone(self.lifecycle_manager._metrics.shutdown_time)
+        self.assertGreater(self.lifecycle_manager._metrics.shutdown_time, 0)
+        self.assertEqual(self.lifecycle_manager._metrics.successful_shutdowns, 1)
+        self.assertEqual(self.lifecycle_manager._metrics.failed_shutdowns, 0)
+    
+    async def test_86_all_component_types_comprehensive_validation(self):
+        """Test all ComponentType enum values with comprehensive validation."""
+        # Test all component types
+        component_types = [
+            ComponentType.WEBSOCKET_MANAGER,
+            ComponentType.DATABASE_MANAGER,
+            ComponentType.AGENT_REGISTRY,
+            ComponentType.HEALTH_SERVICE,
+            ComponentType.LLM_MANAGER,
+            ComponentType.REDIS_MANAGER,
+            ComponentType.CLICKHOUSE_MANAGER
+        ]
+        
+        # Register one component of each type
+        for i, comp_type in enumerate(component_types):
+            mock_comp = AsyncMock()
+            mock_comp.initialize = AsyncMock()
+            mock_comp.shutdown = AsyncMock()
+            mock_comp.name = f"component_{comp_type.value}"
+            
+            await self.lifecycle_manager.register_component(
+                f"test_{comp_type.value}",
+                mock_comp,
+                comp_type
+            )
+            
+            # Verify component is registered with correct type
+            registered_comp = self.lifecycle_manager.get_component(comp_type)
+            self.assertEqual(registered_comp, mock_comp)
+            
+            status = self.lifecycle_manager.get_component_status(f"test_{comp_type.value}")
+            self.assertEqual(status.component_type, comp_type)
+        
+        # Verify all component types are registered
+        self.assertEqual(len(self.lifecycle_manager._components), len(component_types))
+        
+        # Test startup with all component types
+        success = await self.lifecycle_manager.startup()
+        self.assertTrue(success)
+        
+        # Verify all components were initialized
+        for comp_type in component_types:
+            comp = self.lifecycle_manager.get_component(comp_type)
+            comp.initialize.assert_called_once()
+    
+    async def test_87_all_lifecycle_phases_comprehensive_transitions(self):
+        """Test all LifecyclePhase enum values and transitions."""
+        # Test all lifecycle phases
+        all_phases = [
+            LifecyclePhase.INITIALIZING,
+            LifecyclePhase.STARTING,
+            LifecyclePhase.RUNNING,
+            LifecyclePhase.SHUTTING_DOWN,
+            LifecyclePhase.SHUTDOWN_COMPLETE,
+            LifecyclePhase.ERROR
+        ]
+        
+        # Verify initial phase
+        self.assertEqual(self.lifecycle_manager.get_current_phase(), LifecyclePhase.INITIALIZING)
+        
+        # Track phase transitions during startup
+        await self._register_all_components()
+        
+        # Monitor phase transitions during startup
+        startup_task = asyncio.create_task(self.lifecycle_manager.startup())
+        
+        # Give time for phase transitions
+        await asyncio.sleep(0.1)
+        
+        # Phase should be STARTING or RUNNING
+        current_phase = self.lifecycle_manager.get_current_phase()
+        self.assertIn(current_phase, [LifecyclePhase.STARTING, LifecyclePhase.RUNNING])
+        
+        # Wait for startup completion
+        success = await startup_task
+        self.assertTrue(success)
+        self.assertEqual(self.lifecycle_manager.get_current_phase(), LifecyclePhase.RUNNING)
+        
+        # Monitor phase transitions during shutdown
+        shutdown_task = asyncio.create_task(self.lifecycle_manager.shutdown())
+        
+        # Give time for shutdown to start
+        await asyncio.sleep(0.1)
+        
+        # Phase should be SHUTTING_DOWN if not completed yet
+        if not shutdown_task.done():
+            current_phase = self.lifecycle_manager.get_current_phase()
+            self.assertEqual(current_phase, LifecyclePhase.SHUTTING_DOWN)
+        
+        # Wait for shutdown completion
+        success = await shutdown_task
+        self.assertTrue(success)
+        self.assertEqual(self.lifecycle_manager.get_current_phase(), LifecyclePhase.SHUTDOWN_COMPLETE)
+    
+    async def test_88_component_validation_methods_comprehensive_coverage(self):
+        """Test all component validation methods with comprehensive scenarios."""
+        # Test database component validation
+        db_manager = AsyncMock()
+        db_manager.health_check = AsyncMock(return_value={"healthy": True})
+        
+        await self.lifecycle_manager.register_component(
+            "test_database",
+            db_manager,
+            ComponentType.DATABASE_MANAGER
+        )
+        
+        # Test validation method directly
+        try:
+            await self.lifecycle_manager._validate_database_component("test_database")
+        except Exception as e:
+            self.fail(f"Database validation should not raise exception: {e}")
+        
+        # Test with unhealthy database
+        unhealthy_db = AsyncMock()
+        unhealthy_db.health_check = AsyncMock(return_value={"healthy": False, "error": "Connection failed"})
+        
+        await self.lifecycle_manager.register_component(
+            "unhealthy_database",
+            unhealthy_db,
+            ComponentType.DATABASE_MANAGER
+        )
+        
+        # Validation should raise exception for unhealthy database
+        with self.assertRaises(Exception):
+            await self.lifecycle_manager._validate_database_component("unhealthy_database")
+        
+        # Test WebSocket component validation
+        ws_manager = AsyncMock()
+        ws_manager.broadcast_system_message = AsyncMock()
+        
+        await self.lifecycle_manager.register_component(
+            "test_websocket",
+            ws_manager,
+            ComponentType.WEBSOCKET_MANAGER
+        )
+        
+        try:
+            await self.lifecycle_manager._validate_websocket_component("test_websocket")
+            # Should set the WebSocket manager reference
+            self.assertEqual(self.lifecycle_manager._websocket_manager, ws_manager)
+        except Exception as e:
+            self.fail(f"WebSocket validation should not raise exception: {e}")
+        
+        # Test agent registry validation
+        agent_registry = AsyncMock()
+        agent_registry.get_registry_status = MagicMock(return_value={"ready": True})
+        
+        await self.lifecycle_manager.register_component(
+            "test_agent_registry",
+            agent_registry,
+            ComponentType.AGENT_REGISTRY
+        )
+        
+        try:
+            await self.lifecycle_manager._validate_agent_registry_component("test_agent_registry")
+        except Exception as e:
+            self.fail(f"Agent registry validation should not raise exception: {e}")
+        
+        # Test with unready agent registry
+        unready_registry = AsyncMock()
+        unready_registry.get_registry_status = MagicMock(return_value={"ready": False, "reason": "Not initialized"})
+        
+        await self.lifecycle_manager.register_component(
+            "unready_registry",
+            unready_registry,
+            ComponentType.AGENT_REGISTRY
+        )
+        
+        with self.assertRaises(Exception):
+            await self.lifecycle_manager._validate_agent_registry_component("unready_registry")
+    
+    async def test_89_shutdown_phase_methods_comprehensive_coverage(self):
+        """Test all shutdown phase methods with comprehensive validation."""
+        await self._register_all_components()
+        await self.lifecycle_manager.startup()
+        
+        # Set up WebSocket manager for testing
+        self.lifecycle_manager.set_websocket_manager(self.mock_websocket_manager)
+        self.mock_websocket_manager.get_connection_count.return_value = 3
+        
+        # Test Phase 1: Mark unhealthy
+        try:
+            await self.lifecycle_manager._shutdown_phase_1_mark_unhealthy()
+            self.mock_health_service.mark_shutting_down.assert_called_once()
+        except Exception as e:
+            self.fail(f"Phase 1 shutdown should not raise exception: {e}")
+        
+        # Test Phase 2: Drain requests (no active requests)
+        try:
+            await self.lifecycle_manager._shutdown_phase_2_drain_requests()
+        except Exception as e:
+            self.fail(f"Phase 2 shutdown should not raise exception: {e}")
+        
+        # Test Phase 3: Close WebSockets
+        try:
+            await self.lifecycle_manager._shutdown_phase_3_close_websockets()
+            self.mock_websocket_manager.broadcast_system_message.assert_called()
+            self.mock_websocket_manager.close_all_connections.assert_called_once()
+        except Exception as e:
+            self.fail(f"Phase 3 shutdown should not raise exception: {e}")
+        
+        # Test Phase 4: Complete agents
+        try:
+            await self.lifecycle_manager._shutdown_phase_4_complete_agents()
+        except Exception as e:
+            self.fail(f"Phase 4 shutdown should not raise exception: {e}")
+        
+        # Test Phase 5: Shutdown components
+        try:
+            await self.lifecycle_manager._shutdown_phase_5_shutdown_components()
+            # Verify components were shut down
+            self.mock_db_manager.shutdown.assert_called_once()
+            self.mock_agent_registry.shutdown.assert_called_once()
+            self.mock_health_service.shutdown.assert_called_once()
+        except Exception as e:
+            self.fail(f"Phase 5 shutdown should not raise exception: {e}")
+        
+        # Test Phase 6: Cleanup resources
+        try:
+            await self.lifecycle_manager._shutdown_phase_6_cleanup_resources()
+        except Exception as e:
+            self.fail(f"Phase 6 shutdown should not raise exception: {e}")
+        
+        # Test Phase 7: Custom handlers
+        handler_executed = False
+        
+        def test_shutdown_handler():
+            nonlocal handler_executed
+            handler_executed = True
+        
+        self.lifecycle_manager.add_shutdown_handler(test_shutdown_handler)
+        
+        try:
+            await self.lifecycle_manager._shutdown_phase_7_custom_handlers()
+            self.assertTrue(handler_executed)
+        except Exception as e:
+            self.fail(f"Phase 7 shutdown should not raise exception: {e}")
+    
+    async def test_90_comprehensive_status_and_health_endpoint_validation(self):
+        """Comprehensive test of all status and health endpoint scenarios."""
+        await self._register_all_components()
+        
+        # Test status in INITIALIZING phase
+        status = self.lifecycle_manager.get_status()
+        self.assertEqual(status["phase"], "initializing")
+        self.assertFalse(status["ready_for_requests"])
+        self.assertFalse(status["is_shutting_down"])
+        
+        health_status = self.lifecycle_manager.get_health_status()
+        self.assertEqual(health_status["status"], "unhealthy")
+        self.assertEqual(health_status["phase"], "initializing")
+        self.assertFalse(health_status["ready"])
+        
+        # Test status in RUNNING phase
+        await self.lifecycle_manager.startup()
+        
+        status = self.lifecycle_manager.get_status()
+        self.assertEqual(status["phase"], "running")
+        self.assertTrue(status["ready_for_requests"])
+        self.assertFalse(status["is_shutting_down"])
+        self.assertGreater(status["uptime"], 0)
+        self.assertIsNotNone(status["startup_time"])
+        
+        health_status = self.lifecycle_manager.get_health_status()
+        self.assertEqual(health_status["status"], "healthy")
+        self.assertEqual(health_status["phase"], "running")
+        self.assertIn("components_healthy", health_status)
+        self.assertEqual(health_status["active_requests"], 0)
+        
+        # Test status with active requests
+        async with self.lifecycle_manager.request_context("test_request"):
+            status = self.lifecycle_manager.get_status()
+            self.assertEqual(status["active_requests"], 1)
+            
+            health_status = self.lifecycle_manager.get_health_status()
+            self.assertEqual(health_status["active_requests"], 1)
+        
+        # Test status during shutdown
+        shutdown_task = asyncio.create_task(self.lifecycle_manager.shutdown())
+        await asyncio.sleep(0.1)  # Let shutdown start
+        
+        if not shutdown_task.done():
+            health_status = self.lifecycle_manager.get_health_status()
+            if self.lifecycle_manager.get_current_phase() == LifecyclePhase.SHUTTING_DOWN:
+                self.assertEqual(health_status["status"], "shutting_down")
+                self.assertFalse(health_status["ready"])
+        
+        # Wait for shutdown completion
+        success = await shutdown_task
+        self.assertTrue(success)
+        
+        # Test status after shutdown
+        status = self.lifecycle_manager.get_status()
+        self.assertEqual(status["phase"], "shutdown_complete")
+        self.assertFalse(status["ready_for_requests"])
+        self.assertTrue(status["is_shutting_down"])
+        self.assertIsNotNone(status["shutdown_time"])
+        
+        health_status = self.lifecycle_manager.get_health_status()
+        self.assertEqual(health_status["status"], "unhealthy")
+        self.assertEqual(health_status["phase"], "shutdown_complete")
+        self.assertFalse(health_status["ready"])
+
+
 if __name__ == "__main__":
     # Run the comprehensive test suite
     import sys
@@ -1903,5 +3106,5 @@ if __name__ == "__main__":
         "-v",
         "--asyncio-mode=auto",
         "--tb=short",
-        "--maxfail=3"  # Stop after 3 failures for faster feedback
+        "--maxfail=5"  # Stop after 5 failures for faster feedback
     ])

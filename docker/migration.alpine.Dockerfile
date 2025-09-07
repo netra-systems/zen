@@ -30,7 +30,7 @@ RUN apk del gcc musl-dev && \
 # Copy migration files and minimal code needed
 COPY alembic /app/alembic
 COPY netra_backend/alembic.ini /app/netra_backend/alembic.ini
-COPY netra_backend/models /app/netra_backend/models
+COPY netra_backend/app/models /app/netra_backend/app/models
 COPY shared/isolated_environment.py /app/shared/isolated_environment.py
 
 # Set environment

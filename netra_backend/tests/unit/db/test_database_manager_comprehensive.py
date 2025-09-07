@@ -184,24 +184,31 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock AsyncSession for this test
+            # FIXED: Properly mock AsyncSession as async context manager
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.commit = AsyncMock()
+            mock_session.rollback = AsyncMock()
             mock_session.close = AsyncMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
                 # Test successful session usage
                 async with db_manager.get_session() as session:
-                    # Session should be what __aenter__ returns (the actual session)
-                    # In real usage, this would be mock_session, but context manager returns __aenter__ result
-                    pass  # Just verify context manager works
+                    # Context manager should yield the mock session
+                    assert session is mock_session
                 
-                # Verify proper lifecycle
+                # Verify proper lifecycle - these will now work
                 mock_session.commit.assert_called_once()
                 mock_session.close.assert_called_once()
+                # Verify __aenter__ and __aexit__ were called
+                mock_session.__aenter__.assert_called_once()
+                mock_session.__aexit__.assert_called_once()
     
     @pytest.mark.unit
     async def test_session_lifecycle_with_error_and_rollback(self, isolated_env):
@@ -216,23 +223,28 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock AsyncSession with error scenario
+            # FIXED: Mock commit to raise exception, verify rollback called
             mock_session = AsyncMock(spec=AsyncSession)
-            mock_session.commit = AsyncMock(side_effect=Exception("Database error"))
+            commit_exception = Exception("Database error")
+            mock_session.commit = AsyncMock(side_effect=commit_exception)
             mock_session.rollback = AsyncMock()
             mock_session.close = AsyncMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
                 # Test error handling in session
                 with pytest.raises(Exception, match="Database error"):
                     async with db_manager.get_session() as session:
-                        # Error occurs during commit
+                        # Exception will be raised during commit in __aexit__
                         pass
                 
-                # Verify rollback was called
+                # Verify rollback was called due to exception
                 mock_session.rollback.assert_called_once()
                 mock_session.close.assert_called_once()
     
@@ -249,14 +261,18 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock AsyncSession with both commit and rollback failing
+            # FIXED: Properly mock AsyncSession with context manager support
             mock_session = AsyncMock(spec=AsyncSession)
             original_error = Exception("Original database error")
             mock_session.commit = AsyncMock(side_effect=original_error)
             mock_session.rollback = AsyncMock(side_effect=Exception("Rollback also failed"))
             mock_session.close = AsyncMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
@@ -283,12 +299,16 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock AsyncSession with close failing
+            # FIXED: Properly mock AsyncSession with context manager support
             mock_session = AsyncMock(spec=AsyncSession)
             mock_session.commit = AsyncMock()
             mock_session.close = AsyncMock(side_effect=Exception("Close failed"))
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
@@ -313,13 +333,17 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock successful health check
+            # FIXED: Properly mock the session context manager and execute result
             mock_session = AsyncMock(spec=AsyncSession)
-            mock_result = Mock()
+            mock_result = Mock()  # fetchone() is NOT async, so use regular Mock
             mock_result.fetchone.return_value = (1,)
             mock_session.execute = AsyncMock(return_value=mock_result)
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
@@ -333,6 +357,9 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
                 mock_session.execute.assert_called_once()
                 call_args = mock_session.execute.call_args[0][0]
                 assert "SELECT 1" in str(call_args)
+                
+                # Verify fetchone was called on result (not awaited)
+                mock_result.fetchone.assert_called_once()
     
     @pytest.mark.unit
     async def test_health_check_failure(self, isolated_env):
@@ -347,11 +374,16 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             mock_config.return_value.database_max_overflow = 10
             mock_config.return_value.database_url = None
             
-            # Mock health check failure
+            # FIXED: Mock session.execute to raise exception
             mock_session = AsyncMock(spec=AsyncSession)
-            mock_session.execute = AsyncMock(side_effect=Exception("Connection failed"))
+            execute_exception = Exception("Connection failed")
+            mock_session.execute = AsyncMock(side_effect=execute_exception)
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             
-            with patch('netra_backend.app.db.database_manager.AsyncSession', return_value=mock_session):
+            with patch('netra_backend.app.db.database_manager.AsyncSession') as mock_session_class:
+                mock_session_class.return_value = mock_session
+                
                 db_manager = DatabaseManager()
                 await db_manager.initialize()
                 
@@ -617,19 +649,29 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
         for key, value in self.test_env_vars.items():
             isolated_env.set(key, value, source="test")
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
-            mock_config.return_value.database_echo = False
-            mock_config.return_value.database_pool_size = 0  # Disabled pooling
-            mock_config.return_value.database_max_overflow = 10
-            mock_config.return_value.database_url = None
+        # FIXED: Patch at the database_manager module level where get_config is imported
+        with patch('netra_backend.app.db.database_manager.get_config') as mock_get_config:
+            # Create mock config object
+            mock_config_obj = Mock()
+            mock_config_obj.database_echo = False
+            mock_config_obj.database_pool_size = 0  # Disabled pooling
+            mock_config_obj.database_max_overflow = 10
+            mock_config_obj.database_url = None
+            
+            mock_get_config.return_value = mock_config_obj
             
             with patch('netra_backend.app.db.database_manager.create_async_engine') as mock_create_engine:
+                # Create DatabaseManager - should now get the mocked config
                 db_manager = DatabaseManager()
+                
                 await db_manager.initialize()
                 
-                # Verify NullPool is used when pooling is disabled
+                # FIXED - The implementation should use NullPool when pool_size=0
                 call_args = mock_create_engine.call_args
                 kwargs = call_args[1]
+                
+                # Implementation logic: pool_size <= 0 OR "sqlite" in url -> NullPool
+                # pool_size=0, so should definitely use NullPool
                 assert kwargs["poolclass"] is NullPool
     
     @pytest.mark.unit
@@ -638,22 +680,31 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
         # Setup minimal environment
         isolated_env.set("ENVIRONMENT", "test", source="test")
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
+        # FIXED: Use the same pattern as the working tests with database_manager.get_config patch
+        with patch('netra_backend.app.db.database_manager.get_config') as mock_get_config:
             # Config with fallback database_url
-            mock_config.return_value.database_echo = False
-            mock_config.return_value.database_pool_size = 5
-            mock_config.return_value.database_max_overflow = 10
-            mock_config.return_value.database_url = "postgresql+asyncpg://fallback:fallback@localhost:5432/fallback_db"
+            mock_config_obj = Mock()
+            mock_config_obj.database_echo = False
+            mock_config_obj.database_pool_size = 5
+            mock_config_obj.database_max_overflow = 10
+            mock_config_obj.database_url = "postgresql+asyncpg://fallback:fallback@localhost:5432/fallback_db"
             
+            mock_get_config.return_value = mock_config_obj
+            
+            # Create DatabaseManager
             db_manager = DatabaseManager()
             
-            # Should use config fallback when DatabaseURLBuilder returns None
-            with patch.object(db_manager, '_url_builder') as mock_builder:
-                mock_builder.get_url_for_environment.return_value = None
-                mock_builder.format_url_for_driver.return_value = mock_config.return_value.database_url
-                
-                url = db_manager._get_database_url()
-                assert url == mock_config.return_value.database_url
+            # Mock the URL builder methods to return None first, then fallback  
+            mock_builder = Mock()
+            mock_builder.get_url_for_environment.return_value = None  # Triggers fallback
+            mock_builder.format_url_for_driver.return_value = mock_config_obj.database_url
+            mock_builder.get_safe_log_message.return_value = "Safe log message"
+            
+            # Directly set the URL builder on the instance
+            db_manager._url_builder = mock_builder
+            
+            url = db_manager._get_database_url()
+            assert url == mock_config_obj.database_url
     
     @pytest.mark.unit
     async def test_configuration_no_fallback_error(self, isolated_env):
@@ -759,13 +810,25 @@ class TestDatabaseManagerEdgeCases(BaseIntegrationTest):
         isolated_env.set("POSTGRES_HOST", "/cloudsql/project:region:instance", source="test")  # Cloud SQL
         # Missing POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
-            mock_config.return_value.database_url = None  # No fallback
+        # FIXED: Mock the DatabaseManager's get_config to return None database_url
+        with patch('netra_backend.app.db.database_manager.get_config') as mock_get_config:
+            mock_config_obj = Mock()
+            mock_config_obj.database_url = None  # No fallback
+            mock_config_obj.database_echo = False
+            mock_config_obj.database_pool_size = 5  # Must be a number, not Mock
+            mock_config_obj.database_max_overflow = 10
+            mock_get_config.return_value = mock_config_obj
             
+            # Mock the URL builder instance on the DatabaseManager
             db_manager = DatabaseManager()
             
-            # This should fail similar to staging failure
-            with pytest.raises(ValueError):
+            # Set up mock URL builder to return None (triggering failure)
+            mock_builder = Mock()
+            mock_builder.get_url_for_environment.return_value = None
+            db_manager._url_builder = mock_builder
+            
+            # This should now fail as expected with URL builder returning None and no config fallback
+            with pytest.raises(ValueError, match="DatabaseURLBuilder failed to construct URL"):
                 await db_manager.initialize()
     
     @pytest.mark.unit

@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+
+# CRITICAL WINDOWS I/O FIX: Apply Windows encoding setup IMMEDIATELY before ANY imports
+import sys
+import os
+from pathlib import Path
+
+# Setup path FIRST
+PROJECT_ROOT = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# CRITICAL: Setup Windows encoding BEFORE importing anything else that might create loggers
+try:
+    from shared.windows_encoding import setup_windows_encoding
+    setup_windows_encoding()
+except ImportError:
+    pass  # Continue if Windows encoding not available
+
 """
 NETRA APEX UNIFIED TEST RUNNER
 ==============================
@@ -58,28 +75,17 @@ NEW ORCHESTRATION EXAMPLES:
     python unified_test_runner.py --orchestration-status
 """
 
+# Now safe to import everything else
 import argparse
 import json
 import logging
-import os
 import subprocess
-import sys
 import time
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
+# CRITICAL: Create logger AFTER Windows encoding setup to prevent I/O closed file errors
 logger = logging.getLogger(__name__)
-
-# Project root - script is now in scripts/ directory
-PROJECT_ROOT = Path(__file__).parent.parent.absolute()
-
-# Add project root to path for absolute imports
-sys.path.insert(0, str(PROJECT_ROOT))
-
-# Import Windows encoding SSOT and set up encoding
-from shared.windows_encoding import setup_windows_encoding
-setup_windows_encoding()
 
 # Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
 try:
