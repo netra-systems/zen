@@ -91,6 +91,9 @@ class E2EAuthHelper:
         if environment is None:
             environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
+        # Store environment for reference
+        self.environment = environment
+        
         # Use provided config or create based on environment
         if config is None:
             self.config = E2EAuthConfig.for_environment(environment)

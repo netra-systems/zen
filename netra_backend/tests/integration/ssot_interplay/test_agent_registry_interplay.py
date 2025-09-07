@@ -861,11 +861,11 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         assert data_agent.user_context.user_id == analysis_agent.user_context.user_id  # Same user
         assert data_agent.user_context.request_id != analysis_agent.user_context.request_id  # Different contexts
         
-        # Test context isolation between agent types
-        data_agent.user_context.execution_metrics['agent_type_data'] = "data_processing_secret"
-        analysis_agent.user_context.execution_metrics['agent_type_data'] = "analysis_processing_secret"
+        # Test context isolation between agent types - verify metadata was set during creation
+        assert data_agent.user_context.metadata['agent_type'] == "data_processing"
+        assert analysis_agent.user_context.metadata['agent_type'] == "analysis"
         
-        assert data_agent.user_context.execution_metrics['agent_type_data'] != analysis_agent.user_context.execution_metrics['agent_type_data']
+        assert data_agent.user_context.metadata['agent_type'] != analysis_agent.user_context.metadata['agent_type']
         
         # Verify session cleanup handles multiple agent contexts
         cleanup_metrics = await registry.cleanup_user_session(user_id)
