@@ -14,6 +14,7 @@ from test_framework.fixtures.websocket_manager_mock import *
 from test_framework.fixtures.websocket_test_helpers import *
 
 # Legacy compatibility classes removed - use unified configuration management
+# create_test_app is now available via wildcard import from service_fixtures
 
 # Import create_test_client from backend route helpers
 try:
@@ -147,9 +148,8 @@ def get_test_db_session():
 
 __all__ = [
     # Re-export all fixtures from submodules
-    "ConfigManagerHelper",
     "create_test_app",
-    "create_test_client",
+    "create_test_client", 
     "create_test_deep_state",
     "create_test_thread_message",
     "create_test_user",

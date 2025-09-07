@@ -177,13 +177,17 @@ class TestDockerEnvironmentDetection:
 10:freezer:/docker/container_id
 """
         
-        with patch('os.path.exists') as mock_exists, \
+        def mock_exists_side_effect(path):
+            if path == "/.dockerenv":
+                return False  # .dockerenv doesn't exist
+            elif path == "/proc/self/cgroup":
+                return True   # cgroup file exists
+            return False
+        
+        with patch('os.path.exists', side_effect=mock_exists_side_effect), \
              patch('builtins.open', mock_open(read_data=docker_cgroup_content)) as mock_file:
             
-            mock_exists.return_value = True  # /proc/self/cgroup exists
-            
             assert builder.is_docker_environment(), "Should detect Docker via cgroup"
-            mock_exists.assert_called_with("/proc/self/cgroup")
     
     def test_docker_detection_cgroup_error_handling(self):
         """Test Docker detection handles cgroup file errors gracefully."""

@@ -181,9 +181,12 @@ export class UnifiedWebSocketMock {
    * FIXES: Ensures handlers are established before triggering events
    */
   private simulateConnectionSuccess(): void {
+    // Don't proceed if error is already configured
+    if (this.hasErrored || this.config.enableErrorSimulation) return;
+    
     // Wait for React component to set up event handlers
     this.waitForHandlerSetup(() => {
-      if (this.isDisposed) return;
+      if (this.isDisposed || this.hasErrored) return;
       
       this.readyState = UnifiedWebSocketMock.OPEN;
       const openEvent = new Event('open');
@@ -208,6 +211,18 @@ export class UnifiedWebSocketMock {
       });
       
       this.triggerEventHandler('onerror', errorEvent);
+      
+      // Also trigger close event after error to complete the failed connection flow
+      setTimeout(() => {
+        if (!this.isDisposed) {
+          const closeEvent = new CloseEvent('close', {
+            code: 1006,
+            reason: 'Connection failed',
+            wasClean: false
+          });
+          this.triggerEventHandler('onclose', closeEvent);
+        }
+      }, 10);
     });
   }
 

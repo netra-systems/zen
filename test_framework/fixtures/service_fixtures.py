@@ -501,5 +501,6 @@ __all__ = [
     'service_health_check',
     'service_lifecycle_manager',
     
-    # Legacy helpers removed
+    # Test app factory
+    'create_test_app',
 ]
