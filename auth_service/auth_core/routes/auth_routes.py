@@ -49,6 +49,64 @@ async def auth_status() -> Dict[str, Any]:
         "version": "1.0.0"
     }
 
+@router.get("/auth/health")
+async def auth_health() -> Dict[str, Any]:
+    """Comprehensive health check endpoint with database connectivity"""
+    try:
+        # Get database connection health status
+        database_status = "disconnected"
+        database_details = {}
+        
+        if auth_service._db_connection:
+            try:
+                # Check database connectivity using the connection health method
+                health_info = await auth_service._db_connection.get_connection_health()
+                if health_info.get("status") == "healthy":
+                    database_status = "connected"
+                elif health_info.get("status") == "not_initialized":
+                    database_status = "not_initialized"
+                else:
+                    database_status = "error"
+                
+                database_details = {
+                    "connectivity_test": health_info.get("connectivity_test", "unknown"),
+                    "initialized": health_info.get("initialized", False)
+                }
+            except Exception as db_error:
+                logger.warning(f"Database health check failed: {db_error}")
+                database_status = "error"
+                database_details = {"error": str(db_error)}
+        else:
+            database_status = "not_configured"
+            
+        # Determine overall service health
+        overall_status = "healthy" if database_status in ["connected", "not_configured"] else "unhealthy"
+        
+        health_response = {
+            "status": overall_status,
+            "service": "auth-service",
+            "version": "1.0.0",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "database_status": database_status
+        }
+        
+        # Add database details for debugging if available
+        if database_details:
+            health_response["database_details"] = database_details
+            
+        return health_response
+        
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "service": "auth-service",
+            "version": "1.0.0",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "database_status": "error",
+            "error": str(e)
+        }
+
 @router.get("/auth/config")
 async def auth_config() -> Dict[str, Any]:
     """Get auth service configuration for frontend initialization"""
@@ -1368,6 +1426,161 @@ async def oauth_callback(
             status_code=500,
             detail="OAuth authentication failed"
         )
+
+@router.get("/auth/me")
+async def get_current_user(request: Request) -> Dict[str, Any]:
+    """Get current user's profile information
+    
+    Requires a valid JWT token in the Authorization header.
+    Returns the authenticated user's profile information.
+    """
+    try:
+        # Get token from Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            logger.warning("Profile request without valid Authorization header")
+            raise HTTPException(
+                status_code=401,
+                detail="Authorization header with Bearer token required"
+            )
+        
+        token = auth_header.split(" ")[1]
+        
+        # Validate token using auth service
+        try:
+            token_response = await auth_service.validate_token(token, "access")
+        except Exception as e:
+            logger.error(f"Token validation failed: {e}")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid or expired token"
+            )
+        
+        # Check if token is valid
+        if not token_response or not token_response.valid:
+            logger.debug("Invalid token provided for profile request")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid or expired token"
+            )
+        
+        # Build user profile response
+        user_profile = {
+            "user_id": token_response.user_id,
+            "email": token_response.email,
+            "permissions": token_response.permissions or []
+        }
+        
+        # Try to enrich with database information if available
+        try:
+            if auth_service._db_connection:
+                from auth_service.auth_core.database.repository import AuthUserRepository
+                session = await auth_service._get_db_session()
+                if session:
+                    user_repo = AuthUserRepository(session)
+                    user = await user_repo.get_by_id(token_response.user_id)
+                    if user:
+                        user_profile.update({
+                            "name": user.full_name,
+                            "created_at": user.created_at.isoformat() if user.created_at else None,
+                            "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+                            "is_verified": user.is_verified,
+                            "auth_provider": user.auth_provider
+                        })
+        except Exception as e:
+            logger.warning(f"Failed to enrich user profile from database: {e}")
+            # Continue with token-based information only
+        
+        # Add token expiration if available
+        if token_response.expires_at:
+            user_profile["token_expires_at"] = token_response.expires_at.isoformat()
+        
+        logger.debug(f"Profile retrieved successfully for user: {token_response.email}")
+        return user_profile
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in profile endpoint: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error"
+        )
+
+@router.post("/auth/verify")
+@router.get("/auth/verify")
+async def verify_token_endpoint(request: Request) -> Dict[str, Any]:
+    """Verify JWT token endpoint for E2E tests and authentication validation
+    
+    Accepts token from Authorization header (Bearer token) or request body.
+    Returns user information if valid, error message if invalid.
+    """
+    try:
+        token = None
+        
+        # Try to get token from Authorization header first
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+        
+        # If no Authorization header, try to get token from request body (POST only)
+        if not token and request.method == "POST":
+            try:
+                body = await request.json()
+                token = body.get("token") or body.get("access_token")
+            except Exception:
+                # Ignore JSON parsing errors and continue with no token
+                pass
+        
+        if not token:
+            logger.warning("Token verification requested with no token provided")
+            return {
+                "valid": False,
+                "error": "No token provided in Authorization header or request body"
+            }
+        
+        # Validate token using auth service
+        try:
+            token_response = await auth_service.validate_token(token, "access")
+        except Exception as e:
+            logger.error(f"Token validation failed with error: {e}")
+            return {
+                "valid": False,
+                "error": "Token validation failed"
+            }
+        
+        # Check if token is valid
+        if not token_response or not token_response.valid:
+            logger.debug("Token validation returned invalid token")
+            return {
+                "valid": False,
+                "error": "Invalid or expired token"
+            }
+        
+        # Return user information for valid token
+        response_data = {
+            "valid": True,
+            "user_id": token_response.user_id,
+            "email": token_response.email
+        }
+        
+        # Add expiration timestamp if available
+        if token_response.expires_at:
+            response_data["exp"] = token_response.expires_at.isoformat()
+        
+        # Add permissions if available
+        if hasattr(token_response, 'permissions') and token_response.permissions:
+            response_data["permissions"] = token_response.permissions
+        
+        logger.debug(f"Token verified successfully for user: {token_response.email}")
+        return response_data
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in token verification endpoint: {e}")
+        return {
+            "valid": False,
+            "error": "Internal server error during token verification"
+        }
 
 @oauth_router.get("/oauth/providers")
 async def oauth_providers() -> Dict[str, Any]:

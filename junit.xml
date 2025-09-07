@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.113" timestamp="2025-09-06T16:42:48.429805-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="" name="tests.critical.test_oauth_configuration_missing_staging_regression" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="8" failures="0" skipped="0" tests="8" time="1.508" timestamp="2025-09-06T17:07:32.620332-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="" name="tests.unit.test_auth_config_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_auth_config_comprehensive.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
@@ -18,6 +18,160 @@ venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
     ???
 venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
     exec(co, module.__dict__)
-auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:27: in &lt;module&gt;
+auth_service/tests/unit/test_auth_config_comprehensive.py:11: in &lt;module&gt;
+    from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+E   ModuleNotFoundError: No module named 'test_framework.redis_test_utils_test_utils'</error></testcase><testcase classname="" name="tests.unit.test_auth_endpoint_response_consistency" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_auth_endpoint_response_consistency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_auth_endpoint_response_consistency.py:15: in &lt;module&gt;
+    from auth_service.core.auth_manager import AuthManager
+E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase><testcase classname="" name="tests.unit.test_auth_endpoint_validation_security" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_auth_endpoint_validation_security.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_auth_endpoint_validation_security.py:15: in &lt;module&gt;
+    from auth_service.core.auth_manager import AuthManager
+E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase><testcase classname="" name="tests.unit.test_docker_hostname_resolution" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_docker_hostname_resolution.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_docker_hostname_resolution.py:4: in &lt;module&gt;
+    from auth_service.core.auth_manager import AuthManager
+E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase><testcase classname="" name="tests.unit.test_oauth_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_oauth_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_oauth_comprehensive.py:14: in &lt;module&gt;
+    from auth_service.core.auth_manager import AuthManager
+E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase><testcase classname="" name="tests.unit.test_oauth_redirect_uri_regression" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_oauth_redirect_uri_regression.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_oauth_redirect_uri_regression.py:12: in &lt;module&gt;
+    from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+E   ModuleNotFoundError: No module named 'test_framework.redis_test_utils_test_utils'</error></testcase><testcase classname="" name="tests.unit.test_refresh_endpoint" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_refresh_endpoint.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_refresh_endpoint.py:13: in &lt;module&gt;
+    from auth_service.core.auth_manager import AuthManager
+E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase><testcase classname="" name="tests.unit.test_registration_regression" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/anthony/Documents/GitHub/netra-apex/auth_service/tests/unit/test_registration_regression.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+venv/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+auth_service/tests/unit/test_registration_regression.py:10: in &lt;module&gt;
     from auth_service.core.auth_manager import AuthManager
 E   ModuleNotFoundError: No module named 'auth_service.core.auth_manager'</error></testcase></testsuite></testsuites>

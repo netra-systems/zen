@@ -45,7 +45,7 @@ class UnifiedDockerCLI:
     
     def get_manager(self, 
                    environment: str = "cli",
-                   environment_type: EnvironmentType = EnvironmentType.SHARED) -> UnifiedDockerManager:
+                   environment_type: EnvironmentType = EnvironmentType.DEDICATED) -> UnifiedDockerManager:
         """Get or create UnifiedDockerManager instance."""
         if self.manager is None:
             self.manager = UnifiedDockerManager(

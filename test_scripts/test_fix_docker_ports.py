@@ -26,7 +26,7 @@ def test_docker_environment_acquisition():
     # Create manager instance like the test runner does
     manager = UnifiedDockerManager(
         test_id='test-port-fix',
-        environment_type=EnvironmentType.SHARED,
+        environment_type=EnvironmentType.TEST,
         use_production_images=True
     )
     

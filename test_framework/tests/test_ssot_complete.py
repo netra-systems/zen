@@ -300,14 +300,14 @@ class TestDockerTestUtility:
     def test_docker_environment_types(self):
         """Test Docker environment type enumeration."""
         assert DockerTestEnvironmentType.ISOLATED
-        assert DockerTestEnvironmentType.SHARED
+        assert DockerTestEnvironmentType.DEDICATED
         assert DockerTestEnvironmentType.INTEGRATION
         assert DockerTestEnvironmentType.PERFORMANCE
         assert DockerTestEnvironmentType.PARALLEL
         
         # Test values
         assert DockerTestEnvironmentType.ISOLATED.value == "isolated"
-        assert DockerTestEnvironmentType.SHARED.value == "shared"
+        assert DockerTestEnvironmentType.DEDICATED.value == "dedicated"
 
 
 class TestSSotCompliance:

@@ -44,7 +44,7 @@ class ParallelTestSimulator:
         
         try:
             # Determine environment type
-            env_type = EnvironmentType.SHARED if use_shared else EnvironmentType.DEDICATED
+            env_type = EnvironmentType.TEST if use_shared else EnvironmentType.DEDICATED
             
             print(f"[Runner {runner_id}] Starting with {env_type.value} environment")
             
