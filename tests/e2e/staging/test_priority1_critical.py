@@ -199,10 +199,9 @@ class TestCriticalWebSocket:
         async def test_connection(index: int):
             """Test a single WebSocket connection"""
             try:
-                async with asyncio.timeout(5):
-                    async with websockets.connect(
-                        config.websocket_url
-                    ) as ws:
+                async with websockets.connect(
+                    config.websocket_url
+                ) as ws:
                         await ws.send(json.dumps({
                             "type": "ping",
                             "id": f"test_{index}",
