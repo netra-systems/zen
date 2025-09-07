@@ -275,7 +275,7 @@ class TestServiceURLConstruction:
             assert expected_db in url, f"URL should contain database '{expected_db}' for {env_type}"
     
     def test_database_url_environment_variable_setting(self):
-        """Test that DATABASE_URL is set with correct credentials."""
+        """Test that #removed-legacyis set with correct credentials."""
         env = IsolatedEnvironment()
         
         with patch.object(env, 'set') as mock_set:
@@ -286,7 +286,7 @@ class TestServiceURLConstruction:
             # Simulate setting up environment
             manager._setup_environment_for_e2e({'postgres': 5433})
             
-            # Check DATABASE_URL was set with correct credentials
+            # Check #removed-legacywas set with correct credentials
             calls = mock_set.call_args_list
             db_url_call = None
             for call in calls:
@@ -294,9 +294,9 @@ class TestServiceURLConstruction:
                     db_url_call = call
                     break
             
-            assert db_url_call is not None, "DATABASE_URL should be set"
+            assert db_url_call is not None, "#removed-legacyshould be set"
             db_url = db_url_call[0][1]
-            assert 'netra:netra123' in db_url, f"Development DATABASE_URL should use netra:netra123"
+            assert 'netra:netra123' in db_url, f"Development #removed-legacyshould use netra:netra123"
 
 
 class TestEnvironmentIsolation:

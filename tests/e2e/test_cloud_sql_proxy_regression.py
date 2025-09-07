@@ -211,7 +211,7 @@ class TestDeploymentScriptCompliance:
         with open(deploy_script, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Check that DATABASE_URL is not being constructed
+        # Check that #removed-legacyis not being constructed
         assert 'env_vars["DATABASE_URL"]' not in content, \
             "Deployment script should not construct DATABASE_URL"
         

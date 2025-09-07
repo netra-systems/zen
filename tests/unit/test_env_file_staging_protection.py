@@ -38,7 +38,7 @@ def test_env_file_not_loaded_in_staging():
                 
                 # Verify .env values were NOT loaded
                 assert env.get("TEST_SECRET") is None, ".env file should not be loaded in staging"
-                assert env.get("DATABASE_URL") != "dev_database", ".env DATABASE_URL should not be loaded in staging"
+                assert env.get("DATABASE_URL") != "dev_database", ".env #removed-legacyshould not be loaded in staging"
                 
         finally:
             os.chdir(original_cwd)

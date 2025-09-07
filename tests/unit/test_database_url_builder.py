@@ -17,7 +17,7 @@ class TestDatabaseURLBuilder:
     """Test DatabaseURLBuilder URL construction for all environments."""
     
     def test_development_with_database_url_async(self):
-        """Test development environment with DATABASE_URL returns async format."""
+        """Test development environment with #removed-legacyreturns async format."""
         env_vars = {
             "ENVIRONMENT": "development",
             "DATABASE_URL": "postgresql://user:pass@host:5432/db"
@@ -29,7 +29,7 @@ class TestDatabaseURLBuilder:
         assert url == "postgresql+asyncpg://user:pass@host:5432/db"
         
     def test_development_with_database_url_sync(self):
-        """Test development environment with DATABASE_URL returns sync format when requested."""
+        """Test development environment with #removed-legacyreturns sync format when requested."""
         env_vars = {
             "ENVIRONMENT": "development",
             "DATABASE_URL": "postgresql://user:pass@host:5432/db"
@@ -148,7 +148,7 @@ class TestDatabaseURLBuilder:
         assert "Missing required" in error_msg
         
     def test_database_url_priority_over_postgres_vars(self):
-        """Test DATABASE_URL takes priority when both are present."""
+        """Test #removed-legacytakes priority when both are present."""
         env_vars = {
             "ENVIRONMENT": "development",
             "DATABASE_URL": "postgresql://priority:user@priority-host:5432/priority-db",

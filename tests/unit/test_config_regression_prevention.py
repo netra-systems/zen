@@ -97,7 +97,7 @@
 
     # REMOVED_SYNTAX_ERROR: warnings = LegacyConfigMarker.check_legacy_usage(configs)
 
-    # Should warn about DATABASE_URL (still supported)
+    # Should warn about #removed-legacy(still supported)
     # REMOVED_SYNTAX_ERROR: db_warnings = [item for item in []]
     # REMOVED_SYNTAX_ERROR: assert len(db_warnings) > 0
     # REMOVED_SYNTAX_ERROR: assert "deprecated" in db_warnings[0].lower()

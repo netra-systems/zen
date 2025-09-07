@@ -229,7 +229,7 @@ class TestDeploymentConfigurationFailures:
             # Check database URL
             db_url = manager._get_postgres_url()
             if "localhost" in db_url or "127.0.0.1" in db_url:
-                precedence_issues.append("DATABASE_URL using local override in staging")
+                precedence_issues.append("#removed-legacyusing local override in staging")
             
             # Check ClickHouse config
             ch_config = manager._get_clickhouse_configuration()
@@ -486,7 +486,7 @@ class TestConfigurationIntegrationFailures:
     @pytest.mark.e2e
     def test_database_url_sharing_inconsistency(self):
         """
-        FAILING TEST: Shows DATABASE_URL sharing inconsistency between services.
+        FAILING TEST: Shows #removed-legacysharing inconsistency between services.
         
         Root Cause: Backend and auth service handle the same DATABASE_URL
         differently, causing connection issues.

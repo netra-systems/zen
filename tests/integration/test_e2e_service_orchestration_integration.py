@@ -78,7 +78,7 @@ class TestE2EServiceOrchestration:
             
             # Test environment configuration
             env = get_env()
-            assert env.get("DATABASE_URL") is not None, "DATABASE_URL not configured"
+            assert env.get("DATABASE_URL") is not None, "#removed-legacynot configured"
             assert env.get("REDIS_URL") is not None, "REDIS_URL not configured"
             assert "localhost:5433" in env.get("DATABASE_URL"), "Wrong PostgreSQL port in DATABASE_URL"
             assert "localhost:6381" in env.get("REDIS_URL"), "Wrong Redis port in REDIS_URL"
@@ -183,7 +183,7 @@ class TestE2EServiceOrchestration:
             
             # Validate port mappings are correct
             database_url = env.get("DATABASE_URL")
-            assert ":5433/" in database_url, f"DATABASE_URL should use test port 5433: {database_url}"
+            assert ":5433/" in database_url, f"#removed-legacyshould use test port 5433: {database_url}"
             
             redis_url = env.get("REDIS_URL") 
             assert ":6381/" in redis_url, f"REDIS_URL should use test port 6381: {redis_url}"

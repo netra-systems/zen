@@ -1115,7 +1115,7 @@ class UnifiedTestRunner:
             if 'postgres' in self.docker_ports:
                 postgres_port = self.docker_ports['postgres']
                 
-                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                # Construct #removed-legacywith discovered port and correct user/password for each environment
                 if args.env == "dev":
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
@@ -1124,7 +1124,7 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'docker_manager')
-                print(f"[INFO] Updated DATABASE_URL with Docker port: {postgres_port}")
+                print(f"[INFO] Updated #removed-legacywith Docker port: {postgres_port}")
             
             # Update Redis URL
             if 'redis' in self.docker_ports:
@@ -1182,7 +1182,7 @@ class UnifiedTestRunner:
             if 'postgres' in port_mappings and port_mappings['postgres'].is_available:
                 postgres_port = port_mappings['postgres'].external_port
                 
-                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                # Construct #removed-legacywith discovered port and correct user/password for each environment
                 if args.env == "dev":
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
@@ -1191,7 +1191,7 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
-                print(f"[INFO] Updated DATABASE_URL with discovered PostgreSQL port: {postgres_port}")
+                print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
             else:
                 print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
             

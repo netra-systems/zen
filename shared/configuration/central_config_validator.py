@@ -66,15 +66,6 @@ class LegacyConfigMarker:
     """Mark and track legacy configuration variables to prevent regression."""
     
     LEGACY_VARIABLES: Dict[str, Dict[str, Any]] = {
-        "DATABASE_URL": {
-            "replacement": ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"],
-            "deprecation_date": "2025-12-01",
-            "migration_guide": "Use component-based database configuration (POSTGRES_HOST, POSTGRES_PORT, etc.) instead of single DATABASE_URL. The system will construct the URL internally.",
-            "still_supported": True,
-            "removal_version": "2.0.0",
-            "environments_affected": ["development", "test"],
-            "auto_construct": True  # System can construct this from components
-        },
         "JWT_SECRET": {
             "replacement": "JWT_SECRET_KEY",
             "deprecation_date": "2025-10-01",
@@ -206,25 +197,25 @@ class CentralConfigurationValidator:
         ),
         
         # Database Configuration (CRITICAL) 
-        # CRITICAL FIX: Support DATABASE_URL OR component-based configuration
-        # This aligns with actual GCP deployment patterns where DATABASE_URL is provided
-        # No hard requirements for individual components if DATABASE_URL is present
+        # CRITICAL FIX: Support #removed-legacyOR component-based configuration
+        # This aligns with actual GCP deployment patterns where #removed-legacyis provided
+        # No hard requirements for individual components if #removed-legacyis present
         ConfigRule(
             env_var="POSTGRES_PASSWORD",
-            requirement=ConfigRequirement.OPTIONAL,  # Made optional since DATABASE_URL can be used instead
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since #removed-legacycan be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=8,
             forbidden_values={"", "password", "postgres", "admin"},
-            error_message="POSTGRES_PASSWORD (if provided) must be 8+ characters and not use common defaults. Alternative: Use DATABASE_URL for Cloud SQL connections."
+            error_message="POSTGRES_PASSWORD (if provided) must be 8+ characters and not use common defaults. Alternative: Use #removed-legacyfor Cloud SQL connections."
         ),
         ConfigRule(
             env_var="POSTGRES_HOST",
-            requirement=ConfigRequirement.OPTIONAL,  # Made optional since DATABASE_URL can be used instead
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since #removed-legacycan be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
             # Note: Cloud SQL Unix socket paths are valid (e.g., /cloudsql/project:region:instance)
             # These should NOT be treated as localhost violations
             forbidden_values={"localhost", "127.0.0.1"},  # Removed empty string check for Cloud SQL
-            error_message="POSTGRES_HOST (if provided) cannot be localhost/127.0.0.1 in staging/production. Cloud SQL Unix sockets (/cloudsql/...) are allowed. Alternative: Use DATABASE_URL for Cloud SQL connections."
+            error_message="POSTGRES_HOST (if provided) cannot be localhost/127.0.0.1 in staging/production. Cloud SQL Unix sockets (/cloudsql/...) are allowed. Alternative: Use #removed-legacyfor Cloud SQL connections."
         ),
         
         # Redis Configuration (CRITICAL)
@@ -525,15 +516,15 @@ class CentralConfigurationValidator:
         """
         Validate that database configuration is sufficient for the environment.
         
-        CRITICAL: Ensure we have EITHER DATABASE_URL OR component-based configuration.
-        This prevents false positives where GCP provides DATABASE_URL but validator
+        CRITICAL: Ensure we have EITHER #removed-legacyOR component-based configuration.
+        This prevents false positives where GCP provides #removed-legacybut validator
         expects individual components.
         """
         database_url = self.env_getter("DATABASE_URL")
         
-        # If DATABASE_URL is provided, that's sufficient (GCP Cloud Run pattern)
+        # If #removed-legacyis provided, that's sufficient (GCP Cloud Run pattern)
         if database_url and database_url.strip():
-            logger.info(f"Database configuration: Using DATABASE_URL for {environment.value} environment")
+            logger.info(f"Database configuration: Using #removed-legacyfor {environment.value} environment")
             return
         
         # Otherwise, require component-based configuration
@@ -544,13 +535,13 @@ class CentralConfigurationValidator:
         if not host:
             raise ValueError(
                 f"Database host required in {environment.value} environment. "
-                f"Provide either DATABASE_URL or POSTGRES_HOST/DATABASE_HOST"
+                f"Provide either #removed-legacyor POSTGRES_HOST/DATABASE_HOST"
             )
         
         if not password:
             raise ValueError(
                 f"Database password required in {environment.value} environment. "
-                f"Provide either DATABASE_URL or POSTGRES_PASSWORD/DATABASE_PASSWORD"
+                f"Provide either #removed-legacyor POSTGRES_PASSWORD/DATABASE_PASSWORD"
             )
         
         # Validate host (allow Cloud SQL sockets)
@@ -619,13 +610,13 @@ class CentralConfigurationValidator:
         environment = self.get_environment()
         
         if environment in [Environment.STAGING, Environment.PRODUCTION]:
-            # CRITICAL: Check for DATABASE_URL first (Cloud Run deployment pattern)
+            # CRITICAL: Check for #removed-legacyfirst (Cloud Run deployment pattern)
             database_url = self.env_getter("DATABASE_URL")
             if database_url:
-                # DATABASE_URL is sufficient - no need to validate individual components
+                # #removed-legacyis sufficient - no need to validate individual components
                 # This is how GCP Cloud Run deployments work
-                logger.info(f"Using DATABASE_URL for {environment.value} database configuration")
-                # Return minimal config - the actual connection uses DATABASE_URL directly
+                logger.info(f"Using #removed-legacyfor {environment.value} database configuration")
+                # Return minimal config - the actual connection uses #removed-legacydirectly
                 return {
                     "url": database_url,
                     "host": "cloud-sql",  # Placeholder for Cloud SQL
@@ -642,9 +633,9 @@ class CentralConfigurationValidator:
             
             # Validate that we have at least host and password for component-based config
             if not host:
-                raise ValueError(f"Database host required in {environment.value}. Set DATABASE_URL or POSTGRES_HOST/DATABASE_HOST")
+                raise ValueError(f"Database host required in {environment.value}. Set #removed-legacyor POSTGRES_HOST/DATABASE_HOST")
             if not password:
-                raise ValueError(f"Database password required in {environment.value}. Set DATABASE_URL or POSTGRES_PASSWORD/DATABASE_PASSWORD")
+                raise ValueError(f"Database password required in {environment.value}. Set #removed-legacyor POSTGRES_PASSWORD/DATABASE_PASSWORD")
             
             # Additional validation for component-based config
             if host in {"localhost", "127.0.0.1"} and not host.startswith("/cloudsql/"):

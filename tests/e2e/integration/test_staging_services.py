@@ -173,7 +173,7 @@ class TestStagingDatabaseHealth:
         """Test database configurations meet staging requirements."""
         # PostgreSQL configuration
         db_url = get_env().get("DATABASE_URL")
-        assert db_url is not None, "DATABASE_URL not set"
+        assert db_url is not None, "#removed-legacynot set"
         assert db_url.startswith("postgresql://"), "Invalid PostgreSQL URL"
         
         # Redis configuration  

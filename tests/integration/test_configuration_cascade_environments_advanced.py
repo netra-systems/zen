@@ -543,8 +543,8 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
         # Test database URL regression prevention
         with IsolatedEnvironment() as env:
             database_url = env.get('DATABASE_URL')
-            assert database_url, "DATABASE_URL must be present"
-            assert database_url.startswith(('postgresql://', 'postgres://')), "DATABASE_URL must be PostgreSQL"
+            assert database_url, "#removed-legacymust be present"
+            assert database_url.startswith(('postgresql://', 'postgres://')), "#removed-legacymust be PostgreSQL"
             
         # Test JWT secret regression prevention
         with IsolatedEnvironment() as env:

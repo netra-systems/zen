@@ -37,7 +37,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Override test environment DATABASE_URL to use real database for critical system tests
+# Override test environment #removed-legacyto use real database for critical system tests
 # This is needed because conftest.py forces sqlite for tests, but we need real DB for these E2E tests
 if get_env().get('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
     # Load real database URL from .env file
@@ -65,8 +65,8 @@ import os
 # Create a simple settings mock for testing
 class Settings:
     def __init__(self):
-        # Load DATABASE_URL dynamically to ensure env vars are loaded
-        self.DATABASE_URL = get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
+        # Load #removed-legacydynamically to ensure env vars are loaded
+        self.#removed-legacy= get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
         self.REDIS_URL = get_env().get('REDIS_URL', 'redis://localhost:6379/1')
     
     def is_postgresql(self):

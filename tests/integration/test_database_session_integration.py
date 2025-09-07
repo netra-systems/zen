@@ -13,7 +13,7 @@ from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
 # In-memory SQLite database for testing
-DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+#removed-legacy= "sqlite+aiosqlite:///:memory:"
 
 
 @pytest.fixture(scope="module")

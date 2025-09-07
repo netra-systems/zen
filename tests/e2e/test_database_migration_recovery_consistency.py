@@ -279,7 +279,7 @@ class TestDatabaseMigrationConsistencyer:
                     self.metrics.connection_establishment_times["postgresql"] = time.time() - start_time
                     logger.info("PostgreSQL direct connection established")
                 else:
-                    self.metrics.warnings.append("PostgreSQL DATABASE_URL not available")
+                    self.metrics.warnings.append("PostgreSQL #removed-legacynot available")
             except Exception as e:
                 self.metrics.warnings.append(f"PostgreSQL connection failed: {e}")
         

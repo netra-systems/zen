@@ -281,7 +281,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: lines = f.readlines()
 
         # REMOVED_SYNTAX_ERROR: for i, line in enumerate(lines, 1):
-            # Skip comments and DATABASE_URL validation
+            # Skip comments and #removed-legacyvalidation
             # REMOVED_SYNTAX_ERROR: if 'localhost' in line.lower():
                 # REMOVED_SYNTAX_ERROR: if not line.strip().startswith('#') and 'DATABASE_URL' not in line:
                     # Check it's not in the validation section

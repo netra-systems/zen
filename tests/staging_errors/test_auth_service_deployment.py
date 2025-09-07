@@ -39,7 +39,7 @@ def test_auth_service_missing_database_url():
     # Mock: Authentication service isolation for testing without real auth flows
     with patch('auth_service.auth_db') as mock_auth_db:
         # Simulate database initialization failure
-        mock_auth_db.initialize.side_effect = Exception("Connection failed: DATABASE_URL not set")
+        mock_auth_db.initialize.side_effect = Exception("Connection failed: #removed-legacynot set")
         
         # This should fail with database connection error
         with pytest.raises(Exception, match="DATABASE_URL"):

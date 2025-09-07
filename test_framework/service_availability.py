@@ -144,7 +144,7 @@ class ServiceAvailabilityChecker:
                 service_name="PostgreSQL",
                 details="No database connection URL found in environment",
                 remediation_steps=[
-                    "Set DATABASE_URL environment variable",
+                    "Set #removed-legacyenvironment variable",
                     "Or start PostgreSQL using: docker-compose -f docker-compose.dev.yml up postgres",
                     "Or run dev launcher: python scripts/dev_launcher.py"
                 ]

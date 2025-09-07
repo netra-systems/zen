@@ -165,7 +165,7 @@ Reports are generated in `reports/system-startup/`:
 
 2. **Database Connection Failures**
    - Use in-memory SQLite for testing
-   - Check DATABASE_URL environment variable
+   - Check #removed-legacyenvironment variable
    - Ensure database server running (if using PostgreSQL)
 
 3. **WebSocket Test Hangs**
