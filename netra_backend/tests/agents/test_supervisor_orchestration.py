@@ -13,7 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.agents.test_supervisor_basic import TestSupervisorOrchestration
+from netra_backend.tests.test_supervisor_basic import TestSupervisorOrchestration
 from netra_backend.tests.agents.test_supervisor_patterns import (
 TestResourceManagement,
 TestWorkflowPatterns,
