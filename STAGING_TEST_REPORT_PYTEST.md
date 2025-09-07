@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 11:42:17
+**Generated:** 2025-09-07 12:09:45
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 10.33 seconds
+- **Duration:** 11.41 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | FAIL failed | 9.229s | test_priority1_critical.py |
+| test_001_websocket_connection_real | FAIL failed | 10.414s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_001_websocket_connection_real
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_priority1_critical.py
-- **Duration:** 9.229s
+- **Duration:** 10.414s
 - **Error:** tests\e2e\staging\test_priority1_critical.py:37: in test_001_websocket_connection_real
     assert response.status_code == 200, f"Backend not healthy: {response.text}"
 E   AssertionError: Backend not healthy: Service Unavailable
@@ -38,7 +38,7 @@ E    +  where 503 = <Response [503 Service Unavailable]>.status_code...
 test_priority1_critical.py::test_001_websocket_connection_real FAILED
 
 ==================================================
-0 passed, 1 failed in 10.33s
+0 passed, 1 failed in 11.41s
 ```
 
 ## Test Coverage Matrix

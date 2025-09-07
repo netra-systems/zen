@@ -94,7 +94,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         test_context = {"query": "optimize my costs", "user_intent": "cost_reduction"}
         trace_context = {"trace_id": "abc123", "span_id": "def456"}
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_started(
                 run_id=self.test_run_id,
@@ -129,7 +129,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         step_number = 3
         progress_percentage = 45.0
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_thinking(
                 run_id=self.test_run_id,
@@ -164,7 +164,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         }
         execution_time_ms = 2456.78
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_completed(
                 run_id=self.test_run_id,
@@ -193,7 +193,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         error_msg = "API rate limit exceeded"
         error_context = {"api_endpoint": "/cost-analysis", "retry_after": 60}
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_error(
                 run_id=self.test_run_id,
@@ -222,7 +222,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         death_cause = "Memory exhaustion"
         death_context = {"memory_usage_mb": 8192, "last_operation": "data_analysis"}
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_death(
                 run_id=self.test_run_id,
@@ -255,7 +255,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         # Arrange
         parameters = {"query": "cost optimization", "timeframe": "30d"}
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_tool_executing(
                 run_id=self.test_run_id,
@@ -284,7 +284,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         tool_result = {"cost_data": [1200, 1350, 980], "trend": "decreasing"}
         execution_time_ms = 1234.56
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_tool_completed(
                 run_id=self.test_run_id,
@@ -470,7 +470,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         agent_1 = "CostOptimizer"
         agent_2 = "SecurityAnalyzer"
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act - Simulate concurrent notifications
             tasks = [
                 self.bridge.notify_agent_started(run_id_1, agent_1, {"query": "costs"}),
@@ -501,7 +501,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         # Arrange
         tools = ["CostAnalyzer", "PerformanceProfiler", "SecurityScanner"]
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act - Simulate concurrent tool executions
             tasks = []
             for i, tool in enumerate(tools):
@@ -531,7 +531,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         """
         # Assert - Initial state should be set
         assert self.bridge.config is not None
-        assert self.bridge._integration_state == IntegrationState.UNINITIALIZED
+        assert self.bridge.state == IntegrationState.UNINITIALIZED
         assert isinstance(self.bridge.config, IntegrationConfig)
         assert self.bridge._initialized
 
@@ -559,7 +559,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         for monitoring and alerting.
         """
         # Arrange - Start with healthy state
-        self.bridge._integration_state = IntegrationState.ACTIVE
+        self.bridge.state = IntegrationState.ACTIVE
         self.bridge._websocket_manager = self.mock_websocket_manager
         
         # Act - Get health status
@@ -610,7 +610,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         
         RESILIENCE: None context should be handled gracefully.
         """
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_agent_started(
                 run_id=self.test_run_id,
@@ -630,7 +630,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         
         RESILIENCE: Empty parameters should be handled gracefully.
         """
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             # Act
             result = await self.bridge.notify_tool_executing(
                 run_id=self.test_run_id,
@@ -654,7 +654,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         # Arrange
         num_events = 100
         
-        with patch.object(self.bridge, '_emit_agent_event', return_value=True) as mock_emit:
+        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
             start_time = time.time()
             
             # Act - Send burst of events
