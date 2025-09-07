@@ -224,7 +224,7 @@ class TestWebSocketJWTAuthFix:
         assert "Authorization" in headers, "WebSocket headers should include Authorization header"
         assert headers["Authorization"].startswith("Bearer "), "Authorization header should be Bearer token"
 
-    def test_create_reproduction_scenario(self):
+    async def test_create_reproduction_scenario(self):
         """Create a scenario that exactly reproduces the staging WebSocket auth failure."""
         print("\n=== CREATING REPRODUCTION SCENARIO ===")
         
@@ -253,7 +253,7 @@ class TestWebSocketJWTAuthFix:
         extractor = UserContextExtractor()
         
         try:
-            payload = extractor.validate_and_decode_jwt(test_token) if test_token else None
+            payload = await extractor.validate_and_decode_jwt(test_token) if test_token else None  # CRITICAL FIX: Added await
             if payload:
                 print(f"   ❌ UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario")
             else:
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     print("=" * 60)
     
     try:
-        test.test_reproduce_jwt_secret_mismatch()
+        asyncio.run(test.test_reproduce_jwt_secret_mismatch())  # CRITICAL FIX: Added asyncio.run
     except AssertionError as e:
         print(f"✅ CONFIRMED BUG: {e}")
     
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     
     asyncio.run(test.test_websocket_headers_generation_fix())
     
-    test.test_create_reproduction_scenario()
+    asyncio.run(test.test_create_reproduction_scenario())  # CRITICAL FIX: Added asyncio.run
     
     print("\n" + "=" * 60)
     print("Bug reproduction complete. Implement fix and re-run tests.")
