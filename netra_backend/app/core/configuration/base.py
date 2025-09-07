@@ -98,8 +98,17 @@ class UnifiedConfigManager:
                 env = get_env()
                 service_secret = env.get('SERVICE_SECRET')
                 if service_secret:
-                    config.service_secret = service_secret
+                    # DEFENSIVE FIX: Strip whitespace from environment variable to prevent header issues
+                    config.service_secret = service_secret.strip()
                     self._logger.info("Loaded SERVICE_SECRET from environment as fallback")
+                    
+            # DEFENSIVE FIX: Ensure service_id is also sanitized from environment
+            # This prevents header value issues from Windows line endings or whitespace
+            if hasattr(config, 'service_id') and config.service_id:
+                original_service_id = config.service_id
+                config.service_id = str(config.service_id).strip()
+                if config.service_id != original_service_id:
+                    self._logger.warning(f"SERVICE_ID contained whitespace - sanitized from {repr(original_service_id)} to {repr(config.service_id)}")
                     
             return config
         except Exception as e:

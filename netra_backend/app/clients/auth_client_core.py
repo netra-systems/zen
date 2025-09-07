@@ -339,9 +339,20 @@ class AuthServiceClient:
         """Get service-to-service authentication headers."""
         headers = {}
         if self.service_id and self.service_secret:
-            headers["X-Service-ID"] = self.service_id
-            headers["X-Service-Secret"] = self.service_secret
-            logger.debug(f"Service auth headers configured for service ID: '{self.service_id}'")
+            # CRITICAL FIX: Sanitize header values to remove illegal characters
+            # Windows line endings and whitespace can cause "Illegal header value" errors
+            sanitized_service_id = str(self.service_id).strip()
+            sanitized_service_secret = str(self.service_secret).strip()
+            
+            # Log warning if sanitization was needed (helps detect config issues)
+            if sanitized_service_id != str(self.service_id):
+                logger.warning(f"SERVICE_ID contained illegal characters - sanitized from {repr(str(self.service_id))} to {repr(sanitized_service_id)}")
+            if sanitized_service_secret != str(self.service_secret):
+                logger.warning(f"SERVICE_SECRET contained illegal characters - sanitized (length: {len(str(self.service_secret))} -> {len(sanitized_service_secret)})")
+            
+            headers["X-Service-ID"] = sanitized_service_id
+            headers["X-Service-Secret"] = sanitized_service_secret
+            logger.debug(f"Service auth headers configured for service ID: '{sanitized_service_id}'")
         else:
             # Log detailed diagnostic info when service auth is missing
             missing_parts = []

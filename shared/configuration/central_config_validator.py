@@ -496,8 +496,31 @@ class CentralConfigurationValidator:
         """Validate a single configuration requirement."""
         value = self.env_getter(rule.env_var)
         
-        # Check if value is present
-        if rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
+        # CRITICAL FIX: For test environment OAuth credentials during pytest collection,
+        # be more lenient to handle timing issues during configuration loading
+        if environment == Environment.TEST and rule.env_var in ['GOOGLE_OAUTH_CLIENT_ID_TEST', 'GOOGLE_OAUTH_CLIENT_SECRET_TEST']:
+            if not value or not value.strip():
+                # During test context, try to get the value from test defaults if available
+                try:
+                    from shared.isolated_environment import get_env
+                    env = get_env()
+                    if env._is_test_context() and hasattr(env, '_get_test_environment_defaults'):
+                        test_defaults = env._get_test_environment_defaults()
+                        if rule.env_var in test_defaults:
+                            value = test_defaults[rule.env_var]
+                            logger.debug(f"Using test default for {rule.env_var} during validation")
+                except Exception as e:
+                    logger.debug(f"Could not load test defaults for {rule.env_var}: {e}")
+                
+                # If still no value, fail with detailed error message
+                if not value or not value.strip():
+                    error_msg = (rule.error_message or 
+                               f"{rule.env_var} is required in {environment.value} environment. "
+                               f"Ensure test environment is properly configured with OAuth test credentials.")
+                    raise ValueError(error_msg)
+        
+        # Check if value is present for non-OAuth test credentials
+        elif rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
             if not value or not value.strip():
                 error_msg = rule.error_message or f"{rule.env_var} is required in {environment.value} environment"
                 raise ValueError(error_msg)

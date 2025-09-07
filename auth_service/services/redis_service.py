@@ -31,23 +31,69 @@ class RedisService:
     
     async def close(self):
         """Close Redis connection."""
-        await self._redis_manager.close()
+        await self._redis_manager.disconnect()
     
     async def set(self, key: str, value: Any, ex: Optional[int] = None) -> bool:
         """Set a key-value pair in Redis."""
-        return await self._redis_manager.set(key, value, ex=ex)
+        if not await self._redis_manager.ensure_connected():
+            return False
+        
+        try:
+            client = self._redis_manager.get_client()
+            if not client:
+                return False
+            
+            if ex is not None:
+                await client.setex(key, ex, value)
+            else:
+                await client.set(key, value)
+            return True
+        except Exception:
+            return False
     
     async def get(self, key: str) -> Optional[str]:
         """Get value by key from Redis."""
-        return await self._redis_manager.get(key)
+        if not await self._redis_manager.ensure_connected():
+            return None
+        
+        try:
+            client = self._redis_manager.get_client()
+            if not client:
+                return None
+            
+            result = await client.get(key)
+            return result.decode('utf-8') if result else None
+        except Exception:
+            return None
     
     async def delete(self, *keys: str) -> int:
         """Delete keys from Redis."""
-        return await self._redis_manager.delete(*keys)
+        if not await self._redis_manager.ensure_connected():
+            return 0
+        
+        try:
+            client = self._redis_manager.get_client()
+            if not client:
+                return 0
+            
+            return await client.delete(*keys)
+        except Exception:
+            return 0
     
     async def keys(self, pattern: str) -> List[str]:
         """Get keys matching pattern."""
-        return await self._redis_manager.keys(pattern)
+        if not await self._redis_manager.ensure_connected():
+            return []
+        
+        try:
+            client = self._redis_manager.get_client()
+            if not client:
+                return []
+            
+            result = await client.keys(pattern)
+            return [key.decode('utf-8') if isinstance(key, bytes) else key for key in result]
+        except Exception:
+            return []
 
 
 __all__ = ["RedisService"]
