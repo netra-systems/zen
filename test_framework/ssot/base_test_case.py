@@ -545,32 +545,13 @@ class SSotAsyncTestCase(SSotBaseTestCase):
             raise TimeoutError(f"Coroutine timed out after {timeout} seconds")
 
 
-# === BACKWARDS COMPATIBILITY ALIASES ===
+# === SSOT MIGRATION COMPLETE ===
 
-# CRITICAL: These aliases ensure backwards compatibility while migrating to SSOT
+# Aliases migrated to SSOT patterns - use SSotBaseTestCase directly
 BaseTestCase = SSotBaseTestCase
 AsyncTestCase = SSotAsyncTestCase
 
-# Legacy compatibility for existing test patterns
-class BaseTestMixin(SSotBaseTestCase):
-    """Legacy compatibility mixin - redirects to SSOT BaseTestCase."""
-    pass
-
-class TestErrorHandling(SSotBaseTestCase):
-    """Legacy compatibility class - redirects to SSOT BaseTestCase."""
-    pass
-
-class TestIntegration(SSotBaseTestCase):
-    """Legacy compatibility class - redirects to SSOT BaseTestCase."""
-    pass
-
-class TestIntegrationScenarios(SSotBaseTestCase):
-    """Legacy compatibility class - redirects to SSOT BaseTestCase."""
-    pass
-
-class TestErrorContext(SSotBaseTestCase):
-    """Legacy compatibility class - redirects to SSOT BaseTestCase."""
-    pass
+# Legacy compatibility classes removed - use SSotBaseTestCase directly
 
 
 # === EXPORT CONTROL ===
@@ -582,14 +563,11 @@ __all__ = [
     "SsotTestMetrics",
     "SsotTestContext",
     
-    # Backwards Compatibility
+    # SSOT Aliases
     "BaseTestCase",
     "AsyncTestCase",
-    "BaseTestMixin",
-    "TestErrorHandling", 
-    "TestIntegration",
-    "TestIntegrationScenarios",
-    "TestErrorContext",
+    
+    # Legacy compatibility classes removed
     
     # Legacy Aliases (deprecated)
     "TestMetrics", 
