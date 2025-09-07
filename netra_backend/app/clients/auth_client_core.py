@@ -201,7 +201,7 @@ class AuthServiceClient:
             # This prevents race conditions where token is cached but then blacklisted
             if await self._is_token_blacklisted_atomic(token):
                 logger.warning("Token is blacklisted, removing from cache and rejecting")
-                self.token_cache.invalidate_cached_token(token)
+                await self.token_cache.invalidate_cached_token(token)
                 return None
         return cached_result
     
@@ -214,7 +214,7 @@ class AuthServiceClient:
     async def _cache_validation_result(self, token: str, result: Optional[Dict]) -> Optional[Dict]:
         """Cache validation result if successful."""
         if result:
-            self.token_cache.cache_token(token, result)
+            await self.token_cache.cache_token(token, result)
         return result
     
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
@@ -621,7 +621,7 @@ class AuthServiceClient:
     
     async def _process_logout_result(self, token: str, result: bool) -> bool:
         """Process logout result and invalidate cache."""
-        self.token_cache.invalidate_cached_token(token)
+        await self.token_cache.invalidate_cached_token(token)
         return result
     
     async def _is_token_blacklisted_atomic(self, token: str) -> bool:

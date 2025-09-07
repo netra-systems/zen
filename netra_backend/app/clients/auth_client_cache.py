@@ -652,8 +652,10 @@ class AuthTokenCache:
         self._token_cache: Dict[str, CachedToken] = {}  # For test compatibility
         self.cache_ttl_seconds = cache_ttl_seconds
     
-    def cache_token(self, token: str, data: Dict[str, Any]) -> None:
-        """Cache token data synchronously for test compatibility.
+    async def cache_token(self, token: str, data: Dict[str, Any]) -> None:
+        """Cache token data asynchronously.
+        
+        CRITICAL FIX: Made async to match usage in auth_client_core.py.
         
         Args:
             token: The token to cache
@@ -662,17 +664,56 @@ class AuthTokenCache:
         # Store in both internal dict (for tests) and async cache
         self._token_cache[token] = CachedToken(data, self.cache_ttl_seconds)
         
-        # Also cache asynchronously if possible (fire and forget)
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.create_task(self._inner_cache.cache_token(token, data))
-        except RuntimeError:
-            # No event loop, just use sync storage
-            pass
+        # Also cache through inner cache
+        await self._inner_cache.cache_token(token, data)
     
-    def get_cached_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Get cached token data synchronously for test compatibility.
+    def cache_token_sync(self, token: str, data: Dict[str, Any]) -> None:
+        """DEPRECATED: Synchronous cache method for test compatibility ONLY.
+        
+        WARNING: Use async cache_token() for production code.
+        
+        Args:
+            token: The token to cache
+            data: The validation data to cache
+        """
+        # Store in internal dict only
+        self._token_cache[token] = CachedToken(data, self.cache_ttl_seconds)
+    
+    async def get_cached_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Get cached token data asynchronously - FIXED FOR ASYNC/AWAIT COMPATIBILITY.
+        
+        CRITICAL FIX: Changed from synchronous to async method to match 
+        auth_client_core.py expectations. This fixes the "object NoneType 
+        can't be used in 'await' expression" error.
+        
+        Args:
+            token: The token to retrieve
+            
+        Returns:
+            Cached data if valid, None otherwise
+        """
+        # Check synchronous cache first for test compatibility
+        if token in self._token_cache:
+            cached = self._token_cache[token]
+            if cached.is_valid():
+                return cached.data
+            else:
+                # Remove expired token
+                del self._token_cache[token]
+        
+        # Also check async cache through inner TokenCache
+        result = await self._inner_cache.get_cached_token(token)
+        if result:
+            return result
+            
+        return None
+    
+    def get_cached_token_sync(self, token: str) -> Optional[Dict[str, Any]]:
+        """RENAMED: Synchronous version for test compatibility ONLY.
+        
+        WARNING: This is the synchronous version that was causing the bug.
+        Use get_cached_token() (async) for production code.
+        This method exists ONLY for backward compatibility with tests.
         
         Args:
             token: The token to retrieve
@@ -689,8 +730,10 @@ class AuthTokenCache:
                 del self._token_cache[token]
         return None
     
-    def invalidate_cached_token(self, token: str) -> None:
-        """Invalidate cached token synchronously for test compatibility.
+    async def invalidate_cached_token(self, token: str) -> None:
+        """Invalidate cached token asynchronously.
+        
+        CRITICAL FIX: Made async to match usage in auth_client_core.py.
         
         Args:
             token: The token to invalidate
@@ -698,14 +741,19 @@ class AuthTokenCache:
         if token in self._token_cache:
             del self._token_cache[token]
         
-        # Also invalidate asynchronously if possible (fire and forget)
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.create_task(self._inner_cache.invalidate_cached_token(token))
-        except RuntimeError:
-            # No event loop, just use sync storage
-            pass
+        # Also invalidate through inner cache
+        await self._inner_cache.invalidate_cached_token(token)
+    
+    def invalidate_cached_token_sync(self, token: str) -> None:
+        """DEPRECATED: Synchronous invalidation for test compatibility ONLY.
+        
+        WARNING: Use async invalidate_cached_token() for production code.
+        
+        Args:
+            token: The token to invalidate
+        """
+        if token in self._token_cache:
+            del self._token_cache[token]
     
     # Delegate other methods to inner cache for full compatibility
     async def get_token(self, user_id: str) -> Optional[str]:
