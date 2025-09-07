@@ -66,6 +66,16 @@ class UserContextExtractor:
         """
         Get JWT secret key from environment.
         
+        CRITICAL FIX: Now supports environment-specific JWT secrets to match auth service.
+        This fixes the staging 401 authentication regression where auth service uses
+        JWT_SECRET_STAGING but backend was only looking for JWT_SECRET_KEY.
+        
+        Priority order (matches auth_service/auth_core/auth_environment.py):
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
+        2. Generic JWT_SECRET_KEY
+        3. Legacy JWT_SECRET
+        4. Other fallbacks
+        
         Returns:
             JWT secret key string
             
@@ -76,24 +86,40 @@ class UserContextExtractor:
             from shared.isolated_environment import get_env
             env = get_env()
             
-            # Try different possible JWT secret environment variables
+            # Get current environment
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # 1. Try environment-specific secret first (matches auth service logic)
+            env_specific_key = f"JWT_SECRET_{environment.upper()}"
+            jwt_secret = env.get(env_specific_key)
+            if jwt_secret:
+                logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
+                return jwt_secret.strip()
+            
+            # 2. Try generic JWT_SECRET_KEY (original logic)
+            jwt_secret = env.get("JWT_SECRET_KEY")
+            if jwt_secret:
+                logger.debug("Using generic JWT_SECRET_KEY")
+                return jwt_secret.strip()
+            
+            # 3. Try legacy fallbacks
             jwt_secret = (
-                env.get("JWT_SECRET_KEY") or 
                 env.get("JWT_SECRET") or
                 env.get("AUTH_JWT_SECRET") or
                 env.get("SECRET_KEY")
             )
             
-            if not jwt_secret:
-                # For testing environments, use a default secret with warning
-                environment = env.get("ENVIRONMENT", "development").lower()
-                if environment in ["testing", "development"]:
-                    logger.warning("Using default JWT secret for testing - NOT FOR PRODUCTION")
-                    return "test_jwt_secret_key_for_development_only"
-                else:
-                    raise RuntimeError("JWT secret key not configured in environment")
+            if jwt_secret:
+                logger.debug("Using legacy JWT secret variable")
+                return jwt_secret.strip()
             
-            return jwt_secret
+            # 4. Environment-specific defaults
+            if environment in ["testing", "development"]:
+                logger.warning("Using default JWT secret for testing - NOT FOR PRODUCTION")
+                return "test_jwt_secret_key_for_development_only"
+            else:
+                raise RuntimeError(f"JWT secret key not configured in {environment} environment. "
+                                 f"Please set {env_specific_key} or JWT_SECRET_KEY")
             
         except ImportError:
             logger.error("Could not import isolated environment - using fallback")
