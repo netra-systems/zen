@@ -335,9 +335,10 @@ class TestSecretKeySecurityImplications:
         SPECIFIC STAGING ISSUE: Current staging keys contain 'staging' and 'secret' patterns
         that should be rejected by validation for security in staging/production environments.
         
-        This test should FAIL with current staging config to demonstrate the validation issue.
+        This test demonstrates the validation logic that should catch insecure patterns.
         """
         from netra_backend.app.schemas.config import AppConfig
+        from unittest.mock import MagicMock, patch
         
         # These are the exact patterns used in staging.env that should fail validation
         staging_patterns = [
@@ -345,10 +346,14 @@ class TestSecretKeySecurityImplications:
             "staging-jwt-secret-key-should-be-replaced-in-deployment",  # Current staging JWT_SECRET_KEY
         ]
         
-        # Mock staging environment by directly testing the validation logic with staging environment
+        # Mock get_env to return staging environment
+        mock_env = MagicMock()
+        mock_env.get.return_value = "staging"
+        
+        # Mock staging environment by directly patching the get_env function
         for secret_pattern in staging_patterns:
-            # Test the validation logic directly - force staging environment in validation
-            with patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False):
+            # Mock get_env function to return staging environment
+            with patch('netra_backend.app.schemas.config.get_env', return_value=mock_env):
                 # This should raise ValueError for staging environment with insecure patterns
                 with pytest.raises(ValueError, match=r"contains insecure pattern for staging environment"):
                     # Test SECRET_KEY validation with mocked environment

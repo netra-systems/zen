@@ -138,11 +138,15 @@ class TestMultiUserAuthIsolation(SSotBaseTestCase):
             assert decoded["email"] == users_data[i]["email"], f"User {i} email not isolated"
             assert decoded["permissions"] == users_data[i]["permissions"], f"User {i} permissions not isolated"
             
-            # Validate no leakage from other users
+            # Validate no leakage from other users - CRITICAL security boundary
             for j, other_user in enumerate(users_data):
                 if i != j:
-                    assert decoded["sub"] != other_user["user_id"], f"User {i} leaked ID from user {j}"
-                    assert decoded["email"] != other_user["email"], f"User {i} leaked email from user {j}"
+                    assert decoded["sub"] != other_user["user_id"], f"User {i} leaked ID from user {j} - SECURITY VIOLATION"
+                    assert decoded["email"] != other_user["email"], f"User {i} leaked email from user {j} - SECURITY VIOLATION"
+                    
+                    # Additional isolation checks - session data should not leak
+                    if "session_id" in decoded:
+                        assert decoded["session_id"] != users_data[j].get("session_id"), f"User {i} leaked session from user {j}"
         
         # Test concurrent operations without interference
         concurrent_ops = []
@@ -162,11 +166,19 @@ class TestMultiUserAuthIsolation(SSotBaseTestCase):
         successful_ops = [result for result in operation_results if not isinstance(result, Exception)]
         logger.info(f"Concurrent operations: {len(successful_ops)} successful out of {len(operation_results)}")
         
-        # Performance validation
+        # Performance validation - critical for multi-user scalability
         execution_time = time.time() - start_time
-        assert execution_time < 5.0, f"Concurrent session isolation too slow: {execution_time:.2f}s"
+        assert execution_time < 5.0, f"Concurrent session isolation too slow: {execution_time:.2f}s (impacts multi-user scalability)"
         
-        logger.info(f"Concurrent user session isolation successful: {execution_time:.2f}s")
+        # Validate isolation completeness
+        isolation_summary = {
+            "users_tested": num_concurrent_users,
+            "sessions_created": len(user_sessions),
+            "concurrent_operations": len(concurrent_ops),
+            "successful_operations": len(successful_ops)
+        }
+        
+        logger.info(f"Concurrent user session isolation successful: {execution_time:.2f}s - {isolation_summary}")
     
     @pytest.mark.asyncio
     @pytest.mark.e2e

@@ -116,9 +116,13 @@ class TestJWTTokenLifecycle(SSotBaseTestCase):
         is_valid = await self.auth_helper.validate_token(token)
         assert is_valid, "Token validation with auth service failed"
         
-        # Performance validation
+        # Performance validation - critical for user experience
         execution_time = time.time() - start_time
-        assert execution_time < 5.0, f"JWT creation/validation too slow: {execution_time:.2f}s"
+        assert execution_time < 5.0, f"JWT creation/validation too slow: {execution_time:.2f}s (impacts user login flow)"
+        
+        # Validate token security properties
+        assert decoded_token["exp"] > decoded_token["iat"], "Token expiry must be after issued time"
+        assert decoded_token["jti"], "JWT ID must be non-empty for tracking"
         
         logger.info(f"JWT creation/validation successful: {execution_time:.2f}s")
     
@@ -187,10 +191,16 @@ class TestJWTTokenLifecycle(SSotBaseTestCase):
         assert refreshed_decoded["email"] == initial_email, "Email not preserved in refresh"
         assert refreshed_decoded["type"] == "access", "Token type not preserved"
         
-        # Validate refreshed token has new expiry
+        # Validate refreshed token has new expiry and security properties
         initial_exp = initial_decoded["exp"]
         refreshed_exp = refreshed_decoded["exp"]
         assert refreshed_exp > initial_exp, "Refreshed token should have later expiry"
+        
+        # Ensure refreshed token has different JWT ID (security requirement)
+        assert refreshed_decoded["jti"] != initial_decoded["jti"], "Refreshed token must have new JWT ID"
+        
+        # Validate refresh token is actually newer
+        assert refreshed_decoded["iat"] >= initial_decoded["iat"], "Refreshed token issued time should be newer"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -234,9 +244,15 @@ class TestJWTTokenLifecycle(SSotBaseTestCase):
             exp_minutes=-1  # Expired 1 minute ago
         )
         
-        # Validate expired token is rejected
+        # Validate expired token is rejected - CRITICAL security boundary
         is_valid = await self.auth_helper.validate_token(expired_token)
-        assert not is_valid, "Expired token must be rejected by auth service"
+        assert not is_valid, "Expired token must be rejected by auth service - security violation"
+        
+        # Additional expired token validation
+        expired_decoded = jwt.decode(expired_token, options={"verify_signature": False})
+        exp_time = datetime.fromtimestamp(expired_decoded["exp"], tz=timezone.utc)
+        now = datetime.now(timezone.utc)
+        assert exp_time < now, "Test setup error: expired token exp time should be in past"
         
         # Test malformed token security
         malformed_tokens = [

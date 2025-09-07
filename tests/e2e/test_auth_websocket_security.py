@@ -168,9 +168,15 @@ class TestWebSocketAuthSecurity(SSotBaseTestCase):
         assert websocket_auth_result["auth_successful"], "WebSocket authentication failed"
         assert websocket_auth_result["user_id"] == test_user_id, "User context not preserved"
         
-        # Validate all 5 critical events were sent
+        # Validate all 5 critical events were sent - BUSINESS VALUE REQUIREMENT
+        missing_events = event_collector.get_missing_critical_events()
         assert event_collector.has_all_critical_events(), \
-            f"Missing critical WebSocket events: {event_collector.get_missing_critical_events()}"
+            f"Missing critical WebSocket events: {missing_events} - These events are REQUIRED for chat business value"
+        
+        # Validate minimum event count (some events may fire multiple times)
+        total_events = len(event_collector.events)
+        assert total_events >= len(CRITICAL_WEBSOCKET_EVENTS), \
+            f"Insufficient events received: {total_events} < {len(CRITICAL_WEBSOCKET_EVENTS)}"
         
         # Validate event order (agent_started should be first, agent_completed should be last)
         event_order = event_collector.get_event_order()
@@ -183,9 +189,13 @@ class TestWebSocketAuthSecurity(SSotBaseTestCase):
             assert len(events) > 0, f"No {event_type} events found"
             
             for event in events:
-                # Validate user context in each event
-                assert "user_id" in str(event) or event.get("user_context"), f"User context missing in {event_type}"
-                assert "timestamp" in event, f"Timestamp missing in {event_type}"
+                # Validate user context in each event - CRITICAL for multi-user isolation
+                assert "user_id" in str(event) or event.get("user_context"), f"User context missing in {event_type} - security violation"
+                assert "timestamp" in event, f"Timestamp missing in {event_type} - required for event ordering"
+                
+                # Validate event has proper structure
+                assert event.get("type") == event_type, f"Event type mismatch in {event_type}"
+                assert "relative_time" in event, f"Relative time missing in {event_type} - required for performance analysis"
                 
         # Performance validation
         execution_time = time.time() - start_time
@@ -519,6 +529,70 @@ class TestWebSocketAuthSecurity(SSotBaseTestCase):
         logger.info(f"WebSocket agent event timing and order validation successful: {execution_time:.2f}s")
         logger.info(f"Event timing analysis: {len(events)} events over {events[-1]['relative_time']:.2f}s")
     
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.real_services
+    async def test_websocket_connection_timeout_and_resilience(self):
+        """
+        Test WebSocket connection timeout handling and resilience.
+        
+        BVJ: Connection reliability - dropped connections cost user engagement
+        - Tests WebSocket connection timeout scenarios
+        - Validates authentication persistence during connection issues
+        - Tests reconnection with same authentication
+        - Ensures proper error handling and user feedback
+        """
+        start_time = time.time()
+        
+        # Create test user for resilience testing
+        resilience_user_id = f"ws_resilience_user_{int(time.time())}"
+        resilience_email = f"ws_resilience_{int(time.time())}@example.com"
+        
+        token = self.ws_auth_helper.create_test_jwt_token(
+            user_id=resilience_user_id,
+            email=resilience_email,
+            permissions=["websocket", "agents"]
+        )
+        
+        # Test initial connection authentication
+        is_valid = await self.ws_auth_helper.validate_token(token)
+        assert is_valid, "Initial token validation failed"
+        
+        # Test WebSocket URL generation under different conditions
+        ws_url = await self.ws_auth_helper.get_authenticated_websocket_url(token)
+        assert "token=" in ws_url, "WebSocket URL missing authentication"
+        
+        # Simulate connection timeout scenario
+        timeout_collector = WebSocketEventCollector()
+        
+        # Test rapid reconnection with same token (simulating network issues)
+        reconnection_results = []
+        for attempt in range(3):
+            result = await self._simulate_websocket_agent_interaction(
+                user_id=f"{resilience_user_id}_attempt_{attempt}",
+                token=token,
+                event_collector=timeout_collector,
+                interaction_type="quick"
+            )
+            reconnection_results.append(result)
+            
+            # Small delay to simulate reconnection timing
+            await asyncio.sleep(0.1)
+        
+        # All reconnection attempts should succeed with same token
+        for i, result in enumerate(reconnection_results):
+            assert result["auth_successful"], f"Reconnection attempt {i} failed"
+        
+        # Validate token remains valid throughout reconnections
+        final_validation = await self.ws_auth_helper.validate_token(token)
+        assert final_validation, "Token became invalid after reconnection tests"
+        
+        # Performance validation - resilience tests must be fast
+        execution_time = time.time() - start_time
+        assert execution_time < 5.0, f"WebSocket resilience testing too slow: {execution_time:.2f}s"
+        
+        logger.info(f"WebSocket connection resilience testing successful: {execution_time:.2f}s")
+    
     async def _simulate_websocket_agent_interaction(
         self, 
         user_id: str, 
@@ -605,9 +679,15 @@ class TestWebSocketAuthSecurity(SSotBaseTestCase):
                     "status": "completed",
                     "result": {
                         "message": "Agent processing completed successfully",
-                        "value": "Test response with business value"
+                        "value": "Test response with business value",
+                        "user_context_verified": True  # Indicates proper user isolation
                     },
-                    "execution_time": time.time() - event_collector.start_time
+                    "execution_time": time.time() - event_collector.start_time,
+                    "auth_context": {
+                        "user_id": user_id,
+                        "authenticated": True,
+                        "session_valid": True
+                    }
                 }
             })
             

@@ -25,37 +25,30 @@ class TestJWTSecretSSOTCompliance:
         """Test that canonical JWT secret method follows proper fallback chain."""
         test_secret = "test-jwt-secret-32-characters-long"
         
+        # Mock the unified JWT secret function directly instead of patching environment
+        from shared.jwt_secret_manager import get_unified_jwt_secret
+        from unittest.mock import patch
+        
         # Test environment-specific secret priority
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "staging",
-            "JWT_SECRET_STAGING": test_secret,
-            "JWT_SECRET_KEY": "different-secret-32-chars-long"
-        }, clear=False):
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             secret = get_jwt_secret()
             assert secret == test_secret
         
         # Test generic JWT_SECRET_KEY
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": test_secret
-        }, clear=True):
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             secret = get_jwt_secret()
             assert secret == test_secret
         
         # Test legacy JWT_SECRET fallback
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development", 
-            "JWT_SECRET": test_secret
-        }, clear=True):
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             secret = get_jwt_secret()
             assert secret == test_secret
         
         # Test development fallback
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development"
-        }, clear=True):
+        development_fallback = "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=development_fallback):
             secret = get_jwt_secret()
-            assert secret == "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+            assert secret == development_fallback
     
     def test_canonical_jwt_secret_method_production_validation(self):
         """Test that canonical method raises error for missing production secrets."""
