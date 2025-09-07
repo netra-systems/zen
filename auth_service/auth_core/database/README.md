@@ -7,21 +7,13 @@ The auth service uses two database connections:
 
 ## Environment Variables
 
-### Auth Database
-- `DATABASE_URL` - Primary auth database URL
-- `DATABASE_URL` - Fallback if DATABASE_URL not set
 
 ### Main Database (User Sync)
 - `MAIN_DATABASE_URL` - Primary main app database URL (recommended for clarity)
-- `DATABASE_URL` - Fallback if MAIN_DATABASE_URL not set
 
 ## Deployment Configuration
 
-### Local Development
-```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/auth_development
-MAIN_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/apex_development
-```
+
 
 ### Google Cloud Run (Staging/Production)
 Set these environment variables in your Cloud Run service:
