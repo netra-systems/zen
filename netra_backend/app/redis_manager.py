@@ -31,6 +31,7 @@ except ImportError:
     REDIS_AVAILABLE = False
 
 from shared.isolated_environment import get_env
+from netra_backend.app.core.backend_environment import BackendEnvironment
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker, 
     UnifiedCircuitConfig, 
@@ -122,8 +123,9 @@ class RedisManager:
         """
         async with self._connection_lock:
             try:
-                env = get_env()
-                redis_url = env.get("REDIS_URL", "redis://localhost:6380")
+                # Use BackendEnvironment for proper Redis URL configuration
+                backend_env = BackendEnvironment()
+                redis_url = backend_env.get_redis_url()
                 
                 # Create new client instance
                 self._client = redis.from_url(redis_url, decode_responses=True)
