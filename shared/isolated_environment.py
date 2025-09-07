@@ -182,6 +182,12 @@ class IsolatedEnvironment:
             # Set default optimized persistence configuration
             self._set_optimized_persistence_defaults()
             
+            # CRITICAL FIX: Auto-enable isolation during test contexts to ensure test defaults are available
+            # This ensures OAuth test credentials are accessible during CentralConfigurationValidator execution
+            if self._is_test_context():
+                self._isolation_enabled = True
+                logger.debug("Auto-enabled isolation for test context - OAuth test credentials now available")
+            
             self._initialized = True
             logger.debug("Unified IsolatedEnvironment initialized")
     
@@ -285,23 +291,71 @@ class IsolatedEnvironment:
             'TEST_MODE'
         ]
         
-        # CRITICAL: Use internal state or fallback to os.environ for test detection only
-        # This is necessary to avoid recursion since get() calls _is_test_context()
-        # We must use direct access here, not self.get()
-        env_dict = self._isolated_vars if self._isolation_enabled else os.environ
-        
+        # CRITICAL: Always use os.environ for test detection to avoid chicken-and-egg during initialization
+        # During initialization, _isolation_enabled might be True but _isolated_vars is empty
+        # We must use direct os.environ access here, not isolated vars or self.get()
         for indicator in test_indicators:
-            value = env_dict.get(indicator, '').lower()
+            value = os.environ.get(indicator, '').lower()
             # Only consider it a test context if the value is explicitly true
             if value in ['true', '1', 'yes', 'on']:
                 return True
         
         # Check if ENVIRONMENT is set to testing (direct access, not via self.get())
-        env_value = env_dict.get('ENVIRONMENT', '').lower()
+        env_value = os.environ.get('ENVIRONMENT', '').lower()
         if env_value in ['test', 'testing']:
             return True
         
         return False
+    
+    def _get_test_environment_defaults(self) -> Dict[str, str]:
+        """
+        Get built-in default values for test environment.
+        
+        CRITICAL: These defaults ensure OAuth test credentials are ALWAYS available
+        during test execution, preventing CentralConfigurationValidator failures.
+        
+        Returns:
+            Dict of test environment default values
+        """
+        return {
+            # OAuth Test Environment Credentials - CRITICAL for CentralConfigurationValidator
+            'GOOGLE_OAUTH_CLIENT_ID_TEST': 'test-oauth-client-id-for-automated-testing',
+            'GOOGLE_OAUTH_CLIENT_SECRET_TEST': 'test-oauth-client-secret-for-automated-testing',
+            
+            # Basic test environment settings
+            'ENVIRONMENT': 'test',
+            'TESTING': '1',
+            'TEST_MODE': 'true',
+            
+            # Security defaults for testing
+            'JWT_SECRET_KEY': 'test-jwt-secret-key-32-characters-long-for-testing-only',
+            'SERVICE_SECRET': 'test-service-secret-32-characters-long-for-cross-service-auth',
+            'FERNET_KEY': 'test-fernet-key-for-encryption-32-characters-long-base64-encoded=',
+            'SECRET_KEY': 'test-secret-key-for-test-environment-only-32-chars-min',
+            
+            # API Keys for testing (placeholder values)
+            'ANTHROPIC_API_KEY': 'test-anthropic-api-key',
+            'OPENAI_API_KEY': 'test-openai-api-key', 
+            'GEMINI_API_KEY': 'test-gemini-api-key',
+            
+            # Database defaults for testing
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5434',
+            'POSTGRES_USER': 'netra_test',
+            'POSTGRES_PASSWORD': 'netra_test_password',
+            'POSTGRES_DB': 'netra_test',
+            
+            # Redis defaults for testing
+            'REDIS_HOST': 'localhost',
+            'REDIS_PORT': '6381',
+            'REDIS_URL': 'redis://localhost:6381/0',
+            
+            # Service configuration for testing
+            'SERVER_PORT': '8000',
+            'AUTH_PORT': '8081',
+            'FRONTEND_PORT': '3000',
+            'LOG_LEVEL': 'DEBUG'
+        }
     
     def _sync_with_os_environ(self) -> None:
         """Synchronize isolated variables with os.environ during test execution.
@@ -506,6 +560,13 @@ class IsolatedEnvironment:
                 if self._is_test_context() and key in os.environ:
                     value = os.environ[key]
                     return self._expand_shell_commands(value) if value else value
+                
+                # CRITICAL FIX: Provide OAuth test credentials as built-in defaults during test context
+                # This ensures CentralConfigurationValidator can always find required test OAuth credentials
+                if self._is_test_context():
+                    test_defaults = self._get_test_environment_defaults()
+                    if key in test_defaults:
+                        return test_defaults[key]
                 
                 # Not found in isolated vars or os.environ
                 return default

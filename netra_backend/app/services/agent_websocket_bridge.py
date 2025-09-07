@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
 # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
-from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
+from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
@@ -2384,7 +2384,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         # Import from the actual location - use the create_scoped_emitter function
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
+        from netra_backend.app.websocket_core import create_websocket_manager
         
         # Create scoped emitter using the factory pattern for user isolation
         manager = create_websocket_manager(user_context)

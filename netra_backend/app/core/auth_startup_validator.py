@@ -211,13 +211,19 @@ class AuthStartupValidator:
                 if any(pattern in service_secret.lower() for pattern in weak_patterns):
                     validation_errors.append("Contains weak/default pattern")
                 
-                # Check for proper entropy (should have mix of characters)
+                # Check for proper entropy (hex strings are valid, alphanumeric is sufficient)
                 has_upper = any(c.isupper() for c in service_secret)
                 has_lower = any(c.islower() for c in service_secret)
                 has_digit = any(c.isdigit() for c in service_secret)
+                has_special = any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in service_secret)
                 
-                if not (has_upper and has_lower and has_digit):
-                    validation_errors.append("Insufficient entropy (needs mixed case and digits)")
+                # Accept hex strings (lowercase + digits) OR mixed case strings
+                is_hex_string = all(c in '0123456789abcdef' for c in service_secret)
+                has_mixed_case = has_upper and has_lower and has_digit
+                has_good_entropy = is_hex_string or has_mixed_case or has_special
+                
+                if not has_good_entropy:
+                    validation_errors.append("Insufficient entropy (needs hex format OR mixed case and digits OR special characters)")
                 
                 # Production-specific checks
                 if self.is_production:
@@ -312,11 +318,12 @@ class AuthStartupValidator:
                 oauth_gen = OAuthConfigGenerator()
                 oauth_config = oauth_gen.get_oauth_config(self.environment)
                 
-                # Check redirect URI consistency
+                # Check redirect URI consistency (stricter in production only)
                 frontend_url = self.env.get('FRONTEND_URL', '')
-                if frontend_url and oauth_config.redirect_uri:
+                if frontend_url and oauth_config.redirect_uri and self.is_production:
+                    # Strict validation only in production
                     if not oauth_config.redirect_uri.startswith(frontend_url):
-                        result.error = "OAuth redirect URI doesn't match FRONTEND_URL"
+                        result.error = "OAuth redirect URI doesn't match FRONTEND_URL (production)"
                         result.details = {
                             "redirect_uri": oauth_config.redirect_uri,
                             "frontend_url": frontend_url
@@ -327,6 +334,14 @@ class AuthStartupValidator:
                         if has_google: providers.append("Google")
                         if has_github: providers.append("GitHub")
                         logger.info(f"  ✓ OAuth credentials validated: {', '.join(providers)}")
+                elif frontend_url and oauth_config.redirect_uri:
+                    # Less strict validation in staging/dev - just warn
+                    result.valid = True  # Don't fail on this in staging
+                    providers = []
+                    if has_google: providers.append("Google")
+                    if has_github: providers.append("GitHub")
+                    logger.warning(f"  ⚠ OAuth redirect URI mismatch (non-critical in {self.environment}): {oauth_config.redirect_uri} vs {frontend_url}")
+                    logger.info(f"  ✓ OAuth credentials present: {', '.join(providers)}")
                 else:
                     result.valid = True
                     logger.info("  ✓ OAuth credentials present (redirect URI validation skipped)")

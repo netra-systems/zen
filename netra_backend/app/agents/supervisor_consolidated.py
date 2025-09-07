@@ -47,16 +47,23 @@ class SupervisorAgent(BaseAgent):
     
     def __init__(self, 
                  llm_manager: LLMManager,
-                 websocket_bridge: AgentWebSocketBridge):
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 db_session_factory=None,
+                 user_context: Optional[UserExecutionContext] = None):
         """Initialize SupervisorAgent with UserExecutionContext pattern.
         
         CRITICAL: No user context, session storage, or tool_dispatcher in constructor.
         All user-specific data and tools come through execute() method via context.
         Tool dispatcher is created per-request for complete isolation.
         
+        ARCHITECTURE: WebSocket bridge is now optional and will be created per-request
+        when UserExecutionContext is available, following factory pattern.
+        
         Args:
             llm_manager: LLM manager for agent operations
-            websocket_bridge: WebSocket bridge for notifications
+            websocket_bridge: Optional WebSocket bridge (lazy initialized if None)
+            db_session_factory: Optional database session factory  
+            user_context: Optional user context (set per-request)
         """
         # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
@@ -70,36 +77,42 @@ class SupervisorAgent(BaseAgent):
         )
         
         # Core infrastructure (NO user-specific data)
-        if not websocket_bridge:
-            raise ValueError("SupervisorAgent requires websocket_bridge to be provided")
-        
+        # ARCHITECTURE: WebSocket bridge is now optional for lazy initialization
         self.websocket_bridge = websocket_bridge
-        logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+        self.db_session_factory = db_session_factory
+        self.user_context = user_context
+        
+        if websocket_bridge:
+            logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+        else:
+            logger.info("✅ SupervisorAgent initialized with lazy WebSocket bridge initialization")
         
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
         self.flow_logger = get_supervisor_flow_logger()
         
-        # CRITICAL FIX: Pre-configure the factory with WebSocket bridge IMMEDIATELY
-        # This ensures sub-agents created later will have WebSocket events working
-        # We'll configure again with registries in execute(), but at least bridge is set now
-        logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
-        try:
-            # Pre-configure with just the websocket bridge (registries will be added in execute())
-            # This is critical to prevent None bridge errors when creating sub-agents
-            # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
-            self.agent_instance_factory.configure(
-                websocket_bridge=websocket_bridge,
-                websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
-                agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
-                llm_manager=llm_manager,
-                tool_dispatcher=None  # Will be set per-request in execute()
-            )
-            logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
-        except Exception as e:
-            # CRITICAL: Changed from warning to error - configuration failure should fail fast
-            logger.error(f"❌ Failed to pre-configure factory in init: {e}")
-            raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
+        # ARCHITECTURE: Conditional factory pre-configuration
+        # Only pre-configure if WebSocket bridge is available, otherwise defer to execute()
+        if websocket_bridge:
+            logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
+            try:
+                # Pre-configure with just the websocket bridge (registries will be added in execute())
+                # This is critical to prevent None bridge errors when creating sub-agents
+                # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
+                self.agent_instance_factory.configure(
+                    websocket_bridge=websocket_bridge,
+                    websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
+                    agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
+                    llm_manager=llm_manager,
+                    tool_dispatcher=None  # Will be set per-request in execute()
+                )
+                logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
+            except Exception as e:
+                # CRITICAL: Changed from warning to error - configuration failure should fail fast
+                logger.error(f"❌ Failed to pre-configure factory in init: {e}")
+                raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
+        else:
+            logger.info("⏳ WebSocket bridge is None - factory configuration deferred to execute() method")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager

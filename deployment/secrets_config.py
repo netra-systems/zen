@@ -35,9 +35,9 @@ class SecretConfig:
                 "POSTGRES_PORT", 
                 "POSTGRES_DB",
                 "POSTGRES_USER",
-                "POSTGRES_PASSWORD",
-                "DATABASE_HOST",      # CRITICAL: Required by central config validator
-                "DATABASE_PASSWORD"   # CRITICAL: Required by central config validator
+                "POSTGRES_PASSWORD"
+                # DATABASE_HOST removed - conflicts with Cloud Run environment variable
+                # DATABASE_PASSWORD removed - redundant with POSTGRES_PASSWORD
             ],
             "authentication": [
                 "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
@@ -117,8 +117,7 @@ class SecretConfig:
         "POSTGRES_DB": "postgres-db-staging",
         "POSTGRES_USER": "postgres-user-staging",
         "POSTGRES_PASSWORD": "postgres-password-staging",
-        "DATABASE_HOST": "postgres-host-staging",  # Same host, config validator expects this name
-        "DATABASE_PASSWORD": "postgres-password-staging",  # Same password, different name
+        # DATABASE_HOST and DATABASE_PASSWORD mappings removed - avoid conflicts with Cloud Run env vars
         
         # Authentication & JWT
         # CRITICAL FIX: All JWT secret names must map to the same secret for consistency
