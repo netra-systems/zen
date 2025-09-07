@@ -2029,6 +2029,575 @@ class TestStatusAndMonitoring(BaseTestCase):
         self.assertGreater(type_stats["agent_execution"], 0)
 
 
+# ============================================================================
+# ADDITIONAL COVERAGE ENHANCEMENT TESTS
+# ============================================================================
+
+class TestEventSystemComprehensive(BaseTestCase):
+    """Test comprehensive event system functionality."""
+    
+    def test_change_listener_management(self):
+        """
+        BVJ: Event listener management enables flexible state monitoring.
+        Tests adding, removing, and managing change listeners.
+        """
+        manager = UnifiedStateManager()
+        events_received = []
+        
+        def listener1(event):
+            events_received.append(("listener1", event))
+        
+        def listener2(event):
+            events_received.append(("listener2", event))
+        
+        # Add listeners
+        manager.add_change_listener(listener1)
+        manager.add_change_listener(listener2)
+        
+        # Trigger event
+        manager.set("event_key", "event_value")
+        
+        # Give time for async processing (if any)
+        time.sleep(0.01)
+        
+        # Verify both listeners received event
+        listener1_events = [e for e in events_received if e[0] == "listener1"]
+        listener2_events = [e for e in events_received if e[0] == "listener2"]
+        
+        self.assertEqual(len(listener1_events), 1)
+        self.assertEqual(len(listener2_events), 1)
+        
+        # Remove one listener
+        manager.remove_change_listener(listener1)
+        events_received.clear()
+        
+        # Trigger another event
+        manager.set("event_key2", "event_value2")
+        time.sleep(0.01)
+        
+        # Only listener2 should receive event
+        listener1_events = [e for e in events_received if e[0] == "listener1"]
+        listener2_events = [e for e in events_received if e[0] == "listener2"]
+        
+        self.assertEqual(len(listener1_events), 0)
+        self.assertEqual(len(listener2_events), 1)
+    
+    def test_event_listener_exception_handling(self):
+        """
+        BVJ: Event listener exceptions must not crash the state manager.
+        Tests that failing listeners don't affect system stability.
+        """
+        manager = UnifiedStateManager()
+        events_received = []
+        
+        def failing_listener(event):
+            raise ValueError("Listener intentionally failed")
+        
+        def working_listener(event):
+            events_received.append(event)
+        
+        # Add both listeners
+        manager.add_change_listener(failing_listener)
+        manager.add_change_listener(working_listener)
+        
+        # Trigger event (should not crash despite failing listener)
+        manager.set("exception_test_key", "exception_test_value")
+        time.sleep(0.01)
+        
+        # Working listener should still receive event
+        self.assertEqual(len(events_received), 1)
+        self.assertEqual(events_received[0].key, "exception_test_key")
+    
+    def test_state_change_event_types(self):
+        """
+        BVJ: Different event types enable granular state monitoring.
+        Tests all types of state change events.
+        """
+        manager = UnifiedStateManager()
+        events_received = []
+        
+        def event_tracker(event):
+            events_received.append((event.change_type, event.key))
+        
+        manager.add_change_listener(event_tracker)
+        
+        # Test create event
+        manager.set("new_key", "new_value")
+        
+        # Test update event
+        manager.set("new_key", "updated_value")
+        
+        # Test delete event
+        manager.delete("new_key")
+        
+        time.sleep(0.01)  # Allow event processing
+        
+        # Verify event types
+        event_types = [event_type for event_type, _ in events_received]
+        self.assertIn("create", event_types)
+        self.assertIn("update", event_types)
+        self.assertIn("delete", event_types)
+
+
+class TestEnvironmentConfigurationHandling(BaseTestCase):
+    """Test environment configuration loading and handling."""
+    
+    def test_environment_config_loading(self):
+        """
+        BVJ: Environment configuration enables flexible deployment settings.
+        Tests loading configuration from environment variables.
+        """
+        # Create manager with custom environment
+        env = IsolatedEnvironment()
+        
+        with patch.object(UnifiedStateManager, '_env', env):
+            env.set('STATE_CLEANUP_INTERVAL', '30', source='test')
+            env.set('STATE_MAX_MEMORY_ENTRIES', '5000', source='test')
+            env.set('STATE_ENABLE_PERSISTENCE', 'false', source='test')
+            
+            manager = UnifiedStateManager()
+            
+            # Values should be loaded from environment
+            self.assertEqual(manager.cleanup_interval, 30)
+            self.assertEqual(manager.max_memory_entries, 5000)
+            self.assertFalse(manager.enable_persistence)
+    
+    def test_environment_config_invalid_values(self):
+        """
+        BVJ: Invalid environment values should not crash the system.
+        Tests handling of invalid environment configuration values.
+        """
+        env = IsolatedEnvironment()
+        
+        with patch.object(UnifiedStateManager, '_env', env):
+            env.set('STATE_CLEANUP_INTERVAL', 'invalid_number', source='test')
+            env.set('STATE_MAX_MEMORY_ENTRIES', 'not_a_number', source='test')
+            
+            # Should not crash, should use defaults
+            manager = UnifiedStateManager()
+            
+            # Should have reasonable defaults
+            self.assertIsInstance(manager.cleanup_interval, int)
+            self.assertIsInstance(manager.max_memory_entries, int)
+            self.assertGreater(manager.cleanup_interval, 0)
+            self.assertGreater(manager.max_memory_entries, 0)
+
+
+class TestAsyncBackgroundTasks(BaseTestCase):
+    """Test async background task functionality."""
+    
+    @pytest.mark.asyncio
+    async def test_background_task_startup_without_loop(self):
+        """
+        BVJ: Background tasks should handle no event loop gracefully.
+        Tests manager creation when no asyncio loop is running.
+        """
+        # Create manager outside of async context
+        def create_manager():
+            return UnifiedStateManager(enable_ttl_cleanup=True)
+        
+        # This should not raise an exception
+        manager = create_manager()
+        
+        # Background tasks should not be started yet
+        self.assertIsNone(manager._cleanup_task)
+        self.assertIsNone(manager._event_processing_task)
+        
+        # Manual cleanup
+        if hasattr(manager, 'shutdown'):
+            await manager.shutdown()
+    
+    @pytest.mark.asyncio 
+    async def test_background_task_manual_start(self):
+        """
+        BVJ: Background tasks can be started manually when needed.
+        Tests manual background task initialization.
+        """
+        manager = UnifiedStateManager(enable_ttl_cleanup=False)
+        
+        # Manually start background tasks
+        manager._start_background_tasks()
+        
+        # Verify tasks are running
+        self.assertIsNotNone(manager._event_processing_task)
+        self.assertFalse(manager._event_processing_task.done())
+        
+        # Cleanup
+        await manager.shutdown()
+    
+    @pytest.mark.asyncio
+    async def test_event_processing_with_queue_overflow(self):
+        """
+        BVJ: Event processing should handle high-volume scenarios gracefully.
+        Tests event processing under heavy load.
+        """
+        manager = UnifiedStateManager()
+        
+        try:
+            # Generate many events rapidly
+            for i in range(1000):
+                manager.set(f"load_test_key_{i}", f"value_{i}")
+            
+            # Allow some processing time
+            await asyncio.sleep(0.5)
+            
+            # System should remain stable
+            status = manager.get_health_status()
+            self.assertIsNotNone(status["status"])
+            
+        finally:
+            await manager.shutdown()
+
+
+class TestAdvancedQueryOperations(BaseTestCase):
+    """Test advanced state querying operations."""
+    
+    def test_empty_query_results(self):
+        """
+        BVJ: Empty query results should be handled gracefully.
+        Tests queries that return no results.
+        """
+        manager = UnifiedStateManager()
+        
+        # Query non-existent scope
+        query = StateQuery(user_id="nonexistent_user")
+        results = manager.query_states(query)
+        
+        self.assertEqual(len(results), 0)
+        self.assertIsInstance(results, list)
+    
+    def test_query_with_all_filters(self):
+        """
+        BVJ: Complex queries enable sophisticated state analysis.
+        Tests query with maximum number of filters applied.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set up specific test data
+        current_time = time.time()
+        
+        manager.set(
+            "complex_query_key",
+            "complex_value",
+            scope=StateScope.AGENT,
+            state_type=StateType.AGENT_EXECUTION,
+            user_id="query_user",
+            session_id="query_session",
+            thread_id="query_thread",
+            agent_id="query_agent"
+        )
+        
+        # Query with all possible filters
+        query = StateQuery(
+            scope=StateScope.AGENT,
+            state_type=StateType.AGENT_EXECUTION,
+            user_id="query_user",
+            session_id="query_session",
+            thread_id="query_thread",
+            agent_id="query_agent",
+            status=StateStatus.ACTIVE,
+            created_after=current_time - 1,
+            created_before=current_time + 1,
+            updated_after=current_time - 1,
+            updated_before=current_time + 1,
+            key_pattern="complex_.*",
+            limit=10
+        )
+        
+        results = manager.query_states(query)
+        
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].key, "complex_query_key")
+    
+    def test_query_sorting_behavior(self):
+        """
+        BVJ: Query result sorting ensures predictable result ordering.
+        Tests that query results are properly sorted by updated_at.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set entries with slight delays to ensure different timestamps
+        keys = []
+        for i in range(5):
+            key = f"sorted_key_{i}"
+            manager.set(key, f"value_{i}")
+            keys.append(key)
+            time.sleep(0.01)
+        
+        # Query all entries
+        query = StateQuery()
+        results = manager.query_states(query)
+        
+        # Should be sorted by updated_at descending (newest first)
+        for i in range(len(results) - 1):
+            self.assertGreaterEqual(
+                results[i].updated_at,
+                results[i + 1].updated_at,
+                "Results should be sorted by updated_at descending"
+            )
+
+
+class TestStateValidationAndIntegrity(BaseTestCase):
+    """Test state validation and data integrity operations."""
+    
+    def test_state_scope_validation(self):
+        """
+        BVJ: Scope validation prevents incorrect state categorization.
+        Tests validation of state scope consistency.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set state with specific scope
+        manager.set("scope_test", "value", scope=StateScope.USER, state_type=StateType.USER_PREFERENCES)
+        
+        # Retrieve with scope validation
+        value_correct_scope = manager.get("scope_test", scope=StateScope.USER)
+        value_wrong_scope = manager.get("scope_test", scope=StateScope.AGENT)
+        
+        self.assertEqual(value_correct_scope, "value")
+        self.assertIsNone(value_wrong_scope)  # Should return None for wrong scope
+    
+    def test_state_type_validation(self):
+        """
+        BVJ: Type validation ensures proper state categorization.
+        Tests validation of state type consistency.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set state with specific type
+        manager.set("type_test", "value", state_type=StateType.CACHE_DATA)
+        
+        # Retrieve with type validation
+        value_correct_type = manager.get("type_test", state_type=StateType.CACHE_DATA)
+        value_wrong_type = manager.get("type_test", state_type=StateType.AGENT_EXECUTION)
+        
+        self.assertEqual(value_correct_type, "value")
+        self.assertIsNone(value_wrong_type)  # Should return None for wrong type
+    
+    def test_data_integrity_after_operations(self):
+        """
+        BVJ: Data integrity must be maintained across all operations.
+        Tests that data remains consistent after various operations.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set initial data
+        original_data = {
+            "nested": {"values": [1, 2, 3, 4, 5]},
+            "metadata": {"created": time.time(), "version": 1}
+        }
+        
+        manager.set("integrity_test", original_data)
+        
+        # Perform various operations
+        retrieved = manager.get("integrity_test")
+        manager.update("integrity_test", lambda x: {**x, "modified": True})
+        final_data = manager.get("integrity_test")
+        
+        # Verify data integrity
+        self.assertEqual(retrieved["nested"]["values"], [1, 2, 3, 4, 5])
+        self.assertEqual(final_data["nested"]["values"], [1, 2, 3, 4, 5])  # Should be unchanged
+        self.assertTrue(final_data["modified"])  # Should have modification
+        self.assertEqual(final_data["metadata"]["version"], 1)  # Original metadata preserved
+
+
+class TestErrorRecoveryAndResilience(BaseTestCase):
+    """Test error recovery and system resilience."""
+    
+    def test_recovery_from_index_corruption(self):
+        """
+        BVJ: Index corruption recovery prevents system failure.
+        Tests recovery when internal indices become corrupted.
+        """
+        manager = UnifiedStateManager()
+        
+        # Set some normal data
+        manager.set("recovery_test", "test_value", StateScope.USER, user_id="test_user")
+        
+        # Simulate index corruption by clearing an index
+        manager._user_index.clear()
+        
+        # System should still function for basic operations
+        value = manager.get("recovery_test")
+        self.assertEqual(value, "test_value")
+        
+        # Should be able to set new data
+        manager.set("new_after_corruption", "new_value")
+        self.assertEqual(manager.get("new_after_corruption"), "new_value")
+    
+    def test_memory_pressure_handling(self):
+        """
+        BVJ: Memory pressure handling prevents out-of-memory crashes.
+        Tests behavior under extreme memory pressure.
+        """
+        manager = UnifiedStateManager(max_memory_entries=5)  # Very low limit
+        
+        # Add more entries than the limit allows
+        for i in range(20):
+            manager.set(f"pressure_key_{i}", f"large_value_{i}" * 100)  # Larger values
+        
+        # Verify system remains stable
+        total_entries = len(manager._states)
+        self.assertLessEqual(total_entries, 10)  # Should enforce limits
+        
+        # System should still be responsive
+        manager.set("test_after_pressure", "responsive")
+        self.assertEqual(manager.get("test_after_pressure"), "responsive")
+    
+    def test_concurrent_shutdown_safety(self):
+        """
+        BVJ: Concurrent shutdown safety prevents resource leaks.
+        Tests safe shutdown during concurrent operations.
+        """
+        manager = UnifiedStateManager(enable_ttl_cleanup=True)
+        
+        # Start concurrent operations
+        def concurrent_operations():
+            for i in range(100):
+                manager.set(f"shutdown_test_{i}", f"value_{i}")
+                manager.get(f"shutdown_test_{i}")
+        
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            # Start background operations
+            future = executor.submit(concurrent_operations)
+            
+            # Small delay then shutdown
+            time.sleep(0.1)
+            
+            # Shutdown should complete without hanging
+            shutdown_task = asyncio.create_task(manager.shutdown())
+            
+            # Wait for operations to complete
+            try:
+                future.result(timeout=2.0)  # Should complete quickly
+            except:
+                pass  # Operations might be interrupted by shutdown
+
+
+class TestWebSocketIntegrationAdvanced(BaseTestCase):
+    """Test advanced WebSocket integration scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_websocket_notification_without_manager(self):
+        """
+        BVJ: WebSocket notifications should handle missing manager gracefully.
+        Tests WebSocket event emission when no WebSocket manager is set.
+        """
+        manager = UnifiedStateManager()
+        
+        # No WebSocket manager set - should not crash
+        manager.set("no_ws_test", "test_value")
+        
+        # Give time for any async processing
+        await asyncio.sleep(0.01)
+        
+        # Should complete successfully
+        self.assertEqual(manager.get("no_ws_test"), "test_value")
+    
+    @pytest.mark.asyncio
+    async def test_websocket_manager_exception_handling(self):
+        """
+        BVJ: WebSocket manager exceptions should not crash state operations.
+        Tests handling of WebSocket manager failures.
+        """
+        manager = UnifiedStateManager()
+        
+        # Mock WebSocket manager that throws exceptions
+        mock_ws = Mock()
+        mock_ws.broadcast_system_message = Mock(side_effect=Exception("WebSocket error"))
+        
+        manager.set_websocket_manager(mock_ws)
+        
+        # State operations should still work despite WebSocket errors
+        manager.set("ws_error_test", "test_value")
+        
+        await asyncio.sleep(0.01)
+        
+        # State should be set successfully
+        self.assertEqual(manager.get("ws_error_test"), "test_value")
+
+
+class TestFactoryPatternAdvanced(BaseTestCase):
+    """Test advanced factory pattern scenarios."""
+    
+    @pytest.mark.asyncio
+    async def test_factory_concurrent_manager_creation(self):
+        """
+        BVJ: Concurrent factory usage must be thread-safe.
+        Tests concurrent creation of user managers through factory.
+        """
+        user_ids = [f"concurrent_user_{i}" for i in range(20)]
+        created_managers = {}
+        
+        def create_manager(user_id):
+            manager = StateManagerFactory.get_user_manager(user_id)
+            created_managers[user_id] = id(manager)
+            return manager
+        
+        # Create managers concurrently
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [
+                executor.submit(create_manager, user_id)
+                for user_id in user_ids
+            ]
+            
+            managers = []
+            for future in as_completed(futures):
+                managers.append(future.result())
+        
+        # Verify each user got a unique manager
+        unique_manager_ids = set(created_managers.values())
+        self.assertEqual(len(unique_manager_ids), 20)
+        
+        # Verify same user gets same manager on repeat access
+        for user_id in user_ids[:5]:  # Test a few
+            same_manager = StateManagerFactory.get_user_manager(user_id)
+            self.assertEqual(id(same_manager), created_managers[user_id])
+        
+        # Cleanup
+        await StateManagerFactory.shutdown_all_managers()
+    
+    def test_factory_manager_isolation_verification(self):
+        """
+        BVJ: Factory-created managers must maintain complete isolation.
+        Tests that factory-created managers are truly isolated.
+        """
+        # Create managers for different users
+        manager_a = StateManagerFactory.get_user_manager("isolation_user_a")
+        manager_b = StateManagerFactory.get_user_manager("isolation_user_b")
+        global_manager = StateManagerFactory.get_global_manager()
+        
+        # Set same key in all managers
+        manager_a.set("isolation_test", "value_a")
+        manager_b.set("isolation_test", "value_b")
+        global_manager.set("isolation_test", "value_global")
+        
+        # Verify complete isolation
+        self.assertEqual(manager_a.get("isolation_test"), "value_a")
+        self.assertEqual(manager_b.get("isolation_test"), "value_b") 
+        self.assertEqual(global_manager.get("isolation_test"), "value_global")
+        
+        # Verify internal state isolation
+        self.assertNotEqual(
+            id(manager_a._states),
+            id(manager_b._states),
+            "Internal state dictionaries should be different"
+        )
+        
+        # Verify metrics isolation
+        manager_a.get("isolation_test")  # Trigger cache hit
+        manager_b.delete("isolation_test")  # Trigger delete
+        
+        status_a = manager_a.get_status()
+        status_b = manager_b.get_status()
+        
+        self.assertNotEqual(
+            status_a["metrics"]["cache_hits"],
+            status_b["metrics"]["cache_hits"],
+            "Metrics should be isolated between managers"
+        )
+
+
 if __name__ == "__main__":
     # Run tests with verbose output
     pytest.main([__file__, "-v", "-s", "--tb=short"])

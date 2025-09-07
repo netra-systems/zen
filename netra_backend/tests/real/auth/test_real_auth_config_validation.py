@@ -242,7 +242,7 @@ class TestRealAuthConfigValidation:
         database_url = env.get_env_var("DATABASE_URL", required=False)
         
         if not database_url:
-            pytest.skip("DATABASE_URL not configured - skipping database config validation")
+            pytest.skip("#removed-legacynot configured - skipping database config validation")
         
         current_env = env.get_current_environment()
         print(f"🔍 Validating database configuration for environment: {current_env}")

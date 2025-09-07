@@ -235,29 +235,29 @@ class TestBackendAuthenticationIntegrationFailures:
         """
         EXPECTED TO FAIL - CRITICAL DATABASE CONFIG ISSUE
         App should use Cloud SQL staging database but falls back to localhost:5432/netra
-        Root cause: DATABASE_URL environment variable not loaded or incorrect
+        Root cause: #removed-legacyenvironment variable not loaded or incorrect
         
         Staging should use: Cloud SQL staging-shared-postgres with database netra_staging
         Currently using: localhost:5432/netra (development fallback)
         """
         env = IsolatedEnvironment()
         
-        # Test that DATABASE_URL exists and is loaded from environment
+        # Test that #removed-legacyexists and is loaded from environment
         database_url = env.get("DATABASE_URL")
         
-        # Should have a DATABASE_URL set
-        assert database_url is not None, "DATABASE_URL environment variable should be set"
+        # Should have a #removed-legacyset
+        assert database_url is not None, "#removed-legacyenvironment variable should be set"
         
         # Should NOT be using localhost in staging environment
-        assert "localhost" not in database_url, f"DATABASE_URL should not use localhost in staging: {database_url}"
+        assert "localhost" not in database_url, f"#removed-legacyshould not use localhost in staging: {database_url}"
         
         # Should be using staging database name
-        assert "netra_staging" in database_url, f"DATABASE_URL should use netra_staging database: {database_url}"
+        assert "netra_staging" in database_url, f"#removed-legacyshould use netra_staging database: {database_url}"
         
         # Should be using Cloud SQL or staging host
         staging_indicators = ["staging-shared-postgres", "cloudsql", "staging"]
         has_staging_indicator = any(indicator in database_url for indicator in staging_indicators)
-        assert has_staging_indicator, f"DATABASE_URL should indicate staging environment: {database_url}"
+        assert has_staging_indicator, f"#removed-legacyshould indicate staging environment: {database_url}"
 
     @pytest.mark.integration
     @pytest.mark.critical
@@ -280,7 +280,7 @@ class TestBackendAuthenticationIntegrationFailures:
         
         if is_staging:
             database_url = env.get("DATABASE_URL")
-            assert database_url is not None, "DATABASE_URL must be set in staging"
+            assert database_url is not None, "#removed-legacymust be set in staging"
             
             # Staging should never allow localhost fallbacks
             forbidden_patterns = ["localhost", "127.0.0.1", "netra_dev", "netra_test"]

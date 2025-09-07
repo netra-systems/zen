@@ -94,7 +94,11 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
         test_context = {"query": "optimize my costs", "user_intent": "cost_reduction"}
         trace_context = {"trace_id": "abc123", "span_id": "def456"}
         
-        with patch.object(self.bridge, 'emit_agent_event', return_value=True) as mock_emit:
+        # Mock WebSocket manager and thread resolution
+        self.bridge._websocket_manager = self.mock_websocket_manager
+        with patch.object(self.bridge, '_resolve_thread_id_from_run_id', return_value="thread_123") as mock_resolve:
+            self.mock_websocket_manager.send_to_thread.return_value = True
+            
             # Act
             result = await self.bridge.notify_agent_started(
                 run_id=self.test_run_id,
@@ -105,17 +109,18 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             
             # Assert - Verify correct emission
             assert result, "Agent started notification should succeed"
-            mock_emit.assert_called_once_with(
-                event_type="agent_started",
-                data={
-                    "agent_name": self.test_agent_name,
-                    "context": test_context,
-                    "trace_context": trace_context,
-                    "timestamp": mock_emit.call_args[1]["data"]["timestamp"]
-                },
-                run_id=self.test_run_id,
-                agent_name=self.test_agent_name
-            )
+            mock_resolve.assert_called_once_with(self.test_run_id)
+            self.mock_websocket_manager.send_to_thread.assert_called_once()
+            
+            # Verify the notification structure
+            call_args = self.mock_websocket_manager.send_to_thread.call_args
+            thread_id = call_args[0][0]
+            notification = call_args[0][1]
+            
+            assert thread_id == "thread_123"
+            assert notification["type"] == "agent_started"
+            assert notification["run_id"] == self.test_run_id
+            assert notification["agent_name"] == self.test_agent_name
     
     async def test_notify_agent_thinking_with_progress(self):
         """

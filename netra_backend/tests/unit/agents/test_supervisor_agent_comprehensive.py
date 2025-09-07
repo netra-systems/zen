@@ -142,6 +142,35 @@ class TestSupervisorAgentCore(BaseTestCase):
         self.mock_db_session = AsyncMock()
         self.test_context = self.test_context.with_db_session(self.mock_db_session)
         
+        # Create mock registries to avoid global dependencies
+        self.mock_class_registry = Mock()
+        self.mock_class_registry.get_agent_classes.return_value = {
+            'triage': Mock(),
+            'reporting': Mock(),
+            'data': Mock()
+        }
+        self.mock_class_registry.__len__ = Mock(return_value=3)
+        
+        self.mock_instance_factory = Mock()
+        self.mock_instance_factory.configure = Mock()
+        self.mock_instance_factory.create_agent_instance = AsyncMock()
+        # Add attributes that the factory might access
+        self.mock_instance_factory.agent_class_registry = self.mock_class_registry
+        
+        # Patch global registries before creating SupervisorAgent
+        self.registry_patcher = patch('netra_backend.app.agents.supervisor.agent_class_registry.get_agent_class_registry')
+        self.factory_patcher = patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory')
+        # Also patch the import inside agent_instance_factory for configure() method
+        self.internal_registry_patcher = patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_class_registry')
+        
+        mock_registry_func = self.registry_patcher.start()
+        mock_factory_func = self.factory_patcher.start()
+        mock_internal_registry_func = self.internal_registry_patcher.start()
+        
+        mock_registry_func.return_value = self.mock_class_registry
+        mock_factory_func.return_value = self.mock_instance_factory
+        mock_internal_registry_func.return_value = self.mock_class_registry
+        
         # Create real SupervisorAgent instance for testing
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
@@ -150,8 +179,15 @@ class TestSupervisorAgentCore(BaseTestCase):
         
         # Track resources for cleanup
         self.track_resource(self.supervisor)
+    
+    def tearDown(self):
+        """Clean up patches."""
+        super().tearDown()
+        self.registry_patcher.stop()
+        self.factory_patcher.stop()
+        self.internal_registry_patcher.stop()
 
-    async def test_supervisor_initialization_with_user_context(self):
+    def test_supervisor_initialization_with_user_context(self):
         """Test SupervisorAgent initializes properly with UserExecutionContext pattern."""
         # REAL INSTANCE TEST - verify initialization
         self.assertIsNotNone(self.supervisor)
@@ -339,7 +375,7 @@ class TestSupervisorAgentCore(BaseTestCase):
                                 call[0][0] == 'agent_thinking']  # Handle different call signatures
             self.assertGreater(len(thinking_events), 0)
 
-    async def test_agent_dependency_validation_ssot(self):
+    def test_agent_dependency_validation_ssot(self):
         """Test agent dependency validation using SSOT AGENT_DEPENDENCIES mapping."""
         # Test the SSOT _can_execute_agent method directly
         
@@ -762,7 +798,11 @@ class TestSupervisorAgentCore(BaseTestCase):
             self.assertFalse(self.supervisor._is_recoverable_error(error))
 
     def test_string_representations(self):
-        """Test string representation methods."""
+        """Test string representation methods.""" 
+        # Add mock registry attribute for string representation testing
+        self.supervisor.registry = Mock()
+        self.supervisor.registry.agents = {"triage": Mock(), "reporting": Mock()}
+        
         # Test __str__
         str_repr = str(self.supervisor)
         self.assertIn("SupervisorAgent", str_repr)
@@ -775,6 +815,10 @@ class TestSupervisorAgentCore(BaseTestCase):
 
     def test_get_stats_and_performance_metrics(self):
         """Test utility methods for stats and performance metrics."""
+        # Add mock registry attribute for stats testing
+        self.supervisor.registry = Mock()
+        self.supervisor.registry.agents = {"triage": Mock(), "reporting": Mock()}
+        
         # Test get_stats
         stats = self.supervisor.get_stats()
         self.assertIsInstance(stats, dict)

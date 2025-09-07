@@ -37,7 +37,7 @@ from dataclasses import dataclass
 from contextlib import asynccontextmanager
 
 # Import SSOT test framework
-from test_framework.ssot.base_test_case import SSotSSotBaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import the class under test and dependencies
 from netra_backend.app.agents.supervisor.agent_instance_factory import (

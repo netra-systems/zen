@@ -357,11 +357,11 @@ NEW_VAR_FROM_FILE2=file2_value
                 loaded_count2, errors2 = self.env.load_from_file(env_file2_path, override_existing=False)
                 assert len(errors2) == 0, f"Errors loading second .env file: {errors2}"
                 
-                # DATABASE_URL should NOT change (already exists)
+                # #removed-legacyshould NOT change (already exists)
                 actual_db_url = self.env.get("DATABASE_URL")
                 expected_db_url = os_override_vars["DATABASE_URL"]  # Should still be OS override
                 assert actual_db_url == expected_db_url, (
-                    f"override_existing=False failed: DATABASE_URL changed from '{expected_db_url}' to '{actual_db_url}'"
+                    f"override_existing=False failed: #removed-legacychanged from '{expected_db_url}' to '{actual_db_url}'"
                 )
                 
                 # NEW_VAR_FROM_FILE2 should be added

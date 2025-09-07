@@ -175,7 +175,7 @@ class TestHealthCheckDatabaseValidation:
                 # Test in staging environment - should raise
                 mock_env.return_value.get.return_value = 'staging'
                 
-                with pytest.raises(ValueError, match="DATABASE_URL is not configured"):
+                with pytest.raises(ValueError, match="#removed-legacyis not configured"):
                     await _check_postgres_connection(mock_db)
     
     @pytest.mark.asyncio

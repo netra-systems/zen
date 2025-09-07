@@ -48,20 +48,20 @@ class TestConfigurationResilience:
     """Test configuration loading resilience that currently fails."""
     
     def test_missing_database_url_should_use_safe_default(self):
-        """Test service handles missing DATABASE_URL gracefully.
+        """Test service handles missing #removed-legacygracefully.
         
-        CURRENTLY FAILS: Service crashes when DATABASE_URL is not provided,
+        CURRENTLY FAILS: Service crashes when #removed-legacyis not provided,
         should use safe default or provide clear error message.
         
         Expected: Should use default database URL or fail gracefully with guidance.
         """
-        # Remove DATABASE_URL completely
+        # Remove #removed-legacycompletely
         with patch.dict(os.environ, {}, clear=True):
             # Add minimal required environment
             with patch.dict(os.environ, {
                 'ENVIRONMENT': 'development',
                 'SERVICE_NAME': 'netra_backend',
-                # DATABASE_URL is missing - this should be handled gracefully
+                # #removed-legacyis missing - this should be handled gracefully
             }):
                 try:
                     config = get_unified_config()
@@ -74,10 +74,10 @@ class TestConfigurationResilience:
                     if database_url is None:
                         # If no default, should have clear error indication
                         assert hasattr(config, 'configuration_errors'), \
-                            "Should track configuration errors when DATABASE_URL is missing"
+                            "Should track configuration errors when #removed-legacyis missing"
                     
                 except Exception as e:
-                    pytest.fail(f"Configuration should handle missing DATABASE_URL gracefully: {e}")
+                    pytest.fail(f"Configuration should handle missing #removed-legacygracefully: {e}")
     
     def test_gcp_secret_manager_unavailable_should_fallback(self):
         """Test GCP Secret Manager failures fallback to environment variables.
