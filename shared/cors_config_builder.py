@@ -163,8 +163,13 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
             if cors_origins_env:
                 return self._parse_cors_origins_env(cors_origins_env)
             
-            # Use SSOT SecurityOriginsConfig for origins
-            return SecurityOriginsConfig.get_cors_origins(self.parent.environment)
+            # Use environment-specific methods that include additional origins
+            if self.parent.environment == "development":
+                return self._get_development_origins()
+            elif self.parent.environment == "staging":
+                return self._get_staging_origins()
+            else:  # production
+                return self._get_production_origins()
         
         def _parse_cors_origins_env(self, cors_origins_env: str) -> List[str]:
             """Parse CORS_ORIGINS environment variable."""
