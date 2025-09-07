@@ -146,8 +146,13 @@ def get_staging_config() -> StagingTestConfig:
     global _staging_config
     if _staging_config is None:
         _staging_config = StagingTestConfig()
-        _staging_config.validate_configuration()
-        _staging_config.log_configuration()
+        # Only validate configuration when actually running against staging
+        current_env = get_env().get("ENVIRONMENT", get_env().get("TEST_ENV", "test")).lower()
+        if current_env == "staging":
+            _staging_config.validate_configuration()
+            _staging_config.log_configuration()
+        else:
+            logger.info(f"Staging config loaded for environment '{current_env}' - skipping staging validation")
     return _staging_config
 
 

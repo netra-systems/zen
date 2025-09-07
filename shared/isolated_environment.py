@@ -322,10 +322,14 @@ class IsolatedEnvironment:
             'GOOGLE_OAUTH_CLIENT_ID_TEST': 'test-oauth-client-id-for-automated-testing',
             'GOOGLE_OAUTH_CLIENT_SECRET_TEST': 'test-oauth-client-secret-for-automated-testing',
             
+            # E2E Test OAuth Simulation - CRITICAL for agent integration tests
+            'E2E_OAUTH_SIMULATION_KEY': 'test-e2e-oauth-bypass-key-for-testing-only-unified-2025',
+            
             # Basic test environment settings
             'ENVIRONMENT': 'test',
             'TESTING': '1',
             'TEST_MODE': 'true',
+            'TEST_ENV': 'test',
             
             # Security defaults for testing
             'JWT_SECRET_KEY': 'test-jwt-secret-key-32-characters-long-for-testing-only',
@@ -852,6 +856,11 @@ class IsolatedEnvironment:
                     key = key.strip()
                     value = value.strip()
                     
+                    # Validate key is not empty
+                    if not key:
+                        errors.append(f"Line {line_num}: Invalid format (empty key name)")
+                        continue
+                    
                     # Remove quotes if present
                     if value and value[0] == value[-1] and value[0] in ('"', "'"):
                         value = value[1:-1]
@@ -1020,7 +1029,8 @@ class IsolatedEnvironment:
         
         if missing_vars:
             validation_result["valid"] = False
-            validation_result["issues"].append(f"Missing required staging database variables: {missing_vars}")
+            for var in missing_vars:
+                validation_result["issues"].append(f"Missing required staging database variable: {var}")
         
         # Validate specific credential values for staging
         postgres_host = self.get("POSTGRES_HOST", "")
@@ -1049,12 +1059,12 @@ class IsolatedEnvironment:
         if not postgres_password:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is not set")
-        elif len(postgres_password) < 8:
-            validation_result["valid"] = False
-            validation_result["issues"].append("POSTGRES_PASSWORD is too short (< 8 characters) for staging")
         elif postgres_password in ["password", "123456", "admin", "test", "wrong_password"]:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is using insecure default - must be secure for staging")
+        elif len(postgres_password) < 8:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is too short (< 8 characters) for staging")
         elif postgres_password.isdigit() and len(postgres_password) < 12:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is only numbers and too short - needs complexity")

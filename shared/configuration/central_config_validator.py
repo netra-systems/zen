@@ -503,8 +503,19 @@ class CentralConfigurationValidator:
                 # During test context, try to get the value from test defaults if available
                 try:
                     from shared.isolated_environment import get_env
+                    import os
                     env = get_env()
-                    if env._is_test_context() and hasattr(env, '_get_test_environment_defaults'):
+                    
+                    # CRITICAL FIX: More robust test context detection during pytest collection
+                    # The isolated environment's _is_test_context() may fail during collection
+                    is_test_context = (
+                        env._is_test_context() or 
+                        os.environ.get('PYTEST_CURRENT_TEST') or 
+                        environment == Environment.TEST or
+                        'pytest' in str(os.environ.get('_', ''))
+                    )
+                    
+                    if is_test_context and hasattr(env, '_get_test_environment_defaults'):
                         test_defaults = env._get_test_environment_defaults()
                         if rule.env_var in test_defaults:
                             value = test_defaults[rule.env_var]

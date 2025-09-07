@@ -1124,15 +1124,45 @@ async def websocket_health_check():
     if errors:
         status = "degraded"
     
+    # Add environment and E2E testing information for debugging WebSocket connectivity
+    from shared.isolated_environment import get_env
+    env = get_env()
+    environment = env.get("ENVIRONMENT", "development").lower()
+    
+    # Check E2E testing environment variables
+    e2e_vars = {
+        "E2E_TESTING": env.get("E2E_TESTING"),
+        "PYTEST_RUNNING": env.get("PYTEST_RUNNING"), 
+        "STAGING_E2E_TEST": env.get("STAGING_E2E_TEST"),
+        "E2E_OAUTH_SIMULATION_KEY": "SET" if env.get("E2E_OAUTH_SIMULATION_KEY") else None,
+        "E2E_TEST_ENV": env.get("E2E_TEST_ENV")
+    }
+    
+    # Determine if E2E testing is enabled
+    is_e2e_testing = (
+        env.get("E2E_TESTING", "0") == "1" or 
+        env.get("PYTEST_RUNNING", "0") == "1" or
+        env.get("STAGING_E2E_TEST", "0") == "1" or
+        env.get("E2E_OAUTH_SIMULATION_KEY") is not None or
+        env.get("E2E_TEST_ENV") == "staging"
+    )
+    
     response = {
         "status": status,
         "service": "websocket",
         "version": "1.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "environment": environment,
         "metrics": metrics,
         "config": {
             "max_connections_per_user": WEBSOCKET_CONFIG.max_connections_per_user,
-            "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds
+            "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
+            "pre_connection_auth_required": environment in ["staging", "production"] and not is_e2e_testing
+        },
+        "e2e_testing": {
+            "enabled": is_e2e_testing,
+            "variables": e2e_vars,
+            "auth_bypass_active": is_e2e_testing
         }
     }
     
