@@ -31,8 +31,8 @@ class TestRealCriticalWebSocket:
         config = get_staging_config()
         start_time = time.time()
         
-        # First verify backend is accessible
-        async with httpx.AsyncClient(timeout=30) as client:
+        # First verify backend is accessible with test headers
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             response = await client.get(f"{config.backend_url}/health")
             assert response.status_code == 200, f"Backend not healthy: {response.text}"
             health_data = response.json()
@@ -43,10 +43,11 @@ class TestRealCriticalWebSocket:
         error_message = None
         
         try:
-            # Attempt WebSocket connection
+            # Attempt WebSocket connection with test headers
             async with websockets.connect(
                 config.websocket_url,
-                close_timeout=10
+                close_timeout=10,
+                extra_headers=config.get_websocket_headers()
             ) as ws:
                 # If we get here, connection was established
                 connection_successful = True
@@ -137,7 +138,7 @@ class TestRealCriticalWebSocket:
         config = get_staging_config()
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # First check if message endpoint exists
             response = await client.get(f"{config.backend_url}/api/messages")
             
@@ -168,7 +169,7 @@ class TestRealCriticalWebSocket:
         endpoints_tested = 0
         results = {}
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Test multiple health endpoints
             health_endpoints = [
                 "/health",
@@ -223,7 +224,7 @@ class TestRealCriticalAgent:
         config = get_staging_config()
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Test MCP servers endpoint
             response = await client.get(f"{config.backend_url}/api/mcp/servers")
             
@@ -251,7 +252,7 @@ class TestRealCriticalAgent:
         config = get_staging_config()
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Test MCP config endpoint
             response = await client.get(f"{config.backend_url}/api/mcp/config")
             
@@ -275,7 +276,7 @@ class TestRealCriticalAgent:
         config = get_staging_config()
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Test thread endpoints
             response = await client.get(f"{config.backend_url}/api/threads")
             
@@ -299,7 +300,7 @@ class TestRealCriticalAgent:
         
         latencies = []
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Make multiple requests to measure latency
             for i in range(5):
                 req_start = time.time()
@@ -345,7 +346,7 @@ class TestRealCriticalAgent:
             except Exception as e:
                 return {"index": index, "error": str(e)}
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Send 10 concurrent requests
             tasks = [make_request(client, i) for i in range(10)]
             results = await asyncio.gather(*tasks)
@@ -378,7 +379,7 @@ class TestRealCriticalAgent:
         
         error_responses = {}
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Test various error scenarios
             test_cases = [
                 ("/api/nonexistent", "404 Not Found"),
@@ -431,7 +432,7 @@ class TestRealCriticalAgent:
         
         services_found = {}
         
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, headers=config.get_headers()) as client:
             # Try different service discovery patterns
             discovery_endpoints = [
                 "/api/discovery/services",

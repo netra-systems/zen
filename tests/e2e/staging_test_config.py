@@ -11,10 +11,10 @@ from dataclasses import dataclass
 class StagingConfig:
     """Configuration for staging environment tests"""
     
-    # Backend URLs
-    backend_url: str = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-    api_url: str = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/api"
-    websocket_url: str = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
+    # Backend URLs - Using proper staging domain
+    backend_url: str = "https://api.staging.netrasystems.ai"
+    api_url: str = "https://api.staging.netrasystems.ai/api"
+    websocket_url: str = "wss://api.staging.netrasystems.ai/ws"
     
     # Auth service URLs (when deployed)
     auth_url: str = "https://auth.staging.netrasystems.ai"
@@ -61,6 +61,10 @@ class StagingConfig:
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "X-Test-Type": "E2E",
+            "X-Test-Environment": "staging",
+            "X-Test-Session": f"e2e-staging-{os.getpid()}",
+            "User-Agent": "Netra-E2E-Tests/1.0"
         }
         
         if include_auth and self.test_api_key:
@@ -72,7 +76,12 @@ class StagingConfig:
     
     def get_websocket_headers(self) -> Dict[str, str]:
         """Get headers for WebSocket connection"""
-        headers = {}
+        headers = {
+            "X-Test-Type": "E2E",
+            "X-Test-Environment": "staging",
+            "X-Test-Session": f"e2e-staging-{os.getpid()}",
+            "User-Agent": "Netra-E2E-Tests/1.0"
+        }
         
         if self.test_jwt_token:
             headers["Authorization"] = f"Bearer {self.test_jwt_token}"
