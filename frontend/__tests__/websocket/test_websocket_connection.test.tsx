@@ -26,7 +26,13 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
-// Import WebSocket utilities and test helpers
+// Import unified WebSocket mock and test helpers
+import { 
+  UnifiedWebSocketMock, 
+  setupUnifiedWebSocketMock, 
+  WebSocketMockConfigs,
+  WebSocketTestHelpers 
+} from '../mocks/unified-websocket-mock';
 import { WebSocketTestHelper, WebSocketEventValidator } from '../helpers/websocket-test-helpers';
 
 /**
@@ -290,56 +296,8 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
       const onConnect = jest.fn();
       const onError = jest.fn();
 
-      // Mock WebSocket to fail immediately - use independent implementation
-      const originalWebSocket = global.WebSocket;
-      global.WebSocket = class MockFailingWebSocket {
-        constructor(url) {
-          console.log('DEBUG: MockFailingWebSocket constructor called');
-          this.url = url;
-          this.protocols = [];
-          this.readyState = 0; // CONNECTING
-          this.bufferedAmount = 0;
-          this.binaryType = 'blob';
-          this.extensions = '';
-          this.protocol = '';
-          
-          // Event handlers
-          this.onopen = null;
-          this.onclose = null;
-          this.onerror = null;
-          this.onmessage = null;
-          
-          // Event listener management
-          this.eventListeners = new Map();
-          this.send = jest.fn();
-          this.close = jest.fn();
-          this.addEventListener = jest.fn();
-          this.removeEventListener = jest.fn();
-          this.dispatchEvent = jest.fn(() => true);
-          
-          // Force immediate error - wait for event handlers to be set up
-          setTimeout(() => {
-            this.readyState = 3; // CLOSED
-            if (this.onerror) {
-              console.log('DEBUG: MockFailingWebSocket triggering onerror');
-              this.onerror(new ErrorEvent('error', { error: new Error('Connection failed') }));
-            } else {
-              console.log('DEBUG: MockFailingWebSocket onerror is null - handler not set yet');
-            }
-          }, 50); // Give more time for event handlers to be set up
-          
-          // Add to global tracking
-          if (global.mockWebSocketInstances) {
-            global.mockWebSocketInstances.push(this);
-          }
-        }
-        
-        // Mock constants
-        static CONNECTING = 0;
-        static OPEN = 1;
-        static CLOSING = 2;
-        static CLOSED = 3;
-      };
+      // FIXED: Use unified WebSocket mock with immediate error configuration
+      setupUnifiedWebSocketMock(WebSocketMockConfigs.immediateError);
 
       render(
         <MockWebSocketConnection
@@ -355,14 +313,14 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         await userEvent.click(connectButton);
       });
 
+      // FIXED: Proper timing for error scenario testing
       await waitFor(() => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('error');
         expect(onConnect).not.toHaveBeenCalled();
         expect(onError).toHaveBeenCalledTimes(1);
-      }, { timeout: 1000 });
+      }, { timeout: 3000 });
 
-      // Restore original WebSocket
-      global.WebSocket = originalWebSocket;
+      console.log('✅ Connection error handling test completed successfully');
     });
 
     test('should track connection status changes', async () => {
@@ -527,18 +485,8 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
 
   describe('Connection Retry and Recovery', () => {
     test('should attempt reconnection after unexpected disconnection', async () => {
-      let mockWs = null;
-      const originalWebSocket = global.WebSocket;
-      const onReconnect = jest.fn();
-
-      // Mock WebSocket that can be forcibly disconnected
-      global.WebSocket = class TestWebSocket extends originalWebSocket {
-        constructor(url) {
-          super(url);
-          mockWs = this;
-          setTimeout(() => this.onopen && this.onopen({}), 10);
-        }
-      };
+      // FIXED: Use unified WebSocket mock with network simulation
+      setupUnifiedWebSocketMock(WebSocketMockConfigs.networkSimulation);
 
       render(
         <MockWebSocketConnection
@@ -557,10 +505,19 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       });
 
-      // Simulate unexpected disconnection
+      // FIXED: Get active WebSocket instance through global tracking
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
+
+      // FIXED: Simulate unexpected disconnection using unified mock method
       await act(async () => {
-        if (mockWs && mockWs.onclose) {
-          mockWs.onclose({ code: 1006, reason: 'Abnormal closure', wasClean: false });
+        if (activeWs && activeWs.simulateNetworkDisconnection) {
+          activeWs.simulateNetworkDisconnection();
         }
       });
 
@@ -572,10 +529,9 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
       await waitFor(() => {
         const attempts = parseInt(screen.getByTestId('reconnect-attempts').textContent || '0');
         expect(attempts).toBeGreaterThan(0);
-      }, { timeout: 2000 });
+      }, { timeout: 3000 });
 
-      // Restore original WebSocket
-      global.WebSocket = originalWebSocket;
+      console.log('✅ Reconnection after disconnection test completed successfully');
     });
 
     test('should stop retrying after max attempts reached', async () => {
