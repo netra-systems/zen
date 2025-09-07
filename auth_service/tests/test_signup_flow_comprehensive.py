@@ -6,7 +6,7 @@ import pytest
 # Using repository pattern per SSOT requirements
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 

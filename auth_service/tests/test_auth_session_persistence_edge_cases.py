@@ -7,8 +7,8 @@ Focus: Service restart scenarios, database failover, and cross-service session c
 import pytest
 import asyncio
 import time
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import TestRedisManager as RedisTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 

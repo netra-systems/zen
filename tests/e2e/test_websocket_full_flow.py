@@ -146,8 +146,8 @@ async def authenticate(session: aiohttp.ClientSession) -> str:
                 data = await resp.json()
                 print(f"{Fore.GREEN}✓ Authentication successful{Style.RESET_ALL}\n")
                 return data.get("access_token")
-    except:
-        pass
+    except Exception as e:
+        print(f"{Fore.YELLOW}Login attempt failed, will try registration: {e}{Style.RESET_ALL}")
         
     # If login fails, try to register
     try:
@@ -162,6 +162,7 @@ async def authenticate(session: aiohttp.ClientSession) -> str:
                         return data.get("access_token")
     except Exception as e:
         print(f"{Fore.RED}Authentication failed: {e}{Style.RESET_ALL}")
+        raise  # Re-raise to fail test if authentication completely fails
         
     return None
 
@@ -221,8 +222,13 @@ async def run_agent_and_capture_events():
                     except websockets.exceptions.ConnectionClosed:
                         print(f"{Fore.RED}WebSocket connection closed{Style.RESET_ALL}")
                         break
+                    except json.JSONDecodeError as e:
+                        print(f"{Fore.RED}Invalid JSON received: {e}{Style.RESET_ALL}")
+                        # Continue to try to get more messages
+                        continue
                     except Exception as e:
-                        print(f"{Fore.RED}Error receiving message: {e}{Style.RESET_ALL}")
+                        print(f"{Fore.RED}Unexpected error receiving message: {e}{Style.RESET_ALL}")
+                        raise  # Re-raise unexpected errors to fail the test
                         
                 capture.end_time = time.time()
                 
@@ -286,12 +292,16 @@ async def test_multiple_concurrent_users():
                                     
                         except asyncio.TimeoutError:
                             continue
+                        except json.JSONDecodeError:
+                            # Skip invalid JSON and continue
+                            continue
                             
                     print(f"{Fore.GREEN}User {user_id}: Received {len(events)} events{Style.RESET_ALL}")
                     return events
                     
         except Exception as e:
             print(f"{Fore.RED}User {user_id}: Error - {e}{Style.RESET_ALL}")
+            # For multi-user tests, individual user failures shouldn't fail entire test
             return []
             
     # Run 10 concurrent users

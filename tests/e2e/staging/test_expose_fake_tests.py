@@ -932,8 +932,9 @@ class TestComprehensiveFakeDetection:
             domain = config.backend_url.replace('https://', '').replace('http://', '')
             socket.gethostbyname(domain)
             evidence['dns_resolution'] = True
-        except:
-            pass
+        except Exception as e:
+            print(f"DNS resolution failed: {e}")
+            # Expected for some staging environments
         
         # HTTP timing check  
         start_time = time.time()
@@ -942,14 +943,16 @@ class TestComprehensiveFakeDetection:
                 response = await client.get(config.health_endpoint)
                 if response.status_code == 200 and time.time() - start_time > 0.02:
                     evidence['http_timing'] = True
-        except:
-            pass
+        except Exception as e:
+            print(f"HTTP timing check failed: {e}")
+            # Expected for unreachable endpoints
         
         # WebSocket check
         try:
             async with websockets.connect(config.websocket_url, timeout=5) as ws:
                 evidence['websocket_handshake'] = True
-        except:
+        except Exception as e:
+            print(f"WebSocket connection failed: {e}")
             evidence['websocket_handshake'] = True  # Connection closed also indicates real server
         
         # Auth enforcement check
@@ -958,8 +961,9 @@ class TestComprehensiveFakeDetection:
                 response = await client.get(f"{config.api_url}/admin")
                 if response.status_code in [401, 403, 404]:
                     evidence['auth_enforcement'] = True
-        except:
-            pass
+        except Exception as e:
+            print(f"Auth enforcement check failed: {e}")
+            # Expected for some endpoints
         
         # Count evidence
         real_evidence_count = sum(evidence.values())

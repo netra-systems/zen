@@ -281,8 +281,9 @@ async def test_scalable_tenant_isolation(resource_isolation_suite):
             if agent.connection:
                 try:
                     await agent.connection.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Connection cleanup failures are non-critical between test iterations
+                    logger.debug(f"Failed to close connection for agent: {e}")
     
     # Analyze scalability
     if len(scalability_results) >= 2:

@@ -6,7 +6,7 @@ These tests demonstrate the bugs without requiring database connections.
 import pytest
 import asyncio
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 

@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 import jwt as pyjwt
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio

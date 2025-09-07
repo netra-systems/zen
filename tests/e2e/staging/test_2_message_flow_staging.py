@@ -86,7 +86,7 @@ class TestMessageFlowStaging(StagingTestBase):
                         try:
                             data = response.json()
                             print(f"[INFO] {endpoint} returned data: {type(data)}")
-                        except:
+                        except json.JSONDecodeError:
                             pass
                             
                 except Exception as e:
@@ -253,7 +253,7 @@ class TestMessageFlowStaging(StagingTestBase):
                             elif isinstance(data, dict):
                                 thread_result["data_type"] = "object"
                             print(f"[INFO] {description}: {response.status_code} - {type(data)}")
-                        except:
+                        except json.JSONDecodeError:
                             thread_result["content"] = "non-json"
                     else:
                         print(f"[INFO] {description}: {response.status_code} (auth required)")
@@ -326,7 +326,7 @@ class TestMessageFlowStaging(StagingTestBase):
                                 error_result["error_data"] = error_data
                             else:
                                 error_result["proper_error_format"] = False
-                        except:
+                        except json.JSONDecodeError:
                             error_result["error_text"] = response.text[:100]
                     
                     error_tests.append(error_result)

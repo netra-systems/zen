@@ -486,7 +486,7 @@ class TestAgentPipelineStaging(StagingTestBase):
                                 "has_code_field": "code" in error_data
                             }
                             error_result["proper_error_response"] = any(error_result["error_structure"].values())
-                        except:
+                        except json.JSONDecodeError:
                             error_result["error_text"] = response.text[:100]
                             error_result["proper_error_response"] = len(response.text) > 0
                     

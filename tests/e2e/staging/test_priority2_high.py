@@ -113,7 +113,7 @@ class TestHighAuthentication:
                             if "google" in json.dumps(data).lower():
                                 oauth_results[endpoint]["google_config"] = True
                                 print(f"✓ Google OAuth config found at {endpoint}")
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                 except Exception as e:
@@ -198,7 +198,7 @@ class TestHighAuthentication:
                             token_data = post_response.json()
                             if "access_token" in token_data or "token" in token_data:
                                 refresh_results[endpoint]["token_response"] = True
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                 except Exception as e:

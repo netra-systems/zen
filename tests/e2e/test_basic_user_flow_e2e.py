@@ -198,7 +198,14 @@ class TestBasicUserFlowE2Eer:
                     WEBSOCKET_URL,
                     additional_headers=headers
                 )
+        except asyncio.TimeoutError:
+            pytest.fail("WebSocket connection timed out after 10 seconds")
+        except websockets.exceptions.InvalidStatusCode as e:
+            pytest.fail(f"WebSocket connection rejected (likely auth failure): {e}")
+        except Exception as e:
+            pytest.fail(f"WebSocket connection failed: {e}")
             
+        try:
             # Wait for connection acknowledgment
             welcome_message = await asyncio.wait_for(
                 self.websocket_connection.recv(),
@@ -215,9 +222,12 @@ class TestBasicUserFlowE2Eer:
                 "welcome_message": welcome_data,
                 "connection_established": True
             }
-            
+        except asyncio.TimeoutError:
+            pytest.fail("No welcome message received within 5 seconds")
+        except json.JSONDecodeError as e:
+            pytest.fail(f"Invalid JSON in welcome message: {e}")
         except Exception as e:
-            raise AssertionError(f"WebSocket connection failed: {e}")
+            pytest.fail(f"Failed to process welcome message: {e}")
     
     async def _execute_real_chat_flow(self) -> Dict[str, Any]:
         """Send real chat message and receive agent response."""
@@ -279,8 +289,9 @@ class TestBasicUserFlowE2Eer:
         if self.websocket_connection:
             try:
                 await self.websocket_connection.close()
-            except Exception:
-                pass
+            except Exception as e:
+                # Log cleanup error but don't fail test
+                print(f"Warning: WebSocket cleanup failed: {e}")
         
         if hasattr(self.test_client, 'close'):
             await self.test_client.close()

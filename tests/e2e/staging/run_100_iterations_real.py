@@ -91,7 +91,8 @@ class StagingE2ETestRunner:
             import httpx
             response = httpx.get(f"{self.staging_url}/health", timeout=10)
             return response.status_code == 200
-        except:
+        except Exception as e:
+            print(f"Health check failed: {e}")
             return False
     
     def fix_common_issues(self, failed_tests: List[str]) -> bool:

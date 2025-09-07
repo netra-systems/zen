@@ -13,6 +13,7 @@ prime directives. your operating instructions. your core principles.
   * **Explain Your Reasoning:** Step-by-step analysis is mandatory for all tasks. Think carefully.
   * **Ship for Value:** As a startup, time-to-market is critical. We must ship working products quickly.
   * **Think with Nuance:** Use "wise mind" middle-ground thinking.
+  CHEATING ON TESTS = ABOMINATION
 
 ## 0\. Current Mission: Stabilize Core Systems
 
@@ -204,6 +205,8 @@ Before coding, conduct a rigorous analysis.
   * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
+ULTRA THINK DEEPLY ALL THE TIME.
+
 ### 3.4. Multi-Environment Validation
 
 Code is not "done" until it is validated in environments that mirror production. Local E2E tests MUST use real services (local databases, shared LLMs). Mocks are forbidden in E2E testing.
@@ -213,6 +216,9 @@ Code is not "done" until it is validated in environments that mirror production.
 1.  **Local/CI:** Fast feedback with unit and integration tests.
 2.  **Development:** Integration/E2E tests against deployed services.
 ALWAYS use real services for testing. If they appear to not be available start or restarting them. If that too fails then hard fail the entire test suite.
+
+CHEATING ON TESTS = ABOMINATION
+ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
 
 ### 3.5. MANDATORY BUG FIXING PROCESS:
 
@@ -225,9 +231,12 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
 4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
 
+YOU MUST WORK HARD AND COMPLETE ALL OF YOUR WORK. YOU MUST KEEP GOING UNTIL THE WORK IS COMPLETE AND BE PATIENT.
+
 ### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
 
 **CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
+CHEATING ON TESTS = ABOMINATION
 
 **See Also:** 
 - [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
@@ -342,9 +351,7 @@ for the simple "pip package test" to determine what belongs in `/shared`.
 ### 5.4. Import Rules
 
 **ABSOLUTE IMPORTS ONLY.**
-  * **ALL Python files  use absolute imports** starting from the package root.
-  * **NEVER use relative imports (`.` or `..`)** in any Python file, including tests.
-  * See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
+  * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
 
 -----
 
@@ -382,56 +389,20 @@ The following events MUST be sent during agent execution to enable meaningful AI
 - See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
 
 -----
+CHEATING ON TESTS = ABOMINATION
 
 ## 7\. Project Tooling
 
 ### 7.1. Docker
 
-**CRITICAL: All Docker operations go through the central UnifiedDockerManager.**
-**See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
+**CRITICAL: All Docker operations go through the central UnifiedDockerManager.** **See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
 
-#### Automatic Docker Management (Primary Usage)
+#### Automatic Docker Management is integrated with testing
 ```bash
-# Tests use UnifiedDockerManager - just run:
 python tests/unified_test_runner.py --real-services
-
-# Docker starts automatically, conflicts are resolved, services are health-checked
 ```
-
-#### Manual Docker Operations (When Needed)
-
-"Refresh" local dev = for the relevant containers, remove the existing, create a new fresh image, deploy it
-
-```bash
-# Manual control script (uses central UnifiedDockerManager)
-python scripts/docker_manual.py start     # Start test environment
-python scripts/docker_manual.py stop      # Stop all containers  
-python scripts/docker_manual.py restart   # Restart services
-python scripts/docker_manual.py status    # Check status
-python scripts/docker_manual.py clean     # Clean up everything
-python scripts/docker_manual.py test      # Run tests with Docker
-
-# Restart specific services
-python scripts/docker_manual.py restart --services backend auth
-```
-
-**Key Features:**
-- **Automatic Conflict Resolution**: Removes conflicting containers automatically
-- **Health Monitoring**: Comprehensive health checks and reporting
-- **Dynamic Port Allocation**: Avoids port conflicts in parallel runs
-- **Cross-platform**: Works on Windows, macOS, and Linux
 
 #### Alpine Container Support
-**Optimized Alpine Docker images for 50% faster testing with minimal resource usage:**
-
-The platform supports Alpine-based containers for dramatic performance improvements:
-
-**DEFAULT BEHAVIOR (as of current implementation):**
-- **Alpine containers**: Enabled by default for all test runs
-- **Image rebuilding**: Enabled by default to ensure fresh images
-- **Graceful startup**: Automatically reuses healthy containers when available
-- **Memory pre-flight checks**: Performed before starting services
-
 **Usage Examples:**
 
 ```bash
@@ -447,21 +418,12 @@ python tests/unified_test_runner.py --real-services --no-rebuild
 
 # Rebuild all services (not just backend)
 python tests/unified_test_runner.py --real-services --rebuild-all
-
-# Manual Docker operations with Alpine
-python scripts/docker_manual.py start --alpine
-python scripts/docker_manual.py status --alpine
 ```
 
 **Alpine Compose Files:**
 - `docker-compose.alpine-test.yml` - Test environment with named volumes (stable storage)
 - `docker-compose.alpine.yml` - Development environment
 - Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
-
-**When to Use Alpine:**
-- **✓ Test environments** (default choice for speed)
-- **✓ CI/CD pipelines** (faster builds, lower resource usage)
-- **✓ Development** (when memory is constrained)
 
 **⚠️ CRITICAL WARNING: tmpfs Storage Removed**
 Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. 
@@ -492,6 +454,7 @@ python scripts/refresh_dev_services.py logs --services backend -f
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
+FAKE TESTS ARE BAD
 
 **See [`TEST_CREATION_GUIDE.md`](reports/testing/TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
 **See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
@@ -557,7 +520,7 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
 6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-7.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
+7.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
 8.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
 9.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
 10. **Update Documentation:** Ensure specs reflect the implemented reality.
@@ -574,4 +537,4 @@ A user asking for "git commit" means: For EACH group of work that's related do a
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
   * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
 
-**Final Reminder:** ULTRA THINK DEEPLY. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**
+**Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

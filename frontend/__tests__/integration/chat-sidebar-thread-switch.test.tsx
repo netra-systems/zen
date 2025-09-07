@@ -111,7 +111,8 @@ describe('ChatSidebar Thread Switching Glitch Detection', () => {
   let sendMessageSpy: jest.Mock;
   
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Instead, reset specific mocks we need to reset
     
     // Reset store
     resetMockState();

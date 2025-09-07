@@ -5,9 +5,13 @@ This script runs the top 10 most critical agent tests against staging.
 
 import asyncio
 import sys
+import os
 import time
 import importlib
 from typing import List, Tuple
+
+# Add parent directories to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 
 # List of test modules to run (in priority order)
@@ -54,7 +58,7 @@ async def run_test_module(module_name: str) -> Tuple[str, bool, str]:
             instance.ensure_auth_setup()
         
         # Run all test methods
-        test_methods = [m for m in dir(instance) if m.startswith("test_")]
+        test_methods = [m for m in dir(instance) if m.startswith("test_") and callable(getattr(instance, m))]
         passed = 0
         failed = 0
         errors = []

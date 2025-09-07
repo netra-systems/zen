@@ -186,12 +186,14 @@ class SimplifiedAuthTester:
                 "email": token_data.get('email')
             }
             
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return {
                 "valid": False,
                 "service": "simplified_test",
                 "error": f"Token validation failed: {str(e)}"
             }
+        except Exception as e:
+            pytest.fail(f"Unexpected error during token validation: {e}")
     
     async def test_token_refresh(self, refresh_token: str) -> Dict[str, Any]:
         """Test token refresh flow - simplified for testing core logic."""

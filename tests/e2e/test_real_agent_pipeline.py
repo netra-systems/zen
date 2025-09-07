@@ -345,6 +345,9 @@ class AgentFailureRecoveryTester:
             mock_llm.side_effect = Exception("Simulated LLM failure")
             try:
                 await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
-            except Exception:
-                pass  # Expected failure
+                pytest.fail("Expected LLM failure was not raised")
+            except Exception as e:
+                # Expected failure from simulated LLM error
+                if "Simulated LLM failure" not in str(e):
+                    pytest.fail(f"Unexpected error type: {e}")
             return {"failure_detected": True, "recovery_attempted": True, "fallback_successful": True}

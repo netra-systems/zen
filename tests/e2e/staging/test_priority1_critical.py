@@ -567,7 +567,7 @@ class TestCriticalAgent:
                                 found_status = [field for field in status_fields if field in data]
                                 if found_status:
                                     status_checks[endpoint]["status_fields"] = found_status
-                        except:
+                        except json.JSONDecodeError:
                             status_checks[endpoint]["json_data"] = False
                     
                 except Exception as e:
@@ -616,7 +616,7 @@ class TestCriticalAgent:
                                 tool_results[f"GET {endpoint}"]["tool_count"] = len(data)
                             elif isinstance(data, dict) and "tools" in data:
                                 tool_results[f"GET {endpoint}"]["tool_count"] = len(data["tools"])
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                     # For execute endpoints, try POST
@@ -747,7 +747,7 @@ class TestCriticalMessaging:
                                     message_endpoints_tested[f"GET {endpoint}"]["message_count"] = len(data["messages"])
                                 elif "data" in data:
                                     message_endpoints_tested[f"GET {endpoint}"]["has_data"] = True
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                     # Test POST (create message) for appropriate endpoints
@@ -820,7 +820,7 @@ class TestCriticalMessaging:
                                 thread_operations[f"GET {endpoint}"]["thread_count"] = len(data)
                             elif isinstance(data, dict) and "threads" in data:
                                 thread_operations[f"GET {endpoint}"]["thread_count"] = len(data["threads"])
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                     # Test POST (create thread)
@@ -848,7 +848,7 @@ class TestCriticalMessaging:
                             created_thread = post_response.json()
                             if "id" in created_thread:
                                 thread_operations[f"POST {endpoint}"]["thread_id"] = created_thread["id"][:8]  # Truncated for logs
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                 except Exception as e:
@@ -890,7 +890,7 @@ class TestCriticalMessaging:
                         available_threads = data["threads"]
                     
                     switching_results["available_thread_count"] = len(available_threads)
-                except:
+                except json.JSONDecodeError:
                     pass
             
             # Test accessing specific thread endpoints
@@ -970,7 +970,7 @@ class TestCriticalMessaging:
                                 found_pagination = [field for field in pagination_fields if field in data]
                                 if found_pagination:
                                     history_results[f"GET {endpoint}"]["pagination_fields"] = found_pagination
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                     # Test with pagination parameters
@@ -1037,7 +1037,7 @@ class TestCriticalMessaging:
                                     print(f"✓ Proper isolation: {endpoint} returns empty without auth")
                             elif isinstance(data, dict):
                                 isolation_results[f"GET {endpoint} (no auth)"]["has_user_data"] = bool(data)
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     elif response.status_code in [401, 403]:
                         print(f"✓ Proper auth required: {endpoint}")
@@ -1308,7 +1308,7 @@ class TestCriticalScalability:
                             if found_fields:
                                 error_info["error_fields"] = found_fields
                                 
-                        except:
+                        except json.JSONDecodeError:
                             error_info["json_response"] = False
                     
                     error_test_results[f"{method} {endpoint}"] = error_info
@@ -1582,7 +1582,7 @@ class TestCriticalUserExperience:
                         try:
                             data = get_response.json()
                             lifecycle_results[f"GET {endpoint}"]["has_data"] = bool(data)
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                     # Test POST (for action endpoints)
@@ -1935,7 +1935,7 @@ class TestCriticalUserExperience:
                                 found_fields = [field for field in event_fields if field in data]
                                 if found_fields:
                                     event_results["event_endpoints"][endpoint]["event_fields"] = found_fields
-                        except:
+                        except json.JSONDecodeError:
                             pass
                     
                 except Exception as e:

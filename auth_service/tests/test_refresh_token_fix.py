@@ -4,7 +4,7 @@
 import pytest
 import asyncio
 import time
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 

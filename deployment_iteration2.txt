@@ -1,0 +1,293 @@
+
+🚀 Using Alpine-optimized images (default):
+   • 78% smaller images (150MB vs 350MB)
+   • 3x faster startup times
+   • 68% cost reduction ($205/month vs $650/month)
+   • Optimized resource limits (512MB RAM vs 2GB)
+
+  Container runtime: Docker
+🚀 Deploying Netra Apex Platform to GCP
+   Project: netra-staging
+   Region: us-central1
+   Build Mode: Local (Fast)
+   Pre-checks: Disabled
+   Config Validation: Enabled (default)
+
+✅ Phase 0: Validating Deployment Configuration...
+   Checking against proven working configuration from netra-backend-staging-00035-fnj
+Exception in thread Thread-9 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\threading.py", line 1073, in _bootstrap_inner
+    self.run()
+  File "C:\Users\antho\miniconda3\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 309: character maps to <undefined>
+   ✅ Configuration matches proven working setup
+
+🔐 Phase 1: Validating Prerequisites...
+✅ gcloud CLI configured for project: netra-staging
+
+🔧 Enabling required GCP APIs...
+  Enabling run.googleapis.com...
+  Enabling containerregistry.googleapis.com...
+  Enabling cloudbuild.googleapis.com...
+  Enabling secretmanager.googleapis.com...
+  Enabling compute.googleapis.com...
+✅ All required APIs enabled
+
+🔐 Phase 2: Validating Secrets Configuration...
+Checking all required secrets in Secret Manager...
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: postgres-password-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: postgres-db-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: jwt-secret-key-staging
+  ✅ Secret configured: fernet-key-staging
+  ✅ Secret configured: google-oauth-client-id-staging
+  ✅ Secret configured: google-oauth-client-secret-staging
+  ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: jwt-secret-staging
+  ✅ Secret configured: gemini-api-key-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: oauth-hmac-secret-staging
+
+✅ All required secrets are configured
+   Service Filter: backend
+
+🏗️ Phase 4: Building and Deploying Services...
+   All prerequisites validated - proceeding with deployment
+
+   Building backend...
+
+🔨 Building backend Docker image locally...
+  Using existing docker/backend.staging.alpine.Dockerfile
+  Building image locally: gcr.io/netra-staging/netra-backend-staging:latest
+  This is 5-10x faster than Cloud Build...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from backend.staging.alpine.Dockerfile
+#1 transferring dockerfile: 4.44kB done
+#1 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-alpine3.19
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2.79kB done
+#3 DONE 0.0s
+
+#4 [builder 1/5] FROM docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f
+#4 resolve docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.31MB 0.4s done
+#5 DONE 0.4s
+
+#6 [builder 4/5] COPY requirements.txt .
+#6 CACHED
+
+#7 [stage-1 6/8] COPY --chown=netra:netra shared /app/shared
+#7 CACHED
+
+#8 [stage-1 2/8] RUN apk add --no-cache     libpq     curl     tini     lz4-libs     libgcc     libstdc++     ca-certificates     && rm -rf /var/cache/apk/*
+#8 CACHED
+
+#9 [builder 2/5] RUN apk add --no-cache     gcc     musl-dev     libffi-dev     postgresql-dev     make     g++     linux-headers     rust     cargo     && rm -rf /var/cache/apk/*
+#9 CACHED
+
+#10 [builder 5/5] RUN --mount=type=cache,target=/root/.cache/pip     pip install --no-cache-dir --user     --no-warn-script-location     --disable-pip-version-check     -r requirements.txt
+#10 CACHED
+
+#11 [stage-1 3/8] RUN addgroup -g 1000 netra &&     adduser -D -u 1000 -G netra netra &&     mkdir -p /app/logs /app/data /app/tmp /app/scripts &&     chown -R netra:netra /app
+#11 CACHED
+
+#12 [stage-1 5/8] COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
+#12 CACHED
+
+#13 [stage-1 4/8] WORKDIR /app
+#13 CACHED
+
+#14 [builder 3/5] WORKDIR /build
+#14 CACHED
+
+#15 [stage-1 7/8] RUN mkdir -p /app/scripts && touch /app/scripts/__init__.py && chown -R netra:netra /app/scripts
+#15 CACHED
+
+#16 [stage-1 8/8] COPY --chown=netra:netra netra_backend /app/netra_backend
+#16 DONE 1.4s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 1.3s done
+#17 exporting manifest sha256:5da6f15f65c9411469a0ac1383242e0ea66da1041bb6bea86ee1dacea03491be
+#17 exporting manifest sha256:5da6f15f65c9411469a0ac1383242e0ea66da1041bb6bea86ee1dacea03491be 0.0s done
+#17 exporting config sha256:a31573c2876f81f49be245305cb7cfa4f197b1d40665daf53b3c373b08185307 0.0s done
+#17 exporting attestation manifest sha256:8db8fcfe6aae0eb507144bac509faa332ca0bdff3e4c9ae84ff0430e7d2d8dc4 0.0s done
+#17 exporting manifest list sha256:f4ad5d2712f92c04a251e19a04f57f75d20444d1f29854de2fb501b731c2bca8 0.0s done
+#17 naming to gcr.io/netra-staging/netra-backend-staging:latest
+#17 naming to gcr.io/netra-staging/netra-backend-staging:latest done
+#17 unpacking to gcr.io/netra-staging/netra-backend-staging:latest
+#17 unpacking to gcr.io/netra-staging/netra-backend-staging:latest 0.6s done
+#17 DONE 2.1s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/j4cwozatnqk8via57yl8qrcdi
+  ✅ Built successfully, now pushing to registry...
+  Configuring Docker authentication for GCR...
+  ✅ Docker authentication configured successfully
+The push refers to repository [gcr.io/netra-staging/netra-backend-staging]
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+e5f8952e42b7: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+bfb0413a2452: Waiting
+dfc7acfc3979: Waiting
+2bbdc450a238: Waiting
+9597eb95e2f5: Waiting
+4f4fb700ef54: Waiting
+6c66c14a2b74: Waiting
+7a01739510fb: Waiting
+e39cc12b00e3: Waiting
+aae71f2261fb: Waiting
+7a01739510fb: Layer already exists
+e39cc12b00e3: Layer already exists
+aae71f2261fb: Layer already exists
+14a7cdb2a4f0: Layer already exists
+a7cd7d9a2144: Layer already exists
+e5f8952e42b7: Layer already exists
+bfb0413a2452: Waiting
+dfc7acfc3979: Layer already exists
+2bbdc450a238: Layer already exists
+9597eb95e2f5: Layer already exists
+4f4fb700ef54: Layer already exists
+6c66c14a2b74: Waiting
+bfb0413a2452: Waiting
+6c66c14a2b74: Waiting
+6c66c14a2b74: Waiting
+bfb0413a2452: Waiting
+6c66c14a2b74: Pushed
+bfb0413a2452: Pushed
+latest: digest: sha256:f4ad5d2712f92c04a251e19a04f57f75d20444d1f29854de2fb501b731c2bca8 size: 856
+✅ backend image built and pushed successfully
+   Deploying backend...
+
+🚀 Deploying backend to Cloud Run...
+      ℹ️ Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder
+✅ backend deployed successfully
+  📡 Updating traffic to latest revision for netra-backend-staging...
+  ⏳ Waiting for netra-backend-staging revision to be ready...
+  ✅ Revision is ready
+  ✅ Traffic updated to latest revision
+
+==================================================
+
+🏥 Running health checks...
+  ⚠️ backend: No URL available
+
+✅ All services deployed successfully!
+
+📋 Deployment Summary:
+==================================================
+
+==================================================
+🔐 Running Post-Deployment Authentication Tests
+==================================================
+
+Testing staging environment...
+⚠️ Post-deployment tests failed with error: name 'env' is not defined
+⚠️ Post-deployment tests failed - authentication may not be working correctly
+   Check that JWT_SECRET_KEY is set to the same value in both services
+
+🔑 Next Steps:
+1. Update secrets in Secret Manager with real values
+2. Configure Cloud SQL and Redis instances
+3. Set up custom domain and SSL certificates
+4. Configure authentication and remove --allow-unauthenticated
+5. Set up monitoring and alerting

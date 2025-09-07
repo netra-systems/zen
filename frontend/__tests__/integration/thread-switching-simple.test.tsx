@@ -231,15 +231,20 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { clearMessages: true });
     });
 
-    const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
-    expect(clearMessages).toHaveBeenCalled();
+    // Wait for state to stabilize
+    await waitFor(() => {
+      const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
+      expect(clearMessages).toHaveBeenCalled();
+    });
   });
 
   it('should update URL when enabled', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     const updateUrl = jest.fn();
     
-    jest.spyOn(require('@/services/urlSyncService'), 'useURLSync').mockReturnValue({ updateUrl });
+    // Mock the urlSyncService at the module level
+    const urlSyncModule = require('@/services/urlSyncService');
+    jest.spyOn(urlSyncModule, 'useURLSync').mockReturnValue({ updateUrl });
     
     threadLoadingService.loadThread.mockResolvedValue({
       success: true,
@@ -253,7 +258,10 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { updateUrl: true });
     });
 
-    expect(updateUrl).toHaveBeenCalledWith('thread-1');
+    // Wait for the URL update to be called
+    await waitFor(() => {
+      expect(updateUrl).toHaveBeenCalledWith('thread-1');
+    });
   });
 
   it('should handle retry after failure', async () => {
@@ -282,8 +290,12 @@ describe('Thread Switching Basic Tests', () => {
       retryResult = await result.current.retryLastFailed();
     });
 
+    // Wait for state to stabilize
+    await waitFor(() => {
+      expect(result.current.state.error).toBeNull();
+    });
+
     expect(retryResult).toBe(true);
-    expect(result.current.state.error).toBeNull();
     expect(result.current.state.lastLoadedThreadId).toBe('thread-1');
   });
 });

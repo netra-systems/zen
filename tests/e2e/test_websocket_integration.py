@@ -105,8 +105,12 @@ class MessageSimulator:
             try:
                 await client.send_json(message)
                 successful += 1
-            except Exception:
+            except (ConnectionError, asyncio.TimeoutError):
+                # Expected network errors during broadcast
                 failed += 1
+            except Exception as e:
+                # Unexpected errors should fail the test
+                pytest.fail(f"Unexpected error during broadcast: {e}")
         
         return {
             "successful": successful,
@@ -180,9 +184,11 @@ class TestWebSocketAuthHandshake:
                 await websocket.accept()
                 # Mock: Authentication service isolation for testing without real auth flows
                 await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
-                return {"authenticated": True}
+                pytest.fail("Expected ValueError was not raised for invalid token")
             except ValueError as e:
                 return {"authenticated": False, "error": str(e)}
+            except Exception as e:
+                pytest.fail(f"Unexpected error during invalid token test: {e}")
 
 
 @pytest.mark.e2e
@@ -355,7 +361,11 @@ class TestWebSocketRateLimiting:
             except ConnectionError as e:
                 if "rate limit" in str(e).lower():
                     rate_limit_triggered = True
-                break
+                    break
+                else:
+                    pytest.fail(f"Unexpected connection error: {e}")
+            except Exception as e:
+                pytest.fail(f"Unexpected error during rate limit test: {e}")
         
         return {
             "messages_sent": messages_sent,

@@ -91,6 +91,7 @@ async def test_file_handle_isolation(resource_isolation_suite, tenant_agents):
             try:
                 os.unlink(temp_file)
             except Exception as e:
+                # Cleanup failures in finally blocks are acceptable to log only
                 logger.warning(f"Failed to cleanup temp file {temp_file}: {e}")
 
 @pytest.mark.asyncio
@@ -141,6 +142,7 @@ async def test_disk_space_isolation(resource_isolation_suite, tenant_agents):
             try:
                 shutil.rmtree(temp_dir)
             except Exception as e:
+                # Cleanup failures in finally blocks are acceptable to log only
                 logger.warning(f"Failed to cleanup temp dir {temp_dir}: {e}")
 
 @pytest.mark.asyncio
@@ -190,6 +192,7 @@ async def test_concurrent_file_access(resource_isolation_suite, tenant_agents):
         try:
             shutil.rmtree(temp_dir)
         except Exception as e:
+            # Cleanup failures in finally blocks are acceptable to log only
             logger.warning(f"Failed to cleanup concurrent test dir: {e}")
 
 @pytest.mark.asyncio
@@ -240,6 +243,7 @@ async def test_file_system_error_isolation(resource_isolation_suite, tenant_agen
         try:
             shutil.rmtree(temp_dir)
         except Exception as e:
+            # Cleanup failures in finally blocks are acceptable to log only
             logger.warning(f"Failed to cleanup error test dir: {e}")
 
 async def _simulate_file_system_errors(tenant_id: str, base_dir: str):
@@ -266,13 +270,15 @@ async def _simulate_file_system_errors(tenant_id: str, base_dir: str):
                         invalid_file = os.path.join(base_dir, f"invalid{char}file.dat")
                         with open(invalid_file, "w") as f:
                             f.write("test")
-                    except Exception:
-                        pass  # Expected to fail
+                    except (OSError, IOError):
+                        # Expected to fail with invalid characters in filename
+                        continue
             
             await asyncio.sleep(2.0)
             
-        except Exception:
-            pass  # Errors are expected in this simulation
+        except Exception as e:
+            # Errors are expected in this error simulation function
+            logger.debug(f"Expected error in simulation for tenant {tenant_id}: {e}")
 
 async def _normal_file_operations(tenant_id: str, base_dir: str, duration: float) -> Dict[str, Any]:
     """Perform normal file operations that should succeed."""
@@ -319,8 +325,9 @@ async def _normal_file_operations(tenant_id: str, base_dir: str, duration: float
     # Cleanup tenant directory
     try:
         shutil.rmtree(tenant_dir)
-    except Exception:
-        pass
+    except Exception as e:
+        # Cleanup failures are non-critical in helper functions
+        logger.debug(f"Failed to cleanup tenant dir for {tenant_id}: {e}")
     
     duration = time.time() - start_time
     
