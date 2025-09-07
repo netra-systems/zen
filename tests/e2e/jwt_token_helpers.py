@@ -168,6 +168,24 @@ class JWTTestHelper:
         }
         return self.create_token(payload)
     
+    async def create_token_for_user(self, user_id: str) -> str:
+        """Create token for user ID (async version for compatibility)."""
+        return self.create_access_token(user_id, f"{user_id}@test.com")
+    
+    async def create_expired_token(self, user_id: str) -> str:
+        """Create expired token for user ID."""
+        payload = {
+            JWTConstants.SUBJECT: user_id,
+            JWTConstants.EMAIL: f"{user_id}@test.com",
+            JWTConstants.PERMISSIONS: ["read", "write"],
+            JWTConstants.ISSUED_AT: datetime.now(timezone.utc) - timedelta(minutes=30),
+            JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) - timedelta(minutes=1),  # Expired
+            JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
+            "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
+        }
+        return self.create_token(payload)
+    
     async def create_jwt_token(self, payload: Dict, secret: str = None) -> str:
         """Create JWT token with specified payload."""
         return self.create_token(payload, secret)

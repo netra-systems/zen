@@ -16,8 +16,9 @@ All e2e tests MUST use this helper for authentication.
 import asyncio
 import json
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import httpx
 import aiohttp
 import jwt
@@ -461,9 +462,87 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
             return False
 
 
+# SSOT Convenience Functions for Backwards Compatibility
+async def create_authenticated_user(
+    environment: str = "test",
+    user_id: Optional[str] = None,
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None
+) -> Tuple[str, Dict[str, Any]]:
+    """
+    Create an authenticated user and return token and user data.
+    This is a convenience function that wraps E2EAuthHelper.
+    
+    Args:
+        environment: Test environment ('test', 'staging', etc.)
+        user_id: Optional user ID (auto-generated if not provided)
+        email: Optional email (uses default if not provided) 
+        permissions: Optional permissions list
+        
+    Returns:
+        Tuple of (jwt_token, user_data)
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    
+    # Generate user ID if not provided
+    user_id = user_id or f"test-user-{uuid.uuid4().hex[:8]}"
+    email = email or auth_helper.config.test_user_email
+    permissions = permissions or ["read", "write"]
+    
+    # Create JWT token with user data
+    token = auth_helper.create_test_jwt_token(
+        user_id=user_id,
+        email=email, 
+        permissions=permissions
+    )
+    
+    # Create user data structure
+    user_data = {
+        "id": user_id,
+        "email": email,
+        "permissions": permissions,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_test_user": True
+    }
+    
+    return token, user_data
+
+
+def get_test_jwt_token(
+    user_id: str = "test-user-123",
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None,
+    environment: str = "test",
+    exp_minutes: int = 30
+) -> str:
+    """
+    Get a test JWT token with specified parameters.
+    This is a convenience function that wraps E2EAuthHelper.create_test_jwt_token.
+    
+    Args:
+        user_id: User ID for the token
+        email: User email (uses default if not provided)
+        permissions: User permissions (defaults to ["read", "write"])
+        environment: Test environment 
+        exp_minutes: Token expiry in minutes
+        
+    Returns:
+        Valid JWT token string
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    return auth_helper.create_test_jwt_token(
+        user_id=user_id,
+        email=email,
+        permissions=permissions,
+        exp_minutes=exp_minutes
+    )
+
+
 # SSOT Export - All e2e tests MUST use these
 __all__ = [
     "E2EAuthConfig",
     "E2EAuthHelper", 
-    "E2EWebSocketAuthHelper"
+    "E2EWebSocketAuthHelper",
+    "create_authenticated_user",
+    "get_test_jwt_token"
 ]
