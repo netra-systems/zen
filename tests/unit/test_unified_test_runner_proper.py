@@ -42,14 +42,14 @@ import pytest
 
 # CRITICAL: Use REAL SSOT imports that actually exist
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from test_framework.ssot.base_test_case import SsotBaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import the actual UnifiedTestRunner - this will test the real implementation
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 from unified_test_runner import UnifiedTestRunner
 
 
-class TestUnifiedTestRunnerProper(SsotBaseTestCase):
+class TestUnifiedTestRunnerProper(SSotBaseTestCase):
     """
     Proper unit tests for UnifiedTestRunner that test REAL functionality.
     
@@ -58,13 +58,13 @@ class TestUnifiedTestRunnerProper(SsotBaseTestCase):
     correctly in real environments.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with real components."""
-        super().setUp()
+        super().setup_method(method)
         
         # Initialize with real environment
-        self.env = get_env()
-        self.env.set("TEST_MODE", "unit", "test_unified_runner")
+        self.env = self.get_env()
+        self.set_env_var("TEST_MODE", "unit")
         
         # Create real UnifiedTestRunner instance
         self.runner = UnifiedTestRunner()
@@ -72,11 +72,11 @@ class TestUnifiedTestRunnerProper(SsotBaseTestCase):
         # Record that we're testing the unified test runner
         self.record_metric("test_setup", "unified_test_runner")
     
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up test environment."""
         # Clean up any environment variables we set
-        self.env.unset("TEST_MODE", "test_unified_runner")
-        super().tearDown()
+        self.delete_env_var("TEST_MODE")
+        super().teardown_method(method)
     
     def test_python_command_detection_real_system(self):
         """
@@ -330,7 +330,7 @@ class TestUnifiedTestRunnerProper(SsotBaseTestCase):
         
         # Verify environment is properly configured
         # The method should set environment variables via IsolatedEnvironment
-        use_real_llm = self.env.get("USE_REAL_LLM")
+        use_real_llm = self.get_env_var("USE_REAL_LLM")
         assert use_real_llm == "true"  # Should be set to true by the method
         
         # Test different frontend categories

@@ -38,7 +38,8 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture, with_test_database
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
-from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext, ExecutionStatus
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionStatus
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_factory import get_agent_service
@@ -146,8 +147,9 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         user_id = user_id or self.test_user_id
         return UserExecutionContext(
             user_id=user_id,
-            request_id=f"req_{uuid.uuid4().hex[:8]}",
-            thread_id=f"thread_{uuid.uuid4().hex[:8]}"
+            thread_id=f"thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"run_{uuid.uuid4().hex[:8]}",
+            request_id=f"req_{uuid.uuid4().hex[:8]}"
         )
     
     def _create_registry(self) -> AgentRegistry:
@@ -222,11 +224,9 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
             assert context.user_id is not None
             assert context.request_id is not None  
             assert context.thread_id is not None
+            assert context.run_id is not None
             assert context.created_at is not None
-            assert context.status == ExecutionStatus.ACTIVE
-            assert isinstance(context.active_runs, dict)
-            assert isinstance(context.run_history, list)
-            assert isinstance(context.execution_metrics, dict)
+            assert isinstance(context.metadata, dict)
             
             tool_dispatcher = await self._mock_tool_dispatcher_factory(context, websocket_bridge)
             agent = MockAgentForTesting("context_agent", context, tool_dispatcher, websocket_bridge)
