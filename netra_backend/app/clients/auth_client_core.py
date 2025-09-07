@@ -221,6 +221,23 @@ def handle_auth_service_error(error: Exception):
         logger.error(f"Unexpected auth error: {error}")
 
 
+def validate_jwt_format(token: str) -> bool:
+    """Validate JWT token format without decoding."""
+    if not token or not isinstance(token, str):
+        return False
+    
+    # Strip Bearer prefix if present
+    jwt_token = token.replace("Bearer ", "") if token.startswith("Bearer ") else token
+    
+    # Basic JWT format check (header.payload.signature)
+    parts = jwt_token.split('.')
+    if len(parts) != 3:
+        return False
+    
+    # Check if all parts are non-empty
+    return all(part for part in parts)
+
+
 class AuthOperationType(Enum):
     """Types of authentication operations for resilience handling."""
     TOKEN_VALIDATION = "token_validation"
