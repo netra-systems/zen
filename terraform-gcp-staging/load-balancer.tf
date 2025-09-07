@@ -226,22 +226,6 @@ resource "google_compute_url_map" "https_lb" {
         timeout {
           seconds = var.websocket_timeout_sec  # NEW: Dedicated WebSocket timeout
         }
-        
-        # CRITICAL FIX: Headers for WebSocket upgrade
-        request_header_transformations {
-          set_headers = [
-            {
-              header_name  = "Connection"
-              header_value = "Upgrade"
-              replace      = true
-            },
-            {
-              header_name  = "Upgrade" 
-              header_value = "websocket"
-              replace      = true
-            }
-          ]
-        }
       }
     }
   }

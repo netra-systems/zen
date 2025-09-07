@@ -20,7 +20,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { WebSocketProvider } from '../../providers/WebSocketProvider';
 import { webSocketService, WebSocketStatus } from '../../services/webSocketService';
-import { WebSocketMessage } from '../../types/unified';
+import { WebSocketMessage } from '../../types/registry';
 import { AuthProvider } from '../../auth/context';
 
 // Mock dependencies
