@@ -15,7 +15,7 @@ import logging
 import time
 from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Import UnifiedCircuitBreaker for proper circuit breaker implementation
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
@@ -37,6 +37,38 @@ class CacheEntry:
     def is_expired(self) -> bool:
         """Check if cache entry is expired."""
         return time.time() > (self.created_at + self.ttl)
+
+
+class CachedToken:
+    """Token cache entry for test compatibility.
+    
+    This class is used by test_auth_token_cache.py to simulate expired tokens.
+    It provides the same interface as expected by the E2E tests.
+    """
+    
+    def __init__(self, data: Dict[str, Any], ttl_seconds: int = 300):
+        """Initialize cached token with data and TTL.
+        
+        Args:
+            data: The token validation data to cache
+            ttl_seconds: Time-to-live in seconds (negative for expired)
+        """
+        self.data = data
+        if ttl_seconds < 0:
+            # Negative TTL means already expired (for testing)
+            self.expires_at = datetime.now(timezone.utc) - timedelta(seconds=abs(ttl_seconds))
+        else:
+            self.expires_at = datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)
+    
+    def is_valid(self) -> bool:
+        """Check if the cached token is still valid."""
+        return datetime.now(timezone.utc) < self.expires_at
+    
+    def get(self) -> Optional[Dict[str, Any]]:
+        """Get the cached data if still valid."""
+        if self.is_valid():
+            return self.data
+        return None
 
 
 class AuthClientCache:
@@ -336,6 +368,54 @@ class TokenCache:
         """
         logger.debug(f"Sync get_cached_token_sync called for backward compatibility - returning None to force async path")
         return None
+    
+    async def cache_token(self, token: str, result: Dict[str, Any], ttl: Optional[int] = None) -> None:
+        """Cache token validation result for auth_client_core compatibility.
+        
+        This method is called by auth_client_core.py line 217 after successful validation.
+        It caches the validation result to avoid repeated auth service calls.
+        
+        Args:
+            token: The authentication token
+            result: The validation result to cache
+            ttl: Optional TTL override in seconds
+        """
+        if result is None:
+            logger.debug(f"Skipping cache for None result for token: {token[:20]}...")
+            return
+        
+        # Use provided TTL or default to 300 seconds (5 minutes)
+        cache_ttl = ttl if ttl is not None else 300
+        
+        # Validate cache type (defensive programming)
+        if isinstance(self._cache, int):
+            logger.error(f"CRITICAL BUG: self._cache is an integer: {self._cache}")
+            return
+        
+        # Store with the specified TTL
+        await self._cache.set(f"validated_token:{token}", result, ttl=cache_ttl)
+        logger.debug(f"Cached validation result for token: {token[:20]}... with TTL: {cache_ttl}s")
+    
+    async def invalidate_cached_token(self, token: str) -> None:
+        """Invalidate a cached token validation result.
+        
+        This method is called by auth_client_core.py line 204 when a token is blacklisted
+        or line 624 during logout to ensure the token is removed from cache.
+        
+        Args:
+            token: The authentication token to invalidate
+        """
+        # Validate cache type (defensive programming)
+        if isinstance(self._cache, int):
+            logger.error(f"CRITICAL BUG: self._cache is an integer: {self._cache}")
+            return
+        
+        # Remove the validated token from cache
+        removed = await self._cache.delete(f"validated_token:{token}")
+        if removed:
+            logger.info(f"Invalidated cached token: {token[:20]}...")
+        else:
+            logger.debug(f"Token not in cache, nothing to invalidate: {token[:20]}...")
 
 
 class UserCache:
@@ -555,5 +635,87 @@ class AuthServiceSettings:
         return service_id, service_secret
 
 
-# Alias for backward compatibility
-AuthTokenCache = TokenCache
+class AuthTokenCache:
+    """Specialized token cache for E2E test compatibility.
+    
+    This class wraps TokenCache and adds methods expected by test_auth_token_cache.py.
+    It maintains a _token_cache dict for direct test access.
+    """
+    
+    def __init__(self, cache_ttl_seconds: int = 300):
+        """Initialize auth token cache with TTL.
+        
+        Args:
+            cache_ttl_seconds: Default TTL for cached tokens
+        """
+        self._inner_cache = TokenCache(cache_ttl_seconds)
+        self._token_cache: Dict[str, CachedToken] = {}  # For test compatibility
+        self.cache_ttl_seconds = cache_ttl_seconds
+    
+    def cache_token(self, token: str, data: Dict[str, Any]) -> None:
+        """Cache token data synchronously for test compatibility.
+        
+        Args:
+            token: The token to cache
+            data: The validation data to cache
+        """
+        # Store in both internal dict (for tests) and async cache
+        self._token_cache[token] = CachedToken(data, self.cache_ttl_seconds)
+        
+        # Also cache asynchronously if possible (fire and forget)
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.create_task(self._inner_cache.cache_token(token, data))
+        except RuntimeError:
+            # No event loop, just use sync storage
+            pass
+    
+    def get_cached_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Get cached token data synchronously for test compatibility.
+        
+        Args:
+            token: The token to retrieve
+            
+        Returns:
+            Cached data if valid, None otherwise
+        """
+        if token in self._token_cache:
+            cached = self._token_cache[token]
+            if cached.is_valid():
+                return cached.data
+            else:
+                # Remove expired token
+                del self._token_cache[token]
+        return None
+    
+    def invalidate_cached_token(self, token: str) -> None:
+        """Invalidate cached token synchronously for test compatibility.
+        
+        Args:
+            token: The token to invalidate
+        """
+        if token in self._token_cache:
+            del self._token_cache[token]
+        
+        # Also invalidate asynchronously if possible (fire and forget)
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.create_task(self._inner_cache.invalidate_cached_token(token))
+        except RuntimeError:
+            # No event loop, just use sync storage
+            pass
+    
+    # Delegate other methods to inner cache for full compatibility
+    async def get_token(self, user_id: str) -> Optional[str]:
+        """Get cached token for user."""
+        return await self._inner_cache.get_token(user_id)
+    
+    async def set_token(self, user_id: str, token: str, expires_in: int = 3600) -> None:
+        """Cache token for user."""
+        await self._inner_cache.set_token(user_id, token, expires_in)
+    
+    async def invalidate_token(self, user_id: str) -> None:
+        """Invalidate cached token for user."""
+        await self._inner_cache.invalidate_token(user_id)
