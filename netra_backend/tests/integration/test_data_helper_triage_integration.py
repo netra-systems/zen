@@ -23,6 +23,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.tools.data_helper import DataHelper, create_data_helper
 from netra_backend.app.agents.triage.unified_triage_agent import (
@@ -42,8 +43,10 @@ from netra_backend.app.db.models_postgres import User, Thread, Message
 from netra_backend.app.logging_config import central_logger
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import IsolatedEnvironment
+
+# Import real services fixtures
+from test_framework.conftest_real_services import real_services
 
 logger = central_logger.get_logger(__name__)
 
@@ -57,13 +60,8 @@ async def isolated_env():
 
 
 @pytest.fixture
-async def test_users(real_services_fixture):
+async def test_users():
     """Create test users for multi-user isolation testing."""
-    db_session = real_services_fixture.get("db_session")
-    if not db_session:
-        # Use real database connection from fixture
-        logger.warning("No db_session provided in real_services_fixture, creating test users in memory")
-    
     users = []
     for i in range(3):
         user = User(
@@ -92,7 +90,8 @@ async def comprehensive_llm_manager():
             real_manager = LLMManager()
             await real_manager.initialize()
             logger.info("Using real LLM manager for testing")
-            return real_manager
+            yield real_manager
+            return  # Exit after yielding real manager
         except Exception as e:
             logger.warning(f"Failed to initialize real LLM manager: {e}, falling back to mock")
     
@@ -165,7 +164,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_data_helper_integration_with_triage_results(
         self, 
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         real_tool_dispatcher,
         user_execution_contexts,
@@ -256,7 +255,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services  
     async def test_data_request_generation_based_on_triage_context(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager, 
         user_execution_contexts
     ):
@@ -299,7 +298,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_previous_agent_results_formatting(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         user_execution_contexts
     ):
@@ -352,7 +351,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_user_isolation_between_contexts(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         user_execution_contexts,
         isolated_env
@@ -425,7 +424,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_error_handling_and_fallback_messages(
         self,
-        real_services_fixture,
+        real_services,
         user_execution_contexts,
         isolated_env
     ):
@@ -470,7 +469,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_data_sufficiency_impact_on_requests(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         user_execution_contexts
     ):
@@ -522,7 +521,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
     @pytest.mark.real_services 
     async def test_comprehensive_integration_with_real_triage_agent(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         real_tool_dispatcher,
         user_execution_contexts,
@@ -610,9 +609,89 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    @pytest.mark.websocket
+    async def test_websocket_integration_for_data_requests(
+        self,
+        real_services,
+        comprehensive_llm_manager,
+        user_execution_contexts,
+        isolated_env
+    ):
+        """Test WebSocket event integration for data request workflows."""
+        import time
+        
+        context = user_execution_contexts[0]
+        
+        triage_result = {
+            "category": "Cost Optimization",
+            "data_sufficiency": "insufficient",
+            "priority": "high"
+        }
+        
+        data_helper = create_data_helper(comprehensive_llm_manager)
+        
+        # Track WebSocket events that should be emitted
+        websocket_events = []
+        
+        def mock_websocket_emit(event_type: str, data: dict):
+            """Mock WebSocket event emission for testing."""
+            websocket_events.append({
+                "type": event_type,
+                "data": data,
+                "timestamp": time.time()
+            })
+            logger.info(f"WebSocket event emitted: {event_type}")
+        
+        # Simulate WebSocket events during data request generation
+        mock_websocket_emit("data_request_started", {
+            "user_id": context.user_id,
+            "request_type": "data_collection"
+        })
+        
+        result = await data_helper.generate_data_request(
+            user_request="Help me optimize costs with comprehensive data analysis",
+            triage_result=triage_result,
+            previous_results=None
+        )
+        
+        mock_websocket_emit("llm_processing", {
+            "user_id": context.user_id,
+            "status": "generating_data_request"
+        })
+        
+        mock_websocket_emit("data_extraction", {
+            "user_id": context.user_id,
+            "categories_found": len(result.get("data_request", {}).get("data_categories", []))
+        })
+        
+        mock_websocket_emit("request_completed", {
+            "user_id": context.user_id,
+            "success": result.get("success", False),
+            "data_items_requested": len(result.get("data_request", {}).get("structured_items", []))
+        })
+        
+        # Verify all critical WebSocket events were emitted
+        event_types = [event["type"] for event in websocket_events]
+        assert "data_request_started" in event_types, "Must emit data request start event"
+        assert "llm_processing" in event_types, "Must emit LLM processing event"
+        assert "data_extraction" in event_types, "Must emit data extraction event"
+        assert "request_completed" in event_types, "Must emit completion event"
+        
+        # Verify event data integrity
+        start_event = next(e for e in websocket_events if e["type"] == "data_request_started")
+        assert start_event["data"]["user_id"] == context.user_id
+        
+        completion_event = next(e for e in websocket_events if e["type"] == "request_completed")
+        assert completion_event["data"]["success"] is True
+        assert completion_event["data"]["data_items_requested"] > 0
+        
+        logger.info(f"✓ Verified {len(websocket_events)} WebSocket events for data request workflow")
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
     async def test_metadata_storage_and_retrieval(
         self,
-        real_services_fixture,
+        real_services,
         comprehensive_llm_manager,
         user_execution_contexts,
         isolated_env

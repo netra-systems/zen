@@ -114,35 +114,8 @@ class MessageSimulator:
         }
 
 
-class WebSocketAuthTester:
-    """Real WebSocket connection tester with auth validation."""
-    
-    def __init__(self):
-        self.connection_manager = get_websocket_manager()
-        self.test_users: Dict[str, str] = {}
-        self.active_connections: List[MockWebSocket] = []
-        self.auth_results: List[Dict[str, Any]] = []
-    
-    def create_test_user_with_token(self, user_id: str) -> str:
-        """Create test user and return valid JWT token."""
-        token = create_test_token(user_id)
-        self.test_users[user_id] = token
-        return token
-    
-    def record_auth_result(self, user_id: str, success: bool, 
-                          error: Optional[str] = None) -> None:
-        """Record authentication test result."""
-        result = self._create_auth_result(user_id, success, error)
-        self.auth_results.append(result)
-    
-    def _create_auth_result(self, user_id: str, success: bool, error: Optional[str]) -> Dict[str, Any]:
-        """Create authentication result record."""
-        return {
-            "user_id": user_id,
-            "success": success,
-            "error": error,
-            "timestamp": datetime.now(timezone.utc)
-        }
+# WebSocketAuthTester class moved to test_framework.helpers.auth_helpers to maintain SSOT
+from test_framework.helpers.auth_helpers import WebSocketAuthTester
 
 
 @pytest.fixture

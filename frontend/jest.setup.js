@@ -2423,6 +2423,13 @@ jest.mock('@/hooks/useThreadSwitching', () => {
             'switch',
             threadId,
             async (signal) => {
+              // Handle clearMessages option
+              const { useUnifiedChatStore } = require('@/store/unified-chat');
+              const store = useUnifiedChatStore.getState();
+              if (options.clearMessages && store.clearMessages) {
+                store.clearMessages();
+              }
+              
               // Update loading state
               const loadingUpdates = {
                 isLoading: true,
@@ -2477,10 +2484,29 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                   }
                 }
                 
+                // Handle URL update if requested
+                if (options.updateUrl) {
+                  try {
+                    const urlSyncModule = require('@/services/urlSyncService');
+                    if (urlSyncModule && urlSyncModule.useURLSync) {
+                      const { updateUrl } = urlSyncModule.useURLSync();
+                      if (updateUrl) {
+                        updateUrl(threadId);
+                      }
+                    }
+                  } catch (error) {
+                    console.warn('Could not update URL:', error);
+                  }
+                }
+                
                 console.log(`useThreadSwitching: Successfully switched to ${threadId} via ThreadOperationManager`);
                 return { success: true, threadId };
               } else {
-                throw new Error(loadResult?.error || 'Thread loading failed');
+                // Preserve original error message if available
+                const errorMessage = (loadResult && typeof loadResult.error === 'string') ? loadResult.error : 
+                                   (loadResult && loadResult.error && loadResult.error.message) ? loadResult.error.message :
+                                   'Thread loading failed';
+                throw new Error(errorMessage);
               }
             },
             {
@@ -2489,6 +2515,20 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               force: options.force
             }
           );
+          
+          // Handle operation result - if not successful, update error state
+          if (!result.success && result.error) {
+            const errorUpdates = {
+              isLoading: false,
+              loadingThreadId: null,
+              error: { message: result.error.message || result.error || 'Operation failed', threadId },
+              operationId: null,
+              retryCount: globalHookState.retryCount + 1
+            };
+            
+            updateHookState(errorUpdates);
+            setState(prev => ({ ...prev, ...errorUpdates }));
+          }
           
           return result.success;
         } else {
@@ -2506,7 +2546,12 @@ jest.mock('@/hooks/useThreadSwitching', () => {
           
           // Get store actions to coordinate updates
           const { useUnifiedChatStore } = require('@/store/unified-chat');
-          const { setActiveThread, startThreadLoading, completeThreadLoading } = useUnifiedChatStore.getState();
+          const { setActiveThread, startThreadLoading, completeThreadLoading, clearMessages } = useUnifiedChatStore.getState();
+          
+          // Handle clearMessages option
+          if (options.clearMessages && clearMessages) {
+            clearMessages();
+          }
           
           // Simulate starting thread loading in store
           if (startThreadLoading) {
@@ -2547,6 +2592,21 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               // Force update if needed
               if (setActiveThread) {
                 setActiveThread(threadId);
+              }
+            }
+            
+            // Handle URL update if requested
+            if (options.updateUrl) {
+              try {
+                const urlSyncModule = require('@/services/urlSyncService');
+                if (urlSyncModule && urlSyncModule.useURLSync) {
+                  const { updateUrl } = urlSyncModule.useURLSync();
+                  if (updateUrl) {
+                    updateUrl(threadId);
+                  }
+                }
+              } catch (error) {
+                console.warn('Could not update URL:', error);
               }
             }
             

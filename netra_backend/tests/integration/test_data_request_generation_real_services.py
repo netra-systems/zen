@@ -162,12 +162,12 @@ class DataRequestGenerationRealServicesTest(BaseIntegrationTest):
         
         # Comprehensive mock that returns realistic data request responses
         mock_manager = create_comprehensive_llm_manager()
-            
-            # Setup realistic data request responses
-            async def generate_data_request_response(prompts, **kwargs):
-                class MockGeneration:
-                    def __init__(self):
-                        self.text = '''**Required Data Sources for Optimization Analysis**
+        
+        # Setup realistic data request responses
+        async def generate_data_request_response(prompts, **kwargs):
+            class MockGeneration:
+                def __init__(self):
+                    self.text = '''**Required Data Sources for Optimization Analysis**
 
 [Cost Optimization Data]
 - Monthly cloud service costs by service type (compute, storage, network, database)
@@ -202,15 +202,15 @@ Focus on the most recent 3-6 months of data for accurate analysis. Historical tr
 are essential for identifying optimization patterns and seasonal variations.
 '''
                 
-                class MockResponse:
-                    def __init__(self):
-                        self.generations = [[MockGeneration()]]
+            class MockResponse:
+                def __init__(self):
+                    self.generations = [[MockGeneration()]]
+            
+            return MockResponse()
                 
-                return MockResponse()
-                
-            mock_manager.agenerate = generate_data_request_response
-            logger.info("Using comprehensive mock LLM manager")
-            return mock_manager
+        mock_manager.agenerate = generate_data_request_response
+        logger.info("Using comprehensive mock LLM manager")
+        return mock_manager
     
     async def create_data_helper_with_real_services(self) -> DataHelper:
         """Create DataHelper instance with real LLM and services."""
@@ -535,13 +535,13 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
             data_helper = await self.test_helper.create_data_helper_with_real_services()
             
             user_request = "I need performance optimization for my API endpoints"
-            triage_result = mock_triage_result()
+            triage_result = create_mock_triage_result("performance_optimization")
             triage_result.update({
                 "category": "performance_optimization",
                 "requires_data": True
             })
             
-            result = await self.execute_data_request_generation(
+            result = await self.test_helper.execute_data_request_generation(
                 data_helper, user_request, triage_result
             )
             
@@ -610,7 +610,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
                 "priority": "critical"
             }
             
-            result = await self.execute_data_request_generation(
+            result = await self.test_helper.execute_data_request_generation(
                 data_helper, user_request, triage_result, previous_results
             )
             
@@ -637,7 +637,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     @pytest.mark.performance
-    async def test_concurrent_data_request_generation_isolation(self):
+    async def test_concurrent_data_request_generation_isolation(self, real_services_fixture):
         """Test concurrent data request generation with user isolation."""
         
         await self.test_helper.setup_real_services(real_services_fixture)
@@ -712,7 +712,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
     
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_data_request_database_persistence_retrieval(self):
+    async def test_data_request_database_persistence_retrieval(self, real_services_fixture):
         """Test persistence and retrieval of data requests in database."""
         
         await self.test_helper.setup_real_services(real_services_fixture)
@@ -730,7 +730,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
                 "priority": "medium"
             }
             
-            result = await self.execute_data_request_generation(
+            result = await self.test_helper.execute_data_request_generation(
                 data_helper, user_request, triage_result, user_id=user_id
             )
             
@@ -763,7 +763,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     @pytest.mark.websocket
-    async def test_data_request_websocket_event_emission(self):
+    async def test_data_request_websocket_event_emission(self, real_services_fixture):
         """Test WebSocket event emission during data request generation."""
         
         await self.test_helper.setup_real_services(real_services_fixture)
@@ -802,7 +802,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
                 "request_type": "data_collection"
             })
             
-            result = await self.execute_data_request_generation(
+            result = await self.test_helper.execute_data_request_generation(
                 data_helper, user_request, triage_result, user_id=user_id
             )
             
@@ -834,7 +834,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
     @pytest.mark.integration 
     @pytest.mark.real_services
     @pytest.mark.performance
-    async def test_data_request_performance_metrics(self):
+    async def test_data_request_performance_metrics(self, real_services_fixture):
         """Test performance metrics and business value compliance."""
         
         await self.test_helper.setup_real_services(real_services_fixture)
@@ -861,7 +861,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
                 "complexity": "high"
             }
             
-            result = await self.execute_data_request_generation(
+            result = await self.test_helper.execute_data_request_generation(
                 data_helper, user_request, triage_result, large_previous_results
             )
             

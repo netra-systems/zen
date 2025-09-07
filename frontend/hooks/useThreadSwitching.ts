@@ -63,12 +63,13 @@ export interface UseThreadSwitchingResult {
 /**
  * Default switching options
  */
-const DEFAULT_OPTIONS: Required<ThreadSwitchingOptions> = {
+const DEFAULT_OPTIONS: Required<Omit<ThreadSwitchingOptions, 'force'>> & { force: boolean } = {
   clearMessages: true,
   showLoadingIndicator: true,
   timeoutMs: 5000,
   updateUrl: true,
-  skipUrlUpdate: false
+  skipUrlUpdate: false,
+  force: false
 };
 
 /**
@@ -141,6 +142,20 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
       }
     );
     
+    // Handle operation-level errors that weren't propagated to hook state
+    if (!result.success && result.error) {
+      const operationId = generateOperationId(threadId);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        loadingThreadId: null,
+        operationId: null,
+        error: createThreadError(threadId, result.error!),
+        retryCount: prev.retryCount + 1
+      }));
+      lastFailedThreadRef.current = threadId;
+    }
+    
     return result.success;
   }, [state, storeActions, updateUrl]);
   
@@ -210,7 +225,7 @@ const performThreadSwitchWithManager = async (
   const controller = startLoadingState(threadId, operationId, setState, storeActions, opts, timeoutManager);
   
   try {
-    // Check if operation was aborted
+    // Check if operation was aborted before starting
     if (signal.aborted) {
       throw new Error('Operation aborted');
     }
@@ -220,6 +235,11 @@ const performThreadSwitchWithManager = async (
       baseDelayMs: 1000,
       signal
     });
+    
+    // Check if operation was aborted after loading but before processing result
+    if (signal.aborted) {
+      throw new Error('Operation aborted after loading');
+    }
     
     const success = handleLoadingResult(
       result, 
@@ -235,6 +255,11 @@ const performThreadSwitchWithManager = async (
     
     return { success, threadId };
   } catch (error) {
+    // Don't treat aborted operations as errors - just ignore them silently
+    if (error instanceof Error && error.message.includes('aborted')) {
+      return { success: false, threadId, error: undefined };
+    }
+    
     handleLoadingError(error, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
     return { success: false, error: error as Error };
   }
@@ -313,7 +338,7 @@ const generateOperationId = (threadId: string): string => {
 };
 
 /**
- * Starts loading state for thread switch
+ * Starts loading state for thread switch with atomic updates
  */
 const startLoadingState = (
   threadId: string,
@@ -325,30 +350,38 @@ const startLoadingState = (
 ): AbortController => {
   const controller = new AbortController();
   
-  setState(prev => ({ 
-    ...prev, 
-    isLoading: true, 
-    loadingThreadId: threadId, 
-    operationId,
-    error: null,
-    retryCount: 0
-  }));
-  
   // Register cleanup for this operation
   globalCleanupManager.registerAbortController(operationId, controller);
   
-  // Use startThreadLoading for coordinated state management
-  if (storeActions.startThreadLoading) {
-    storeActions.startThreadLoading(threadId);
-  } else {
-    // Fallback to basic state updates
-    storeActions.setActiveThread?.(threadId);
-    storeActions.setThreadLoading?.(true);
-  }
+  // ATOMIC STATE UPDATE: Update both hook and store state together
+  const atomicUpdate = () => {
+    // Update hook state first
+    setState(prev => ({ 
+      ...prev, 
+      isLoading: true, 
+      loadingThreadId: threadId, 
+      operationId,
+      error: null,
+      retryCount: 0
+    }));
+    
+    // Then update store state with coordinated method
+    if (storeActions.startThreadLoading) {
+      storeActions.startThreadLoading(threadId);
+    } else {
+      // Fallback to basic state updates
+      storeActions.setActiveThread?.(threadId);
+      storeActions.setThreadLoading?.(true);
+    }
+    
+    // Clear messages if needed
+    if (options.clearMessages && storeActions.clearMessages) {
+      storeActions.clearMessages();
+    }
+  };
   
-  if (options.clearMessages && storeActions.clearMessages) {
-    storeActions.clearMessages();
-  }
+  // Perform atomic update
+  atomicUpdate();
   
   // Start timeout tracking
   if (timeoutManager) {
@@ -364,7 +397,7 @@ const startLoadingState = (
 };
 
 /**
- * Handles successful loading result
+ * Handles successful loading result with atomic state updates
  */
 const handleLoadingResult = (
   result: ThreadLoadingResult,
@@ -385,15 +418,31 @@ const handleLoadingResult = (
     
     globalCleanupManager.cleanupThread(operationId);
     
-    // Use completeThreadLoading for coordinated state management
-    if (storeActions.completeThreadLoading) {
-      storeActions.completeThreadLoading(threadId, result.messages);
-    } else {
-      // Fallback to basic state updates
-      storeActions.setActiveThread?.(threadId);
-      storeActions.loadMessages?.(result.messages);
-      storeActions.setThreadLoading?.(false);
-    }
+    // ATOMIC STATE UPDATE: Update both hook and store state together
+    const atomicUpdate = () => {
+      // Update hook state first
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        loadingThreadId: null,
+        operationId: null,
+        lastLoadedThreadId: threadId,
+        error: null
+      }));
+      
+      // Then update store state with coordinated method
+      if (storeActions.completeThreadLoading) {
+        storeActions.completeThreadLoading(threadId, result.messages);
+      } else {
+        // Fallback to basic state updates
+        storeActions.setActiveThread?.(threadId);
+        storeActions.loadMessages?.(result.messages);
+        storeActions.setThreadLoading?.(false);
+      }
+    };
+    
+    // Perform atomic update
+    atomicUpdate();
     
     const loadedEvent = createThreadLoadedEvent(threadId, result.messages);
     if (storeActions.handleWebSocketEvent) {
@@ -405,14 +454,6 @@ const handleLoadingResult = (
       updateUrl(threadId);
     }
     
-    setState(prev => ({
-      ...prev,
-      isLoading: false,
-      loadingThreadId: null,
-      operationId: null,
-      lastLoadedThreadId: threadId
-    }));
-    
     return true;
   } else {
     // Handle the case where the result indicates failure
@@ -422,7 +463,7 @@ const handleLoadingResult = (
 };
 
 /**
- * Handles loading error
+ * Handles loading error with atomic state updates and preserved error messages
  */
 const handleLoadingError = (
   error: unknown,
@@ -433,7 +474,15 @@ const handleLoadingError = (
   storeActions?: any,
   timeoutManager?: any
 ): boolean => {
-  const threadError = createThreadError(threadId, error);
+  // Create thread error while preserving original error message
+  let threadError;
+  if (typeof error === 'string') {
+    threadError = createThreadError(threadId, new Error(error));
+  } else if (error instanceof Error) {
+    threadError = createThreadError(threadId, error);
+  } else {
+    threadError = createThreadError(threadId, new Error('Thread loading failed'));
+  }
   
   // Clear timeout and cleanup on error
   if (timeoutManager) {
@@ -442,22 +491,29 @@ const handleLoadingError = (
   
   globalCleanupManager.cleanupThread(operationId);
   
-  // Reset thread loading state in store and clear active thread on error
-  if (storeActions?.setThreadLoading) {
-    storeActions.setThreadLoading(false);
-  }
-  if (storeActions?.setActiveThread) {
-    storeActions.setActiveThread(null);
-  }
+  // ATOMIC STATE UPDATE: Update both hook and store state together
+  const atomicUpdate = () => {
+    // Update hook state first
+    setState(prev => ({
+      ...prev,
+      isLoading: false,
+      loadingThreadId: null,
+      operationId: null,
+      error: threadError,
+      retryCount: prev.retryCount + 1
+    }));
+    
+    // Reset thread loading state in store and clear active thread on error
+    if (storeActions?.setThreadLoading) {
+      storeActions.setThreadLoading(false);
+    }
+    if (storeActions?.setActiveThread) {
+      storeActions.setActiveThread(null);
+    }
+  };
   
-  setState(prev => ({
-    ...prev,
-    isLoading: false,
-    loadingThreadId: null,
-    operationId: null,
-    error: threadError,
-    retryCount: prev.retryCount + 1
-  }));
+  // Perform atomic update
+  atomicUpdate();
   
   lastFailedThreadRef.current = threadId;
   return false;

@@ -33,10 +33,19 @@ class TestWebSocketEventsStaging(StagingTestBase):
     """Test WebSocket events in staging environment"""
     
     def setup_method(self):
-        """Set up test authentication"""
+        """Set up test authentication - called by pytest lifecycle"""
         super().setup_method() if hasattr(super(), 'setup_method') else None
-        self.auth_helper = TestAuthHelper(environment="staging")
-        self.test_token = self.auth_helper.create_test_token("staging_test_user", "staging@test.netrasystems.ai")
+        self.ensure_auth_setup()
+    
+    def ensure_auth_setup(self):
+        """Ensure authentication is set up regardless of execution method"""
+        if not hasattr(self, 'auth_helper'):
+            self.auth_helper = TestAuthHelper(environment="staging")
+        if not hasattr(self, 'test_token'):
+            self.test_token = self.auth_helper.create_test_token(
+                f"staging_test_user_{int(time.time())}", 
+                "staging@test.netrasystems.ai"
+            )
     
     @staging_test
     async def test_health_check(self):
@@ -351,6 +360,9 @@ if __name__ == "__main__":
     async def run_tests():
         test_class = TestWebSocketEventsStaging()
         test_class.setup_class()
+        
+        # Ensure authentication setup for direct execution (not managed by pytest)
+        test_class.ensure_auth_setup()
         
         try:
             print("=" * 60)

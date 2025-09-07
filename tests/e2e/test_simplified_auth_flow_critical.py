@@ -27,13 +27,8 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 
-@dataclass
-class AuthTestConfig:
-    """Configuration for authentication tests."""
-    auth_service_url: str = "http://localhost:8001"
-    backend_url: str = "http://localhost:8000"
-    timeout: float = 10.0
-    test_user_prefix: str = "test_auth"
+# AuthTestConfig class moved to test_framework.helpers.auth_helpers to maintain SSOT
+from test_framework.helpers.auth_helpers import AuthTestConfig
 
 
 class SimplifiedAuthTester:

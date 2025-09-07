@@ -367,10 +367,39 @@ class CentralConfigurationValidator:
         self._current_environment = None
         
     def get_environment(self) -> Environment:
-        """Get the current deployment environment."""
-        # In test contexts, don't cache the environment value to ensure 
-        # test patches (patch.dict(os.environ, ...)) are respected
+        """Get the current deployment environment using unified detection logic."""
+        # CRITICAL FIX: Use unified environment detection that matches ConfigManager
+        # This prevents validation/config environment mismatches that cause fallback to AppConfig
+        try:
+            # Try to use the unified environment detector for consistency
+            # Import locally to avoid circular dependencies during config bootstrap
+            from netra_backend.app.core.environment_constants import EnvironmentDetector
+            
+            unified_env = EnvironmentDetector.get_environment()
+            
+            # Map backend environment names to central validator environment names
+            env_mapping = {
+                "testing": Environment.TEST,    # Backend uses "testing", central uses "test"
+                "development": Environment.DEVELOPMENT,
+                "staging": Environment.STAGING,
+                "production": Environment.PRODUCTION
+            }
+            
+            if unified_env.lower() in env_mapping:
+                return env_mapping[unified_env.lower()]
+            else:
+                logger.warning(f"Unknown environment from EnvironmentDetector: '{unified_env}', falling back to legacy detection")
+                # Fall through to legacy detection as fallback
+        except ImportError:
+            # If backend modules not available (e.g., during auth service tests), use legacy detection
+            logger.debug("EnvironmentDetector not available, using legacy environment detection")
+        
+        # Legacy fallback - but now with better test context detection
         if self._is_test_context():
+            # Check for pytest context first (matches EnvironmentDetector logic)
+            if self.env_getter("PYTEST_CURRENT_TEST"):
+                return Environment.TEST
+            
             env_str = self.env_getter("ENVIRONMENT", "development").lower()
             try:
                 return Environment(env_str)

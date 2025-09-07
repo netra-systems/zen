@@ -57,6 +57,11 @@ class MockThreadOperationManagerImpl {
   ): Promise<ThreadOperationResult> {
     const operationId = this.generateOperationId(type, threadId);
     
+    // Cancel any existing operation if not the same thread or if force is enabled
+    if (this.currentOperation && (this.currentOperation.threadId !== threadId || options.force)) {
+      await this.cancelCurrentOperation();
+    }
+    
     // Create operation
     const operation: ThreadOperation = {
       id: operationId,
@@ -74,6 +79,16 @@ class MockThreadOperationManagerImpl {
     try {
       // Actually execute the provided function
       const result = await executor(operation.abortController!.signal);
+      
+      // Check if operation was aborted during execution
+      if (operation.abortController!.signal.aborted) {
+        this.updateOperation(operationId, { 
+          status: 'cancelled',
+          error: new Error('Operation aborted during execution')
+        });
+        this.addToHistory(operation);
+        return { success: false, error: new Error('Operation aborted during execution') };
+      }
       
       // Update operation status based on result
       this.updateOperation(operationId, { 

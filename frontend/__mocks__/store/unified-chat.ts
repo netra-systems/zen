@@ -43,18 +43,22 @@ const initializeMockFunctions = (state: any) => {
   });
   
   state.startThreadLoading = jest.fn((threadId) => {
+    // Ensure atomic state update for thread loading start
     state.activeThreadId = threadId;
     state.isThreadLoading = true;
     state.threadLoading = true;
     state.messages = [];
+    console.log(`Mock store: startThreadLoading(${threadId}) - activeThreadId now: ${state.activeThreadId}`);
     return state;
   });
   
   state.completeThreadLoading = jest.fn((threadId, messages) => {
+    // Ensure atomic state update for thread loading completion
     state.activeThreadId = threadId;
     state.isThreadLoading = false;
     state.threadLoading = false;
     state.messages = messages || [];
+    console.log(`Mock store: completeThreadLoading(${threadId}) - activeThreadId now: ${state.activeThreadId}, messages: ${state.messages.length}`);
     return state;
   });
   

@@ -196,18 +196,27 @@ def pytest_collection_modifyitems(config, items):
 # Hook to provide memory usage report at end of session  
 def pytest_sessionfinish(session, exitstatus):
     """Report memory usage at end of test session."""
-    print("\n=== Memory Usage Report ===")
-    loaded_modules = get_loaded_fixture_modules()
-    print(f"Loaded fixture modules: {', '.join(loaded_modules)}")
-    
     try:
-        import psutil
-        process = psutil.Process(os.getpid())
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        print(f"Peak memory usage: {memory_mb:.1f} MB")
-    except ImportError:
-        print("Memory tracking not available (psutil required)")
-    
-    # Report on fixture loading efficiency
-    if len(loaded_modules) > 3:
-        print("NOTE: Multiple fixture modules loaded - this is normal for integration/E2E tests")
+        # Check if stdout is available before attempting to print
+        import sys
+        if hasattr(sys.stdout, 'closed') and sys.stdout.closed:
+            return  # Skip reporting if stdout is closed
+        
+        print("\n=== Memory Usage Report ===")
+        loaded_modules = get_loaded_fixture_modules()
+        print(f"Loaded fixture modules: {', '.join(loaded_modules)}")
+        
+        try:
+            import psutil
+            process = psutil.Process(os.getpid())
+            memory_mb = process.memory_info().rss / 1024 / 1024
+            print(f"Peak memory usage: {memory_mb:.1f} MB")
+        except ImportError:
+            print("Memory tracking not available (psutil required)")
+        
+        # Report on fixture loading efficiency
+        if len(loaded_modules) > 3:
+            print("NOTE: Multiple fixture modules loaded - this is normal for integration/E2E tests")
+    except (ValueError, OSError):
+        # Silently skip if there are I/O issues
+        pass

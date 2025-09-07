@@ -1262,9 +1262,9 @@ class NetraTestingConfig(AppConfig):
                 ),
             }
         
-        # Load OAuth credentials from environment
-        oauth_client_id = env.get('OAUTH_GOOGLE_CLIENT_ID_ENV')
-        oauth_client_secret = env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV')
+        # Load OAuth credentials from environment (test environment uses TEST suffix)
+        oauth_client_id = env.get('GOOGLE_OAUTH_CLIENT_ID_TEST')
+        oauth_client_secret = env.get('GOOGLE_OAUTH_CLIENT_SECRET_TEST')
         
         if oauth_client_id or oauth_client_secret:
             if 'google_cloud' not in data:

@@ -23,10 +23,19 @@ class TestAgentPipelineStaging(StagingTestBase):
     """Test agent pipeline in staging environment"""
     
     def setup_method(self):
-        """Set up test authentication"""
+        """Set up test authentication - called by pytest lifecycle"""
         super().setup_method() if hasattr(super(), 'setup_method') else None
-        self.auth_helper = TestAuthHelper(environment="staging")
-        self.test_token = self.auth_helper.create_test_token("staging_pipeline_test_user", "staging_pipeline@test.netrasystems.ai")
+        self.ensure_auth_setup()
+    
+    def ensure_auth_setup(self):
+        """Ensure authentication is set up regardless of execution method"""
+        if not hasattr(self, 'auth_helper'):
+            self.auth_helper = TestAuthHelper(environment="staging")
+        if not hasattr(self, 'test_token'):
+            self.test_token = self.auth_helper.create_test_token(
+                f"staging_pipeline_test_user_{int(time.time())}", 
+                "staging_pipeline@test.netrasystems.ai"
+            )
     
     @staging_test
     async def test_real_agent_discovery(self):
@@ -685,6 +694,9 @@ if __name__ == "__main__":
     async def run_tests():
         test_class = TestAgentPipelineStaging()
         test_class.setup_class()
+        
+        # Ensure authentication setup for direct execution (not managed by pytest)
+        test_class.ensure_auth_setup()
         
         try:
             print("=" * 60)
