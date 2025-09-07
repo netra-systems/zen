@@ -247,9 +247,9 @@ class JWTTestHelper:
             
             # Diagnostic logging to confirm secret usage
             secret_hash = hashlib.md5(staging_secret.encode()).hexdigest()[:16]
-            print(f"🔧 STAGING TOKEN FIX: Using staging secret from config/staging.env")
-            print(f"🔧 STAGING TOKEN FIX: Secret hash {secret_hash} (length: {len(staging_secret)})")
-            print(f"🔧 STAGING TOKEN FIX: This MUST match what staging WebSocket service uses")
+            print(f"[STAGING TOKEN FIX] Using staging secret from config/staging.env")
+            print(f"[STAGING TOKEN FIX] Secret hash {secret_hash} (length: {len(staging_secret)})")
+            print(f"[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses")
             
             # Create payload with proper structure for staging
             payload = self.create_valid_payload()
@@ -266,13 +266,13 @@ class JWTTestHelper:
             
             # Verify token was created correctly
             user_display = payload[JWTConstants.SUBJECT][:8] + "..." if len(payload[JWTConstants.SUBJECT]) > 8 else payload[JWTConstants.SUBJECT]
-            print(f"✅ STAGING TOKEN CREATED: {user_display} with staging secret (hash: {secret_hash})")
+            print(f"[SUCCESS] STAGING TOKEN CREATED: {user_display} with staging secret (hash: {secret_hash})")
             
             return token
                 
         except Exception as e:
-            print(f"❌ CRITICAL: Staging JWT token creation failed: {e}")
-            print(f"❌ This will cause WebSocket 403 authentication failures in staging!")
+            print(f"[CRITICAL ERROR] Staging JWT token creation failed: {e}")
+            print(f"[CRITICAL ERROR] This will cause WebSocket 403 authentication failures in staging!")
             return None
     
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:

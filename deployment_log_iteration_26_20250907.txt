@@ -1,6 +1,0 @@
-usage: deploy_to_gcp.py [-h] --project PROJECT [--region REGION]
-                        [--skip-build] [--build-local] [--run-checks]
-                        [--cleanup] [--service-account SERVICE_ACCOUNT]
-                        [--service SERVICE] [--skip-post-tests] [--no-traffic]
-                        [--no-alpine] [--skip-validation]
-deploy_to_gcp.py: error: unrecognized arguments: --services backend auth

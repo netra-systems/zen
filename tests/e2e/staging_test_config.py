@@ -119,9 +119,9 @@ class StagingConfig:
             
             # Diagnostic logging to confirm secret usage
             secret_hash = hashlib.md5(staging_secret.encode()).hexdigest()[:16]
-            print(f"🔧 STAGING CONFIG TOKEN FIX: Using staging secret from config/staging.env")
-            print(f"🔧 STAGING CONFIG TOKEN FIX: Secret hash {secret_hash} (length: {len(staging_secret)})")
-            print(f"🔧 STAGING CONFIG TOKEN FIX: This MUST match staging WebSocket service secret")
+            print(f"[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env")
+            print(f"[STAGING CONFIG TOKEN FIX] Secret hash {secret_hash} (length: {len(staging_secret)})")
+            print(f"[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret")
             
             # Create payload with proper structure for staging
             payload = {
@@ -139,13 +139,13 @@ class StagingConfig:
             
             # Verify token was created correctly
             user_display = payload['sub'][:8] + "..." if len(payload['sub']) > 8 else payload['sub']
-            print(f"✅ STAGING CONFIG TOKEN CREATED: {user_display} with staging secret (hash: {secret_hash})")
+            print(f"[SUCCESS] STAGING CONFIG TOKEN CREATED: {user_display} with staging secret (hash: {secret_hash})")
             
             return token
                 
         except Exception as e:
-            print(f"❌ CRITICAL: Staging JWT token creation failed: {e}")
-            print(f"❌ This will cause WebSocket 403 authentication failures in staging!")
+            print(f"[CRITICAL ERROR] Staging JWT token creation failed: {e}")
+            print(f"[CRITICAL ERROR] This will cause WebSocket 403 authentication failures in staging!")
             return None
 
 

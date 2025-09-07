@@ -92,6 +92,8 @@ class TestAuthHelper:
         same secret resolution as the backend UserContextExtractor, fixing the
         WebSocket 403 authentication failures.
         
+        ASYNCIO FIX: Handle both sync and async contexts to prevent event loop conflicts.
+        
         Args:
             user_id: The user ID for the token
             email: Optional email (defaults to {user_id}@netrasystems.ai)
@@ -106,9 +108,29 @@ class TestAuthHelper:
         if email is None:
             email = f"{user_id}@netrasystems.ai"
         
-        # Use the staging JWT token creation from JWTTestHelper
+        # CRITICAL FIX: Handle both sync and async contexts
         import asyncio
-        return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
+        
+        try:
+            # Check if we're already in an event loop
+            loop = asyncio.get_running_loop()
+            # If we have a running loop, create a task and run it
+            task = loop.create_task(self.jwt_helper.get_staging_jwt_token(user_id, email))
+            # Use asyncio.wait_for to get the result synchronously from the async context
+            # This is a hack but necessary for the sync interface with async implementation
+            import concurrent.futures
+            import threading
+            
+            def run_async():
+                return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
+            
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(run_async)
+                return future.result(timeout=10)  # 10 second timeout
+                
+        except RuntimeError:
+            # No running event loop, safe to use asyncio.run()
+            return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
     
     def create_test_token_with_permissions(
         self, 

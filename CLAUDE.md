@@ -59,6 +59,7 @@ Especially when dealing with apparent regression issues.
 12. On Windows use UTF-8 encoding for encoding issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
 14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
+15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. NO EXCEPTIONS. This ensures multi-user isolation works. See [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
@@ -226,6 +227,15 @@ ALWAYS use real services for testing. If they appear to not be available start o
 
 CHEATING ON TESTS = ABOMINATION
 ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
+
+**🚨 CRITICAL: E2E TESTS WITH 0-SECOND EXECUTION = AUTOMATIC HARD FAILURE**
+Any e2e test that returns in 0.00s is automatically failed by the test runner. This indicates:
+- Tests are not actually executing (being skipped/mocked)
+- Missing async/await handling
+- Not connecting to real services
+- Authentication is being bypassed
+See [`reports/staging/STAGING_100_TESTS_REPORT.md`](reports/staging/STAGING_100_TESTS_REPORT.md) for context.
+The unified test runner enforces this with `_validate_e2e_test_timing()`.
 
 ### 3.5. MANDATORY BUG FIXING PROCESS:
 

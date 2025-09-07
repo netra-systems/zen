@@ -8,12 +8,81 @@ import pytest
 import httpx
 import websockets
 import json
-from typing import Optional, Dict, Any
+import time
+import functools
+from typing import Optional, Dict, Any, Callable
 from tests.e2e.staging_test_config import get_staging_config, is_staging_available
 
 
+def track_test_timing(test_func: Callable) -> Callable:
+    """Decorator to track test execution time and fail on 0-second e2e tests.
+    
+    CRITICAL: All e2e tests that return in 0 seconds are automatic hard failures.
+    This indicates tests are not actually executing or are being mocked.
+    See reports/staging/STAGING_100_TESTS_REPORT.md
+    """
+    @functools.wraps(test_func)
+    async def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        test_name = test_func.__name__
+        
+        try:
+            # Run the actual test
+            result = await test_func(*args, **kwargs)
+            
+            # Calculate execution time
+            execution_time = time.perf_counter() - start_time
+            
+            # CRITICAL: Fail any e2e test that executes in under 0.01 seconds
+            if execution_time < 0.01:
+                pytest.fail(
+                    f"\n{'='*60}\n"
+                    f"🚨 E2E TEST FAILED: ZERO-SECOND EXECUTION\n"
+                    f"{'='*60}\n"
+                    f"Test: {test_name}\n"
+                    f"Execution Time: {execution_time:.4f}s\n\n"
+                    f"This test executed in effectively 0 seconds, indicating:\n"
+                    f"  - Test is not actually running\n"
+                    f"  - Test is being skipped/mocked\n"
+                    f"  - Missing async/await handling\n"
+                    f"  - Not connecting to real staging services\n\n"
+                    f"ALL E2E TESTS MUST:\n"
+                    f"  1. Connect to real staging services\n"
+                    f"  2. Perform actual network I/O\n"
+                    f"  3. Use proper authentication (JWT/OAuth)\n"
+                    f"  4. Take measurable time to execute\n\n"
+                    f"See STAGING_100_TESTS_REPORT.md for context\n"
+                    f"{'='*60}"
+                )
+            
+            # Warn if test is suspiciously fast (under 0.1 seconds)
+            elif execution_time < 0.1:
+                print(
+                    f"\n⚠️  WARNING: Test '{test_name}' executed in {execution_time:.3f}s\n"
+                    f"   This is suspiciously fast for an e2e test connecting to staging.\n"
+                    f"   Verify the test is actually performing real operations.\n"
+                )
+            
+            # Log normal execution time
+            else:
+                print(f"[✓] Test '{test_name}' completed in {execution_time:.2f}s")
+            
+            return result
+            
+        except Exception as e:
+            execution_time = time.perf_counter() - start_time
+            print(f"[✗] Test '{test_name}' failed after {execution_time:.2f}s: {e}")
+            raise
+    
+    return wrapper
+
+
 class StagingTestBase:
-    """Base class for staging environment tests"""
+    """Base class for staging environment tests
+    
+    CRITICAL: All e2e tests MUST take measurable time to execute.
+    Tests returning in 0 seconds are automatic hard failures.
+    """
     
     @classmethod
     def setup_class(cls):

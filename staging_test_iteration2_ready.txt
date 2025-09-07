@@ -1,6 +1,0 @@
-======================================================================
-STAGING E2E TEST SUITE - TOP 10 AGENT TESTS
-======================================================================
-Running 10 test modules against staging environment
-
-[ERROR] Staging environment is not available!

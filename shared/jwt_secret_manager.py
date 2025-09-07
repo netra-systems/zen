@@ -79,20 +79,7 @@ class JWTSecretManager:
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
-            # 3. Try legacy JWT_SECRET (third priority)
-            jwt_secret = self.env.get("JWT_SECRET")
-            if jwt_secret:
-                logger.warning("Using legacy JWT_SECRET (DEPRECATED - use JWT_SECRET_KEY or environment-specific)")
-                self._cached_secret = jwt_secret.strip()
-                return self._cached_secret
-            
-            # 4. Try other common JWT environment variables
-            for fallback_key in ["AUTH_JWT_SECRET", "SECRET_KEY"]:
-                jwt_secret = self.env.get(fallback_key)
-                if jwt_secret:
-                    logger.warning(f"Using fallback JWT secret: {fallback_key} (use JWT_SECRET_KEY instead)")
-                    self._cached_secret = jwt_secret.strip()
-                    return self._cached_secret
+            # 3. No more legacy fallbacks - must use proper env vars
             
             # 5. Environment-specific fallbacks for development/testing only
             if environment in ["testing", "development", "test"]:
