@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 class DockerTestEnvironmentType(Enum):
     """Docker test environment types."""
     ISOLATED = "isolated"          # Single test isolation
-    SHARED = "shared"              # Shared across test suite
+    DEDICATED = "dedicated"        # Dedicated test environment
     INTEGRATION = "integration"    # Integration test environment
     PERFORMANCE = "performance"    # Performance testing environment
     PARALLEL = "parallel"          # Parallel execution environment
@@ -997,7 +997,7 @@ _global_docker_utilities: Dict[str, DockerTestUtility] = {}
 
 
 async def get_docker_test_utility(
-    environment_type: DockerTestEnvironmentType = DockerTestEnvironmentType.SHARED
+    environment_type: DockerTestEnvironmentType = DockerTestEnvironmentType.DEDICATED
 ) -> DockerTestUtility:
     """Get or create a global Docker test utility."""
     global _global_docker_utilities
