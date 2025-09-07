@@ -152,6 +152,17 @@ class PerformanceOptimizationManager:
             "report_timestamp": datetime.utcnow(),
             "metrics_analyzed": len(self._metrics_history)
         }
+    
+    async def shutdown(self) -> None:
+        """Gracefully shutdown the performance optimization manager."""
+        try:
+            # Clear metrics history to free memory
+            self._metrics_history.clear()
+            self._optimization_recommendations.clear()
+            logger.info("PerformanceOptimizationManager shutdown complete")
+        except Exception as e:
+            logger.error(f"Error during PerformanceOptimizationManager shutdown: {e}")
+            # Continue shutdown even if error occurs
 
 
 # Global instance

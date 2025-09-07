@@ -61,7 +61,8 @@ jest.mock('@/lib/logger', () => ({
 
 describe('BUG REPRODUCTION: Thread State Synchronization', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Instead, reset specific mocks we need to reset
     resetMockState();
     
     // Reset ThreadOperationManager
@@ -69,6 +70,18 @@ describe('BUG REPRODUCTION: Thread State Synchronization', () => {
     if (ThreadOperationManager?.reset) {
       ThreadOperationManager.reset();
     }
+    
+    // Reset only the calls, not the implementation
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockClear();
+    
+    // Re-set up retry manager mock implementation
+    const { executeWithRetry } = require('@/lib/retry-manager');
+    executeWithRetry.mockClear();
+    executeWithRetry.mockImplementation(async (fn, options) => {
+      const result = await fn();
+      return result;
+    });
   });
 
   it('BUG: Hook state and store state get out of sync', async () => {

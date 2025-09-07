@@ -1,0 +1,158 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\run_staging_tests.py", line 244, in <module>
+    sys.exit(asyncio.run(run_all_tests()))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\run_staging_tests.py", line 105, in run_all_tests
+    module_name, success, message = await run_test_module(module_name)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\run_staging_tests.py", line 47, in run_test_module
+    instance.setup_class()
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging_test_base.py", line 27, in setup_class
+    pytest.skip("Staging environment is not available")
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\outcomes.py", line 159, in skip
+    raise Skipped(msg=reason, allow_module_level=allow_module_level)
+Skipped: Staging environment is not available
+======================================================================
+STAGING E2E TEST SUITE - TOP 10 AGENT TESTS
+======================================================================
+Running 10 test modules against staging environment
+
+[OK] Staging environment is available
+
+[1/10] Running test_1_websocket_events_staging...
+[PASS] Service discovery working
+[PASS] MCP config available
+[PASS] MCP servers endpoint working
+Concurrent WebSocket test results:
+  Total connections: 7
+  Successful: 0
+  Auth required: 0
+  Timeouts: 0
+  Errors: 7
+  Total test duration: 0.004s
+  Average connection time: 0.001s
+[PASS] Health checks successful
+[INFO] WebSocket error: 'TestWebSocketEventsStaging' object has no attribute 'test_token'
+Test duration: 0.000s
+Events received: 0
+  [FAIL] 2 passed, 3 failed: test_concurrent_websocket_real: Test too fast (0.004s) for 7 concurrent connections!; test_websocket_connection: 'TestWebSocketEventsStaging' object has no attribute 'test_token'; test_websocket_event_flow_real: Test completed too quickly (0.000s) - might be fake!
+
+[2/10] Running test_2_message_flow_staging...
+[PASS] Endpoint /api/health responding
+[PASS] Endpoint /api/discovery/services responding
+[INFO] Not Found Test: 404
+[INFO] Invalid ID Test: 403
+[INFO] Unauthorized Execution Test: 422
+[INFO] Security Test: 403
+[INFO] Missing Auth Test: 403
+Error handling test results:
+  API error tests: 5
+  WebSocket error tests: 1
+  Test duration: 0.826s
+[PASS] Real error handling flow tested
+[INFO] /api/messages: 403
+[INFO] /api/threads: 403
+[INFO] /api/conversations: 404
+[INFO] /api/chat: 404
+[INFO] /api/chat/messages: 404
+Message API test duration: 1.018s
+[INFO] Accessible endpoints: 2/5
+[PASS] Real message API endpoints tested
+[INFO] List threads: 403 (auth required)
+[INFO] List conversations: 404 (auth required)
+[INFO] List messages: 403 (auth required)
+Thread management test results:
+  List threads: 403
+  List conversations: 404
+  List messages: 403
+Test duration: 0.698s
+[PASS] Real thread management tested
+[INFO] WebSocket error: 'TestMessageFlowStaging' object has no attribute 'test_token'
+Message flow test results:
+  Connection established: False
+  Messages sent: 0
+  Events received: 0
+  Auth error detected: False
+  Test duration: 0.000s
+  [FAIL] 4 passed, 1 failed: test_real_websocket_message_flow: Test too fast (0.000s) - not a real message flow test!
+
+[3/10] Running test_3_agent_pipeline_staging...
+[INFO] /api/mcp/config: 200 - 649 bytes
+[INFO] /api/agents/config: 404
+[INFO] /api/configuration: 404
+[INFO] /api/settings: 422
+Agent configuration test results:
+  /api/mcp/config: 200 - Agent config: True
+  /api/agents/config: 404 - Agent config: False
+  /api/configuration: 404 - Agent config: False
+  /api/settings: 422 - Agent config: False
+Test duration: 0.792s
+[SUCCESS] Found 1 accessible configuration endpoints
+[PASS] Real agent configuration tested
+[INFO] /api/mcp/servers: 200 - 1
+[INFO] /api/agents: 404 (auth required)
+[INFO] /api/agents/list: 404 (auth required)
+[INFO] /api/mcp/config: 200 - config
+[INFO] /api/discovery/agents: 404 (auth required)
+Agent discovery test results:
+  Endpoints tested: 5
+  Successful responses: 2
+  Agents discovered: 1
+  Test duration: 0.955s
+[PASS] Real agent discovery tested
+[INFO] /api/agents/status: 404
+[INFO] /api/agents/active: 404
+[INFO] /api/execution/status: 404
+[INFO] /api/jobs: 404
+[INFO] /api/tasks: 404
+[INFO] WebSocket lifecycle error: 'TestAgentPipelineStaging' object has no attribute 'test_token'
+Agent lifecycle monitoring results:
+  Endpoints tested: 5
+  Agent status found: False
+  WebSocket events: 0
+  Test duration: 0.947s
+[PASS] Real agent lifecycle monitoring tested
+[INFO] Pipeline execution error: 'TestAgentPipelineStaging' object has no attribute 'test_token'
+Agent pipeline test results:
+  Execution attempted: False
+  Pipeline events received: 0
+  Auth error received: False
+  Test duration: 0.000s
+[INFO] Nonexistent Agent Error: 404
+[INFO] Invalid Execution Request: 422
+[INFO] Invalid Pipeline ID: 404
+[INFO] Wrong HTTP Method: 405
+Pipeline error handling results:
+  API error tests: 4
+  WebSocket error tests: 1
+  Proper API error responses: 0/4
+  Test duration: 0.865s
+[PASS] Real pipeline error handling tested
+[INFO] /api/metrics: 404
+[INFO] /api/metrics/agents: 404
+[INFO] /api/metrics/pipeline: 404
+[INFO] /api/stats: 404
+[INFO] /api/health/metrics: 404
+[INFO] /api/performance: 404
+Pipeline metrics test results:
+  Metrics endpoints tested: 6
+  Endpoints with metrics: 0
+  Performance test iterations: 5
+  Successful requests: 1/5
+  Response time - Avg: 0.611s, Min: 0.611s, Max: 0.611s
+  Total test duration: 28.562s
+[PASS] Real pipeline metrics tested
+  [FAIL] 5 passed, 1 failed: test_real_agent_pipeline_execution: Test too fast (0.000s) for pipeline execution test!
+
+[4/10] Running test_4_agent_orchestration_staging...

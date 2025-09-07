@@ -65,7 +65,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent

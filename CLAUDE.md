@@ -48,12 +48,7 @@ Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING
    - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
 7. **MULTI-USER** The system is MULTI-USER.
-8. **🚨 CRITICAL WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
-   - **ALL entry points need factory patterns** - WebSocket, REST, gRPC, background tasks
-   - **WebSocket is PRIMARY path (90% traffic)** - Not just "transport layer"
-   - **Silent data leakage is a bug** - User A sees User B's data with no errors
-   - **UserExecutionContext** - Every message/request MUST have isolation
-   - **NO SINGLETONS for user data** - Factory patterns are NOT optional
+8. **WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
 9. **PARAMOUNT IMPORTANCE** Always look for the "error behind the error". Example: AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md
 Often the face value error message is masking other errors, sometimes the real root.
 Look for the "error behind the error" up to 10 times until true true root cause.
@@ -62,6 +57,7 @@ Especially when dealing with apparent regression issues.
 11. NEVER ADD "extra" things. bad: [fallback, 'reliability', etc.] without express direction. ALL "mixin" type features or "enterprise" type must be requested directly, be SSOT compliant. 
 12. On Windows use UTF-8 encoding for encoding issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
+14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)

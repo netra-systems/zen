@@ -234,7 +234,8 @@ describe('Thread Switching E2E Integration', () => {
   let sendMessageSpy: jest.Mock;
   
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Instead, reset specific mocks we need to reset
     
     // Reset the mock store to initial state
     if (typeof resetMockState === 'function') {
@@ -309,7 +310,9 @@ describe('Thread Switching E2E Integration', () => {
   });
   
   afterEach(() => {
-    jest.clearAllMocks();
+    // Reset only specific spies
+    mockSwitchToThread.mockClear();
+    sendMessageSpy?.mockClear();
   });
   
   it('should use useThreadSwitching hook when clicking a thread', async () => {

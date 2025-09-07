@@ -7,7 +7,7 @@ import pytest
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.services.auth_service import AuthService

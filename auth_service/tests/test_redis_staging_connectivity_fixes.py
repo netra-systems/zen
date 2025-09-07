@@ -16,7 +16,7 @@
     # REMOVED_SYNTAX_ERROR: from typing import Optional
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
     # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.redis_manager import AuthRedisManager, auth_redis_manager

@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 

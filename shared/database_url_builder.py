@@ -31,21 +31,9 @@ class DatabaseURLBuilder:
         """Initialize with environment variables."""
         self.env = env_vars
         self.environment = env_vars.get("ENVIRONMENT", "development").lower()
-        
-        # Parse DATABASE_URL first if present to populate components
-        database_url = env_vars.get("DATABASE_URL")
-        parsed_components = {}
-        if database_url and database_url.strip():
-            parsed_components = self._parse_database_url(database_url.strip())
-        
-        # DATABASE_URL takes priority over individual vars when both are present
-        # This implements proper priority: individual POSTGRES_* vars < DATABASE_URL
-        self.postgres_host = parsed_components.get("host", env_vars.get("POSTGRES_HOST", ""))
-        self.postgres_port = parsed_components.get("port", env_vars.get("POSTGRES_PORT", "5432"))
-        self.postgres_db = parsed_components.get("database", env_vars.get("POSTGRES_DB", ""))
-        self.postgres_user = parsed_components.get("username", env_vars.get("POSTGRES_USER", ""))
-        self.postgres_password = parsed_components.get("password", env_vars.get("POSTGRES_PASSWORD", ""))
-        
+
+        # ALWAYS build rom component parts never directly take database url from env
+
         # Initialize sub-builders
         self.cloud_sql = self.CloudSQLBuilder(self)
         self.tcp = self.TCPBuilder(self)
@@ -54,58 +42,6 @@ class DatabaseURLBuilder:
         self.docker = self.DockerBuilder(self)
         self.staging = self.StagingBuilder(self)
         self.production = self.ProductionBuilder(self)
-    
-    def _parse_database_url(self, database_url: str) -> Dict[str, str]:
-        """
-        Parse DATABASE_URL to extract individual components.
-        
-        Args:
-            database_url: Database URL to parse (e.g., postgresql://user:pass@host:5432/db)
-            
-        Returns:
-            Dict with extracted components: host, port, database, username, password
-        """
-        try:
-            # Normalize postgres:// to postgresql:// first
-            if database_url.startswith("postgres://"):
-                database_url = database_url.replace("postgres://", "postgresql://", 1)
-            
-            # Remove SQLAlchemy driver prefixes for parsing
-            clean_url = database_url
-            if "+asyncpg://" in clean_url:
-                clean_url = clean_url.replace("+asyncpg://", "://")
-            elif "+psycopg2://" in clean_url:
-                clean_url = clean_url.replace("+psycopg2://", "://")
-            elif "+psycopg://" in clean_url:
-                clean_url = clean_url.replace("+psycopg://", "://")
-            
-            parsed = urlparse(clean_url)
-            
-            # Handle Cloud SQL URLs where host is in query parameters
-            host = parsed.hostname or ""
-            if not host and parsed.query:
-                # Check for host parameter in query string (Cloud SQL format)
-                from urllib.parse import parse_qs
-                query_params = parse_qs(parsed.query)
-                if 'host' in query_params and query_params['host']:
-                    host = query_params['host'][0]
-            
-            components = {
-                "host": host,
-                "port": str(parsed.port) if parsed.port else "5432",
-                "database": parsed.path.lstrip("/") if parsed.path else "",
-                "username": parsed.username or "",
-                "password": parsed.password or ""
-            }
-            
-            logger.debug(f"Parsed DATABASE_URL components: host={components['host']}, "
-                        f"user={components['username']}, db={components['database']}")
-            
-            return components
-            
-        except Exception as e:
-            logger.error(f"Failed to parse DATABASE_URL '{database_url}': {e}")
-            return {}
     
     def is_docker_environment(self) -> bool:
         """
@@ -140,6 +76,38 @@ class DatabaseURLBuilder:
             pass
         
         return False
+    
+    # ===== POSTGRES ENVIRONMENT VARIABLE PROPERTIES =====
+    
+    @property
+    def postgres_host(self) -> Optional[str]:
+        """Get PostgreSQL host from environment variables."""
+        return self.env.get("POSTGRES_HOST")
+    
+    @property 
+    def postgres_port(self) -> Optional[str]:
+        """Get PostgreSQL port from environment variables."""
+        return self.env.get("POSTGRES_PORT") or "5432"
+    
+    @property
+    def postgres_user(self) -> Optional[str]:
+        """Get PostgreSQL user from environment variables."""
+        return self.env.get("POSTGRES_USER")
+    
+    @property
+    def postgres_password(self) -> Optional[str]:
+        """Get PostgreSQL password from environment variables."""
+        return self.env.get("POSTGRES_PASSWORD")
+    
+    @property
+    def postgres_db(self) -> Optional[str]:
+        """Get PostgreSQL database name from environment variables."""
+        return self.env.get("POSTGRES_DB")
+    
+    @property
+    def postgres_url(self) -> Optional[str]:
+        """Get PostgreSQL URL from environment variables."""
+        return self.env.get("POSTGRES_URL")
     
     def apply_docker_hostname_resolution(self, host: str) -> str:
         """

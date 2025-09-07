@@ -9,7 +9,6 @@ Reference: OAuth Regression Analysis 20250905
 
 import os
 import pytest
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider

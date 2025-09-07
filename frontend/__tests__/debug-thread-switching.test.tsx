@@ -77,12 +77,25 @@ jest.mock('@/lib/thread-operation-manager', () => ({
 
 describe('Debug Thread Switching', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Instead, reset specific mocks we need to reset
     
     // Reset the mock store to initial state
     if (typeof resetMockState === 'function') {
       resetMockState();
     }
+    
+    // Reset only the calls, not the implementation
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockClear();
+    
+    // Re-set up retry manager mock implementation
+    const { executeWithRetry } = require('@/lib/retry-manager');
+    executeWithRetry.mockClear();
+    executeWithRetry.mockImplementation(async (fn, options) => {
+      const result = await fn();
+      return result;
+    });
     
     console.log('=== BEFORE EACH ===');
     console.log('Mock store state:', useUnifiedChatStore.getState());

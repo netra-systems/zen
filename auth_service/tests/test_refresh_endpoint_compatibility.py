@@ -8,7 +8,7 @@ import jwt
 import pytest
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.main import app

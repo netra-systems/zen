@@ -15,7 +15,7 @@ Fix: Always use self.get_redirect_uri() to ensure the redirect URI is properly s
 import pytest
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 from auth_service.auth_core.auth_environment import AuthEnvironment
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 

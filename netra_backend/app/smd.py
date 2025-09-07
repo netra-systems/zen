@@ -817,24 +817,54 @@ class StartupOrchestrator:
         """Initialize database connection - CRITICAL."""
         from netra_backend.app.db.postgres import initialize_postgres
         from netra_backend.app.startup_module import _ensure_database_tables_exist
+        from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+        from shared.isolated_environment import get_env
+        
+        # Get environment-aware timeout configuration
+        environment = get_env().get("ENVIRONMENT", "development")
+        timeout_config = get_database_timeout_config(environment)
+        
+        self.logger.info(f"Initializing database for {environment} environment with timeout config: {timeout_config}")
+        
+        # Use environment-specific timeout - Cloud SQL needs more time than local PostgreSQL
+        initialization_timeout = timeout_config["initialization_timeout"]
+        table_setup_timeout = timeout_config["table_setup_timeout"]
         
         # No graceful mode - fail if database fails
-        async_session_factory = await asyncio.wait_for(
-            asyncio.to_thread(initialize_postgres),
-            timeout=30.0
-        )
-        
-        if async_session_factory is None:
-            raise DeterministicStartupError("Database initialization returned None")
-        
-        self.app.state.db_session_factory = async_session_factory
-        self.app.state.database_available = True
-        
-        # Ensure tables exist - no graceful mode
-        await asyncio.wait_for(
-            _ensure_database_tables_exist(self.logger, graceful_startup=False),
-            timeout=15.0
-        )
+        try:
+            self.logger.debug(f"Starting database initialization with {initialization_timeout}s timeout...")
+            async_session_factory = await asyncio.wait_for(
+                asyncio.to_thread(initialize_postgres),
+                timeout=initialization_timeout
+            )
+            
+            if async_session_factory is None:
+                raise DeterministicStartupError("Database initialization returned None")
+            
+            self.app.state.db_session_factory = async_session_factory
+            self.app.state.database_available = True
+            self.logger.info("Database session factory successfully initialized")
+            
+            # Ensure tables exist - no graceful mode
+            self.logger.debug(f"Starting table setup with {table_setup_timeout}s timeout...")
+            await asyncio.wait_for(
+                _ensure_database_tables_exist(self.logger, graceful_startup=False),
+                timeout=table_setup_timeout
+            )
+            self.logger.info("Database table setup completed successfully")
+            
+        except asyncio.TimeoutError as e:
+            error_msg = (
+                f"Database initialization timeout after {initialization_timeout}s in {environment} environment. "
+                f"This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and "
+                f"Cloud SQL instance accessibility."
+            )
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg) from e
+        except Exception as e:
+            error_msg = f"Database initialization failed in {environment} environment: {e}"
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg) from e
     
     async def _initialize_redis(self) -> None:
         """Initialize Redis connection - CRITICAL."""

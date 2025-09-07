@@ -6,8 +6,7 @@ import pytest
 from datetime import datetime, UTC
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import TestDatabaseManager as DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from auth_service.auth_core.services.auth_service import AuthService
@@ -24,7 +23,7 @@ class TestRegistrationRegression:
         service = AuthService()
         
         # Mock database connection
-        mock_db_connection = TestDatabaseManager().get_session()
+        mock_db_connection = DatabaseManager().get_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         mock_repo = AsyncNone  # TODO: Use real service instance
         
@@ -61,7 +60,7 @@ class TestRegistrationRegression:
         service = AuthService()
         
         # Mock database connection
-        mock_db_connection = TestDatabaseManager().get_session()
+        mock_db_connection = DatabaseManager().get_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         mock_repo = AsyncNone  # TODO: Use real service instance
         
@@ -171,7 +170,7 @@ class TestRegistrationRegression:
         service = AuthService()
         
         # Mock database to inspect what gets stored
-        mock_db_connection = TestDatabaseManager().get_session()
+        mock_db_connection = DatabaseManager().get_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         stored_user = None
         

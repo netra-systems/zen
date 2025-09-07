@@ -509,16 +509,28 @@ async def setup_database_connections(app: FastAPI) -> None:
         return
     
     # CRITICAL FIX: Wrap database initialization in timeout to prevent server startup hanging
+    # Get environment-aware timeout configuration
+    from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+    from shared.isolated_environment import get_env
+    
+    environment = get_env().get("ENVIRONMENT", "development")
+    timeout_config = get_database_timeout_config(environment)
+    
+    initialization_timeout = timeout_config["initialization_timeout"]
+    table_setup_timeout = timeout_config["table_setup_timeout"]
+    
+    logger.info(f"Database setup for {environment} environment - init timeout: {initialization_timeout}s, table timeout: {table_setup_timeout}s")
+    
     try:
-        logger.debug("Calling initialize_postgres() with 15s timeout...")
+        logger.debug(f"Calling initialize_postgres() with {initialization_timeout}s timeout...")
         async_session_factory = await asyncio.wait_for(
             asyncio.create_task(_async_initialize_postgres(logger)),
-            timeout=15.0
+            timeout=initialization_timeout
         )
         logger.debug(f"initialize_postgres() returned: {async_session_factory}")
         
         if async_session_factory is None:
-            error_msg = "initialize_postgres() returned None - database initialization failed"
+            error_msg = f"initialize_postgres() returned None - database initialization failed in {environment} environment"
             if graceful_startup:
                 logger.error(f"{error_msg} - using mock database for graceful degradation")
                 app.state.db_session_factory = None  # Signal to use mock/fallback
@@ -529,10 +541,10 @@ async def setup_database_connections(app: FastAPI) -> None:
                 raise RuntimeError(error_msg)
         
         # Ensure database tables exist with timeout protection
-        logger.debug("Ensuring database tables exist with 10s timeout...")
+        logger.debug(f"Ensuring database tables exist with {table_setup_timeout}s timeout...")
         await asyncio.wait_for(
             _ensure_database_tables_exist(logger, graceful_startup),
-            timeout=10.0
+            timeout=table_setup_timeout
         )
             
         app.state.db_session_factory = async_session_factory

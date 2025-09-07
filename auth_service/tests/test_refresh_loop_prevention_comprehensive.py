@@ -5,7 +5,7 @@
 import asyncio
 import time
 import uuid
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 import jwt

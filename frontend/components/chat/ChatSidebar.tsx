@@ -54,6 +54,18 @@ export const ChatSidebar: React.FC = () => {
     if (threadId === activeThreadId) {
       return;
     }
+
+    // Prevent switching if processing is in progress
+    if (isProcessing) {
+      console.warn('Cannot switch threads while processing is in progress');
+      return;
+    }
+
+    // Prevent switching if already loading another thread
+    if (threadSwitchState.isLoading) {
+      console.warn('Thread switching already in progress');
+      return;
+    }
     
     // Use ThreadOperationManager to ensure atomic operation
     const result = await ThreadOperationManager.startOperation(
@@ -84,7 +96,12 @@ export const ChatSidebar: React.FC = () => {
           updateUrl: true
         });
         
-        return { success, threadId };
+        // Return the expected structure for ThreadOperationManager
+        if (success) {
+          return { success: true, threadId };
+        } else {
+          return { success: false, error: new Error(`Failed to switch to thread ${threadId}`) };
+        }
       },
       {
         timeoutMs: 5000,

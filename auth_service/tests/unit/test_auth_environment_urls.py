@@ -15,7 +15,7 @@
     # REMOVED_SYNTAX_ERROR: import os
     # REMOVED_SYNTAX_ERROR: from typing import Dict, Any
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.auth_environment import AuthEnvironment

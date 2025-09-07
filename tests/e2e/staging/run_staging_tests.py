@@ -46,6 +46,13 @@ async def run_test_module(module_name: str) -> Tuple[str, bool, str]:
         instance = test_class()
         instance.setup_class()
         
+        # Call setup_method if it exists (for authentication setup)
+        if hasattr(instance, 'setup_method'):
+            instance.setup_method()
+        # Also ensure auth setup if available
+        if hasattr(instance, 'ensure_auth_setup'):
+            instance.ensure_auth_setup()
+        
         # Run all test methods
         test_methods = [m for m in dir(instance) if m.startswith("test_")]
         passed = 0

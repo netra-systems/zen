@@ -41,7 +41,7 @@
         # REMOVED_SYNTAX_ERROR: import time
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
-        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+        # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment

@@ -58,7 +58,11 @@ jest.mock('@/services/threadLoadingService', () => ({
 
 describe('New Chat URL Update Integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Reset only specific mocks that need resetting
+    mockRouter.push.mockClear();
+    mockRouter.replace.mockClear();
+    mockRouter.prefetch.mockClear();
   });
   
   it('should update URL when creating and switching to new thread', async () => {

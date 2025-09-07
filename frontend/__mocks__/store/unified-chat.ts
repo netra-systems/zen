@@ -146,8 +146,22 @@ export const useUnifiedChatStore = Object.assign(
     },
     getState: () => mockState,
     subscribe: jest.fn((selector: any, listener: any) => {
-      // Simple mock implementation - just return a function to unsubscribe
-      return jest.fn();
+      // Track the initial value
+      let lastValue = selector ? selector(mockState) : mockState;
+      
+      // Create an interval to check for changes
+      const interval = setInterval(() => {
+        const currentValue = selector ? selector(mockState) : mockState;
+        if (currentValue !== lastValue) {
+          lastValue = currentValue;
+          if (listener) {
+            listener(currentValue);
+          }
+        }
+      }, 10); // Check every 10ms
+      
+      // Return unsubscribe function that clears the interval
+      return () => clearInterval(interval);
     })
   }
 );

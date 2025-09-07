@@ -247,25 +247,28 @@ class AsyncDatabase:
             "pool_reset_on_return": "rollback",  # Safe connection resets
         }
         
-        # Add pool sizing for non-NullPool connections
+        # Add pool sizing for non-NullPool connections with environment-aware optimization
         if pool_class != NullPool:
             config = get_unified_config()
+            
+            # Get environment-aware database configuration
+            from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
+            environment = get_env().get("ENVIRONMENT", "development")
+            cloud_sql_config = get_cloud_sql_optimized_config(environment)
+            
+            # Use Cloud SQL optimized configuration if available
+            pool_config = cloud_sql_config["pool_config"]
             engine_args.update({
-                "pool_size": max(config.db_pool_size, 10),  # Minimum enforced for resilience
-                "max_overflow": max(config.db_max_overflow, 20),  # Minimum enforced for resilience
-                "pool_timeout": max(config.db_pool_timeout, 45),  # Shorter timeout for faster feedback
-                "pool_recycle": config.db_pool_recycle,
+                "pool_size": pool_config["pool_size"],
+                "max_overflow": pool_config["max_overflow"],
+                "pool_timeout": pool_config["pool_timeout"],
+                "pool_recycle": pool_config["pool_recycle"],
+                "pool_pre_ping": pool_config["pool_pre_ping"],
+                "pool_reset_on_return": pool_config["pool_reset_on_return"],
             })
             
-            # Add connection arguments for PostgreSQL
-            engine_args["connect_args"] = {
-                "server_settings": {
-                    "application_name": "netra_async_db",
-                    "tcp_keepalives_idle": "600",
-                    "tcp_keepalives_interval": "30",
-                    "tcp_keepalives_count": "3",
-                }
-            }
+            # Use Cloud SQL optimized connection arguments
+            engine_args["connect_args"] = cloud_sql_config["connect_args"]
         
         self._engine = create_async_engine(self.db_url, **engine_args)
         self._session_factory = async_sessionmaker(

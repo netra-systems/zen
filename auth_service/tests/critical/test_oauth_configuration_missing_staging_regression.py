@@ -24,7 +24,7 @@ import os
 import pytest
 from typing import Dict, Any, List
 from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import - using OAuthManager instead
 from shared.isolated_environment import IsolatedEnvironment
 
 # REAL SERVICES: Use actual conftest setup (no mocks per CLAUDE.md)

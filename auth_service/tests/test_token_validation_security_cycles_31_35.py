@@ -15,7 +15,7 @@
     # REMOVED_SYNTAX_ERROR: import time
     # REMOVED_SYNTAX_ERROR: import jwt
     # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta, UTC
-    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.core.token_validator import TokenValidator

@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import - using AuthService and JWTHandler instead
 from shared.isolated_environment import IsolatedEnvironment
 
 import jwt
