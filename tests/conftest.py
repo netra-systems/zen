@@ -28,6 +28,15 @@ import pytest
 # Always import core base fixtures (minimal memory impact)
 from tests.conftest_base import *
 
+# CRITICAL FIX: Set OAuth test credentials to prevent CentralConfigurationValidator errors
+# Must be done early during conftest loading before any validation occurs
+from shared.isolated_environment import get_env
+_env = get_env()
+if not _env.get("GOOGLE_OAUTH_CLIENT_ID_TEST"):
+    _env.set("GOOGLE_OAUTH_CLIENT_ID_TEST", "test-oauth-client-id-for-automated-testing", source="main_conftest_oauth_fix")
+if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
+    _env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "test-oauth-client-secret-for-automated-testing", source="main_conftest_oauth_fix")
+
 # Import mock fixtures (lightweight, good for most unit tests)
 from tests.conftest_mocks import *
 

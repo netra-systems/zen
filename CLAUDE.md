@@ -1,5 +1,5 @@
 # 🚨 ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
-ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work.
+ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work. Have patience. Slow down. Search for existing methods.
 
 ## IMPORTANT: YOU **MUST** DO YOUR BEST WORK. 
 
@@ -28,6 +28,7 @@ Your primary mission is to get existing systems fully operational. **Maintain th
 **IMPORTANT: In the case of conflict between existing state of code and this document, this document wins.**
 
 CRUCIAL: ULTRA THINK DEEPLY.
+NEVER CREATE NEW SCRIPTS. ALWAYS USE EXISTING SSOT METHODS OR UPDATE AND IMPROVE SSOT METHODS.
 
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
@@ -45,7 +46,7 @@ The system has a lot of async, websockets, and other patterns that require heavy
 Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
-   - **NO silent fallbacks** - Hard failures are better than wrong environment configs leaking
+   - **SILENT FAILURES = ABOMINATION** - Hard failures are better than wrong environment configs leaking
    - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
 7. **MULTI-USER** The system is MULTI-USER.
@@ -71,7 +72,7 @@ Especially when dealing with apparent regression issues.
 Expect everything to fail. Add conditional error logging by default whenever possible.
 Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
 Make all errors loud.
-Protect against silent errors. Avoid "fallbacks" unless expressly part of named design and class.
+Protect against silent errors. NEVER MAKE "fallbacks" unless expressly part of named design and class.
 
 -----
 

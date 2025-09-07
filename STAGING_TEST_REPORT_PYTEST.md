@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 08:47:18
+**Generated:** 2025-09-07 09:08:16
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 3.01 seconds
+- **Duration:** 3.88 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_websocket_event_flow_real | FAIL failed | 0.347s | test_1_websocket_events_staging.py |
+| test_websocket_event_flow_real | FAIL failed | 0.418s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_websocket_event_flow_real
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.347s
+- **Duration:** 0.418s
 - **Error:** tests\e2e\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,7 +42,7 @@ tests\e2e\staging\test_1_websocket_events_staging.py:222: in test_websocket_even
 test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
 
 ==================================================
-0 passed, 1 failed in 3.01s
+0 passed, 1 failed in 3.88s
 ```
 
 ## Test Coverage Matrix

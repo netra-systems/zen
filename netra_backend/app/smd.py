@@ -200,21 +200,25 @@ class StartupOrchestrator:
         """Phase 2: DEPENDENCIES - Core service managers and keys."""
         self.logger.info("PHASE 2: DEPENDENCIES - Core Services")
         
-        # Step 4: Key Manager (CRITICAL)
+        # Step 4: SSOT Auth Validation (CRITICAL - Must be first)
+        await self._validate_auth_configuration()
+        self.logger.info("  ✓ Step 4: Auth configuration validated")
+        
+        # Step 5: Key Manager (CRITICAL)
         self._initialize_key_manager()
         if not hasattr(self.app.state, 'key_manager') or self.app.state.key_manager is None:
             raise DeterministicStartupError("Key manager initialization failed")
-        self.logger.info("  ✓ Step 4: Key manager initialized")
+        self.logger.info("  ✓ Step 5: Key manager initialized")
         
-        # Step 5: LLM Manager (CRITICAL)
+        # Step 6: LLM Manager (CRITICAL)
         self._initialize_llm_manager()
         if not hasattr(self.app.state, 'llm_manager') or self.app.state.llm_manager is None:
             raise DeterministicStartupError("LLM manager initialization failed")
-        self.logger.info("  ✓ Step 5: LLM manager initialized")
+        self.logger.info("  ✓ Step 6: LLM manager initialized")
         
-        # Step 6: Apply startup fixes (CRITICAL)
+        # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
-        self.logger.info("  ✓ Step 6: Startup fixes applied")
+        self.logger.info("  ✓ Step 7: Startup fixes applied")
     
     async def _phase3_database_setup(self) -> None:
         """Phase 3: DATABASE - Database connections and schema."""
@@ -317,55 +321,55 @@ class StartupOrchestrator:
         """Phase 7: FINALIZE - Final validation and optional services."""
         self.logger.info("PHASE 7: FINALIZE - Validation & Optional Services")
         
-        # Step 22: Connection monitoring (CRITICAL)
+        # Step 23: Connection monitoring (CRITICAL)
         await self._start_connection_monitoring()
-        self.logger.info("  ✓ Step 22: Connection monitoring started")
+        self.logger.info("  ✓ Step 23: Connection monitoring started")
         
-        # Step 23a: Apply startup validation fixes before validation
+        # Step 24a: Apply startup validation fixes before validation
         await self._apply_startup_validation_fixes()
-        self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
+        self.logger.info("  ✓ Step 24a: Startup validation fixes applied")
         
-        # Step 23b: Run comprehensive startup health checks (CRITICAL)
+        # Step 24b: Run comprehensive startup health checks (CRITICAL)
         from netra_backend.app.startup_health_checks import validate_startup_health
         self.logger.info("  🏥 Running comprehensive startup health checks...")
         try:
             health_ok = await validate_startup_health(self.app, fail_on_critical=True)
             if health_ok:
-                self.logger.info("  ✓ Step 23b: All critical services passed health checks")
+                self.logger.info("  ✓ Step 24b: All critical services passed health checks")
             else:
-                self.logger.warning("  ⚠️ Step 23b: Some optional services are degraded but continuing")
+                self.logger.warning("  ⚠️ Step 24b: Some optional services are degraded but continuing")
         except RuntimeError as e:
-            self.logger.error(f"  ❌ Step 23b: Critical services failed health checks: {e}")
+            self.logger.error(f"  ❌ Step 24b: Critical services failed health checks: {e}")
             raise DeterministicStartupError(f"Health check validation failed: {e}")
         
-        # Step 23c: Comprehensive startup validation
+        # Step 24c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23c: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 24c: Comprehensive validation completed")
         
-        # Step 24: Critical path validation (CHAT FUNCTIONALITY)
+        # Step 25: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
-        self.logger.info("  ✓ Step 24: Critical path validation completed")
+        self.logger.info("  ✓ Step 25: Critical path validation completed")
         
-        # Step 25: ClickHouse (optional)
+        # Step 26: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 25: ClickHouse initialized")
+            self.logger.info("  ✓ Step 26: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 25: ClickHouse skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 26: ClickHouse skipped: {e}")
         
-        # Step 26: Performance Manager (optional)
+        # Step 27: Performance Manager (optional)
         try:
             await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 26: Performance manager initialized")
+            self.logger.info("  ✓ Step 27: Performance manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 26: Performance manager skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 27: Performance manager skipped: {e}")
         
-        # Step 27: Advanced Monitoring (optional)
+        # Step 28: Advanced Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 27: Advanced monitoring started")
+            self.logger.info("  ✓ Step 28: Advanced monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 27: Advanced monitoring skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 28: Advanced monitoring skipped: {e}")
     
     # DEPRECATED METHODS - keeping temporarily for reference during transition
     async def _phase4_integration_enhancement(self) -> None:
@@ -807,6 +811,32 @@ class StartupOrchestrator:
         """Validate environment configuration."""
         from netra_backend.app.core.environment_validator import validate_environment_at_startup
         validate_environment_at_startup()
+    
+    async def _validate_auth_configuration(self) -> None:
+        """
+        Validate auth configuration using SSOT validator.
+        This is CRITICAL and must happen early in startup to prevent auth vulnerabilities.
+        """
+        try:
+            from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+            
+            self.logger.info("  🔐 Running SSOT auth validation...")
+            await validate_auth_at_startup()
+            self.logger.info("  ✅ SSOT auth validation passed - auth system is secure")
+            
+        except ImportError as e:
+            # Missing auth validator is CRITICAL
+            self.logger.error(f"  ❌ Failed to import auth validator: {e}")
+            raise DeterministicStartupError(
+                "Auth validator module not found - cannot verify auth security"
+            ) from e
+            
+        except Exception as e:
+            # Any auth validation failure is CRITICAL
+            self.logger.error(f"  ❌ CRITICAL AUTH VALIDATION FAILURE: {e}")
+            raise DeterministicStartupError(
+                f"Auth validation failed - system cannot start: {e}"
+            ) from e
     
     async def _run_migrations(self) -> None:
         """Run database migrations if needed."""

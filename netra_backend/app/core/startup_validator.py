@@ -313,10 +313,10 @@ class StartupValidator:
     def _validate_configuration(self) -> Tuple[bool, str]:
         """Validate configuration is properly loaded."""
         try:
-            from netra_backend.app.core.configuration import settings
+            from netra_backend.app.config import settings
             
             # Check critical settings exist
-            critical_settings = ['APP_ENV', 'LOG_LEVEL']
+            critical_settings = ['environment']  # Use actual SSOT configuration attributes
             
             missing = []
             for setting in critical_settings:
@@ -326,7 +326,7 @@ class StartupValidator:
             if missing:
                 return False, f"Missing settings: {', '.join(missing)}"
             
-            return True, f"Configuration loaded (env: {settings.APP_ENV})"
+            return True, f"Configuration loaded (env: {settings.environment})"
             
         except Exception as e:
             return False, f"Configuration error: {str(e)}"

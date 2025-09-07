@@ -855,20 +855,8 @@ class AuthServiceClient:
                 if self._is_valid_test_token(jwt_token):
                     logger.warning("Using emergency test token fallback due to auth service unavailability")
                     
-                    # Try to decode JWT token to extract user data
-                    jwt_data = self._decode_test_jwt(jwt_token)
-                    if jwt_data:
-                        return {
-                            "valid": True,
-                            "user_id": jwt_data.get("sub", "test_user"),
-                            "email": jwt_data.get("email", "test@example.com"),
-                            "permissions": jwt_data.get("permissions", ["user"]),
-                            "fallback_used": True,
-                            "source": "emergency_test_fallback",
-                            "warning": "Emergency fallback validation - limited functionality"
-                        }
-                    
-                    # Fallback to default values if JWT decode fails
+                    # SSOT COMPLIANCE: No local JWT decoding - use default test values
+                    # The auth service is the ONLY entity that should decode JWT tokens
                     return {
                         "valid": True,
                         "user_id": "test_user",
@@ -937,22 +925,6 @@ class AuthServiceClient:
         except Exception:
             return False
     
-    def _decode_test_jwt(self, jwt_token: str) -> Optional[Dict[str, Any]]:
-        """Decode test JWT token to extract user data."""
-        try:
-            import jwt
-            import os
-            
-            # Use same secret loading logic as backend middleware for consistency
-            from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
-            secret = get_jwt_secret()
-            
-            # Decode the JWT token
-            decoded = jwt.decode(jwt_token, secret, algorithms=["HS256"], options={"verify_exp": False})
-            return decoded
-        except Exception as e:
-            logger.debug(f"Failed to decode test JWT token: {e}")
-            return None
 
     async def close(self):
         """Close HTTP client."""
@@ -1013,19 +985,6 @@ class AuthServiceClient:
             })()
         return None
     
-    def _decode_token(self, token: str) -> Dict:
-        """Decode JWT token - PRODUCTION: This should only be used with proper JWT secret from auth service."""
-        # PRODUCTION SECURITY: Never allow direct token decoding in production
-        if self._is_production_environment():
-            logger.error("PRODUCTION SECURITY: Direct token decoding is forbidden in production")
-            logger.error("All token validation must go through the auth service")
-            return {"error": "Direct token decoding forbidden in production"}
-        
-        # SECURITY: In staging/production, JWT tokens should only be validated by the auth service
-        # This method exists for backward compatibility but should not be used for actual authentication
-        logger.error("_decode_token called - this method should not be used in production or staging")
-        logger.error("All token validation must go through the auth service")
-        return {"error": "Direct token decoding not allowed - use auth service"}
     
     def _check_permission_match(self, required_permission: str, user_permissions: List[str]) -> bool:
         """Check if user has the required permission."""
