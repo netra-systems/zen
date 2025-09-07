@@ -29,7 +29,7 @@ import pytest
 from dataclasses import dataclass, asdict
 from concurrent.futures import ThreadPoolExecutor
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))

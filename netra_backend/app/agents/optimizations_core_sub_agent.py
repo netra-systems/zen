@@ -14,9 +14,9 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.prompts import optimizations_core_prompt_template
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.utils import extract_json_from_response
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
@@ -31,7 +31,7 @@ class OptimizationsCoreSubAgent(BaseAgent):
     """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, 
-                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 tool_dispatcher: Optional[UnifiedToolDispatcher] = None,
                  websocket_manager: Optional[Any] = None):
         """Initialize OptimizationsCoreSubAgent.
         

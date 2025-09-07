@@ -21,12 +21,7 @@ from dataclasses import dataclass
 
 # CRITICAL: Import session management for per-request isolation using TYPE_CHECKING to avoid circular imports
 if TYPE_CHECKING:
-    from netra_backend.app.database.session_manager import (
-        DatabaseSessionManager,
-        SessionScopeValidator,
-        SessionIsolationError,
-        SessionManagerError
-    )
+    pass  # Legacy session manager imports removed - using SSOT database module
 
 # NEW: Split architecture imports
 from netra_backend.app.models.user_execution_context import UserExecutionContext
@@ -66,32 +61,21 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
-# Lazy import functions to avoid circular imports
-def _get_session_scope_validator():
-    """Lazy import of SessionScopeValidator to avoid circular imports."""
-    from netra_backend.app.database.session_manager import SessionScopeValidator
-    return SessionScopeValidator
+# Session isolation error class
+class SessionIsolationError(Exception):
+    """Raised when session isolation is violated."""
+    pass
 
-def _get_session_isolation_error():
-    """Lazy import of SessionIsolationError to avoid circular imports.""" 
-    from netra_backend.app.database.session_manager import SessionIsolationError
-    return SessionIsolationError
+# Basic session validation functions (replacing legacy lazy imports)
+def validate_session_is_request_scoped_simple(session: AsyncSession) -> None:
+    """Simple session validation for request scope."""
+    if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+        raise SessionIsolationError("Session must be request-scoped, not globally stored")
+    logger.debug(f"Session {id(session)} validated as request-scoped")
 
-def _get_managed_session():
-    """Lazy import of managed_session to avoid circular imports."""
-    from netra_backend.app.database.session_manager import managed_session
-    return managed_session
-
-def _validate_agent_session_isolation(agent):
-    """Lazy import wrapper for validate_agent_session_isolation."""
-    from netra_backend.app.database.session_manager import validate_agent_session_isolation
-    return validate_agent_session_isolation(agent)
-
-# Session validation utilities - ENHANCED with SessionScopeValidator
+# Session validation utilities - Simplified SSOT implementation
 def validate_session_is_request_scoped(session: AsyncSession, context: str = "unknown") -> None:
     """Validate that a session is request-scoped and not globally stored.
-    
-    ENHANCED: Now uses SessionScopeValidator for comprehensive validation.
     
     Args:
         session: Database session to validate
@@ -101,21 +85,12 @@ def validate_session_is_request_scoped(session: AsyncSession, context: str = "un
         SessionIsolationError: If session appears to be globally stored
     """
     try:
-        # Use new validator for comprehensive checking
-        SessionScopeValidator = _get_session_scope_validator()
-        SessionScopeValidator.validate_request_scoped(session)
-        
-        # Legacy validation for backward compatibility
-        if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
-            logger.error(f"CRITICAL: Globally stored session detected in {context}")
-            SessionIsolationError = _get_session_isolation_error()
-            raise SessionIsolationError(f"Session in {context} must be request-scoped, not globally stored")
-        
+        # Use simplified validation
+        validate_session_is_request_scoped_simple(session)
         logger.debug(f"Validated session {id(session)} is request-scoped for {context}")
         
     except Exception as e:
         # Check if it's the SessionIsolationError we want to re-raise
-        SessionIsolationError = _get_session_isolation_error()
         if isinstance(e, SessionIsolationError):
             raise
         logger.error(f"Session validation failed in {context}: {e}")
@@ -446,13 +421,15 @@ def create_user_execution_context(user_id: str,
             validate_session_is_request_scoped(db_session, "create_user_execution_context")
             
             # Tag session with user context for validation
-            SessionScopeValidator = _get_session_scope_validator()
-            SessionScopeValidator.tag_session(
-                session=db_session,
-                user_id=user_id,
-                run_id=run_id or str(uuid.uuid4()),
-                request_id=str(uuid.uuid4())
-            )
+            if hasattr(db_session, 'info'):
+                if not db_session.info:
+                    db_session.info = {}
+                db_session.info.update({
+                    'user_id': user_id,
+                    'run_id': run_id or str(uuid.uuid4()),
+                    'request_id': str(uuid.uuid4()),
+                    'tagged_at': time.time()
+                })
         
         # Generate run_id if not provided
         if not run_id:

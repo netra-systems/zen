@@ -17,12 +17,11 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.core.middleware_setup import ( )
+from netra_backend.app.core.middleware_setup import setup_cors_middleware
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
-setup_cors_middleware
 
 
 # REMOVED_SYNTAX_ERROR: class TestSyntaxFix:

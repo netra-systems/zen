@@ -33,6 +33,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
 import pytest
+from unittest.mock import Mock
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -49,9 +50,10 @@ from shared.isolated_environment import get_env
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def create_test_request_with_origin(origin: str, method: str = "GET") -> Mock:
+    def create_test_request_with_origin(self, origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
         # Mock: Generic component isolation for controlled unit testing
+        request = Mock()
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
         request.method = method
         request.headers = {"origin": origin}

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tools.data_helper import DataHelper
@@ -30,7 +30,7 @@ class DataHelperAgent(BaseAgent):
     to enable optimization strategies when data is insufficient.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, context: Optional['UserExecutionContext'] = None):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher, context: Optional['UserExecutionContext'] = None):
         """Initialize the Data Helper Agent.
         
         Args:

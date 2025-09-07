@@ -39,7 +39,7 @@ from loguru import logger
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Import configuration components
-from netra_backend.app.startup_module import validate_critical_environment_variables
+from scripts.environment_validator_core import EnvironmentValidatorCore
 from test_framework.docker_test_base import DockerTestBase
 
 

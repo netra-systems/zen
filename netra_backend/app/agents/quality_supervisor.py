@@ -26,7 +26,7 @@ from netra_backend.app.agents.quality_fallback import QualityFallbackManager
 from netra_backend.app.agents.quality_hooks import QualityHooksManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.fallback_response_service import FallbackResponseService
@@ -45,7 +45,7 @@ class QualityEnhancedSupervisor:
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
                  websocket_manager: 'WebSocketManager',
-                 tool_dispatcher: ToolDispatcher,
+                 tool_dispatcher: UnifiedToolDispatcher,
                  enable_quality_gates: bool = True,
                  strict_mode: bool = False):
         """Initialize quality-enhanced supervisor with modular components"""

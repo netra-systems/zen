@@ -545,6 +545,22 @@ class RedisManager:
         
         return await self._attempt_connection()
     
+    def reinitialize_configuration(self):
+        """Reinitialize Redis configuration from environment variables.
+        
+        This method re-reads configuration from environment variables and prepares
+        for a fresh connection attempt. Useful for tests that modify environment
+        variables after initialization.
+        """
+        logger.info("Reinitializing Redis configuration from environment")
+        # Force disconnection to ensure fresh connection attempt
+        self._connected = False
+        self._consecutive_failures = 0
+        self._current_retry_delay = self._base_retry_delay
+        
+        # Configuration will be re-read in next connection attempt
+        logger.info("Redis configuration reinitialized")
+    
     async def reset_circuit_breaker(self):
         """Reset the circuit breaker to closed state.
         

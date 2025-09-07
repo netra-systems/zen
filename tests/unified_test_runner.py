@@ -9,10 +9,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-# CRITICAL: Setup Windows encoding BEFORE importing anything else that might create loggers
+# CRITICAL: Delay Windows encoding setup to prevent I/O errors during Docker initialization
+# We'll call setup_windows_encoding() after Docker manager is initialized
+_windows_encoding_setup_pending = False
 try:
     from shared.windows_encoding import setup_windows_encoding
-    setup_windows_encoding()
+    _windows_encoding_setup_pending = True
 except ImportError:
     pass  # Continue if Windows encoding not available
 
@@ -604,6 +606,16 @@ class UnifiedTestRunner:
         print(f"[INFO] Using Docker environment: type={env_type.value}, alpine={use_alpine}, "
               f"rebuild={rebuild_images}, backend_only={rebuild_backend_only}, production={use_production}")
         
+        # CRITICAL: Now that Docker manager is initialized, apply Windows encoding setup
+        global _windows_encoding_setup_pending
+        if _windows_encoding_setup_pending:
+            try:
+                setup_windows_encoding()
+                _windows_encoding_setup_pending = False
+                print("[INFO] Windows encoding setup completed after Docker initialization")
+            except Exception as e:
+                print(f"[WARNING] Windows encoding setup failed: {e}")
+        
         # Acquire environment with locking
         try:
             self.docker_environment, self.docker_ports = self.docker_manager.acquire_environment()
@@ -648,7 +660,7 @@ class UnifiedTestRunner:
                 
                 try:
                     # Check if containers exist but are unhealthy
-                    existing_containers = self.docker_manager._detect_existing_netra_containers()
+                    existing_containers = self.docker_manager._detect_existing_dev_containers()
                     if existing_containers:
                         print(f"  Found {len(existing_containers)} existing containers")
                         
@@ -678,10 +690,18 @@ class UnifiedTestRunner:
                         
                         # Try to start services again
                         if env_type == "test":
+                            # First try normal environment
                             success = self.docker_manager.start_test_environment(
                                 use_alpine=use_alpine,
                                 rebuild=rebuild_images
                             )
+                            
+                            # If that fails, try minimal environment as fallback
+                            if not success:
+                                print("\n🔄 Attempting minimal test environment (infrastructure only)...")
+                                success = self.docker_manager.start_test_environment(
+                                    minimal_only=True
+                                )
                         else:
                             success = self.docker_manager.start_dev_environment(
                                 rebuild=rebuild_images
@@ -1797,16 +1817,43 @@ class UnifiedTestRunner:
                     cleanup_subprocess(process, timeout=5, force=True)
                     raise
                 except Exception as e:
-                    print(f"[WARNING] Process communication error: {e}")
-                    print(f"[DEBUG] Error type: {type(e)}")
-                    print(f"[DEBUG] Error args: {e.args}")
-                    import traceback
-                    print(f"[DEBUG] Full traceback: {traceback.format_exc()}")
+                    # CRITICAL: Robust error handling for Windows I/O issues in process communication
+                    error_messages = [
+                        f"[WARNING] Process communication error: {e}",
+                        f"[DEBUG] Error type: {type(e)}",
+                        f"[DEBUG] Error args: {e.args}"
+                    ]
+                    
+                    # Try to get full traceback safely
+                    try:
+                        import traceback
+                        error_messages.append(f"[DEBUG] Full traceback: {traceback.format_exc()}")
+                    except Exception:
+                        error_messages.append("[DEBUG] Unable to get full traceback")
+                    
+                    # Print error messages with I/O error resilience
+                    for msg in error_messages:
+                        try:
+                            print(msg)
+                        except Exception:
+                            # If print fails, try direct stderr write
+                            try:
+                                if hasattr(sys.stderr, 'write') and not getattr(sys.stderr, 'closed', False):
+                                    sys.stderr.write(msg + '\n')
+                                    sys.stderr.flush()
+                            except Exception:
+                                # Complete failure - continue without logging
+                                pass
+                    
                     # Try to clean up gracefully
                     try:
                         cleanup_subprocess(process, timeout=2)
                     except Exception as cleanup_e:
-                        print(f"[DEBUG] Cleanup error: {cleanup_e}")
+                        try:
+                            print(f"[DEBUG] Cleanup error: {cleanup_e}")
+                        except Exception:
+                            # Ignore if we can't print the cleanup error
+                            pass
                     raise
                 finally:
                     # Always ensure process is cleaned up

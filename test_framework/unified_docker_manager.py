@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import time
 import threading
 import hashlib
@@ -85,6 +86,71 @@ def _get_logger():
     if _logger_instance is None:
         _logger_instance = logging.getLogger(__name__)
     return _logger_instance
+
+
+def _get_safe_subprocess_env():
+    """Get Windows-safe environment variables for subprocess calls."""
+    import sys  # Import sys here to avoid import-time issues
+    env = os.environ.copy()
+    
+    # On Windows, ensure proper encoding for subprocess calls
+    if sys.platform == "win32":
+        env['PYTHONIOENCODING'] = 'utf-8'
+        env['PYTHONUTF8'] = '1'
+        env['LANG'] = 'C.UTF-8'
+        env['LC_ALL'] = 'C.UTF-8'
+    
+    return env
+
+
+def _run_subprocess_safe(cmd, **kwargs):
+    """Run subprocess with Windows-safe environment and error handling."""
+    import sys  # Import sys here for Windows error handling
+    try:
+        # Use safe environment for all subprocess calls
+        if 'env' not in kwargs:
+            kwargs['env'] = _get_safe_subprocess_env()
+        
+        # Ensure capture_output and text are set for consistent behavior
+        if 'capture_output' not in kwargs:
+            kwargs['capture_output'] = True
+        if 'text' not in kwargs:
+            kwargs['text'] = True
+        
+        # On Windows, handle encoding explicitly
+        if sys.platform == "win32" and 'encoding' not in kwargs:
+            kwargs['encoding'] = 'utf-8'
+            kwargs['errors'] = 'replace'
+        
+        return subprocess.run(cmd, **kwargs)
+        
+    except Exception as e:
+        # CRITICAL: Robust error handling for Windows I/O issues
+        # Avoid logging errors that could cause secondary "I/O operation on closed file" issues
+        try:
+            _get_logger().warning(f"Subprocess call failed: {cmd} - {e}")
+        except Exception:
+            # If logging fails (common on Windows with I/O issues), use direct print with error handling
+            error_msg = f"Subprocess call failed: {cmd} - {e}"
+            try:
+                # Try to write to stderr with fallback
+                if hasattr(sys.stderr, 'write') and not getattr(sys.stderr, 'closed', False):
+                    sys.stderr.write(f"WARNING: {error_msg}\n")
+                    sys.stderr.flush()
+                else:
+                    # Last resort: use print() which has its own fallback handling
+                    print(f"WARNING: {error_msg}")
+            except Exception:
+                # Complete failure - silently continue to prevent cascade failures
+                pass
+        
+        # Return a mock result object for failed calls
+        class MockResult:
+            def __init__(self):
+                self.returncode = 1
+                self.stdout = ""
+                self.stderr = str(e) if e else "Unknown subprocess error"
+        return MockResult()
 
 
 @dataclass
@@ -447,9 +513,9 @@ class UnifiedDockerManager:
         """
         # Try to detect from running containers first
         try:
-            result = subprocess.run(
+            result = _run_subprocess_safe(
                 ["docker", "ps", "--format", "{{.Names}}", "--filter", "status=running"],
-                capture_output=True, text=True, timeout=10
+                timeout=10
             )
             if result.returncode == 0:
                 container_names = result.stdout.strip().split('\n') if result.stdout.strip() else []
@@ -696,7 +762,7 @@ class UnifiedDockerManager:
         try:
             # First check if container exists
             inspect_cmd = ["docker", "inspect", container_name]
-            inspect_result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=5)
+            inspect_result = _run_subprocess_safe(inspect_cmd, timeout=5)
             
             if inspect_result.returncode != 0:
                 # Container doesn't exist, nothing to remove
@@ -720,7 +786,7 @@ class UnifiedDockerManager:
             
             # Step 3: Verify container is stopped
             verify_cmd = ["docker", "inspect", "-f", "{{.State.Running}}", container_name]
-            verify_result = subprocess.run(verify_cmd, capture_output=True, text=True, timeout=5)
+            verify_result = _run_subprocess_safe(verify_cmd, timeout=5)
             
             if verify_result.returncode == 0:
                 is_running = verify_result.stdout.strip() == "true"
@@ -1051,7 +1117,7 @@ class UnifiedDockerManager:
                 
                 for pattern in container_patterns:
                     cmd = ["docker", "ps", "-a", "--filter", f"name={pattern}", "--format", "{{.Names}}"]
-                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    result = _run_subprocess_safe(cmd)
                     
                     if result.returncode == 0 and result.stdout.strip():
                         container_names = result.stdout.strip().split('\n')
@@ -1094,7 +1160,7 @@ class UnifiedDockerManager:
     def _cleanup_test_containers(self):
         """Clean up all netra-test containers"""
         cmd = ["docker", "ps", "-a", "--filter", "name=netra-test", "--format", "{{.Names}}"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = _run_subprocess_safe(cmd)
         
         if result.returncode == 0 and result.stdout.strip():
             container_names = result.stdout.strip().split('\n')
@@ -1434,7 +1500,7 @@ class UnifiedDockerManager:
                         patterns = ["netra-dev-", "netra-apex-test-", "netra-test-"]
                         for pattern in patterns:
                             cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
-                            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                            result = _run_subprocess_safe(cmd, timeout=5)
                             if result.returncode == 0 and result.stdout.strip():
                                 container_names = result.stdout.strip().split('\n')
                                 for container_name in container_names:
@@ -1467,7 +1533,7 @@ class UnifiedDockerManager:
                         _get_logger().debug(f"🔍 Trying alternative docker detection methods")
                         for pattern in search_patterns:
                             cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
-                            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                            result = _run_subprocess_safe(cmd, timeout=5)
                             if result.returncode == 0 and result.stdout.strip():
                                 container_names = result.stdout.strip().split('\n')
                                 for container_name in container_names:
@@ -1777,7 +1843,7 @@ class UnifiedDockerManager:
         for name in possible_names:
             try:
                 cmd = ["docker", "ps", "-a", "--filter", f"name=^{name}$", "--format", "{{.Names}}"]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                result = _run_subprocess_safe(cmd, timeout=5)
                 if result.returncode == 0 and result.stdout.strip():
                     actual_name = result.stdout.strip().split('\n')[0]
                     if actual_name:
@@ -1789,7 +1855,7 @@ class UnifiedDockerManager:
         # Method 2: Search all containers and parse with new logic
         try:
             cmd = ["docker", "ps", "--format", "{{.Names}}"]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            result = _run_subprocess_safe(cmd, timeout=5)
             if result.returncode == 0 and result.stdout.strip():
                 container_names = result.stdout.strip().split('\n')
                 for container_name in container_names:
@@ -1819,7 +1885,7 @@ class UnifiedDockerManager:
         try:
             # Check container status
             cmd = ["docker", "inspect", "--format='{{.State.Status}} {{.State.Health.Status}}'", container_name]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            result = _run_subprocess_safe(cmd, timeout=5)
             
             if result.returncode == 0:
                 status_output = result.stdout.strip().strip("'")
@@ -1863,7 +1929,7 @@ class UnifiedDockerManager:
                 str(config["port"])
             ]
             
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = _run_subprocess_safe(cmd)
             if result.returncode == 0 and result.stdout:
                 # Parse output like "0.0.0.0:32768"
                 host_port = result.stdout.strip().split(":")[-1]
@@ -2089,7 +2155,7 @@ class UnifiedDockerManager:
         
         # Check container status
         cmd = ["docker", "inspect", "--format='{{.State.Health.Status}}'", container_name]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = _run_subprocess_safe(cmd)
         
         if result.returncode == 0:
             status = result.stdout.strip().strip("'")
@@ -2303,7 +2369,7 @@ class UnifiedDockerManager:
                     build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
                     _get_logger().info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
                     
-                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                     if result.returncode != 0:
                         _get_logger().warning(f"⚠️ Failed to build services: {result.stderr}")
             elif not self.rebuild_backend_only:
@@ -2311,7 +2377,7 @@ class UnifiedDockerManager:
                 build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
                 _get_logger().info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
                 
-                result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                 if result.returncode != 0:
                     _get_logger().warning(f"⚠️ Failed to build services: {result.stderr}")
         
@@ -3086,7 +3152,7 @@ class UnifiedDockerManager:
             cmd = ["docker-compose", "-f", self._get_compose_file(), 
                    "-p", self._get_project_name(), "ps", "--format", "json", mapped_service]
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            result = _run_subprocess_safe(cmd, timeout=10)
             
             if result.returncode != 0 or not result.stdout.strip():
                 return False  # No container exists
@@ -3122,45 +3188,39 @@ class UnifiedDockerManager:
         try:
             # 1. Stop any orphaned containers from previous test runs
             _get_logger().info("Stopping orphaned containers...")
-            result = subprocess.run(
-                ["docker", "ps", "-q", "--filter", "label=com.docker.compose.project"],
-                capture_output=True, text=True, timeout=10
+            result = _run_subprocess_safe(
+                ["docker", "ps", "-q", "--filter", "label=com.docker.compose.project"], timeout=10
             )
             if result.returncode == 0 and result.stdout.strip():
                 container_ids = result.stdout.strip().split('\n')
                 _get_logger().info(f"Found {len(container_ids)} orphaned containers to clean")
-                subprocess.run(
-                    ["docker", "stop"] + container_ids,
-                    capture_output=True, timeout=30
+                _run_subprocess_safe(
+                    ["docker", "stop"] + container_ids, timeout=30
                 )
             
             # 2. Prune stopped containers (but not volumes - we want to keep test data)
             _get_logger().info("Pruning stopped containers...")
-            subprocess.run(
-                ["docker", "container", "prune", "-f"],
-                capture_output=True, timeout=30
+            _run_subprocess_safe(
+                ["docker", "container", "prune", "-f"], timeout=30
             )
             
             # 3. Prune unused networks to prevent network conflicts
             _get_logger().info("Pruning unused networks...")
-            subprocess.run(
-                ["docker", "network", "prune", "-f"],
-                capture_output=True, timeout=30
+            _run_subprocess_safe(
+                ["docker", "network", "prune", "-f"], timeout=30
             )
             
             # 4. Clean build cache if disk space is low (optional, conservative)
             # Only clean layers older than 24h to preserve recent builds
             _get_logger().info("Cleaning old build cache...")
-            subprocess.run(
-                ["docker", "builder", "prune", "-f", "--filter", "until=24h"],
-                capture_output=True, timeout=30
+            _run_subprocess_safe(
+                ["docker", "builder", "prune", "-f", "--filter", "until=24h"], timeout=30
             )
             
             # 5. Verify Docker daemon is responsive
             _get_logger().info("Verifying Docker daemon health...")
-            result = subprocess.run(
-                ["docker", "version", "--format", "{{.Server.Version}}"],
-                capture_output=True, text=True, timeout=5
+            result = _run_subprocess_safe(
+                ["docker", "version", "--format", "{{.Server.Version}}"], timeout=5
             )
             if result.returncode != 0:
                 _get_logger().error("Docker daemon not responding properly")
@@ -3259,7 +3319,7 @@ class UnifiedDockerManager:
                     if services_to_build:
                         build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_build
                         _get_logger().info(f"🔨 Building backend services with pull_policy={self.pull_policy}: {services_to_build}")
-                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                         if result.returncode != 0:
                             if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
                                 _get_logger().error("❌ Docker Hub rate limit hit! Cannot pull base images.")
@@ -3269,7 +3329,7 @@ class UnifiedDockerManager:
                 else:
                     build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_start
                     _get_logger().info(f"🔨 Building all services with pull_policy={self.pull_policy}: {services_to_start}")
-                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                     if result.returncode != 0:
                         if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
                             _get_logger().error("❌ Docker Hub rate limit hit! Cannot pull base images.")
@@ -3291,7 +3351,7 @@ class UnifiedDockerManager:
                     return False
                 
                 _get_logger().info(f"🚀 Starting services: {', '.join(mapped_services)}")
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=env)
+                result = _run_subprocess_safe(cmd, timeout=120, env=env)
                 
                 if result.returncode != 0:
                     _get_logger().error(f"Failed to start services: {result.stderr}")
@@ -3337,7 +3397,7 @@ class UnifiedDockerManager:
             try:
                 # Check if image exists locally
                 cmd = ["docker", "images", "-q", image]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                result = _run_subprocess_safe(cmd, timeout=5)
                 
                 if result.returncode == 0 and result.stdout.strip():
                     available_images.append(image)
@@ -3388,7 +3448,7 @@ class UnifiedDockerManager:
             else:
                 cmd.extend(["-t", str(timeout)])
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 10)
+            result = _run_subprocess_safe(cmd, timeout=timeout + 10)
             
             if result.returncode != 0:
                 _get_logger().warning(f"Graceful shutdown had issues: {result.stderr}")
@@ -3424,7 +3484,7 @@ class UnifiedDockerManager:
             if services:
                 cmd.extend(services)
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            result = _run_subprocess_safe(cmd, timeout=30)
             
             # Wait for containers to be fully killed
             await asyncio.sleep(3)
@@ -3436,7 +3496,7 @@ class UnifiedDockerManager:
             if services:
                 cmd_stop.extend(services)
             
-            subprocess.run(cmd_stop, capture_output=True, text=True, timeout=30)
+            _run_subprocess_safe(cmd_stop, timeout=30)
             
             # Wait additional time for cleanup
             await asyncio.sleep(2)
@@ -3447,7 +3507,7 @@ class UnifiedDockerManager:
             if services:
                 cmd_rm.extend(services)
             
-            subprocess.run(cmd_rm, capture_output=True, text=True, timeout=30)
+            _run_subprocess_safe(cmd_rm, timeout=30)
             
             _get_logger().info("Force shutdown completed")
             return True
@@ -3498,7 +3558,7 @@ class UnifiedDockerManager:
                        "-p", self._get_project_name(), "exec", "-T", "postgres",
                        "psql", "-U", "netra", "-d", "netra", "-c", sql]
                 
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                result = _run_subprocess_safe(cmd, timeout=10)
                 if result.returncode != 0:
                     _get_logger().warning(f"Failed to execute SQL: {sql} - {result.stderr}")
                     
@@ -3516,7 +3576,7 @@ class UnifiedDockerManager:
                    "-p", self._get_project_name(), "exec", "-T", "redis",
                    "redis-cli", "FLUSHALL"]
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            result = _run_subprocess_safe(cmd, timeout=10)
             
             if result.returncode != 0:
                 _get_logger().error(f"Failed to flush Redis: {result.stderr}")
@@ -3546,7 +3606,7 @@ class UnifiedDockerManager:
             cmd.extend(services)
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            result = _run_subprocess_safe(cmd, timeout=10)
             
             if result.returncode != 0:
                 if services:
@@ -3633,7 +3693,7 @@ class UnifiedDockerManager:
             cmd = ["docker-compose", "-f", self._get_compose_file(),
                    "-p", self._get_project_name(), "down", "--remove-orphans"]
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            result = _run_subprocess_safe(cmd, timeout=60)
             
             if result.returncode != 0:
                 _get_logger().warning(f"Orphan cleanup had issues: {result.stderr}")
@@ -4025,11 +4085,8 @@ class UnifiedDockerManager:
     def _get_container_details(self, container_name: str) -> Dict[str, Any]:
         """Get detailed information about a specific container."""
         try:
-            result = subprocess.run(
-                ["docker", "inspect", container_name],
-                capture_output=True,
-                text=True,
-                timeout=10
+            result = _run_subprocess_safe(
+                ["docker", "inspect", container_name], timeout=10
             )
             if result.returncode == 0:
                 import json
@@ -4058,11 +4115,8 @@ class UnifiedDockerManager:
     def _get_container_logs_tail(self, container_name: str, lines: int = 100) -> List[str]:
         """Get recent logs from a container."""
         try:
-            result = subprocess.run(
-                ["docker", "logs", "--tail", str(lines), container_name],
-                capture_output=True,
-                text=True,
-                timeout=10
+            result = _run_subprocess_safe(
+                ["docker", "logs", "--tail", str(lines), container_name], timeout=10
             )
             if result.returncode == 0:
                 return result.stdout.split('\n')[-lines:]
@@ -4075,11 +4129,8 @@ class UnifiedDockerManager:
         status = {}
         try:
             # Check if Docker is running
-            result = subprocess.run(
-                ["docker", "version", "--format", "json"],
-                capture_output=True,
-                text=True,
-                timeout=5
+            result = _run_subprocess_safe(
+                ["docker", "version", "--format", "json"], timeout=5
             )
             if result.returncode == 0:
                 import json
@@ -4153,11 +4204,11 @@ class UnifiedDockerManager:
         
         try:
             # Check for existing netra-dev containers
-            result = subprocess.run([
+            result = _run_subprocess_safe([
                 "docker", "ps", "-a", 
                 "--filter", "name=netra-dev",
                 "--format", "{{.Names}}"
-            ], capture_output=True, text=True, timeout=10)
+            ], timeout=10)
             
             if result.returncode == 0 and result.stdout.strip():
                 containers = result.stdout.strip().split('\n')
@@ -4172,14 +4223,14 @@ class UnifiedDockerManager:
                     _get_logger().info(f"   Stopping containers: {', '.join(containers)}")
                     
                     # Stop containers gracefully
-                    subprocess.run([
+                    _run_subprocess_safe([
                         "docker", "stop", "-t", "10"  # 10 second graceful shutdown
-                    ] + containers, capture_output=True, check=False)
+                    ] + containers, check=False)
                     
                     # Remove containers to ensure clean state
-                    subprocess.run([
+                    _run_subprocess_safe([
                         "docker", "rm", "-f"
-                    ] + containers, capture_output=True, check=False)
+                    ] + containers, check=False)
                     
                     _get_logger().info("   ✅ Development containers stopped")
                 else:
@@ -4210,7 +4261,7 @@ class UnifiedDockerManager:
         
         try:
             project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
-            result = subprocess.run(
+            result = _run_subprocess_safe(
                 cmd,
                 cwd=project_root,
                 check=True,
@@ -4242,13 +4293,10 @@ class UnifiedDockerManager:
         try:
             # Start services
             project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
-            result = subprocess.run(
+            result = _run_subprocess_safe(
                 cmd,
                 cwd=project_root,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=120
+                check=True, timeout=120
             )
             
             _get_logger().info("   ✅ Services started, checking health...")
@@ -4274,11 +4322,11 @@ class UnifiedDockerManager:
         while time.time() - start_time < timeout:
             try:
                 # Check container health
-                result = subprocess.run([
+                result = _run_subprocess_safe([
                     "docker", "ps", 
                     "--filter", "name=netra-dev",
                     "--format", "{{.Names}}\t{{.Status}}"
-                ], capture_output=True, text=True, timeout=10)
+                ], timeout=10)
                 
                 if result.returncode == 0 and result.stdout.strip():
                     lines = result.stdout.strip().split('\n')
@@ -4317,11 +4365,11 @@ class UnifiedDockerManager:
         try:
             _get_logger().info("🔍 Development container status:")
             
-            result = subprocess.run([
+            result = _run_subprocess_safe([
                 "docker", "ps", "-a",
                 "--filter", "name=netra-dev", 
                 "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-            ], capture_output=True, text=True, timeout=10)
+            ], timeout=10)
             
             if result.returncode == 0 and result.stdout.strip():
                 print(result.stdout)
@@ -4329,12 +4377,171 @@ class UnifiedDockerManager:
             # Also check logs for any obvious errors
             _get_logger().info("Recent logs (last 20 lines):")
             project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
-            subprocess.run([
+            _run_subprocess_safe([
                 "docker-compose", "-f", "docker-compose.yml", "logs", "--tail=20"
             ], cwd=project_root, timeout=30)
             
         except Exception as e:
             _get_logger().warning(f"Could not generate health report: {e}")
+
+    def start_dev_environment(self, rebuild: bool = False) -> bool:
+        """
+        Start development environment with standard docker-compose.yml.
+        
+        Args:
+            rebuild: Whether to rebuild images before starting (default: False)
+            
+        Returns:
+            True if environment started successfully, False otherwise
+        """
+        _get_logger().info("🚀 Starting development environment...")
+        
+        try:
+            # Check Docker availability first
+            if not self.is_docker_available():
+                _get_logger().error("Docker is not available - cannot start development environment")
+                return False
+            
+            # Rebuild if requested
+            if rebuild:
+                _get_logger().info("🔨 Rebuilding development images...")
+                project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+                rebuild_result = _run_subprocess_safe([
+                    "docker-compose", "-f", "docker-compose.yml", "build"
+                ], cwd=project_root, timeout=600)  # 10 minute timeout for builds
+                
+                if rebuild_result.returncode != 0:
+                    _get_logger().error("❌ Failed to rebuild development images")
+                    return False
+            
+            # Start the development services
+            return self._start_dev_services()
+            
+        except Exception as e:
+            _get_logger().error(f"❌ Failed to start development environment: {e}")
+            return False
+
+    def start_test_environment(self, use_alpine: bool = True, rebuild: bool = False, minimal_only: bool = False) -> bool:
+        """
+        Start test environment using Alpine containers for testing.
+        
+        Args:
+            use_alpine: Whether to use Alpine containers (default: True)
+            rebuild: Whether to rebuild images before starting (default: False)
+            minimal_only: Whether to start only infrastructure services (default: False)
+            
+        Returns:
+            True if test environment started successfully, False otherwise
+        """
+        _get_logger().info("🧪 Starting test environment...")
+        
+        try:
+            # Check Docker availability first  
+            if not self.is_docker_available():
+                _get_logger().error("Docker is not available - cannot start test environment")
+                return False
+            
+            # Select compose file based on configuration
+            if minimal_only:
+                compose_file = "docker-compose.minimal-test.yml"
+                _get_logger().info("🚀 Using minimal test environment (infrastructure only)")
+            else:
+                compose_file = "docker-compose.alpine-test.yml" if use_alpine else "docker-compose.test.yml"
+            
+            project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+            
+            # Only build if we're using the full environment (minimal doesn't need builds)
+            if not minimal_only:
+                # CRITICAL FIX: Always build images first, then start with --build flag for safety
+                # This ensures images are built locally instead of trying to pull from non-existent registries
+                # Use --pull=never to avoid Docker Hub rate limits for base images
+                _get_logger().info("🔨 Building test images (required for local development)...")
+                build_result = _run_subprocess_safe([
+                    "docker-compose", "-f", compose_file, "build", "--pull=never"
+                ], cwd=project_root, timeout=600)  # 10 minute timeout for builds
+                
+                if build_result.returncode != 0:
+                    _get_logger().error(f"❌ Failed to build test images: {build_result.stderr}")
+                    _get_logger().error("This usually means:")
+                    _get_logger().error("  1. Docker daemon is not running")
+                    _get_logger().error("  2. Dockerfile syntax error")
+                    _get_logger().error("  3. Missing dependencies in the build context")
+                    _get_logger().error("  4. Docker Hub rate limits (try minimal_only=True)")
+                    return False
+            
+            # Start the test services with --build flag as fallback
+            # The --build flag ensures any missing images are built automatically
+            _get_logger().info("🚀 Starting test services...")
+            start_result = _run_subprocess_safe([
+                "docker-compose", "-f", compose_file, "up", "-d", "--build"
+            ], cwd=project_root, timeout=180)
+            
+            if start_result.returncode != 0:
+                _get_logger().error(f"❌ Failed to start test services: {start_result.stderr}")
+                _get_logger().error("Attempting to diagnose the issue...")
+                
+                # Diagnostic: Check if any containers are actually running
+                diag_result = _run_subprocess_safe([
+                    "docker-compose", "-f", compose_file, "ps"
+                ], cwd=project_root, timeout=10)
+                
+                if diag_result.returncode == 0 and diag_result.stdout:
+                    _get_logger().info(f"Container status:\n{diag_result.stdout}")
+                
+                return False
+            
+            # Wait for test services to be ready
+            _get_logger().info("⏱️ Waiting for test services to be ready...")
+            return self._wait_for_test_health(compose_file, timeout=120)
+            
+        except Exception as e:
+            _get_logger().error(f"❌ Failed to start test environment: {e}")
+            return False
+
+    def _wait_for_test_health(self, compose_file: str, timeout: int = 120) -> bool:
+        """Wait for test services to be healthy."""
+        _get_logger().info(f"⏱️ Waiting up to {timeout}s for test services to be ready...")
+        
+        start_time = time.time()
+        project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+        
+        while time.time() - start_time < timeout:
+            try:
+                # Check container health using docker-compose ps
+                result = _run_subprocess_safe([
+                    "docker-compose", "-f", compose_file, "ps", "--format", "json"
+                ], cwd=project_root, timeout=10)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    try:
+                        # Parse docker-compose ps JSON output
+                        services_data = []
+                        for line in result.stdout.strip().split('\n'):
+                            if line.strip():
+                                services_data.append(json.loads(line))
+                        
+                        # Check if all services are running
+                        running_services = [s for s in services_data if s.get('State') == 'running']
+                        total_services = len(services_data)
+                        
+                        if total_services > 0 and len(running_services) == total_services:
+                            _get_logger().info("✅ All test services are running")
+                            return True
+                        else:
+                            _get_logger().debug(f"Services status: {len(running_services)}/{total_services} running")
+                    
+                    except (json.JSONDecodeError, KeyError) as e:
+                        _get_logger().debug(f"Could not parse service status: {e}")
+                
+                time.sleep(3)
+                
+            except Exception as e:
+                _get_logger().debug(f"Health check error: {e}")
+                time.sleep(3)
+        
+        # Timeout reached
+        _get_logger().warning(f"⏰ Test services did not become ready within {timeout}s")
+        return False
 
     async def ensure_e2e_environment(self, force_alpine: bool = True, timeout: int = 180) -> bool:
         """
@@ -4401,7 +4608,7 @@ class UnifiedDockerManager:
             ]
             
             _get_logger().info("   🔨 Building and starting E2E services...")
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=test_env)
+            result = _run_subprocess_safe(cmd, timeout=timeout, env=test_env)
             
             if result.returncode != 0:
                 _get_logger().error(f"❌ Failed to start E2E services: {result.stderr}")
@@ -4450,17 +4657,17 @@ class UnifiedDockerManager:
         """Clean up any stale test containers and volumes."""
         try:
             # Remove any existing test containers
-            subprocess.run([
+            _run_subprocess_safe([
                 "docker-compose", "-f", "docker-compose.alpine-test.yml",
                 "-p", test_env["COMPOSE_PROJECT_NAME"],
                 "down", "-v", "--remove-orphans"
-            ], capture_output=True, timeout=30, env=test_env)
+            ], timeout=30, env=test_env)
             
             # Clean up any dangling test volumes
-            subprocess.run([
+            _run_subprocess_safe([
                 "docker", "volume", "prune", "-f",
                 "--filter", "label=com.docker.compose.project=netra-e2e-test"
-            ], capture_output=True, timeout=30)
+            ], timeout=30)
             
             _get_logger().info("   🧹 Cleaned up stale test environment")
             
@@ -4476,11 +4683,11 @@ class UnifiedDockerManager:
         while time.time() - start_time < timeout:
             try:
                 # Check service health using docker-compose ps
-                result = subprocess.run([
+                result = _run_subprocess_safe([
                     "docker-compose", "-f", str(compose_file),
                     "-p", test_env["COMPOSE_PROJECT_NAME"],
                     "ps", "--format", "json"
-                ], capture_output=True, text=True, timeout=10, env=test_env)
+                ], timeout=10, env=test_env)
                 
                 if result.returncode == 0:
                     import json
@@ -4521,11 +4728,11 @@ class UnifiedDockerManager:
         try:
             _get_logger().info("🔍 Collecting failure logs...")
             
-            result = subprocess.run([
+            result = _run_subprocess_safe([
                 "docker-compose", "-f", str(compose_file),
                 "-p", test_env["COMPOSE_PROJECT_NAME"],
                 "logs", "--tail=50"
-            ], capture_output=True, text=True, timeout=30, env=test_env)
+            ], timeout=30, env=test_env)
             
             if result.stdout:
                 _get_logger().error("E2E Service Logs:")
@@ -4547,11 +4754,11 @@ class UnifiedDockerManager:
             test_env["COMPOSE_PROJECT_NAME"] = self._e2e_project_name
             
             # Stop and remove containers
-            subprocess.run([
+            _run_subprocess_safe([
                 "docker-compose", "-f", str(self._e2e_compose_file),
                 "-p", self._e2e_project_name,
                 "down", "-v", "--remove-orphans"
-            ], capture_output=True, timeout=60, env=test_env)
+            ], timeout=60, env=test_env)
             
             _get_logger().info("✅ E2E environment cleaned up")
             

@@ -22,7 +22,6 @@ TestCorpusLifecycle,
 TestWorkloadTypesCoverage,
 )
 from netra_backend.tests.test_corpus_metadata import (
-TestErrorRecovery,
 TestMetadataTracking,
 )
 from netra_backend.tests.test_corpus_validation import (
@@ -38,6 +37,5 @@ __all__ = [
 'TestBatchProcessing',
 'TestValidationAndSafety',
 'TestCorpusCloning',
-'TestMetadataTracking',
-'TestErrorRecovery'
+'TestMetadataTracking'
 ]

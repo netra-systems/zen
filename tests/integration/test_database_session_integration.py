@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.db.session import DatabaseSessionManager
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,

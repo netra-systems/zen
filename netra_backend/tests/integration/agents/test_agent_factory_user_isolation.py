@@ -62,7 +62,7 @@ from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 
 # Database and Redis for integration testing
-from netra_backend.app.db.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.redis_manager import RedisManager
 
 

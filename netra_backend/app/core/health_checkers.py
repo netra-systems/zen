@@ -111,20 +111,9 @@ async def _execute_postgres_query() -> None:
         async with get_db() as session:
             await session.execute(text("SELECT 1"))
     except (ValueError, Exception):
-        # Fallback to direct engine access with validation
-        from netra_backend.app.db.postgres import initialize_postgres
-        from netra_backend.app.db.postgres_core import async_engine
-        
-        # Always get fresh reference to engine after ensuring initialization
-        if async_engine is None:
-            initialize_postgres()
-            # Get fresh reference after initialization
-            from netra_backend.app.db.postgres_core import async_engine as engine_ref
-            if engine_ref is None:
-                raise RuntimeError("Database engine not initialized after initialization")
-            engine = engine_ref
-        else:
-            engine = async_engine
+        # Fallback to direct engine access via SSOT database module
+        from netra_backend.app.database import get_engine
+        engine = get_engine()
         
         # CRITICAL: Defensive check to prevent sslmode regression
         engine_url = str(getattr(engine, 'url', ''))

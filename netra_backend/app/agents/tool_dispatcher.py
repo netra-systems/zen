@@ -39,6 +39,9 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
     create_request_scoped_dispatcher,
 )
 
+# Import core tool models (SSOT for tool execution results)
+from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
+
 # Import production tool support
 try:
     from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
@@ -114,6 +117,8 @@ __all__ = [
     "ToolDispatchRequest", 
     "ToolDispatchResponse",
     "DispatchStrategy",
+    "ToolExecutionResult",
+    "UnifiedTool",
 ]
 
 # Add production tool exports if available

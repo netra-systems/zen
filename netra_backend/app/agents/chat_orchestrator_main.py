@@ -30,7 +30,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
 )
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
@@ -44,7 +44,7 @@ class ChatOrchestrator(SupervisorAgent):
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
                  websocket_manager,
-                 tool_dispatcher: ToolDispatcher,
+                 tool_dispatcher: UnifiedToolDispatcher,
                  cache_manager=None,
                  semantic_cache_enabled: bool = True):
         # SupervisorAgent uses UserExecutionContext pattern - only needs llm_manager and websocket_bridge

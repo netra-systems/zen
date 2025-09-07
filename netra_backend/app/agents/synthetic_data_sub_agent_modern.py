@@ -19,7 +19,7 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler as 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     SyntheticDataApprovalHandler,
 )
@@ -49,7 +49,7 @@ from netra_backend.app.agents.synthetic_data_sub_agent_workflow import (
     SyntheticDataContext,
     SyntheticDataWorkflowOrchestrator,
 )
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.serialization.unified_json_handler import safe_json_dumps
@@ -71,7 +71,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
     Uses ExecutionContext/ExecutionResult types for consistency.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher,
                  reliability_manager: Optional[ReliabilityManager] = None):
         # Initialize BaseAgent with proper parameters
         super().__init__(

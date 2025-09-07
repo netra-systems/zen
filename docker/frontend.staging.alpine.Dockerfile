@@ -2,7 +2,7 @@
 # 78% smaller, 3x faster startup, production-optimized Next.js build
 # CRITICAL: Uses standalone output for minimal runtime
 
-FROM node:23-alpine as builder
+FROM node:20-alpine AS builder
 
 # Build arguments for staging environment
 ARG BUILD_ENV=staging
@@ -82,7 +82,7 @@ RUN npx next build
 # ============================================
 # Production Stage - Minimal Alpine Runtime
 # ============================================
-FROM node:23-alpine
+FROM node:20-alpine
 
 # Build and environment arguments
 ARG BUILD_ENV=staging

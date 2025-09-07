@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
@@ -40,10 +40,7 @@ class EnhancedExecutionAgent(BaseAgent):
             if not isinstance(context, UserExecutionContext):
                 raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
             
-            # Get database session manager for this context if needed
-            session_manager = None
-            if context.db_session:
-                session_manager = DatabaseSessionManager(context)
+            # Database session available via context.db_session if needed
             
             # Start execution
             await self._begin_execution(context, stream_updates)

@@ -6,7 +6,7 @@ This module has been removed but tests still reference it.
 """
 
 from typing import Any, Dict
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from .operations_crud import CorpusCRUDOperations
 from .operations_analysis import CorpusAnalysisOperations
 from .operations_execution import CorpusExecutionOperations
@@ -19,7 +19,7 @@ class CorpusOperationHandler:
     Coordinates all corpus operations including CRUD, analysis, and execution.
     """
     
-    def __init__(self, tool_dispatcher: ToolDispatcher):
+    def __init__(self, tool_dispatcher: UnifiedToolDispatcher):
         self.tool_dispatcher = tool_dispatcher
         self.crud_ops = CorpusCRUDOperations(tool_dispatcher)
         self.analysis_ops = CorpusAnalysisOperations(tool_dispatcher)

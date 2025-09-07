@@ -1,6 +1,6 @@
 # Alpine-based Production Dockerfile for Frontend Service
 # Optimized for test isolation and minimal size
-FROM node:23-alpine as builder
+FROM node:20-alpine AS builder
 
 # Build arguments
 ARG BUILD_ENV=test
@@ -20,21 +20,23 @@ WORKDIR /build
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies efficiently
-RUN npm ci --omit=dev && \
+# Install ALL dependencies for build (including devDependencies for cross-env)
+# CRITICAL: Explicitly install all deps including devDependencies in development mode
+ENV NODE_ENV=development
+RUN npm ci && \
     npm cache clean --force
 
 # Copy source code
 COPY frontend/ .
 
 # Build Next.js with standalone output for smaller image
-ENV NODE_ENV=production
+# CRITICAL: Keep NODE_ENV as development during build to preserve devDependencies like cross-env
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build && \
+RUN NODE_ENV=development npm run build && \
     rm -rf .next/cache
 
 # Production stage - minimal Alpine image
-FROM node:23-alpine
+FROM node:20-alpine
 
 # Install runtime dependencies only
 RUN apk add --no-cache \

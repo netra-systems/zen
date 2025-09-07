@@ -8,7 +8,7 @@ Functionality has been consolidated into the unified data agent.
 from typing import Any, Dict, Optional
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import models for backward compatibility
@@ -32,7 +32,7 @@ class DataSubAgent(BaseAgent):
     The actual data analysis functionality has been consolidated into the unified agent system.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher, 
                  websocket_manager: Optional[Any] = None):
         super().__init__(
             name="DataSubAgent", 

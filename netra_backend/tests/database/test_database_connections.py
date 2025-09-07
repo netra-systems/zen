@@ -31,7 +31,7 @@ class TestClickHouseConnectionPool:
         # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_client = mock_client_instance  # Initialize appropriate service
+            mock_client = MagicMock()  # Initialize appropriate service
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
 
@@ -172,41 +172,46 @@ class TestClickHouseConnectionPool:
                                                                         assert isinstance(pool_alert, dict) and len(pool_alert) > 0
                                                                         assert isinstance(pool_alert, dict)
 
-                                                                        def _create_test_db():
-                                                                            """Create test database configuration."""
-                                                                            return ClickHouseDatabase(
-                                                                        host="localhost",
-                                                                        port=9000,
-                                                                        database="test",
-                                                                        user="default",
-                                                                        password="",
-                                                                        secure=False
-                                                                        )
 
-                                                                        def _create_failing_migration():
-                                                                            """Create migration that fails."""
-                                                                            class FailingMigration:
-                                                                                pass
-                                                                                async def up(self, session):
-                                                                                    raise Exception("Migration failed")
 
-                                                                                async def down(self, session):
-                                                                                    pass
+def _create_test_db():
+    """Create test database configuration."""
+    return ClickHouseDatabase(
+        host="localhost",
+        port=9000,
+        database="test",
+        user="default",
+        password="",
+        secure=False
+    )
 
-                                                                                    return FailingMigration()
 
-                                                                                def _create_test_migration():
-                                                                                    """Create test migration."""
-                                                                                    class TestMigration:
-                                                                                        pass
-                                                                                        async def up(self, session):
-                                                                                            await session.execute("CREATE TABLE test_table (id INT)")
-                                                                                            await session.execute("INSERT INTO test_table VALUES (1)")
+def _create_failing_migration():
+    """Create migration that fails."""
+    class FailingMigration:
+        async def up(self, session):
+            raise Exception("Migration failed")
 
-                                                                                            return TestMigration()
+        async def down(self, session):
+            pass
 
-                                                                                        def _setup_slow_query_mock(mock_session):
-                                                                                            """Setup slow query mock."""
-                                                                                            mock_session.execute.return_value.all.return_value = [
-                                                                                            ("SELECT * FROM large_table", 5000)  # 5 second query
-                                                                                            ]
+    return FailingMigration()
+
+
+
+def _create_test_migration():
+    """Create test migration."""
+    class TestMigration:
+        async def up(self, session):
+            await session.execute("CREATE TABLE test_table (id INT)")
+            await session.execute("INSERT INTO test_table VALUES (1)")
+
+    return TestMigration()
+
+
+
+def _setup_slow_query_mock(mock_session):
+    """Setup slow query mock."""
+    mock_session.execute.return_value.all.return_value = [
+        ("SELECT * FROM large_table", 5000)  # 5 second query
+    ]

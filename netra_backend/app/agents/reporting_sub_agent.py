@@ -19,7 +19,7 @@ from netra_backend.app.core.serialization.unified_json_handler import (
     JSONErrorFixer
 )
 from netra_backend.app.services.cache.cache_helpers import CacheHelpers
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.llm.observability import (
     generate_llm_correlation_id,
     log_agent_input,

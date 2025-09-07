@@ -252,7 +252,7 @@ services:
         NEXT_PUBLIC_WS_URL: ws://localhost:8002
         NEXT_PUBLIC_ENVIRONMENT: test
       cache_from:
-        - node:20-alpine3.19
+        - node:20-alpine
     environment:
       NODE_ENV: test
       PORT: 3000

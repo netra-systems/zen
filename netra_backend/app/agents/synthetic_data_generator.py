@@ -18,7 +18,7 @@ from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.synthetic_data_progress_tracker import (
     SyntheticDataProgressTracker,
 )
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.logging_config import central_logger
 
 # Import consolidated types from single source of truth
@@ -30,7 +30,7 @@ logger = central_logger.get_logger(__name__)
 class SyntheticDataGenerator:
     """Main orchestrator for synthetic data generation operations"""
     
-    def __init__(self, tool_dispatcher: ToolDispatcher):
+    def __init__(self, tool_dispatcher: UnifiedToolDispatcher):
         self.tool_dispatcher = tool_dispatcher
         self.batch_processor = SyntheticDataBatchProcessor(tool_dispatcher)
         self.progress_tracker = SyntheticDataProgressTracker()

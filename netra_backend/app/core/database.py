@@ -1,6 +1,4 @@
 # Shim module for backward compatibility - REDIRECTS TO SINGLE SOURCE OF TRUTH
-from netra_backend.app.db.database_manager import *
-
 # DEPRECATED: Use netra_backend.app.database for SSOT compliance
 import warnings
 warnings.warn(
@@ -9,5 +7,13 @@ warnings.warn(
     stacklevel=2
 )
 
-# Import Database and AsyncDatabase for backward compatibility but with warning
-from netra_backend.app.db.postgres_core import Database, AsyncDatabase
+# Re-export SSOT database functions for backward compatibility
+from netra_backend.app.database import (
+    get_db,
+    get_system_db,
+    get_database_url,
+    get_engine,
+    get_sessionmaker,
+    DatabaseManager,
+    database_manager
+)

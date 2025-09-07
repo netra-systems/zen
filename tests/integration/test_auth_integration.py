@@ -5,6 +5,9 @@ from fastapi.testclient import TestClient
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
+# Get environment instance first
+env = get_env()
+
 # Set environment to development for dev login endpoint to work
 env.set("NETRA_ENVIRONMENT", "development", "test")
 
@@ -12,9 +15,6 @@ from auth_service.main import app
 from auth_service.auth_core.database.connection import auth_db
 
 client = TestClient(app)
-
-
-env = get_env()
 @pytest.fixture(scope="function", autouse=True)
 def setup_database():
     """Setup database tables before running tests.

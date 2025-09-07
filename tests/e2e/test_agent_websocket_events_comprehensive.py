@@ -157,7 +157,7 @@ async def test_agent_websocket_events_comprehensive():
     test_config = UnifiedTestConfig()
     
     # Use real database session manager per CLAUDE.md
-    from netra_backend.app.db.session import DatabaseSessionManager
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
     db_session_manager = DatabaseSessionManager()
     
     try:
@@ -310,7 +310,7 @@ async def test_agent_thinking_events_with_real_websocket():
         env_manager.setup_test_secrets()
         
         test_config = UnifiedTestConfig()
-        from netra_backend.app.db.session import DatabaseSessionManager
+        from netra_backend.app.database.session_manager import DatabaseSessionManager
         db_session_manager = DatabaseSessionManager()
         
         collector = AgentEventCollector()
@@ -404,7 +404,7 @@ async def test_tool_execution_events_with_real_services():
         env_manager.setup_test_secrets()
         
         test_config = UnifiedTestConfig()
-        from netra_backend.app.db.session import DatabaseSessionManager
+        from netra_backend.app.database.session_manager import DatabaseSessionManager
         db_session_manager = DatabaseSessionManager()
         
         collector = AgentEventCollector()
@@ -503,7 +503,7 @@ async def test_complete_agent_lifecycle_events():
         env_manager.setup_test_secrets()
         
         test_config = UnifiedTestConfig()
-        from netra_backend.app.db.session import DatabaseSessionManager
+        from netra_backend.app.database.session_manager import DatabaseSessionManager
         db_session_manager = DatabaseSessionManager()
         
         collector = AgentEventCollector()

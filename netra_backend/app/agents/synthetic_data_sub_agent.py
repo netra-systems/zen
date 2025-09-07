@@ -14,7 +14,7 @@ from typing import List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # Import modular components
@@ -38,7 +38,7 @@ from netra_backend.app.agents.synthetic_data_metrics_handler import (
 )
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import log_agent_communication
 from netra_backend.app.logging_config import central_logger
@@ -50,7 +50,7 @@ logger = central_logger.get_logger(__name__)
 class SyntheticDataSubAgent(BaseAgent):
     """Sub-agent dedicated to synthetic data generation"""
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[UnifiedToolDispatcher] = None):
         super().__init__(
             llm_manager, 
             name="SyntheticDataSubAgent", 

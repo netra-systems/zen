@@ -518,23 +518,14 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
-        # Initialize postgres through service pattern
-        from netra_backend.app.db.postgres import initialize_postgres
-        from netra_backend.app.db.postgres_core import async_engine
+        # Use SSOT database module for engine access
+        from netra_backend.app.database import get_engine
         from netra_backend.app.services.database_operations_service import (
             database_operations_service,
         )
         
-        # Always get fresh reference to engine after ensuring initialization
-        if async_engine is None:
-            initialize_postgres()
-            # Get fresh reference after initialization
-            from netra_backend.app.db.postgres_core import async_engine as engine_ref
-            if engine_ref is None:
-                raise RuntimeError("Database engine not initialized after initialization")
-            engine = engine_ref
-        else:
-            engine = async_engine
+        # Get engine via SSOT pattern
+        engine = get_engine()
             
         return await SchemaValidationService.validate_schema(engine)
     except Exception as e:

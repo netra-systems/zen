@@ -25,7 +25,6 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Set, Any, Optional
 from collections import defaultdict
 import threading
-from netra_backend.app.core.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
