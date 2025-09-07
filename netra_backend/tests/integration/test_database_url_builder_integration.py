@@ -2,7 +2,7 @@
 
 import pytest
 import os
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment

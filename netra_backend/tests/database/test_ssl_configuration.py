@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch, MagicMock
 import pytest
 import asyncio
 import ssl
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from shared.database_url_builder import DatabaseURLBuilder

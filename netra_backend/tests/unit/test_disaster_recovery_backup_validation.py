@@ -5,7 +5,7 @@ Validates backup completeness, restoration procedures, and recovery time objecti
 import pytest
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

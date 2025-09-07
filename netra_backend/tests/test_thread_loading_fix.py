@@ -7,7 +7,7 @@ import pytest
 import time
 import uuid
 from fastapi import HTTPException
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.routes.utils.thread_validators import (

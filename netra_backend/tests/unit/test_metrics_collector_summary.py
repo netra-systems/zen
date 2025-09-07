@@ -9,7 +9,7 @@ for customer optimization and revenue forecasting.
 
 from pathlib import Path
 import sys
-from test_framework.redis_test_utils import TestRedisManager
+from test_framework.redis_test_utils import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from collections import deque

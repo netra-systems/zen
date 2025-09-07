@@ -32,8 +32,8 @@ import pytest
 import asyncio
 import os
 from typing import Dict, Any, Optional
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml

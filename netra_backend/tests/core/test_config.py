@@ -9,7 +9,7 @@ Business Value: Platform stability and performance
 import pytest
 from netra_backend.app.core.config import get_config, get_settings, reload_config
 from netra_backend.app.schemas.config import AppConfig
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestConfig:

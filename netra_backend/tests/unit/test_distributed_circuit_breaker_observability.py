@@ -13,7 +13,7 @@ import pytest
 from enum import Enum
 from uuid import uuid4
 from unittest.mock import Mock, AsyncMock, patch
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

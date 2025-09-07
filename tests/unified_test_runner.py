@@ -1718,42 +1718,89 @@ class UnifiedTestRunner:
         else:
             timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
-            # Fix stdout flush issue by using run with explicit flushing
+            # Fix stdout flush issue with Windows-safe flushing
             import sys
-            sys.stdout.flush()
-            sys.stderr.flush()
+            try:
+                if hasattr(sys.stdout, 'flush') and not getattr(sys.stdout, 'closed', False):
+                    sys.stdout.flush()
+            except (ValueError, OSError):
+                pass  # Skip flush if stdout is closed or has issues
             
-            # Prepare environment for subprocess with proper isolation
+            try:
+                if hasattr(sys.stderr, 'flush') and not getattr(sys.stderr, 'closed', False):
+                    sys.stderr.flush()
+            except (ValueError, OSError):
+                pass  # Skip flush if stderr is closed or has issues
+            
+            # Prepare environment for subprocess with proper isolation and Windows encoding
             env_manager = get_env()
             subprocess_env = env_manager.get_subprocess_env()
+            
+            # CRITICAL: Apply Windows encoding fixes to subprocess environment
+            if sys.platform == "win32":
+                from shared.windows_encoding import get_subprocess_env
+                subprocess_env = get_subprocess_env(subprocess_env)
+            
             subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
             
-            # Use subprocess.Popen for better process control on Windows with Node.js
-            if sys.platform == "win32" and service == "frontend":
-                # Special handling for Node.js processes on Windows
+            # Use subprocess.Popen for better process control on Windows 
+            # CRITICAL FIX: Apply Windows file handle management to all services, not just frontend
+            if sys.platform == "win32":
+                # Special handling for all processes on Windows to prevent I/O closed file errors
+                # Configure Windows-specific creation flags and file handle management
+                creationflags = 0
+                if sys.platform == "win32":
+                    creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+                
+                # CRITICAL: Windows-specific subprocess environment already set by get_subprocess_env above
+                # Add additional Windows-specific variables for testing stability
+                subprocess_env.update({
+                    'PYTHONLEGACYWINDOWSSTDIO': '0',  # Use new Windows stdio for better Unicode support
+                    'PYTHONDONTWRITEBYTECODE': '1',  # Prevent .pyc files during testing
+                })
+                
+                # CRITICAL: Use explicit encoding and error handling for Windows Unicode issues
                 process = subprocess.Popen(
                     cmd,
                     cwd=config["path"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
+                    stdin=subprocess.PIPE,  # Provide stdin to prevent handle issues
                     shell=True,
                     text=True,
                     encoding='utf-8',
-                    errors='replace',
+                    errors='replace',  # CRITICAL: Replace invalid characters instead of failing
                     env=subprocess_env,
-                    # Use CREATE_NEW_PROCESS_GROUP on Windows to isolate process tree
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+                    creationflags=creationflags,
+                    # CRITICAL: Close file descriptors on Windows to prevent leaks
+                    close_fds=False,  # Keep False on Windows as it's incompatible with shell=True
+                    # Additional Windows-specific options to prevent encoding issues
+                    bufsize=0  # Unbuffered to prevent issues with mixed text/binary
                 )
                 
                 # Track the process for automatic cleanup
                 track_subprocess(process)
                 
                 try:
+                    # CRITICAL: Close stdin immediately to prevent hanging
+                    process.stdin.close()
                     stdout, stderr = process.communicate(timeout=timeout_seconds)
                     returncode = process.returncode
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
                     cleanup_subprocess(process, timeout=5, force=True)
+                    raise
+                except Exception as e:
+                    print(f"[WARNING] Process communication error: {e}")
+                    print(f"[DEBUG] Error type: {type(e)}")
+                    print(f"[DEBUG] Error args: {e.args}")
+                    import traceback
+                    print(f"[DEBUG] Full traceback: {traceback.format_exc()}")
+                    # Try to clean up gracefully
+                    try:
+                        cleanup_subprocess(process, timeout=2)
+                    except Exception as cleanup_e:
+                        print(f"[DEBUG] Cleanup error: {cleanup_e}")
                     raise
                 finally:
                     # Always ensure process is cleaned up
@@ -1762,11 +1809,11 @@ class UnifiedTestRunner:
                 result = subprocess.CompletedProcess(
                     args=cmd,
                     returncode=returncode,
-                    stdout=stdout,
-                    stderr=stderr
+                    stdout=stdout if 'stdout' in locals() else "",
+                    stderr=stderr if 'stderr' in locals() else ""
                 )
             else:
-                # Use standard subprocess.run for other cases
+                # Use standard subprocess.run for non-Windows platforms
                 result = subprocess.run(
                     cmd,
                     cwd=config["path"],
@@ -1803,6 +1850,11 @@ class UnifiedTestRunner:
             )
         except Exception as e:
             print(f"[ERROR] Failed to run {service} tests: {e}")
+            print(f"[DEBUG] Exception type: {type(e)}")
+            print(f"[DEBUG] Exception args: {e.args}")
+            import traceback
+            print(f"[DEBUG] Full exception traceback:")
+            print(traceback.format_exc())
             success = False
             result = None
         

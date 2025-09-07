@@ -252,7 +252,6 @@ class AuthOperationType(Enum):
 class AuthResilienceMode(Enum):
     """Authentication resilience operating modes - simplified for SSOT."""
     NORMAL = "normal"
-    # CACHED_FALLBACK removed - violates SSOT architecture
     DEGRADED = "degraded"
     EMERGENCY = "emergency"
     RECOVERY = "recovery"

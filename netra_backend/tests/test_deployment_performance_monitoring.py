@@ -12,7 +12,7 @@ import psutil
 import json
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.base import BaseTestCase

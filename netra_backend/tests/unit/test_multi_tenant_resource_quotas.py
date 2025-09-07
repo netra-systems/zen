@@ -4,7 +4,7 @@ Validates per-tenant resource limits and prevents quota violations.
 """
 import pytest
 from typing import Dict, Any
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

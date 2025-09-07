@@ -6,7 +6,7 @@ Core tests for SupplyResearcherAgent - Basic functionality
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 # Removed non-existent AuthManager import
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -35,7 +35,7 @@ class TestSupplyResearcherAgentCore:
         # TODO: Initialize real service
         """Create mock database session"""
         # Mock: Generic component isolation for controlled unit testing
-        db = TestDatabaseManager().get_session()
+        db = DatabaseTestManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
         db.query = query_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing

@@ -18,7 +18,7 @@ Business Value Justification (BVJ):
 CRITICAL: This test validates the security fix that prevents mock session factories
 from being returned in any environment, which would cause silent data corruption.
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """
 

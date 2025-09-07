@@ -30,7 +30,7 @@ from sqlalchemy.exc import OperationalError
 from alembic import command, config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment

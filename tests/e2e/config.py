@@ -203,7 +203,7 @@ TEST_CONFIG = {
 
 
 # Additional missing classes and functions expected by tests
-class TestDatabaseManager:
+class DatabaseTestManager:
     """Test database manager for E2E testing."""
     
     def __init__(self, config: Dict[str, Any] = None):

@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """Unified test configuration validation
 
@@ -16,7 +16,7 @@ from tests.e2e.config import (
     TEST_ENDPOINTS,
     TEST_SECRETS,
     TEST_USERS,
-    TestDatabaseManager,
+    DatabaseTestManager,
     TestDataFactory,
     CustomerTier,
     TestTokenManager,
@@ -82,15 +82,15 @@ def test_factory_functions():
 @pytest.mark.e2e
 def test_database_manager():
     """Test that database manager provides correct configuration"""
-    db_url = TestDatabaseManager.get_memory_db_url()
+    db_url = DatabaseTestManager.get_memory_db_url()
     assert "sqlite" in db_url
     assert ":memory:" in db_url
     
-    db_config = TestDatabaseManager.get_test_db_config()
+    db_config = DatabaseTestManager.get_test_db_config()
     assert "url" in db_config
     assert db_config["echo"] is False
     
-    session_config = TestDatabaseManager.create_test_session_config()
+    session_config = DatabaseTestManager.create_test_session_config()
     assert "autocommit" in session_config
     assert session_config["autocommit"] is False
 

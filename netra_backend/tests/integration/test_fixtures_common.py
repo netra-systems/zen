@@ -10,8 +10,8 @@ from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -80,7 +80,7 @@ async def test_database():
         ws_manager = WebSocketManager()
 
     # Mock: Generic component isolation for controlled unit testing
-        cache_service = TestRedisManager().get_client()
+        cache_service = RedisTestManager().get_client()
 
     # Mock: Async component isolation for testing without real async operations
         cache_service.get = AsyncMock(return_value=None)

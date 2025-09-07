@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """Redis Connection Staging Issues - Failing Tests
 

@@ -34,9 +34,9 @@ from enum import Enum
 import pytest
 
 # SSOT test framework imports
-from test_framework.ssot.base_test_case import BaseSsotTestCase
-from test_framework.ssot.mocks import create_mock_websocket_manager, create_mock_user_context
-from test_framework.unified import TestCategory
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.mocks import MockFactory
+# from test_framework.unified import TestCategory  # Not needed for unit tests
 from shared.isolated_environment import get_env
 
 # Import the module under test
@@ -51,7 +51,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 )
 
 
-class TestAgentWebSocketBridgeInitialization(BaseSsotTestCase):
+class TestAgentWebSocketBridgeInitialization:
     """Test AgentWebSocketBridge initialization and configuration."""
     
     @pytest.mark.unit
@@ -110,7 +110,7 @@ class TestAgentWebSocketBridgeInitialization(BaseSsotTestCase):
         assert bridge.metrics.health_checks_performed == 0
 
 
-class TestAgentWebSocketBridgeIntegration(BaseSsotTestCase):
+class TestAgentWebSocketBridgeIntegration:
     """Test AgentWebSocketBridge integration lifecycle management."""
     
     @pytest.mark.unit
@@ -262,7 +262,7 @@ class TestAgentWebSocketBridgeIntegration(BaseSsotTestCase):
             assert bridge._registry is mock_registry, "Registry should be stored"
 
 
-class TestAgentWebSocketBridgeHealthMonitoring(BaseSsotTestCase):
+class TestAgentWebSocketBridgeHealthMonitoring:
     """Test AgentWebSocketBridge health monitoring and recovery."""
     
     @pytest.mark.unit
@@ -423,7 +423,7 @@ class TestAgentWebSocketBridgeHealthMonitoring(BaseSsotTestCase):
             # Note: Actual notification would be called within health_check in real implementation
 
 
-class TestAgentWebSocketBridgeRecovery(BaseSsotTestCase):
+class TestAgentWebSocketBridgeRecovery:
     """Test AgentWebSocketBridge recovery mechanisms."""
     
     @pytest.mark.unit
@@ -508,7 +508,7 @@ class TestAgentWebSocketBridgeRecovery(BaseSsotTestCase):
                 mock_blocked.assert_not_called()  # Should not attempt recovery again
 
 
-class TestAgentWebSocketBridgeUserEmitters(BaseSsotTestCase):
+class TestAgentWebSocketBridgeUserEmitters:
     """Test AgentWebSocketBridge per-user emitter creation."""
     
     @pytest.mark.unit
@@ -517,7 +517,12 @@ class TestAgentWebSocketBridgeUserEmitters(BaseSsotTestCase):
         # Business Value: Ensures isolated WebSocket events for Enterprise multi-user security
         
         bridge = AgentWebSocketBridge()
-        mock_user_context = create_mock_user_context()
+        mock_factory = MockFactory()
+        mock_user_context = mock_factory.create_mock(
+            "UserExecutionContext",
+            user_id="test-user",
+            session_id="test-session"
+        )
         
         with patch('netra_backend.app.services.agent_websocket_bridge.validate_user_context') as mock_validate, \
              patch('netra_backend.app.services.agent_websocket_bridge.create_websocket_manager') as mock_create_ws, \
@@ -566,7 +571,12 @@ class TestAgentWebSocketBridgeUserEmitters(BaseSsotTestCase):
         # Business Value: Ensures proper error handling when WebSocket infrastructure is unavailable
         
         bridge = AgentWebSocketBridge()
-        mock_user_context = create_mock_user_context()
+        mock_factory = MockFactory()
+        mock_user_context = mock_factory.create_mock(
+            "UserExecutionContext",
+            user_id="test-user",
+            session_id="test-session"
+        )
         
         with patch('netra_backend.app.services.agent_websocket_bridge.validate_user_context') as mock_validate, \
              patch('netra_backend.app.services.agent_websocket_bridge.create_websocket_manager') as mock_create_ws:
@@ -595,7 +605,7 @@ class TestAgentWebSocketBridgeUserEmitters(BaseSsotTestCase):
             mock_create.assert_called_once_with(user_id, session_id)
 
 
-class TestAgentWebSocketBridgeWebSocketNotifications(BaseSsotTestCase):
+class TestAgentWebSocketBridgeWebSocketNotifications:
     """Test AgentWebSocketBridge WebSocket event notifications (MISSION CRITICAL for chat value)."""
     
     @pytest.mark.unit
@@ -756,7 +766,7 @@ class TestAgentWebSocketBridgeWebSocketNotifications(BaseSsotTestCase):
             assert call_args["data"] == custom_data
 
 
-class TestAgentWebSocketBridgeThreadRegistry(BaseSsotTestCase):
+class TestAgentWebSocketBridgeThreadRegistry:
     """Test AgentWebSocketBridge thread registry integration."""
     
     @pytest.mark.unit
@@ -859,7 +869,7 @@ class TestAgentWebSocketBridgeThreadRegistry(BaseSsotTestCase):
         assert result == run_id  # Returns original if parsing fails
 
 
-class TestAgentWebSocketBridgeConcurrencyAndEdgeCases(BaseSsotTestCase):
+class TestAgentWebSocketBridgeConcurrencyAndEdgeCases:
     """Test AgentWebSocketBridge concurrency handling and edge cases."""
     
     @pytest.mark.unit
@@ -1052,7 +1062,7 @@ class TestAgentWebSocketBridgeConcurrencyAndEdgeCases(BaseSsotTestCase):
         assert len(bridge._monitor_observers) == initial_observer_count
 
 
-class TestAgentWebSocketBridgeFactoryFunction(BaseSsotTestCase):
+class TestAgentWebSocketBridgeFactoryFunction:
     """Test the factory function for creating AgentWebSocketBridge instances."""
     
     @pytest.mark.unit
@@ -1071,7 +1081,12 @@ class TestAgentWebSocketBridgeFactoryFunction(BaseSsotTestCase):
         """Test bridge creation with user context."""
         # Business Value: Creates bridge with user context for isolated operations
         
-        mock_user_context = create_mock_user_context()
+        mock_factory = MockFactory()
+        mock_user_context = mock_factory.create_mock(
+            "UserExecutionContext",
+            user_id="test-user",
+            session_id="test-session"
+        )
         
         bridge = create_agent_websocket_bridge(mock_user_context)
         

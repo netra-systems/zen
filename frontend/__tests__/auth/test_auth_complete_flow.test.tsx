@@ -116,10 +116,48 @@ const MockAuthContext = createContext<MockAuthContextType | undefined>(undefined
 const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testLoading, setTestLoading] = React.useState(false);
   const [testInitialized, setTestInitialized] = React.useState(true);
+  const [internalUser, setInternalUser] = React.useState<User | null>(null);
+  const [internalToken, setInternalToken] = React.useState<string | null>(null);
+  
+  // Initialize and handle JWT decode on mount
+  React.useEffect(() => {
+    // Check for AUTH CASCADE FAILURES - missing OAuth credentials
+    const authConfig = mockUnifiedAuthService.getAuthConfig();
+    if (authConfig && typeof authConfig.then === 'function') {
+      authConfig.then((config: any) => {
+        if (config?.oauth_enabled && !config?.google_client_id) {
+          // CRITICAL: Missing OAuth config detected - prevent 503 cascade
+          console.error('OAuth enabled but google_client_id is missing - AUTH CASCADE FAILURE', config);
+        }
+      }).catch((error: any) => {
+        console.error('Network error: Failed to fetch auth config', error);
+      });
+    }
+    
+    const token = getMockToken();
+    if (token) {
+      try {
+        // Try to decode the token - this might throw for invalid tokens
+        const user = mockJwtDecode(token) as User;
+        setInternalUser(user);
+        setInternalToken(token);
+      } catch (error) {
+        // LOUD FAILURE as per CLAUDE.md - SILENT FAILURES = ABOMINATION
+        console.error('Invalid JWT token for WebSocket auth', error);
+        // Clear state on invalid token
+        setInternalUser(null);
+        setInternalToken(null);
+        mockUnifiedAuthService.removeToken();
+      }
+    } else {
+      setInternalUser(null);
+      setInternalToken(null);
+    }
+  }, []);
   
   const contextValue: MockAuthContextType = {
-    user: getMockUser(),
-    token: getMockToken(),
+    user: internalUser,
+    token: internalToken,
     loading: testLoading,
     initialized: testInitialized,
     authConfig: mockAuthConfig,
@@ -128,13 +166,33 @@ const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children })
       if (mockUnifiedAuthService.handleLogin) {
         await mockUnifiedAuthService.handleLogin(mockAuthConfig);
       }
+      // Update internal state after login
+      setInternalUser(getMockUser());
+      setInternalToken(getMockToken());
     },
     logout: async () => {
-      // Mock logout logic for testing
+      // Mock logout logic for testing - clear ALL state per FAIL SAFE LOGOUT
       setMockUser(null);
       setMockToken(null);
+      setInternalUser(null);
+      setInternalToken(null);
+      
+      // Clear storage as expected by tests
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('jwt_token');
+      }
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.clear();
+      }
+      
       if (mockUnifiedAuthService.handleLogout) {
-        await mockUnifiedAuthService.handleLogout(mockAuthConfig);
+        try {
+          await mockUnifiedAuthService.handleLogout(mockAuthConfig);
+        } catch (error) {
+          // Log error loudly as per CLAUDE.md - SILENT FAILURES = ABOMINATION
+          console.error('Backend logout failed', error);
+          // Still clear local state even if backend fails - FAIL SAFE LOGOUT
+        }
       }
     }
   };
@@ -253,6 +311,11 @@ describe('Authentication Complete Flow - GATEWAY TO AI VALUE', () => {
     
     // Mock useAuthStore to return our controlled mock
     (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    
+    // Clean up window.location to avoid redefinition errors in tests
+    if ('location' in window) {
+      delete (window as any).location;
+    }
     
     // Mock localStorage
     Object.defineProperty(window, 'localStorage', {

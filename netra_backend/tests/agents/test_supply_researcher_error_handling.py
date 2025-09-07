@@ -6,7 +6,7 @@ Error handling tests for SupplyResearcherAgent
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -32,7 +32,7 @@ class TestSupplyResearcherErrorHandling:
         # TODO: Initialize real service
         """Create mock database session"""
         # Mock: Generic component isolation for controlled unit testing
-        db = TestDatabaseManager().get_session()
+        db = DatabaseTestManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
         db.query = query_instance  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing

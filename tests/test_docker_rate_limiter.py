@@ -40,7 +40,7 @@
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
     # REMOVED_SYNTAX_ERROR: import asyncio

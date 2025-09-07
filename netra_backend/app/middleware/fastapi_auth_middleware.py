@@ -631,21 +631,19 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
                 "error": str(e)
             }
     
-    def _validate_token_in_database(self, token: str) -> dict:
+    async def _validate_token_in_database(self, token: str) -> dict:
         """Mock method for database token validation used in tests."""
         # This would normally validate against database
         # For testing, delegate to auth service - SSOT compliant
-        import asyncio
-        return await asyncio.create_task(self._validate_token(token))
+        return await self._validate_token(token)
     
-    def _validate_with_auth_service(self, token: str) -> dict:
+    async def _validate_with_auth_service(self, token: str) -> dict:
         """Mock method for auth service validation used in tests."""
         # This would normally validate with auth service
         # For testing, delegate to auth service - SSOT compliant
-        import asyncio
-        return await asyncio.create_task(self._validate_token(token))
+        return await self._validate_token(token)
     
-    def _process_authentication(self, request) -> dict:
+    async def _process_authentication(self, request) -> dict:
         """Mock method for authentication processing used in tests."""
         # This would normally do full authentication processing
         # We do simplified processing to avoid recursion with authenticate_request

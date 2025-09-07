@@ -6,7 +6,7 @@ COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio

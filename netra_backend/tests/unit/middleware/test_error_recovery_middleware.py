@@ -8,7 +8,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.error_recovery_middleware import ErrorRecoveryMiddleware

@@ -6,7 +6,7 @@ Business Value: Long-term maintainability
 
 import pytest
 from netra_backend.app.db.migrations import MigrationRunner
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
@@ -19,7 +19,7 @@ class TestMigrations:
     # TODO: Initialize real service
         """Create test instance"""
         pass
-        mock_session = TestDatabaseManager().get_session()
+        mock_session = DatabaseTestManager().get_session()
         return MigrationRunner(mock_session)
 
     def test_initialization(self, instance):

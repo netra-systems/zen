@@ -27,7 +27,7 @@ import os
 import pytest
 from typing import Optional
 from unittest.mock import patch
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env

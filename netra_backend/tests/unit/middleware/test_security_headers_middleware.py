@@ -8,7 +8,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware

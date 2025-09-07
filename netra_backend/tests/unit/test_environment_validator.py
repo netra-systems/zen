@@ -9,8 +9,8 @@ import os
 import pytest
 
 from shared.isolated_environment import get_env, IsolatedEnvironment
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils import TestRedisManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils import RedisTestManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from netra_backend.app.core.environment_validator import (

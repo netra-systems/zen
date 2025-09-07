@@ -20,7 +20,7 @@ Updated to test the SSOT method using DatabaseURLBuilder and IsolatedEnvironment
 import pytest
 from typing import Optional
 import os
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.schemas.config import (

@@ -16,7 +16,7 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.exc import OperationalError
 import psycopg2
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 
 from netra_backend.app.db.database_manager import DatabaseManager
