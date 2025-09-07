@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.983" timestamp="2025-09-07T11:21:51.128181-07:00" hostname="Anthony"><testcase classname="" name="" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py:512: in __call__
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.563" timestamp="2025-09-07T11:24:16.900609-07:00" hostname="Anthony"><testcase classname="" name="" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py:512: in __call__
     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py:120: in _hookexec
@@ -13,6 +13,10 @@
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:706: in readouterr
     out = self.out.snap() if self.out else ""
           ^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:591: in snap
-    self.tmpfile.seek(0)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:453: in snap
+    res = self.tmpfile.getvalue()
+          ^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py:209: in getvalue
+    return self.buffer.getvalue().decode("UTF-8")
+           ^^^^^^^^^^^^^^^^^^^^^^
 E   ValueError: I/O operation on closed file.</error></testcase></testsuite></testsuites>

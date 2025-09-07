@@ -1,5 +1,4 @@
 ---
-allowed-tools: ["Bash"]
 description: "Audit"
 ---
 
