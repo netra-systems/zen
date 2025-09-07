@@ -66,67 +66,61 @@ class TestRealAgentPipeline:
     async def test_complete_agent_workflow_message_to_response(self, test_pipeline_test_core, test_supervisor_setup):
         """Test complete: User message → routing → execution → response flow."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.ENTERPRISE)
-        try:
-            workflow_result = await self._execute_complete_workflow(session_data, test_supervisor_setup)
-            self._assert_complete_workflow_success(workflow_result)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        workflow_result = await self._execute_complete_workflow(session_data, test_supervisor_setup)
+        self._assert_complete_workflow_success(workflow_result)
+        await session_data["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_supervisor_routing_logic_with_real_messages(self, test_pipeline_test_core, test_supervisor_setup):
         """Test supervisor routing logic with real message patterns."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.PRO)
-        try:
-            routing_results = await self._test_supervisor_routing_patterns(session_data, test_supervisor_setup)
-            self._assert_routing_logic_success(routing_results)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        routing_results = await self._test_supervisor_routing_patterns(session_data, test_supervisor_setup)
+        self._assert_routing_logic_success(routing_results)
+        await session_data["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_agent_execution_with_real_llm_calls(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent execution with real LLM calls in test mode."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.ENTERPRISE)
-        try:
-            execution_result = await self._execute_agent_with_real_llm(session_data, test_supervisor_setup)
-            self._assert_real_llm_execution_success(execution_result)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        execution_result = await self._execute_agent_with_real_llm(session_data, test_supervisor_setup)
+        self._assert_real_llm_execution_success(execution_result)
+        await session_data["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_streaming_response_format_validation(self, test_pipeline_test_core, test_supervisor_setup):
         """Test response streaming format and real-time updates."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.PRO)
-        try:
-            streaming_validator = StreamingResponseValidator()
-            stream_result = await streaming_validator.validate_response_streaming(session_data, test_supervisor_setup)
-            self._assert_streaming_response_success(stream_result)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        streaming_validator = StreamingResponseValidator()
+        stream_result = await streaming_validator.validate_response_streaming(session_data, test_supervisor_setup)
+        self._assert_streaming_response_success(stream_result)
+        await session_data["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_multi_agent_coordination_and_parallel_execution(self, test_pipeline_test_core, test_supervisor_setup):
         """Test multi-agent coordination with parallel execution."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.ENTERPRISE)
-        try:
-            coordination_result = await self._test_multi_agent_coordination(session_data, test_supervisor_setup)
-            self._assert_multi_agent_coordination_success(coordination_result)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        coordination_result = await self._test_multi_agent_coordination(session_data, test_supervisor_setup)
+        self._assert_multi_agent_coordination_success(coordination_result)
+        await session_data["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_agent_failure_and_recovery_scenarios(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent failure handling and fallback scenarios."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.PRO)
-        try:
-            recovery_result = await self._test_failure_recovery_scenarios(session_data, test_supervisor_setup)
-            self._assert_failure_recovery_success(recovery_result)
-        finally:
-            await session_data["client"].close()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        recovery_result = await self._test_failure_recovery_scenarios(session_data, test_supervisor_setup)
+        self._assert_failure_recovery_success(recovery_result)
+        await session_data["client"].close()
     
     async def _execute_complete_workflow(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Execute complete workflow from message to response."""
@@ -343,11 +337,7 @@ class AgentFailureRecoveryTester:
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.side_effect = Exception("Simulated LLM failure")
-            try:
-                await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
-                pytest.fail("Expected LLM failure was not raised")
-            except Exception as e:
-                # Expected failure from simulated LLM error
-                if "Simulated LLM failure" not in str(e):
-                    pytest.fail(f"Unexpected error type: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            pytest.fail("Expected LLM failure was not raised")
             return {"failure_detected": True, "recovery_attempted": True, "fallback_successful": True}

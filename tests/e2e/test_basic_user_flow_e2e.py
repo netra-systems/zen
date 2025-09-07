@@ -41,20 +41,11 @@ from websockets import ServerConnection
 
 # CRITICAL: Set development environment for dev login to work
 
-# Use absolute imports or handle missing dependencies gracefully
-try:
-    from tests.e2e.harness_utils import (
-        TestClient,
-        TestHarnessContext,
-    )
-except ImportError:
-    # Create mock classes if dependencies not available
-    class TestHarnessContext:
-        async def __aenter__(self): return self
-        async def __aexit__(self, *args): pass
-        
-    class TestClient:
-        def __init__(self, base_url): self.base_url = base_url
+# TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+from tests.e2e.harness_utils import (
+    TestClient,
+    TestHarnessContext,
+)
 
 # Test configuration
 AUTH_SERVICE_URL = "http://localhost:8001"
@@ -79,56 +70,51 @@ class TestBasicUserFlowE2Eer:
         flow_start_time = time.time()
         results = {"steps": [], "success": False, "duration": 0}
         
-        try:
-            # Step 1: Create user via Auth service DEV endpoint
-            signup_result = await self._execute_real_signup()
-            results["steps"].append({
-                "step": "signup", 
-                "success": True, 
-                "user_id": signup_result["user_id"],
-                "email": signup_result["email"]
-            })
-            
-            # Step 2: Login via Auth service to get JWT token
-            login_result = await self._execute_real_login()
-            results["steps"].append({
-                "step": "login",
-                "success": True,
-                "token_length": len(login_result["access_token"]),
-                "token_type": login_result.get("token_type")
-            })
-            
-            # Step 3: Establish WebSocket connection with JWT token
-            websocket_result = await self._establish_real_websocket_connection()
-            results["steps"].append({
-                "step": "websocket_connect",
-                "success": True,
-                "connected": websocket_result["connected"]
-            })
-            
-            # Step 4: Send real chat message and get agent response
-            chat_result = await self._execute_real_chat_flow()
-            results["steps"].append({
-                "step": "chat_flow",
-                "success": True,
-                "message_sent": chat_result["message_sent"],
-                "response_received": chat_result["response_received"],
-                "response_length": chat_result["response_length"]
-            })
-            
-            # Calculate total duration
-            results["duration"] = time.time() - flow_start_time
-            results["success"] = True
-            
-            # CRITICAL: Must complete in <20 seconds for business UX
-            assert results["duration"] < 20.0, f"Flow took {results['duration']:.2f}s > 20s limit"
-            
-        except Exception as e:
-            results["error"] = str(e)
-            results["duration"] = time.time() - flow_start_time
-            raise
-        finally:
-            await self._cleanup_resources()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Step 1: Create user via Auth service DEV endpoint
+        signup_result = await self._execute_real_signup()
+        results["steps"].append({
+            "step": "signup", 
+            "success": True, 
+            "user_id": signup_result["user_id"],
+            "email": signup_result["email"]
+        })
+        
+        # Step 2: Login via Auth service to get JWT token
+        login_result = await self._execute_real_login()
+        results["steps"].append({
+            "step": "login",
+            "success": True,
+            "token_length": len(login_result["access_token"]),
+            "token_type": login_result.get("token_type")
+        })
+        
+        # Step 3: Establish WebSocket connection with JWT token
+        websocket_result = await self._establish_real_websocket_connection()
+        results["steps"].append({
+            "step": "websocket_connect",
+            "success": True,
+            "connected": websocket_result["connected"]
+        })
+        
+        # Step 4: Send real chat message and get agent response
+        chat_result = await self._execute_real_chat_flow()
+        results["steps"].append({
+            "step": "chat_flow",
+            "success": True,
+            "message_sent": chat_result["message_sent"],
+            "response_received": chat_result["response_received"],
+            "response_length": chat_result["response_length"]
+        })
+        
+        # Calculate total duration
+        results["duration"] = time.time() - flow_start_time
+        results["success"] = True
+        
+        # CRITICAL: Must complete in <20 seconds for business UX
+        assert results["duration"] < 20.0, f"Flow took {results['duration']:.2f}s > 20s limit"
+        
+        await self._cleanup_resources()
         
         return results
     
@@ -191,43 +177,31 @@ class TestBasicUserFlowE2Eer:
         # Connect to real WebSocket endpoint with JWT token
         headers = {"Authorization": f"Bearer {self.jwt_token}"}
         
-        try:
-            # Use asyncio.timeout for Python 3.12 compatibility
-            async with asyncio.timeout(10):
-                self.websocket_connection = await websockets.connect(
-                    WEBSOCKET_URL,
-                    additional_headers=headers
-                )
-        except asyncio.TimeoutError:
-            pytest.fail("WebSocket connection timed out after 10 seconds")
-        except websockets.exceptions.InvalidStatusCode as e:
-            pytest.fail(f"WebSocket connection rejected (likely auth failure): {e}")
-        except Exception as e:
-            pytest.fail(f"WebSocket connection failed: {e}")
-            
-        try:
-            # Wait for connection acknowledgment
-            welcome_message = await asyncio.wait_for(
-                self.websocket_connection.recv(),
-                timeout=5.0
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Use asyncio.timeout for Python 3.12 compatibility
+        async with asyncio.timeout(10):
+            self.websocket_connection = await websockets.connect(
+                WEBSOCKET_URL,
+                additional_headers=headers
             )
             
-            welcome_data = json.loads(welcome_message)
-            
-            # Validate connection acknowledgment
-            assert "type" in welcome_data, "Welcome message must have type"
-            
-            return {
-                "connected": True,
-                "welcome_message": welcome_data,
-                "connection_established": True
-            }
-        except asyncio.TimeoutError:
-            pytest.fail("No welcome message received within 5 seconds")
-        except json.JSONDecodeError as e:
-            pytest.fail(f"Invalid JSON in welcome message: {e}")
-        except Exception as e:
-            pytest.fail(f"Failed to process welcome message: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Wait for connection acknowledgment
+        welcome_message = await asyncio.wait_for(
+            self.websocket_connection.recv(),
+            timeout=5.0
+        )
+        
+        welcome_data = json.loads(welcome_message)
+        
+        # Validate connection acknowledgment
+        assert "type" in welcome_data, "Welcome message must have type"
+        
+        return {
+            "connected": True,
+            "welcome_message": welcome_data,
+            "connection_established": True
+        }
     
     async def _execute_real_chat_flow(self) -> Dict[str, Any]:
         """Send real chat message and receive agent response."""
@@ -246,26 +220,23 @@ class TestBasicUserFlowE2Eer:
         await self.websocket_connection.send(json.dumps(test_message))
         
         # Wait for real agent response (with timeout)
-        try:
-            response_message = await asyncio.wait_for(
-                self.websocket_connection.recv(),
-                timeout=15.0  # Allow time for real agent processing
-            )
-            
-            response_data = json.loads(response_message)
-            
-            # Validate business-critical response
-            self._validate_agent_response(response_data)
-            
-            return {
-                "message_sent": True,
-                "response_received": True,
-                "response_data": response_data,
-                "response_length": len(str(response_data))
-            }
-            
-        except asyncio.TimeoutError:
-            raise AssertionError("Agent response timeout - pipeline may be broken")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        response_message = await asyncio.wait_for(
+            self.websocket_connection.recv(),
+            timeout=15.0  # Allow time for real agent processing
+        )
+        
+        response_data = json.loads(response_message)
+        
+        # Validate business-critical response
+        self._validate_agent_response(response_data)
+        
+        return {
+            "message_sent": True,
+            "response_received": True,
+            "response_data": response_data,
+            "response_length": len(str(response_data))
+        }
     
     def _validate_agent_response(self, response_data: Dict[str, Any]) -> None:
         """Validate agent response meets business requirements."""
@@ -287,11 +258,8 @@ class TestBasicUserFlowE2Eer:
     async def _cleanup_resources(self) -> None:
         """Cleanup test resources."""
         if self.websocket_connection:
-            try:
-                await self.websocket_connection.close()
-            except Exception as e:
-                # Log cleanup error but don't fail test
-                print(f"Warning: WebSocket cleanup failed: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await self.websocket_connection.close()
         
         if hasattr(self.test_client, 'close'):
             await self.test_client.close()

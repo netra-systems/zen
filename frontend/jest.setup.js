@@ -1410,6 +1410,9 @@ jest.mock('@/store/unified-chat', () => {
     return hookFunction;
   };
 
+  // Create store instance first
+  let storeInstance = null;
+  
   const getInitialChatState = () => ({
     isAuthenticated: true,
     activeThreadId: 'test-thread-123',
@@ -1421,10 +1424,14 @@ jest.mock('@/store/unified-chat', () => {
     sendMessage: jest.fn(),
     addMessage: jest.fn(),
     setProcessing: jest.fn((processing) => {
-      useUnifiedChatStore.setState({ isProcessing: processing });
+      if (storeInstance) {
+        storeInstance.setState({ isProcessing: processing });
+      }
     }),
     setActiveThread: jest.fn((threadId) => {
-      useUnifiedChatStore.setState({ activeThreadId: threadId });
+      if (storeInstance) {
+        storeInstance.setState({ activeThreadId: threadId });
+      }
     }),
     addOptimisticMessage: jest.fn(),
     updateOptimisticMessage: jest.fn(),
@@ -1433,49 +1440,75 @@ jest.mock('@/store/unified-chat', () => {
     resetLayers: jest.fn(),
     setConnectionStatus: jest.fn(),
     setThreadLoading: jest.fn((loading) => {
-      useUnifiedChatStore.setState({ isThreadLoading: loading });
+      if (storeInstance) {
+        storeInstance.setState({ isThreadLoading: loading });
+      }
     }),
     startThreadLoading: jest.fn(() => {
-      useUnifiedChatStore.setState({ isThreadLoading: true });
+      if (storeInstance) {
+        storeInstance.setState({ isThreadLoading: true });
+      }
     }),
-    completeThreadLoading: jest.fn(() => {
-      useUnifiedChatStore.setState({ isThreadLoading: false });
+    completeThreadLoading: jest.fn((threadId, messages) => {
+      if (storeInstance) {
+        storeInstance.setState({ 
+          isThreadLoading: false,
+          activeThreadId: threadId,
+          messages: messages || []
+        });
+      }
     }),
     clearMessages: jest.fn(() => {
-      useUnifiedChatStore.setState({ messages: [] });
+      if (storeInstance) {
+        storeInstance.setState({ messages: [] });
+      }
     }),
     loadMessages: jest.fn(),
     handleWebSocketEvent: jest.fn((event) => {
       // Mock implementation that processes WebSocket events
       if (event.type === 'agent_started') {
-        useUnifiedChatStore.setState({
-          isProcessing: true,
-          currentRunId: event.payload?.run_id || 'mock-run-id'
-        });
+        if (storeInstance) {
+          storeInstance.setState({
+            isProcessing: true,
+            currentRunId: event.payload?.run_id || 'mock-run-id'
+          });
+        }
       } else if (event.type === 'agent_completed') {
-        useUnifiedChatStore.setState({
-          isProcessing: false,
-          currentRunId: null
-        });
+        if (storeInstance) {
+          storeInstance.setState({
+            isProcessing: false,
+            currentRunId: null
+          });
+        }
       } else if (event.type === 'error') {
-        useUnifiedChatStore.setState({
-          isProcessing: false
-        });
+        if (storeInstance) {
+          storeInstance.setState({
+            isProcessing: false
+          });
+        }
       }
       return Promise.resolve();
     }),
     resetState: jest.fn(() => {
-      useUnifiedChatStore.setState({
-        isProcessing: false,
-        isThreadLoading: false,
-        messages: [],
-        currentRunId: null,
-        fastLayerData: null
-      });
+      if (storeInstance) {
+        storeInstance.setState({
+          isProcessing: false,
+          isThreadLoading: false,
+          messages: [],
+          currentRunId: null,
+          fastLayerData: null
+        });
+      }
+    }),
+    resetStore: jest.fn(() => {
+      if (storeInstance) {
+        storeInstance.setState(getInitialChatState());
+      }
     })
   });
   
   const useUnifiedChatStore = createChatStoreMock(getInitialChatState());
+  storeInstance = useUnifiedChatStore; // Set the reference after creation
   
   return { useUnifiedChatStore };
 });
