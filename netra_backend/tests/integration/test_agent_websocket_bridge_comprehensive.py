@@ -37,13 +37,10 @@ from unittest.mock import patch
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
-from test_framework.fixtures.integration_auth_fixtures import (
-    integration_auth_manager,
-    integration_auth_helper,
-    authenticated_user_token,
-    authenticated_websocket_headers,
-    auth_service_health_check
-)
+# Import integration auth fixtures directly for this test
+import pytest
+import asyncio
+from test_framework.ssot.integration_auth_manager import create_integration_test_helper
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # Import the class under test and dependencies
@@ -183,23 +180,20 @@ class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
     # ========================================================================
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    @pytest.mark.auth_required
-    async def test_agent_websocket_event_bridging_lifecycle(
-        self, 
-        real_services_fixture,
-        integration_auth_helper,
-        authenticated_user_token,
-        auth_service_health_check
-    ):
+    @pytest.mark.real_services 
+    async def test_agent_websocket_event_bridging_lifecycle(self, real_services_fixture):
         """
         Test complete agent-WebSocket event bridging lifecycle.
         
         BUSINESS VALUE: Ensures agent execution events reach users via WebSocket
         enabling real-time visibility into AI processing.
         """
-        # Verify auth service is healthy before proceeding
-        assert auth_service_health_check, "Auth service must be healthy for WebSocket integration tests"
+        # Set up authentication for the test
+        auth_helper = await create_integration_test_helper()
+        authenticated_user_token = await auth_helper.create_integration_test_token()
+        
+        # Verify auth service is healthy and token is created
+        assert authenticated_user_token, "Auth service must be healthy and provide tokens for WebSocket integration tests"
         
         # Log authentication status for debugging
         self.logger.info(f"Integration test using token: {authenticated_user_token[:20]}...")
@@ -292,16 +286,32 @@ class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    @pytest.mark.multi_user
-    async def test_multi_user_agent_websocket_isolation(self, real_services_fixture, multi_user_tokens, auth_service_health_check):
+    async def test_multi_user_agent_websocket_isolation(self, real_services_fixture):
         """
         Test multi-user agent-WebSocket isolation during concurrent execution.
         
         BUSINESS VALUE: Ensures user isolation so agents don't leak information
         between different users' sessions.
         """
-        # Verify auth service is healthy and we have multiple user tokens
-        assert auth_service_health_check, "Auth service must be healthy for multi-user tests"
+        # Set up authentication helper and create tokens for multiple users
+        auth_helper = await create_integration_test_helper()
+        
+        # Create multiple user tokens
+        multi_user_tokens = {}
+        user_configs = [
+            {"user_id": "test-user-1", "email": "user1@test.com"},
+            {"user_id": "test-user-2", "email": "user2@test.com"},
+            {"user_id": "test-user-3", "email": "user3@test.com"}
+        ]
+        
+        for config in user_configs:
+            token = await auth_helper.create_integration_test_token(
+                user_id=config["user_id"],
+                email=config["email"]
+            )
+            multi_user_tokens[config["user_id"]] = token
+        
+        # Verify we have multiple user tokens
         assert len(multi_user_tokens) >= 3, "Multi-user test requires at least 3 user tokens"
         
         self.logger.info(f"Multi-user test using {len(multi_user_tokens)} authenticated users")
