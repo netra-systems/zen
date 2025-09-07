@@ -118,12 +118,11 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         yield redis_mgr
         await redis_mgr.shutdown()
     
-    @pytest.fixture
-    async def execution_engine_factory(self):
-        """Real execution engine factory."""
-        factory = await get_execution_engine_factory()
-        yield factory
-        # The factory has built-in cleanup handling
+    # CRITICAL FIX: Use test fixture that properly initializes ExecutionEngineFactory
+    # The original fixture failed because get_execution_engine_factory() expects 
+    # the factory to be configured during app startup, but tests run independently.
+    # The new fixture handles the complete initialization sequence.
+    # Original error: "ExecutionEngineFactory not configured during startup"
     
     @pytest.fixture
     def llm_manager(self):

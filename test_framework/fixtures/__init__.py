@@ -13,6 +13,9 @@ from test_framework.fixtures.real_services import *
 from test_framework.fixtures.websocket_manager_mock import *
 from test_framework.fixtures.websocket_test_helpers import *
 
+# CRITICAL: Import ExecutionEngineFactory fixtures for integration tests
+from test_framework.fixtures.execution_engine_factory_fixtures import *
+
 # Legacy compatibility classes removed - use unified configuration management
 # create_test_app is now available via wildcard import from service_fixtures
 
