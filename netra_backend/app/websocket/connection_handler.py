@@ -198,6 +198,17 @@ class ConnectionHandler:
             logger.info(f"✅ ConnectionHandler authenticated for user {self.context.user_id[:8]}... "
                        f"thread_id: {thread_id}")
             
+            # SECURITY FIX: Flush any buffered events that arrived before thread association
+            buffered_events = self.context.get_buffered_events()
+            if buffered_events:
+                logger.info(f"🔄 Flushing {len(buffered_events)} buffered events for connection {self.connection_id}")
+                for event in buffered_events:
+                    try:
+                        await self.emitter.send_event(event)
+                        self.context.events_sent += 1
+                    except Exception as e:
+                        logger.error(f"Failed to send buffered event: {e}")
+            
             return True
             
         except Exception as e:

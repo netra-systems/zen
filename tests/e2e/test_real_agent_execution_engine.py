@@ -530,7 +530,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         
         # Set up execution
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         engine = create_request_scoped_engine(user_context, registry, bridge)
         
         # Track agent execution order via WebSocket events
@@ -633,7 +633,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         
         # Set up execution with error simulation
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         engine = create_request_scoped_engine(user_context, registry, bridge)
         
         await self.setup_websocket_event_tracking(context.user_id)
@@ -689,7 +689,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         )
         
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         
         # Create engine with shorter timeout for testing
         engine = create_request_scoped_engine(user_context, registry, bridge)
@@ -767,7 +767,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         )
         
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         engine = create_request_scoped_engine(user_context, registry, bridge)
         
         try:
@@ -799,7 +799,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         tasks = []
         
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         
         async def single_user_load_test(user_index: int):
             """Single user load test execution."""
@@ -899,7 +899,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         )
         
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         engine = create_request_scoped_engine(user_context, registry, bridge)
         
         # Set up comprehensive event tracking
@@ -1037,7 +1037,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                 
                 # Set up execution components
                 registry = await get_agent_registry()
-                bridge = await get_agent_websocket_bridge()
+                bridge = create_agent_websocket_bridge(user_context)
                 engine = create_request_scoped_engine(user_context, registry, bridge)
                 
                 # Set up WebSocket tracking
@@ -1104,7 +1104,7 @@ async def execution_test_registry():
 @pytest.fixture
 async def execution_test_bridge():
     """Get WebSocket bridge for execution tests."""
-    return await get_agent_websocket_bridge()
+    return create_agent_websocket_bridge()
 
 
 @pytest.fixture
