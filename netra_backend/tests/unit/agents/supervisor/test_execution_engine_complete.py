@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call, Mock
 
-from test_framework.ssot.base import BaseTestCase, AsyncBaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Mock the problematic WebSocket imports at the module level
@@ -141,7 +141,7 @@ class MockAgentCore:
             raise RuntimeError("Mock execution failure")
 
 
-class TestExecutionEngineConstruction(AsyncBaseTestCase):
+class TestExecutionEngineConstruction(AsyncSSotBaseTestCase):
     """Test ExecutionEngine construction and initialization patterns."""
     
     def setUp(self):
@@ -283,7 +283,7 @@ class TestExecutionEngineConstruction(AsyncBaseTestCase):
         self.assertIn("No fallback paths allowed", error_msg)
 
 
-class TestExecutionEngineInitialization(AsyncBaseTestCase):
+class TestExecutionEngineInitialization(AsyncSSotBaseTestCase):
     """Test ExecutionEngine initialization and component setup."""
     
     def setUp(self):
@@ -477,7 +477,7 @@ class TestExecutionEngineInitialization(AsyncBaseTestCase):
         mock_tracker.register_timeout_callback.assert_called_once_with(engine._handle_agent_timeout)
 
 
-class TestExecutionEngineValidation(AsyncBaseTestCase):
+class TestExecutionEngineValidation(AsyncSSotBaseTestCase):
     """Test ExecutionEngine context validation functionality."""
     
     def setUp(self):
@@ -661,7 +661,7 @@ class TestExecutionEngineValidation(AsyncBaseTestCase):
         self.assertLess(end_time - start_time, 0.1)
 
 
-class TestExecutionEngineWebSocketEvents(AsyncBaseTestCase):
+class TestExecutionEngineWebSocketEvents(AsyncSSotBaseTestCase):
     """Test ExecutionEngine WebSocket event emission functionality."""
     
     def setUp(self):
@@ -857,7 +857,7 @@ class TestExecutionEngineWebSocketEvents(AsyncBaseTestCase):
         self.assertIn("(Complete)", complete_event["reasoning"])
 
 
-class TestExecutionEngineAgentExecution(AsyncBaseTestCase):
+class TestExecutionEngineAgentExecution(AsyncSSotBaseTestCase):
     """Test ExecutionEngine single agent execution functionality."""
     
     def setUp(self):
@@ -1069,7 +1069,7 @@ class TestExecutionEngineAgentExecution(AsyncBaseTestCase):
             self.assertTrue(len(engine.execution_stats['queue_wait_times']) > 0)
 
 
-class TestExecutionEnginePipelineExecution(AsyncBaseTestCase):
+class TestExecutionEnginePipelineExecution(AsyncSSotBaseTestCase):
     """Test ExecutionEngine pipeline execution functionality."""
     
     def setUp(self):
@@ -1273,7 +1273,7 @@ class TestExecutionEnginePipelineExecution(AsyncBaseTestCase):
         self.assertEqual(step_context.metadata, {"step_type": "analysis", "priority": "high"})
 
 
-class TestExecutionEngineErrorHandling(AsyncBaseTestCase):
+class TestExecutionEngineErrorHandling(AsyncSSotBaseTestCase):
     """Test ExecutionEngine error handling and recovery functionality."""
     
     def setUp(self):
@@ -1453,7 +1453,7 @@ class TestExecutionEngineErrorHandling(AsyncBaseTestCase):
         self.assertIn("engineering team", system_event["error"])
 
 
-class TestExecutionEnginePerformanceAndStats(AsyncBaseTestCase):
+class TestExecutionEnginePerformanceAndStats(AsyncSSotBaseTestCase):
     """Test ExecutionEngine performance monitoring and statistics."""
     
     def setUp(self):
@@ -1614,7 +1614,7 @@ class TestExecutionEnginePerformanceAndStats(AsyncBaseTestCase):
         self.assertEqual(self.engine.execution_stats['timeout_executions'], 1)
 
 
-class TestExecutionEngineFactoryMethods(AsyncBaseTestCase):
+class TestExecutionEngineFactoryMethods(AsyncSSotBaseTestCase):
     """Test ExecutionEngine factory methods and creation patterns."""
     
     def setUp(self):
@@ -1705,7 +1705,7 @@ class TestExecutionEngineFactoryMethods(AsyncBaseTestCase):
         self.assertIn('RequestScopedExecutionEngine', recommendations_text)
 
 
-class TestExecutionEngineUserIsolation(AsyncBaseTestCase):
+class TestExecutionEngineUserIsolation(AsyncSSotBaseTestCase):
     """Test ExecutionEngine user isolation and context management."""
     
     def setUp(self):
@@ -1944,7 +1944,7 @@ class TestExecutionEngineUserIsolation(AsyncBaseTestCase):
             mock_engine.execute_agent.assert_called_once_with(agent_context, state)
 
 
-class TestExecutionEngineShutdownAndCleanup(AsyncBaseTestCase):
+class TestExecutionEngineShutdownAndCleanup(AsyncSSotBaseTestCase):
     """Test ExecutionEngine shutdown and cleanup functionality."""
     
     def setUp(self):

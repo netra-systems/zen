@@ -30,10 +30,10 @@ class TestServiceStatusEnum(BaseIntegrationTest):
     
     def test_service_status_enum_values(self):
         """Test all ServiceStatus enum values are correct."""
-        assert ServiceStatus.HEALTHY == "healthy"
-        assert ServiceStatus.UNHEALTHY == "unhealthy"
-        assert ServiceStatus.DEGRADED == "degraded"
-        assert ServiceStatus.NOT_CONFIGURED == "not_configured"
+        assert ServiceStatus.HEALTHY.value == "healthy"
+        assert ServiceStatus.UNHEALTHY.value == "unhealthy"
+        assert ServiceStatus.DEGRADED.value == "degraded"
+        assert ServiceStatus.NOT_CONFIGURED.value == "not_configured"
         
     def test_service_status_string_conversion(self):
         """Test ServiceStatus string representation."""
