@@ -2,9 +2,9 @@
 import pytest
 import asyncio
 from contextlib import asynccontextmanager
+from unittest.mock import patch, AsyncMock, Mock
 from test_framework.database.test_database_manager import TestDatabaseManager
 from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.health_checkers import HealthChecker
