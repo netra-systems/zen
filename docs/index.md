@@ -47,6 +47,7 @@
 - **[Test Creation Guide](../TEST_CREATION_GUIDE.md)** 🆕 - **AUTHORITATIVE**: Complete guide for creating tests with SSOT patterns
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
 - [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
+- **[Docker Architecture Diagrams](./docker_architecture_diagrams.md)** 🐳 - **NEW**: Comprehensive Docker build, caching, and deployment diagrams
 - [Unified Test Runner](../tests/unified_test_runner.py) - Central test execution
 
 ### 🔒 Security & Compliance

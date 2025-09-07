@@ -1,0 +1,99 @@
+{
+  "environment": "staging",
+  "timestamp": "2025-09-06T01:30:22.428870",
+  "postgresql": {
+    "status": "failed",
+    "connection_test": {
+      "connected": false,
+      "error": "Connection timeout (10s)",
+      "response_time_ms": null,
+      "server_version": null,
+      "database_name": null
+    },
+    "configuration_validation": {
+      "is_valid": true,
+      "error_message": "",
+      "postgres_host": "34.28.12.145",
+      "postgres_port": "5432",
+      "postgres_db": "netra_staging",
+      "postgres_user": "postgres",
+      "postgres_password": "***"
+    },
+    "url_builder_analysis": {
+      "environment": "staging",
+      "has_cloud_sql": false,
+      "has_tcp_config": true,
+      "debug_info": {
+        "environment": "staging",
+        "has_cloud_sql": false,
+        "has_tcp_config": true,
+        "postgres_host": "34.28.12.145",
+        "postgres_db": "netra_staging",
+        "available_urls": {
+          "cloud_sql_async": false,
+          "cloud_sql_sync": false,
+          "tcp_async": true,
+          "tcp_sync": true,
+          "tcp_async_ssl": true,
+          "auto_url": true
+        }
+      }
+    },
+    "staging_specific_issues": [],
+    "recommendations": [
+      "Check database credentials and network connectivity"
+    ]
+  },
+  "redis": {
+    "status": "failed",
+    "connection_test": {
+      "connected": false,
+      "error": "Connection timeout (5s)",
+      "response_time_ms": null,
+      "redis_version": null,
+      "memory_usage": null
+    },
+    "configuration": {
+      "redis_host": "34.28.12.146",
+      "redis_port": "6379",
+      "redis_db": "0",
+      "redis_password": "***",
+      "redis_url": "redis://:staging_redis_password_2024@34.28.12.146:..."
+    },
+    "staging_specific_issues": [],
+    "recommendations": [
+      "Check Redis connection settings and network connectivity"
+    ]
+  },
+  "clickhouse": {
+    "status": "failed",
+    "connection_test": {
+      "connected": false,
+      "error": "clickhouse://default:staging_clickhouse_password@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1/?query=SELECT%20version()",
+      "response_time_ms": null,
+      "clickhouse_version": null,
+      "server_info": null
+    },
+    "configuration": {
+      "clickhouse_host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+      "clickhouse_port": "8443",
+      "clickhouse_user": "default",
+      "clickhouse_password": "***",
+      "clickhouse_secure": true,
+      "clickhouse_url": "clickhouse://default:staging_clickhouse_password@x..."
+    },
+    "staging_specific_issues": [
+      "INFO: Using ClickHouse Cloud for staging - verify credentials and connectivity",
+      "INFO: Using secure ClickHouse port 8443"
+    ],
+    "recommendations": [
+      "Check ClickHouse connection settings and network connectivity"
+    ]
+  },
+  "configuration": {
+    "loaded_from": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.staging",
+    "variables_loaded": 90,
+    "load_errors": []
+  },
+  "overall_status": "failed"
+}

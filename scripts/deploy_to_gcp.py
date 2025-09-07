@@ -152,7 +152,7 @@ class GCPDeployer:
                 dockerfile="docker/frontend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/frontend.gcp.Dockerfile",
                 cloud_run_name="netra-frontend-staging",
                 memory="512Mi" if self.use_alpine else "2Gi",
-                cpu="0.5" if self.use_alpine else "1",
+                cpu="1" if self.use_alpine else "1",
                 min_instances=1,
                 max_instances=10,
                 # ⚠️ CRITICAL: Frontend environment variables are MANDATORY for deployment

@@ -64,7 +64,7 @@ gcp-*.json
 .service_discovery/
 
 # Test artifacts
-reports/
+# reports/ - Now tracked for organized documentation
 coverage/
 test-results/
 *.log
