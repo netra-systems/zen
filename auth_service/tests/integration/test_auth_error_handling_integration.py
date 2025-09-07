@@ -27,7 +27,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.services.auth_service import AuthService as UserService
 from auth_service.auth_core.core.jwt_handler import JWTHandler as JWTService
-from auth_service.auth_core.database.connection import ConnectionManager as RedisService
+from auth_service.services.redis_service import RedisService
 from auth_service.auth_core.services.auth_service import AuthService as ErrorHandlerService
 from auth_service.database import get_database
 

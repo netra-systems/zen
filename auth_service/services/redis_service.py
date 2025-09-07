@@ -7,7 +7,7 @@ following SSOT principles and maintaining service independence.
 
 import logging
 from typing import Any, Optional, List
-from auth_service.auth_core.redis_manager import RedisManager
+from auth_service.auth_core.redis_manager import AuthRedisManager
 from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class RedisService:
     def __init__(self, auth_config: AuthConfig):
         """Initialize Redis service with configuration."""
         self.auth_config = auth_config
-        self._redis_manager = RedisManager(auth_config)
+        self._redis_manager = AuthRedisManager()
     
     async def connect(self):
         """Connect to Redis."""
