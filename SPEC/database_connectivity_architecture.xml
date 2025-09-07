@@ -285,7 +285,7 @@ def get_migration_url(base_url: str) -> str:
                 deployment completion to prevent startup failures.
             </description>
             <validation_steps>
-                <step>Verify DATABASE_URL secret exists</step>
+                <step>Verify #removed-legacysecret exists</step>
                 <step>Test connection with resolved SSL parameters</step>
                 <step>Validate credentials are current</step>
                 <step>Ensure no localhost in staging/production</step>
@@ -321,7 +321,7 @@ def get_migration_url(base_url: str) -> str:
         <pattern name="SSL Requirement">
             <error>SSL connection required but not provided</error>
             <cause>Missing SSL parameters for staging/production TCP connections</cause>
-            <solution>Add sslmode=require to DATABASE_URL for TCP connections</solution>
+            <solution>Add sslmode=require to #removed-legacyfor TCP connections</solution>
         </pattern>
         
         <pattern name="IllegalStateChangeError">

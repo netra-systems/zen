@@ -60,7 +60,7 @@
     <conflict id="C002" severity="HIGH">
       <name>Database URL Format Inconsistency</name>
       <description>
-                Multiple formats for DATABASE_URL across different contexts
+                Multiple formats for #removed-legacyacross different contexts
             </description>
       <formats>
         <terraform>postgresql://user:pass@host:5432/db</terraform>

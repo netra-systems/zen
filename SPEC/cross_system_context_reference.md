@@ -212,7 +212,7 @@ def get_backend_url():
 
 **Secret Management** (GCP Secret Manager):
 - JWT_SECRET_KEY (64+ characters, synchronized)
-- DATABASE_URL (Unix socket format)
+- #removed-legacy(Unix socket format)
 - REDIS_URL
 - CLICKHOUSE_HOST (NOT localhost)
 - OAUTH_GOOGLE_CLIENT_ID_STAGING (OAuth Google credentials for staging)

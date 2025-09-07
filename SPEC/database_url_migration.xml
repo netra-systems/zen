@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
   <metadata>
-    <title>PostgreSQL Configuration Migration from DATABASE_URL to Individual Variables</title>
+    <title>PostgreSQL Configuration Migration from #removed-legacyto Individual Variables</title>
     <version>1.0.0</version>
     <created>2025-08-25</created>
     <category>database_configuration</category>
@@ -16,14 +16,14 @@
 
   <overview>
     <summary>
-      Migrates PostgreSQL configuration from monolithic DATABASE_URL to individual
+      Migrates PostgreSQL configuration from monolithic #removed-legacyto individual
       environment variables (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, 
       POSTGRES_PASSWORD) for better flexibility and compatibility across different
       connection types (async, sync, with/without SSL).
     </summary>
     
     <rationale>
-      <item>DATABASE_URL parsing is error-prone and inconsistent across drivers</item>
+      <item>#removed-legacyparsing is error-prone and inconsistent across drivers</item>
       <item>Different connection types require different URL formats (asyncpg vs psycopg2)</item>
       <item>Cloud SQL Unix socket connections have special formatting requirements</item>
       <item>SSL configuration varies between environments and connection types</item>
@@ -96,7 +96,7 @@
       <changes>
         <change>DatabaseConfigManager._get_postgres_url() now constructs URL from individual variables</change>
         <change>Added get_sync_postgres_url() for synchronous connections (migrations)</change>
-        <change>Falls back to DATABASE_URL if individual variables not set</change>
+        <change>Falls back to #removed-legacyif individual variables not set</change>
       </changes>
     </service>
     
@@ -176,7 +176,7 @@
     <test_file>tests/unit/test_database_url_construction.py</test_file>
     <test_scenarios>
       <scenario>Construct URL from individual variables</scenario>
-      <scenario>Fall back to DATABASE_URL when variables not set</scenario>
+      <scenario>Fall back to #removed-legacywhen variables not set</scenario>
       <scenario>Handle Cloud SQL Unix socket paths</scenario>
       <scenario>Add SSL parameters for staging/production</scenario>
       <scenario>Generate both async and sync URLs</scenario>
