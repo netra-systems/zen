@@ -98,36 +98,36 @@ class TestCriticalWebSocket:
         auth_enforced = False
         
         try:
-            # Try to connect without auth with Python 3.12 compatible timeout
-            async with asyncio.timeout(10):
-                async with websockets.connect(config.websocket_url) as ws:
-                    # Send message without auth
-                    await ws.send(json.dumps({
-                        "type": "message",
-                        "content": "Test without auth"
-                    }))
+            # Try to connect without auth (don't use asyncio.timeout wrapper to avoid exception masking)
+            async with websockets.connect(config.websocket_url) as ws:
+                # Send message without auth
+                await ws.send(json.dumps({
+                    "type": "message",
+                    "content": "Test without auth"
+                }))
+                
+                # Should get error or connection close
+                try:
+                    response = await asyncio.wait_for(ws.recv(), timeout=5)
+                    data = json.loads(response)
                     
-                    # Should get error or connection close
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=5)
-                        data = json.loads(response)
-                        
-                        # Check if we got an auth error
-                        if data.get("type") == "error" and "auth" in data.get("message", "").lower():
-                            auth_enforced = True
-                        
-                    except (asyncio.TimeoutError, websockets.ConnectionClosed):
-                        # Connection closed = auth enforced
+                    # Check if we got an auth error
+                    if data.get("type") == "error" and "auth" in data.get("message", "").lower():
                         auth_enforced = True
                     
+                except (asyncio.TimeoutError, websockets.ConnectionClosed):
+                    # Connection closed = auth enforced
+                    auth_enforced = True
+                    
         except websockets.exceptions.InvalidStatusCode as e:
+            print(f"Caught InvalidStatusCode: {e.status_code}")
             if e.status_code in [401, 403]:
                 auth_enforced = True
         except Exception as e:
+            print(f"Auth test error type: {type(e).__name__}")
             print(f"Auth test error: {e}")
-            # Check if the error message indicates HTTP 403/401 (authentication required)
-            error_str = str(e).lower()
-            if "403" in error_str or "401" in error_str or "unauthorized" in error_str or "forbidden" in error_str:
+            # Check if it's a 403 error in the message
+            if "403" in str(e) or "HTTP 403" in str(e):
                 auth_enforced = True
         
         duration = time.time() - start_time
