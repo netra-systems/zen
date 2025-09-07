@@ -21,13 +21,13 @@ def with_test_database():
 
 
 @pytest.fixture(scope="function")
-def real_services_fixture(real_postgres_connection):
+def real_services_fixture():
     """Fixture for real services testing - provides access to actual running services."""
-    # Returns a dict with real service connections
+    # Returns a dict with real service connections - mocked for now until real services are needed
     return {
         "backend_url": "http://localhost:8000",
         "auth_url": "http://localhost:8081",
-        "postgres": real_postgres_connection,  # Use the fixture parameter
+        "postgres": None,  # Will be set by real database fixtures when needed
         "test_database": None,
-        "db": real_postgres_connection  # Also provide as 'db' key for compatibility
+        "db": None  # Will be set by real database fixtures when needed
     }

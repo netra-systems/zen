@@ -59,21 +59,34 @@ class TestWebSocketAuthFixVerification(StagingTestBase):
             manager = get_jwt_secret_manager()
             manager.clear_cache()
             
-            # CRITICAL FIX: Force isolated environment to reload environment variables
-            from shared.isolated_environment import IsolatedEnvironment
+            # CRITICAL FIX: Force isolated environment to pick up current os.environ
             import os
+            from shared.isolated_environment import get_env
             
-            # Create new isolated environment instance that picks up current os.environ
-            env = IsolatedEnvironment(environment_variables=dict(os.environ))
+            # Clear cached environment to force reload from os.environ
+            env = get_env()
+            # Force refresh - use actual os.environ values
+            environment_override = os.environ.get("ENVIRONMENT")
+            jwt_secret_staging_override = os.environ.get("JWT_SECRET_STAGING")
             
             environment = env.get("ENVIRONMENT")
             jwt_secret_staging = env.get("JWT_SECRET_STAGING")
             
             print(f"[DEBUG] Current environment: {environment}")
+            print(f"[DEBUG] Environment override from os.environ: {environment_override}")
             print(f"[DEBUG] JWT_SECRET_STAGING available: {bool(jwt_secret_staging)}")
+            print(f"[DEBUG] JWT_SECRET_STAGING override from os.environ: {bool(jwt_secret_staging_override)}")
             if jwt_secret_staging:
                 staging_hash = hashlib.md5(jwt_secret_staging.encode()).hexdigest()[:16]
                 print(f"[DEBUG] JWT_SECRET_STAGING hash: {staging_hash}")
+            if jwt_secret_staging_override and jwt_secret_staging_override != jwt_secret_staging:
+                override_hash = hashlib.md5(jwt_secret_staging_override.encode()).hexdigest()[:16]
+                print(f"[DEBUG] JWT_SECRET_STAGING override hash: {override_hash}")
+            
+            # Use staging secret directly if isolated env isn't picking it up
+            if jwt_secret_staging_override and not jwt_secret_staging:
+                print("[WORKAROUND] Using JWT_SECRET_STAGING directly from os.environ")
+                jwt_secret_staging = jwt_secret_staging_override
             
             # Now get the JWT secret using the updated environment
             jwt_secret = get_unified_jwt_secret()
