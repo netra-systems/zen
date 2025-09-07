@@ -78,6 +78,25 @@
         </prevention>
     </learning>
     
+    <learning id="auth-ssot-implementation-2025-01-07">
+        <title>Auth SSOT Implementation - JWT Decoding Removal</title>
+        <category>Security/Architecture/SSOT/Authentication</category>
+        <keywords>jwt-decoding, auth-ssot, single-source-of-truth, jwt-validation, websocket-auth, auth-service</keywords>
+        <path>auth_ssot_implementation_20250107.xml</path>
+        <critical-takeaway>
+            Backend contained JWT decoding violations that should only exist in auth service.
+            Removed _decode_test_jwt() and _decode_token() from backend, eliminated WebSocket 
+            local validation fallback, created automated compliance check. Auth service is now
+            exclusive JWT authority. SSOT score improved from 40/100 to 85/100.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$50K MRR protection from JWT mismatch causing WebSocket 403 failures</business-impact>
+        <prevention>
+            Run scripts/check_auth_ssot_compliance.py in CI/CD. Backend must never decode JWT.
+            WebSocket must fail when auth service unavailable. All JWT ops through auth service only.
+        </prevention>
+    </learning>
+    
     <learning id="service-id-stability-fix-2025-09-07">
         <title>SERVICE_ID Stability Fix for Cross-Service Authentication</title>
         <category>Authentication/Configuration/Deployment/CriticalFix</category>
