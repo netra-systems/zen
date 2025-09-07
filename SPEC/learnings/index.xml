@@ -3187,4 +3187,28 @@
             <learning-ref>service_authentication_mismatch_fix_20250107.xml</learning-ref>
         </related-learnings>
     </learning>
+
+    <learning id="stub-file-anti-pattern-2025-09-07">
+        <title>Stub File Anti-Pattern: The AgentExecutionRegistry Abomination</title>
+        <category>AntiPatterns/SSOT/TechnicalDebt/TestCheating</category>
+        <keywords>stub-files, anti-pattern, ssot-violation, test-cheating, agent-execution-registry, minimal-implementation, duplication</keywords>
+        <path>stub_file_anti_pattern_20250907.xml</path>
+        <critical-takeaway>
+            NEVER create "minimal stub" files to pass tests. agent_execution_registry.py was created
+            as stub to satisfy startup_validator imports instead of fixing the real issue (wrong imports).
+            This violates SSOT, creates confusion, and is CHEATING ON TESTS = ABOMINATION.
+            Fix: Updated imports to use UniversalRegistry SSOT, deleted stub file completely.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Technical debt, maintenance nightmare, confusion about which registry to use</business-impact>
+        <prevention>
+            Never create stub files to pass tests. Always search for existing SSOT implementations.
+            If import fails, fix the import path, don't create new file. Tests validate real system, not stubs.
+            When seeing "minimal implementation" comment, it's a red flag indicating anti-pattern.
+        </prevention>
+        <related-learnings>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>type_safety.xml</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
