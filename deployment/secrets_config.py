@@ -35,7 +35,9 @@ class SecretConfig:
                 "POSTGRES_PORT", 
                 "POSTGRES_DB",
                 "POSTGRES_USER",
-                "POSTGRES_PASSWORD"
+                "POSTGRES_PASSWORD",
+                "DATABASE_HOST",      # CRITICAL: Required by central config validator
+                "DATABASE_PASSWORD"   # CRITICAL: Required by central config validator
             ],
             "authentication": [
                 "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
@@ -51,7 +53,10 @@ class SecretConfig:
                 # Backend config.py tries: OAUTH_GOOGLE_CLIENT_ID_ENV or GOOGLE_CLIENT_ID or GOOGLE_OAUTH_CLIENT_ID
                 # Tests expect GOOGLE_CLIENT_ID which is the second fallback option
                 "GOOGLE_CLIENT_ID", 
-                "GOOGLE_CLIENT_SECRET"
+                "GOOGLE_CLIENT_SECRET",
+                # CRITICAL: Also include staging-specific OAuth variables that config validation expects
+                "GOOGLE_OAUTH_CLIENT_ID_STAGING",
+                "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"
             ],
             "redis": [
                 "REDIS_HOST",
@@ -112,6 +117,8 @@ class SecretConfig:
         "POSTGRES_DB": "postgres-db-staging",
         "POSTGRES_USER": "postgres-user-staging",
         "POSTGRES_PASSWORD": "postgres-password-staging",
+        "DATABASE_HOST": "postgres-host-staging",  # Same host, config validator expects this name
+        "DATABASE_PASSWORD": "postgres-password-staging",  # Same password, different name
         
         # Authentication & JWT
         # CRITICAL FIX: All JWT secret names must map to the same secret for consistency
