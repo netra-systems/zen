@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 class TestWebSocketJWTAuthFix:
     """Test class to reproduce and verify WebSocket JWT authentication fix."""
 
-    def test_reproduce_jwt_secret_mismatch(self):
+    async def test_reproduce_jwt_secret_mismatch(self):
         """Reproduce the JWT secret mismatch issue between test config and backend."""
         print("\n=== REPRODUCING JWT SECRET MISMATCH BUG ===")
         
@@ -70,7 +70,7 @@ class TestWebSocketJWTAuthFix:
         # Test JWT validation
         if test_jwt_token and extractor_secret:
             print(f"4. Testing JWT token validation...")
-            payload = extractor.validate_and_decode_jwt(test_jwt_token)
+            payload = await extractor.validate_and_decode_jwt(test_jwt_token)  # CRITICAL FIX: Added await
             
             if payload:
                 print(f"   ✅ JWT validation SUCCESS - fix is working!")
@@ -200,7 +200,7 @@ class TestWebSocketJWTAuthFix:
                 # Test that this token can be validated by backend
                 print("2. Testing token validation by backend...")
                 extractor = UserContextExtractor()
-                payload = extractor.validate_and_decode_jwt(token)
+                payload = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
                 
                 if payload:
                     print(f"   ✅ Token validation SUCCESS!")

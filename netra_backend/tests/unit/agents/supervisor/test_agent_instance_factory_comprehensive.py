@@ -181,7 +181,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         factory1 = get_agent_instance_factory()
         factory2 = get_factory_alt()
         
-        self.assertIs(factory1, factory2)
+        assert factory1 is factory2
         
     def test_singleton_reset_creates_new_instance(self):
         """Test 3: Resetting singleton creates new instance."""
@@ -193,8 +193,8 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         factory2 = get_agent_instance_factory()
         
-        self.assertIsNot(factory1, factory2)
-        self.assertIsInstance(factory2, AgentInstanceFactory)
+        assert factory1 is not factory2
+        assert isinstance(factory2, AgentInstanceFactory)
 
     # =========================================================================
     # FACTORY INITIALIZATION TESTS
@@ -204,26 +204,26 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         """Test 4: Factory initializes with proper defaults."""
         factory = AgentInstanceFactory()
         
-        self.assertIsNone(factory._agent_class_registry)
-        self.assertIsNone(factory._agent_registry)
-        self.assertIsNone(factory._websocket_bridge)
-        self.assertIsNone(factory._websocket_manager)
-        self.assertIsNone(factory._llm_manager)
-        self.assertIsNone(factory._tool_dispatcher)
+        assert factory._agent_class_registry is None
+        assert factory._agent_registry is None
+        assert factory._websocket_bridge is None
+        assert factory._websocket_manager is None
+        assert factory._llm_manager is None
+        assert factory._tool_dispatcher is None
         
         # Check performance configuration is loaded
-        self.assertIsNotNone(factory._performance_config)
-        self.assertGreater(factory._max_concurrent_per_user, 0)
-        self.assertGreater(factory._execution_timeout, 0)
-        self.assertGreater(factory._cleanup_interval, 0)
+        assert factory._performance_config is not None
+        assert factory._max_concurrent_per_user > 0
+        assert factory._execution_timeout > 0
+        assert factory._cleanup_interval > 0
         
         # Check tracking structures are initialized
         # Note: These may be WeakValueDictionary if enable_weak_references is True
         import weakref
-        self.assertIsInstance(factory._user_semaphores, (dict, weakref.WeakValueDictionary))
-        self.assertIsInstance(factory._active_contexts, (dict, weakref.WeakValueDictionary))
-        self.assertIsInstance(factory._factory_metrics, dict)
-        self.assertEqual(factory._factory_metrics['total_instances_created'], 0)
+        assert isinstance(factory._user_semaphores, (dict, weakref.WeakValueDictionary))
+        assert isinstance(factory._active_contexts, (dict, weakref.WeakValueDictionary))
+        assert isinstance(factory._factory_metrics, dict)
+        assert factory._factory_metrics['total_instances_created'] == 0
         
     def test_factory_initialization_performance_config(self):
         """Test 5: Factory initializes with performance configuration."""
@@ -231,17 +231,17 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         # Verify performance config attributes
         perf_config = factory._performance_config
-        self.assertTrue(hasattr(perf_config, 'max_concurrent_per_user'))
-        self.assertTrue(hasattr(perf_config, 'execution_timeout'))
-        self.assertTrue(hasattr(perf_config, 'max_history_per_user'))
-        self.assertTrue(hasattr(perf_config, 'enable_emitter_pooling'))
-        self.assertTrue(hasattr(perf_config, 'enable_class_caching'))
-        self.assertTrue(hasattr(perf_config, 'enable_metrics'))
+        assert hasattr(perf_config, 'max_concurrent_per_user')
+        assert hasattr(perf_config, 'execution_timeout')
+        assert hasattr(perf_config, 'max_history_per_user')
+        assert hasattr(perf_config, 'enable_emitter_pooling')
+        assert hasattr(perf_config, 'enable_class_caching')
+        assert hasattr(perf_config, 'enable_metrics')
         
         # Verify factory uses config values
-        self.assertEqual(factory._max_concurrent_per_user, perf_config.max_concurrent_per_user)
-        self.assertEqual(factory._execution_timeout, perf_config.execution_timeout)
-        self.assertEqual(factory._max_history_per_user, perf_config.max_history_per_user)
+        assert factory._max_concurrent_per_user == perf_config.max_concurrent_per_user
+        assert factory._execution_timeout == perf_config.execution_timeout
+        assert factory._max_history_per_user == perf_config.max_history_per_user
 
     # =========================================================================
     # FACTORY CONFIGURATION TESTS
@@ -261,10 +261,10 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             tool_dispatcher=self.mock_tool_dispatcher
         )
         
-        self.assertIs(factory._agent_class_registry, self.mock_agent_class_registry)
-        self.assertIs(factory._websocket_bridge, self.mock_websocket_bridge)
-        self.assertIs(factory._llm_manager, self.mock_llm_manager)
-        self.assertIs(factory._tool_dispatcher, self.mock_tool_dispatcher)
+        assert factory._agent_class_registry is self.mock_agent_class_registry
+        assert factory._websocket_bridge is self.mock_websocket_bridge
+        assert factory._llm_manager is self.mock_llm_manager
+        assert factory._tool_dispatcher is self.mock_tool_dispatcher
         
     def test_configure_with_legacy_agent_registry_fallback(self):
         """Test 7: Configure with legacy AgentRegistry as fallback."""
@@ -275,17 +275,17 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             websocket_bridge=self.mock_websocket_bridge
         )
         
-        self.assertIs(factory._agent_registry, self.mock_agent_registry)
-        self.assertIsNone(factory._agent_class_registry)  # Should not be set
-        self.assertIs(factory._websocket_bridge, self.mock_websocket_bridge)
+        assert factory._agent_registry is self.mock_agent_registry
+        assert factory._agent_class_registry is None  # Should not be set
+        assert factory._websocket_bridge is self.mock_websocket_bridge
         
     def test_configure_none_websocket_bridge_raises_error(self):
         """Test 8: Configuring with None WebSocket bridge raises error."""
         factory = AgentInstanceFactory()
         
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             factory.configure(websocket_bridge=None)
-        self.assertIn("AgentWebSocketBridge cannot be None", str(ctx.exception))
+        assert "AgentWebSocketBridge cannot be None" in str(ctx.value)
             
     def test_configure_empty_agent_class_registry_raises_error(self):
         """Test 9: Configure falls back to global registry when none provided."""
@@ -293,11 +293,11 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         # Don't provide agent_class_registry, forcing fallback to global registry
         # The global registry is None in test environment, causing this error
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             factory.configure(
                 websocket_bridge=self.mock_websocket_bridge
             )
-        self.assertIn("Global AgentClassRegistry is None", str(ctx.exception))
+        assert "Global AgentClassRegistry is None" in str(ctx.value)
             
     @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_class_registry')
     def test_configure_with_global_registry_fallback(self, mock_get_global_registry):
@@ -311,7 +311,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         factory.configure(websocket_bridge=self.mock_websocket_bridge)
         
-        self.assertIs(factory._agent_class_registry, mock_global_registry)
+        assert factory._agent_class_registry is mock_global_registry
         mock_get_global_registry.assert_called_once()
         
     @pytest.mark.asyncio
@@ -323,10 +323,10 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             llm_manager=self.mock_llm_manager
         )
         
-        self.assertIsInstance(result, AgentInstanceFactory)
-        self.assertIs(result._agent_class_registry, self.mock_agent_class_registry)
-        self.assertIs(result._websocket_bridge, self.mock_websocket_bridge)
-        self.assertIs(result._llm_manager, self.mock_llm_manager)
+        assert isinstance(result, AgentInstanceFactory)
+        assert result._agent_class_registry is self.mock_agent_class_registry
+        assert result._websocket_bridge is self.mock_websocket_bridge
+        assert result._llm_manager is self.mock_llm_manager
 
     # =========================================================================
     # USER EXECUTION CONTEXT CREATION TESTS
@@ -369,13 +369,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         factory.configure(websocket_bridge=self.mock_websocket_bridge)
         
         # Test missing user_id
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_user_execution_context(
                 user_id="",
                 thread_id=self.test_thread_id,
                 run_id=self.test_run_id
             )
-        self.assertIn("user_id, thread_id, and run_id are required", str(ctx.exception))
+        assert "user_id, thread_id, and run_id are required" in str(ctx.value)
         
         # Test missing thread_id
         with self.assertRaises(ValueError) as ctx:

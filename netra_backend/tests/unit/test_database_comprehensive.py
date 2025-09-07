@@ -1231,10 +1231,7 @@ class TestDatabaseErrorHandlingAndRecovery(BaseIntegrationTest):
             db = ActualAsyncDatabase("postgresql+asyncpg://test@localhost:5432/test")
             
             # Test connection failure detection and re-initialization
-            connection_error = Exception("connection failed")
-            
-            async def failing_get_session():
-                raise connection_error
+            connection_error = Exception("database connection pool failed")
             
             # First call fails, should trigger re-initialization
             from contextlib import asynccontextmanager
@@ -1249,7 +1246,7 @@ class TestDatabaseErrorHandlingAndRecovery(BaseIntegrationTest):
             with patch('asyncio.sleep') as mock_sleep, \
                  patch.object(db, '_ensure_initialized') as mock_ensure_init:
                 
-                with pytest.raises(Exception, match="connection failed"):
+                with pytest.raises(Exception, match="database connection pool failed"):
                     await db.execute_with_retry("SELECT 1", max_retries=1)
                 
                 # Should attempt re-initialization on connection errors with "connection" or "pool" keywords
