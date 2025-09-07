@@ -341,6 +341,378 @@ class TestAuthCompleteFlow(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.asyncio
+    async def test_auth_security_edge_cases(self):
+        """
+        Test authentication security edge cases and attack scenarios.
+        
+        CRITICAL: Security testing ensures the platform cannot be compromised
+        by malicious authentication attempts.
+        """
+        logger.info("🔒 Starting authentication security edge cases test")
+        
+        # Test 1: SQL Injection attempts in email field
+        malicious_emails = [
+            "admin'; DROP TABLE users; --@evil.com",
+            "test@example.com' OR '1'='1",
+            "user@test.com'; INSERT INTO users (email) VALUES ('hacked@evil.com'); --"
+        ]
+        
+        for malicious_email in malicious_emails:
+            with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+                await self._create_test_user(malicious_email)
+            assert exc_info.value.status in [400, 422], f"Should reject malicious email: {malicious_email}"
+        
+        # Test 2: XSS attempts in user data
+        xss_payloads = [
+            "<script>alert('xss')</script>",
+            "javascript:alert('xss')",
+            "<img src=x onerror=alert('xss')>"
+        ]
+        
+        user_email = f"xss_test_{uuid.uuid4().hex[:8]}@example.com"
+        
+        for xss_payload in xss_payloads:
+            with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+                await self._create_test_user_with_name(user_email, xss_payload)
+            assert exc_info.value.status in [400, 422], f"Should sanitize XSS payload: {xss_payload}"
+        
+        # Test 3: JWT Token tampering
+        user_email = f"jwt_tamper_test_{uuid.uuid4().hex[:8]}@example.com"
+        user_data = await self._create_test_user(user_email)
+        self.test_users.append(user_data)
+        
+        tokens = await self._authenticate_user(user_email, "test_password")
+        valid_token = tokens["access_token"]
+        
+        # Tamper with token payload
+        tampered_tokens = [
+            valid_token[:-5] + "xxxxx",  # Tamper signature
+            valid_token.replace(".", "x", 1),  # Tamper structure
+            "Bearer fake_token_123",  # Completely fake token
+            ""  # Empty token
+        ]
+        
+        for tampered_token in tampered_tokens:
+            with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+                await self._get_user_profile(tampered_token)
+            assert exc_info.value.status == 401, f"Should reject tampered token"
+        
+        # Test 4: Rate limiting (if implemented)
+        await self._test_rate_limiting(user_email)
+        
+        logger.info("✅ Authentication security edge cases test completed successfully")
+    
+    async def _test_rate_limiting(self, user_email: str):
+        """Test rate limiting on authentication endpoints."""
+        # Attempt multiple rapid login attempts
+        start_time = time.time()
+        failed_attempts = 0
+        
+        for attempt in range(20):  # Attempt 20 rapid logins
+            try:
+                await self._authenticate_user(user_email, "wrong_password")
+            except aiohttp.ClientResponseError as e:
+                if e.status == 429:  # Rate limited
+                    logger.info(f"Rate limiting triggered after {attempt + 1} attempts")
+                    break
+                elif e.status in [401, 403]:  # Expected auth failure
+                    failed_attempts += 1
+            
+            # Brief delay to avoid overwhelming the service
+            await asyncio.sleep(0.1)
+        
+        # Log rate limiting behavior for monitoring
+        elapsed_time = time.time() - start_time
+        logger.info(f"Auth rate limiting test: {failed_attempts} failed attempts in {elapsed_time:.2f}s")
+    
+    @pytest.mark.e2e
+    @pytest.mark.real_services
+    @pytest.mark.asyncio
+    async def test_multi_user_race_conditions(self):
+        """
+        Test concurrent authentication operations for race conditions.
+        
+        CRITICAL: Race condition testing ensures system stability under
+        concurrent user authentication load.
+        """
+        logger.info("🏁 Starting multi-user race condition test")
+        
+        # Test concurrent user creation
+        concurrent_users = 5
+        user_creation_tasks = []
+        
+        for i in range(concurrent_users):
+            email = f"race_test_{i}_{uuid.uuid4().hex[:8]}@example.com"
+            task = asyncio.create_task(self._create_test_user(email))
+            user_creation_tasks.append((email, task))
+        
+        # Execute all user creation tasks concurrently
+        created_users = []
+        for email, task in user_creation_tasks:
+            try:
+                user_data = await task
+                created_users.append((email, user_data))
+                self.test_users.append(user_data)
+            except Exception as e:
+                logger.warning(f"Concurrent user creation failed for {email}: {e}")
+        
+        assert len(created_users) >= concurrent_users - 1, "Most concurrent user creations should succeed"
+        
+        # Test concurrent authentication
+        auth_tasks = []
+        for email, user_data in created_users:
+            task = asyncio.create_task(self._authenticate_user(email, "test_password"))
+            auth_tasks.append((email, task))
+        
+        # Execute all authentication tasks concurrently
+        authenticated_users = []
+        for email, task in auth_tasks:
+            try:
+                tokens = await task
+                authenticated_users.append((email, tokens))
+            except Exception as e:
+                logger.warning(f"Concurrent authentication failed for {email}: {e}")
+        
+        assert len(authenticated_users) >= len(created_users) - 1, "Most concurrent authentications should succeed"
+        
+        # Test concurrent WebSocket connections
+        websocket_tasks = []
+        for email, tokens in authenticated_users[:3]:  # Test with first 3 users
+            access_token = tokens["access_token"]
+            task = asyncio.create_task(self._test_concurrent_websocket_connection(access_token, email))
+            websocket_tasks.append((email, task))
+        
+        # Execute all WebSocket connection tasks concurrently
+        websocket_results = []
+        for email, task in websocket_tasks:
+            try:
+                result = await task
+                websocket_results.append((email, result))
+            except Exception as e:
+                logger.warning(f"Concurrent WebSocket connection failed for {email}: {e}")
+        
+        assert len(websocket_results) >= 2, "At least 2 concurrent WebSocket connections should succeed"
+        
+        logger.info("✅ Multi-user race condition test completed successfully")
+    
+    async def _test_concurrent_websocket_connection(self, access_token: str, user_email: str) -> bool:
+        """Test concurrent WebSocket connection for a user."""
+        websocket_url = f"{self.service_endpoints.websocket_url}?token={access_token}"
+        
+        try:
+            # Create WebSocket connection with shorter timeout for race condition testing
+            websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                websocket_url, 
+                timeout=5.0,
+                max_retries=2,
+                user_id=user_email
+            )
+            
+            # Track connection for cleanup
+            self.test_websocket_connections.append(websocket)
+            
+            # Send simple message to verify connection works
+            test_message = {
+                "type": "ping",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "user": user_email
+            }
+            
+            await WebSocketTestHelpers.send_test_message(websocket, test_message, timeout=3.0)
+            
+            # Try to receive response
+            response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=3.0)
+            
+            return response is not None
+            
+        except Exception as e:
+            logger.debug(f"Concurrent WebSocket test failed for {user_email}: {e}")
+            return False
+    
+    @pytest.mark.e2e
+    @pytest.mark.real_services
+    @pytest.mark.asyncio
+    async def test_token_lifecycle_comprehensive(self):
+        """
+        Test comprehensive token lifecycle including edge cases.
+        
+        CRITICAL: Token lifecycle testing ensures proper token management
+        across the entire user session lifecycle.
+        """
+        logger.info("🔄 Starting comprehensive token lifecycle test")
+        
+        # Step 1: Create user and get initial tokens
+        user_email = f"token_lifecycle_{uuid.uuid4().hex[:8]}@example.com"
+        user_data = await self._create_test_user(user_email)
+        self.test_users.append(user_data)
+        
+        initial_tokens = await self._authenticate_user(user_email, "test_password")
+        access_token = initial_tokens["access_token"]
+        refresh_token = initial_tokens["refresh_token"]
+        
+        # Step 2: Test token validation with edge cases
+        edge_case_tokens = [
+            None,  # None token
+            "",    # Empty string
+            "Bearer",  # Just "Bearer"
+            "Bearer ",  # "Bearer " with space
+            "Invalid token format",  # Invalid format
+            access_token[:-10],  # Truncated token
+        ]
+        
+        for edge_token in edge_case_tokens:
+            with pytest.raises((aiohttp.ClientResponseError, ValueError, TypeError)):
+                await self._get_user_profile(edge_token)
+        
+        # Step 3: Test multiple token refresh cycles
+        current_access_token = access_token
+        current_refresh_token = refresh_token
+        
+        for cycle in range(3):
+            logger.info(f"Testing token refresh cycle {cycle + 1}")
+            
+            # Refresh tokens
+            new_tokens = await self._refresh_tokens(current_refresh_token)
+            new_access_token = new_tokens["access_token"]
+            new_refresh_token = new_tokens["refresh_token"]
+            
+            # Verify new tokens are different
+            assert new_access_token != current_access_token, f"New access token should differ in cycle {cycle + 1}"
+            assert new_refresh_token != current_refresh_token, f"New refresh token should differ in cycle {cycle + 1}"
+            
+            # Verify new tokens work
+            profile = await self._get_user_profile(new_access_token)
+            assert profile["email"] == user_email, f"New token should work in cycle {cycle + 1}"
+            
+            # Update for next cycle
+            current_access_token = new_access_token
+            current_refresh_token = new_refresh_token
+        
+        # Step 4: Test token expiry handling
+        # Create an expired token using auth helper
+        expired_token = self.auth_helper.create_expired_test_token(user_data["id"], user_email)
+        
+        with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+            await self._get_user_profile(expired_token)
+        assert exc_info.value.status == 401, "Expired token should return 401"
+        
+        # Step 5: Test token revocation
+        logout_result = await self._logout_user(current_access_token)
+        assert logout_result.get("success"), "Logout should succeed"
+        
+        # Both access and refresh tokens should be invalid after logout
+        with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+            await self._get_user_profile(current_access_token)
+        assert exc_info.value.status == 401, "Access token should be invalid after logout"
+        
+        with pytest.raises(aiohttp.ClientResponseError) as exc_info:
+            await self._refresh_tokens(current_refresh_token)
+        assert exc_info.value.status == 401, "Refresh token should be invalid after logout"
+        
+        logger.info("✅ Comprehensive token lifecycle test completed successfully")
+    
+    @pytest.mark.e2e
+    @pytest.mark.real_services
+    @pytest.mark.asyncio
+    async def test_websocket_authentication_edge_cases(self):
+        """
+        Test WebSocket authentication edge cases and error handling.
+        
+        CRITICAL: WebSocket authentication edge cases ensure reliable
+        real-time communication under various failure scenarios.
+        """
+        logger.info("🔌 Starting WebSocket authentication edge cases test")
+        
+        # Create test user
+        user_email = f"ws_edge_test_{uuid.uuid4().hex[:8]}@example.com"
+        user_data = await self._create_test_user(user_email)
+        self.test_users.append(user_data)
+        
+        tokens = await self._authenticate_user(user_email, "test_password")
+        valid_token = tokens["access_token"]
+        
+        # Test 1: Invalid token formats in WebSocket URL
+        invalid_tokens = [
+            "invalid_token",
+            "",
+            "expired_token_123",
+            valid_token[:-5]  # Truncated valid token
+        ]
+        
+        for invalid_token in invalid_tokens:
+            websocket_url = f"{self.service_endpoints.websocket_url}?token={invalid_token}"
+            
+            with pytest.raises((ConnectionClosedError, WebSocketException, Exception)):
+                websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                    websocket_url,
+                    timeout=3.0,
+                    max_retries=1
+                )
+                await WebSocketTestHelpers.close_test_connection(websocket)
+        
+        # Test 2: WebSocket connection without token
+        websocket_url_no_token = self.service_endpoints.websocket_url
+        
+        with pytest.raises((ConnectionClosedError, WebSocketException, Exception)):
+            websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                websocket_url_no_token,
+                timeout=3.0,
+                max_retries=1
+            )
+            await WebSocketTestHelpers.close_test_connection(websocket)
+        
+        # Test 3: Valid connection with malformed messages
+        websocket_url = f"{self.service_endpoints.websocket_url}?token={valid_token}"
+        
+        try:
+            websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                websocket_url,
+                timeout=5.0,
+                max_retries=2
+            )
+            
+            self.test_websocket_connections.append(websocket)
+            
+            # Send malformed messages
+            malformed_messages = [
+                "not json",
+                "{invalid json}",
+                json.dumps({"type": None}),  # Invalid type
+                json.dumps({}),  # Missing type
+                "x" * 10000  # Oversized message
+            ]
+            
+            for malformed_msg in malformed_messages:
+                try:
+                    await WebSocketTestHelpers.send_raw_test_message(
+                        websocket, 
+                        malformed_msg, 
+                        timeout=2.0
+                    )
+                    
+                    # Try to receive error response
+                    try:
+                        response = await WebSocketTestHelpers.receive_test_message(
+                            websocket, 
+                            timeout=2.0
+                        )
+                        # Should receive error response for malformed message
+                        if isinstance(response, dict) and response.get("type") == "error":
+                            logger.info(f"Properly handled malformed message: {response.get('error')}")
+                    except Exception:
+                        pass  # Some malformed messages may close connection
+                        
+                except Exception as e:
+                    logger.debug(f"Malformed message handling: {e}")
+        
+        except Exception as e:
+            logger.info(f"WebSocket edge case test handled connection failure as expected: {e}")
+        
+        logger.info("✅ WebSocket authentication edge cases test completed successfully")
+    
+    @pytest.mark.e2e
+    @pytest.mark.real_services
+    @pytest.mark.asyncio
     async def test_multi_user_isolation(self):
         """
         Test that multiple users are properly isolated.

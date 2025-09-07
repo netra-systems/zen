@@ -68,7 +68,7 @@ async def get_current_user_from_jwt(credentials: HTTPAuthorizationCredentials = 
         extractor = get_user_context_extractor()
         
         # Validate and decode JWT
-        jwt_payload = extractor.validate_and_decode_jwt(credentials.credentials)
+        jwt_payload = await extractor.validate_and_decode_jwt(credentials.credentials)
         if not jwt_payload:
             raise HTTPException(
                 status_code=401,
