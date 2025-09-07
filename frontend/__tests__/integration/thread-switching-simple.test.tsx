@@ -73,7 +73,7 @@ describe('Thread Switching Basic Tests', () => {
     }
   });
 
-  it.skip('should switch to a thread successfully', async () => {
+  it('should switch to a thread successfully', async () => {
     const mockMessages = [
       { id: 'msg-1', content: 'Test message', role: 'user', timestamp: Date.now() }
     ];
@@ -112,7 +112,7 @@ describe('Thread Switching Basic Tests', () => {
     expect(threadLoadingService.loadThread).toHaveBeenCalledWith('thread-1');
   });
 
-  it.skip('should handle loading errors', async () => {
+  it('should handle loading errors', async () => {
     (threadLoadingService.loadThread as jest.Mock).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useThreadSwitching());
@@ -130,7 +130,7 @@ describe('Thread Switching Basic Tests', () => {
     expect(storeState.activeThreadId).toBeNull(); // Should not change on error
   });
 
-  it.skip('should prevent concurrent switches', async () => {
+  it('should prevent concurrent switches', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     
     const resolvers: { [key: string]: any } = {};
@@ -204,7 +204,7 @@ describe('Thread Switching Basic Tests', () => {
     expect(clearMessages).toHaveBeenCalled();
   });
 
-  it.skip('should update URL when enabled', async () => {
+  it('should update URL when enabled', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     const updateUrl = jest.fn();
     
@@ -225,7 +225,7 @@ describe('Thread Switching Basic Tests', () => {
     expect(updateUrl).toHaveBeenCalledWith('thread-1');
   });
 
-  it.skip('should handle retry after failure', async () => {
+  it('should handle retry after failure', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     
     // First attempt fails

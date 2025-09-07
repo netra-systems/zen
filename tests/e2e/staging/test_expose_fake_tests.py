@@ -287,8 +287,11 @@ class TestWebSocketConnectionAuthenticity:
             # Manual WebSocket handshake to check headers
             import base64
             import hashlib
+            import os
             
-            key = base64.b64encode(f"{uuid.uuid4()}".encode()).decode()
+            # Generate proper 16-byte random key for WebSocket handshake
+            random_bytes = os.urandom(16)
+            key = base64.b64encode(random_bytes).decode()
             
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             context = ssl.create_default_context()

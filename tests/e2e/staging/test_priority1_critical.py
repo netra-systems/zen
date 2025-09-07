@@ -43,24 +43,24 @@ class TestCriticalWebSocket:
         error_message = None
         
         try:
-            # Attempt WebSocket connection
-            async with websockets.connect(
-                config.websocket_url,
-                timeout=10,
-                close_timeout=10
-            ) as ws:
-                # If we get here, connection was established
-                connection_successful = True
-                
-                # Try to send a ping
-                await ws.send(json.dumps({"type": "ping"}))
-                
-                # Wait for response (may get auth error)
-                try:
-                    response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    print(f"WebSocket response: {response}")
-                except asyncio.TimeoutError:
-                    print("WebSocket ping timeout (expected if auth required)")
+            # Attempt WebSocket connection with Python 3.12 compatible timeout
+            async with asyncio.timeout(10):
+                async with websockets.connect(
+                    config.websocket_url,
+                    close_timeout=10
+                ) as ws:
+                    # If we get here, connection was established
+                    connection_successful = True
+                    
+                    # Try to send a ping
+                    await ws.send(json.dumps({"type": "ping"}))
+                    
+                    # Wait for response (may get auth error)
+                    try:
+                        response = await asyncio.wait_for(ws.recv(), timeout=5)
+                        print(f"WebSocket response: {response}")
+                    except asyncio.TimeoutError:
+                        print("WebSocket ping timeout (expected if auth required)")
                     
         except websockets.exceptions.InvalidStatusCode as e:
             # This is expected if auth is required
@@ -98,26 +98,27 @@ class TestCriticalWebSocket:
         auth_enforced = False
         
         try:
-            # Try to connect without auth
-            async with websockets.connect(config.websocket_url, timeout=10) as ws:
-                # Send message without auth
-                await ws.send(json.dumps({
-                    "type": "message",
-                    "content": "Test without auth"
-                }))
-                
-                # Should get error or connection close
-                try:
-                    response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    data = json.loads(response)
+            # Try to connect without auth with Python 3.12 compatible timeout
+            async with asyncio.timeout(10):
+                async with websockets.connect(config.websocket_url) as ws:
+                    # Send message without auth
+                    await ws.send(json.dumps({
+                        "type": "message",
+                        "content": "Test without auth"
+                    }))
                     
-                    # Check if we got an auth error
-                    if data.get("type") == "error" and "auth" in data.get("message", "").lower():
+                    # Should get error or connection close
+                    try:
+                        response = await asyncio.wait_for(ws.recv(), timeout=5)
+                        data = json.loads(response)
+                        
+                        # Check if we got an auth error
+                        if data.get("type") == "error" and "auth" in data.get("message", "").lower():
+                            auth_enforced = True
+                        
+                    except (asyncio.TimeoutError, websockets.ConnectionClosed):
+                        # Connection closed = auth enforced
                         auth_enforced = True
-                    
-                except (asyncio.TimeoutError, websockets.ConnectionClosed):
-                    # Connection closed = auth enforced
-                    auth_enforced = True
                     
         except websockets.exceptions.InvalidStatusCode as e:
             if e.status_code in [401, 403]:
@@ -142,30 +143,30 @@ class TestCriticalWebSocket:
         response_received = False
         
         try:
-            # Attempt to connect and send message
-            async with websockets.connect(
-                config.websocket_url,
-                timeout=10
-            ) as ws:
-                # Create test message
-                test_message = {
-                    "type": "chat_message",
-                    "content": "Test message for staging",
-                    "timestamp": time.time(),
-                    "id": str(uuid.uuid4())
-                }
-                
-                # Send message
-                await ws.send(json.dumps(test_message))
-                message_sent = True
-                
-                # Try to receive response (with timeout)
-                try:
-                    response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    print(f"WebSocket response received: {response[:100]}...")
-                    response_received = True
-                except asyncio.TimeoutError:
-                    print("No response received (may require auth)")
+            # Attempt to connect and send message with Python 3.12 compatible timeout
+            async with asyncio.timeout(10):
+                async with websockets.connect(
+                    config.websocket_url
+                ) as ws:
+                    # Create test message
+                    test_message = {
+                        "type": "chat_message",
+                        "content": "Test message for staging",
+                        "timestamp": time.time(),
+                        "id": str(uuid.uuid4())
+                    }
+                    
+                    # Send message
+                    await ws.send(json.dumps(test_message))
+                    message_sent = True
+                    
+                    # Try to receive response (with timeout)
+                    try:
+                        response = await asyncio.wait_for(ws.recv(), timeout=5)
+                        print(f"WebSocket response received: {response[:100]}...")
+                        response_received = True
+                    except asyncio.TimeoutError:
+                        print("No response received (may require auth)")
                     
         except websockets.exceptions.InvalidStatusCode as e:
             if e.status_code in [401, 403]:
@@ -196,22 +197,22 @@ class TestCriticalWebSocket:
         async def test_connection(index: int):
             """Test a single WebSocket connection"""
             try:
-                async with websockets.connect(
-                    config.websocket_url,
-                    timeout=5
-                ) as ws:
-                    await ws.send(json.dumps({
-                        "type": "ping",
-                        "id": f"test_{index}",
-                        "timestamp": time.time()
-                    }))
-                    
-                    # Try to get response
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=3)
-                        return {"index": index, "status": "success", "response": response[:50]}
-                    except asyncio.TimeoutError:
-                        return {"index": index, "status": "timeout"}
+                async with asyncio.timeout(5):
+                    async with websockets.connect(
+                        config.websocket_url
+                    ) as ws:
+                        await ws.send(json.dumps({
+                            "type": "ping",
+                            "id": f"test_{index}",
+                            "timestamp": time.time()
+                        }))
+                        
+                        # Try to get response
+                        try:
+                            response = await asyncio.wait_for(ws.recv(), timeout=3)
+                            return {"index": index, "status": "success", "response": response[:50]}
+                        except asyncio.TimeoutError:
+                            return {"index": index, "status": "timeout"}
                         
             except websockets.exceptions.InvalidStatusCode as e:
                 return {"index": index, "status": "auth_required", "code": e.status_code}

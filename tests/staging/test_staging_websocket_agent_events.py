@@ -219,7 +219,8 @@ class StagingWebSocketTestRunner:
             
             # Test 1: No token (should fail)
             try:
-                async with websockets.connect(ws_url, close_timeout=5) as websocket:
+                async with asyncio.timeout(10):
+                    async with websockets.connect(ws_url, close_timeout=5) as websocket:
                     await websocket.send('{"type": "ping"}')
                     await asyncio.wait_for(websocket.recv(), timeout=3.0)
                     no_token_result = "UNEXPECTED_SUCCESS"  # Should not reach here
@@ -231,7 +232,8 @@ class StagingWebSocketTestRunner:
             # Test 2: Invalid token (should fail)  
             invalid_headers = {"Authorization": "Bearer invalid-token-123"}
             try:
-                async with websockets.connect(ws_url, extra_headers=invalid_headers, close_timeout=5) as websocket:
+                async with asyncio.timeout(10):
+                    async with websockets.connect(ws_url, extra_headers=invalid_headers, close_timeout=5) as websocket:
                     await websocket.send('{"type": "ping"}')
                     await asyncio.wait_for(websocket.recv(), timeout=3.0)
                     invalid_token_result = "UNEXPECTED_SUCCESS"
@@ -245,7 +247,8 @@ class StagingWebSocketTestRunner:
             if token:
                 valid_headers = {"Authorization": f"Bearer {token}"}
                 try:
-                    async with websockets.connect(ws_url, extra_headers=valid_headers, close_timeout=5) as websocket:
+                    async with asyncio.timeout(10):
+                        async with websockets.connect(ws_url, extra_headers=valid_headers, close_timeout=5) as websocket:
                         await websocket.send('{"type": "ping"}')
                         await asyncio.wait_for(websocket.recv(), timeout=3.0)
                         valid_token_result = "CORRECTLY_ACCEPTED"

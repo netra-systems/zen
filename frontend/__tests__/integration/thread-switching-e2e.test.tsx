@@ -9,10 +9,14 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { act } from 'react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import * as threadService from '@/services/threadService';
-// Remove the import since we'll mock it directly
+
+// Mock the unified chat store
+jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-chat'));
+
+// Import the mocked store
+import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
 
 // Mock modules
 jest.mock('@/hooks/useWebSocket', () => ({
@@ -85,16 +89,23 @@ const mockMessages = [
   }
 ];
 
-describe.skip('Thread Switching E2E Integration', () => {
+describe('Thread Switching E2E Integration', () => {
   let sendMessageSpy: jest.Mock;
   
   beforeEach(() => {
-    // Reset store
+    jest.clearAllMocks();
+    
+    // Reset the mock store to initial state
+    if (typeof resetMockState === 'function') {
+      resetMockState();
+    }
+    
+    // Set initial state
     useUnifiedChatStore.setState({
       activeThreadId: 'thread-1',
       messages: [],
       isProcessing: false,
-      threadLoading: false
+      isThreadLoading: false
     });
     
     // Setup spies
@@ -200,7 +211,8 @@ describe.skip('Thread Switching E2E Integration', () => {
     expect(sendMessageSpy).not.toHaveBeenCalled();
     
     // Verify thread loading was not called
-    expect(loadThreadSpy).not.toHaveBeenCalled();
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    expect(threadLoadingService.loadThread).not.toHaveBeenCalled();
   });
   
   it('should not switch while processing', async () => {
@@ -222,12 +234,14 @@ describe.skip('Thread Switching E2E Integration', () => {
     
     // Verify no actions were taken
     expect(sendMessageSpy).not.toHaveBeenCalled();
-    expect(loadThreadSpy).not.toHaveBeenCalled();
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    expect(threadLoadingService.loadThread).not.toHaveBeenCalled();
   });
   
   it('should handle loading errors gracefully', async () => {
     // Mock loading failure
-    loadThreadSpy.mockRejectedValueOnce(new Error('Network error'));
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockRejectedValueOnce(new Error('Network error'));
     
     const { container } = render(<ChatSidebar />);
     
@@ -251,7 +265,7 @@ describe.skip('Thread Switching E2E Integration', () => {
     });
     
     // Verify loading was attempted
-    expect(loadThreadSpy).toHaveBeenCalled();
+    expect(threadLoadingService.loadThread).toHaveBeenCalled();
     
     // Verify thread did not switch on error
     const state = useUnifiedChatStore.getState();

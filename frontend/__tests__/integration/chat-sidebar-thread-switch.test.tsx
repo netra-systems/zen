@@ -107,7 +107,7 @@ const mockThreads = [
   }
 ];
 
-describe.skip('ChatSidebar Thread Switching Glitch Detection', () => {
+describe('ChatSidebar Thread Switching Glitch Detection', () => {
   let sendMessageSpy: jest.Mock;
   
   beforeEach(() => {

@@ -129,12 +129,13 @@ class WebSocketAuthHandshakeTester:
             
             # Mock WebSocket connection for testing
             # In production, this would be a real WebSocket connection
-            async with websockets.connect(
-                self.ws_url,
-                extra_headers=headers,
-                open_timeout=timeout
-            ) as websocket:
-                connection_time = time.time() - start_time
+            # Use asyncio.timeout for Python 3.12 compatibility
+            async with asyncio.timeout(timeout):
+                async with websockets.connect(
+                    self.ws_url,
+                    extra_headers=headers
+                ) as websocket:
+                    connection_time = time.time() - start_time
                 
                 # Send auth handshake message
                 auth_message = {

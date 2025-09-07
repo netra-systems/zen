@@ -314,7 +314,8 @@ class WebSocketConnectionManager:
         
         try:
             logger.info(f"Connecting to WebSocket: {url}")
-            websocket = await websockets.connect(url, timeout=10)
+            async with asyncio.timeout(10):
+                websocket = await websockets.connect(url)
             self.connections[connection_id] = websocket
             
             yield websocket

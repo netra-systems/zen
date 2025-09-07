@@ -83,8 +83,15 @@ class StagingConfig:
             "User-Agent": "Netra-E2E-Tests/1.0"
         }
         
+        # For staging, try to use JWT token if available
         if self.test_jwt_token:
             headers["Authorization"] = f"Bearer {self.test_jwt_token}"
+        elif self.test_api_key:
+            headers["Authorization"] = f"Bearer {self.test_api_key}"
+        else:
+            # For testing purposes, include a test token header
+            # This will still get rejected but allows us to test the auth flow
+            headers["X-Test-Auth"] = "test-token-for-staging"
             
         return headers
 

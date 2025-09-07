@@ -351,15 +351,16 @@ class TestFirstMessageExperience:
                         "X-Test-Environment": "staging"
                     }
                     
-                    ws = await websockets.connect(
-                        self.ws_url,
-                        ssl=ssl_context,
-                        extra_headers=extra_headers,
-                        ping_interval=30,
-                        ping_timeout=10,
-                        close_timeout=10,
-                        open_timeout=15
-                    )
+                    # Use asyncio.timeout for Python 3.12 compatibility
+                    async with asyncio.timeout(15):  # 15 second timeout for connection
+                        ws = await websockets.connect(
+                            self.ws_url,
+                            ssl=ssl_context,
+                            extra_headers=extra_headers,
+                            ping_interval=30,
+                            ping_timeout=10,
+                            close_timeout=10
+                        )
                     logger.info(f"Connected to staging WebSocket: {self.ws_url}")
                     
                     # Send authentication message with JWT token
