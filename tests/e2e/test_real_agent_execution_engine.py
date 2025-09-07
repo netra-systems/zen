@@ -369,7 +369,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         
         # Set up components
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         engine = create_request_scoped_engine(user_context, registry, bridge)
         
         # Set up WebSocket tracking
@@ -443,10 +443,11 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             )
             state = await self.create_test_state(f"User {i} query for analysis")
             
-            user_context = create_user_context(
+            user_context = UserExecutionContext(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
-                run_id=context.run_id
+                run_id=context.run_id,
+                websocket_connection_id=f"ws_{context.user_id}"
             )
             
             user_contexts.append(user_context)
@@ -455,10 +456,11 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         
         # Create execution engines for each user
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        # Note: bridge will be created per user context below
         
         engines = []
         for user_context in user_contexts:
+            bridge = create_agent_websocket_bridge(user_context)
             engine = create_request_scoped_engine(user_context, registry, bridge)
             engines.append(engine)
         
@@ -807,10 +809,11 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             )
             state = await self.create_test_state(f"Load test query {user_index}")
             
-            user_context = create_user_context(
+            user_context = UserExecutionContext(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
-                run_id=context.run_id
+                run_id=context.run_id,
+                websocket_connection_id=f"ws_{context.user_id}"
             )
             
             engine = create_request_scoped_engine(user_context, registry, bridge)

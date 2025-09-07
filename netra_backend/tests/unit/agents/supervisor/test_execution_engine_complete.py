@@ -33,14 +33,18 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 
 from test_framework.ssot.base import BaseTestCase, AsyncBaseTestCase
 from shared.isolated_environment import get_env
-
-# Import components under test
-from netra_backend.app.agents.supervisor.execution_engine import (
-    ExecutionEngine,
-    create_request_scoped_engine,
-    create_execution_context_manager,
-    detect_global_state_usage,
-)
+# Mock problematic imports before importing the module
+with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_get_ws_manager:
+    mock_get_ws_manager.return_value = MagicMock()
+    
+    # Import execution engine components
+    from netra_backend.app.agents.supervisor.execution_engine import (
+        ExecutionEngine,
+        create_request_scoped_engine,
+        create_execution_context_manager,
+        detect_global_state_usage,
+    )
+    
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
