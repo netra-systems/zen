@@ -951,7 +951,7 @@ CMD ["npm", "start"]
                 elif env_name == "REDIS_PORT":
                     env_vars[env_name] = "6379"  # Default Redis port
         
-        # IMPORTANT: Do NOT construct DATABASE_URL here!
+        # IMPORTANT: Do NOT construct #removed-legacyhere!
         # The backend uses DatabaseURLBuilder as the SSOT to build URLs from POSTGRES_* variables
         # This ensures Cloud SQL proxy connections work correctly
         # See: shared/database_url_builder.py and netra_backend/app/core/backend_environment.py
@@ -999,7 +999,7 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # IMPORTANT: Do NOT add DATABASE_URL for backend/auth services!
+        # IMPORTANT: Do NOT add #removed-legacyfor backend/auth services!
         # The backend and auth services use DatabaseURLBuilder to construct URLs from POSTGRES_* variables
         # This is critical for Cloud SQL proxy connections to work correctly
         # Individual POSTGRES_* variables are already mounted as secrets via --set-secrets

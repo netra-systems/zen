@@ -101,7 +101,7 @@ class AuthenticationSystemFixer:
                 logger.info(f"🔧 Setting missing environment variable: {var}")
                 self.env.set(var, default_value, source="auth_fix")
         
-        # Ensure DATABASE_URL is consistent across services
+        # Ensure #removed-legacyis consistent across services
         database_url = self.env.get('DATABASE_URL')
         if not database_url:
             database_url = f"postgresql://{self.env.get('POSTGRES_USER', 'postgres')}:{self.env.get('POSTGRES_PASSWORD')}@{self.env.get('POSTGRES_HOST', 'localhost')}:{self.env.get('POSTGRES_PORT', '5433')}/{self.env.get('POSTGRES_DB', 'netra_dev')}"

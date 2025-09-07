@@ -233,7 +233,7 @@ class ConfigurationChecker:
         elif current_env == "staging":
             # Staging should mirror production
             if not env.get("DATABASE_URL"):
-                self.warnings.append("Staging should have DATABASE_URL configured")
+                self.warnings.append("Staging should have #removed-legacyconfigured")
         
         return True
     

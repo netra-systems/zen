@@ -114,7 +114,7 @@ def main():
     print("PostgreSQL Secrets Migration Tool")
     print("==================================")
     print("\nThis tool will create/update individual PostgreSQL secrets in GCP")
-    print("to replace the monolithic DATABASE_URL with individual variables.")
+    print("to replace the monolithic #removed-legacywith individual variables.")
     print("\nTarget project: netra-staging")
     
     if migrator.migrate_postgres_secrets():

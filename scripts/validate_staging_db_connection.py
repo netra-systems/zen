@@ -212,8 +212,8 @@ class StagingDatabaseValidator:
         logger.info("STAGING DATABASE CONNECTION VALIDATION")
         logger.info("="*60)
         
-        # Fetch the current DATABASE_URL from staging secret
-        logger.info("\n1. Fetching DATABASE_URL from Google Secret Manager...")
+        # Fetch the current #removed-legacyfrom staging secret
+        logger.info("\n1. Fetching #removed-legacyfrom Google Secret Manager...")
         database_url = self.fetch_secret_from_gcp("database-url-staging")
         
         if not database_url:

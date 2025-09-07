@@ -110,8 +110,8 @@ def test_deployment_script_compliance():
     
     # Check that we're not constructing DATABASE_URL
     checks = [
-        ("DATABASE_URL construction removed", 'env_vars["DATABASE_URL"]' not in content),
-        ("No DATABASE_URL in environment", 'env_vars.append(f"DATABASE_URL=' not in content),
+        ("#removed-legacyconstruction removed", 'env_vars["DATABASE_URL"]' not in content),
+        ("No #removed-legacyin environment", 'env_vars.append(f"DATABASE_URL=' not in content),
         ("DatabaseURLBuilder comment present", "DatabaseURLBuilder" in content),
         ("SSOT comment present", "SSOT" in content)
     ]
