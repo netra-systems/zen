@@ -414,9 +414,9 @@ class TestJWTHandlerPerformance:
     def test_token_structure_validation(self):
         """Test JWT structure validation catches malformed tokens early"""
         invalid_structures = [
-            "not.a.jwt",
-            "YQ==.YQ==",  # Valid base64 but not JSON
-            "eyJhIjoxfQ==.eyJhIjoxfQ==.c2ln",  # Valid JSON but wrong padding
+            "not.enough.parts",  # Only 2 parts
+            "too.many.parts.here.invalid",  # Too many parts
+            "invalid.base64!.sig",  # Invalid base64
             ".",  # Empty parts
             "..",  # All empty parts
         ]

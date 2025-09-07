@@ -922,6 +922,21 @@ CMD ["npm", "start"]
                     env_vars[env_name] = value
                     print(f"      ✅ Retrieved {env_name}")
             
+            # OAuth configuration - CRITICAL for auth to work
+            oauth_mappings = {
+                "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
+                "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
+                "OAUTH_HMAC_SECRET_STAGING": "oauth-hmac-secret-staging"
+            }
+            
+            for env_name, gsm_name in oauth_mappings.items():
+                value = self.retrieve_secret_value(gsm_name)
+                if value:
+                    env_vars[env_name] = value
+                    print(f"      ✅ Retrieved {env_name}")
+                else:
+                    print(f"      ⚠️ Missing {env_name} - OAuth may not work")
+            
             # Redis configuration
             redis_mappings = {
                 "REDIS_HOST": "redis-host-staging",

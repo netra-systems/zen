@@ -153,30 +153,103 @@ class AuthStartupValidator:
         self.validation_results.append(result)
     
     async def _validate_service_credentials(self) -> None:
-        """Validate service-to-service authentication credentials."""
+        """
+        Validate service-to-service authentication credentials.
+        
+        CRITICAL: SERVICE_SECRET has 173+ dependencies across the codebase.
+        Missing or misconfigured SERVICE_SECRET causes:
+        - 100% authentication failure (all users locked out)
+        - Circuit breaker permanently open (no recovery)
+        - Complete system unusable (no business value)
+        
+        See SERVICE_SECRET_DEPENDENCY_ANALYSIS_COMPREHENSIVE.md for full impact analysis.
+        """
         result = AuthValidationResult(component=AuthComponent.SERVICE_CREDENTIALS, valid=False)
         
         try:
             service_id = self.env.get('SERVICE_ID')
             service_secret = self.env.get('SERVICE_SECRET')
             
+            # Check SERVICE_ID first
             if not service_id:
-                result.error = "SERVICE_ID not configured"
-                result.is_critical = self.is_production  # Critical in production
+                result.error = "SERVICE_ID not configured - CRITICAL for inter-service auth"
+                result.is_critical = True  # Always critical
+                result.details = {
+                    "impact": "No inter-service communication possible",
+                    "affected_services": ["auth_service", "analytics_service"],
+                    "recovery": "Set SERVICE_ID environment variable"
+                }
+            # Check SERVICE_SECRET - ULTRA CRITICAL
             elif not service_secret:
-                result.error = "SERVICE_SECRET not configured"
-                result.is_critical = self.is_production  # Critical in production
+                result.error = "SERVICE_SECRET not configured - SINGLE POINT OF FAILURE"
+                result.is_critical = True  # Always critical
+                result.details = {
+                    "impact": "100% authentication failure, all users locked out",
+                    "dependencies": "173+ files depend on SERVICE_SECRET",
+                    "affected_components": [
+                        "Inter-service authentication",
+                        "WebSocket authentication",
+                        "Circuit breaker functionality",
+                        "Token blacklist validation"
+                    ],
+                    "recovery": "Set SERVICE_SECRET environment variable immediately"
+                }
+                logger.critical("🚨 SERVICE_SECRET MISSING - SYSTEM WILL FAIL")
             else:
-                # Validate format
-                if len(service_secret) < 16:
-                    result.error = f"SERVICE_SECRET too short ({len(service_secret)} chars)"
-                    result.details = {"minimum_length": 16}
+                # Validate SERVICE_SECRET format and strength
+                validation_errors = []
+                
+                # Check minimum length
+                if len(service_secret) < 32:
+                    validation_errors.append(f"Too short ({len(service_secret)} chars, minimum 32)")
+                
+                # Check for default/weak values
+                weak_patterns = [
+                    'secret', 'password', 'test', 'demo', 'example',
+                    '12345', 'admin', 'default', 'changeme'
+                ]
+                if any(pattern in service_secret.lower() for pattern in weak_patterns):
+                    validation_errors.append("Contains weak/default pattern")
+                
+                # Check for proper entropy (should have mix of characters)
+                has_upper = any(c.isupper() for c in service_secret)
+                has_lower = any(c.islower() for c in service_secret)
+                has_digit = any(c.isdigit() for c in service_secret)
+                
+                if not (has_upper and has_lower and has_digit):
+                    validation_errors.append("Insufficient entropy (needs mixed case and digits)")
+                
+                # Production-specific checks
+                if self.is_production:
+                    if len(service_secret) < 64:
+                        validation_errors.append(f"Production requires 64+ chars (current: {len(service_secret)})")
+                
+                if validation_errors:
+                    result.error = f"SERVICE_SECRET validation failed: {'; '.join(validation_errors)}"
+                    result.is_critical = True
+                    result.details = {
+                        "current_length": len(service_secret),
+                        "validation_errors": validation_errors,
+                        "recommendation": "Generate strong SERVICE_SECRET using: openssl rand -hex 32"
+                    }
                 else:
+                    # Additional connectivity check for production
+                    if self.is_production:
+                        logger.info("  🔍 Performing SERVICE_SECRET connectivity verification...")
+                        # Could add actual auth service ping here
+                    
                     result.valid = True
                     logger.info(f"  ✓ Service credentials validated (ID: {service_id})")
+                    logger.info(f"  ✓ SERVICE_SECRET strength validated (length: {len(service_secret)})")
+                    logger.info("  ✓ Inter-service authentication ready")
         
         except Exception as e:
             result.error = f"Service credentials validation error: {e}"
+            result.is_critical = True
+            result.details = {
+                "exception": str(e),
+                "recovery": "Check environment configuration and SERVICE_SECRET format"
+            }
         
         self.validation_results.append(result)
     

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # TEST ENVIRONMENT MANAGER
 # =============================================================================
 
-class TestEnvironmentManager:
+class EnvironmentTestManager:
     """
     Manages isolated environment variables for testing.
     

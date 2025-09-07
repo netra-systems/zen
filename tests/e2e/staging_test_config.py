@@ -101,17 +101,40 @@ class StagingConfig:
         return headers
     
     def create_test_jwt_token(self) -> Optional[str]:
-        """Create a test JWT token for staging authentication using SSOT E2E Auth Helper
+        """Create a test JWT token for staging authentication using EXISTING staging users.
         
-        CRITICAL FIX: Uses the SSOT E2EAuthHelper for proper async-safe token generation.
-        This avoids the asyncio.run() error and ensures proper staging authentication.
+        CRITICAL FIX: Uses pre-existing staging test users instead of generating random ones.
+        This ensures user validation passes in staging environment.
         """
         try:
-            # Use SSOT E2E Auth Helper for staging
+            # CRITICAL FIX: Use EXISTING staging test users instead of generating random ones
+            # These users must be pre-created in the staging database
+            STAGING_TEST_USERS = [
+                {
+                    "user_id": "staging-e2e-user-001", 
+                    "email": "e2e-test-001@staging.netrasystems.ai"
+                },
+                {
+                    "user_id": "staging-e2e-user-002",
+                    "email": "e2e-test-002@staging.netrasystems.ai" 
+                },
+                {
+                    "user_id": "staging-e2e-user-003",
+                    "email": "e2e-test-003@staging.netrasystems.ai"
+                }
+            ]
+            
+            # Select user based on process ID for consistency across test runs
+            user_index = os.getpid() % len(STAGING_TEST_USERS)
+            test_user = STAGING_TEST_USERS[user_index]
+            
+            print(f"[STAGING AUTH FIX] Using EXISTING staging user: {test_user['user_id']}")
+            print(f"[STAGING AUTH FIX] This user should exist in staging database")
+            
+            # Use SSOT E2E Auth Helper for staging with EXISTING user
             from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
             
             # Ensure E2E_OAUTH_SIMULATION_KEY is set for staging
-            import os
             if not os.environ.get("E2E_OAUTH_SIMULATION_KEY"):
                 os.environ["E2E_OAUTH_SIMULATION_KEY"] = "staging-e2e-test-bypass-key-2025"
                 print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for staging testing")
@@ -120,14 +143,15 @@ class StagingConfig:
             staging_config = E2EAuthConfig.for_staging()
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             
-            # Create test JWT token synchronously (safe for non-async context)
+            # Create token for EXISTING staging user (should pass user validation)
             token = auth_helper.create_test_jwt_token(
-                user_id="staging-test-user-" + str(os.getpid()),
-                email="e2e-websocket-test@staging.netrasystems.ai"
+                user_id=test_user["user_id"],
+                email=test_user["email"],
+                permissions=["read", "write", "execute"]  # Standard test permissions
             )
             
-            print(f"[SUCCESS] Created staging test JWT using SSOT E2EAuthHelper")
-            print(f"[INFO] This avoids asyncio.run() conflicts in async test contexts")
+            print(f"[SUCCESS] Created staging JWT for EXISTING user: {test_user['user_id']}")
+            print(f"[SUCCESS] This should pass staging user validation checks")
             
             return token
                 

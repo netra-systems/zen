@@ -152,3 +152,51 @@ repos:
         pass_filenames: false
         stages: [commit]
         description: 'CRITICAL: Enhanced syntax validation for mission-critical test files'
+        
+      # AUTH SSOT COMPLIANCE: Prevents JWT operations in backend service
+      - id: auth-ssot-compliance
+        name: Auth SSOT Compliance Check
+        entry: python scripts/check_auth_ssot_compliance.py --exclude-tests
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+        description: 'CRITICAL: Prevents JWT operations in backend ($50K MRR impact)'
+        
+      # NO DIRECT JWT IMPORTS: Blocks jwt library usage in backend
+      - id: no-jwt-backend
+        name: No JWT imports in backend
+        entry: 'import\s+jwt|from\s+jwt\s+import'
+        language: pygrep
+        files: '^netra_backend/.*\.py$'
+        exclude: '^netra_backend/app/websocket_core/user_context_extractor\.py$'
+        
+      # NO FALLBACK VALIDATION: Prevents auth bypass mechanisms
+      - id: no-fallback-validation
+        name: No fallback validation patterns
+        entry: 'fallback.*validation|validation.*fallback|fallback.*auth|auth.*fallback'
+        language: pygrep
+        files: '^netra_backend/.*\.py$'
+        
+      # NO LOCAL TOKEN VALIDATION: Enforces auth service usage
+      - id: no-local-validation
+        name: No local token validation methods
+        entry: 'def\s+(decode_token|validate_jwt|validate_token|verify_token)\s*\('
+        language: pygrep
+        files: '^netra_backend/.*\.py$'
+        exclude: '^(auth_service|test_framework|tests)/.*\.py$'
+        
+      # NO MOCKS IN E2E: Enforces real service testing
+      - id: no-mocks-e2e
+        name: No mocks in E2E tests
+        entry: 'Mock\(|MagicMock\(|@mock|@patch'
+        language: pygrep
+        files: '^tests/e2e/.*\.py$'
+        
+      # E2E AUTH REQUIRED: Reminder for auth usage
+      - id: e2e-auth-required
+        name: E2E tests must use authentication
+        entry: 'async def test_'
+        language: pygrep
+        files: '^tests/e2e/.*\.py$'
+        # This is a reminder hook - actual validation in test runner

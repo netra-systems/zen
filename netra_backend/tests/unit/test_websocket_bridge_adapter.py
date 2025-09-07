@@ -67,8 +67,21 @@ class TestWebSocketBridgeAdapterInitialization(BaseTestCase):
         
         # Verify instances are independent
         assert adapter1 is not adapter2, "Should create separate instances"
+        
+        # Initially both should have None values but be independent objects
+        assert adapter1._bridge is None, "Bridge should be None initially"
+        assert adapter2._bridge is None, "Bridge should be None initially"
+        assert adapter1._run_id is None, "Run ID should be None initially"
+        assert adapter2._run_id is None, "Run ID should be None initially"
+        
+        # After configuration, they should be independent
+        mock_bridge1 = AsyncMock()
+        mock_bridge2 = AsyncMock()
+        adapter1.set_websocket_bridge(mock_bridge1, "run-1", "Agent1")
+        adapter2.set_websocket_bridge(mock_bridge2, "run-2", "Agent2")
+        
         assert adapter1._bridge is not adapter2._bridge, "Bridges should be independent"
-        assert adapter1._run_id is not adapter2._run_id, "Run IDs should be independent"
+        assert adapter1._run_id != adapter2._run_id, "Run IDs should be independent"
 
 
 class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):

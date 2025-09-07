@@ -492,6 +492,101 @@ url = PortDiscovery.get_service_url("auth", environment=env)
 4. Port conflict detection
 5. Environment consistency checks
 
+## OAuth Dual Naming Convention Rationale
+
+### Background
+The platform implements a dual naming convention for OAuth credentials that was identified as a MEDIUM risk in the CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT. This section documents the rationale and proper usage.
+
+### The Dual Naming Pattern
+
+```python
+# Backend Service Pattern (Simplified Names)
+GOOGLE_CLIENT_ID = "your-client-id"
+GOOGLE_CLIENT_SECRET = "your-client-secret"
+
+# Auth Service Pattern (Environment-Specific Names)
+GOOGLE_OAUTH_CLIENT_ID_STAGING = "your-staging-client-id"
+GOOGLE_OAUTH_CLIENT_SECRET_STAGING = "your-staging-client-secret"
+GOOGLE_OAUTH_CLIENT_ID_PRODUCTION = "your-production-client-id"
+GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION = "your-production-client-secret"
+```
+
+### Why Two Naming Conventions?
+
+#### 1. Service Architecture Differences
+- **Backend Service**: Uses a single OAuth configuration per deployment
+- **Auth Service**: Manages multiple environment configurations simultaneously
+- **Deployment Scripts**: Need to map both patterns to the same GCP secrets
+
+#### 2. Historical Evolution
+- Initially, backend service was primary OAuth handler (simplified names)
+- Auth service added later with multi-environment support requirement
+- Maintaining backward compatibility prevented immediate unification
+
+#### 3. Security Isolation
+- **Backend**: Simplified names reduce configuration complexity for single-env deployments
+- **Auth Service**: Environment-specific names prevent accidental cross-environment credential usage
+- **Risk Mitigation**: Explicit environment naming prevents staging credentials in production
+
+### Implementation in deployment/secrets_config.py
+
+```python
+# The dual mapping ensures both services get correct credentials
+SECRET_MAPPINGS = {
+    # Backend service uses simplified names
+    "GOOGLE_CLIENT_ID": "google-oauth-client-id-{environment}",
+    "GOOGLE_CLIENT_SECRET": "google-oauth-client-secret-{environment}",
+    
+    # Auth service uses explicit environment names
+    "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
+    "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
+    "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION": "google-oauth-client-id-production",
+    "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": "google-oauth-client-secret-production",
+}
+```
+
+### Risk Assessment and Mitigation
+
+**Current Risks:**
+- Configuration complexity increases maintenance burden
+- Potential for misconfiguration during deployment
+- Different naming patterns can confuse developers
+
+**Mitigation Strategies:**
+1. **Documentation**: This section serves as the canonical reference
+2. **Validation**: Deployment scripts validate both patterns exist
+3. **Testing**: Integration tests verify OAuth works in both services
+4. **Future Consolidation**: Plan to unify in next major version (2.0)
+
+### Best Practices
+
+1. **For Backend Service Development:**
+   - Always use simplified names (GOOGLE_CLIENT_ID)
+   - Let deployment system handle environment mapping
+
+2. **For Auth Service Development:**
+   - Always use environment-specific names
+   - Never hardcode environment in variable values
+
+3. **For Deployment:**
+   - Ensure both patterns map to same GCP secrets
+   - Validate credentials exist for target environment
+   - Test OAuth flow end-to-end after deployment
+
+### Future Consolidation Plan (v2.0)
+
+**Target State:**
+- Single naming convention: `OAUTH_{PROVIDER}_{FIELD}_{ENVIRONMENT}`
+- Example: `OAUTH_GOOGLE_CLIENT_ID_STAGING`
+- Migration script to update all references
+- Backward compatibility layer for 6 months
+
+**Benefits:**
+- Reduced configuration complexity
+- Single source of truth for OAuth config
+- Easier debugging and maintenance
+- Lower risk of misconfiguration
+
 ## Environment-Specific Behavior
 
 ### Why Different Behaviors per Environment?
