@@ -46,7 +46,7 @@ class TestCriticalWebSocket:
         ws_headers = config.get_websocket_headers()
         
         # Test connection without auth first to verify auth is enforced
-        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # TESTS MUST RAISE ERRORS - but here we catch expected authentication errors
         # We expect this to fail with 403
         try:
             async with websockets.connect(
@@ -60,6 +60,9 @@ class TestCriticalWebSocket:
             if "403" in str(e):
                 got_auth_error = True
                 print(f"Got expected auth error without token: {e}")
+            else:
+                # Unexpected error - re-raise
+                raise
         
         # Now try with auth token
         if ws_headers.get("Authorization"):
@@ -113,7 +116,7 @@ class TestCriticalWebSocket:
         auth_enforced = False
         auth_accepted = False
         
-        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # TESTS MUST RAISE ERRORS - but here we catch expected authentication errors
         # First test: Try to connect without auth - should fail with 403
         try:
             async with websockets.connect(config.websocket_url) as ws:
@@ -130,27 +133,24 @@ class TestCriticalWebSocket:
         # Second test: Connect with auth token
         ws_headers = config.get_websocket_headers()
         if ws_headers.get("Authorization"):
-            try:
-                async with websockets.connect(
-                    config.websocket_url,
-                    additional_headers=ws_headers
-                ) as ws:
-                    # Send authenticated message
-                    await ws.send(json.dumps({
-                        "type": "message",
-                        "content": "Test with auth"
-                    }))
-                    
-                    # Should get response (not auth error)
-                    response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    data = json.loads(response)
-                    
-                    # Check if auth was accepted
-                    if data.get("type") != "error" or "auth" not in data.get("message", "").lower():
-                        auth_accepted = True
-                        print(f"Auth accepted, response: {data}")
-            except Exception as e:
-                print(f"Auth test with token failed: {e}")
+            async with websockets.connect(
+                config.websocket_url,
+                additional_headers=ws_headers
+            ) as ws:
+                # Send authenticated message
+                await ws.send(json.dumps({
+                    "type": "message",
+                    "content": "Test with auth"
+                }))
+                
+                # Should get response (not auth error)
+                response = await asyncio.wait_for(ws.recv(), timeout=5)
+                data = json.loads(response)
+                
+                # Check if auth was accepted
+                if data.get("type") != "error" or "auth" not in data.get("message", "").lower():
+                    auth_accepted = True
+                    print(f"Auth accepted, response: {data}")
         
         duration = time.time() - start_time
         print(f"Test duration: {duration:.3f}s")
@@ -476,26 +476,26 @@ class TestCriticalAgent:
                     # CRITICAL: PROPERLY FAIL ON UNEXPECTED STATUS CODES
                     # Per CLAUDE.md: "CHEATING ON TESTS = ABOMINATION"
                     if response.status_code == 200:
-                        print(f"✓ {method} {endpoint}: Success")
+                        print(f"[OK] {method} {endpoint}: Success")
                     elif response.status_code in [401, 403]:
                         # These are expected for unauthenticated requests
-                        print(f"🔐 {method} {endpoint}: Auth required (expected)")
+                        print(f"[AUTH] {method} {endpoint}: Auth required (expected)")
                     elif response.status_code == 404:
                         # 404 should be a hard failure - the endpoint should exist
-                        raise AssertionError(f"❌ {method} {endpoint}: Endpoint not found (404) - TEST FAILURE")
+                        raise AssertionError(f"[FAIL] {method} {endpoint}: Endpoint not found (404) - TEST FAILURE")
                     else:
                         # Any other status code is a test failure
-                        raise AssertionError(f"❌ {method} {endpoint}: Unexpected status {response.status_code} - TEST FAILURE")
+                        raise AssertionError(f"[FAIL] {method} {endpoint}: Unexpected status {response.status_code} - TEST FAILURE")
                     
                 except httpx.ConnectError as e:
                     # Connection errors mean the service is down - hard failure
-                    raise AssertionError(f"❌ {method} {endpoint}: Service unavailable - {str(e)[:100]}")
+                    raise AssertionError(f"[FAIL] {method} {endpoint}: Service unavailable - {str(e)[:100]}")
                 except AssertionError:
                     # Re-raise assertion errors
                     raise
                 except Exception as e:
                     # Any other exception is a test failure
-                    raise AssertionError(f"❌ {method} {endpoint}: Unexpected error - {str(e)[:100]}")
+                    raise AssertionError(f"[FAIL] {method} {endpoint}: Unexpected error - {str(e)[:100]}")
         
         duration = time.time() - start_time
         print(f"Agent execution endpoint test results:")

@@ -69,10 +69,8 @@ class MockWebSocket:
     
     async def send(self, message: str):
         """Mock send method with request tracking"""
-        try:
-            self._last_request = json.loads(message)
-        except json.JSONDecodeError:
-            self._last_request = None
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        self._last_request = json.loads(message)
         logger.info(f"Mock WebSocket: would send {message[:100]}...")
         
     async def recv(self):

@@ -65,6 +65,7 @@ const initializeMockFunctions = (state: any) => {
   });
   
   state.clearMessages = jest.fn(() => {
+    console.log('Mock store: clearMessages() called');
     state.messages = [];
     return state;
   });

@@ -2409,7 +2409,7 @@ jest.mock('@/hooks/useThreadSwitching', () => {
     
     // Mock switchToThread with proper state management
     const switchToThread = React.useCallback(async (threadId, options = {}) => {
-      console.log(`useThreadSwitching: switchToThread called with ${threadId}`);
+      console.log(`useThreadSwitching: switchToThread called with ${threadId}, options:`, JSON.stringify(options));
       
       try {
         // Check if we should use ThreadOperationManager (for tests that expect it)
@@ -2436,7 +2436,9 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               // Handle clearMessages option and get store reference
               const { useUnifiedChatStore } = require('@/store/unified-chat');
               const store = useUnifiedChatStore.getState();
+              console.log(`ThreadOperation: clearMessages option = ${options.clearMessages}, store.clearMessages exists = ${!!store.clearMessages}`);
               if (options.clearMessages && store.clearMessages) {
+                console.log('ThreadOperation: Calling store.clearMessages()');
                 store.clearMessages();
               }
               
@@ -2567,6 +2569,16 @@ jest.mock('@/hooks/useThreadSwitching', () => {
             
             updateHookState(errorUpdates);
             setState(prev => ({ ...prev, ...errorUpdates }));
+            
+            // CRITICAL: Reset store's activeThreadId to null on error
+            const { useUnifiedChatStore } = require('@/store/unified-chat');
+            const store = useUnifiedChatStore.getState();
+            if (store.setActiveThread) {
+              store.setActiveThread(null);
+            }
+            if (store.setThreadLoading) {
+              store.setThreadLoading(false);
+            }
           }
           
           return result.success;

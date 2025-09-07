@@ -83,24 +83,20 @@ async def _generate_high_bandwidth_workload(agent, duration: float) -> Dict[str,
     large_payload = "x" * 50000  # 50KB payload
     
     while time.time() < end_time:
-        try:
-            message = {
-                "type": "high_bandwidth_test",
-                "tenant_id": agent.tenant_id,
-                "message_id": f"{agent.tenant_id}-bandwidth-{messages_sent}",
-                "large_payload": large_payload,
-                "timestamp": time.time()
-            }
-            
-            await agent.connection.send(json.dumps(message))
-            messages_sent += 1
-            
-            # Send rapidly to consume bandwidth
-            await asyncio.sleep(0.05)  # 20 messages per second
-            
-        except Exception as e:
-            logger.error(f"Error in bandwidth workload for {agent.tenant_id}: {e}")
-            break
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        message = {
+            "type": "high_bandwidth_test",
+            "tenant_id": agent.tenant_id,
+            "message_id": f"{agent.tenant_id}-bandwidth-{messages_sent}",
+            "large_payload": large_payload,
+            "timestamp": time.time()
+        }
+        
+        await agent.connection.send(json.dumps(message))
+        messages_sent += 1
+        
+        # Send rapidly to consume bandwidth
+        await asyncio.sleep(0.05)  # 20 messages per second
     
     return {
         "workload_type": "high_bandwidth",
@@ -218,33 +214,24 @@ async def _test_connection_stability(agent, duration: float) -> Dict[str, Any]:
     end_time = start_time + duration
     
     while time.time() < end_time:
-        try:
-            # Rapid ping-pong messages to test stability
-            message = {
-                "type": "stability_test",
-                "tenant_id": agent.tenant_id,
-                "message_id": f"stability-{messages_sent}",
-                "timestamp": time.time()
-            }
-            
-            await agent.connection.send(json.dumps(message))
-            messages_sent += 1
-            
-            # Try to receive response
-            try:
-                await asyncio.wait_for(agent.connection.recv(), timeout=0.5)
-            except asyncio.TimeoutError:
-                pass  # Not all messages may get responses
-            
-            await asyncio.sleep(0.1)
-            
-        except Exception as e:
-            connection_errors += 1
-            logger.warning(f"Connection error for {agent.tenant_id}: {e}")
-            
-            # If too many errors, break to avoid flooding logs
-            if connection_errors > 10:
-                break
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Rapid ping-pong messages to test stability
+        message = {
+            "type": "stability_test",
+            "tenant_id": agent.tenant_id,
+            "message_id": f"stability-{messages_sent}",
+            "timestamp": time.time()
+        }
+        
+        await agent.connection.send(json.dumps(message))
+        messages_sent += 1
+        
+        # Try to receive response
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Note: Using timeout for response collection - let timeout raise if needed
+        await asyncio.wait_for(agent.connection.recv(), timeout=0.5)
+        
+        await asyncio.sleep(0.1)
     
     error_rate = connection_errors / messages_sent if messages_sent > 0 else 1.0
     
@@ -348,45 +335,35 @@ async def _simulate_network_errors(agent, duration: float):
     end_time = start_time + duration
     
     while time.time() < end_time:
-        try:
-            # Send malformed/invalid messages
-            malformed_messages = [
-                "invalid json{",
-                json.dumps({"type": "invalid_type", "data": "x" * 100000}),  # Very large
-                "",  # Empty message
-                json.dumps({"type": None}),  # Invalid type
-            ]
-            
-            for msg in malformed_messages:
-                try:
-                    await agent.connection.send(msg)
-                    await asyncio.sleep(0.1)
-                except Exception:
-                    pass  # Expected errors
-            
-            await asyncio.sleep(1.0)
-            
-        except Exception:
-            break  # Connection likely broken, which is expected
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Send malformed/invalid messages
+        malformed_messages = [
+            "invalid json{",
+            json.dumps({"type": "invalid_type", "data": "x" * 100000}),  # Very large
+            "",  # Empty message
+            json.dumps({"type": None}),  # Invalid type
+        ]
+        
+        for msg in malformed_messages:
+            await agent.connection.send(msg)
+            await asyncio.sleep(0.1)
+        
+        await asyncio.sleep(1.0)
 
 async def _quick_connectivity_check(agent) -> Dict[str, Any]:
     """Quick check if agent connection is still working."""
-    try:
-        test_message = {
-            "type": "connectivity_test",
-            "tenant_id": agent.tenant_id,
-            "timestamp": time.time()
-        }
-        
-        await agent.connection.send(json.dumps(test_message))
-        
-        # Try to receive any response (or timeout quickly)
-        try:
-            await asyncio.wait_for(agent.connection.recv(), timeout=2.0)
-        except asyncio.TimeoutError:
-            pass  # No response is fine, we just tested sending
-        
-        return {"connected": True}
-        
-    except Exception as e:
-        return {"connected": False, "error": str(e)}
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    test_message = {
+        "type": "connectivity_test",
+        "tenant_id": agent.tenant_id,
+        "timestamp": time.time()
+    }
+    
+    await agent.connection.send(json.dumps(test_message))
+    
+    # Try to receive any response (or timeout quickly)
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    # Note: Using timeout for response collection - let timeout raise if needed
+    await asyncio.wait_for(agent.connection.recv(), timeout=2.0)
+    
+    return {"connected": True}

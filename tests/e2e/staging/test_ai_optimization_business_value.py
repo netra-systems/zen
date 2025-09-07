@@ -73,27 +73,23 @@ class TestAIOptimizationBusinessValue:
         # Use proper staging authentication with multiple fallback strategies
         from tests.e2e.jwt_token_helpers import JWTTestHelper
         
-        try:
-            # Primary approach: Use JWTTestHelper for staging authentication
-            jwt_helper = JWTTestHelper(environment="staging")
-            token = await jwt_helper.get_staging_jwt_token(
-                user_id=user_id, 
-                email=f"{user_id}@test.netrasystems.ai"
-            )
-            if token:
-                logger.info(f"✓ Generated staging JWT token for user {user_id}")
-                return token
-        except Exception as e:
-            logger.warning(f"JWTTestHelper failed: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Primary approach: Use JWTTestHelper for staging authentication
+        jwt_helper = JWTTestHelper(environment="staging")
+        token = await jwt_helper.get_staging_jwt_token(
+            user_id=user_id, 
+            email=f"{user_id}@test.netrasystems.ai"
+        )
+        if token:
+            logger.info(f"✓ Generated staging JWT token for user {user_id}")
+            return token
         
-        try:
-            # Fallback: Try staging config token generation
-            test_token = self.config.create_test_jwt_token()
-            if test_token:
-                logger.info(f"✓ Generated staging config token for user {user_id}")
-                return test_token
-        except Exception as e:
-            logger.warning(f"Config token generation failed: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Fallback: Try staging config token generation
+        test_token = self.config.create_test_jwt_token()
+        if test_token:
+            logger.info(f"✓ Generated staging config token for user {user_id}")
+            return test_token
         
         # Final fallback with clear error message
         error_msg = (
@@ -122,18 +118,14 @@ class TestAIOptimizationBusinessValue:
         import httpx
         
         for attempt in range(max_retries):
-            try:
-                async with httpx.AsyncClient(timeout=30) as client:
-                    response = await client.get(f"{self.config.backend_url}/health")
-                    if response.status_code == 200:
-                        health_data = response.json()
-                        if health_data.get("status") == "healthy":
-                            logger.info(f"Backend healthy on attempt {attempt + 1}")
-                            return True
-            except Exception as e:
-                logger.warning(f"Health check attempt {attempt + 1} failed: {e}")
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.get(f"{self.config.backend_url}/health")
+                if response.status_code == 200:
+                    health_data = response.json()
+                    if health_data.get("status") == "healthy":
+                        logger.info(f"Backend healthy on attempt {attempt + 1}")
+                        return True
         
         return False
 

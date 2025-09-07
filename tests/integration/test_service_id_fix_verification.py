@@ -31,7 +31,7 @@ class TestWebSocketAuthFix:
         test_token = config.create_test_jwt_token()
         
         assert test_token is not None, "Test token creation should succeed"
-        print(f"✅ Test token created successfully")
+        print(f"[PASS] Test token created successfully")
         
         # Verify backend can validate the test token
         extractor = UserContextExtractor()
@@ -39,9 +39,9 @@ class TestWebSocketAuthFix:
         
         assert jwt_payload is not None, "Backend should validate test token successfully"
         assert jwt_payload.get("sub") is not None, "Token should contain user ID"
-        print(f"✅ Backend validated test token successfully (user: {jwt_payload.get('sub', 'unknown')[:8]}...)")
+        print(f"[PASS] Backend validated test token successfully (user: {jwt_payload.get('sub', 'unknown')[:8]}...)")
         
-        print("✅ JWT secret alignment verified - test and backend use compatible secrets")
+        print("[PASS] JWT secret alignment verified - test and backend use compatible secrets")
     
     def test_websocket_headers_creation(self):
         """Verify WebSocket headers are created correctly"""
@@ -59,7 +59,7 @@ class TestWebSocketAuthFix:
         token = auth_header.replace("Bearer ", "")
         assert len(token) > 50, "JWT token should be substantial length"
         
-        print(f"✅ WebSocket headers created correctly with Bearer token")
+        print(f"[PASS] WebSocket headers created correctly with Bearer token")
         print(f"   Authorization: Bearer {token[:20]}...")
     
     @pytest.mark.asyncio
@@ -83,11 +83,11 @@ class TestWebSocketAuthFix:
             jwt_payload = extractor.validate_and_decode_jwt(token)
             
             assert jwt_payload is not None, "Token in headers should be valid"
-            print(f"✅ WebSocket connection headers contain valid JWT token")
+            print(f"[PASS] WebSocket connection headers contain valid JWT token")
         else:
-            print("⚠️  No JWT token in headers - will test fallback behavior")
+            print("[WARN] No JWT token in headers - will test fallback behavior")
         
-        print("✅ WebSocket connection logic verified")
+        print("[PASS] WebSocket connection logic verified")
     
     def test_staging_config_environment_detection(self):
         """Test that staging config detects environment correctly"""
@@ -100,7 +100,7 @@ class TestWebSocketAuthFix:
         assert config.websocket_url.startswith("wss://"), "WebSocket URL should use secure protocol"
         assert "staging" in config.websocket_url, "WebSocket URL should be for staging"
         
-        print(f"✅ Staging environment detected correctly:")
+        print(f"[PASS] Staging environment detected correctly:")
         print(f"   Backend URL: {config.backend_url}")
         print(f"   WebSocket URL: {config.websocket_url}")
     
@@ -124,7 +124,7 @@ class TestWebSocketAuthFix:
         for claim in required_claims:
             assert claim in unverified_payload, f"Token should contain {claim} claim"
         
-        print("✅ JWT secret priority order verified")
+        print("[PASS] JWT secret priority order verified")
         print(f"   Token contains required claims: {list(unverified_payload.keys())}")
 
 
@@ -167,13 +167,13 @@ class TestWebSocketAuthFixIntegration:
             assert isinstance(user_context, UserExecutionContext), "Should create UserExecutionContext"
             assert user_context.user_id == jwt_payload["sub"], "User context should match token"
             
-            print("✅ Complete authentication flow simulation successful")
+            print("[PASS] Complete authentication flow simulation successful")
             print(f"   User ID: {user_context.user_id}")
             print(f"   WebSocket Connection ID: {user_context.websocket_connection_id}")
             
         except Exception as e:
-            print(f"⚠️  User context creation test skipped: {e}")
-            print("✅ Core authentication flow verified (context creation optional)")
+            print(f"[WARN] User context creation test skipped: {e}")
+            print("[PASS] Core authentication flow verified (context creation optional)")
 
 
 def run_websocket_auth_fix_tests():
@@ -200,7 +200,7 @@ def run_websocket_auth_fix_tests():
     asyncio.run(run_async_tests())
     
     print("\n" + "=" * 80)
-    print("✅ ALL WEBSOCKET AUTHENTICATION FIX TESTS PASSED")
+    print("[SUCCESS] ALL WEBSOCKET AUTHENTICATION FIX TESTS PASSED")
     print("The JWT secret alignment issue has been resolved.")
     print("Staging WebSocket tests should now pass authentication.")
     print("=" * 80)
