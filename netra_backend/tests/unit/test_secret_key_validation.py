@@ -26,6 +26,7 @@ Expected Test Behavior:
 import os
 import pytest
 from typing import Optional
+from unittest.mock import patch
 from test_framework.database.test_database_manager import TestDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -254,8 +255,9 @@ class TestSecretKeyConfigurationIssues:
         
         for env_var, value, should_be_valid in test_scenarios:
             with patch.dict(os.environ, {env_var: value}, clear=False):
-                # Mock environment loading
-                loaded_value = env.get(env_var, "")
+                # Mock environment loading using IsolatedEnvironment
+                env_instance = get_env()
+                loaded_value = env_instance.get(env_var, "")
                 
                 # Validate loaded value
                 is_valid = len(loaded_value) >= 32
@@ -270,12 +272,14 @@ class TestSecretKeyConfigurationIssues:
         
         # Test configuration precedence: ENV > config file > default
         with patch.dict(os.environ, {"SECRET_KEY": "env_secret_32_characters_long_ok"}, clear=False):
-            env_value = env.get("SECRET_KEY", "")
+            env_instance = get_env()
+            env_value = env_instance.get("SECRET_KEY", "")
             assert len(env_value) >= 32, "Environment SECRET_KEY should take precedence"
         
         # Test fallback behavior when SECRET_KEY is not set
         with patch.dict(os.environ, {}, clear=True):
-            fallback_value = env.get("SECRET_KEY", "fallback_default_value")
+            env_instance = get_env()
+            fallback_value = env_instance.get("SECRET_KEY", "fallback_default_value")
             
             # The fallback should be rejected for being too short
             assert len(fallback_value) < 32, (

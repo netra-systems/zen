@@ -1,32 +1,54 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 08:35:31
+**Generated:** 2025-09-07 08:38:42
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
-- **Skipped:** 0
-- **Duration:** 3.38 seconds
-- **Pass Rate:** 0.0%
+- **Total Tests:** 18
+- **Passed:** 4 (22.2%)
+- **Failed:** 1 (5.6%)
+- **Skipped:** 13
+- **Duration:** 4.35 seconds
+- **Pass Rate:** 22.2%
 
 ## Test Results by Priority
+
+### CRITICAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_debug_jwt_secret_resolution | PASS passed | 0.001s | test_websocket_auth_fix.py |
+| test_reproduce_websocket_403_error | PASS passed | 0.355s | test_websocket_auth_fix.py |
+| test_create_jwt_with_backend_secret | PASS passed | 0.346s | test_websocket_auth_fix.py |
 
 ### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_websocket_connection | FAIL failed | 0.385s | test_1_websocket_events_staging.py |
+| test_auth_google_login_route_returns_404 | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_multiple_oauth_routes_missing_404_pattern | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_route_registration_incomplete | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_route_mapping_configuration_error | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_oauth_blueprint_not_registered | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_oauth_route_handler_import_or_dependency_missing | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_google_oauth_client_id_missing_from_environment | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_google_oauth_client_secret_missing_from_environment | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_oauth_configuration_incomplete_for_staging_deployment | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_oauth_google_authorization_url_construction_fails | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_oauth_token_exchange_endpoint_unreachable | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_oauth_redirect_uri_misconfiguration | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_oauth_scopes_configuration_incomplete | SKIP skipped | 0.000s | test_oauth_configuration.py |
+| test_websocket_auth_consistency_fix | FAIL failed | 0.543s | test_websocket_auth_consistency_fix.py |
+| test_jwt_validation_methods_comparison | PASS passed | 0.587s | test_websocket_auth_consistency_fix.py |
 
 ## Failed Tests Details
 
-### FAILED: test_websocket_connection
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.385s
-- **Error:** tests\e2e\staging\test_1_websocket_events_staging.py:79: in test_websocket_connection
+### FAILED: test_websocket_auth_consistency_fix
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_auth_consistency_fix.py
+- **Duration:** 0.543s
+- **Error:** tests\e2e\staging\test_websocket_auth_consistency_fix.py:202: in _test_websocket_auth
     async with websockets.connect(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
     return await self
@@ -38,17 +60,35 @@
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_websocket_connection FAILED
+test_auth_routes.py::test_auth_google_login_route_returns_404 SKIPPED
+test_auth_routes.py::test_multiple_oauth_routes_missing_404_pattern SKIPPED
+test_auth_routes.py::test_auth_service_route_registration_incomplete SKIPPED
+test_auth_routes.py::test_auth_service_route_mapping_configuration_error SKIPPED
+test_auth_routes.py::test_auth_service_oauth_blueprint_not_registered SKIPPED
+test_auth_routes.py::test_oauth_route_handler_import_or_dependency_missing SKIPPED
+test_oauth_configuration.py::test_google_oauth_client_id_missing_from_environment SKIPPED
+test_oauth_configuration.py::test_google_oauth_client_secret_missing_from_environment SKIPPED
+test_oauth_configuration.py::test_oauth_configuration_incomplete_for_staging_deployment SKIPPED
+test_oauth_configuration.py::test_oauth_google_authorization_url_construction_fails SKIPPED
+test_oauth_configuration.py::test_oauth_token_exchange_endpoint_unreachable SKIPPED
+test_oauth_configuration.py::test_oauth_redirect_uri_misconfiguration SKIPPED
+test_oauth_configuration.py::test_oauth_scopes_configuration_incomplete SKIPPED
+test_websocket_auth_consistency_fix.py::test_websocket_auth_consistency_fix FAILED
+test_websocket_auth_consistency_fix.py::test_jwt_validation_methods_comparison PASSED
+test_websocket_auth_fix.py::test_debug_jwt_secret_resolution PASSED
+test_websocket_auth_fix.py::test_reproduce_websocket_403_error PASSED
+test_websocket_auth_fix.py::test_create_jwt_with_backend_secret PASSED
 
 ==================================================
-0 passed, 1 failed in 3.38s
+4 passed, 1 failed, 13 skipped in 4.35s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
+| WebSocket | 2 | 1 | 1 | 50.0% |
+| Authentication | 17 | 3 | 1 | 17.6% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

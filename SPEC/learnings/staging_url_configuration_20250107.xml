@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Staging URL Configuration Must Use Central Config</title>
+  <date>2025-01-07</date>
+  <category>configuration</category>
+  <severity>CRITICAL</severity>
+  <business_impact>
+    <impact>$50K+ MRR loss from staging environment failures</impact>
+    <root_cause>E2E tests using localhost URLs instead of staging URLs</root_cause>
+  </business_impact>
+  
+  <problem>
+    <description>
+      The E2EAuthHelper in test_framework/ssot/e2e_auth_helper.py was hardcoding localhost URLs
+      instead of using the centralized staging configuration from tests/e2e/staging_config.py.
+      This caused all E2E tests to fail when run against staging environment.
+    </description>
+    <symptoms>
+      - E2E tests connecting to localhost:8002 instead of staging URLs
+      - Tests passing locally but failing in staging
+      - WebSocket connections failing with wrong URLs
+    </symptoms>
+  </problem>
+  
+  <solution>
+    <principle>ALWAYS use centralized configuration for environment-specific URLs</principle>
+    <implementation>
+      1. Import staging config: from tests.e2e.staging_config import StagingTestConfig
+      2. Use E2EAuthConfig.for_staging() which pulls from central config
+      3. Auto-detect environment from TEST_ENV or ENVIRONMENT variables
+      4. Never hardcode URLs - always reference central config
+    </implementation>
+    <code_example><![CDATA[
+# WRONG - Hardcoded URLs
+class E2EAuthConfig:
+    auth_service_url: str = "http://localhost:8083"
+    backend_url: str = "http://localhost:8002"
+    
+# CORRECT - Use central config
+from tests.e2e.staging_config import StagingTestConfig
+
+@classmethod
+def for_staging(cls) -> "E2EAuthConfig":
+    staging_config = StagingTestConfig()
+    return cls(
+        auth_service_url=staging_config.urls.auth_url,
+        backend_url=staging_config.urls.backend_url,
+        websocket_url=staging_config.urls.websocket_url
+    )
+    ]]></code_example>
+  </solution>
+  
+  <prevention>
+    <rule>All test helpers MUST import from tests/e2e/staging_config.py for staging URLs</rule>
+    <rule>Never duplicate URL definitions - always reference the SSOT</rule>
+    <rule>Use environment detection to automatically select correct config</rule>
+    <checklist>
+      - [ ] Check if file uses URLs
+      - [ ] Verify it imports from staging_config for staging
+      - [ ] Ensure environment detection is implemented
+      - [ ] No hardcoded localhost URLs in production code paths
+    </checklist>
+  </prevention>
+  
+  <references>
+    <file>test_framework/ssot/e2e_auth_helper.py</file>
+    <file>tests/e2e/staging_config.py</file>
+    <pattern>StagingTestConfig, staging_urls</pattern>
+  </references>
+  
+  <tags>
+    <tag>staging</tag>
+    <tag>configuration</tag>
+    <tag>urls</tag>
+    <tag>ssot</tag>
+    <tag>e2e-tests</tag>
+  </tags>
+</learning>

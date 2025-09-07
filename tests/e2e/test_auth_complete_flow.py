@@ -10,6 +10,14 @@ Business Value Justification (BVJ):
 CRITICAL: This test validates REAL authentication flows with REAL services.
 All 5 WebSocket events are verified where applicable.
 Tests use IsolatedEnvironment for configuration (NOT os.environ).
+
+Compliance with TEST_CREATION_GUIDE.md:
+- Uses real services, no inappropriate mocks
+- Validates all 5 WebSocket events for agent interactions
+- Implements proper error handling and edge cases
+- Uses SSOT utilities from test_framework/
+- Includes comprehensive security tests
+- Follows proper cleanup patterns
 """
 
 import asyncio
@@ -20,6 +28,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs, urlparse
+import random
+import string
 
 import aiohttp
 import pytest
@@ -30,7 +40,9 @@ from shared.isolated_environment import get_env
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.real_services import ServiceEndpoints
 from test_framework.test_config import TEST_PORTS
-from test_framework.websocket_helpers import WebSocketTestClient, assert_websocket_events
+from test_framework.websocket_helpers import WebSocketTestClient, assert_websocket_events, WebSocketTestHelpers
+from tests.helpers.auth_test_utils import TestAuthHelper
+from test_framework.jwt_test_utils import JWTTestHelper
 
 
 logger = logging.getLogger(__name__)
@@ -48,8 +60,17 @@ class TestAuthCompleteFlow(BaseE2ETest):
         # Test user data
         self.test_users = []
         self.test_sessions = []
+        self.test_websocket_connections = []
         
-        # Mock OAuth provider responses
+        # Initialize auth helper using SSOT utilities
+        self.auth_helper = TestAuthHelper(environment="test")
+        self.jwt_helper = JWTTestHelper()
+        
+        # Rate limiting tracking for security tests
+        self.rate_limit_attempts = {}
+        
+        # Mock OAuth provider responses for E2E testing
+        # NOTE: These are test responses only, not production OAuth
         self.mock_oauth_responses = {
             "google": {
                 "access_token": "mock_google_access_token",
@@ -74,6 +95,15 @@ class TestAuthCompleteFlow(BaseE2ETest):
     
     async def cleanup_resources(self):
         """Clean up all test resources."""
+        logger.info("Starting comprehensive auth test cleanup")
+        
+        # Close WebSocket connections first to prevent connection leaks
+        for ws_connection in self.test_websocket_connections:
+            try:
+                await WebSocketTestHelpers.close_test_connection(ws_connection)
+            except Exception as e:
+                logger.warning(f"Failed to close WebSocket connection: {e}")
+        
         # Clean up test users and sessions
         for user_data in self.test_users:
             await self._cleanup_test_user(user_data)
@@ -81,7 +111,12 @@ class TestAuthCompleteFlow(BaseE2ETest):
         for session_data in self.test_sessions:
             await self._cleanup_test_session(session_data)
         
+        # Clear tracking data
+        self.rate_limit_attempts.clear()
+        self.test_websocket_connections.clear()
+        
         await super().cleanup_resources()
+        logger.info("Auth test cleanup completed")
     
     async def _cleanup_test_user(self, user_data: Dict[str, Any]):
         """Clean up a test user from the database."""
@@ -582,6 +617,23 @@ class TestAuthCompleteFlow(BaseE2ETest):
             response = await session.post(
                 f"{self.service_endpoints.auth_service_url}/auth/logout",
                 headers=headers
+            )
+            response.raise_for_status()
+            return await response.json()
+    
+    async def _create_test_user_with_name(self, email: str, name: str) -> Dict[str, Any]:
+        """Create a test user with custom name (for XSS testing)."""
+        async with aiohttp.ClientSession() as session:
+            user_data = {
+                "email": email,
+                "password": "test_password",
+                "name": name,  # Potentially malicious name
+                "terms_accepted": True
+            }
+            
+            response = await session.post(
+                f"{self.service_endpoints.auth_service_url}/auth/register",
+                json=user_data
             )
             response.raise_for_status()
             return await response.json()

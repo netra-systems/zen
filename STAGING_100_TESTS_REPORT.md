@@ -1,17 +1,17 @@
 # Top 100 E2E Staging Tests - Execution Report
 
-**Generated:** 2025-09-07 08:22:54
+**Generated:** 2025-09-07 08:39:43
 **Environment:** Staging - https://netra-backend-staging-pnovr5vsba-uc.a.run.app
 **Test Framework:** Pytest unknown
 
 ## Executive Summary
 
-- **Total Tests:** 62
-- **Passed:** 52
-- **Failed:** 6
+- **Total Tests:** 61
+- **Passed:** 51
+- **Failed:** 7
 - **Skipped:** 0
-- **Duration:** 44.60 seconds
-- **Pass Rate:** 83.9%
+- **Duration:** 51.07 seconds
+- **Pass Rate:** 83.6%
 
 ## Test Results
 
@@ -25,15 +25,15 @@ tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::tes
 tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_error_handling PASSED [0.00s]
 tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_business_critical_features PASSED [0.00s]
 tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_health_check PASSED [0.00s]
-tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection FAILED [0.00s]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection PASSED [0.00s]
 tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_api_endpoints_for_agents PASSED [0.00s]
 tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real FAILED [0.00s]
 tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real FAILED [0.00s]
 tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_message_endpoints PASSED [0.00s]
 tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_message_api_endpoints PASSED [0.00s]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow PASSED [0.00s]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow FAILED [0.00s]
 tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_thread_management PASSED [0.00s]
-tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow PASSED [0.00s]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow FAILED [0.00s]
 tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_discovery PASSED [0.00s]
 tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_configuration PASSED [0.00s]
 tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution FAILED [0.00s]
@@ -78,14 +78,14 @@ tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_
 tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_metrics PASSED [0.00s]
 
 ============================================================
-52 passed, 6 failed in 44.60s
+51 passed, 7 failed in 51.07s
 ```
 
 ## Results by Priority
 
 ### [NORMAL] Priority
 
-**Results:** 52/62 passed, 6 failed
+**Results:** 51/61 passed, 7 failed
 
 | Test | Result | Duration |
 |------|--------|----------|
@@ -96,15 +96,15 @@ tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_
 | test_critical_error_handling | [PASS] passed | 0.000s |
 | test_business_critical_features | [PASS] passed | 0.000s |
 | test_health_check | [PASS] passed | 0.000s |
-| test_websocket_connection | [FAIL] failed | 0.000s |
+| test_websocket_connection | [PASS] passed | 0.000s |
 | test_api_endpoints_for_agents | [PASS] passed | 0.000s |
 | test_websocket_event_flow_real | [FAIL] failed | 0.000s |
 | test_concurrent_websocket_real | [FAIL] failed | 0.000s |
 | test_message_endpoints | [PASS] passed | 0.000s |
 | test_real_message_api_endpoints | [PASS] passed | 0.000s |
-| test_real_websocket_message_flow | [PASS] passed | 0.000s |
+| test_real_websocket_message_flow | [FAIL] failed | 0.000s |
 | test_real_thread_management | [PASS] passed | 0.000s |
-| test_real_error_handling_flow | [PASS] passed | 0.000s |
+| test_real_error_handling_flow | [FAIL] failed | 0.000s |
 | test_real_agent_discovery | [PASS] passed | 0.000s |
 | test_real_agent_configuration | [PASS] passed | 0.000s |
 | test_real_agent_pipeline_execution | [FAIL] failed | 0.000s |
@@ -150,41 +150,17 @@ tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_
 | test_001_basic_optimization_agent_flow | [SKIP] error | 0.000s |
 | test_002_multi_turn_optimization_conversation | [SKIP] error | 0.000s |
 | test_003_concurrent_user_isolation | [SKIP] error | 0.000s |
-| test_004_realtime_agent_status_events | [SKIP] error | 0.000s |
 
 ## Failed Test Details
-
-### [FAILED] tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection
-
-**Error:**
-```
-..\staging_test_base.py:224: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_1_websocket_events_staging.py:73: in test_websocket_connection
-    async with websockets.connect(
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
-    await self.connection.handshake(
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
-    raise self.protocol.handshake_exc
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
-    self.process_response(response)
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
-    raise InvalidStatus(response)
-E   websockets.exceptions.InvalidStatus: server reje...
-```
 
 ### [FAILED] tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real
 
 **Error:**
 ```
-..\staging_test_base.py:224: in wrapper
+..\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_1_websocket_events_staging.py:139: in test_websocket_event_flow_real
+test_1_websocket_events_staging.py:222: in test_websocket_event_flow_real
     async with websockets.connect(
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
     return await self
@@ -204,13 +180,13 @@ E   websockets.exceptions.InvalidStatus: serve...
 
 **Error:**
 ```
-..\staging_test_base.py:224: in wrapper
+..\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_1_websocket_events_staging.py:247: in test_concurrent_websocket_real
+test_1_websocket_events_staging.py:376: in test_concurrent_websocket_real
     results = await asyncio.gather(*tasks)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_1_websocket_events_staging.py:221: in test_connection
+test_1_websocket_events_staging.py:350: in test_connection
     async with websockets.connect(
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
     return await self
@@ -224,11 +200,57 @@ C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.
 C:\Users\antho\AppData\Roaming\Python\Pytho...
 ```
 
+### [FAILED] tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow
+
+**Error:**
+```
+..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_2_message_flow_staging.py:120: in test_real_websocket_message_flow
+    async with websockets.connect(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server ...
+```
+
+### [FAILED] tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow
+
+**Error:**
+```
+..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_2_message_flow_staging.py:314: in test_real_error_handling_flow
+    async with websockets.connect(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rej...
+```
+
 ### [FAILED] tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution
 
 **Error:**
 ```
-..\staging_test_base.py:224: in wrapper
+..\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 test_3_agent_pipeline_staging.py:204: in test_real_agent_pipeline_execution
@@ -251,7 +273,7 @@ E   websockets.exceptions.InvalidStatus: ser...
 
 **Error:**
 ```
-..\staging_test_base.py:224: in wrapper
+..\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 test_3_agent_pipeline_staging.py:357: in test_real_agent_lifecycle_monitoring
@@ -274,7 +296,7 @@ E   websockets.exceptions.InvalidStatus: s...
 
 **Error:**
 ```
-..\staging_test_base.py:224: in wrapper
+..\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 test_3_agent_pipeline_staging.py:450: in test_real_pipeline_error_handling
@@ -297,10 +319,10 @@ E   websockets.exceptions.InvalidStatus: serv...
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 10 | 7 | 3 | 70.0% |
-| Agent | 15 | 10 | 3 | 66.7% |
-| Message | 6 | 6 | 0 | 100.0% |
-| Error | 4 | 3 | 1 | 75.0% |
+| WebSocket | 10 | 6 | 4 | 60.0% |
+| Agent | 14 | 10 | 3 | 71.4% |
+| Message | 6 | 4 | 2 | 66.7% |
+| Error | 4 | 2 | 2 | 50.0% |
 | Performance | 3 | 3 | 0 | 100.0% |
 
 ## Environment Information

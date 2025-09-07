@@ -173,7 +173,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 return
             
             # Validate JWT token
-            jwt_payload = extractor.validate_and_decode_jwt(jwt_token)
+            jwt_payload = await extractor.validate_and_decode_jwt(jwt_token)
             if not jwt_payload:
                 logger.warning(f"WebSocket connection rejected in {environment}: Invalid JWT token")
                 await websocket.close(code=1008, reason="Invalid authentication")

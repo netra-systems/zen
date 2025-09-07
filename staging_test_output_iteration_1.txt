@@ -1,0 +1,702 @@
+======================================================================
+RUNNING TOP 100 E2E STAGING TESTS
+Time: 2025-09-07 08:38:49
+======================================================================
+
+Executing pytest with full reporting...
+Command: C:\Users\antho\miniconda3\python.exe -m pytest -v --tb=short --color=yes -m staging --junit-xml=test_results.xml --html=test_results.html --self-contained-html --json-report --json-report-file=test_results.json --capture=no .
+----------------------------------------------------------------------
+
+======================================================================
+STAGING E2E TEST SESSION STARTED
+Time: 2025-09-07 08:38:51
+======================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'Faker': '37.4.2', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+[1mcollecting ... [0mcollected 248 items / 33 deselected / 215 selected
+
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_basic_functionality [32mPASSED[0m
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_api_endpoints [32mPASSED[0m
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_end_to_end_message_flow [32mPASSED[0m
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_performance_targets [32mPASSED[0m
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_error_handling [32mPASSED[0m
+test_10_critical_path_staging.py::TestCriticalPathStaging::test_business_critical_features [32mPASSED[0m
+test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_health_check [32mPASSED[0m
+test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection [32mPASSED[0m
+test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_api_endpoints_for_agents [32mPASSED[0m
+test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real [31mFAILED[0m
+test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real [31mFAILED[0m
+test_2_message_flow_staging.py::TestMessageFlowStaging::test_message_endpoints [32mPASSED[0m
+test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_message_api_endpoints [32mPASSED[0m
+test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Loaded JWT_SECRET_STAGING from config/staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[PASS] /health returned 200
+[PASS] /api/health returned 200
+[PASS] /api/discovery/services returned 200
+[PASS] /api/mcp/config returned 200
+[PASS] /api/mcp/servers returned 200
+[PASS] All 5 critical endpoints working
+[INFO] Critical path flow:
+  1. user_input_received
+  2. message_validated
+  3. agent_selected
+  4. agent_executed
+  5. response_generated
+  6. response_delivered
+[PASS] End-to-end message flow validated
+[PASS] api_response_time_ms: 85ms (target: 100ms)
+[PASS] websocket_latency_ms: 42ms (target: 50ms)
+[PASS] agent_startup_time_ms: 380ms (target: 500ms)
+[PASS] message_processing_time_ms: 165ms (target: 200ms)
+[PASS] total_request_time_ms: 872ms (target: 1000ms)
+[PASS] All performance targets met
+[INFO] Error AUTH_FAILED: redirect_to_login
+[INFO] Error RATE_LIMITED: exponential_backoff
+[INFO] Error SERVICE_UNAVAILABLE: failover
+[INFO] Error INVALID_REQUEST: return_error
+[INFO] Error INTERNAL_ERROR: log_and_retry
+[PASS] Validated 5 critical error handlers
+[INFO] Critical features: 5/5 enabled
+[PASS] chat_functionality: enabled
+[PASS] agent_execution: enabled
+[PASS] real_time_updates: enabled
+[PASS] error_recovery: enabled
+[PASS] performance_monitoring: enabled
+[PASS] All business critical features enabled
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[PASS] Health checks successful
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Attempting WebSocket connection to: wss://api.staging.netrasystems.ai/ws
+[INFO] Auth headers present: True
+[DEBUG] WebSocket InvalidStatus error: server rejected WebSocket connection: HTTP 500
+[DEBUG] Extracted status code: 500
+[WARNING] WebSocket server error (HTTP 500): server rejected WebSocket connection: HTTP 500
+[INFO] This indicates staging service may be experiencing issues
+[INFO] But the lack of 403 error suggests JWT authentication is now working!
+[PARTIAL PASS] WebSocket authentication working (JWT accepted), but staging server has issues
+[INFO] This confirms the JWT 403 authentication fix is successful!
+[PASS] WebSocket connection test completed - staging behavior verified
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[PASS] Service discovery working
+[PASS] MCP config available
+[PASS] MCP servers endpoint working
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Testing WebSocket event flow with authentication
+[INFO] Target URL: wss://api.staging.netrasystems.ai/ws
+[ERROR] Unexpected WebSocket status code in event flow: 0
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[PASS] Endpoint /api/health responding
+[PASS] Endpoint /api/discovery/services responding
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/messages: 403
+[INFO] /api/threads: 403
+[INFO] /api/conversations: 404
+[INFO] /api/chat: 404
+[INFO] /api/chat/messages: 404
+Message API test duration: 0.754s
+[INFO] Accessible endpoints: 2/5
+[PASS] Real message API endpoints tested
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[31mFAILED[0m
+test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_thread_management [32mPASSED[0m
+test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow [31mFAILED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_discovery [32mPASSED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_configuration [32mPASSED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution [31mFAILED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_lifecycle_monitoring [31mFAILED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_error_handling [31mFAILED[0m
+test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_metrics [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_basic_functionality [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_discovery_and_listing [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_workflow_states [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_communication_patterns [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_error_scenarios [32mPASSED[0m
+test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_multi_agent_coordination_metrics [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_basic_functionality [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_protocols [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_chunk_handling [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_performance_metrics [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_backpressure_handling [32mPASSED[0m
+test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_stream_recovery [32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_basic_functionality [STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] List threads: 403 (auth required)
+[INFO] List conversations: 404 (auth required)
+[INFO] List messages: 403 (auth required)
+Thread management test results:
+  List threads: 403
+  List conversations: 404
+  List messages: 403
+Test duration: 0.581s
+[PASS] Real thread management tested
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] Not Found Test: 404
+[INFO] Invalid ID Test: 403
+[INFO] Unauthorized Execution Test: 422
+[INFO] Security Test: 403
+[INFO] Missing Auth Test: 403
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/mcp/servers: 200 - 1
+[INFO] /api/agents: 404 (auth required)
+[INFO] /api/agents/list: 404 (auth required)
+[INFO] /api/mcp/config: 200 - config
+[INFO] /api/discovery/agents: 404 (auth required)
+Agent discovery test results:
+  Endpoints tested: 5
+  Successful responses: 2
+  Agents discovered: 1
+  Test duration: 0.770s
+[PASS] Real agent discovery tested
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/mcp/config: 200 - 649 bytes
+[INFO] /api/agents/config: 404
+[INFO] /api/configuration: 404
+[INFO] /api/settings: 422
+Agent configuration test results:
+  /api/mcp/config: 200 - Agent config: True
+  /api/agents/config: 404 - Agent config: False
+  /api/configuration: 404 - Agent config: False
+  /api/settings: 422 - Agent config: False
+Test duration: 0.653s
+[SUCCESS] Found 1 accessible configuration endpoints
+[PASS] Real agent configuration tested
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/agents/status: 404
+[INFO] /api/agents/active: 404
+[INFO] /api/execution/status: 404
+[INFO] /api/jobs: 404
+[INFO] /api/tasks: 404
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] Nonexistent Agent Error: 404
+[INFO] Invalid Execution Request: 422
+[INFO] Invalid Pipeline ID: 404
+[INFO] Wrong HTTP Method: 405
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/metrics: 404
+[INFO] /api/metrics/agents: 404
+[INFO] /api/metrics/pipeline: 404
+[INFO] /api/stats: 404
+[INFO] /api/health/metrics: 404
+[INFO] /api/performance: 404
+Pipeline metrics test results:
+  Metrics endpoints tested: 6
+  Endpoints with metrics: 0
+  Performance test iterations: 5
+  Successful requests: 5/5
+  Response time - Avg: 0.550s, Min: 0.516s, Max: 0.579s
+  Total test duration: 4.691s
+[PASS] Real pipeline metrics tested
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Found agent: netra-mcp (status: connected)
+[PASS] Agent discovery and listing test
+[INFO] Testing workflow state transitions:
+  pending -> initializing
+  initializing -> running
+  running -> coordinating
+  coordinating -> waiting_for_agents
+  waiting_for_agents -> aggregating_results
+  aggregating_results -> completed
+[PASS] Orchestration workflow states test
+[INFO] Pattern 'broadcast': Send message to all agents
+[INFO] Pattern 'round_robin': Distribute tasks evenly
+[INFO] Pattern 'priority': Send to highest priority agent
+[INFO] Pattern 'parallel': Execute on all agents simultaneously
+[INFO] Pattern 'sequential': Execute one after another
+[PASS] Validated 5 communication patterns
+[PASS] Tested 5 error scenarios
+[INFO] Coordination efficiency: 70.0%
+[PASS] Multi-agent coordination metrics test
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Protocol 'websocket' configuration validated
+[INFO] Protocol 'server-sent-events' configuration validated
+[INFO] Protocol 'chunked-transfer' configuration validated
+[PASS] Tested 3 streaming protocols
+[PASS] Validated 5 chunk sizes
+[INFO] Streaming success rate: 95.0%
+[PASS] Streaming performance metrics test
+[INFO] Backpressure scenario: slow_consumer
+[INFO] Backpressure scenario: fast_producer
+[INFO] Backpressure scenario: network_congestion
+[INFO] Backpressure scenario: buffer_overflow
+[PASS] Tested 4 backpressure scenarios
+[PASS] Validated 3 recovery checkpoints
+[32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_failure_detection [32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_retry_strategies [32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_circuit_breaker [32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_graceful_degradation [32mPASSED[0m
+test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_recovery_metrics [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_basic_functionality [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_sequence [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_dependency_validation [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_cold_start_performance [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_failure_handling [32mPASSED[0m
+test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_health_check_endpoints [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_basic_functionality [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_types [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_sequencing [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_metadata [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_filtering [32mPASSED[0m
+test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_persistence [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_basic_functionality [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_patterns [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_task_distribution [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_synchronization_primitives [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_consensus_mechanisms [32mPASSED[0m
+test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_metrics [32mPASSED[0m
+test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_001_basic_optimization_agent_flow [31mERROR[0m
+test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_002_multi_turn_optimization_conversation [31mERROR[0m
+test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_003_concurrent_user_isolation [31mERROR[0m
+
+=================================== ERRORS ====================================
+[31m[1m_ ERROR at setup of TestAIOptimizationBusinessValue.test_001_basic_optimization_agent_flow _[0m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:604: in _verify_server_availability
+    [0mtest_ws = [94mawait[39;49;00m websockets.connect([96mself[39;49;00m.base_url, ping_timeout=[94m5[39;49;00m)[90m[39;49;00m
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403[0m
+
+[33mDuring handling of the above exception, another exception occurred:[0m
+[1m[31mtest_ai_optimization_business_value.py[0m:60: in setup
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.ws_utility.initialize()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:589: in initialize
+    [0m[94mawait[39;49;00m [96mself[39;49;00m._verify_server_availability()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:608: in _verify_server_availability
+    [0m[94mraise[39;49;00m [96mRuntimeError[39;49;00m([33mf[39;49;00m[33m"[39;49;00m[33mWebSocket server not available at [39;49;00m[33m{[39;49;00m[96mself[39;49;00m.base_url[33m}[39;49;00m[33m: [39;49;00m[33m{[39;49;00me[33m}[39;49;00m[33m"[39;49;00m)[90m[39;49;00m
+[1m[31mE   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403[0m
+----------------------------- Captured log setup ------------------------------
+[1m[31mERROR   [0m test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+[31m[1m_ ERROR at setup of TestAIOptimizationBusinessValue.test_002_multi_turn_optimization_conversation _[0m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:604: in _verify_server_availability
+    [0mtest_ws = [94mawait[39;49;00m websockets.connect([96mself[39;49;00m.base_url, ping_timeout=[94m5[39;49;00m)[90m[39;49;00m
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403[0m
+
+[33mDuring handling of the above exception, another exception occurred:[0m
+[1m[31mtest_ai_optimization_business_value.py[0m:60: in setup
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.ws_utility.initialize()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:589: in initialize
+    [0m[94mawait[39;49;00m [96mself[39;49;00m._verify_server_availability()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:608: in _verify_server_availability
+    [0m[94mraise[39;49;00m [96mRuntimeError[39;49;00m([33mf[39;49;00m[33m"[39;49;00m[33mWebSocket server not available at [39;49;00m[33m{[39;49;00m[96mself[39;49;00m.base_url[33m}[39;49;00m[33m: [39;49;00m[33m{[39;49;00me[33m}[39;49;00m[33m"[39;49;00m)[90m[39;49;00m
+[1m[31mE   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403[0m
+----------------------------- Captured log setup ------------------------------
+[1m[31mERROR   [0m test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+[31m[1m_ ERROR at setup of TestAIOptimizationBusinessValue.test_003_concurrent_user_isolation _[0m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:604: in _verify_server_availability
+    [0mtest_ws = [94mawait[39;49;00m websockets.connect([96mself[39;49;00m.base_url, ping_timeout=[94m5[39;49;00m)[90m[39;49;00m
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403[0m
+
+[33mDuring handling of the above exception, another exception occurred:[0m
+[1m[31mtest_ai_optimization_business_value.py[0m:60: in setup
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.ws_utility.initialize()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:589: in initialize
+    [0m[94mawait[39;49;00m [96mself[39;49;00m._verify_server_availability()[90m[39;49;00m
+[1m[31m..\..\..\test_framework\ssot\websocket.py[0m:608: in _verify_server_availability
+    [0m[94mraise[39;49;00m [96mRuntimeError[39;49;00m([33mf[39;49;00m[33m"[39;49;00m[33mWebSocket server not available at [39;49;00m[33m{[39;49;00m[96mself[39;49;00m.base_url[33m}[39;49;00m[33m: [39;49;00m[33m{[39;49;00me[33m}[39;49;00m[33m"[39;49;00m)[90m[39;49;00m
+[1m[31mE   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403[0m
+----------------------------- Captured log setup ------------------------------
+[1m[31mERROR   [0m test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+================================== FAILURES ===================================
+[31m[1m__________ TestWebSocketEventsStaging.test_websocket_event_flow_real __________[0m
+[1m[31m..\staging_test_base.py[0m:293: in wrapper
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m func(*args, **kwargs)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_1_websocket_events_staging.py[0m:222: in test_websocket_event_flow_real
+    [0m[94masync[39;49;00m [94mwith[39;49;00m websockets.connect([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:587: in __aenter__
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m [96mself[39;49;00m[90m[39;49;00m
+           ^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 500[0m
+[31m[1m__________ TestWebSocketEventsStaging.test_concurrent_websocket_real __________[0m
+[1m[31m..\staging_test_base.py[0m:293: in wrapper
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m func(*args, **kwargs)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_1_websocket_events_staging.py[0m:376: in test_concurrent_websocket_real
+    [0mresults = [94mawait[39;49;00m asyncio.gather(*tasks)[90m[39;49;00m
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_1_websocket_events_staging.py[0m:350: in test_connection
+    [0m[94masync[39;49;00m [94mwith[39;49;00m websockets.connect([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:587: in __aenter__
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m [96mself[39;49;00m[90m[39;49;00m
+           ^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 500[0m
+[31m[1m___________ TestMessageFlowStaging.test_real_websocket_message_flow ___________[0m
+[1m[31m..\staging_test_base.py[0m:293: in wrapper
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m func(*args, **kwargs)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_2_message_flow_staging.py[0m:120: in test_real_websocket_message_flow
+    [0m[94masync[39;49;00m [94mwith[39;49;00m websockets.connect([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:587: in __aenter__
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m [96mself[39;49;00m[90m[39;49;00m
+           ^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 500[0m
+[31m[1m____________ TestMessageFlowStaging.test_real_error_handling_flow _____________[0m
+[1m[31m..\staging_test_base.py[0m:293: in wrapper
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m func(*args, **kwargs)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_2_message_flow_staging.py[0m:314: in test_real_error_handling_flow
+    [0m[94masync[39;49;00m [94mwith[39;49;00m websockets.connect([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:587: in __aenter__
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m [96mself[39;49;00m[90m[39;49;00m
+           ^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+[1m[31mE   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 500[0m
+[31m[1m_________ TestAgentPipelineStaging.test_real_agent_pipeline_execution _________[0m
+[1m[31m..\staging_test_base.py[0m:293: in wrapper
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m func(*args, **kwargs)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtest_3_agent_pipeline_staging.py[0m:204: in test_real_agent_pipeline_execution
+    [0m[94masync[39;49;00m [94mwith[39;49;00m websockets.connect([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:587: in __aenter__
+    [0m[94mreturn[39;49;00m [94mawait[39;49;00m [96mself[39;49;00m[90m[39;49;00m
+           ^^^^^^^^^^[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:543: in __await_impl__
+    [0m[94mawait[39;49;00m [96mself[39;49;00m.connection.handshake([90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py[0m:114: in handshake
+    [0m[94mraise[39;49;00m [96mself[39;49;00m.protocol.handshake_exc[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:325: in parse
+    [0m[96mself[39;49;00m.process_response(response)[90m[39;49;00m
+[1m[31mC:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\client.py[0m:142: in process_response
+    [0m[94mraise[39;49;00m InvalidStatus(response)[90m[39;49;00m
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[PASS] Tested 5 failure detection types
+[INFO] Strategy 'exponential_backoff': {'initial_delay': 1, 'max_delay': 32, 'multiplier': 2}
+[INFO] Strategy 'linear_backoff': {'delay': 5, 'max_attempts': 3}
+[INFO] Strategy 'immediate': {'delay': 0, 'max_attempts': 1}
+[INFO] Strategy 'jittered': {'base_delay': 2, 'jitter_range': 1}
+[PASS] Validated 4 retry strategies
+[INFO] Circuit breaker state: closed
+[INFO] Circuit breaker state: open
+[INFO] Circuit breaker state: half_open
+[PASS] Circuit breaker pattern test
+[INFO] Level 0: Full functionality
+[INFO] Level 1: Non-critical features disabled
+[INFO] Level 2: Read-only mode
+[INFO] Level 3: Minimal functionality
+[INFO] Level 4: Maintenance mode
+[PASS] Tested 5 degradation levels
+[INFO] Recovery rate: 90.0%
+[INFO] Availability: 99.5%
+[PASS] Recovery metrics test
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Startup sequence:
+  -> config_loading
+  -> dependency_check
+  -> database_connection
+  -> service_initialization
+  -> health_check
+  -> ready
+[PASS] Validated 6 startup steps
+[INFO] Dependencies: 3/4 available
+[INFO] Required: 3 services
+[INFO] Checking required dependency: database
+[INFO] Checking required dependency: redis
+[INFO] Checking required dependency: llm_service
+[PASS] Dependency validation test
+[PASS] config_load_ms: 85ms (target: 100ms)
+[PASS] db_connect_ms: 420ms (target: 500ms)
+[PASS] service_init_ms: 890ms (target: 1000ms)
+[PASS] total_startup_ms: 2500ms (target: 3000ms)
+[PASS] Cold start performance test
+[INFO] Scenario: config_missing -> Fallback to defaults
+[INFO] Scenario: db_unavailable -> Retry with exponential backoff
+[INFO] Scenario: port_conflict -> Try alternative ports
+[INFO] Scenario: memory_insufficient -> Reduce cache size
+[INFO] Scenario: service_conflict -> Wait for service availability
+[PASS] Tested 5 failure scenarios
+[INFO] Service reported as healthy
+[INFO] Service: netra-ai-platform
+[INFO] Version: 1.0.0
+[PASS] Health check endpoints test
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[PASS] Validated 9 event types
+[INFO] Valid sequence: agent_started -> agent_thinking -> agent_completed
+[INFO] Valid sequence: agent_started -> tool_executing -> tool_completed -> agent_completed
+[INFO] Valid sequence: agent_started -> agent_failed
+[INFO] Valid sequence: system_startup -> agent_initialized -> agent_started
+[PASS] Validated 4 event sequences
+[INFO] Event metadata validated
+[INFO] Duration: 1500ms
+[INFO] Tokens: 250
+[PASS] Event metadata test
+[INFO] Filter: by_type
+[INFO] Filter: by_time_range
+[INFO] Filter: by_agent
+[INFO] Filter: by_status
+[PASS] Validated 4 filter types
+[INFO] Retention: 30 days
+[INFO] Max events: 10000
+[PASS] Event persistence test
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Pattern: master_slave
+[INFO] Pattern: peer_to_peer
+[INFO] Pattern: publish_subscribe
+[INFO] Pattern: request_reply
+[INFO] Pattern: pipeline
+[PASS] Tested 5 coordination patterns
+[INFO] Strategy 'round_robin': {'index': 0, 'agents': 3}
+[INFO] Strategy 'least_loaded': {'load_threshold': 0.8}
+[INFO] Strategy 'random': {'seed': 42}
+[INFO] Strategy 'weighted': {'weights': [0.5, 0.3, 0.2]}
+[INFO] Strategy 'sticky': {'session_affinity': True}
+[PASS] Validated 5 distribution strategies
+[INFO] Primitive: mutex
+[INFO] Primitive: semaphore
+[INFO] Primitive: barrier
+[INFO] Primitive: event
+[INFO] Primitive: condition
+[PASS] Tested 5 synchronization primitives
+[INFO] Consensus: voting
+[INFO] Consensus: quorum
+[INFO] Consensus: leader_election
+[INFO] Consensus: two_phase_commit
+[PASS] Tested 4 consensus mechanisms
+[INFO] Coordination efficiency: 95.0%
+[INFO] Throughput: 20.5 tasks/sec
+[PASS] Coordination metrics test
+
+Test report saved to: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\STAGING_TEST_REPORT_PYTEST.md
+
+=== Memory Usage Report ===
+Loaded fixture modules: base, mocks
+Peak memory usage: 194.1 MB
+
+----------------------------------------------------------------------
+
+======================================================================
+TEST RESULTS SUMMARY
+======================================================================
+Total Tests: 61
+Passed: 51
+Failed: 7
+Skipped: 0
+Duration: 51.07 seconds
+
+[X] FAILED TESTS:
+  - tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_lifecycle_monitoring
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+  - tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_error_handling
+    Error: ..\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^...
+
+TESTS BY PRIORITY:
+  NORMAL: 51/61 passed
+
+[REPORT] Report saved to: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\STAGING_100_TESTS_REPORT.md
+
+======================================================================
+[FAILURE] TESTS FAILED (exit code: 1)
+======================================================================
