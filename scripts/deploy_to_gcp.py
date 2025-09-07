@@ -1365,7 +1365,7 @@ CMD ["npm", "start"]
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
-            "service-id-staging": f"netra-auth-staging-{int(time.time())}",
+            "service-id-staging": "netra-auth-staging",
             # CRITICAL: Redis endpoint must match staging-shared-redis primary endpoint in GCP
             # Primary endpoint: 10.107.0.3 (verified in Google Cloud Console)
             # See SPEC/redis_staging_configuration.xml for full configuration details

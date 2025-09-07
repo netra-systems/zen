@@ -3104,4 +3104,26 @@
             <learning-ref>docker_alpine_optimization_20250907.xml</learning-ref>
         </related-learnings>
     </learning>
+    
+    <learning id="service-id-timestamp-issue-2025-09-07">
+        <title>SERVICE_ID Timestamp Suffix Issue</title>
+        <category>Deployment/Authentication/Configuration</category>
+        <keywords>service-id, authentication, inter-service-auth, staging, google-secret-manager, timestamp</keywords>
+        <path>service_id_timestamp_issue_20250907.xml</path>
+        <critical-takeaway>
+            Deployment script was appending timestamp to SERVICE_ID in Google Secret Manager
+            (e.g., 'netra-auth-staging-1757224059'), causing service ID mismatch between backend
+            and auth service. Fixed by using stable SERVICE_ID without timestamp: 'netra-auth-staging'.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Inter-service authentication failures preventing backend from communicating with auth service</business-impact>
+        <prevention>
+            Never append dynamic values (timestamps, random numbers) to SERVICE_ID or other
+            authentication identifiers. SERVICE_ID should be stable and environment-specific:
+            'netra-{service}-{environment}'. Add validation to ensure proper format.
+        </prevention>
+        <related-learnings>
+            <learning-ref>service_authentication_mismatch_fix_20250107.xml</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
