@@ -882,6 +882,21 @@ class AgentWebSocketBridge(MonitorableComponent):
             logger.error(f"🚨 Error getting thread registry status: {e}")
             return None
     
+    # ===================== UTILITY METHODS =====================
+    # Support methods for run ID processing (required by startup validator)
+    
+    def extract_thread_id(self, run_id: str) -> str:
+        """
+        Extract thread ID from run ID (delegated to UnifiedIDManager).
+        
+        Args:
+            run_id: Run ID to extract thread ID from
+            
+        Returns:
+            Extracted thread ID
+        """
+        return UnifiedIDManager.extract_thread_id(run_id)
+    
     # ===================== NOTIFICATION INTERFACE =====================
     # SSOT for all WebSocket notifications - CRYSTAL CLEAR emission paths
     # BUSINESS CRITICAL: These methods enable 90% of chat functionality value

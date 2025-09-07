@@ -22,6 +22,28 @@ class ThreadRepository(BaseRepository[Thread]):
     def __init__(self):
         super().__init__(Thread)
     
+    async def create(self, db: AsyncSession, **kwargs) -> Thread:
+        """Create a thread with proper metadata handling.
+        
+        Ensures metadata is never None when creating threads to prevent database operation failures.
+        This is the SSOT method for thread creation that guarantees valid metadata structure.
+        """
+        # Ensure metadata_ is never None - set to empty dict if None
+        if kwargs.get('metadata_') is None:
+            kwargs['metadata_'] = {}
+            logger.info("Initialized NULL metadata to empty dict for thread creation")
+        
+        # Call parent create method with sanitized kwargs
+        thread = await super().create(db, **kwargs)
+        
+        # Double-check the created thread has valid metadata
+        if thread and thread.metadata_ is None:
+            logger.warning(f"Thread {thread.id} has NULL metadata after creation, fixing...")
+            thread.metadata_ = {}
+            await db.flush()  # Persist the fix
+        
+        return thread
+    
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Thread]:
         """Find all threads for a user using JSONB query.
         

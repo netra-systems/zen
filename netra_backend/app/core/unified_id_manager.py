@@ -253,6 +253,98 @@ class UnifiedIDManager:
             self._active_ids = {id_type: set() for id_type in IDType}
             self._id_counters = {id_type: 0 for id_type in IDType}
             logger.warning("UnifiedIDManager cleared")
+    
+    # CRITICAL: Class methods required by startup validator
+    @classmethod
+    def generate_run_id(cls, thread_id: str) -> str:
+        """
+        Generate a run ID for a thread (required by startup validator).
+        
+        Args:
+            thread_id: Thread identifier to embed in run ID
+            
+        Returns:
+            Unique run ID containing thread ID
+        """
+        import uuid
+        import time
+        
+        # Generate unique run ID with embedded thread ID
+        uuid_part = str(uuid.uuid4())[:8]
+        timestamp = int(time.time() * 1000) % 100000  # Last 5 digits of timestamp
+        run_id = f"run_{thread_id}_{timestamp}_{uuid_part}"
+        
+        return run_id
+    
+    @classmethod
+    def extract_thread_id(cls, run_id: str) -> str:
+        """
+        Extract thread ID from run ID (required by startup validator).
+        
+        Args:
+            run_id: Run ID containing embedded thread ID
+            
+        Returns:
+            Extracted thread ID
+        """
+        # Parse run ID format: run_{thread_id}_{timestamp}_{uuid}
+        parts = run_id.split('_')
+        if len(parts) >= 3 and parts[0] == 'run':
+            # Join all parts between 'run_' and the last two parts (timestamp_uuid)
+            thread_id = '_'.join(parts[1:-2])
+            return thread_id
+        
+        # Fallback: return the run_id if parsing fails
+        return run_id
+    
+    @classmethod
+    def validate_run_id(cls, run_id: str) -> bool:
+        """
+        Validate run ID format (required by startup validator).
+        
+        Args:
+            run_id: Run ID to validate
+            
+        Returns:
+            True if run ID is valid format
+        """
+        if not run_id or not isinstance(run_id, str):
+            return False
+        
+        # Check basic format: run_{thread_id}_{timestamp}_{uuid}
+        parts = run_id.split('_')
+        return (len(parts) >= 4 and 
+                parts[0] == 'run' and 
+                len(parts[-1]) == 8)  # UUID part should be 8 characters
+    
+    @classmethod
+    def parse_run_id(cls, run_id: str) -> Dict[str, str]:
+        """
+        Parse run ID into components (required by startup validator).
+        
+        Args:
+            run_id: Run ID to parse
+            
+        Returns:
+            Dictionary with parsed components
+        """
+        result = {
+            'thread_id': '',
+            'timestamp': '',
+            'uuid_part': '',
+            'valid': False
+        }
+        
+        if not cls.validate_run_id(run_id):
+            return result
+        
+        parts = run_id.split('_')
+        result['thread_id'] = '_'.join(parts[1:-2])
+        result['timestamp'] = parts[-2]
+        result['uuid_part'] = parts[-1]
+        result['valid'] = True
+        
+        return result
 
 
 # Global ID manager instance
@@ -305,3 +397,5 @@ def generate_execution_id() -> str:
 def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:
     """Convenience function to validate ID"""
     return get_id_manager().is_valid_id(id_value, id_type)
+
+
