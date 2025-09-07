@@ -155,7 +155,7 @@ def mock_agent_with_cleanup():
 # TEST: UserAgentSession Complete Coverage
 # ============================================================================
 
-class TestUserAgentSessionComplete(BaseTestCase):
+class TestUserAgentSessionComplete(SSotBaseTestCase):
     """Complete test coverage for UserAgentSession class."""
     
     def test_user_session_initialization_validates_user_id(self):
@@ -393,7 +393,7 @@ class TestUserAgentSessionComplete(BaseTestCase):
 # TEST: AgentLifecycleManager Complete Coverage
 # ============================================================================
 
-class TestAgentLifecycleManagerComplete(BaseTestCase):
+class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     """Complete test coverage for AgentLifecycleManager class."""
     
     def test_lifecycle_manager_initialization(self):
@@ -588,7 +588,7 @@ class TestAgentLifecycleManagerComplete(BaseTestCase):
 # TEST: AgentRegistry Complete Coverage
 # ============================================================================
 
-class TestAgentRegistryComplete(BaseTestCase):
+class TestAgentRegistryComplete(SSotBaseTestCase):
     """Complete test coverage for AgentRegistry class with all isolation features."""
     
     def test_agent_registry_initialization_comprehensive(self, mock_llm_manager):
@@ -899,7 +899,7 @@ class TestAgentRegistryComplete(BaseTestCase):
 # TEST: Tool Dispatcher Integration
 # ============================================================================
 
-class TestToolDispatcherIntegration(BaseTestCase):
+class TestToolDispatcherIntegration(SSotBaseTestCase):
     """Test tool dispatcher creation and user isolation."""
     
     @pytest.mark.asyncio
@@ -987,7 +987,7 @@ class TestToolDispatcherIntegration(BaseTestCase):
 # TEST: Concurrent User Scenarios
 # ============================================================================
 
-class TestConcurrentUserScenarios(BaseTestCase):
+class TestConcurrentUserScenarios(SSotBaseTestCase):
     """Test concurrent user scenarios with isolation guarantees."""
     
     @pytest.mark.asyncio
@@ -1184,7 +1184,7 @@ class TestConcurrentUserScenarios(BaseTestCase):
 # TEST: Agent Factory Registration and Execution
 # ============================================================================
 
-class TestAgentFactoryRegistration(BaseTestCase):
+class TestAgentFactoryRegistration(SSotBaseTestCase):
     """Test agent factory registration and default agent setup."""
     
     def test_register_default_agents_sets_registration_flag(self, mock_llm_manager):
@@ -1301,7 +1301,7 @@ class TestAgentFactoryRegistration(BaseTestCase):
 # TEST: Registry Health and Diagnostics
 # ============================================================================
 
-class TestRegistryHealthAndDiagnostics(BaseTestCase):
+class TestRegistryHealthAndDiagnostics(SSotBaseTestCase):
     """Test registry health monitoring and diagnostic capabilities."""
     
     def test_get_registry_health_comprehensive_metrics(self, mock_llm_manager):
@@ -1490,7 +1490,7 @@ class TestRegistryHealthAndDiagnostics(BaseTestCase):
 # TEST: Backward Compatibility and Legacy Support
 # ============================================================================
 
-class TestBackwardCompatibilityAndLegacySupport(BaseTestCase):
+class TestBackwardCompatibilityAndLegacySupport(SSotBaseTestCase):
     """Test backward compatibility methods and legacy support."""
     
     def test_list_agents_returns_registered_keys(self, mock_llm_manager):
@@ -1593,7 +1593,7 @@ class TestBackwardCompatibilityAndLegacySupport(BaseTestCase):
 # TEST: Module Exports and Factory Functions
 # ============================================================================
 
-class TestModuleExportsAndFactoryFunctions(BaseTestCase):
+class TestModuleExportsAndFactoryFunctions(SSotBaseTestCase):
     """Test module-level exports and factory functions."""
     
     def test_get_agent_registry_returns_proper_instance(self, mock_llm_manager):
@@ -1631,7 +1631,7 @@ class TestModuleExportsAndFactoryFunctions(BaseTestCase):
 # TEST: Memory Leak Prevention and Resource Management
 # ============================================================================
 
-class TestMemoryLeakPreventionAndResourceManagement(BaseTestCase):
+class TestMemoryLeakPreventionAndResourceManagement(SSotBaseTestCase):
     """Test memory leak prevention and resource management features."""
     
     @pytest.mark.asyncio
@@ -1796,7 +1796,7 @@ class TestMemoryLeakPreventionAndResourceManagement(BaseTestCase):
 # TEST: Error Handling and Edge Cases
 # ============================================================================
 
-class TestErrorHandlingAndEdgeCases(BaseTestCase):
+class TestErrorHandlingAndEdgeCases(SSotBaseTestCase):
     """Test comprehensive error handling and edge cases."""
     
     @pytest.mark.asyncio

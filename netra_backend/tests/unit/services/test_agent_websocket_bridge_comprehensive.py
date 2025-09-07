@@ -371,20 +371,20 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
     async def test_create_user_emitter_from_ids_missing_required_id(self):
         """Test create_user_emitter_from_ids with missing required ID."""
         # Test missing user_id
-        with self.assertRaises(ValueError) as context:
+        with pytest.raises(ValueError) as context:
             await self.bridge.create_user_emitter_from_ids(
                 user_id="", thread_id="thread456", run_id="run789"
             )
-        self.assertIn("user_id, thread_id, and run_id are all required", str(context.exception))
+        assert "user_id, thread_id, and run_id are all required" in str(context.exception)
         
         # Test missing thread_id
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             await self.bridge.create_user_emitter_from_ids(
                 user_id="user123", thread_id="", run_id="run789"
             )
             
         # Test missing run_id
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             await self.bridge.create_user_emitter_from_ids(
                 user_id="user123", thread_id="thread456", run_id=""
             )
@@ -413,7 +413,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert - Should handle gracefully
-            self.assertFalse(result, "Should return False on WebSocket failure")
+            assert result is False, "Should return False on WebSocket failure"
 
     async def test_emit_agent_event_no_websocket_manager(self):
         """
@@ -432,7 +432,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert - Should handle gracefully
-            self.assertFalse(result, "Should return False when WebSocket manager unavailable")
+            assert result is False, "Should return False when WebSocket manager unavailable"
 
     async def test_notify_agent_error_recursive_failure(self):
         """
@@ -450,7 +450,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert - Should handle gracefully
-            self.assertFalse(result, "Should return False on emission failure")
+            assert result is False, "Should return False on emission failure"
 
     # ========================================================================
     # CRITICAL: Concurrent Agent Execution Tests
@@ -482,14 +482,14 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             results = await asyncio.gather(*tasks)
             
             # Assert - All should succeed
-            self.assertTrue(all(results), "All concurrent notifications should succeed")
-            self.assertEqual(mock_emit.call_count, 4, "Should emit 4 separate events")
+            assert all(results), "All concurrent notifications should succeed"
+            assert mock_emit.call_count == 4, "Should emit 4 separate events"
             
             # Verify run_id isolation in calls
             call_args_list = mock_emit.call_args_list
             run_ids_in_calls = [call[1]["run_id"] for call in call_args_list]
-            self.assertIn(run_id_1, run_ids_in_calls)
-            self.assertIn(run_id_2, run_ids_in_calls)
+            assert run_id_1 in run_ids_in_calls
+            assert run_id_2 in run_ids_in_calls
 
     async def test_concurrent_tool_executions_no_interference(self):
         """
@@ -514,8 +514,8 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             results = await asyncio.gather(*tasks)
             
             # Assert - All should succeed independently
-            self.assertTrue(all(results), "All concurrent tool notifications should succeed")
-            self.assertEqual(mock_emit.call_count, len(tasks), "Should emit event for each notification")
+            assert all(results), "All concurrent tool notifications should succeed"
+            assert mock_emit.call_count == len(tasks), "Should emit event for each notification"
 
     # ========================================================================
     # Integration State and Health Monitoring Tests
@@ -601,7 +601,7 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert - Should handle large payload
-            self.assertTrue(result, "Should handle large payloads")
+            assert result, "Should handle large payloads"
             self.mock_websocket_manager.emit_to_run.assert_called_once()
 
     async def test_notify_agent_started_with_none_context(self):
@@ -619,10 +619,10 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert
-            self.assertTrue(result)
+            assert result
             call_args = mock_emit.call_args
             data = call_args[1]["data"]
-            self.assertIsNone(data["context"])
+            assert data["context"] is None
 
     async def test_notify_tool_executing_with_empty_parameters(self):
         """
@@ -640,10 +640,10 @@ class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
             )
             
             # Assert
-            self.assertTrue(result)
+            assert result
             call_args = mock_emit.call_args
             data = call_args[1]["data"]
-            self.assertEqual(data["parameters"], {})
+            assert data["parameters"] == {}
 
     async def test_bridge_performance_under_high_event_volume(self):
         """
