@@ -335,14 +335,15 @@ class TestWebSocketDevConnectivity:
         ws_url = "ws://localhost:8001/ws/test"
         
         try:
-            async with websockets.connect(
-                ws_url, 
-                open_timeout=3,
-                close_timeout=1
-            ) as websocket:
-                # Just verify connection works
-                welcome = await asyncio.wait_for(websocket.recv(), timeout=2)
-                welcome_data = json.loads(welcome)
+            # Use asyncio.timeout for Python 3.12 compatibility
+            async with asyncio.timeout(3):  # 3 second timeout for connection
+                async with websockets.connect(
+                    ws_url,
+                    close_timeout=1
+                ) as websocket:
+                    # Just verify connection works
+                    welcome = await asyncio.wait_for(websocket.recv(), timeout=2)
+                    welcome_data = json.loads(welcome)
                 
                 assert welcome_data.get("type") == "connection_established", \
                     "WebSocket not ready"
