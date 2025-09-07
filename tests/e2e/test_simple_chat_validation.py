@@ -47,9 +47,15 @@ class SimpleChatTester:
             )
             logger.info(f"Connected to {self.ws_url}")
             return True
-        except Exception as e:
-            logger.error(f"Connection failed: {e}")
+        except asyncio.TimeoutError:
+            logger.error("Connection timed out after 10 seconds")
             return False
+        except websockets.exceptions.WebSocketException as e:
+            logger.error(f"WebSocket connection failed: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected connection error: {e}")
+            raise
             
     async def send_chat(self, message: str, thread_id: str = None):
         """Send a chat message."""

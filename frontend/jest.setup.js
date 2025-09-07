@@ -2423,14 +2423,14 @@ jest.mock('@/hooks/useThreadSwitching', () => {
             'switch',
             threadId,
             async (signal) => {
-              // Handle clearMessages option
+              // Handle clearMessages option and get store reference
               const { useUnifiedChatStore } = require('@/store/unified-chat');
               const store = useUnifiedChatStore.getState();
               if (options.clearMessages && store.clearMessages) {
                 store.clearMessages();
               }
               
-              // Update loading state
+              // Update loading state in both hook and store (ATOMIC)
               const loadingUpdates = {
                 isLoading: true,
                 loadingThreadId: threadId,
@@ -2440,6 +2440,15 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               
               updateHookState(loadingUpdates);
               setState(prev => ({ ...prev, ...loadingUpdates }));
+              
+              // Update store loading state - CRITICAL for synchronization!
+              if (store.startThreadLoading) {
+                store.startThreadLoading(threadId);
+              } else if (store.setThreadLoading && store.setActiveThread) {
+                // Fallback: Manual atomic update
+                store.setActiveThread(threadId);
+                store.setThreadLoading(true);
+              }
               
               // Execute thread loading with the service
               const { threadLoadingService } = require('@/services/threadLoadingService');
@@ -2452,6 +2461,12 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               });
               
               if (loadResult && loadResult.success) {
+                // CRITICAL: Check if operation was aborted during execution
+                if (signal.aborted) {
+                  console.log(`Operation for ${threadId} was aborted, not updating state`);
+                  return { success: false, threadId, error: new Error('Operation aborted') };
+                }
+                
                 // Success: Update both hook and store state
                 const successUpdates = {
                   isLoading: false,
@@ -2465,13 +2480,15 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                 updateHookState(successUpdates);
                 setState(prev => ({ ...prev, ...successUpdates }));
                 
-                // Update store state
-                const { useUnifiedChatStore } = require('@/store/unified-chat');
-                const store = useUnifiedChatStore.getState();
-                if (store.completeThreadLoading) {
-                  store.completeThreadLoading(threadId, loadResult.messages || []);
-                } else if (store.setActiveThread) {
-                  store.setActiveThread(threadId);
+                // Update store state - but only if not aborted
+                if (!signal.aborted) {
+                  const { useUnifiedChatStore } = require('@/store/unified-chat');
+                  const store = useUnifiedChatStore.getState();
+                  if (store.completeThreadLoading) {
+                    store.completeThreadLoading(threadId, loadResult.messages || []);
+                  } else if (store.setActiveThread) {
+                    store.setActiveThread(threadId);
+                  }
                 }
                 
                 // Ensure the store state is actually updated

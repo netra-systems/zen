@@ -1,0 +1,9 @@
+Checking Docker health...
+[ERROR] Docker Desktop service is not running
+
+[WARNING] Docker services are not healthy!
+Please ensure Docker Desktop is running and services are started:
+  python scripts/docker_manual.py start
+[WARNING] Windows detected with e2e tests - using safe runner to prevent Docker crash
+[INFO] See tests/e2e/WINDOWS_SAFE_TESTING_GUIDE.md for details
+[INFO] Executing: C:\Users\antho\miniconda3\python.exe C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\run_safe_windows.py

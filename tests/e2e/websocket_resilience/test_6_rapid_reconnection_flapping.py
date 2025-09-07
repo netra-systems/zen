@@ -169,7 +169,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in RapidReconnectionClient: {e}")
             
     async def _attempt_disconnection(self) -> bool:
         """Attempt to disconnect WebSocket."""
@@ -190,7 +190,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Disconnection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected disconnection failure in RapidReconnectionClient: {e}")
             
     async def establish_stable_connection(self) -> bool:
         """Establish a stable connection after flapping."""

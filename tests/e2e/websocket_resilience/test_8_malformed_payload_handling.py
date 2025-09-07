@@ -122,7 +122,7 @@ class TestMalformedPayloadClient:
             return True
         except Exception as e:
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in MalformedPayloadTestClient: {e}")
             
     async def disconnect(self):
         """Disconnect from WebSocket server."""
@@ -177,7 +177,7 @@ class TestMalformedPayloadClient:
         except Exception as e:
             logger.error(f"Failed to send attack payload: {e}")
             self.simulator.record_attack_result(attack_type, len(payload), False, str(e))
-            return {'success': False, 'error': str(e)}
+            pytest.fail(f"Unexpected error sending attack payload: {e}")
             
     async def send_binary_attack(self, payload: bytes, attack_type: str) -> Dict[str, Any]:
         """Send binary payload attack."""
@@ -203,7 +203,7 @@ class TestMalformedPayloadClient:
         except Exception as e:
             logger.error(f"Failed to send binary attack: {e}")
             self.simulator.record_attack_result(attack_type, len(payload), False, str(e))
-            return {'success': False, 'error': str(e)}
+            pytest.fail(f"Unexpected error sending binary attack: {e}")
 
 
 @pytest.mark.asyncio

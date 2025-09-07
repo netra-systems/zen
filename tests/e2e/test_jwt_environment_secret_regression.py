@@ -55,8 +55,11 @@ class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
         for key in ["JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION", "JWT_SECRET_TEST", "JWT_SECRET_KEY"]:
             try:
                 self.env.delete(key, "test_setup")
-            except:
+            except KeyError:
+                # Expected - key may not exist
                 pass
+            except Exception as e:
+                self.fail(f"Unexpected error deleting {key}: {e}")
     
     @pytest.mark.asyncio
     async def test_staging_jwt_secret_alignment(self):
@@ -327,8 +330,11 @@ class TestJWTSecretValidation(UnifiedTestBase):
         for key in ["JWT_SECRET_PRODUCTION", "JWT_SECRET_KEY", "JWT_SECRET"]:
             try:
                 self.env.delete(key, "test")
-            except:
+            except KeyError:
+                # Expected - key may not exist
                 pass
+            except Exception as e:
+                self.fail(f"Unexpected error deleting {key} during test: {e}")
         
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
         

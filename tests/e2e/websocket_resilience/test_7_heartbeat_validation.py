@@ -183,7 +183,7 @@ class TestHeartbeatClient:
             
         except Exception as e:
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in HeartbeatTestClient: {e}")
             
     async def disconnect(self):
         """Disconnect from WebSocket server."""

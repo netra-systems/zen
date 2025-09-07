@@ -13,7 +13,7 @@ def test_docker_health():
         print(f"Backend status: {response.status_code}")
         print(f"Response: {response.text}")
         return True
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Failed to reach backend: {e}")
         return False
 

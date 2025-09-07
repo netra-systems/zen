@@ -43,16 +43,9 @@ class BackendEnvironment:
         if missing:
             logger.warning(f"Missing required backend environment variables: {missing}")
         
-        # Check database configuration - DATABASE_URL takes priority
-        if self.env.get("DATABASE_URL"):
-            logger.info(f"Using DATABASE_URL for database connection")
-        else:
-            # Check if we can build a database URL from POSTGRES_* variables
-            db_url = self.get_database_url()
-            if not db_url:
-                logger.info("Database URL will be built from POSTGRES_* environment variables")
-            else:
-                logger.info("Built database URL from POSTGRES_* environment variables")
+        # Check if we can build a database URL from POSTGRES_* variables
+        db_url = self.get_database_url()
+        logger.info("Built database URL from POSTGRES_* environment variables")
     
     # Authentication & Security
     def get_jwt_secret_key(self) -> str:

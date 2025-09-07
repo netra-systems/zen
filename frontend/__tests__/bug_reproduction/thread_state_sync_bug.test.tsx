@@ -149,6 +149,12 @@ describe('BUG REPRODUCTION: Thread State Synchronization', () => {
       store: useUnifiedChatStore.getState().threadLoading
     });
 
+    // DEBUG: Log both states to understand the issue
+    console.log('Hook isLoading:', result.current.state.isLoading);
+    console.log('Store threadLoading:', useUnifiedChatStore.getState().threadLoading);
+    console.log('Hook loadingThreadId:', result.current.state.loadingThreadId);
+    console.log('Store activeThreadId:', useUnifiedChatStore.getState().activeThreadId);
+
     // BUG REPRODUCTION: States might not be in sync
     expect(result.current.state.isLoading).toBe(useUnifiedChatStore.getState().threadLoading);
     

@@ -103,13 +103,15 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             # Close WebSocket connections
             if self.websocket_connection:
                 await WebSocketTestHelpers.close_test_connection(self.websocket_connection)
+        except Exception as e:
+            self.logger.warning(f"WebSocket cleanup error: {e}")
             
+        try:
             # Shutdown execution engine
             if self.execution_engine and hasattr(self.execution_engine, 'shutdown'):
                 await self.execution_engine.shutdown()
-                
         except Exception as e:
-            self.logger.warning(f"Cleanup error: {e}")
+            self.logger.warning(f"Engine shutdown error: {e}")
     
     async def create_test_execution_context(self, 
                                           user_id: str = None,
@@ -149,12 +151,15 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             self.websocket_connection = connection
             self.logger.info(f"WebSocket event tracking initialized for user: {user_id}")
             return connection
-        except Exception as e:
-            self.logger.error(f"Failed to setup WebSocket event tracking for user {user_id}: {e}")
+        except (ConnectionError, asyncio.TimeoutError) as e:
+            self.logger.warning(f"WebSocket connection error for user {user_id}: {e}")
             # Return a basic connection that won't break the test
             connection = MockWebSocketConnection(user_id=user_id)
             self.websocket_connection = connection
             return connection
+        except Exception as e:
+            self.logger.error(f"Unexpected error setting up WebSocket tracking for user {user_id}: {e}")
+            pytest.fail(f"Failed to setup WebSocket tracking: {e}")
     
     async def collect_websocket_events(self, 
                                      timeout: float = 30.0) -> List[Dict[str, Any]]:
@@ -181,8 +186,11 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             except asyncio.TimeoutError:
                 # Continue collecting - this is normal for event gaps
                 continue
+            except (json.JSONDecodeError, AttributeError) as e:
+                self.logger.debug(f"Event parsing error: {e}")
+                continue  # Skip malformed events
             except Exception as e:
-                self.logger.debug(f"Event collection error: {e}")
+                self.logger.error(f"Unexpected event collection error: {e}")
                 break
         
         return events
@@ -499,6 +507,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                     await engine.cleanup() if hasattr(engine, 'cleanup') else None
                 except Exception as e:
                     self.logger.warning(f"Engine cleanup error: {e}")
+                    # Log but continue cleanup of other engines
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -919,8 +928,11 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                         
                 except asyncio.TimeoutError:
                     continue
+                except (json.JSONDecodeError, AttributeError) as e:
+                    self.logger.debug(f"Event parsing error: {e}")
+                    continue  # Skip malformed events
                 except Exception as e:
-                    self.logger.debug(f"Event collection error: {e}")
+                    self.logger.error(f"Unexpected event collection error: {e}")
                     break
             
             return events
@@ -1067,10 +1079,14 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                         event_task.cancel()
                     await engine.cleanup() if hasattr(engine, 'cleanup') else None
                     
+            except (ValueError, TypeError, KeyError) as e:
+                # Expected errors for malformed input scenarios
+                self.logger.info(f"Scenario '{scenario['name']}' raised expected error: {e}")
+                # This is acceptable for error testing scenarios
             except Exception as e:
-                # Log but don't fail - some scenarios may raise exceptions
-                self.logger.error(f"Scenario '{scenario['name']}' raised exception: {e}")
-                # This is acceptable for some error scenarios
+                # Unexpected errors should be investigated
+                self.logger.error(f"Scenario '{scenario['name']}' raised unexpected exception: {e}")
+                pytest.fail(f"Unexpected error in scenario '{scenario['name']}': {e}")
         
         self.logger.info("✅ Comprehensive error recovery scenarios completed")
 

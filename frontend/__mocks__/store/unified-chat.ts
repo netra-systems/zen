@@ -39,6 +39,7 @@ const initializeMockFunctions = (state: any) => {
   state.setThreadLoading = jest.fn((isLoading) => {
     state.isThreadLoading = isLoading;
     state.threadLoading = isLoading;
+    console.log(`Mock store: setThreadLoading(${isLoading}) - threadLoading: ${state.threadLoading}`);
     return state;
   });
   
@@ -48,7 +49,7 @@ const initializeMockFunctions = (state: any) => {
     state.isThreadLoading = true;
     state.threadLoading = true;
     state.messages = [];
-    console.log(`Mock store: startThreadLoading(${threadId}) - activeThreadId now: ${state.activeThreadId}`);
+    console.log(`Mock store: startThreadLoading(${threadId}) - activeThreadId now: ${state.activeThreadId}, threadLoading: ${state.threadLoading}`);
     return state;
   });
   
@@ -105,66 +106,69 @@ const initializeMockFunctions = (state: any) => {
 // Initialize the functions for the initial mockState
 initializeMockFunctions(mockState);
 
-export const useUnifiedChatStore = Object.assign(
-  (selector?: (state: any) => any) => {
-    if (selector) {
-      try {
-        const result = selector(mockState);
-        // Ensure we never return undefined - provide sensible defaults
-        return result !== undefined ? result : null;
-      } catch (error) {
-        console.warn('Selector failed, returning null:', error);
-        return null;
-      }
+// Store function that mimics zustand's behavior exactly
+const mockStoreFunction = (selector?: (state: any) => any) => {
+  if (selector) {
+    try {
+      const result = selector(mockState);
+      // Ensure we never return undefined - provide sensible defaults
+      return result !== undefined ? result : null;
+    } catch (error) {
+      console.warn('Selector failed, returning null:', error);
+      return null;
     }
-    return mockState;
-  },
-  {
-    setState: (newState: any) => {
-      if (typeof newState === 'function') {
-        try {
-          const updates = newState(mockState);
-          if (updates && typeof updates === 'object') {
-            // Deep merge to preserve nested objects and arrays
-            Object.keys(updates).forEach(key => {
-              if (updates[key] !== undefined) {
-                mockState[key] = updates[key];
-              }
-            });
-          }
-        } catch (error) {
-          console.error('setState function failed:', error);
-        }
-      } else if (newState && typeof newState === 'object') {
-        // Direct object merge
-        Object.keys(newState).forEach(key => {
-          if (newState[key] !== undefined) {
-            mockState[key] = newState[key];
+  }
+  return mockState;
+};
+
+// Add store methods as properties of the function
+mockStoreFunction.setState = (newState: any) => {
+  if (typeof newState === 'function') {
+    try {
+      const updates = newState(mockState);
+      if (updates && typeof updates === 'object') {
+        // Deep merge to preserve nested objects and arrays
+        Object.keys(updates).forEach(key => {
+          if (updates[key] !== undefined) {
+            mockState[key] = updates[key];
           }
         });
       }
-    },
-    getState: () => mockState,
-    subscribe: jest.fn((selector: any, listener: any) => {
-      // Track the initial value
-      let lastValue = selector ? selector(mockState) : mockState;
-      
-      // Create an interval to check for changes
-      const interval = setInterval(() => {
-        const currentValue = selector ? selector(mockState) : mockState;
-        if (currentValue !== lastValue) {
-          lastValue = currentValue;
-          if (listener) {
-            listener(currentValue);
-          }
-        }
-      }, 10); // Check every 10ms
-      
-      // Return unsubscribe function that clears the interval
-      return () => clearInterval(interval);
-    })
+    } catch (error) {
+      console.error('setState function failed:', error);
+    }
+  } else if (newState && typeof newState === 'object') {
+    // Direct object merge
+    Object.keys(newState).forEach(key => {
+      if (newState[key] !== undefined) {
+        mockState[key] = newState[key];
+      }
+    });
   }
-);
+};
+
+mockStoreFunction.getState = () => mockState;
+
+mockStoreFunction.subscribe = jest.fn((selector: any, listener: any) => {
+  // Track the initial value
+  let lastValue = selector ? selector(mockState) : mockState;
+  
+  // Create an interval to check for changes
+  const interval = setInterval(() => {
+    const currentValue = selector ? selector(mockState) : mockState;
+    if (currentValue !== lastValue) {
+      lastValue = currentValue;
+      if (listener) {
+        listener(currentValue);
+      }
+    }
+  }, 10); // Check every 10ms
+  
+  // Return unsubscribe function that clears the interval
+  return () => clearInterval(interval);
+});
+
+export const useUnifiedChatStore = mockStoreFunction;
 
 export const resetMockState = () => {
   mockState = {

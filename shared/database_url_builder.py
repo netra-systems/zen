@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 import logging
 import re
 import os
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 

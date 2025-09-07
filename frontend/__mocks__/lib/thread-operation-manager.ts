@@ -45,6 +45,10 @@ class MockThreadOperationManagerImpl {
     options: ThreadOperationOptions;
     result: ThreadOperationResult;
   }> = [];
+  
+  // Track the most recent successful operation to prevent out-of-order completions
+  private lastCompletedOperationTime: number = 0;
+  private lastCompletedThreadId: string | null = null;
 
   /**
    * Mock implementation that actually executes the provided executor function
@@ -60,6 +64,17 @@ class MockThreadOperationManagerImpl {
     // Cancel any existing operation if not the same thread or if force is enabled
     if (this.currentOperation && (this.currentOperation.threadId !== threadId || options.force)) {
       await this.cancelCurrentOperation();
+    }
+    
+    // CRITICAL: Also abort any operations for different threads that might still be running
+    // This handles the race condition where multiple operations start simultaneously
+    if (threadId !== this.currentOperation?.threadId) {
+      // Mark any previous operations for this thread as superseded
+      this.operationHistory.forEach(op => {
+        if (op.threadId !== threadId && op.status === 'running' && op.abortController) {
+          op.abortController.abort();
+        }
+      });
     }
     
     // Create operation
@@ -90,11 +105,28 @@ class MockThreadOperationManagerImpl {
         return { success: false, error: new Error('Operation aborted during execution') };
       }
       
+      // CRITICAL: Check if this operation is outdated (a newer one already completed)
+      if (result.success && operation.startTime < this.lastCompletedOperationTime) {
+        console.log(`Operation for ${threadId} completed but is outdated (started ${operation.startTime} < last completed ${this.lastCompletedOperationTime}), not updating state`);
+        this.updateOperation(operationId, { 
+          status: 'cancelled',
+          error: new Error('Operation superseded by newer operation')
+        });
+        this.addToHistory(operation);
+        return { success: false, threadId, error: new Error('Operation superseded') };
+      }
+      
       // Update operation status based on result
       this.updateOperation(operationId, { 
         status: result.success ? 'completed' : 'failed',
         error: result.error
       });
+      
+      // If successful, update the completion tracking
+      if (result.success) {
+        this.lastCompletedOperationTime = Date.now();
+        this.lastCompletedThreadId = threadId;
+      }
 
       // Add to history
       this.addToHistory(operation);
@@ -200,6 +232,8 @@ class MockThreadOperationManagerImpl {
     this.operationHistory = [];
     this.listeners.clear();
     this.operationExecutionHistory = [];
+    this.lastCompletedOperationTime = 0;
+    this.lastCompletedThreadId = null;
   }
 
   private generateOperationId(type: ThreadOperationType, threadId: string | null): string {
