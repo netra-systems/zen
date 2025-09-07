@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Foundation for enterprise-grade security
 """
 
-import jwt
+# JWT import removed - SSOT compliance: all JWT operations delegated to auth service
 import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
@@ -105,7 +105,7 @@ class AuthMiddleware:
         
         return token
     
-    def _validate_token(self, token: str) -> Dict[str, Any]:
+    async def _validate_token(self, token: str) -> Dict[str, Any]:
         """Validate JWT token and extract payload.
         
         Args:
@@ -119,15 +119,30 @@ class AuthMiddleware:
             TokenExpiredError: If token is expired
         """
         try:
-            # Decode and validate token
-            # Skip audience verification for test environments
-            verify_options = {"verify_exp": True, "verify_aud": False}
-            payload = jwt.decode(
-                token,
-                self.jwt_secret,
-                algorithms=[self.jwt_algorithm],
-                options=verify_options
-            )
+            # SSOT COMPLIANCE: Use auth service for token validation
+            from netra_backend.app.clients.auth_client_core import AuthClientCore
+            auth_client = AuthClientCore()
+            
+            validation_result = await auth_client.validate_token(token)
+            if not validation_result or not validation_result.get('valid'):
+                error = validation_result.get('error', 'Token validation failed') if validation_result else 'Auth service unavailable'
+                if 'expired' in error.lower():
+                    raise TokenExpiredError(error)
+                else:
+                    raise TokenInvalidError(error)
+            
+            # Return payload in expected format
+            payload = validation_result.get('payload', {})
+            if not payload:
+                # Build payload from validation result for backward compatibility
+                payload = {
+                    'user_id': validation_result.get('user_id'),
+                    'sub': validation_result.get('user_id'),
+                    'email': validation_result.get('email'),
+                    'permissions': validation_result.get('permissions', []),
+                    'exp': validation_result.get('exp'),
+                    'iat': validation_result.get('iat')
+                }
             
             # Additional expiration check
             exp = payload.get("exp")
@@ -136,10 +151,11 @@ class AuthMiddleware:
             
             return payload
             
-        except jwt.ExpiredSignatureError:
-            raise TokenExpiredError("Token expired")
-        except jwt.InvalidTokenError as e:
-            raise TokenInvalidError(f"Invalid token: {str(e)}")
+        except (TokenExpiredError, TokenInvalidError):
+            raise
+        except Exception as e:
+            logger.error(f"Auth middleware token validation error: {str(e)}")
+            raise TokenInvalidError("Token validation failed")
         except Exception as e:
             logger.error(f"Token validation error: {str(e)}")
             raise TokenInvalidError("Token validation failed")

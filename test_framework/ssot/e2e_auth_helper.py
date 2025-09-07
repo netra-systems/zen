@@ -306,6 +306,58 @@ class E2EAuthHelper:
         token = self.create_test_jwt_token()
         headers = self.get_auth_headers(token)
         return httpx.Client(headers=headers, base_url=self.config.backend_url)
+    
+    async def get_staging_token_async(
+        self,
+        email: Optional[str] = None,
+        bypass_key: Optional[str] = None
+    ) -> str:
+        """
+        Get a valid staging token using E2E auth bypass (async-safe).
+        This is the SSOT method for staging authentication in async contexts.
+        
+        Args:
+            email: Test user email
+            bypass_key: E2E bypass key (uses env if not provided)
+            
+        Returns:
+            Valid JWT token for staging
+        """
+        email = email or self.config.test_user_email
+        bypass_key = bypass_key or self.env.get("E2E_OAUTH_SIMULATION_KEY")
+        
+        if not bypass_key:
+            # For staging tests, use a well-known test key
+            bypass_key = "staging-e2e-test-bypass-key-2025"
+            
+        async with aiohttp.ClientSession() as session:
+            # Try staging auth bypass endpoint
+            bypass_url = f"{self.config.auth_service_url}/auth/e2e/test-auth"
+            headers = {
+                "X-E2E-Bypass-Key": bypass_key,
+                "Content-Type": "application/json"
+            }
+            data = {
+                "email": email,
+                "name": f"E2E Test User {int(time.time())}",
+                "permissions": ["read", "write"]
+            }
+            
+            try:
+                async with session.post(bypass_url, headers=headers, json=data, timeout=10) as resp:
+                    if resp.status == 200:
+                        result = await resp.json()
+                        token = result.get("access_token")
+                        if token:
+                            self._cached_token = token
+                            self._token_expiry = datetime.now(timezone.utc) + timedelta(minutes=14)
+                            return token
+            except Exception as e:
+                # Fall back to creating a test JWT if bypass fails
+                print(f"[INFO] Staging bypass failed ({e}), using test JWT")
+                
+        # Fallback to test JWT
+        return self.create_test_jwt_token(user_id=f"staging-user-{int(time.time())}")
 
 
 class E2EWebSocketAuthHelper(E2EAuthHelper):
@@ -316,6 +368,7 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
     def __init__(self, config: Optional[E2EAuthConfig] = None, environment: Optional[str] = None):
         """Initialize WebSocket auth helper with proper environment config."""
         super().__init__(config=config, environment=environment)
+        self.environment = environment or self.env.get("TEST_ENV", "test")
     
     async def get_authenticated_websocket_url(self, token: Optional[str] = None) -> str:
         """
@@ -330,26 +383,44 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
         token = token or self._get_valid_token()
         return f"{self.config.websocket_url}?token={token}"
     
-    async def connect_authenticated_websocket(self):
+    async def connect_authenticated_websocket(self, timeout: float = 10.0):
         """
         Connect to WebSocket with proper authentication.
+        SSOT method that handles staging environment properly.
         
+        Args:
+            timeout: Connection timeout in seconds
+            
         Returns:
             Authenticated WebSocket connection
         """
         import websockets
         
-        # Get or create token
-        token = self._get_valid_token()
+        # For staging, use async-safe token generation
+        if self.environment == "staging":
+            token = await self.get_staging_token_async()
+        else:
+            token = self._get_valid_token()
+            
         headers = self.get_websocket_headers(token)
         
-        # Connect with auth headers
-        websocket = await websockets.connect(
-            self.config.websocket_url,
-            extra_headers=headers
-        )
-        
-        return websocket
+        # Add explicit timeout for staging connections
+        try:
+            websocket = await asyncio.wait_for(
+                websockets.connect(
+                    self.config.websocket_url,
+                    additional_headers=headers,
+                    open_timeout=timeout
+                ),
+                timeout=timeout
+            )
+            return websocket
+        except asyncio.TimeoutError:
+            # Provide better error for debugging
+            raise TimeoutError(
+                f"WebSocket connection to {self.config.websocket_url} timed out after {timeout}s. "
+                f"This may indicate auth rejection or network issues. Token provided: {bool(token)}"
+            )
     
     async def test_websocket_auth_flow(self) -> bool:
         """

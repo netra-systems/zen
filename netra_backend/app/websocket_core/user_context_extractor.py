@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from typing import Dict, Optional, Any, Tuple
 from dataclasses import asdict
 
-import jwt
+# JWT import removed - SSOT compliance: all JWT operations delegated to auth service
 from fastapi import WebSocket, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 
@@ -157,7 +157,7 @@ class UserContextExtractor:
             Decoded JWT payload if valid, None otherwise
         """
         import hashlib
-        import jwt
+        # JWT import removed - SSOT compliance: all JWT operations delegated to auth service
         from shared.isolated_environment import get_env
         from shared.jwt_secret_manager import get_unified_jwt_secret, get_unified_jwt_algorithm
         
@@ -181,12 +181,26 @@ class UserContextExtractor:
             logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Using algorithm: {jwt_algorithm}")
             logger.info("🔍 WEBSOCKET JWT VALIDATION - Same secret resolution as REST middleware!")
             
-            # Decode and validate JWT using unified secret
-            payload = jwt.decode(
-                token,
-                jwt_secret,
-                algorithms=[jwt_algorithm]
-            )
+            # SSOT COMPLIANCE: Use auth service for JWT validation
+            from netra_backend.app.clients.auth_client_core import AuthClientCore
+            auth_client = AuthClientCore()
+            
+            validation_result = await auth_client.validate_token(token)
+            if not validation_result or not validation_result.get('valid'):
+                logger.error(f"❌ WEBSOCKET JWT FAILED - Auth service validation failed")
+                return None
+            
+            payload = validation_result.get('payload', {})
+            if not payload:
+                # Build payload from validation result for backward compatibility
+                payload = {
+                    'sub': validation_result.get('user_id'),
+                    'user_id': validation_result.get('user_id'),
+                    'email': validation_result.get('email'),
+                    'permissions': validation_result.get('permissions', []),
+                    'exp': validation_result.get('exp'),
+                    'iat': validation_result.get('iat')
+                }
             
             # Basic validation
             user_id = payload.get("sub")
@@ -206,16 +220,8 @@ class UserContextExtractor:
             
             return payload
             
-        except jwt.ExpiredSignatureError as e:
-            logger.error(f"❌ WEBSOCKET JWT FAILED - Token expired: {e}")
-            return None
-        except jwt.InvalidSignatureError as e:
-            logger.error(f"❌ WEBSOCKET JWT FAILED - Signature verification failed: {e}")
-            logger.error("❌ This indicates JWT secret mismatch between WebSocket and REST")
-            logger.error(f"❌ Environment: {environment}, Secret hash: {hashlib.md5(jwt_secret.encode()).hexdigest()[:16] if 'jwt_secret' in locals() else 'NOT_LOADED'}")
-            return None
-        except jwt.InvalidTokenError as e:
-            logger.error(f"❌ WEBSOCKET JWT FAILED - Invalid token format: {e}")
+        except Exception as e:
+            logger.error(f"❌ WEBSOCKET JWT FAILED - Auth service validation error: {e}")
             return None
         except Exception as e:
             logger.error(f"❌ WEBSOCKET JWT FAILED - Unexpected error: {e}")
@@ -296,12 +302,26 @@ class UserContextExtractor:
         logger.info(f"🔍 LEGACY JWT VALIDATION - Algorithm: {self.jwt_algorithm}")
         
         try:
-            # Decode and validate JWT using local secret
-            payload = jwt.decode(
-                token,
-                self.jwt_secret_key,
-                algorithms=[self.jwt_algorithm]
-            )
+            # SSOT COMPLIANCE: Use auth service for JWT validation - no local decode
+            from netra_backend.app.clients.auth_client_core import AuthClientCore
+            auth_client = AuthClientCore()
+            
+            validation_result = await auth_client.validate_token(token)
+            if not validation_result or not validation_result.get('valid'):
+                logger.error(f"❌ LEGACY JWT FAILED - Auth service validation failed")
+                return None
+            
+            payload = validation_result.get('payload', {})
+            if not payload:
+                # Build payload from validation result for backward compatibility
+                payload = {
+                    'sub': validation_result.get('user_id'),
+                    'user_id': validation_result.get('user_id'),
+                    'email': validation_result.get('email'),
+                    'permissions': validation_result.get('permissions', []),
+                    'exp': validation_result.get('exp'),
+                    'iat': validation_result.get('iat')
+                }
             
             # Basic validation
             if not payload.get("sub"):  # Subject (user ID)
@@ -315,15 +335,8 @@ class UserContextExtractor:
             
             return payload
             
-        except jwt.ExpiredSignatureError as e:
-            logger.error(f"❌ LEGACY JWT FAILED - Token expired: {e}")
-            return None
-        except jwt.InvalidSignatureError as e:
-            logger.error(f"❌ LEGACY JWT FAILED - Signature verification failed: {e}")
-            logger.error("❌ This indicates JWT secret mismatch in legacy validation")
-            return None
-        except jwt.InvalidTokenError as e:
-            logger.error(f"❌ LEGACY JWT FAILED - Invalid token format: {e}")
+        except Exception as e:
+            logger.error(f"❌ LEGACY JWT FAILED - Auth service validation error: {e}")
             return None
         except Exception as e:
             logger.error(f"❌ LEGACY JWT FAILED - Unexpected error: {e}")

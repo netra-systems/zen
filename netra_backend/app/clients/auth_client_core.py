@@ -252,7 +252,7 @@ class AuthOperationType(Enum):
 class AuthResilienceMode(Enum):
     """Authentication resilience operating modes - simplified for SSOT."""
     NORMAL = "normal"
-    CACHED_FALLBACK = "cached_fallback"
+    # CACHED_FALLBACK removed - violates SSOT architecture
     DEGRADED = "degraded"
     EMERGENCY = "emergency"
     RECOVERY = "recovery"
@@ -469,27 +469,9 @@ class AuthServiceClient:
             logger.critical(f"Auth service enabled: {self.settings.enabled}")
             logger.critical("BUSINESS IMPACT: Users may be unable to authenticate or access protected resources")
         
-        # Always try local fallback when validation fails
-        fallback_result = await self._local_validate(token)
-        
-        # If fallback worked, return it with error context and user notification
-        if fallback_result and fallback_result.get("valid", False):
-            fallback_result["error_context"] = f"Primary validation failed: {error_msg}"
-            fallback_result["error_type"] = error_type
-            fallback_result["user_notification"] = {
-                "message": "Authentication system temporarily using backup validation",
-                "severity": "warning",
-                "user_friendly_message": (
-                    "You're successfully authenticated using our backup system. "
-                    "All features are available normally."
-                ),
-                "action_required": None
-            }
-            if is_service_auth_issue:
-                fallback_result["warning"] = "Using fallback due to inter-service auth failure"
-                fallback_result["user_notification"]["message"] = "Service authentication using backup method"
-            logger.info(f"Using fallback validation: {fallback_result.get('source', 'unknown')}")
-            return fallback_result
+        # SSOT COMPLIANCE: NO fallback validation - auth service is SSOT
+        # Fallback mechanisms violate SSOT architecture and cause JWT secret mismatches
+        logger.warning("SSOT COMPLIANCE: Rejecting fallback validation - auth service is single source of truth")
         
         # If fallback also failed or returned invalid token
         # Check if this is a connection/service error
@@ -532,8 +514,8 @@ class AuthServiceClient:
                 }
             }
         
-        # For other errors, return the fallback result with enhanced error details
-        enhanced_result = fallback_result or {"valid": False}
+        # For other errors, return validation failure - no fallback allowed per SSOT
+        enhanced_result = {"valid": False}
         enhanced_result.update({
             "error": f"validation_failed_{error_type.lower()}",
             "details": error_msg,
@@ -562,17 +544,8 @@ class AuthServiceClient:
     
     async def _execute_token_validation(self, token: str) -> Optional[Dict]:
         """Execute token validation with error handling and circuit breaker."""
-        # PERFORMANCE FIX: Try local JWT validation first for efficiency and reliability
-        # This reduces latency and eliminates dependency on auth service HTTP calls
-        try:
-            local_result = await self._local_validate(token)
-            if local_result and local_result.get("valid", False):
-                logger.debug("Using local JWT validation (primary)")
-                return local_result
-        except Exception as e:
-            logger.debug(f"Local validation failed, falling back to remote: {e}")
-        
-        # Fallback to remote validation if local validation fails
+        # SSOT COMPLIANCE: Only use auth service for validation - no local fallback
+        # Local validation violates SSOT and causes JWT secret mismatches
         # Use circuit breaker to protect against auth service failures
         try:
             # Define the validation function for circuit breaker
@@ -593,9 +566,9 @@ class AuthServiceClient:
                 # Circuit is open, use fallback validation
                 return await self._handle_validation_error(token, Exception("Auth service unavailable (circuit open)"))
             except ValueError as e:
-                # Token was rejected (not a service failure)
-                logger.debug(f"Token rejected: {e}")
-                return await self._local_validate(token)
+                # Token was rejected (not a service failure) - no fallback allowed
+                logger.debug(f"Token rejected by auth service: {e}")
+                return {"valid": False, "error": "token_rejected", "details": str(e)}
                 
         except Exception as e:
             return await self._handle_validation_error(token, e)
@@ -1031,66 +1004,9 @@ class AuthServiceClient:
             logger.error(f"Token creation failed: {e}")
             return None
     
-    async def _local_validate(self, token: str) -> Optional[Dict]:
-        """Local token validation with cached fallback for resilience."""
-        # PRODUCTION SECURITY: Never allow mock authentication in production
-        if self._is_production_environment():
-            logger.error("PRODUCTION SECURITY: Mock authentication is forbidden in production")
-            logger.error("Auth service is required for all token validation in production")
-            return {
-                "valid": False, 
-                "error": "auth_service_required_production",
-                "details": "Production environment requires auth service - no fallbacks allowed"
-            }
-        
-        # First, try cached token as fallback
-        cached_result = await self.token_cache.get_cached_token(token)
-        if cached_result:
-            logger.warning("Using cached token validation due to auth service unavailability")
-            cached_result["fallback_used"] = True
-            cached_result["source"] = "cache"
-            return cached_result
-        
-        # In test/development environment, provide development user fallback
-        if self._is_test_environment():
-            # For JWT-like tokens, use emergency test token fallback
-            if token.startswith("Bearer eyJ") or token.startswith("eyJ"):
-                # Extract token from Bearer prefix if present
-                jwt_token = token.replace("Bearer ", "") if token.startswith("Bearer ") else token
-                
-                if self._is_valid_test_token(jwt_token):
-                    logger.warning("Using emergency test token fallback due to auth service unavailability")
-                    
-                    # SSOT COMPLIANCE: No local JWT decoding - use default test values
-                    # The auth service is the ONLY entity that should decode JWT tokens
-                    return {
-                        "valid": True,
-                        "user_id": "test_user",
-                        "email": "test@example.com", 
-                        "permissions": ["user"],
-                        "fallback_used": True,
-                        "source": "emergency_test_fallback",
-                        "warning": "Emergency fallback validation - limited functionality"
-                    }
-            
-            # For any token in development environment, provide development user fallback
-            logger.warning("Using development user fallback due to auth service unavailability")
-            return {
-                "valid": True,
-                "user_id": "dev-user-1",
-                "email": "dev@example.com", 
-                "permissions": ["user"],
-                "fallback_used": True,
-                "source": "development_fallback",
-                "warning": "Development environment fallback - for testing only"
-            }
-        
-        logger.error("Auth service is required for token validation - no fallback available")
-        return {
-            "valid": False, 
-            "error": "auth_service_required",
-            "details": "Auth service unavailable and no cached validation available"
-        }
+    # SSOT COMPLIANCE: _local_validate method REMOVED
+    # All validation must go through auth service to maintain SSOT architecture
+    # Fallback validation causes JWT secret mismatches and violates SSOT principles
     
     def _is_test_environment(self) -> bool:
         """Check if we're in a test environment.
@@ -1594,7 +1510,7 @@ class AuthServiceClient:
                     "permissions": result.get("permissions", []),
                     "resilience_mode": "normal",
                     "source": "auth_service",
-                    "fallback_used": False,
+                    # fallback_used removed - SSOT compliance
                     "response_time": time.time() - start_time
                 }
             else:
@@ -1604,7 +1520,7 @@ class AuthServiceClient:
                     "error": "Token validation failed",
                     "resilience_mode": "normal",
                     "source": "auth_service",
-                    "fallback_used": False,
+                    # fallback_used removed - SSOT compliance
                     "response_time": time.time() - start_time
                 }
                 
@@ -1621,9 +1537,9 @@ class AuthServiceClient:
                     "user_id": cached_result.get("user_id"),
                     "email": cached_result.get("email"),
                     "permissions": cached_result.get("permissions", []),
-                    "resilience_mode": "cached_fallback",
-                    "source": "cache",
-                    "fallback_used": True,
+                    "resilience_mode": "direct_auth_service",
+                    "source": "auth_service",
+                    # fallback_used removed - SSOT compliance
                     "response_time": time.time() - start_time,
                     "warning": "Using cached validation due to auth service error"
                 }
@@ -1634,7 +1550,7 @@ class AuthServiceClient:
                 "error": f"Auth service unavailable: {str(e)}",
                 "resilience_mode": "failed",
                 "source": "error",
-                "fallback_used": True,
+                # fallback_used removed - SSOT compliance
                 "response_time": time.time() - start_time
             }
 

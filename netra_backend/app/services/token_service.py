@@ -365,15 +365,16 @@ class TokenService:
             logger.warning(f"Failed to store refresh token: {e}")
     
     async def _validate_refresh_token(self, refresh_token: str) -> Optional[Dict[str, Any]]:
-        """Validate refresh token and return payload."""
+        """Validate refresh token and return payload - SSOT compliant."""
         try:
-            secret = self._get_jwt_secret()
-            payload = jwt.decode(
-                refresh_token,
-                secret,
-                algorithms=['HS256'],
-                leeway=timedelta(seconds=self._clock_skew_tolerance)
-            )
+            # Delegate refresh token validation to auth service - SSOT compliant
+            from netra_backend.app.clients.auth_client_core import auth_client
+            validation_result = await auth_client.validate_token_jwt(refresh_token)
+            
+            if not validation_result or not validation_result.get('valid'):
+                return None
+            
+            payload = validation_result.get('payload', {})
             
             # Check token type
             if payload.get('type') != 'refresh':
@@ -381,7 +382,7 @@ class TokenService:
             
             return payload
             
-        except jwt.InvalidTokenError:
+        except Exception:
             return None
     
     async def _is_refresh_token_used(self, refresh_token: str) -> bool:
