@@ -22,7 +22,7 @@ async def validate_test_structure():
     
     # Check 1: Real assertions present
     test_file_path = project_root / "tests" / "e2e" / "test_critical_websocket_agent_events.py"
-    content = test_file_path.read_text()
+    content = test_file_path.read_text(encoding='utf-8')
     
     fake_patterns = [
         "assert True",
@@ -61,18 +61,18 @@ async def validate_test_structure():
     test_instance = TestCriticalWebSocketAgentEvents()
     validator = CriticalEventValidator()
     
-    print("\n🏗️ Test Class Structure:")
-    print(f"  ✅ TestCriticalWebSocketAgentEvents class exists")
-    print(f"  ✅ CriticalEventValidator class exists")
+    print("\n[STRUCT] Test Class Structure:")
+    print(f"  [PASS] TestCriticalWebSocketAgentEvents class exists")
+    print(f"  [PASS] CriticalEventValidator class exists")
     
     # Check 3: Required events defined
     from tests.e2e.test_critical_websocket_agent_events import CRITICAL_EVENTS
-    print(f"\n📡 Critical Events Defined: {len(CRITICAL_EVENTS)}")
+    print(f"\n[EVENTS] Critical Events Defined: {len(CRITICAL_EVENTS)}")
     for event in CRITICAL_EVENTS:
         print(f"  - {event}")
     
     # Check 4: Validate event validator logic
-    print("\n🧪 Event Validator Logic Test:")
+    print("\n[TEST] Event Validator Logic Test:")
     validator.record_event({"type": "agent_started", "data": {}})
     validator.record_event({"type": "agent_thinking", "data": {"content": "test"}})
     validator.record_event({"type": "tool_executing", "data": {}})
@@ -81,56 +81,56 @@ async def validate_test_structure():
     
     is_valid, errors = validator.validate_critical_events()
     if is_valid:
-        print("  ✅ Event validation logic works correctly")
+        print("  [PASS] Event validation logic works correctly")
     else:
-        print(f"  ❌ Event validation has issues: {errors}")
+        print(f"  [FAIL] Event validation has issues: {errors}")
     
     # Check 5: Performance metrics
     metrics = validator.get_performance_metrics()
-    print(f"\n📈 Performance Metrics Test:")
+    print(f"\n[METRICS] Performance Metrics Test:")
     print(f"  Total events recorded: {metrics['total_events']}")
     print(f"  Unique event types: {metrics['unique_event_types']}")
     
     # Check 6: Report generation
     report = validator.generate_report()
-    print(f"\n📋 Report Generation:")
+    print(f"\n[REPORT] Report Generation:")
     print(f"  Report length: {len(report)} characters")
-    print(f"  Contains validation result: {'✅ PASSED' in report or '❌ FAILED' in report}")
+    print(f"  Contains validation result: {'PASSED' in report or 'FAILED' in report}")
     
     return True
 
 async def test_auth_helper_structure():
     """Test that auth helper is properly structured."""
-    print("\n🔐 Validating Auth Helper Structure...")
+    print("\n[AUTH] Validating Auth Helper Structure...")
     
     try:
         from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
         
         # Test config creation
         config = E2EAuthConfig.for_environment("test")
-        print(f"  ✅ Test config created: {config.auth_service_url}")
+        print(f"  [PASS] Test config created: {config.auth_service_url}")
         
         # Test helper creation
         helper = E2EWebSocketAuthHelper(environment="test")
-        print(f"  ✅ WebSocket auth helper created")
+        print(f"  [PASS] WebSocket auth helper created")
         
         # Test token creation
         token = helper.create_test_jwt_token()
-        print(f"  ✅ JWT token created (length: {len(token)})")
+        print(f"  [PASS] JWT token created (length: {len(token)})")
         
         # Test headers creation
         headers = helper.get_websocket_headers(token)
-        print(f"  ✅ WebSocket headers created: {list(headers.keys())}")
+        print(f"  [PASS] WebSocket headers created: {list(headers.keys())}")
         
         return True
         
     except Exception as e:
-        print(f"  ❌ Auth helper validation failed: {e}")
+        print(f"  [FAIL] Auth helper validation failed: {e}")
         return False
 
 async def main():
     """Main validation function."""
-    print("🚀 Starting E2E Test Fix Validation")
+    print("[START] Starting E2E Test Fix Validation")
     print("=" * 60)
     
     try:
@@ -141,25 +141,25 @@ async def main():
         auth_ok = await test_auth_helper_structure()
         
         print("\n" + "=" * 60)
-        print("📊 VALIDATION SUMMARY:")
+        print("[SUMMARY] VALIDATION SUMMARY:")
         
         if structure_ok and auth_ok:
-            print("✅ ALL VALIDATIONS PASSED")
-            print("🎯 The E2E test has been successfully fixed:")
+            print("[SUCCESS] ALL VALIDATIONS PASSED")
+            print("[RESULT] The E2E test has been successfully fixed:")
             print("   - No fake patterns detected")
             print("   - Real assertions present")
             print("   - Proper WebSocket connection logic")
             print("   - Authentication integration")
             print("   - Event validation framework")
             print("   - Performance monitoring")
-            print("\n💡 Next step: Run with real services when Docker is fixed")
+            print("\n[NEXT] Next step: Run with real services when Docker is fixed")
             return True
         else:
-            print("❌ SOME VALIDATIONS FAILED")
+            print("[ERROR] SOME VALIDATIONS FAILED")
             return False
             
     except Exception as e:
-        print(f"💥 Validation failed with error: {e}")
+        print(f"[CRASH] Validation failed with error: {e}")
         import traceback
         traceback.print_exc()
         return False
