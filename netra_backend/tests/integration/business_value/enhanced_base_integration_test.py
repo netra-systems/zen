@@ -865,6 +865,41 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
             })
             
         return base_outcomes
+    
+    async def _send_websocket_event(self, ws_context: Optional[Dict[str, Any]], 
+                                  event_type: WebSocketEventType, data: Dict[str, Any]) -> None:
+        """Send WebSocket event through mock client or add to context events list."""
+        if not ws_context:
+            # No WebSocket context provided, skip event generation
+            return
+            
+        try:
+            # Try to send through the mock WebSocket client first
+            client = ws_context.get("client")
+            if client and hasattr(client, 'send_message'):
+                message = await client.send_message(
+                    event_type=event_type,
+                    data=data,
+                    user_id=ws_context.get("user", {}).get("id")
+                )
+                logger.debug(f"WebSocket event sent via mock client: {event_type.value}")
+            
+            # Also add to events list for direct access in tests
+            event_dict = {
+                "type": event_type.value,
+                "data": data,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            events_list = ws_context.get("events", [])
+            events_list.append(event_dict)
+            
+            # Track in business metrics for reporting
+            self.business_metrics.add_websocket_event(event_type.value, data)
+            
+        except Exception as e:
+            logger.warning(f"Failed to send WebSocket event {event_type.value}: {e}")
+            # Don't raise - WebSocket events shouldn't break business logic execution
         
     # ========== Assertion Helpers for Business Value ==========
     
