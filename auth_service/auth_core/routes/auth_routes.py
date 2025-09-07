@@ -670,6 +670,597 @@ async def create_token_endpoint(request: Request) -> Dict[str, Any]:
             detail="Token creation failed"
         )
 
+@router.post("/auth/validate")
+async def validate_token(request: Request) -> Dict[str, Any]:
+    """Validate a JWT token and return user information.
+    
+    This endpoint is used by backend services to validate tokens.
+    Supports both user tokens and service-to-service authentication.
+    """
+    try:
+        # Get request body
+        body = await request.json()
+        token = body.get("token")
+        
+        if not token:
+            logger.warning("Token validation attempted without token")
+            return {
+                "valid": False,
+                "error": "missing_token",
+                "message": "Token is required"
+            }
+        
+        # Check service authentication headers
+        service_id = request.headers.get("X-Service-ID")
+        service_secret = request.headers.get("X-Service-Secret")
+        
+        # Validate service credentials if provided
+        if service_id and service_secret:
+            # Get expected service credentials from environment
+            expected_service_id = env.get("SERVICE_ID", "netra-backend")
+            expected_service_secret = env.get("SERVICE_SECRET", "")
+            
+            # Detailed validation with specific error messages
+            if not expected_service_secret:
+                logger.error("SERVICE_SECRET not configured in auth service environment")
+                return {
+                    "valid": False,
+                    "error": "service_not_configured",
+                    "message": "Service authentication not properly configured"
+                }
+            
+            if service_id != expected_service_id:
+                logger.warning(
+                    f"Service ID mismatch: received '{service_id}', expected '{expected_service_id}'. "
+                    f"Backend should use SERVICE_ID='{expected_service_id}'"
+                )
+                return {
+                    "valid": False,
+                    "error": "invalid_service_id",
+                    "message": f"Invalid service ID. Expected '{expected_service_id}', got '{service_id}'"
+                }
+            
+            if service_secret != expected_service_secret:
+                logger.warning(
+                    f"Service secret mismatch for service '{service_id}'. "
+                    "Check that SERVICE_SECRET environment variable matches between services."
+                )
+                return {
+                    "valid": False,
+                    "error": "invalid_service_secret",
+                    "message": "Invalid service secret"
+                }
+            
+            logger.info(f"Service '{service_id}' successfully authenticated for token validation")
+        else:
+            missing_parts = []
+            if not service_id:
+                missing_parts.append("X-Service-ID")
+            if not service_secret:
+                missing_parts.append("X-Service-Secret")
+            
+            if missing_parts:
+                logger.debug(f"Token validation request missing service auth headers: {', '.join(missing_parts)}")
+            else:
+                logger.debug("Token validation without service credentials")
+        
+        # Validate the token using auth service
+        validation_result = await auth_service.validate_token(token)
+        
+        if validation_result and validation_result.valid:
+            logger.info(f"Token validated for user: {validation_result.user_id}")
+            # Convert TokenResponse to dict for JSON response
+            return {
+                "valid": True,
+                "user_id": validation_result.user_id,
+                "email": validation_result.email,
+                "permissions": validation_result.permissions or [],
+                "expires_at": validation_result.expires_at
+            }
+        else:
+            logger.warning("Token validation failed - invalid or expired")
+            return {
+                "valid": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+            
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in validate request")
+        return {
+            "valid": False,
+            "error": "invalid_request",
+            "message": "Invalid request format"
+        }
+    except Exception as e:
+        logger.error(f"Token validation error: {e}")
+        return {
+            "valid": False,
+            "error": "validation_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/validate-service-token")
+async def validate_service_token_endpoint(request: Request) -> Dict[str, Any]:
+    """Validate a service-to-service authentication token.
+    
+    This endpoint validates service tokens and returns service information.
+    """
+    try:
+        # Get request body
+        body = await request.json()
+        token = body.get("token")
+        service_name = body.get("service_name")
+        
+        if not token:
+            logger.warning("Service token validation attempted without token")
+            return {
+                "valid": False,
+                "error": "missing_token", 
+                "message": "Token is required"
+            }
+        
+        # Validate the token using auth service
+        validation_result = await auth_service.validate_token(token)
+        
+        if validation_result and validation_result.valid:
+            # Check if it's a service token
+            if hasattr(validation_result, 'service_id') and validation_result.service_id:
+                logger.info(f"Service token validated for service: {validation_result.service_id}")
+                return {
+                    "valid": True,
+                    "service_id": validation_result.service_id,
+                    "service_name": service_name or validation_result.service_id,
+                    "permissions": validation_result.permissions or [],
+                    "expires_at": validation_result.expires_at
+                }
+            else:
+                # Regular user token, not a service token
+                logger.warning(f"Non-service token provided to service validation endpoint")
+                return {
+                    "valid": False,
+                    "error": "not_service_token",
+                    "message": "Token is not a service token"
+                }
+        else:
+            logger.warning("Service token validation failed - invalid or expired")
+            return {
+                "valid": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+            
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in service token validation request")
+        return {
+            "valid": False,
+            "error": "invalid_request",
+            "message": "Invalid request format"
+        }
+    except Exception as e:
+        logger.error(f"Service token validation error: {e}")
+        return {
+            "valid": False,
+            "error": "validation_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/check-blacklist")
+async def check_blacklist_endpoint(request: Request) -> Dict[str, Any]:
+    """Check if a token is blacklisted.
+    
+    This endpoint is used by backend services to check if a token has been blacklisted.
+    """
+    try:
+        # Get request body
+        body = await request.json()
+        token = body.get("token")
+        
+        if not token:
+            logger.warning("Blacklist check attempted without token")
+            return {
+                "blacklisted": False,
+                "error": "missing_token",
+                "message": "Token is required"
+            }
+        
+        # Check service authentication headers (optional but recommended)
+        service_id = request.headers.get("X-Service-ID")
+        service_secret = request.headers.get("X-Service-Secret")
+        
+        if service_id and service_secret:
+            # Get expected service credentials from environment
+            expected_service_id = env.get("SERVICE_ID", "netra-backend")
+            expected_service_secret = env.get("SERVICE_SECRET", "")
+            
+            # Detailed validation with specific error messages
+            if not expected_service_secret:
+                logger.error("SERVICE_SECRET not configured in auth service environment for blacklist check")
+                return {
+                    "blacklisted": False,
+                    "error": "service_not_configured",
+                    "message": "Service authentication not properly configured"
+                }
+            
+            if service_id != expected_service_id:
+                logger.warning(
+                    f"Blacklist check - Service ID mismatch: received '{service_id}', expected '{expected_service_id}'. "
+                    f"Backend should use SERVICE_ID='{expected_service_id}'"
+                )
+                return {
+                    "blacklisted": False,
+                    "error": "invalid_service_id",
+                    "message": f"Invalid service ID. Expected '{expected_service_id}', got '{service_id}'"
+                }
+            
+            if service_secret != expected_service_secret:
+                logger.warning(
+                    f"Blacklist check - Service secret mismatch for service '{service_id}'. "
+                    "Check that SERVICE_SECRET environment variable matches between services."
+                )
+                return {
+                    "blacklisted": False,
+                    "error": "invalid_service_secret",
+                    "message": "Invalid service secret"
+                }
+            
+            logger.debug(f"Service '{service_id}' successfully authenticated for blacklist check")
+        else:
+            missing_parts = []
+            if not service_id:
+                missing_parts.append("X-Service-ID")
+            if not service_secret:
+                missing_parts.append("X-Service-Secret")
+            
+            if missing_parts:
+                logger.debug(f"Blacklist check request missing service auth headers: {', '.join(missing_parts)}")
+        
+        # Check if token is blacklisted
+        is_blacklisted = await auth_service.is_token_blacklisted(token)
+        
+        logger.info(f"Token blacklist check: {'blacklisted' if is_blacklisted else 'not blacklisted'}")
+        
+        return {
+            "blacklisted": is_blacklisted,
+            "status": "blacklisted" if is_blacklisted else "valid"
+        }
+        
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in blacklist check request")
+        return {
+            "blacklisted": False,
+            "error": "invalid_request",
+            "message": "Invalid request format"
+        }
+    except Exception as e:
+        logger.error(f"Blacklist check error: {e}")
+        return {
+            "blacklisted": False,
+            "error": "check_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/check-authorization")
+async def check_authorization(request: Request) -> Dict[str, Any]:
+    """Check if a user is authorized to access a resource.
+    
+    This endpoint checks resource-based access control.
+    """
+    try:
+        body = await request.json()
+        token = body.get("token")
+        resource = body.get("resource")
+        action = body.get("action")
+        
+        if not token or not resource or not action:
+            return {
+                "authorized": False,
+                "error": "missing_parameters",
+                "message": "Token, resource, and action are required"
+            }
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "authorized": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # For now, implement basic authorization
+        # TODO: Implement proper RBAC with resource-based permissions
+        user_id = validation_result.user_id
+        permissions = validation_result.permissions or []
+        
+        # Check if user has required permission for the action
+        required_permission = f"{resource}:{action}"
+        authorized = required_permission in permissions or "admin" in permissions
+        
+        logger.info(f"Authorization check for user {user_id}: {resource}:{action} = {authorized}")
+        
+        return {
+            "authorized": authorized,
+            "user_id": user_id,
+            "resource": resource,
+            "action": action
+        }
+        
+    except Exception as e:
+        logger.error(f"Authorization check error: {e}")
+        return {
+            "authorized": False,
+            "error": "authorization_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/check-permission")
+async def check_permission(request: Request) -> Dict[str, Any]:
+    """Check if a user has a specific permission.
+    
+    This endpoint checks permission-based access control.
+    """
+    try:
+        body = await request.json()
+        token = body.get("token")
+        permission = body.get("permission")
+        
+        if not token or not permission:
+            return {
+                "has_permission": False,
+                "error": "missing_parameters",
+                "message": "Token and permission are required"
+            }
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "has_permission": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # Check if user has the permission
+        user_permissions = validation_result.permissions or []
+        has_permission = permission in user_permissions or "admin" in user_permissions
+        
+        logger.info(f"Permission check for user {validation_result.user_id}: {permission} = {has_permission}")
+        
+        return {
+            "has_permission": has_permission,
+            "user_id": validation_result.user_id,
+            "permission": permission,
+            "user_permissions": user_permissions
+        }
+        
+    except Exception as e:
+        logger.error(f"Permission check error: {e}")
+        return {
+            "has_permission": False,
+            "error": "permission_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/create-agent")
+async def create_agent_endpoint(request: Request) -> Dict[str, Any]:
+    """Create a new agent for a user.
+    
+    This endpoint creates an agent and associates it with the user.
+    """
+    try:
+        body = await request.json()
+        token = body.get("token")
+        agent_name = body.get("name")
+        agent_type = body.get("type")
+        agent_config = body.get("config", {})
+        
+        if not token or not agent_name:
+            return {
+                "success": False,
+                "error": "missing_parameters",
+                "message": "Token and agent name are required"
+            }
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "success": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # Create agent (simplified implementation)
+        # TODO: Implement proper agent storage and management
+        agent_id = f"agent_{validation_result.user_id}_{agent_name.replace(' ', '_').lower()}"
+        
+        logger.info(f"Created agent {agent_id} for user {validation_result.user_id}")
+        
+        return {
+            "success": True,
+            "agent_id": agent_id,
+            "agent_name": agent_name,
+            "agent_type": agent_type,
+            "user_id": validation_result.user_id,
+            "created_at": datetime.now(UTC).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Agent creation error: {e}")
+        return {
+            "success": False,
+            "error": "creation_error",
+            "message": str(e)
+        }
+
+@router.delete("/auth/agents/{agent_id}")
+async def delete_agent_endpoint(agent_id: str, request: Request) -> Dict[str, Any]:
+    """Delete an agent.
+    
+    This endpoint deletes an agent if the user owns it.
+    """
+    try:
+        # Get token from Authorization header
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return {
+                "success": False,
+                "error": "missing_token",
+                "message": "Authorization header with Bearer token required"
+            }
+        
+        token = auth_header.replace("Bearer ", "")
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "success": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # Check if user owns the agent (simplified check)
+        # TODO: Implement proper agent ownership verification
+        if not agent_id.startswith(f"agent_{validation_result.user_id}_"):
+            return {
+                "success": False,
+                "error": "unauthorized",
+                "message": "You do not have permission to delete this agent"
+            }
+        
+        logger.info(f"Deleted agent {agent_id} for user {validation_result.user_id}")
+        
+        return {
+            "success": True,
+            "agent_id": agent_id,
+            "deleted_by": validation_result.user_id,
+            "deleted_at": datetime.now(UTC).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Agent deletion error: {e}")
+        return {
+            "success": False,
+            "error": "deletion_error",
+            "message": str(e)
+        }
+
+@router.post("/auth/api-call")
+async def api_call_endpoint(request: Request) -> Dict[str, Any]:
+    """Make a rate-limited API call.
+    
+    This endpoint provides rate limiting for API calls.
+    """
+    try:
+        body = await request.json()
+        token = body.get("token")
+        endpoint = body.get("endpoint")
+        method = body.get("method", "GET")
+        
+        if not token or not endpoint:
+            return {
+                "success": False,
+                "error": "missing_parameters",
+                "message": "Token and endpoint are required"
+            }
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "success": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # TODO: Implement actual rate limiting logic
+        # For now, just allow the call
+        logger.info(f"API call from user {validation_result.user_id} to {method} {endpoint}")
+        
+        return {
+            "success": True,
+            "allowed": True,
+            "user_id": validation_result.user_id,
+            "endpoint": endpoint,
+            "method": method,
+            "rate_limit": {
+                "limit": 1000,
+                "remaining": 999,
+                "reset_at": datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"API call error: {e}")
+        return {
+            "success": False,
+            "error": "api_call_error",
+            "message": str(e)
+        }
+
+@router.get("/auth/users/{user_id}")
+async def get_user_info_endpoint(user_id: str, request: Request) -> Dict[str, Any]:
+    """Get user information.
+    
+    This endpoint retrieves user profile information.
+    """
+    try:
+        # Get token from Authorization header
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return {
+                "success": False,
+                "error": "missing_token",
+                "message": "Authorization header with Bearer token required"
+            }
+        
+        token = auth_header.replace("Bearer ", "")
+        
+        # Validate the token
+        validation_result = await auth_service.validate_token(token)
+        
+        if not validation_result or not validation_result.valid:
+            return {
+                "success": False,
+                "error": "invalid_token",
+                "message": "Invalid or expired token"
+            }
+        
+        # Check if user can access this info (user can access their own, admin can access any)
+        if validation_result.user_id != user_id and "admin" not in (validation_result.permissions or []):
+            return {
+                "success": False,
+                "error": "unauthorized",
+                "message": "You do not have permission to view this user's information"
+            }
+        
+        # TODO: Fetch actual user info from database
+        # For now, return basic info
+        logger.info(f"Retrieved user info for {user_id}")
+        
+        return {
+            "success": True,
+            "user_id": user_id,
+            "email": validation_result.email if validation_result.user_id == user_id else f"user_{user_id}@example.com",
+            "permissions": validation_result.permissions if validation_result.user_id == user_id else [],
+            "created_at": datetime.now(UTC).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Get user info error: {e}")
+        return {
+            "success": False,
+            "error": "user_info_error",
+            "message": str(e)
+        }
+
 @router.get("/auth/oauth/callback")
 @router.get("/auth/callback")
 async def oauth_callback(

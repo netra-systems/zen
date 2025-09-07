@@ -262,6 +262,24 @@ class AuthService:
         except Exception as e:
             logger.error(f"Token blacklist error: {e}")
     
+    async def is_token_blacklisted(self, token: str) -> bool:
+        """Check if a token is blacklisted."""
+        try:
+            # Check JWT handler blacklist first
+            if hasattr(self.jwt_handler, 'is_token_blacklisted'):
+                return await self.jwt_handler.is_token_blacklisted(token)
+            elif hasattr(self.jwt_handler, 'blacklisted_tokens'):
+                return token in self.jwt_handler.blacklisted_tokens
+            
+            # Fallback to in-memory blacklist
+            if hasattr(self, '_blacklisted_tokens'):
+                return token in self._blacklisted_tokens
+            
+            return False
+        except Exception as e:
+            logger.error(f"Token blacklist check error: {e}")
+            return False
+    
     async def verify_password(self, password: str, hash_value: str) -> bool:
         """Verify a password against a hash."""
         try:
