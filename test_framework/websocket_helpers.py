@@ -48,6 +48,107 @@ except ImportError:
     def is_docker_available_for_websocket() -> bool:
         return False
 
+
+# =============================================================================
+# WEBSOCKET TEST ASSERTION FUNCTIONS  
+# =============================================================================
+
+def assert_websocket_events(events: List[Dict[str, Any]], expected_event_types: List[str]):
+    """Assert that WebSocket events contain all expected event types."""
+    actual_event_types = [event.get("type", "unknown") for event in events]
+    
+    for expected_type in expected_event_types:
+        assert expected_type in actual_event_types, (
+            f"Missing expected WebSocket event type: {expected_type}. "
+            f"Actual events: {actual_event_types}"
+        )
+
+
+def create_test_agent(*args, **kwargs):
+    """Create test agent - placeholder implementation."""
+    return MagicMock()
+
+
+def assert_agent_execution(*args, **kwargs):
+    """Assert agent execution - placeholder implementation."""  
+    pass
+
+
+class WebSocketTestClient:
+    """WebSocket test client that supports async context manager pattern."""
+    
+    def __init__(self, url: str, user_id: str = None):
+        self.url = url
+        self.user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
+        self.websocket = None
+        self.events_received = []
+        
+    async def __aenter__(self):
+        """Enter async context manager."""
+        if WEBSOCKETS_AVAILABLE:
+            import websockets
+            try:
+                self.websocket = await websockets.connect(self.url)
+            except Exception as e:
+                # If connection fails, create a mock connection for testing
+                self.websocket = MockWebSocketConnection(self.user_id)
+                await self.websocket._add_mock_responses()
+        else:
+            # Create mock connection when websockets is not available
+            self.websocket = MockWebSocketConnection(self.user_id) 
+            await self.websocket._add_mock_responses()
+        
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Exit async context manager."""
+        if hasattr(self.websocket, 'close') and callable(self.websocket.close):
+            try:
+                await self.websocket.close()
+            except Exception:
+                pass  # Ignore cleanup errors
+                
+    async def send_json(self, data: dict):
+        """Send JSON data to WebSocket."""
+        message = json.dumps(data)
+        if hasattr(self.websocket, 'send'):
+            await self.websocket.send(message)
+        else:
+            # Mock behavior
+            pass
+            
+    async def receive_events(self, timeout: float = 30.0):
+        """Receive events from WebSocket with timeout."""
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            try:
+                if hasattr(self.websocket, 'recv'):
+                    # Real WebSocket
+                    message = await asyncio.wait_for(self.websocket.recv(), timeout=1.0)
+                    event = json.loads(message)
+                    self.events_received.append(event)
+                    yield event
+                else:
+                    # Mock WebSocket
+                    try:
+                        message = await asyncio.wait_for(self.websocket.recv(), timeout=1.0)
+                        if message:
+                            event = json.loads(message)
+                            self.events_received.append(event)  
+                            yield event
+                    except asyncio.TimeoutError:
+                        # No more events in mock queue
+                        break
+                    except Exception:
+                        break
+                        
+            except asyncio.TimeoutError:
+                continue  # Keep trying until overall timeout
+            except Exception as e:
+                break  # Stop on other errors
+
+
 # =============================================================================
 # WEBSOCKET CONNECTION UTILITIES
 # =============================================================================

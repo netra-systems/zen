@@ -37,3 +37,247 @@ UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 309: char
   Enabling run.googleapis.com...
   Enabling containerregistry.googleapis.com...
   Enabling cloudbuild.googleapis.com...
+  Enabling secretmanager.googleapis.com...
+  Enabling compute.googleapis.com...
+✅ All required APIs enabled
+
+🔐 Phase 2: Validating Secrets Configuration...
+Checking all required secrets in Secret Manager...
+  ✅ Secret configured: fernet-key-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: oauth-hmac-secret-staging
+  ✅ Secret configured: postgres-db-staging
+  ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: postgres-password-staging
+  ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: gemini-api-key-staging
+  ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: google-oauth-client-id-staging
+  ✅ Secret configured: jwt-secret-key-staging
+  ✅ Secret configured: google-oauth-client-secret-staging
+  ✅ Secret configured: jwt-secret-staging
+
+✅ All required secrets are configured
+
+🏗️ Phase 4: Building and Deploying Services...
+   All prerequisites validated - proceeding with deployment
+
+   Building backend...
+
+🔨 Building backend Docker image locally...
+  Using existing docker/backend.staging.alpine.Dockerfile
+  Building image locally: gcr.io/netra-staging/netra-backend-staging:latest
+  This is 5-10x faster than Cloud Build...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from backend.staging.alpine.Dockerfile
+#1 transferring dockerfile: 4.44kB done
+#1 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-alpine3.19
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-alpine3.19
+#2 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2.79kB done
+#4 DONE 0.0s
+
+#5 [builder 1/5] FROM docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f
+#5 resolve docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f 0.0s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 transferring context: 4.17MB 0.6s done
+#6 DONE 0.7s
+
+#7 [builder 3/5] WORKDIR /build
+#7 CACHED
+
+#8 [stage-1 3/8] RUN addgroup -g 1000 netra &&     adduser -D -u 1000 -G netra netra &&     mkdir -p /app/logs /app/data /app/tmp /app/scripts &&     chown -R netra:netra /app
+#8 CACHED
+
+#9 [builder 5/5] RUN --mount=type=cache,target=/root/.cache/pip     pip install --no-cache-dir --user     --no-warn-script-location     --disable-pip-version-check     -r requirements.txt
+#9 CACHED
+
+#10 [stage-1 2/8] RUN apk add --no-cache     libpq     curl     tini     lz4-libs     libgcc     libstdc++     ca-certificates     && rm -rf /var/cache/apk/*
+#10 CACHED
+
+#11 [stage-1 4/8] WORKDIR /app
+#11 CACHED
+
+#12 [builder 2/5] RUN apk add --no-cache     gcc     musl-dev     libffi-dev     postgresql-dev     make     g++     linux-headers     rust     cargo     && rm -rf /var/cache/apk/*
+#12 CACHED
+
+#13 [builder 4/5] COPY requirements.txt .
+#13 CACHED
+
+#14 [stage-1 5/8] COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
+#14 CACHED
+
+#15 [stage-1 6/8] COPY --chown=netra:netra shared /app/shared
+#15 DONE 0.1s
+
+#16 [stage-1 7/8] RUN mkdir -p /app/scripts && touch /app/scripts/__init__.py && chown -R netra:netra /app/scripts
+#16 DONE 0.3s
+
+#17 [stage-1 8/8] COPY --chown=netra:netra netra_backend /app/netra_backend
+#17 DONE 2.1s
+
+#18 exporting to image
+#18 exporting layers
+#18 exporting layers 2.6s done
+#18 exporting manifest sha256:c4100d73c80f72135e2fd99726a8916c158b37b09153b13f2b9a4365488ad9b4
+#18 exporting manifest sha256:c4100d73c80f72135e2fd99726a8916c158b37b09153b13f2b9a4365488ad9b4 0.4s done
+#18 exporting config sha256:7da5582ef0d7aa678f50ed7dd6e41552aea3bdc390566a5d2cbbb7bbe5e0c5f1
+#18 exporting config sha256:7da5582ef0d7aa678f50ed7dd6e41552aea3bdc390566a5d2cbbb7bbe5e0c5f1 0.0s done
+#18 exporting attestation manifest sha256:2b66dad3a1768b5087d8258ebee0416c8ec7d629dbc44f9f27980929925b3e67 0.1s done
+#18 exporting manifest list sha256:af426084a0477a7c7495067a7bbb1a91f5183c6e63bfa1e6583bd1a8b687675a
+#18 exporting manifest list sha256:af426084a0477a7c7495067a7bbb1a91f5183c6e63bfa1e6583bd1a8b687675a 0.0s done
+#18 naming to gcr.io/netra-staging/netra-backend-staging:latest 0.0s done
+#18 unpacking to gcr.io/netra-staging/netra-backend-staging:latest
+#18 unpacking to gcr.io/netra-staging/netra-backend-staging:latest 1.6s done
+#18 DONE 4.9s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/f8k1pwsbwln52a89k8eqdtkeb
+  ✅ Built successfully, now pushing to registry...
+  Configuring Docker authentication for GCR...
+  ✅ Docker authentication configured successfully
+The push refers to repository [gcr.io/netra-staging/netra-backend-staging]
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+dfc7acfc3979: Waiting
+14a7cdb2a4f0: Waiting
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Waiting
+2bbdc450a238: Layer already exists
+7a01739510fb: Layer already exists
+4f4fb700ef54: Layer already exists
+a7cd7d9a2144: Waiting
+e5f8952e42b7: Layer already exists
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+dfc7acfc3979: Layer already exists
+14a7cdb2a4f0: Layer already exists
+b38e41f3d4e2: Waiting
+a90abce31383: Waiting
+e39cc12b00e3: Layer already exists
+a7cd7d9a2144: Layer already exists
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+b38e41f3d4e2: Waiting
+81805f8473fa: Waiting
+703c89e3dccc: Waiting
+b38e41f3d4e2: Waiting
+703c89e3dccc: Waiting
+81805f8473fa: Pushed
+b38e41f3d4e2: Pushed
+703c89e3dccc: Pushed
+a90abce31383: Pushed
+latest: digest: sha256:af426084a0477a7c7495067a7bbb1a91f5183c6e63bfa1e6583bd1a8b687675a size: 856
+✅ backend image built and pushed successfully
+   Deploying backend...
+
+🚀 Deploying backend to Cloud Run...
+      ℹ️ Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder
+❌ Failed to deploy backend: Deploying container to Cloud Run service [[1mnetra-backend-staging[m] in project [[1mnetra-staging[m] region [[1mus-central1[m]
+Deploying...
+failed
+Deployment failed
+ERROR: (gcloud.run.deploy) ABORTED: Conflict for resource 'netra-backend-staging': version '1757229777260316' was specified but current version is '1757230340041542'.
+
+❌ Failed to deploy backend

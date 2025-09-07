@@ -2357,6 +2357,288 @@ jest.mock('@/hooks/useProgressiveLoading', () => ({
   }))
 }));
 
+// ============================================================================
+// UNIFIED useThreadSwitching HOOK MOCK
+// ============================================================================
+// This provides a comprehensive mock that properly manages state updates
+// and coordinates with store mocks for reliable test execution
+jest.mock('@/hooks/useThreadSwitching', () => {
+  const React = require('react');
+  
+  // Global state management for the hook mock
+  let globalHookState = {
+    isLoading: false,
+    loadingThreadId: null,
+    error: null,
+    lastLoadedThreadId: null,
+    operationId: null,
+    retryCount: 0
+  };
+  
+  // Reset function for tests
+  const resetHookState = () => {
+    globalHookState = {
+      isLoading: false,
+      loadingThreadId: null,
+      error: null,
+      lastLoadedThreadId: null,
+      operationId: null,
+      retryCount: 0
+    };
+  };
+  
+  // State update function that properly triggers React re-renders
+  const updateHookState = (updates) => {
+    globalHookState = { ...globalHookState, ...updates };
+  };
+  
+  const useThreadSwitching = () => {
+    // Use React state to ensure component re-renders when state changes
+    const [state, setState] = React.useState(() => ({ ...globalHookState }));
+    
+    // Sync global state with component state
+    React.useEffect(() => {
+      setState({ ...globalHookState });
+    }, []);
+    
+    // Mock switchToThread with proper state management
+    const switchToThread = React.useCallback(async (threadId, options = {}) => {
+      console.log(`useThreadSwitching: switchToThread called with ${threadId}`);
+      
+      try {
+        // Check if we should use ThreadOperationManager (for tests that expect it)
+        let shouldUseOperationManager = false;
+        try {
+          const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
+          shouldUseOperationManager = !!ThreadOperationManager;
+        } catch (error) {
+          // ThreadOperationManager not available, use direct approach
+        }
+        
+        if (shouldUseOperationManager) {
+          // Use ThreadOperationManager for tests that expect it
+          const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
+          
+          const result = await ThreadOperationManager.startOperation(
+            'switch',
+            threadId,
+            async (signal) => {
+              // Update loading state
+              const loadingUpdates = {
+                isLoading: true,
+                loadingThreadId: threadId,
+                error: null,
+                operationId: `switch_${threadId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+              };
+              
+              updateHookState(loadingUpdates);
+              setState(prev => ({ ...prev, ...loadingUpdates }));
+              
+              // Execute thread loading with the service
+              const { threadLoadingService } = require('@/services/threadLoadingService');
+              const { executeWithRetry } = require('@/lib/retry-manager');
+              
+              const loadResult = await executeWithRetry(() => threadLoadingService.loadThread(threadId), {
+                maxAttempts: 3,
+                baseDelayMs: 1000,
+                signal
+              });
+              
+              if (loadResult && loadResult.success) {
+                // Success: Update both hook and store state
+                const successUpdates = {
+                  isLoading: false,
+                  loadingThreadId: null,
+                  error: null,
+                  lastLoadedThreadId: threadId,
+                  operationId: null,
+                  retryCount: 0
+                };
+                
+                updateHookState(successUpdates);
+                setState(prev => ({ ...prev, ...successUpdates }));
+                
+                // Update store state
+                const { useUnifiedChatStore } = require('@/store/unified-chat');
+                const { setActiveThread, completeThreadLoading } = useUnifiedChatStore.getState();
+                if (completeThreadLoading) {
+                  completeThreadLoading(threadId, loadResult.messages || []);
+                } else if (setActiveThread) {
+                  setActiveThread(threadId);
+                }
+                
+                console.log(`useThreadSwitching: Successfully switched to ${threadId} via ThreadOperationManager`);
+                return { success: true, threadId };
+              } else {
+                throw new Error(loadResult?.error || 'Thread loading failed');
+              }
+            },
+            {
+              timeoutMs: options.timeoutMs || 5000,
+              retryAttempts: 2,
+              force: options.force
+            }
+          );
+          
+          return result.success;
+        } else {
+          // Direct approach for simpler tests
+          // Update loading state
+          const loadingUpdates = {
+            isLoading: true,
+            loadingThreadId: threadId,
+            error: null,
+            operationId: `switch_${threadId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          };
+          
+          updateHookState(loadingUpdates);
+          setState(prev => ({ ...prev, ...loadingUpdates }));
+          
+          // Get store actions to coordinate updates
+          const { useUnifiedChatStore } = require('@/store/unified-chat');
+          const { setActiveThread, startThreadLoading, completeThreadLoading } = useUnifiedChatStore.getState();
+          
+          // Simulate starting thread loading in store
+          if (startThreadLoading) {
+            startThreadLoading(threadId);
+          } else if (setActiveThread) {
+            setActiveThread(threadId);
+          }
+          
+          // Mock the thread loading service call
+          const { threadLoadingService } = require('@/services/threadLoadingService');
+          const result = await threadLoadingService.loadThread(threadId);
+          
+          if (result && result.success) {
+            // Success: Update both hook and store state
+            const successUpdates = {
+              isLoading: false,
+              loadingThreadId: null,
+              error: null,
+              lastLoadedThreadId: threadId,
+              operationId: null,
+              retryCount: 0
+            };
+            
+            updateHookState(successUpdates);
+            setState(prev => ({ ...prev, ...successUpdates }));
+            
+            // Update store state
+            if (completeThreadLoading) {
+              completeThreadLoading(threadId, result.messages || []);
+            } else if (setActiveThread) {
+              setActiveThread(threadId);
+            }
+            
+            console.log(`useThreadSwitching: Successfully switched to ${threadId}`);
+            return true;
+          } else {
+            // Failure: Update error state
+            const errorUpdates = {
+              isLoading: false,
+              loadingThreadId: null,
+              error: { message: result?.error || 'Failed to load thread', threadId },
+              operationId: null,
+              retryCount: globalHookState.retryCount + 1
+            };
+            
+            updateHookState(errorUpdates);
+            setState(prev => ({ ...prev, ...errorUpdates }));
+            
+            console.log(`useThreadSwitching: Failed to switch to ${threadId}`);
+            return false;
+          }
+        }
+      } catch (error) {
+        // Exception: Update error state
+        const errorUpdates = {
+          isLoading: false,
+          loadingThreadId: null,
+          error: { message: error.message || 'Unknown error', threadId },
+          operationId: null,
+          retryCount: globalHookState.retryCount + 1
+        };
+        
+        updateHookState(errorUpdates);
+        setState(prev => ({ ...prev, ...errorUpdates }));
+        
+        console.log(`useThreadSwitching: Exception during switch to ${threadId}:`, error);
+        return false;
+      }
+    }, []);
+    
+    const cancelLoading = React.useCallback(() => {
+      const cancelUpdates = {
+        isLoading: false,
+        loadingThreadId: null,
+        operationId: null
+      };
+      
+      updateHookState(cancelUpdates);
+      setState(prev => ({ ...prev, ...cancelUpdates }));
+    }, []);
+    
+    const retryLastFailed = React.useCallback(async () => {
+      if (globalHookState.error && globalHookState.error.threadId) {
+        return await switchToThread(globalHookState.error.threadId);
+      }
+      return false;
+    }, [switchToThread]);
+    
+    return {
+      state,
+      switchToThread,
+      cancelLoading,
+      retryLastFailed
+    };
+  };
+  
+  // Expose reset function for tests
+  useThreadSwitching.resetState = resetHookState;
+  useThreadSwitching.getGlobalState = () => ({ ...globalHookState });
+  useThreadSwitching.updateGlobalState = updateHookState;
+  
+  return { useThreadSwitching };
+});
+
+// ============================================================================
+// UNIFIED RETRY MANAGER MOCK
+// ============================================================================
+// This provides a consistent mock for executeWithRetry that properly
+// executes functions and coordinates with other mocks
+jest.mock('@/lib/retry-manager', () => ({
+  executeWithRetry: jest.fn(async (fn, options = {}) => {
+    console.log('executeWithRetry: executing function');
+    try {
+      const result = await fn();
+      console.log('executeWithRetry: function completed successfully');
+      return result;
+    } catch (error) {
+      console.log('executeWithRetry: function failed:', error.message);
+      throw error;
+    }
+  })
+}));
+
+// ============================================================================  
+// UNIFIED THREAD LOADING SERVICE MOCK
+// ============================================================================
+// This provides a consistent mock that returns success by default
+jest.mock('@/services/threadLoadingService', () => ({
+  threadLoadingService: {
+    loadThread: jest.fn(async (threadId) => {
+      console.log(`threadLoadingService: loading thread ${threadId}`);
+      return {
+        success: true,
+        threadId,
+        messages: [
+          { id: `msg-${threadId}-1`, content: `Message for ${threadId}`, timestamp: Date.now() }
+        ]
+      };
+    })
+  }
+}));
+
 jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
   useMessageHistory: jest.fn(() => ({
     messageHistory: [],

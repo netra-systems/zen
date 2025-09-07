@@ -1344,7 +1344,8 @@ CMD ["npm", "start"]
         import os
         
         # CRITICAL FIX: JWT secrets MUST be identical between services
-        jwt_secret_value = "your-secure-jwt-secret-key-staging-64-chars-minimum-for-security"
+        # This value MUST match what's configured in staging.env and used by tests
+        jwt_secret_value = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
         
         secrets = {
             # PostgreSQL configuration - multi-part for flexibility
@@ -1353,18 +1354,18 @@ CMD ["npm", "start"]
             "postgres-db-staging": "netra_dev",
             "postgres-user-staging": "postgres",
             "postgres-password-staging": "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K",  # version 2
-            "secret-key-staging": "your-secure-secret-key-for-backend-staging-32-chars-minimum-required",  # Backend SECRET_KEY
-            "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
+            "secret-key-staging": "MNirOcTwpRfPUhpMHB7n6VOTCD3ggxgWlC8n3ZyZIuE",  # Backend SECRET_KEY - matches staging.env
+            "session-secret-key-staging": "MNirOcTwpRfPUhpMHB7n6VOTCD3ggxgWlC8n3ZyZIuE",  # Same as SECRET_KEY for consistency 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
-            "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
+            "fernet-key-staging": "pbQTBDr9qfDGaNTc9GjtJOAvx9q5zPKAtpf45e1xcJo=",  # Matches staging.env
             "jwt-secret-staging": jwt_secret_value,  # Both backend and auth service use JWT_SECRET_STAGING
             # TOMBSTONE: google-client-id-staging and google-client-secret-staging
             # These should be configured using environment-specific OAuth variables
             "google-oauth-client-id-staging": get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_ID"),
             "google-oauth-client-secret-staging": get_env().get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET"),
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
-            # Enhanced JWT security for auth service
-            "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
+            # Enhanced JWT security for auth service - matches staging.env
+            "service-secret-staging": "staging-service-secret-distinct-from-jwt-7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-staging-distinct",
             "service-id-staging": "netra-auth-staging",
             # CRITICAL: Redis endpoint must match staging-shared-redis primary endpoint in GCP
             # Primary endpoint: 10.107.0.3 (verified in Google Cloud Console)

@@ -12,6 +12,17 @@ from shared.isolated_environment import get_env
 CPU_COUNT = multiprocessing.cpu_count()
 OPTIMAL_WORKERS = min(CPU_COUNT - 1, 8)  # Leave one CPU free
 
+# Test service ports configuration
+TEST_PORTS = {
+    "postgresql": 5434,    # Test PostgreSQL
+    "redis": 6381,         # Test Redis  
+    "backend": 8000,       # Backend service
+    "auth": 8081,          # Auth service
+    "frontend": 3000,      # Frontend
+    "clickhouse": 8123,    # ClickHouse
+    "analytics": 8002,     # Analytics service
+}
+
 # Component mappings for focused testing
 COMPONENT_MAPPINGS = {
     "backend": {

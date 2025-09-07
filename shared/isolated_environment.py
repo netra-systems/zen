@@ -116,11 +116,41 @@ class IsolatedEnvironment:
     }
     
     def __new__(cls) -> 'IsolatedEnvironment':
-        """Ensure singleton behavior with thread safety."""
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
+        """Ensure singleton behavior with thread safety.
+        
+        Enhanced double-checked locking with additional safety measures.
+        This method guarantees that only one instance is ever created across
+        all threads and all access patterns.
+        """
+        # First check (fast path) - no lock needed if instance already exists
+        if cls._instance is not None:
+            return cls._instance
+        
+        # Second check with lock (slow path) - ensure atomic instance creation
+        with cls._lock:
+            if cls._instance is None:
+                logger.debug("Creating new IsolatedEnvironment singleton instance")
+                cls._instance = super().__new__(cls)
+                
+                # CRITICAL: Verify module-level singleton consistency
+                # This ensures _env_instance and cls._instance are always the same
+                import sys
+                current_module = sys.modules.get(__name__)
+                if current_module and hasattr(current_module, '_env_instance'):
+                    if current_module._env_instance is not None and current_module._env_instance is not cls._instance:
+                        logger.warning(
+                            f"Singleton consistency issue detected: "
+                            f"cls._instance={id(cls._instance)} != "
+                            f"_env_instance={id(current_module._env_instance)}"
+                        )
+                        # Force consistency by updating module instance
+                        current_module._env_instance = cls._instance
+                        logger.info("Forced singleton consistency - updated _env_instance")
+                
+                logger.debug(f"Singleton instance created: ID {id(cls._instance)}")
+            else:
+                logger.debug("Singleton instance already exists, returning existing")
+                
         return cls._instance
     
     def __init__(self):
@@ -1104,7 +1134,24 @@ _env_instance = IsolatedEnvironment()
 
 
 def get_env() -> IsolatedEnvironment:
-    """Get the singleton IsolatedEnvironment instance."""
+    """Get the singleton IsolatedEnvironment instance.
+    
+    Enhanced with singleton consistency verification to ensure
+    module-level and class-level singletons are always identical.
+    """
+    global _env_instance
+    
+    # CRITICAL: Verify singleton consistency
+    if IsolatedEnvironment._instance is not None and _env_instance is not IsolatedEnvironment._instance:
+        logger.warning(
+            f"Singleton inconsistency detected in get_env(): "
+            f"_env_instance={id(_env_instance)} != "
+            f"IsolatedEnvironment._instance={id(IsolatedEnvironment._instance)}"
+        )
+        # Force consistency by returning the class instance (which is more authoritative)
+        _env_instance = IsolatedEnvironment._instance
+        logger.info("Forced singleton consistency in get_env() - updated _env_instance")
+    
     return _env_instance
 
 

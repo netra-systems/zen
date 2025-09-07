@@ -1,5 +1,5 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-06 23:56:10
+Generated: 2025-09-07 00:30:58
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
@@ -10,19 +10,19 @@ Environment: https://api.staging.netrasystems.ai
 ## Test Results
 ### http_connectivity
 - **Status**: ✅ PASS
-- **Duration**: 0.358s
+- **Duration**: 0.763s
 - **Health Status**: 200
 - **Service Status**: healthy
 - **Version**: 1.0.0
 
 ### websocket_connectivity
 - **Status**: ❌ FAIL
-- **Duration**: 0.428s
+- **Duration**: 0.747s
 - **Error**: server rejected WebSocket connection: HTTP 403
 
 ### agent_request_pipeline
 - **Status**: ❌ FAIL
-- **Duration**: 0.323s
+- **Duration**: 0.717s
 - **Error**: server rejected WebSocket connection: HTTP 403
 
 ## Recommendations

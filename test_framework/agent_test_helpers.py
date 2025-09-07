@@ -498,3 +498,36 @@ class CommonValidators:
     def non_negative_number(value: Union[int, float]) -> bool:
         """Validate number is non-negative"""
         return isinstance(value, (int, float)) and value >= 0
+
+
+# =============================================================================
+# E2E TEST HELPERS
+# =============================================================================
+
+def create_test_agent(agent_type: str = "test_agent", **kwargs):
+    """Create a test agent instance for E2E testing."""
+    from unittest.mock import MagicMock
+    
+    # Create a mock agent with common methods
+    mock_agent = MagicMock()
+    mock_agent.agent_type = agent_type
+    mock_agent.name = kwargs.get("name", f"{agent_type}_{int(time.time())}")
+    
+    # Add common agent methods
+    mock_agent.execute = lambda *args, **kwargs: {"result": "test_execution_result"}
+    mock_agent.get_capabilities = lambda: ["test_capability_1", "test_capability_2"] 
+    mock_agent.is_ready = lambda: True
+    
+    return mock_agent
+
+
+def assert_agent_execution(result: Dict[str, Any], expected_status: str = "success"):
+    """Assert agent execution completed successfully."""
+    assert isinstance(result, dict), f"Expected dict result, got {type(result)}"
+    
+    # Check for common execution indicators
+    if "status" in result:
+        assert result["status"] == expected_status, f"Expected status {expected_status}, got {result.get('status')}"
+    
+    # Check result is not empty
+    assert len(result) > 0, "Agent execution result should not be empty"
