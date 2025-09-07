@@ -17,3 +17,29 @@ from netra_backend.app.database import (
     DatabaseManager,
     database_manager
 )
+
+# Re-export Database and AsyncDatabase classes from postgres_core for backward compatibility
+from netra_backend.app.db.postgres_core import (
+    Database,
+    AsyncDatabase
+)
+
+# Additional SSOT database utilities that tests might need
+try:
+    from netra_backend.app.db.postgres_core import (
+        initialize_postgres,
+        create_async_database,
+        get_converted_async_db_url
+    )
+except ImportError:
+    # These functions might not be available in all contexts
+    pass
+
+# Additional helper functions for test compatibility
+def get_database_manager():
+    """Get database manager instance for backward compatibility."""
+    return database_manager
+
+def get_db_session():
+    """Alias for get_db for backward compatibility."""
+    return get_db()
