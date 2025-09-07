@@ -1019,6 +1019,15 @@ CMD ["npm", "start"]
         if service.name in ["backend", "auth"]:
             # CRITICAL: VPC connector required for Redis and Cloud SQL connectivity
             cmd.extend(["--vpc-connector", "staging-connector"])
+            
+            # CRITICAL: Cloud SQL proxy connection for database access
+            # This fixes the database initialization timeout issue
+            cloud_sql_instance = f"{self.project_id}:us-central1:staging-shared-postgres"
+            cmd.extend(["--add-cloudsql-instances", cloud_sql_instance])
+            
+            # Extended timeout and CPU boost for database initialization
+            cmd.extend(["--timeout", "300"])  # 5 minutes for DB init
+            cmd.extend(["--cpu-boost"])       # Faster cold starts
         
         # Add service-specific configurations
         if service.name == "backend":

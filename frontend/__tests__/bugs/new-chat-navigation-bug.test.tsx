@@ -29,6 +29,134 @@ jest.mock('@/hooks/useWebSocket', () => ({
   }),
 }));
 
+// Mock all ChatSidebar dependencies to prevent "Element type is invalid" errors
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: () => ({
+    isDeveloperOrHigher: () => false
+  })
+}));
+
+jest.mock('@/hooks/useAuthState', () => ({
+  useAuthState: () => ({
+    isAuthenticated: true,
+    userTier: 'Free',
+    user: { id: 'test-user', email: 'test@test.com' }
+  })
+}));
+
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: any) => <>{children}</>
+}));
+
+jest.mock('@/hooks/useThreadSwitching', () => ({
+  useThreadSwitching: () => ({
+    switchToThread: jest.fn(),
+    state: { isLoading: false, error: null }
+  })
+}));
+
+jest.mock('@/lib/thread-operation-manager', () => ({
+  ThreadOperationManager: {
+    executeWithRetry: jest.fn().mockResolvedValue({ success: true }),
+    switchToThread: jest.fn().mockResolvedValue(true),
+    startOperation: jest.fn().mockImplementation(async (operation, threadId, callback) => {
+      const result = await callback();
+      return result;
+    }),
+    isOperationInProgress: jest.fn().mockReturnValue(false)
+  }
+}));
+
+jest.mock('@/lib/thread-state-machine', () => ({
+  threadStateMachineManager: {
+    transition: jest.fn(),
+    getState: jest.fn().mockReturnValue('IDLE'),
+    getStateMachine: jest.fn().mockReturnValue({
+      canTransition: jest.fn().mockReturnValue(true),
+      transition: jest.fn()
+    })
+  }
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
+  }
+}));
+
+jest.mock('@/components/chat/ChatSidebarUIComponents', () => ({
+  NewChatButton: ({ onNewChat }: any) => <button onClick={onNewChat} data-testid="new-chat-button">New Chat</button>,
+  AdminControls: () => <div data-testid="admin-controls">Admin Controls</div>,
+  SearchBar: ({ onSearchChange }: any) => <input onChange={(e) => onSearchChange(e.target.value)} data-testid="search-bar" />
+}));
+
+jest.mock('@/components/chat/ChatSidebarThreadList', () => ({
+  ThreadList: ({ threads, onThreadClick, ...props }: any) => (
+    <div data-testid="thread-list">
+      {threads && threads.map((thread: any) => (
+        <button 
+          key={thread.id} 
+          onClick={() => onThreadClick && onThreadClick(thread.id)}
+          data-testid={`thread-item-${thread.id}`}
+        >
+          {thread.title}
+        </button>
+      ))}
+    </div>
+  ),
+  ThreadItem: ({ thread, onClick }: any) => (
+    <button onClick={() => onClick && onClick()} data-testid={`thread-item-${thread.id}`}>
+      {thread.title}
+    </button>
+  )
+}));
+
+jest.mock('@/components/chat/ChatSidebarFooter', () => ({
+  PaginationControls: () => <div data-testid="pagination">Pagination</div>,
+  Footer: () => <div data-testid="footer">Footer</div>
+}));
+
+jest.mock('@/components/chat/ChatSidebarHooks', () => ({
+  useChatSidebarState: () => ({
+    searchQuery: '',
+    setSearchQuery: jest.fn(),
+    isCreatingThread: false,
+    setIsCreatingThread: jest.fn(),
+    showAllThreads: false,
+    setShowAllThreads: jest.fn(),
+    filterType: 'all',
+    setFilterType: jest.fn(),
+    currentPage: 1,
+    setCurrentPage: jest.fn(),
+    threadsPerPage: 20,
+    isAdmin: false
+  }),
+  useThreadLoader: () => ({
+    threads: [],
+    isLoadingThreads: false,
+    loadError: null,
+    loadThreads: jest.fn()
+  }),
+  useThreadFiltering: (threads: any) => ({
+    sortedThreads: threads || [],
+    paginatedThreads: threads || [],
+    totalPages: 1
+  })
+}));
+
+jest.mock('@/services/threadLoadingService', () => ({
+  threadLoadingService: {
+    loadThread: jest.fn().mockResolvedValue({
+      success: true,
+      messages: [],
+      threadId: 'new-thread'
+    })
+  }
+}));
+
 jest.mock('@/hooks/useAuthState', () => ({
   useAuthState: () => ({
     isAuthenticated: true,

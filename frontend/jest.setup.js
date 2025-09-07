@@ -2460,11 +2460,21 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                 
                 // Update store state
                 const { useUnifiedChatStore } = require('@/store/unified-chat');
-                const { setActiveThread, completeThreadLoading } = useUnifiedChatStore.getState();
-                if (completeThreadLoading) {
-                  completeThreadLoading(threadId, loadResult.messages || []);
-                } else if (setActiveThread) {
-                  setActiveThread(threadId);
+                const store = useUnifiedChatStore.getState();
+                if (store.completeThreadLoading) {
+                  store.completeThreadLoading(threadId, loadResult.messages || []);
+                } else if (store.setActiveThread) {
+                  store.setActiveThread(threadId);
+                }
+                
+                // Ensure the store state is actually updated
+                const currentState = useUnifiedChatStore.getState();
+                if (currentState.activeThreadId !== threadId) {
+                  console.warn(`Store activeThreadId not updated: expected ${threadId}, got ${currentState.activeThreadId}`);
+                  // Force update if needed
+                  if (store.setActiveThread) {
+                    store.setActiveThread(threadId);
+                  }
                 }
                 
                 console.log(`useThreadSwitching: Successfully switched to ${threadId} via ThreadOperationManager`);
@@ -2528,6 +2538,16 @@ jest.mock('@/hooks/useThreadSwitching', () => {
               completeThreadLoading(threadId, result.messages || []);
             } else if (setActiveThread) {
               setActiveThread(threadId);
+            }
+            
+            // Ensure the store state is actually updated
+            const currentState = useUnifiedChatStore.getState();
+            if (currentState.activeThreadId !== threadId) {
+              console.warn(`Store activeThreadId not updated: expected ${threadId}, got ${currentState.activeThreadId}`);
+              // Force update if needed
+              if (setActiveThread) {
+                setActiveThread(threadId);
+              }
             }
             
             console.log(`useThreadSwitching: Successfully switched to ${threadId}`);

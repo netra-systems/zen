@@ -45,8 +45,13 @@ class SecretConfig:
                 "SERVICE_ID",  # CRITICAL: Required for inter-service auth with auth service
                 "FERNET_KEY"
             ],
-            # OAuth removed - backend doesn't handle OAuth, only the auth service does
-            # Backend communicates with auth service for authentication needs
+            "oauth": [
+                # Backend uses simplified OAuth naming (matches config.py fallback chain)
+                # Backend config.py tries: OAUTH_GOOGLE_CLIENT_ID_ENV or GOOGLE_CLIENT_ID or GOOGLE_OAUTH_CLIENT_ID
+                # Tests expect GOOGLE_CLIENT_ID which is the second fallback option
+                "GOOGLE_CLIENT_ID", 
+                "GOOGLE_CLIENT_SECRET"
+            ],
             "redis": [
                 "REDIS_HOST",
                 "REDIS_PORT",
@@ -113,7 +118,11 @@ class SecretConfig:
         "SERVICE_ID": "service-id-staging",
         "FERNET_KEY": "fernet-key-staging",
         
-        # OAuth - Auth service uses environment-specific names
+        # OAuth - Dual naming convention for backend and auth services
+        # Backend service uses simplified names (matches config.py fallback)
+        "GOOGLE_CLIENT_ID": "google-oauth-client-id-staging",
+        "GOOGLE_CLIENT_SECRET": "google-oauth-client-secret-staging",
+        # Auth service uses environment-specific names
         "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
         "OAUTH_HMAC_SECRET": "oauth-hmac-secret-staging",
@@ -281,8 +290,10 @@ class SecretConfig:
             "POSTGRES_PASSWORD": "PostgreSQL database password (CRITICAL - required for database access)",
             "REDIS_URL": "Redis connection URL for caching and sessions",
             "FERNET_KEY": "Symmetric encryption key for data encryption",
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging environment",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging environment",
+            "GOOGLE_CLIENT_ID": "Google OAuth client ID (simplified naming for backend)",
+            "GOOGLE_CLIENT_SECRET": "Google OAuth client secret (simplified naming for backend)",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging environment (auth service)",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging environment (auth service)",
         }
         
         return explanations.get(
