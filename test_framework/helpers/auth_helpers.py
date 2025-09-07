@@ -256,10 +256,16 @@ class AuthTestConfig:
 class WebSocketAuthTester:
     """Real WebSocket connection tester with auth validation."""
     
-    def __init__(self):
+    def __init__(self, config: Optional[AuthTestConfig] = None):
+        """Initialize WebSocket auth tester."""
+        self.config = config or AuthTestConfig()
         # Import here to avoid circular imports
-        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-        self.connection_manager = get_websocket_manager()
+        try:
+            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+            self.connection_manager = get_websocket_manager()
+        except ImportError:
+            # Handle case where netra_backend is not available (e.g., in isolated test environment)
+            self.connection_manager = None
         self.test_users: Dict[str, str] = {}
         self.active_connections: List = []  # Will be populated with MockWebSocket instances
         self.auth_results: List[Dict[str, Any]] = []
