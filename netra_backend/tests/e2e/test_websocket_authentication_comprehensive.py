@@ -62,6 +62,26 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         self.active_connections = []
         self.test_tokens = []
     
+    async def _check_websocket_service_available(self) -> bool:
+        """Check if WebSocket service is available before running tests."""
+        try:
+            import httpx
+            backend_port = TEST_PORTS.get("backend", 8000)
+            health_url = f"http://localhost:{backend_port}/health"
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.get(health_url, timeout=5.0)
+                if response.status_code == 200:
+                    self.logger.info(f"✓ Backend service available at port {backend_port}")
+                    return True
+                else:
+                    self.logger.warning(f"Backend service returned {response.status_code} at port {backend_port}")
+                    return False
+        except Exception as e:
+            self.logger.warning(f"Backend service not available at port {backend_port}: {e}")
+            self.logger.info("To start services: python tests/unified_test_runner.py --real-services")
+            return False
+    
     def teardown_method(self):
         """Teardown method called after each test (sync wrapper for async cleanup)."""
         # Run async cleanup in sync teardown
@@ -123,18 +143,35 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
             if expect_success:
                 self.active_connections.append(connection)
             
+            # Test connection is working by sending a ping
+            if hasattr(connection, 'ping'):
+                try:
+                    await connection.ping()
+                except Exception as ping_error:
+                    self.logger.warning(f"Connection ping failed, but proceeding: {ping_error}")
+            
             return connection
             
         except Exception as e:
+            error_msg = f"Failed to create WebSocket connection to {self.websocket_url}: {e}"
             if expect_success:
-                self.logger.error(f"Failed to create WebSocket connection: {e}")
-                raise
+                self.logger.error(error_msg)
+                # Check if this is a connection refused error - suggests services not running
+                if "refused" in str(e).lower():
+                    self.logger.error(f"WebSocket service appears to be down. Ensure Docker services are running with: python tests/unified_test_runner.py --real-services")
+                raise ConnectionError(error_msg)
+            else:
+                self.logger.info(f"Expected connection failure: {error_msg}")
             return None
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_valid_jwt_authentication_succeeds(self):
-        """Test that valid JWT authentication succeeds with proper user context."""
+        """Test that valid JWT authentication succeeds with proper user context.
+        
+        Business Value: Ensures authenticated users can connect to WebSocket for real-time interactions.
+        This is critical for the chat feature that delivers 90% of our business value.
+        """
         # Arrange
         test_users = self._create_test_users()
         user_data = test_users["user1"]
@@ -149,6 +186,9 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         # Act
         connection = await self._create_websocket_connection(token, expect_success=True)
         
+        # Verify connection is truly established
+        assert connection is not None, "Connection should not be None for valid authentication"
+        
         # Send authentication verification message
         auth_message = {
             "type": "auth_verify",
@@ -161,10 +201,11 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         # Assert
         response = await WebSocketTestHelpers.receive_test_message(connection, timeout=10.0)
         
+        assert response is not None, "Should receive a response for authentication verification"
         assert response["type"] != "error", f"Authentication failed: {response}"
-        assert "user_id" in response or response["type"] == "ack"
+        assert "user_id" in response or response["type"] == "ack", f"Response should contain user context or acknowledgment: {response}"
         
-        self.logger.info("✓ Valid JWT authentication succeeded")
+        self.logger.info("✓ Valid JWT authentication succeeded - WebSocket ready for business value delivery")
     
     @pytest.mark.e2e  
     @pytest.mark.real_services

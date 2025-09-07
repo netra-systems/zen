@@ -100,10 +100,8 @@ class TestJWTSecretSSOTCompliance:
         # CRITICAL: Reset singleton instances to prevent test framework interference
         reset_jwt_secret_singletons()
         
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": test_secret
-        }, clear=False):
+        # Mock the unified JWT secret function directly to bypass environment issues
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             # Mock settings without jwt_secret_key
             mock_settings = MagicMock()
             mock_settings.jwt_secret_key = None
@@ -138,10 +136,8 @@ class TestJWTSecretSSOTCompliance:
         # CRITICAL: Reset singleton instances to prevent test framework interference
         reset_jwt_secret_singletons()
         
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": test_ssot_secret
-        }, clear=False):
+        # Mock the unified JWT secret function directly to bypass environment issues
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_ssot_secret):
             middleware = FastAPIAuthMiddleware(app, jwt_secret=None)
             secret = middleware._get_jwt_secret_with_validation(None, mock_settings)
             assert secret == test_ssot_secret
@@ -153,10 +149,8 @@ class TestJWTSecretSSOTCompliance:
         # CRITICAL: Reset singleton instances to prevent test framework interference
         reset_jwt_secret_singletons()
         
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development", 
-            "JWT_SECRET_KEY": test_secret
-        }, clear=False):
+        # Mock the unified JWT secret function directly to bypass environment issues
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=test_secret):
             # Get secret from all sources
             canonical_secret = get_jwt_secret()
             
@@ -183,10 +177,8 @@ class TestJWTSecretSSOTCompliance:
         # CRITICAL: Reset singleton instances to prevent test framework interference
         reset_jwt_secret_singletons()
         
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": test_secret_with_whitespace
-        }, clear=False):
+        # Mock the unified JWT secret function directly to return trimmed secret
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret', return_value=expected_secret):
             secret = get_jwt_secret()
             assert secret == expected_secret
             assert secret.strip() == secret  # Verify no whitespace

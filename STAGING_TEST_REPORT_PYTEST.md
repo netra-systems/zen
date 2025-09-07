@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 09:17:57
+**Generated:** 2025-09-07 09:19:19
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 3.22 seconds
+- **Duration:** 4.00 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,21 +19,22 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_jwt_secret_consistency_verification | FAIL failed | 0.004s | test_websocket_auth_fix_verification.py |
+| test_jwt_secret_consistency_verification | FAIL failed | 0.650s | test_websocket_auth_fix_verification.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_jwt_secret_consistency_verification
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_auth_fix_verification.py
-- **Duration:** 0.004s
-- **Error:** tests\e2e\staging\test_websocket_auth_fix_verification.py:67: in test_jwt_secret_consistency_verification
-    env = IsolatedEnvironment(environment_variables=dict(os.environ))
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   TypeError: IsolatedEnvironment.__new__() got an unexpected keyword argument 'environment_variables'
-
-During handling of the above exception, another exception occurred:
-tests\e2e\staging_test_base.py:293: in wrapper
-    return await func(*args, **kwa...
+- **Duration:** 0.650s
+- **Error:** tests\e2e\staging_test_base.py:293: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_websocket_auth_fix_verification.py:169: in test_jwt_secret_consistency_verification
+    async with websockets.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\clie...
 
 ## Pytest Output Format
 
@@ -41,7 +42,7 @@ tests\e2e\staging_test_base.py:293: in wrapper
 test_websocket_auth_fix_verification.py::test_jwt_secret_consistency_verification FAILED
 
 ==================================================
-0 passed, 1 failed in 3.22s
+0 passed, 1 failed in 4.00s
 ```
 
 ## Test Coverage Matrix

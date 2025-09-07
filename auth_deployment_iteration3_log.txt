@@ -44,3 +44,20 @@ UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 309: char
 🔐 Phase 2: Validating Secrets Configuration...
 Checking all required secrets in Secret Manager...
   ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: postgres-db-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: postgres-password-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: google-oauth-client-id-staging
+  ✅ Secret configured: jwt-secret-key-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: gemini-api-key-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: jwt-secret-staging
+  ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: fernet-key-staging
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: oauth-hmac-secret-staging

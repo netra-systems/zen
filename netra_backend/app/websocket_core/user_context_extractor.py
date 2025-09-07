@@ -201,6 +201,9 @@ class UserContextExtractor:
             logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Permissions: {len(payload.get('permissions', []))}")
             logger.info("✅ WEBSOCKET JWT VALIDATION SUCCESS - Using UNIFIED JWT secret (same as REST)")
             
+            # Add marker to indicate this was validated using unified approach (same as REST)
+            payload["source"] = "resilient_validation"
+            
             return payload
             
         except jwt.ExpiredSignatureError as e:

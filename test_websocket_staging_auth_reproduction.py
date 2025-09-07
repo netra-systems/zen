@@ -108,7 +108,7 @@ class WebSocketStagingAuthReproduction:
                 step2_result["close_reason"] = e.reason
                 
                 if e.code == 403 or "403" in str(e):
-                    print("🎯 REPRODUCED: HTTP 403 WebSocket authentication failure!")
+                    print("[REPRODUCED] HTTP 403 WebSocket authentication failure!")
                     step2_result["reproduced_issue"] = True
                     
             except websockets.exceptions.InvalidStatusCode as e:
@@ -118,7 +118,7 @@ class WebSocketStagingAuthReproduction:
                 step2_result["http_status"] = e.status_code
                 
                 if e.status_code == 403:
-                    print("🎯 REPRODUCED: HTTP 403 WebSocket authentication failure!")
+                    print("[REPRODUCED] HTTP 403 WebSocket authentication failure!")
                     step2_result["reproduced_issue"] = True
                     
             except Exception as e:
@@ -224,7 +224,7 @@ async def main():
     """Run the WebSocket staging authentication reproduction test."""
     reproducer = WebSocketStagingAuthReproduction()
     
-    print("🚨 WebSocket Staging Authentication Issue Reproduction")
+    print("[CRITICAL] WebSocket Staging Authentication Issue Reproduction")
     print("=" * 60)
     print("This test reproduces the exact failure happening in staging.")
     print("Expected: FAIL with HTTP 403 (before fix)")
@@ -234,7 +234,7 @@ async def main():
     results = await reproducer.test_websocket_auth_failure_reproduction()
     
     # Print final analysis
-    print("\n🔬 FINAL ANALYSIS")
+    print("\n[FINAL ANALYSIS]")
     print("=" * 60)
     
     if not results["success"]:
@@ -247,7 +247,7 @@ async def main():
         print("   - WebSocket connection succeeded unexpectedly")
         print("   - Either bug is already fixed or test needs adjustment")
         
-    print("\n📊 Test Results Summary:")
+    print("\n[RESULTS] Test Results Summary:")
     for i, step in enumerate(results["steps"], 1):
         print(f"   Step {i} ({step['step']}): {'PASS' if step['success'] else 'FAIL'}")
         
@@ -282,5 +282,5 @@ if __name__ == "__main__":
         print("\n🛑 Test interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n💥 Test crashed: {e}")
+        print(f"\n[CRASHED] Test crashed: {e}")
         sys.exit(2)

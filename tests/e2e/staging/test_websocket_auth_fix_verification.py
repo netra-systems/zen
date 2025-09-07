@@ -102,7 +102,15 @@ class TestWebSocketAuthFixVerification(StagingTestBase):
             print(f"[ERROR] Failed to load unified JWT secret: {e}")
             pytest.fail(f"JWT secret resolution failed: {e}")
         
-        # Step 2: Create test token using unified secret
+        # Step 2: Create test token using STAGING secret if available, otherwise unified secret
+        # This tests if staging token would work even if unified secret is wrong
+        token_secret = jwt_secret_staging if jwt_secret_staging else jwt_secret
+        token_secret_source = "JWT_SECRET_STAGING" if jwt_secret_staging else "unified_secret"
+        
+        print(f"[INFO] Creating test token using {token_secret_source}")
+        token_hash = hashlib.md5(token_secret.encode()).hexdigest()[:16]
+        print(f"[INFO] Token secret hash: {token_hash}")
+        
         test_payload = {
             "sub": f"websocket_test_user_{int(time.time())}",
             "email": "websocket-test@staging.netrasystems.ai", 
@@ -113,18 +121,35 @@ class TestWebSocketAuthFixVerification(StagingTestBase):
         }
         
         try:
-            test_token = jwt.encode(test_payload, jwt_secret, algorithm=jwt_algorithm)
-            print(f"[SUCCESS] Created test JWT token using unified secret")
+            test_token = jwt.encode(test_payload, token_secret, algorithm=jwt_algorithm)
+            print(f"[SUCCESS] Created test JWT token using {token_secret_source}")
             print(f"[INFO] Token payload user: {test_payload['sub']}")
         except Exception as e:
             print(f"[ERROR] Failed to create test token: {e}")
             pytest.fail(f"Token creation failed: {e}")
         
-        # Step 3: Verify token can be decoded with same secret
+        # Step 2a: Verify we can create a token with both secrets if they differ
+        if jwt_secret_staging and jwt_secret != jwt_secret_staging:
+            print(f"[CRITICAL] JWT secret mismatch detected!")
+            print(f"[CRITICAL] Unified secret hash: {hashlib.md5(jwt_secret.encode()).hexdigest()[:16]}")
+            print(f"[CRITICAL] Staging secret hash: {hashlib.md5(jwt_secret_staging.encode()).hexdigest()[:16]}")
+            print(f"[CRITICAL] This confirms the Five Whys analysis - different secrets are the root cause!")
+            
+            # Try creating token with unified secret too
+            try:
+                unified_test_token = jwt.encode(test_payload, jwt_secret, algorithm=jwt_algorithm)
+                print(f"[INFO] Also created token with unified secret for comparison")
+            except Exception as e:
+                print(f"[WARNING] Failed to create token with unified secret: {e}")
+                
+        else:
+            print(f"[INFO] Secrets match - no JWT secret mismatch")
+        
+        # Step 3: Verify token can be decoded with same secret used to create it
         try:
-            decoded_payload = jwt.decode(test_token, jwt_secret, algorithms=[jwt_algorithm])
+            decoded_payload = jwt.decode(test_token, token_secret, algorithms=[jwt_algorithm])
             assert decoded_payload["sub"] == test_payload["sub"]
-            print(f"[SUCCESS] Token decode verification passed")
+            print(f"[SUCCESS] Token decode verification passed with {token_secret_source}")
         except Exception as e:
             print(f"[ERROR] Token decode verification failed: {e}")
             pytest.fail(f"Token consistency check failed: {e}")

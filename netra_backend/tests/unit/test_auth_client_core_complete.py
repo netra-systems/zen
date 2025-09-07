@@ -82,7 +82,10 @@ class TestAuthServiceClient:
             mock_get_config.return_value = mock_config
             
             mock_env = MagicMock()
-            mock_env.get.return_value = None
+            mock_env.get.side_effect = lambda key, default='': {
+                'ENVIRONMENT': 'test',
+                'SERVICE_SECRET': None
+            }.get(key, default)
             mock_get_env.return_value = mock_env
             
             mock_get_current_env.return_value = "test"
@@ -766,7 +769,7 @@ def mock_dependencies():
          patch('netra_backend.app.clients.auth_client_core.OAuthConfigGenerator') as mock_oauth_gen, \
          patch('netra_backend.app.clients.auth_client_core.TracingManager') as mock_tracing, \
          patch('netra_backend.app.clients.auth_client_core.get_circuit_breaker') as mock_get_circuit, \
-         patch('netra_backend.app.clients.auth_client_core.get_configuration') as mock_get_config, \
+         patch('netra_backend.app.core.configuration.get_configuration') as mock_get_config, \
          patch('netra_backend.app.clients.auth_client_core.get_env') as mock_get_env, \
          patch('netra_backend.app.clients.auth_client_core.get_current_environment') as mock_get_current_env, \
          patch('netra_backend.app.clients.auth_client_core.is_production') as mock_is_prod:
