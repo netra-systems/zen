@@ -124,7 +124,20 @@ class WebSocketBridgeAdapter:
                                  parameters: Optional[Dict[str, Any]] = None) -> None:
         """Emit tool executing event."""
         if not self.has_websocket_bridge():
-            return
+            error_msg = (
+                f"CRITICAL: Agent {self._agent_name} missing WebSocket bridge - "
+                f"tool_executing event for {tool_name} will be lost! Users will not see tool usage transparency. "
+                f"Bridge={self._bridge is not None}, Run_ID={self._run_id}"
+            )
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+            
+            # HARD FAILURE: Raise exception instead of silent return
+            # Per CLAUDE.MD Section 6: Tool usage transparency is MISSION CRITICAL
+            raise RuntimeError(
+                f"Missing WebSocket bridge for tool_executing event. "
+                f"Agent: {self._agent_name}, Tool: {tool_name}, Bridge: {self._bridge is not None}, Run_ID: {self._run_id}. "
+                f"This violates SSOT requirement for mandatory WebSocket notifications."
+            )
         
         try:
             await self._bridge.notify_tool_executing(
@@ -140,7 +153,20 @@ class WebSocketBridgeAdapter:
                                  result: Optional[Dict[str, Any]] = None) -> None:
         """Emit tool completed event."""
         if not self.has_websocket_bridge():
-            return
+            error_msg = (
+                f"CRITICAL: Agent {self._agent_name} missing WebSocket bridge - "
+                f"tool_completed event for {tool_name} will be lost! Users will not see tool results. "
+                f"Bridge={self._bridge is not None}, Run_ID={self._run_id}"
+            )
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+            
+            # HARD FAILURE: Raise exception instead of silent return
+            # Per CLAUDE.MD Section 6: Tool results display is MISSION CRITICAL
+            raise RuntimeError(
+                f"Missing WebSocket bridge for tool_completed event. "
+                f"Agent: {self._agent_name}, Tool: {tool_name}, Bridge: {self._bridge is not None}, Run_ID: {self._run_id}. "
+                f"This violates SSOT requirement for mandatory WebSocket notifications."
+            )
         
         try:
             await self._bridge.notify_tool_completed(
