@@ -1590,6 +1590,16 @@ class UnifiedTestRunner:
             result = self._execute_single_category(category_name, args)
             results[category_name] = result
             
+            # Validate E2E test timing BEFORE recording results
+            if 'e2e' in category_name.lower():
+                timing_valid = self._validate_e2e_test_timing(category_name, result)
+                if not timing_valid:
+                    # Force test failure for 0-second e2e tests
+                    result["success"] = False
+                    result["errors"] = (result.get("errors", "") + 
+                                      "\n\n🚨 E2E TESTS FAILED: 0-second execution detected. "
+                                      "All e2e tests returning in 0 seconds are automatic hard failures.").strip()
+            
             # Record test results in tracker
             if self.test_tracker and TestRunRecord:
                 self._record_test_results(category_name, result, args.env)
@@ -2187,6 +2197,57 @@ class UnifiedTestRunner:
         test_counts["total"] = test_counts["passed"] + test_counts["failed"]
         
         return test_counts
+    
+    def _validate_e2e_test_timing(self, category_name: str, result: Dict) -> bool:
+        """Validate that e2e tests have non-zero execution time.
+        
+        CRITICAL: E2E tests returning in 0 seconds are automatic hard failures.
+        This indicates tests are not actually executing or are being skipped/mocked.
+        See STAGING_100_TESTS_REPORT.md for context.
+        """
+        if not category_name or 'e2e' not in category_name.lower():
+            return True  # Only validate e2e tests
+            
+        duration = result.get("duration", 0)
+        output = result.get("output", "")
+        
+        # Check for 0-second test patterns in output
+        import re
+        zero_time_pattern = r'\[(0\.00+s|0s)\]'  # Matches [0.00s], [0.000s], [0s]
+        zero_time_matches = re.findall(zero_time_pattern, output)
+        
+        # Count actual test executions with 0 time
+        test_pattern = r'(test_\w+).*?\[(\d+\.\d+s|\d+s)\]'
+        all_tests = re.findall(test_pattern, output)
+        zero_time_tests = [(test, time) for test, time in all_tests if time in ['0.00s', '0.000s', '0s']]
+        
+        if zero_time_tests:
+            print(f"\n{'='*60}")
+            print(f"🚨 CRITICAL E2E TEST FAILURE: 0-SECOND EXECUTION DETECTED")
+            print(f"{'='*60}")
+            print(f"Category: {category_name}")
+            print(f"Total tests with 0-second execution: {len(zero_time_tests)}")
+            print(f"\nTests that returned in 0 seconds (AUTOMATIC HARD FAIL):")
+            for test_name, exec_time in zero_time_tests[:10]:  # Show first 10
+                print(f"  ❌ {test_name}: {exec_time}")
+            if len(zero_time_tests) > 10:
+                print(f"  ... and {len(zero_time_tests) - 10} more")
+            print(f"\nThis indicates tests are:")
+            print(f"  - Not actually executing")
+            print(f"  - Being skipped/mocked inappropriately")
+            print(f"  - Missing proper async/await handling")
+            print(f"  - Not connecting to real services")
+            print(f"\nSee reports/staging/STAGING_100_TESTS_REPORT.md for details")
+            print(f"{'='*60}\n")
+            return False
+            
+        # Also check if the entire category ran in under 1 second (suspicious for e2e)
+        if duration < 1.0 and result.get("success", False):
+            print(f"\n⚠️  WARNING: E2E category '{category_name}' completed in {duration:.2f}s")
+            print(f"   This is suspiciously fast for e2e tests that should connect to real services.")
+            print(f"   Verify tests are actually executing and not being skipped.\n")
+            
+        return True
     
     def _record_test_results(self, category_name: str, result: Dict, environment: str):
         """Record test execution results in the tracker."""

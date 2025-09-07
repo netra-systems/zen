@@ -202,6 +202,7 @@ Before coding, conduct a rigorous analysis.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
   CRITICAL: Mocks = Abomination
+  * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) for auth flow examples.
   * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
@@ -216,6 +217,12 @@ Code is not "done" until it is validated in environments that mirror production.
 1.  **Local/CI:** Fast feedback with unit and integration tests.
 2.  **Development:** Integration/E2E tests against deployed services.
 ALWAYS use real services for testing. If they appear to not be available start or restarting them. If that too fails then hard fail the entire test suite.
+
+**🚨 E2E AUTH MANDATE:** Every E2E test MUST authenticate properly with the system (using real JWT tokens, OAuth flows, etc.) EXCEPT for the specific tests that validate the auth system itself. This requirement ensures:
+- Real multi-user isolation is tested
+- WebSocket connections use proper auth context
+- Agent executions happen within authenticated user sessions
+- See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) and [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
 
 CHEATING ON TESTS = ABOMINATION
 ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
@@ -455,6 +462,8 @@ python scripts/refresh_dev_services.py logs --services backend -f
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 FAKE TESTS ARE BAD
+
+**🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py) for SSOT auth patterns.
 
 **See [`TEST_CREATION_GUIDE.md`](reports/testing/TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
 **See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**

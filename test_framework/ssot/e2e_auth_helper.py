@@ -1,0 +1,351 @@
+"""
+SSOT E2E Authentication Helper - Single Source of Truth for All E2E Test Authentication
+
+This module provides the CANONICAL authentication helper for ALL e2e tests.
+It ensures proper JWT authentication flow for WebSocket and API connections.
+
+Business Value:
+- Prevents authentication-related test failures (403 errors)
+- Ensures consistent authentication across all e2e tests
+- Validates staging/production authentication flows
+
+CRITICAL: This is the SINGLE SOURCE OF TRUTH for e2e test authentication.
+All e2e tests MUST use this helper for authentication.
+"""
+
+import asyncio
+import json
+import time
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional, Tuple
+import httpx
+import aiohttp
+import jwt
+from dataclasses import dataclass
+
+from shared.isolated_environment import IsolatedEnvironment, get_env
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+from tests.e2e.jwt_token_helpers import JWTTestHelper
+
+
+@dataclass
+class E2EAuthConfig:
+    """Configuration for E2E authentication."""
+    auth_service_url: str = "http://localhost:8083"  # Test auth service
+    backend_url: str = "http://localhost:8002"       # Test backend
+    websocket_url: str = "ws://localhost:8002/ws"    # Test WebSocket
+    test_user_email: str = "e2e_test@example.com"
+    test_user_password: str = "test_password_123"
+    jwt_secret: str = "test-jwt-secret-key-unified-testing-32chars"
+    timeout: float = 10.0
+
+
+class E2EAuthHelper:
+    """
+    SSOT Authentication Helper for ALL E2E Tests.
+    
+    This helper provides:
+    1. JWT token generation and validation
+    2. Authentication flow (login/register)
+    3. WebSocket authentication headers
+    4. Bearer token headers for API calls
+    5. Token refresh handling
+    
+    CRITICAL: All e2e tests MUST use this helper for authentication.
+    """
+    
+    def __init__(self, config: Optional[E2EAuthConfig] = None):
+        """Initialize E2E authentication helper."""
+        self.config = config or E2EAuthConfig()
+        self.env = get_env()
+        self.jwt_helper = JWTTestHelper(environment="test")
+        self._cached_token: Optional[str] = None
+        self._token_expiry: Optional[datetime] = None
+        
+    def create_test_jwt_token(
+        self,
+        user_id: str = "test-user-123",
+        email: Optional[str] = None,
+        permissions: Optional[list] = None,
+        exp_minutes: int = 30
+    ) -> str:
+        """
+        Create a valid JWT token for testing.
+        
+        Args:
+            user_id: User ID for the token
+            email: User email (defaults to config email)
+            permissions: User permissions (defaults to ["read", "write"])
+            exp_minutes: Token expiry in minutes
+            
+        Returns:
+            Valid JWT token string
+        """
+        email = email or self.config.test_user_email
+        permissions = permissions or ["read", "write"]
+        
+        # Create token payload
+        payload = {
+            "sub": user_id,
+            "email": email,
+            "permissions": permissions,
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=exp_minutes),
+            "type": "access",
+            "iss": "netra-auth-service",
+            "jti": f"test-{int(time.time())}"
+        }
+        
+        # Sign token with test secret
+        token = jwt.encode(payload, self.config.jwt_secret, algorithm="HS256")
+        
+        # Cache token for reuse
+        self._cached_token = token
+        self._token_expiry = payload["exp"]
+        
+        return token
+    
+    def get_auth_headers(self, token: Optional[str] = None) -> Dict[str, str]:
+        """
+        Get authentication headers for API requests.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            Headers dict with Authorization Bearer token
+        """
+        token = token or self._get_valid_token()
+        return {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+    
+    def get_websocket_headers(self, token: Optional[str] = None) -> Dict[str, str]:
+        """
+        Get authentication headers for WebSocket connections.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            Headers dict for WebSocket authentication
+        """
+        token = token or self._get_valid_token()
+        return {
+            "Authorization": f"Bearer {token}",
+            "X-User-ID": self._extract_user_id(token),
+            "X-Test-Mode": "true"
+        }
+    
+    async def authenticate_user(
+        self,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        force_new: bool = False
+    ) -> Tuple[str, Dict[str, Any]]:
+        """
+        Authenticate user via auth service (login or register).
+        
+        Args:
+            email: User email (defaults to config)
+            password: User password (defaults to config)
+            force_new: Force new authentication even if cached
+            
+        Returns:
+            Tuple of (token, user_data)
+        """
+        # Use cached token if valid and not forcing new
+        if not force_new and self._cached_token and self._is_token_valid():
+            user_data = self._decode_token(self._cached_token)
+            return self._cached_token, user_data
+        
+        email = email or self.config.test_user_email
+        password = password or self.config.test_user_password
+        
+        async with aiohttp.ClientSession() as session:
+            # Try login first
+            login_url = f"{self.config.auth_service_url}/auth/login"
+            login_data = {"email": email, "password": password}
+            
+            async with session.post(login_url, json=login_data) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    token = data.get("access_token")
+                    self._cached_token = token
+                    self._token_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
+                    return token, data.get("user", {})
+            
+            # If login fails, try to register
+            register_url = f"{self.config.auth_service_url}/auth/register"
+            register_data = {
+                "email": email,
+                "password": password,
+                "name": f"E2E Test User {int(time.time())}"
+            }
+            
+            async with session.post(register_url, json=register_data) as resp:
+                if resp.status in [200, 201]:
+                    data = await resp.json()
+                    token = data.get("access_token")
+                    self._cached_token = token
+                    self._token_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
+                    return token, data.get("user", {})
+                else:
+                    error_text = await resp.text()
+                    raise Exception(f"Authentication failed: {resp.status} - {error_text}")
+    
+    async def validate_token(self, token: str) -> bool:
+        """
+        Validate JWT token with auth service.
+        
+        Args:
+            token: JWT token to validate
+            
+        Returns:
+            True if token is valid
+        """
+        validate_url = f"{self.config.auth_service_url}/auth/validate"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(validate_url, headers=headers) as resp:
+                return resp.status == 200
+    
+    def _get_valid_token(self) -> str:
+        """Get a valid token, creating new if needed."""
+        if self._cached_token and self._is_token_valid():
+            return self._cached_token
+        
+        # Create new token
+        return self.create_test_jwt_token()
+    
+    def _is_token_valid(self) -> bool:
+        """Check if cached token is still valid."""
+        if not self._cached_token or not self._token_expiry:
+            return False
+        
+        # Check expiry with 1 minute buffer
+        buffer = timedelta(minutes=1)
+        return datetime.now(timezone.utc) < (self._token_expiry - buffer)
+    
+    def _decode_token(self, token: str) -> Dict[str, Any]:
+        """Decode JWT token without validation (for testing)."""
+        try:
+            # Decode without verification for test inspection
+            return jwt.decode(token, options={"verify_signature": False})
+        except Exception:
+            return {}
+    
+    def _extract_user_id(self, token: str) -> str:
+        """Extract user ID from token."""
+        decoded = self._decode_token(token)
+        return decoded.get("sub", "unknown-user")
+    
+    async def create_authenticated_session(self) -> aiohttp.ClientSession:
+        """
+        Create an authenticated aiohttp session.
+        
+        Returns:
+            ClientSession with auth headers set
+        """
+        token, _ = await self.authenticate_user()
+        headers = self.get_auth_headers(token)
+        return aiohttp.ClientSession(headers=headers)
+    
+    def create_sync_authenticated_client(self) -> httpx.Client:
+        """
+        Create an authenticated httpx client for sync tests.
+        
+        Returns:
+            httpx.Client with auth headers set
+        """
+        token = self.create_test_jwt_token()
+        headers = self.get_auth_headers(token)
+        return httpx.Client(headers=headers, base_url=self.config.backend_url)
+
+
+class E2EWebSocketAuthHelper(E2EAuthHelper):
+    """
+    Extended helper specifically for WebSocket authentication in E2E tests.
+    """
+    
+    async def get_authenticated_websocket_url(self, token: Optional[str] = None) -> str:
+        """
+        Get WebSocket URL with authentication token as query parameter.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            WebSocket URL with auth token
+        """
+        token = token or self._get_valid_token()
+        return f"{self.config.websocket_url}?token={token}"
+    
+    async def connect_authenticated_websocket(self):
+        """
+        Connect to WebSocket with proper authentication.
+        
+        Returns:
+            Authenticated WebSocket connection
+        """
+        import websockets
+        
+        # Get or create token
+        token = self._get_valid_token()
+        headers = self.get_websocket_headers(token)
+        
+        # Connect with auth headers
+        websocket = await websockets.connect(
+            self.config.websocket_url,
+            extra_headers=headers
+        )
+        
+        return websocket
+    
+    async def test_websocket_auth_flow(self) -> bool:
+        """
+        Test complete WebSocket authentication flow.
+        
+        Returns:
+            True if authentication successful
+        """
+        try:
+            # Create token
+            token = self.create_test_jwt_token()
+            
+            # Validate token
+            is_valid = await self.validate_token(token)
+            if not is_valid:
+                return False
+            
+            # Connect to WebSocket
+            ws = await self.connect_authenticated_websocket()
+            
+            # Send test message
+            test_msg = json.dumps({
+                "type": "ping",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            await ws.send(test_msg)
+            
+            # Wait for response (with timeout)
+            response = await asyncio.wait_for(ws.recv(), timeout=5.0)
+            
+            # Close connection
+            await ws.close()
+            
+            return True
+            
+        except Exception as e:
+            print(f"WebSocket auth test failed: {e}")
+            return False
+
+
+# SSOT Export - All e2e tests MUST use these
+__all__ = [
+    "E2EAuthConfig",
+    "E2EAuthHelper", 
+    "E2EWebSocketAuthHelper"
+]

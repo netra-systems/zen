@@ -205,7 +205,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # Extract user context from WebSocket connection (JWT authentication)
         # CRITICAL SECURITY FIX: No fallbacks allowed in staging/production
         try:
-            user_context, auth_info = extract_websocket_user_context(websocket)
+            user_context, auth_info = await extract_websocket_user_context(websocket)
             logger.info(f"Extracted user context for WebSocket: {user_context}")
             # Create isolated WebSocket manager for this user context
             ws_manager = create_websocket_manager(user_context)

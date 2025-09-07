@@ -24,10 +24,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-from tests.e2e.jwt_token_helpers import JWTTestHelper
+# SSOT Authentication imports per CLAUDE.md
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import proper dependencies
-from tests.e2e.config import TestTokenManager, TEST_SECRETS
 from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
@@ -35,20 +36,22 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
+from unittest.mock import patch
 
 logger = central_logger.get_logger(__name__)
 
 
-# Helper function for creating test tokens
+# Use SSOT authentication helper per CLAUDE.md
+_auth_helper = E2EAuthHelper()
+
 def create_test_token(user_id: str, exp_offset: int = 900) -> str:
-    """Create test JWT token with configurable expiry offset."""
-    jwt_helper = JWTTestHelper()
-    token = jwt_helper.create_access_token(
+    """Create test JWT token using SSOT auth helper."""
+    return _auth_helper.create_test_jwt_token(
         user_id=user_id,
-        email=f"{user_id}@test.com", 
-        permissions=["read", "write"]
+        email=f"{user_id}@test.com",
+        permissions=["read", "write"],
+        exp_minutes=exp_offset // 60
     )
-    return token
 
 
 class WebSocketBuilder:

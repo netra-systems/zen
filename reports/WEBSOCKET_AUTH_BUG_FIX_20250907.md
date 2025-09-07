@@ -180,18 +180,133 @@ sequenceDiagram
 - **Development Velocity:** Team cannot validate changes in staging environment
 - **Customer Impact:** Potential production issues if staging validation is bypassed
 
+## SYSTEM-WIDE FIX PLAN
+
+Based on the Five Whys analysis, here is the comprehensive fix plan:
+
+### Phase 1: Immediate Diagnostic Enhancement ✅ COMPLETED
+- [x] Added comprehensive logging to `UserContextExtractor._get_jwt_secret()`
+- [x] Added enhanced JWT validation logging in `validate_and_decode_jwt()` 
+- [x] Created diagnostic test `tests/debug/websocket_auth_staging_debug.py`
+- [x] Enhanced error messages to distinguish JWT signature failures from other auth errors
+
+### Phase 2: Root Cause Verification (CURRENT)
+**Primary Fix Hypothesis:** JWT secret resolution inconsistency between REST and WebSocket auth
+
+#### Fix Option A: Ensure Consistent JWT Secret Resolution
+1. **Modify WebSocket Authentication to use identical secret source as REST auth**
+   - Update `UserContextExtractor` to use same resolution path as `FastAPIAuthMiddleware`
+   - Ensure both call `validate_token_with_resilience()` or equivalent unified function
+
+#### Fix Option B: Unified JWT Secret Manager Enhancement  
+2. **Enhance shared JWT secret manager for staging environment**
+   - Add staging-specific fallback logic for GCP Secret Manager
+   - Implement secret resolution caching with cross-service consistency
+   - Add environment-specific validation and error handling
+
+#### Fix Option C: WebSocket Auth Middleware Alignment
+3. **Align WebSocket authentication logic with REST middleware patterns**
+   - Create WebSocket-compatible version of `validate_token_with_resilience()`
+   - Implement same JWT secret resolution and caching logic
+   - Ensure consistent error handling and logging
+
+### Phase 3: Implementation Priority (NEXT)
+
+**HIGH PRIORITY FIXES:**
+
+1. **File:** `netra_backend/app/websocket_core/user_context_extractor.py`
+   ```python
+   # CHANGE: Use same JWT validation as REST middleware
+   from netra_backend.app.clients.auth_client_core import validate_token_with_resilience
+   
+   # Replace direct JWT secret resolution with resilient validation
+   validation_result = await validate_token_with_resilience(token, AuthOperationType.TOKEN_VALIDATION)
+   ```
+
+2. **File:** `shared/jwt_secret_manager.py`  
+   ```python
+   # ENHANCEMENT: Add staging environment debugging
+   def get_jwt_secret(self) -> str:
+       # Add comprehensive logging for staging environment
+       # Ensure GCP Secret Manager integration works properly
+       # Add cross-service consistency validation
+   ```
+
+3. **File:** Environment Configuration (Staging)
+   ```bash
+   # ENSURE: Consistent JWT secret configuration
+   export JWT_SECRET_STAGING="<consistent-secret>"
+   # OR ensure GCP Secret Manager has jwt-secret-staging
+   ```
+
+**MEDIUM PRIORITY FIXES:**
+
+4. **File:** `netra_backend/app/routes/websocket.py` 
+   - Add fallback authentication using REST middleware validation logic
+   - Implement consistent error handling with HTTP status code mapping
+
+5. **File:** `netra_backend/app/core/middleware_setup.py`
+   - Consider creating WebSocket-aware auth middleware that handles both HTTP and WS
+
+### Phase 4: Testing and Validation
+
+**Test Files to Create/Update:**
+1. `tests/e2e/staging/test_websocket_auth_fix.py` - Reproduce and verify fix
+2. `tests/unit/test_jwt_secret_consistency.py` - Unit test for JWT secret resolution  
+3. Update existing staging tests to validate WebSocket auth works
+
+**Validation Checklist:**
+- [ ] Run diagnostic test to confirm JWT secret consistency
+- [ ] Verify WebSocket connections succeed with valid tokens
+- [ ] Ensure REST API authentication continues to work
+- [ ] Test both valid and invalid JWT tokens  
+- [ ] Validate error messages are clear and actionable
+
+### Phase 5: Deployment and Monitoring
+
+**Staging Deployment:**
+1. Deploy enhanced logging and diagnostic capabilities
+2. Run comprehensive diagnostic test to identify exact root cause
+3. Deploy identified fix (likely JWT secret consistency)
+4. Validate all 6 failing staging tests now pass
+
+**Production Considerations:**
+- Same fix will likely be needed for production environment
+- Ensure JWT_SECRET_PRODUCTION is consistently configured
+- Plan for gradual rollout with monitoring
+
 ## EXPECTED FIX TIMELINE
 
-- **Diagnosis:** 2-4 hours (comprehensive logging and testing)
-- **Fix Implementation:** 1-2 hours (JWT secret consistency)  
-- **Validation:** 1-2 hours (staging test verification)
-- **Total:** 4-8 hours for complete resolution
+- **✅ Phase 1 (Diagnostic Enhancement):** 2 hours - COMPLETED
+- **🔄 Phase 2 (Root Cause Verification):** 1-2 hours - IN PROGRESS
+- **⏳ Phase 3 (Implementation):** 2-3 hours - PLANNED  
+- **⏳ Phase 4 (Testing & Validation):** 1-2 hours - PLANNED
+- **⏳ Phase 5 (Deployment):** 1 hour - PLANNED
+- **Total:** 7-10 hours for complete resolution
 
 ## STATUS LOG
 
-- **2025-09-07 Initial Investigation:** Identified separate auth mechanisms for REST vs WebSocket
-- **2025-09-07 Five Whys Analysis:** Completed root cause analysis focusing on JWT secret resolution
-- **Next:** Add comprehensive logging and create reproduction test
+- **2025-09-07 09:00 Initial Investigation:** Identified separate auth mechanisms for REST vs WebSocket
+- **2025-09-07 10:00 Five Whys Analysis:** Completed root cause analysis focusing on JWT secret resolution
+- **2025-09-07 11:00 Enhanced Logging:** Added comprehensive diagnostic logging to WebSocket authentication
+- **2025-09-07 12:00 Diagnostic Test:** Created comprehensive test to identify exact JWT secret inconsistency
+- **2025-09-07 12:30 Fix Planning:** Created detailed system-wide fix plan with phases
+- **Next:** Run diagnostic test to confirm exact root cause, then implement primary fix
+
+## DIAGNOSTIC TEST RESULTS
+
+**To run the diagnostic test:**
+```bash
+cd C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+python tests/debug/websocket_auth_staging_debug.py
+```
+
+This will:
+1. Compare JWT secrets used by different components
+2. Test REST API authentication with same token
+3. Test WebSocket authentication with same token
+4. Identify exact point of failure
+5. Generate actionable recommendations
 
 ---
 *This report will be updated as investigation progresses and fixes are implemented.*
