@@ -147,10 +147,14 @@ export class UnifiedWebSocketMock {
 
     console.log('UnifiedWebSocketMock: Created with URL:', url, 'Config:', this.config);
 
-    // Add to global tracking for cleanup
-    if (global.mockWebSocketInstances) {
-      global.mockWebSocketInstances.push(this);
+    // Initialize global tracking array if it doesn't exist
+    if (!global.mockWebSocketInstances) {
+      global.mockWebSocketInstances = [];
     }
+    
+    // Add to global tracking for cleanup
+    global.mockWebSocketInstances.push(this);
+    console.log('UnifiedWebSocketMock: Added to global tracking, total instances:', global.mockWebSocketInstances.length);
 
     // Initialize connection simulation with proper timing
     if (this.config.autoConnect) {
@@ -376,7 +380,7 @@ export const WebSocketMockConfigs = {
     autoConnect: true,
     simulateNetworkDelay: false,
     enableErrorSimulation: true,
-    errorDelay: 10
+    errorDelay: 0
   },
   
   // Delayed error - for timeout testing
@@ -460,6 +464,12 @@ export const WebSocketTestHelpers = {
    * Simulate agent event sequence for testing
    */
   simulateAgentEvents: async (ws: UnifiedWebSocketMock, threadId: string): Promise<void> => {
+    // Ensure WebSocket is in OPEN state before sending events
+    if (ws.readyState !== UnifiedWebSocketMock.OPEN) {
+      console.warn('WebSocket not in OPEN state, cannot simulate events');
+      return;
+    }
+
     const events = [
       { type: 'agent_started', data: { thread_id: threadId, agent: 'test_agent' }},
       { type: 'agent_thinking', data: { thread_id: threadId, reasoning: 'Processing...' }},
@@ -469,9 +479,11 @@ export const WebSocketTestHelpers = {
     ];
 
     for (const event of events) {
-      ws.simulateMessage(event);
-      // Small delay between events for realistic timing
-      await new Promise(resolve => setTimeout(resolve, 10));
+      if (ws.readyState === UnifiedWebSocketMock.OPEN) {
+        ws.simulateMessage(event);
+        // Small delay between events for realistic timing
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
     }
   }
 };

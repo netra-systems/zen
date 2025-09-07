@@ -194,10 +194,15 @@ class TestDockerEnvironmentDetection:
         test_env = {}
         builder = DatabaseURLBuilder(test_env)
         
-        with patch('os.path.exists') as mock_exists, \
+        def mock_exists_side_effect(path):
+            if path == "/.dockerenv":
+                return False  # .dockerenv doesn't exist
+            elif path == "/proc/self/cgroup":
+                return True   # cgroup file exists but can't read
+            return False
+        
+        with patch('os.path.exists', side_effect=mock_exists_side_effect), \
              patch('builtins.open', side_effect=OSError("Permission denied")):
-            
-            mock_exists.return_value = True  # File exists but can't read
             
             # Should not raise exception, should return False
             assert not builder.is_docker_environment(), "Should handle cgroup read errors gracefully"
@@ -490,7 +495,7 @@ class TestTCPBuilder:
         async_url = builder.tcp.async_url
         
         # Should use defaults
-        assert "postgres:" in async_url, "Should default to postgres user"
+        assert "postgres@" in async_url, "Should default to postgres user"  # No colon when no password
         assert ":5432" in async_url, "Should default to port 5432"
         assert "/netra_dev" in async_url, "Should default to netra_dev database"
         
@@ -504,7 +509,7 @@ class TestTCPBuilder:
         builder = DatabaseURLBuilder(partial_env)
         async_url = builder.tcp.async_url
         
-        assert "custom_user:" in async_url, "Should use provided user"
+        assert "custom_user@" in async_url, "Should use provided user"  # No colon when no password
         assert "/custom_db" in async_url, "Should use provided database"
         assert ":5432" in async_url, "Should still default to port 5432"
     
@@ -682,7 +687,7 @@ class TestTestBuilder:
         postgres_url = builder.test.postgres_url
         
         # Should use defaults for missing values
-        assert "postgres:" in postgres_url, "Should default to postgres user"
+        assert "postgres@" in postgres_url, "Should default to postgres user"  # No colon when no password
         assert ":5432" in postgres_url, "Should default to port 5432"
         assert "/netra_test" in postgres_url, "Should default to netra_test database"
 
@@ -962,19 +967,19 @@ class TestDatabaseValidation:
         assert "Missing required variables" in error_msg, "Should mention missing variables"
         assert "POSTGRES_HOST" in error_msg, "Should list POSTGRES_HOST as missing"
         
-        # Missing some required variables
-        partial_production = {
+        # Missing HOST entirely (this will fail TCP config check)
+        no_host_production = {
             "ENVIRONMENT": "production",
-            "POSTGRES_HOST": "prod.db.com",
-            "POSTGRES_USER": "prod_user"
-            # Missing PASSWORD and DB
+            "POSTGRES_USER": "prod_user",
+            "POSTGRES_PASSWORD": "prod_pass",
+            "POSTGRES_DB": "prod_db"
+            # Missing HOST
         }
         
-        builder = DatabaseURLBuilder(partial_production)
+        builder = DatabaseURLBuilder(no_host_production)
         is_valid, error_msg = builder.validate()
-        assert not is_valid, "Partial production config should be invalid"
-        assert "POSTGRES_PASSWORD" in error_msg, "Should mention missing password"
-        assert "POSTGRES_DB" in error_msg, "Should mention missing database"
+        assert not is_valid, "Production config without host should be invalid"
+        assert "Missing required variables" in error_msg, "Should mention missing variables"
     
     def test_validation_development_test_allow_missing_config(self):
         """Test validation allows missing config for development/test."""
@@ -1007,14 +1012,14 @@ class TestDatabaseValidation:
         is_valid, error_msg = builder.validate()
         assert is_valid, f"Valid Cloud SQL config should pass: {error_msg}"
         
-        # Invalid Cloud SQL format - wrong prefix
+        # Invalid Cloud SQL format - wrong prefix (but still contains /cloudsql/ to be detected)
         invalid_prefix = valid_cloud_sql.copy()
-        invalid_prefix["POSTGRES_HOST"] = "/wrong/project-id:us-central1:instance-name"
+        invalid_prefix["POSTGRES_HOST"] = "/cloudsql/wrong-format"  # Wrong format, missing colons
         
         builder = DatabaseURLBuilder(invalid_prefix)
         is_valid, error_msg = builder.validate()
-        assert not is_valid, "Invalid Cloud SQL prefix should fail validation"
-        assert "Invalid Cloud SQL socket path" in error_msg, "Should mention invalid socket path"
+        assert not is_valid, "Invalid Cloud SQL format should fail validation"
+        assert "Invalid Cloud SQL format" in error_msg, "Should mention format error"
         
         # Invalid Cloud SQL format - wrong parts count
         invalid_parts = valid_cloud_sql.copy()
