@@ -53,3 +53,26 @@ set E2E_TEST_ENV=staging && python -m pytest tests/e2e/test_real_agent_data_help
 - Python: 3.12.4
 - pytest: 8.4.1
 - Working Directory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+
+## Iteration 2: After Fixing Syntax Error
+
+### Fixed Issues
+1. **SyntaxError in isolated_environment.py**: Fixed global statement placement issue at line 1150
+   - Moved `global _env_instance` to beginning of function
+   - Error was preventing all test imports
+
+### Current Status After Fix
+
+**Primary Issue**: pytest capture I/O error
+- Tests collect successfully (0-58 items detected)
+- Crash occurs during pytest cleanup: `ValueError: I/O operation on closed file`
+- This is a pytest infrastructure issue, not test code issue
+
+### Test Results Summary
+1. **WebSocket staging tests**: ✅ 5/5 PASSED
+2. **AI Optimization tests**: ❌ Collection succeeds, execution fails (I/O error)
+3. **Data Helper tests**: ❌ Still not collecting properly
+4. **Triage tests**: ❌ Still not collecting properly
+
+### Critical Finding
+The staging tests that work (test_1_websocket_events_staging.py) use a simpler test structure with `StagingTestBase` class. The failing data helper tests use complex inheritance with `BaseE2ETest` that has `__init__` methods which pytest doesn't handle well.

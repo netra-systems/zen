@@ -2639,6 +2639,77 @@ jest.mock('@/services/threadLoadingService', () => ({
   }
 }));
 
+// ============================================================================  
+// UNIFIED THREAD SERVICE MOCK  
+// ============================================================================
+// This provides mock threads for ChatSidebar tests
+jest.mock('@/services/threadService', () => {
+  const mockThreads = [
+    {
+      id: 'thread-1',
+      title: 'First Thread',
+      created_at: Date.now() - 3600000, // 1 hour ago
+      updated_at: Date.now() - 1800000, // 30 minutes ago
+      metadata: {
+        title: 'First Thread',
+        last_message: 'Hello, this is the first thread'
+      }
+    },
+    {
+      id: 'thread-2', 
+      title: 'Second Thread',
+      created_at: Date.now() - 7200000, // 2 hours ago
+      updated_at: Date.now() - 900000, // 15 minutes ago
+      metadata: {
+        title: 'Second Thread',
+        last_message: 'This is the second thread'
+      }
+    },
+    {
+      id: 'thread-3',
+      title: 'Third Thread', 
+      created_at: Date.now() - 10800000, // 3 hours ago
+      updated_at: Date.now() - 600000, // 10 minutes ago
+      metadata: {
+        title: 'Third Thread',
+        last_message: 'This is the third thread'
+      }
+    }
+  ];
+
+  return {
+    ThreadService: {
+      listThreads: jest.fn(async () => {
+        console.log('ThreadService: returning mock threads');
+        return [...mockThreads];
+      }),
+      createThread: jest.fn(async () => {
+        const newThreadId = `new-thread-${Date.now()}`;
+        console.log(`ThreadService: creating new thread ${newThreadId}`);
+        const newThread = {
+          id: newThreadId,
+          title: 'New Thread',
+          created_at: Date.now(),
+          updated_at: Date.now(),
+          metadata: {
+            title: 'New Thread',
+            last_message: ''
+          }
+        };
+        mockThreads.unshift(newThread);
+        return newThread;
+      }),
+      getThread: jest.fn(async (threadId) => {
+        const thread = mockThreads.find(t => t.id === threadId);
+        if (thread) {
+          return thread;
+        }
+        throw new Error(`Thread ${threadId} not found`);
+      })
+    }
+  };
+});
+
 jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
   useMessageHistory: jest.fn(() => ({
     messageHistory: [],

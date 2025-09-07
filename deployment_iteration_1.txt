@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\deploy_to_gcp.py", line 35, in <module>
+    from scripts.gcp_auth_config import GCPAuthConfig
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\gcp_auth_config.py", line 38, in <module>
+    from shared.isolated_environment import get_env
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\shared\isolated_environment.py", line 1146
+    logger.warning(
+                  ^
+SyntaxError: '(' was never closed

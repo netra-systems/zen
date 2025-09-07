@@ -101,21 +101,21 @@ def test_strengthened_singleton():
     
     if len(all_instance_ids) == 1:
         instance_id = list(all_instance_ids)[0]
-        print(f"✓ SINGLETON CONSISTENCY VERIFIED: All accesses returned ID {instance_id}")
+        print(f"SINGLETON CONSISTENCY VERIFIED: All accesses returned ID {instance_id}")
         
         # Verify thread-level consistency
         consistent_threads = sum(1 for _, consistent in consistency_checks if consistent)
         total_threads = len(consistency_checks)
-        print(f"✓ THREAD-LEVEL CONSISTENCY: {consistent_threads}/{total_threads} threads consistent")
+        print(f"THREAD-LEVEL CONSISTENCY: {consistent_threads}/{total_threads} threads consistent")
         
         if consistent_threads == total_threads:
-            print("✓ PERFECT THREAD SAFETY: All threads saw consistent singleton")
+            print("PERFECT THREAD SAFETY: All threads saw consistent singleton")
             return True
         else:
-            print("⚠ THREAD INCONSISTENCY: Some threads saw multiple IDs")
+            print("THREAD INCONSISTENCY: Some threads saw multiple IDs")
             return False
     else:
-        print("✗ SINGLETON VIOLATION: Multiple instance IDs detected")
+        print("SINGLETON VIOLATION: Multiple instance IDs detected")
         for instance_id in all_instance_ids:
             count = sum(1 for result in instances_collected if result[1] == instance_id)
             print(f"  ID {instance_id}: {count} occurrences")
@@ -147,10 +147,10 @@ def test_singleton_monitoring():
     print(f"All instances identical: {all_identical}")
     
     if all_identical:
-        print("✓ SINGLETON MONITORING: All access methods return same instance")
+        print("SINGLETON MONITORING: All access methods return same instance")
         return True
     else:
-        print("✗ SINGLETON MONITORING FAILED: Instances are not identical")
+        print("SINGLETON MONITORING FAILED: Instances are not identical")
         return False
 
 if __name__ == "__main__":
