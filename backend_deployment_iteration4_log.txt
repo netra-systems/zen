@@ -43,25 +43,25 @@ UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 309: char
 
 🔐 Phase 2: Validating Secrets Configuration...
 Checking all required secrets in Secret Manager...
+  ✅ Secret configured: fernet-key-staging
   ✅ Secret configured: jwt-secret-key-staging
   ✅ Secret configured: postgres-password-staging
-  ✅ Secret configured: redis-url-staging
-  ✅ Secret configured: fernet-key-staging
-  ✅ Secret configured: jwt-secret-staging
-  ✅ Secret configured: postgres-user-staging
-  ✅ Secret configured: oauth-hmac-secret-staging
-  ✅ Secret configured: service-id-staging
-  ✅ Secret configured: openai-api-key-staging
-  ✅ Secret configured: service-secret-staging
-  ✅ Secret configured: redis-password-staging
-  ✅ Secret configured: google-oauth-client-secret-staging
-  ✅ Secret configured: postgres-host-staging
-  ✅ Secret configured: postgres-db-staging
-  ✅ Secret configured: secret-key-staging
-  ✅ Secret configured: gemini-api-key-staging
   ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: oauth-hmac-secret-staging
   ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: jwt-secret-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: google-oauth-client-secret-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: gemini-api-key-staging
   ✅ Secret configured: google-oauth-client-id-staging
+  ✅ Secret configured: postgres-db-staging
 
 ✅ All required secrets are configured
    Service Filter: backend
@@ -78,7 +78,7 @@ Checking all required secrets in Secret Manager...
 #0 building with "desktop-linux" instance using docker driver
 
 #1 [internal] load build definition from backend.staging.alpine.Dockerfile
-#1 transferring dockerfile: 4.44kB 0.0s done
+#1 transferring dockerfile: 4.44kB done
 #1 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
 #1 DONE 0.0s
 
@@ -86,42 +86,42 @@ Checking all required secrets in Secret Manager...
 #2 DONE 0.0s
 
 #3 [internal] load metadata for docker.io/library/python:3.11-alpine3.19
-#3 DONE 0.9s
+#3 DONE 0.7s
 
 #4 [internal] load .dockerignore
-#4 transferring context: 2.79kB 0.1s done
-#4 DONE 0.1s
+#4 transferring context: 2.79kB done
+#4 DONE 0.0s
 
 #5 [builder 1/5] FROM docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f
-#5 resolve docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f 0.1s done
-#5 DONE 0.1s
+#5 resolve docker.io/library/python:3.11-alpine3.19@sha256:135b0db9b7c3e33d654ba8893b63cbe9394768cc64fc2a2f283148125ae8aa1f 0.0s done
+#5 DONE 0.0s
 
 #6 [internal] load build context
-#6 transferring context: 3.88MB 0.5s done
-#6 DONE 0.5s
+#6 transferring context: 4.00MB 0.4s done
+#6 DONE 0.4s
 
-#7 [builder 3/5] WORKDIR /build
+#7 [stage-1 4/8] WORKDIR /app
 #7 CACHED
 
 #8 [builder 4/5] COPY requirements.txt .
 #8 CACHED
 
-#9 [stage-1 3/8] RUN addgroup -g 1000 netra &&     adduser -D -u 1000 -G netra netra &&     mkdir -p /app/logs /app/data /app/tmp /app/scripts &&     chown -R netra:netra /app
+#9 [builder 5/5] RUN --mount=type=cache,target=/root/.cache/pip     pip install --no-cache-dir --user     --no-warn-script-location     --disable-pip-version-check     -r requirements.txt
 #9 CACHED
 
-#10 [stage-1 4/8] WORKDIR /app
+#10 [stage-1 6/8] COPY --chown=netra:netra shared /app/shared
 #10 CACHED
 
-#11 [stage-1 6/8] COPY --chown=netra:netra shared /app/shared
+#11 [builder 2/5] RUN apk add --no-cache     gcc     musl-dev     libffi-dev     postgresql-dev     make     g++     linux-headers     rust     cargo     && rm -rf /var/cache/apk/*
 #11 CACHED
 
-#12 [stage-1 2/8] RUN apk add --no-cache     libpq     curl     tini     lz4-libs     libgcc     libstdc++     ca-certificates     && rm -rf /var/cache/apk/*
+#12 [stage-1 3/8] RUN addgroup -g 1000 netra &&     adduser -D -u 1000 -G netra netra &&     mkdir -p /app/logs /app/data /app/tmp /app/scripts &&     chown -R netra:netra /app
 #12 CACHED
 
-#13 [builder 2/5] RUN apk add --no-cache     gcc     musl-dev     libffi-dev     postgresql-dev     make     g++     linux-headers     rust     cargo     && rm -rf /var/cache/apk/*
+#13 [builder 3/5] WORKDIR /build
 #13 CACHED
 
-#14 [builder 5/5] RUN --mount=type=cache,target=/root/.cache/pip     pip install --no-cache-dir --user     --no-warn-script-location     --disable-pip-version-check     -r requirements.txt
+#14 [stage-1 2/8] RUN apk add --no-cache     libpq     curl     tini     lz4-libs     libgcc     libstdc++     ca-certificates     && rm -rf /var/cache/apk/*
 #14 CACHED
 
 #15 [stage-1 5/8] COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
@@ -131,145 +131,136 @@ Checking all required secrets in Secret Manager...
 #16 CACHED
 
 #17 [stage-1 8/8] COPY --chown=netra:netra netra_backend /app/netra_backend
-#17 DONE 0.6s
+#17 DONE 0.4s
 
 #18 exporting to image
 #18 exporting layers
-#18 exporting layers 1.6s done
-#18 exporting manifest sha256:609dcf1e01b4dba7c2f67ebec776e9dff052faa3fbc24838cd94bc59c93069bd 0.0s done
-#18 exporting config sha256:0fe749e7c8ce93a2c7debc6b657aecb8b0a1b20aaca2be332c3180b618442fe4 0.0s done
-#18 exporting attestation manifest sha256:dc74e04d5f2d1f715d934be3e5cebb24111a64bdedb7009fc4402758c9464a30 0.0s done
-#18 exporting manifest list sha256:3def933690b9c9db90243c406a3287ec844cb2de9481ce39657085ea148ef539 0.0s done
+#18 exporting layers 1.3s done
+#18 exporting manifest sha256:2ff7f033221fc29cb5477c06d459bc2a938b0e42098f03925dc87853e20f6024
+#18 exporting manifest sha256:2ff7f033221fc29cb5477c06d459bc2a938b0e42098f03925dc87853e20f6024 0.0s done
+#18 exporting config sha256:460c575222d5ec514b8f53a39411effc7c62bb86af499150ae7553178af25dde 0.0s done
+#18 exporting attestation manifest sha256:fd508ba3847b6806407d69cdeab5369ec41f24cae23ac4907f915dd15133c33c 0.0s done
+#18 exporting manifest list sha256:5cdae716dec0ba2b7387c261c01133fb6605379924fd5c0086f44a709933d4ad 0.0s done
 #18 naming to gcr.io/netra-staging/netra-backend-staging:latest done
 #18 unpacking to gcr.io/netra-staging/netra-backend-staging:latest
 #18 unpacking to gcr.io/netra-staging/netra-backend-staging:latest 0.5s done
-#18 DONE 2.2s
+#18 DONE 2.0s
 
  [33m1 warning found (use docker --debug to expand):
 [0m - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 5)
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/oqxfn2zswm8zw2p33wnm3vizc
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/520m264kewygfww9649v9tnbq
   ✅ Built successfully, now pushing to registry...
   Configuring Docker authentication for GCR...
   ✅ Docker authentication configured successfully
 The push refers to repository [gcr.io/netra-staging/netra-backend-staging]
-4f4fb700ef54: Waiting
-a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
+859ad86189be: Waiting
 7a01739510fb: Waiting
-e5f8952e42b7: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
 a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
-7a01739510fb: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
 e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
+4e624f90e9c4: Waiting
+dfc7acfc3979: Waiting
+dfc7acfc3979: Waiting
+859ad86189be: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
 a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
-7a01739510fb: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
 e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
+4e624f90e9c4: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
 a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
-7a01739510fb: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
 e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
+4e624f90e9c4: Waiting
+dfc7acfc3979: Waiting
+859ad86189be: Waiting
+7a01739510fb: Waiting
+4e624f90e9c4: Waiting
+dfc7acfc3979: Waiting
+859ad86189be: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
-4f4fb700ef54: Waiting
 a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
-7a01739510fb: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
 e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
+859ad86189be: Waiting
+7a01739510fb: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-e39cc12b00e3: Waiting
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
 a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
-7a01739510fb: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
 e5f8952e42b7: Waiting
-14a7cdb2a4f0: Waiting
+a7cd7d9a2144: Waiting
+4e624f90e9c4: Waiting
+dfc7acfc3979: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
+a70593c27a7a: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
+e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
 4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
 dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
-a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
+859ad86189be: Waiting
 7a01739510fb: Waiting
-e5f8952e42b7: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
+4f4fb700ef54: Waiting
 dfc7acfc3979: Waiting
-2bbdc450a238: Waiting
-4f4fb700ef54: Waiting
-a70593c27a7a: Waiting
-a7cd7d9a2144: Waiting
+859ad86189be: Waiting
 7a01739510fb: Waiting
-e5f8952e42b7: Waiting
+4f4fb700ef54: Waiting
 14a7cdb2a4f0: Waiting
 e39cc12b00e3: Waiting
+a70593c27a7a: Waiting
+2bbdc450a238: Waiting
+a11c83f8ed02: Waiting
+e5f8952e42b7: Waiting
+a7cd7d9a2144: Waiting
 4e624f90e9c4: Waiting
-2bbdc450a238: Layer already exists
 4f4fb700ef54: Layer already exists
-a70593c27a7a: Waiting
-a7cd7d9a2144: Layer already exists
-7a01739510fb: Layer already exists
-e5f8952e42b7: Layer already exists
 14a7cdb2a4f0: Layer already exists
 e39cc12b00e3: Layer already exists
-4e624f90e9c4: Waiting
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
-dfc7acfc3979: Layer already exists
-d8f5a1113c32: Waiting
-b39d2e9989e2: Waiting
 a70593c27a7a: Waiting
-4e624f90e9c4: Waiting
-a70593c27a7a: Pushed
-4e624f90e9c4: Pushed
-d8f5a1113c32: Pushed
-b39d2e9989e2: Pushed
-latest: digest: sha256:3def933690b9c9db90243c406a3287ec844cb2de9481ce39657085ea148ef539 size: 856
+2bbdc450a238: Layer already exists
+a11c83f8ed02: Waiting
+e5f8952e42b7: Layer already exists
+a7cd7d9a2144: Layer already exists
+4e624f90e9c4: Layer already exists
+dfc7acfc3979: Layer already exists
+859ad86189be: Waiting
+7a01739510fb: Waiting
+a70593c27a7a: Waiting
+a11c83f8ed02: Waiting
+859ad86189be: Waiting
+7a01739510fb: Waiting
+7a01739510fb: Waiting
+a70593c27a7a: Layer already exists
+a11c83f8ed02: Waiting
+7a01739510fb: Layer already exists
+a11c83f8ed02: Pushed
+859ad86189be: Pushed
+latest: digest: sha256:5cdae716dec0ba2b7387c261c01133fb6605379924fd5c0086f44a709933d4ad size: 856
 ✅ backend image built and pushed successfully
    Deploying backend...
 
