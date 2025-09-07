@@ -209,12 +209,6 @@ print(f"JWT Secret Length: {len(secret)}")
 print(f"JWT Secret Hash: {hash(secret)}")  # Should be same across services
 ```
 
-### Database Credentials
-```bash
-# Check database credentials are set
-echo "Backend DB:" && grep DATABASE_URL netra_backend/.env | wc -l
-echo "Auth DB:" && grep DATABASE_URL auth_service/.env | wc -l
-```
 
 ## Configuration Dependency Map
 

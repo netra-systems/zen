@@ -13,7 +13,7 @@ from netra_backend.app.db.models_postgres import (
 # Import all model modules to ensure all tables are registered with Base
 from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
-DATABASE_URL = "postgresql://postgres:123@localhost/netra_dev"
+#removed-legacy= "postgresql://postgres:123@localhost/netra_dev"
 
 engine = create_engine(DATABASE_URL)
 

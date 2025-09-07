@@ -315,8 +315,8 @@ class ServicesConfiguration:
     
     def _handle_shared_postgres_warning(self):
         """Handle shared PostgreSQL mode warnings."""
-        logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
-        logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
+        logger.warning("PostgreSQL is in SHARED mode but #removed-legacynot found in environment")
+        logger.warning("Please set #removed-legacyenvironment variable for shared PostgreSQL")
     
     def _add_auth_service_url(self, env_vars: Dict[str, str]):
         """Add Auth Service URL to environment variables."""
