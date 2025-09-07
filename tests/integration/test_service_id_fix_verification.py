@@ -22,7 +22,7 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 class TestWebSocketAuthFix:
     """Test suite to verify WebSocket authentication fix"""
     
-    def test_jwt_secret_alignment(self):
+    async def test_jwt_secret_alignment(self):
         """Verify JWT secret resolution alignment between test config and backend"""
         print("\n=== Testing JWT Secret Resolution Alignment ===")
         
@@ -35,7 +35,7 @@ class TestWebSocketAuthFix:
         
         # Verify backend can validate the test token
         extractor = UserContextExtractor()
-        jwt_payload = extractor.validate_and_decode_jwt(test_token)
+        jwt_payload = await extractor.validate_and_decode_jwt(test_token)  # CRITICAL FIX: Added await
         
         assert jwt_payload is not None, "Backend should validate test token successfully"
         assert jwt_payload.get("sub") is not None, "Token should contain user ID"
@@ -80,7 +80,7 @@ class TestWebSocketAuthFix:
             
             # Validate token structure
             extractor = UserContextExtractor()
-            jwt_payload = extractor.validate_and_decode_jwt(token)
+            jwt_payload = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
             
             assert jwt_payload is not None, "Token in headers should be valid"
             print(f"[PASS] WebSocket connection headers contain valid JWT token")
@@ -148,7 +148,7 @@ class TestWebSocketAuthFixIntegration:
         
         # Step 3: Simulate backend validation
         extractor = UserContextExtractor()
-        jwt_payload = extractor.validate_and_decode_jwt(token)
+        jwt_payload = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
         assert jwt_payload is not None, "Backend validation should succeed"
         
         # Step 4: Simulate user context creation
@@ -182,22 +182,20 @@ def run_websocket_auth_fix_tests():
     print("WEBSOCKET AUTHENTICATION FIX VERIFICATION TESTS")
     print("=" * 80)
     
-    # Run synchronous tests
-    test_suite = TestWebSocketAuthFix()
-    test_suite.test_jwt_secret_alignment()
-    test_suite.test_websocket_headers_creation()
-    test_suite.test_staging_config_environment_detection()
-    test_suite.test_jwt_secret_priority_order()
-    
-    # Run async tests
-    async def run_async_tests():
+    # Run all tests asynchronously (some methods now require async)
+    async def run_all_tests():
+        test_suite = TestWebSocketAuthFix()
+        await test_suite.test_jwt_secret_alignment()  # CRITICAL FIX: Now async
+        test_suite.test_websocket_headers_creation()
+        test_suite.test_staging_config_environment_detection()
+        test_suite.test_jwt_secret_priority_order()
+        
         integration_suite = TestWebSocketAuthFixIntegration()
         await integration_suite.test_websocket_auth_flow_simulation()
         
-        test_suite_async = TestWebSocketAuthFix()
-        await test_suite_async.test_websocket_connection_staging_mock()
+        await test_suite.test_websocket_connection_staging_mock()
     
-    asyncio.run(run_async_tests())
+    asyncio.run(run_all_tests())
     
     print("\n" + "=" * 80)
     print("[SUCCESS] ALL WEBSOCKET AUTHENTICATION FIX TESTS PASSED")
