@@ -348,7 +348,11 @@ jobs:
             --min-instances 1 \
             --max-instances 10 \
             --set-env-vars="NETRA_ENV=staging" \
-            --set-secrets="DATABASE_URL=staging-database-url:latest" \
+            --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
+            --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
+            --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
+            --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
+            --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
             --set-secrets="REDIS_URL=staging-redis-url:latest" \
             --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
             
@@ -366,7 +370,11 @@ jobs:
             --min-instances 1 \
             --max-instances 5 \
             --set-env-vars="NETRA_ENV=staging" \
-            --set-secrets="DATABASE_URL=staging-database-url:latest" \
+            --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
+            --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
+            --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
+            --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
+            --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
             --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
 
   deploy-frontend:
