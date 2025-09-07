@@ -22170,8 +22170,8 @@
         "scripts/start_test_services.py:157"
       ]
     },
-    "DATABASE_URL not set": {
-      "value": "DATABASE_URL not set",
+    "#removed-legacynot set": {
+      "value": "#removed-legacynot set",
       "category": "test_literals",
       "locations": [
         "scripts/setup_test_environment.py:150"
@@ -42643,8 +42643,8 @@
         "scripts/run_critical_test.py:43"
       ]
     },
-    "Set DATABASE_URL in .env.mock": {
-      "value": "Set DATABASE_URL in .env.mock",
+    "Set #removed-legacyin .env.mock": {
+      "value": "Set #removed-legacyin .env.mock",
       "category": "test_literals",
       "locations": [
         "scripts/setup_test_environment.py:151"
