@@ -256,7 +256,7 @@ class AuthEnvironment:
         env = self.get_environment()
         
         # CRITICAL: Test environment gets SQLite in-memory for isolation and speed (per CLAUDE.md)
-        # This takes priority over any explicit DATABASE_URL to ensure "permissive" test behavior
+        # This takes priority over any explicit #removed-legacyto ensure "permissive" test behavior
         if env == "test":
             # Test: Always use in-memory SQLite for isolation (permissive test behavior)
             url = "sqlite+aiosqlite:///:memory:"

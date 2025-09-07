@@ -161,8 +161,8 @@ class TestDockerHostnameResolution(unittest.TestCase):
                                     self.assertIn('@custom-db-host.example.com:', db_url)
                                     self.assertNotIn('@postgres:', db_url)
 
-                                    def test_database_url_override(self, mock_exists):
-                                        """Test that DATABASE_URL takes precedence when set."""
+
+                                        """Test that #removed-legacytakes precedence when set."""
                                         pass
         # Setup mocks - Docker environment
                                         mock_exists.return_value = True  # .dockerenv exists

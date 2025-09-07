@@ -197,7 +197,6 @@ pytest tests/
 
 3. **Database connection failed**
    - Ensure PostgreSQL container is running
-   - Check DATABASE_URL environment variable
 
 4. **CORS errors**
    - Verify CORS_ORIGINS environment variable
