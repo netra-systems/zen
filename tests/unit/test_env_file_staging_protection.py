@@ -8,6 +8,7 @@ import os
 import tempfile
 from pathlib import Path
 import pytest
+from unittest.mock import patch
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

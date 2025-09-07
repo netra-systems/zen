@@ -43,12 +43,11 @@ class TestCriticalWebSocket:
         error_message = None
         
         try:
-            # Attempt WebSocket connection with Python 3.12 compatible timeout
-            async with asyncio.timeout(10):
-                async with websockets.connect(
-                    config.websocket_url,
-                    close_timeout=10
-                ) as ws:
+            # Attempt WebSocket connection (remove asyncio.timeout wrapper to avoid exception masking)
+            async with websockets.connect(
+                config.websocket_url,
+                close_timeout=10
+            ) as ws:
                     # If we get here, connection was established
                     connection_successful = True
                     
@@ -147,11 +146,10 @@ class TestCriticalWebSocket:
         response_received = False
         
         try:
-            # Attempt to connect and send message with Python 3.12 compatible timeout
-            async with asyncio.timeout(10):
-                async with websockets.connect(
-                    config.websocket_url
-                ) as ws:
+            # Attempt to connect and send message (remove asyncio.timeout wrapper)
+            async with websockets.connect(
+                config.websocket_url
+            ) as ws:
                     # Create test message
                     test_message = {
                         "type": "chat_message",

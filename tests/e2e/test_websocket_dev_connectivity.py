@@ -344,11 +344,11 @@ class TestWebSocketDevConnectivity:
                     # Just verify connection works
                     welcome = await asyncio.wait_for(websocket.recv(), timeout=2)
                     welcome_data = json.loads(welcome)
-                
-                assert welcome_data.get("type") == "connection_established", \
-                    "WebSocket not ready"
-                
-                print("WebSocket service available and responding")
+                    
+                    assert welcome_data.get("type") == "connection_established", \
+                        "WebSocket not ready"
+                    
+                    print("WebSocket service available and responding")
                 
         except Exception as e:
             raise AssertionError(f"WebSocket service not available: {str(e)}")

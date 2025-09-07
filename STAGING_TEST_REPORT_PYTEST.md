@@ -1,49 +1,91 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 00:09:04
+**Generated:** 2025-09-07 00:11:48
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
-- **Passed:** 5 (100.0%)
+- **Total Tests:** 25
+- **Passed:** 25 (100.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 14.32 seconds
+- **Duration:** 57.76 seconds
 - **Pass Rate:** 100.0%
 
 ## Test Results by Priority
 
-### HIGH Priority Tests
+### CRITICAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_031_session_security_real | PASS passed | 0.888s | test_priority2_high.py |
-| test_032_https_certificate_validation_real | PASS passed | 0.633s | test_priority2_high.py |
-| test_033_cors_policy_real | PASS passed | 1.691s | test_priority2_high.py |
-| test_034_rate_limiting_real | PASS passed | 9.970s | test_priority2_high.py |
-| test_035_websocket_security_real | PASS passed | 0.458s | test_priority2_high.py |
+| test_001_websocket_connection_real | PASS passed | 1.796s | test_priority1_critical.py |
+| test_002_websocket_authentication_real | PASS passed | 0.696s | test_priority1_critical.py |
+| test_003_websocket_message_send_real | PASS passed | 0.726s | test_priority1_critical.py |
+| test_004_websocket_concurrent_connections_real | PASS passed | 2.897s | test_priority1_critical.py |
+| test_005_agent_discovery_real | PASS passed | 0.546s | test_priority1_critical.py |
+| test_006_agent_configuration_real | PASS passed | 0.841s | test_priority1_critical.py |
+| test_007_agent_execution_endpoints_real | PASS passed | 1.004s | test_priority1_critical.py |
+| test_008_agent_streaming_capabilities_real | PASS passed | 0.874s | test_priority1_critical.py |
+| test_009_agent_status_monitoring_real | PASS passed | 0.898s | test_priority1_critical.py |
+| test_010_tool_execution_endpoints_real | PASS passed | 0.901s | test_priority1_critical.py |
+| test_011_agent_performance_real | PASS passed | 1.961s | test_priority1_critical.py |
+| test_012_message_persistence_real | PASS passed | 1.021s | test_priority1_critical.py |
+| test_013_thread_creation_real | PASS passed | 1.249s | test_priority1_critical.py |
+| test_014_thread_switching_real | PASS passed | 0.784s | test_priority1_critical.py |
+| test_015_thread_history_real | PASS passed | 1.156s | test_priority1_critical.py |
+| test_016_user_context_isolation_real | PASS passed | 1.603s | test_priority1_critical.py |
+| test_017_concurrent_users_real | PASS passed | 12.210s | test_priority1_critical.py |
+| test_018_rate_limiting_real | PASS passed | 4.978s | test_priority1_critical.py |
+| test_019_error_handling_real | PASS passed | 1.262s | test_priority1_critical.py |
+| test_020_connection_resilience_real | PASS passed | 9.846s | test_priority1_critical.py |
+| test_021_session_persistence_real | PASS passed | 2.686s | test_priority1_critical.py |
+| test_022_agent_lifecycle_management_real | PASS passed | 1.434s | test_priority1_critical.py |
+| test_023_streaming_partial_results_real | PASS passed | 1.353s | test_priority1_critical.py |
+| test_024_message_ordering_real | PASS passed | 3.012s | test_priority1_critical.py |
+| test_025_critical_event_delivery_real | PASS passed | 0.941s | test_priority1_critical.py |
 
 ## Pytest Output Format
 
 ```
-test_priority2_high.py::test_031_session_security_real PASSED
-test_priority2_high.py::test_032_https_certificate_validation_real PASSED
-test_priority2_high.py::test_033_cors_policy_real PASSED
-test_priority2_high.py::test_034_rate_limiting_real PASSED
-test_priority2_high.py::test_035_websocket_security_real PASSED
+test_priority1_critical.py::test_001_websocket_connection_real PASSED
+test_priority1_critical.py::test_002_websocket_authentication_real PASSED
+test_priority1_critical.py::test_003_websocket_message_send_real PASSED
+test_priority1_critical.py::test_004_websocket_concurrent_connections_real PASSED
+test_priority1_critical.py::test_005_agent_discovery_real PASSED
+test_priority1_critical.py::test_006_agent_configuration_real PASSED
+test_priority1_critical.py::test_007_agent_execution_endpoints_real PASSED
+test_priority1_critical.py::test_008_agent_streaming_capabilities_real PASSED
+test_priority1_critical.py::test_009_agent_status_monitoring_real PASSED
+test_priority1_critical.py::test_010_tool_execution_endpoints_real PASSED
+test_priority1_critical.py::test_011_agent_performance_real PASSED
+test_priority1_critical.py::test_012_message_persistence_real PASSED
+test_priority1_critical.py::test_013_thread_creation_real PASSED
+test_priority1_critical.py::test_014_thread_switching_real PASSED
+test_priority1_critical.py::test_015_thread_history_real PASSED
+test_priority1_critical.py::test_016_user_context_isolation_real PASSED
+test_priority1_critical.py::test_017_concurrent_users_real PASSED
+test_priority1_critical.py::test_018_rate_limiting_real PASSED
+test_priority1_critical.py::test_019_error_handling_real PASSED
+test_priority1_critical.py::test_020_connection_resilience_real PASSED
+test_priority1_critical.py::test_021_session_persistence_real PASSED
+test_priority1_critical.py::test_022_agent_lifecycle_management_real PASSED
+test_priority1_critical.py::test_023_streaming_partial_results_real PASSED
+test_priority1_critical.py::test_024_message_ordering_real PASSED
+test_priority1_critical.py::test_025_critical_event_delivery_real PASSED
 
 ==================================================
-5 passed, 0 failed in 14.32s
+25 passed, 0 failed in 57.76s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 1 | 0 | 100.0% |
-| Security | 3 | 3 | 0 | 100.0% |
+| WebSocket | 4 | 4 | 0 | 100.0% |
+| Agent | 7 | 7 | 0 | 100.0% |
+| Authentication | 1 | 1 | 0 | 100.0% |
+| Performance | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
