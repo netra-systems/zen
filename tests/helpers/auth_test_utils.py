@@ -52,9 +52,10 @@ class TestAuthHelper:
         """Initialize the test auth helper.
         
         Args:
-            environment: Optional environment override ('test', 'dev', etc.)
+            environment: Optional environment override ('test', 'dev', 'staging', etc.)
                         If None, will auto-detect from environment variables
         """
+        self.environment = environment
         self.jwt_helper = JWTTestHelper(environment)
     
     def create_test_token(self, user_id: str, email: Optional[str] = None) -> str:
@@ -77,8 +78,37 @@ class TestAuthHelper:
         if email is None:
             email = f"{user_id}@test.com"
         
+        # CRITICAL FIX: For staging environment, use special staging token creation
+        if self.environment == "staging":
+            return self.create_staging_token(user_id, email)
+        
         # Use default permissions for standard test scenarios
         return self.jwt_helper.create_access_token(user_id, email)
+    
+    def create_staging_token(self, user_id: str, email: Optional[str] = None) -> str:
+        """Create staging-specific token using unified JWT secret manager.
+        
+        CRITICAL FIX: This method ensures staging tokens are created with the EXACT
+        same secret resolution as the backend UserContextExtractor, fixing the
+        WebSocket 403 authentication failures.
+        
+        Args:
+            user_id: The user ID for the token
+            email: Optional email (defaults to {user_id}@netrasystems.ai)
+            
+        Returns:
+            A valid JWT token for staging testing
+            
+        Example:
+            auth_helper = TestAuthHelper(environment="staging")
+            token = auth_helper.create_staging_token("staging_user")
+        """
+        if email is None:
+            email = f"{user_id}@netrasystems.ai"
+        
+        # Use the staging JWT token creation from JWTTestHelper
+        import asyncio
+        return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
     
     def create_test_token_with_permissions(
         self, 

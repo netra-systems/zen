@@ -49,6 +49,9 @@ class MockThreadOperationManagerImpl {
   // Track the most recent successful operation to prevent out-of-order completions
   private lastCompletedOperationTime: number = 0;
   private lastCompletedThreadId: string | null = null;
+  
+  // High-resolution sequence counter for operations that happen in the same millisecond
+  private operationSequence: number = 0;
 
   /**
    * Mock implementation that actually executes the provided executor function
@@ -78,25 +81,55 @@ class MockThreadOperationManagerImpl {
       });
     }
     
-    // Create operation
+    // Create operation with high-resolution sequence number
+    const startTime = Date.now() + (this.operationSequence++);
     const operation: ThreadOperation = {
       id: operationId,
       type,
       threadId,
-      startTime: Date.now(),
+      startTime,
       status: 'pending',
       abortController: new AbortController()
     };
+
+    // console.log(`ThreadOperationManager: Starting operation ${operationId} for ${threadId} at ${operation.startTime} (seq: ${this.operationSequence - 1})`);
 
     // Set as current operation
     this.currentOperation = operation;
     this.updateOperation(operationId, { status: 'running' });
     
+    // Add to history immediately so newer operations can check against it
+    this.addToHistory(operation);
+    
     // Note: Store state updates are handled by the hook's executor function itself
 
     try {
+      // CRITICAL PRE-CHECK: Before executing, check if this operation is already superseded
+      // This prevents any store updates from happening for superseded operations
+      const checkForNewerOperations = () => {
+        const newerOperations = this.operationHistory.filter(op => 
+          op.id !== operationId && 
+          op.startTime > operation.startTime
+        );
+        
+        return newerOperations.some(op => 
+          op.status === 'pending' || op.status === 'running' || op.status === 'completed'
+        );
+      };
+      
+      // Enhanced executor that checks for superseded operations before allowing updates
+      const safeExecutor = async (signal: AbortSignal) => {
+        // Double-check for superseded operations just before execution
+        if (checkForNewerOperations()) {
+          console.log(`Operation ${operationId} for ${threadId} superseded before execution, aborting`);
+          return { success: false, threadId, error: new Error('Operation superseded before execution') };
+        }
+        
+        return await executor(signal);
+      };
+      
       // Actually execute the provided function
-      const result = await executor(operation.abortController!.signal);
+      const result = await safeExecutor(operation.abortController!.signal);
       
       // Check if operation was aborted during execution
       if (operation.abortController!.signal.aborted) {
@@ -104,20 +137,17 @@ class MockThreadOperationManagerImpl {
           status: 'cancelled',
           error: new Error('Operation aborted during execution')
         });
-        this.addToHistory(operation);
         return { success: false, error: new Error('Operation aborted during execution') };
       }
       
-      // CRITICAL: Check if this operation is outdated by sequence, not just time
-      // Allow the most recently started operation to win, not necessarily the one that finishes first
-      const mostRecentOperation = this.operationHistory[0]; // Most recent is at index 0
-      if (result.success && mostRecentOperation && mostRecentOperation.id !== operationId && mostRecentOperation.startTime > operation.startTime) {
-        console.log(`Operation for ${threadId} completed but is outdated (${operationId} started ${operation.startTime} < most recent ${mostRecentOperation.startTime}), not updating state`);
+      // CRITICAL FINAL CHECK: After execution, check again for superseded operations
+      // This catches operations that became superseded during execution
+      if (result.success && checkForNewerOperations()) {
+        console.log(`Operation for ${threadId} (${operationId}) completed but was superseded during execution, not updating state`);
         this.updateOperation(operationId, { 
           status: 'cancelled',
-          error: new Error('Operation superseded by newer operation')
+          error: new Error('Operation superseded during execution')
         });
-        this.addToHistory(operation);
         return { success: false, threadId, error: new Error('Operation superseded') };
       }
       
@@ -132,9 +162,6 @@ class MockThreadOperationManagerImpl {
         this.lastCompletedOperationTime = Date.now();
         this.lastCompletedThreadId = threadId;
       }
-
-      // Add to history
-      this.addToHistory(operation);
 
       // Track execution for test verification
       this.operationExecutionHistory.push({
@@ -152,8 +179,6 @@ class MockThreadOperationManagerImpl {
         status: 'failed',
         error: errorObj
       });
-
-      this.addToHistory(operation);
 
       const result = {
         success: false,
@@ -239,6 +264,7 @@ class MockThreadOperationManagerImpl {
     this.operationExecutionHistory = [];
     this.lastCompletedOperationTime = 0;
     this.lastCompletedThreadId = null;
+    this.operationSequence = 0;
   }
 
   private generateOperationId(type: ThreadOperationType, threadId: string | null): string {

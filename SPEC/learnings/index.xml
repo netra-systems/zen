@@ -56,6 +56,26 @@
         </prevention>
     </learning>
     
+    <learning id="service-id-stability-fix-2025-09-07">
+        <title>SERVICE_ID Stability Fix for Cross-Service Authentication</title>
+        <category>Authentication/Configuration/Deployment/CriticalFix</category>
+        <keywords>SERVICE_ID, timestamp-suffix, authentication-failure, cross-service, stable-identifier, hardcoded-value</keywords>
+        <path>service_id_stability_fix_20250907.xml</path>
+        <critical-takeaway>
+            Auth service was expecting dynamically changing SERVICE_ID with timestamp suffix
+            (e.g., netra-auth-staging-1757252100) while backend sent fixed ID. Fixed by hardcoding
+            expected_service_id = "netra-backend" in auth_routes.py instead of reading from env.
+            SERVICE_ID must be stable for cross-service auth - never use timestamps or dynamic values.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Service authentication failures every 60 seconds, blacklist validation broken</business-impact>
+        <prevention>
+            Always use hardcoded stable SERVICE_ID="netra-backend" for cross-service auth.
+            Never use timestamps in SERVICE_ID. Added to MISSION_CRITICAL_NAMED_VALUES_INDEX.xml.
+            Test with test_service_id_fix_verification.py.
+        </prevention>
+    </learning>
+    
     <learning id="docker-crash-pytest-collection-windows-2025-01-07">
         <title>Docker Desktop Crash During Pytest Collection on Windows WSL2</title>
         <category>Testing/Docker/Windows/ResourceExhaustion/CriticalFailure</category>

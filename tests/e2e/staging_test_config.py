@@ -103,9 +103,9 @@ class StagingConfig:
     def create_test_jwt_token(self) -> Optional[str]:
         """Create a test JWT token for staging authentication
         
-        CRITICAL FIX: Now uses unified JWT secret manager with proper staging configuration.
-        This fixes the WebSocket 403 authentication failures by ensuring the JWT token
-        is created with exactly the same secret that the backend will use for validation.
+        CRITICAL FIX: Now uses IDENTICAL unified JWT secret manager as UserContextExtractor.
+        This fixes the WebSocket 403 authentication failures by ensuring perfect alignment
+        between test token creation and backend validation.
         """
         try:
             import jwt
@@ -113,27 +113,15 @@ class StagingConfig:
             from datetime import datetime, timedelta, timezone
             import uuid
             
-            # CRITICAL FIX: Set up proper staging environment 
-            # This ensures we use the staging JWT secret from config/staging.env
+            # CRITICAL FIX: Set staging environment to match backend behavior exactly
             original_env = os.environ.get("ENVIRONMENT")
-            original_jwt_secret_staging = os.environ.get("JWT_SECRET_STAGING")
-            
-            # Set staging environment
             os.environ["ENVIRONMENT"] = "staging"
             
-            # Load staging JWT secret from config/staging.env if not already set
-            if not os.environ.get("JWT_SECRET_STAGING"):
-                staging_jwt_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
-                os.environ["JWT_SECRET_STAGING"] = staging_jwt_secret
-                print(f"Set JWT_SECRET_STAGING for staging test environment")
-            
             try:
-                # Use the unified JWT secret manager to get the EXACT same secret
-                # that the backend UserContextExtractor will use
+                # Use the unified JWT secret manager - IDENTICAL to UserContextExtractor._get_jwt_secret()
                 from shared.jwt_secret_manager import get_unified_jwt_secret
                 secret = get_unified_jwt_secret()
-                print(f"Test JWT token using unified secret manager (staging environment)")
-                print(f"Secret source: staging environment configuration")
+                print(f"Staging test token using unified JWT secret manager (environment: staging)")
                 
                 # Create payload with minimal required claims (match backend expectations)
                 payload = {
@@ -142,14 +130,13 @@ class StagingConfig:
                     "permissions": ["read", "write"],
                     "iat": int(datetime.now(timezone.utc).timestamp()),
                     "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-                    # Remove audience - backend might not expect it or have different validation
                     "iss": "netra-auth-service",
                     "jti": str(uuid.uuid4())  # Add JWT ID for replay protection
                 }
                 
-                # Create token with unified secret
+                # Create token with unified secret manager - IDENTICAL resolution as backend
                 token = jwt.encode(payload, secret, algorithm="HS256")
-                print(f"Created staging JWT token for user: {payload['sub']}")
+                print(f"Created staging JWT token using unified secret manager (user: {payload['sub']})")
                 return token
                 
             finally:
@@ -158,26 +145,20 @@ class StagingConfig:
                     os.environ["ENVIRONMENT"] = original_env
                 else:
                     os.environ.pop("ENVIRONMENT", None)
-                
-                # Restore original JWT_SECRET_STAGING
-                if original_jwt_secret_staging is not None:
-                    os.environ["JWT_SECRET_STAGING"] = original_jwt_secret_staging
-                else:
-                    os.environ.pop("JWT_SECRET_STAGING", None)
                     
         except Exception as e:
-            print(f"CRITICAL: Failed to create staging JWT token: {e}")
-            print("This will cause WebSocket 403 authentication failures")
+            print(f"CRITICAL: Unified JWT secret manager failed: {e}")
+            print("Falling back to manual staging secret - may still cause auth failures")
             
-            # Fallback: Try to manually load staging secret from config/staging.env
+            # Emergency fallback: Use staging secret directly from config/staging.env
             try:
                 import jwt
                 from datetime import datetime, timedelta, timezone
                 import uuid
                 
-                # Load staging config directly as last resort
-                staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"  # From config/staging.env
-                print("FALLBACK: Using hardcoded staging JWT secret (should only happen as emergency)")
+                # Use the staging JWT secret from config/staging.env line 40
+                staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+                print("FALLBACK: Using staging JWT secret from config/staging.env (line 40)")
                 
                 payload = {
                     "sub": f"test-user-{uuid.uuid4().hex[:8]}",
@@ -185,7 +166,6 @@ class StagingConfig:
                     "permissions": ["read", "write"],
                     "iat": int(datetime.now(timezone.utc).timestamp()),
                     "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-                    "token_type": "access",
                     "iss": "netra-auth-service",
                     "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
                 }

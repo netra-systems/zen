@@ -116,7 +116,9 @@ def setup_auth_middleware(app: FastAPI) -> None:
         excluded_paths=[
             "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
             "/ws", "/websocket", "/ws/test", "/ws/config", "/ws/health", "/ws/stats",
-            "/api/v1/auth"
+            "/api/v1/auth",  # Auth service integration endpoints
+            "/api/auth",  # Direct auth endpoints (login, register, etc.)
+            "/auth"  # OAuth callbacks and public auth endpoints
         ]
     )
     logger.debug("Authentication middleware configured with WebSocket exclusions")

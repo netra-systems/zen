@@ -21,21 +21,29 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/chat'),
 }));
 
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn((selector) => {
-    const mockState = {
-      activeThreadId: null,
-      setActiveThread: jest.fn(),
-      setThreadLoading: jest.fn(),
-      startThreadLoading: jest.fn(),
-      completeThreadLoading: jest.fn(),
-      clearMessages: jest.fn(),
-      loadMessages: jest.fn(),
-      handleWebSocketEvent: jest.fn(),
-    };
+jest.mock('@/store/unified-chat', () => {
+  const mockState = {
+    activeThreadId: null,
+    setActiveThread: jest.fn(),
+    setThreadLoading: jest.fn(),
+    startThreadLoading: jest.fn(),
+    completeThreadLoading: jest.fn(),
+    clearMessages: jest.fn(),
+    loadMessages: jest.fn(),
+    handleWebSocketEvent: jest.fn(),
+  };
+  
+  const mockStore = jest.fn((selector) => {
     return typeof selector === 'function' ? selector(mockState) : mockState;
-  }),
-}));
+  });
+  
+  // CRITICAL: Add getState method that jest.setup.js expects
+  mockStore.getState = () => mockState;
+  
+  return {
+    useUnifiedChatStore: mockStore,
+  };
+});
 
 jest.mock('@/services/threadLoadingService', () => ({
   threadLoadingService: {

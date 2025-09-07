@@ -233,30 +233,23 @@ class JWTTestHelper:
     async def get_staging_jwt_token(self, user_id: str = None, email: str = None) -> Optional[str]:
         """Get valid JWT token for staging environment.
         
-        CRITICAL FIX: Updated to match UserContextExtractor._get_jwt_secret() exactly.
-        This fixes WebSocket 403 authentication failures by ensuring perfect alignment
-        between test token creation and backend validation.
-        
-        Priority order matches backend exactly:
-        1. JWT_SECRET_STAGING (environment-specific secret for staging)
-        2. E2E_BYPASS_KEY (bypass key for E2E testing)  
-        3. STAGING_JWT_SECRET (alternative staging secret)
-        4. Hardcoded fallback (must match backend's fallback)
+        CRITICAL FIX: Now uses IDENTICAL secret resolution as UserContextExtractor.
+        This fixes WebSocket 403 authentication failures by using the unified JWT secret manager
+        with STAGING environment context, ensuring perfect alignment with backend validation.
         """
-        env_manager = get_test_env_manager()
-        env = env_manager.env
-        
-        # CRITICAL FIX: Match UserContextExtractor._get_jwt_secret() priority exactly
-        secrets_to_try = [
-            ("JWT_SECRET_STAGING", env.get("JWT_SECRET_STAGING")),
-            ("E2E_BYPASS_KEY", env.get("E2E_BYPASS_KEY")),
-            ("STAGING_JWT_SECRET", env.get("STAGING_JWT_SECRET")),
-            ("HARDCODED_FALLBACK", "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A")
-        ]
-        
-        for secret_name, secret_value in secrets_to_try:
-            if secret_value:
-                print(f"Using {secret_name} for staging JWT token creation")
+        # CRITICAL FIX: Use the unified JWT secret manager to get IDENTICAL secret
+        # resolution as the backend UserContextExtractor
+        try:
+            # Temporarily set environment to staging to match backend behavior
+            import os
+            original_env = os.environ.get("ENVIRONMENT")
+            os.environ["ENVIRONMENT"] = "staging"
+            
+            try:
+                # Use unified JWT secret manager - IDENTICAL to UserContextExtractor._get_jwt_secret()
+                from shared.jwt_secret_manager import get_unified_jwt_secret
+                secret = get_unified_jwt_secret()
+                print(f"Using unified JWT secret manager for staging token (environment: staging)")
                 
                 # Create payload with proper structure
                 payload = self.create_valid_payload()
@@ -265,18 +258,46 @@ class JWTTestHelper:
                 if email:
                     payload[JWTConstants.EMAIL] = email
                 
-                # Ensure secret is properly stripped
-                clean_secret = secret_value.strip() if isinstance(secret_value, str) else secret_value
-                token = self.create_token(payload, clean_secret)
-                
-                print(f"Created staging JWT token using {secret_name} (user: {payload[JWTConstants.SUBJECT]})")
+                # Create token with IDENTICAL secret resolution
+                token = self.create_token(payload, secret)
+                print(f"Created staging JWT token using unified secret manager (user: {payload[JWTConstants.SUBJECT]})")
                 return token
-        
-        # This should never happen given the hardcoded fallback
-        raise RuntimeError("CRITICAL: No JWT secret available for staging token creation - this should never occur!")
-        
-        # NOTE: Removed the staging API key strategy as it doesn't create proper JWT tokens
-        # API keys are different from JWT tokens and won't work with JWT validation
+                
+            finally:
+                # Restore original environment
+                if original_env is not None:
+                    os.environ["ENVIRONMENT"] = original_env
+                else:
+                    os.environ.pop("ENVIRONMENT", None)
+                    
+        except Exception as e:
+            print(f"CRITICAL: Unified JWT secret manager failed: {e}")
+            print("Falling back to manual secret resolution - may still cause auth failures")
+            
+            # Emergency fallback: Manual resolution that matches config/staging.env
+            env_manager = get_test_env_manager()
+            env = env_manager.env
+            
+            # Try staging-specific secret first (from config/staging.env)
+            staging_secret = env.get("JWT_SECRET_STAGING")
+            if not staging_secret:
+                # Hardcode the staging secret from config/staging.env as last resort
+                staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+                print("FALLBACK: Using hardcoded staging JWT secret from config/staging.env")
+            else:
+                print("FALLBACK: Using JWT_SECRET_STAGING from environment")
+            
+            # Create payload with proper structure
+            payload = self.create_valid_payload()
+            if user_id:
+                payload[JWTConstants.SUBJECT] = user_id
+            if email:
+                payload[JWTConstants.EMAIL] = email
+            
+            # Create token with fallback secret
+            token = self.create_token(payload, staging_secret.strip())
+            print(f"Fallback JWT token created for staging (user: {payload[JWTConstants.SUBJECT]})")
+            return token
     
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
         """Test WebSocket connection with token."""

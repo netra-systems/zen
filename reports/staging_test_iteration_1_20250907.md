@@ -1,100 +1,129 @@
-# Staging Test Iteration 1 - 2025-09-07
+# Staging Test Iteration 1 Report
+**Date**: 2025-09-07  
+**Time**: 08:19:00 UTC  
+**Environment**: GCP Staging (staging.netrasystems.ai)
 
-## Test Run Summary
+## Test Execution Summary
 
-### Execution Time: 06:45:55 UTC
-### Total Tests Run: 60+ tests across 10 modules
-### Overall Pass Rate: 80% (8/10 modules passed)
+### Run 1: Top 10 Agent Tests via run_staging_tests.py
+**Command**: `python tests/e2e/staging/run_staging_tests.py --priority 1-5`
+**Duration**: 46.07 seconds
 
-## Test Results by Module
+#### Results Overview
+- **Total Modules**: 10
+- **Passed**: 8 (80%)
+- **Failed**: 2 (20%)
+- **Skipped**: 0
 
-### PASSED Modules (8/10):
-1. **test_1_websocket_events_staging** - 5/5 tests passed
-   - WebSocket auth properly enforced (HTTP 403)
-   - Concurrent connection test successful
-   - Health checks successful
+#### Module Results
 
-2. **test_4_agent_orchestration_staging** - 7/7 tests passed
-   - All communication patterns validated
-   - Multi-agent coordination working
-   - Error scenarios handled correctly
+| Module | Status | Details |
+|--------|--------|---------|
+| test_1_websocket_events_staging | ❌ FAILED | 2/5 passed. WebSocket 403 errors |
+| test_2_message_flow_staging | ✅ PASSED | All 5 tests passed |
+| test_3_agent_pipeline_staging | ❌ FAILED | 3/6 passed. WebSocket 403 errors |
+| test_4_agent_orchestration_staging | ✅ PASSED | All 6 tests passed |
+| test_5_response_streaming_staging | ✅ PASSED | All 5 tests passed |
+| test_6_failure_recovery_staging | ✅ PASSED | All 5 tests passed |
+| test_7_startup_resilience_staging | ✅ PASSED | All 6 tests passed |
+| test_8_lifecycle_events_staging | ✅ PASSED | All 6 tests passed |
+| test_9_coordination_staging | ✅ PASSED | All 6 tests passed |
+| test_10_critical_path_staging | ✅ PASSED | All 6 tests passed |
 
-3. **test_5_response_streaming_staging** - 5/5 tests passed
-   - Response types validated
-   - Stream processing working
-   - Error handling correct
+### Failed Test Details
 
-4. **test_6_failure_recovery_staging** - 6/6 tests passed
-   - All recovery mechanisms working
-   - Circuit breaker functional
-   - Fallback mechanisms operational
+#### test_1_websocket_events_staging
+**Failed Tests**: 3/5
+1. `test_concurrent_websocket_real`: server rejected WebSocket connection: HTTP 403
+2. `test_websocket_connection`: server rejected WebSocket connection: HTTP 403  
+3. `test_websocket_event_flow_real`: server rejected WebSocket connection: HTTP 403
 
-5. **test_7_startup_resilience_staging** - 6/6 tests passed
-   - All startup sequences validated
-   - Dependency checks working
-   - Health endpoints functional
+#### test_3_agent_pipeline_staging
+**Failed Tests**: 3/6
+1. `test_real_agent_lifecycle_monitoring`: server rejected WebSocket connection: HTTP 403
+2. `test_real_agent_pipeline_execution`: server rejected WebSocket connection: HTTP 403
+3. `test_real_pipeline_error_handling`: server rejected WebSocket connection: HTTP 403
 
-6. **test_8_lifecycle_events_staging** - 6/6 tests passed
-   - Event sequences validated
-   - Event metadata correct
-   - Persistence working
+## Root Cause Analysis
 
-7. **test_9_coordination_staging** - 6/6 tests passed
-   - Consensus mechanisms working
-   - Coordination patterns validated
-   - Synchronization primitives functional
+### Primary Issue: WebSocket Authentication Failure
+**Error Pattern**: All failures show `HTTP 403 Forbidden` on WebSocket connection attempts
 
-8. **test_10_critical_path_staging** - 6/6 tests passed
-   - All critical features enabled
-   - Performance targets met
-   - End-to-end flow validated
+**Affected Components**:
+- WebSocket authentication middleware
+- JWT token validation for WebSocket connections
+- CORS/Origin validation for WebSocket upgrade requests
 
-### FAILED Modules (2/10):
+### Secondary Observations
+1. **REST API**: Health checks and discovery endpoints working (200 OK)
+2. **Authentication**: JWT tokens being created but rejected for WebSocket
+3. **Configuration**: MCP config and server endpoints accessible
+4. **Non-WebSocket Tests**: All passing (80% success rate)
 
-1. **test_2_message_flow_staging** - 3/5 tests passed, 2 failed
-   - FAILED: test_real_error_handling_flow - WebSocket HTTP 403
-   - FAILED: test_real_websocket_message_flow - WebSocket HTTP 403
+## Test Coverage Analysis
 
-2. **test_3_agent_pipeline_staging** - 3/6 tests passed, 3 failed
-   - FAILED: test_real_agent_lifecycle_monitoring - WebSocket HTTP 403
-   - FAILED: test_real_agent_pipeline_execution - WebSocket HTTP 403
-   - FAILED: test_real_pipeline_error_handling - WebSocket HTTP 403
+### By Priority Level
+- **P1 Critical**: Not all tests executed (file naming issue)
+- **P2-P5**: Partially covered through agent tests
 
-### Priority Tests Error:
-- **test_priority2_high.py** - Syntax error on line 680
-  - Issue: 'async with' outside async function
-  - Needs immediate fix
+### By Component
+| Component | Coverage | Status |
+|-----------|----------|--------|
+| REST API | ✅ Good | Health, discovery working |
+| WebSocket | ❌ Failed | Auth rejection issue |
+| Agent Pipeline | ⚠️ Partial | Non-WS parts working |
+| Message Flow | ✅ Good | Non-WS flow validated |
+| Error Recovery | ✅ Good | All scenarios tested |
+| Coordination | ✅ Good | All patterns validated |
 
-## Key Issues Identified
+## Immediate Actions Required
 
-### 1. WebSocket Authentication (403 Errors)
-- Multiple tests failing due to WebSocket 403 authentication errors
-- Tests are attempting WebSocket connections without proper auth tokens
-- This is consistent across message flow and agent pipeline tests
+### 1. WebSocket Authentication Fix
+- Investigate JWT validation in WebSocket middleware
+- Check CORS/Origin headers for WebSocket upgrade
+- Verify staging environment secrets match backend expectations
 
-### 2. Syntax Error in Priority Tests
-- test_priority2_high.py has a syntax error preventing test collection
-- Line 680: async with statement outside async function context
+### 2. Test File Organization
+- Priority test files missing or misnamed
+- Need to verify test_priority1_critical_REAL.py existence
 
-## Performance Metrics
+### 3. Authentication Configuration
+- Staging JWT secrets may be misconfigured
+- WebSocket auth middleware may have different requirements than REST
 
-- Total execution time: 42.85 seconds
-- Average response time: 388ms
-- WebSocket latency: 42ms (target: 50ms) ✓
-- API response time: 85ms (target: 100ms) ✓
-- Agent startup time: 380ms (target: 500ms) ✓
+## Next Steps for Iteration 2
 
-## Next Steps
+1. **Fix WebSocket Authentication** (P0)
+   - Debug JWT validation in WebSocket context
+   - Check staging environment configuration
 
-1. Fix syntax error in test_priority2_high.py
-2. Investigate WebSocket authentication issue
-3. Add proper auth tokens to failing tests
-4. Re-run full test suite after fixes
-5. Deploy fixes to staging if changes are needed
+2. **Run Complete Priority Suite** (P1)
+   - Locate and run actual priority test files
+   - Get full 466 test coverage
 
-## Environment Status
+3. **Deploy Fixes** (P2)
+   - Fix authentication issues
+   - Redeploy to staging
 
-- Staging API: ✓ Online (https://api.staging.netrasystems.ai)
-- Auth Service: ✓ Online (https://auth.staging.netrasystems.ai)
-- WebSocket: ✓ Online but requires authentication
-- Health endpoints: ✓ All responding
+## Environment Configuration Status
+
+### Working Endpoints
+- https://api.staging.netrasystems.ai/health ✅
+- https://api.staging.netrasystems.ai/api/health ✅
+- https://api.staging.netrasystems.ai/api/discovery/services ✅
+- https://api.staging.netrasystems.ai/api/mcp/config ✅
+- https://api.staging.netrasystems.ai/api/mcp/servers ✅
+
+### Failed Endpoints
+- wss://api.staging.netrasystems.ai/ws ❌ (403 Forbidden)
+
+## Metrics
+
+- **Tests Run**: ~56 individual tests
+- **Pass Rate**: 80% overall, 0% for WebSocket tests
+- **Execution Time**: 46.07 seconds
+- **Critical Failures**: 6 (all WebSocket-related)
+
+---
+**Status**: ITERATION INCOMPLETE - WebSocket authentication blocking progress
+**Next Action**: Fix WebSocket auth and continue iterations

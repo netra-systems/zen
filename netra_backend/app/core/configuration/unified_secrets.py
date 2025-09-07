@@ -74,13 +74,14 @@ class UnifiedSecretsManager:
     
     def get_jwt_secret(self) -> str:
         """
-        Get JWT secret following proper fallback chain - instance method.
+        Get JWT secret using the unified JWT secret manager for consistency.
         
-        Priority order:
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} 
-        2. Generic JWT_SECRET_KEY  
-        3. Legacy JWT_SECRET
-        4. Development fallback (only for development environment)
+        CRITICAL FIX: Now delegates to shared.jwt_secret_manager to ensure
+        consistency with auth service. This fixes the WebSocket 403 authentication
+        failures caused by JWT secret mismatches between services.
+        
+        The unified manager ensures IDENTICAL secret resolution logic across
+        all services, preventing authentication issues.
         
         Raises:
             ValueError: If no JWT secret is configured for production environment
@@ -88,34 +89,51 @@ class UnifiedSecretsManager:
         Returns:
             JWT secret string, properly stripped of whitespace
         """
-        environment = self.get_secret('ENVIRONMENT', 'development').lower()
-        
-        # 1. Try environment-specific secret first
-        env_specific_key = f"JWT_SECRET_{environment.upper()}"
-        secret = self.get_secret(env_specific_key)
-        if secret:
-            return secret.strip()
-        
-        # 2. Try generic JWT_SECRET_KEY
-        secret = self.get_secret('JWT_SECRET_KEY')
-        if secret:
-            return secret.strip()
-        
-        # 3. Try legacy JWT_SECRET
-        secret = self.get_secret('JWT_SECRET')
-        if secret:
-            return secret.strip()
-        
-        # 4. Development fallback
-        if environment == 'development':
+        try:
+            # Use the unified JWT secret manager for consistency across all services
+            from shared.jwt_secret_manager import get_unified_jwt_secret
+            secret = get_unified_jwt_secret()
+            logger.debug("Using unified JWT secret manager for consistent secret resolution")
+            return secret
+        except Exception as e:
+            logger.error(f"Failed to use unified JWT secret manager: {e}")
+            logger.warning("Falling back to local JWT secret resolution")
+            
+            # Fallback to local resolution if unified manager fails
+            environment = self.get_secret('ENVIRONMENT', 'development').lower()
+            
+            # 1. Try environment-specific secret first
+            env_specific_key = f"JWT_SECRET_{environment.upper()}"
+            secret = self.get_secret(env_specific_key)
+            if secret:
+                logger.debug(f"Fallback: Using environment-specific JWT secret: {env_specific_key}")
+                return secret.strip()
+            
+            # 2. Try generic JWT_SECRET_KEY
+            secret = self.get_secret('JWT_SECRET_KEY')
+            if secret:
+                logger.debug("Fallback: Using generic JWT_SECRET_KEY")
+                return secret.strip()
+            
+            # 3. Try legacy JWT_SECRET
+            secret = self.get_secret('JWT_SECRET')
+            if secret:
+                logger.warning("Fallback: Using legacy JWT_SECRET (DEPRECATED)")
+                return secret.strip()
+            
+            # 4. Development fallback
+            if environment == 'development':
+                logger.warning("Fallback: Using development default JWT secret")
+                return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+            
+            # 5. Production/staging validation - must have explicit secret
+            if environment in ['production', 'staging']:
+                logger.critical(f"JWT secret not configured for {environment} environment")
+                raise ValueError(f"JWT secret not configured for {environment} environment")
+            
+            # 6. Default fallback for other environments
+            logger.warning(f"Fallback: Using default JWT secret for {environment} environment")
             return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
-        
-        # 5. Production validation - must have explicit secret
-        if environment == 'production':
-            raise ValueError("JWT secret not configured for production environment")
-        
-        # 6. Default fallback for other environments
-        return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
 
 
 # Global instance

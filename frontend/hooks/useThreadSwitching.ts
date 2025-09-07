@@ -119,6 +119,10 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
     options: ThreadSwitchingOptions = {}
   ): Promise<boolean> => {
     try {
+      // Generate operation ID and store it for cleanup
+      const operationId = generateOperationId(threadId);
+      currentOperationRef.current = operationId;
+      
       // Use ThreadOperationManager to ensure atomic operations
       const result = await ThreadOperationManager.startOperation(
         'switch',
@@ -145,7 +149,6 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
       
       // Handle operation-level errors that weren't propagated to hook state
       if (!result.success && result.error) {
-        const operationId = generateOperationId(threadId);
         setState(prev => ({
           ...prev,
           isLoading: false,
@@ -157,8 +160,13 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
         lastFailedThreadRef.current = threadId;
       }
       
+      // Clear the current operation reference
+      currentOperationRef.current = null;
+      
       return result.success;
     } catch (error) {
+      // Clear the current operation reference on error
+      currentOperationRef.current = null;
       return false;
     }
   }, [state, storeActions, updateUrl]);

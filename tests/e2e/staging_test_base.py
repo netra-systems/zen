@@ -18,6 +18,9 @@ class StagingTestBase:
     @classmethod
     def setup_class(cls):
         """Setup for test class"""
+        # CRITICAL FIX: Load staging environment variables for JWT authentication
+        cls._load_staging_environment()
+        
         cls.config = get_staging_config()
         cls.client = None
         cls.websocket = None
@@ -25,6 +28,67 @@ class StagingTestBase:
         # Skip all tests if staging is not available
         if not is_staging_available():
             pytest.skip("Staging environment is not available")
+    
+    @classmethod
+    def _load_staging_environment(cls):
+        """Load staging environment variables from config/staging.env
+        
+        CRITICAL FIX: This ensures staging tests have access to JWT_SECRET_STAGING
+        and other staging-specific configuration needed for proper authentication.
+        """
+        import os
+        from pathlib import Path
+        
+        # Find config/staging.env file
+        current_dir = Path(__file__).resolve().parent
+        project_root = current_dir
+        while project_root.parent != project_root:
+            staging_env_file = project_root / "config" / "staging.env"
+            if staging_env_file.exists():
+                break
+            project_root = project_root.parent
+        else:
+            # Try one more time from current working directory
+            project_root = Path.cwd()
+            staging_env_file = project_root / "config" / "staging.env"
+        
+        if staging_env_file.exists():
+            print(f"Loading staging environment from: {staging_env_file}")
+            
+            # Parse .env file manually (simple key=value format)
+            with open(staging_env_file, 'r', encoding='utf-8') as f:
+                for line_num, line in enumerate(f, 1):
+                    line = line.strip()
+                    
+                    # Skip empty lines and comments
+                    if not line or line.startswith('#'):
+                        continue
+                    
+                    # Parse KEY=VALUE
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+                        
+                        # Remove quotes if present
+                        if value.startswith('"') and value.endswith('"'):
+                            value = value[1:-1]
+                        elif value.startswith("'") and value.endswith("'"):
+                            value = value[1:-1]
+                        
+                        # Only set if not already in environment (don't override)
+                        if key not in os.environ:
+                            os.environ[key] = value
+                            if key == "JWT_SECRET_STAGING":
+                                print(f"Loaded JWT_SECRET_STAGING from config/staging.env")
+            
+            # Ensure ENVIRONMENT is set to staging
+            os.environ["ENVIRONMENT"] = "staging"
+            print(f"Set ENVIRONMENT=staging for staging tests")
+            
+        else:
+            print(f"WARNING: config/staging.env not found at {staging_env_file}")
+            print("Staging tests may fail due to missing environment variables")
     
     @classmethod
     def teardown_class(cls):
