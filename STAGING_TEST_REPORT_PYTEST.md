@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 09:19:19
+**Generated:** 2025-09-07 09:20:45
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 4.00 seconds
+- **Duration:** 4.21 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_jwt_secret_consistency_verification | FAIL failed | 0.650s | test_websocket_auth_fix_verification.py |
+| test_jwt_secret_consistency_verification | FAIL failed | 0.656s | test_websocket_auth_fix_verification.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_jwt_secret_consistency_verification
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_auth_fix_verification.py
-- **Duration:** 0.650s
+- **Duration:** 0.656s
 - **Error:** tests\e2e\staging_test_base.py:293: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,7 +42,7 @@ tests\e2e\staging\test_websocket_auth_fix_verification.py:169: in test_jwt_secre
 test_websocket_auth_fix_verification.py::test_jwt_secret_consistency_verification FAILED
 
 ==================================================
-0 passed, 1 failed in 4.00s
+0 passed, 1 failed in 4.21s
 ```
 
 ## Test Coverage Matrix

@@ -262,70 +262,69 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
         logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
         
-        # Log startup state for debugging but don't block on it
-        # The auth validation system should work regardless of startup state
+        # CRITICAL FIX: Properly check startup state and wait if needed
         startup_complete = getattr(websocket.app.state, 'startup_complete', False)
         startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
         
-        if not startup_complete:
-            logger.debug(f"WebSocket connection during startup (complete={startup_complete}, in_progress={startup_in_progress})")
+        # In staging/production, wait for startup to complete before proceeding
+        if not startup_complete and environment in ["staging", "production"]:
+            max_wait_time = 30  # Maximum 30 seconds to wait for startup
+            wait_interval = 0.5  # Check every 500ms
+            total_waited = 0
+            
+            logger.info(f"WebSocket connection waiting for startup to complete in {environment} (in_progress={startup_in_progress})")
+            
+            while not startup_complete and total_waited < max_wait_time:
+                await asyncio.sleep(wait_interval)
+                total_waited += wait_interval
+                startup_complete = getattr(websocket.app.state, 'startup_complete', False)
+                startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
+                
+                if total_waited % 5 == 0:  # Log every 5 seconds
+                    logger.info(f"Still waiting for startup... (waited {total_waited}s, in_progress={startup_in_progress})")
+            
+            if not startup_complete:
+                logger.error(f"Startup did not complete after {max_wait_time}s in {environment}")
+                error_msg = create_error_message(
+                    "STARTUP_INCOMPLETE",
+                    f"Service startup not complete after {max_wait_time}s. Please try again.",
+                    {"environment": environment, "startup_in_progress": startup_in_progress}
+                )
+                await safe_websocket_send(websocket, error_msg.model_dump())
+                await safe_websocket_close(websocket, code=1011, reason="Service startup incomplete")
+                return
+            
+            logger.info(f"Startup complete after {total_waited}s wait - proceeding with WebSocket connection")
         
-        # CRITICAL FIX: Create missing dependencies in staging environment with robust error handling
-        # This fixes the staging issue where agent_supervisor and thread_service are not initialized
+        # CRITICAL FIX: After waiting for startup, services should be initialized
+        # If they're still missing, it's a critical error - don't try to create them here
         if supervisor is None and environment in ["staging", "production"]:
-            logger.warning(f"agent_supervisor missing in {environment} - attempting to create minimal supervisor for WebSocket events")
-            try:
-                # Create minimal supervisor for WebSocket event handling in staging
-                # This ensures the 5 critical WebSocket events can be transmitted
-                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-                from netra_backend.app.llm.llm_manager import LLMManager
-                from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-                
-                # Create minimal dependencies for staging with individual error handling
-                websocket_bridge = None
-                llm_manager = None
-                
-                try:
-                    websocket_bridge = create_agent_websocket_bridge()
-                    logger.info(f"✅ Created WebSocket bridge for {environment}")
-                except Exception as bridge_error:
-                    logger.error(f"❌ Failed to create WebSocket bridge in {environment}: {bridge_error}")
-                
-                try:
-                    llm_manager = LLMManager()
-                    logger.info(f"✅ Created LLM manager for {environment}")
-                except Exception as llm_error:
-                    logger.error(f"❌ Failed to create LLM manager in {environment}: {llm_error}")
-                
-                # Only create supervisor if we have the minimum required dependencies
-                if websocket_bridge and llm_manager:
-                    supervisor = SupervisorAgent(
-                        llm_manager=llm_manager,
-                        websocket_bridge=websocket_bridge
-                    )
-                    websocket.app.state.agent_supervisor = supervisor
-                    logger.info(f"✅ Successfully created minimal agent_supervisor for WebSocket events in {environment}")
-                else:
-                    logger.warning(f"⚠️ Cannot create agent_supervisor in {environment} - missing dependencies (bridge: {websocket_bridge is not None}, llm: {llm_manager is not None})")
-                    
-            except Exception as e:
-                logger.error(f"❌ Failed to create agent_supervisor in {environment}: {e}")
-                logger.info(f"🔄 Will use fallback handler for WebSocket connections in {environment}")
-                # Continue without supervisor - fallback handler will be used
+            logger.error(f"CRITICAL: agent_supervisor is None after startup in {environment}")
+            logger.error("This indicates a startup sequence failure - services not properly initialized")
+            
+            # Send error to client and close connection
+            error_msg = create_error_message(
+                "SERVICE_UNAVAILABLE",
+                "Required services not initialized. Please contact support.",
+                {"environment": environment, "missing_service": "agent_supervisor"}
+            )
+            await safe_websocket_send(websocket, error_msg.model_dump())
+            await safe_websocket_close(websocket, code=1011, reason="Service unavailable")
+            return
         
-        # CRITICAL FIX: Create thread_service with robust error handling
-        if thread_service is None:
-            logger.warning(f"thread_service missing in {environment} - attempting to create thread_service")
-            try:
-                from netra_backend.app.services.thread_service import ThreadService
-                thread_service = ThreadService()
-                websocket.app.state.thread_service = thread_service
-                logger.info(f"✅ Successfully created thread_service for WebSocket handler in {environment}")
-            except Exception as e:
-                logger.error(f"❌ Failed to create thread_service in {environment}: {e}")
-                logger.info(f"🔄 Will use fallback handler for WebSocket connections in {environment}")
-                # Continue without thread_service - fallback handler will be used
+        if thread_service is None and environment in ["staging", "production"]:
+            logger.error(f"CRITICAL: thread_service is None after startup in {environment}")
+            logger.error("This indicates a startup sequence failure - services not properly initialized")
+            
+            # Send error to client and close connection
+            error_msg = create_error_message(
+                "SERVICE_UNAVAILABLE",
+                "Required services not initialized. Please contact support.",
+                {"environment": environment, "missing_service": "thread_service"}
+            )
+            await safe_websocket_send(websocket, error_msg.model_dump())
+            await safe_websocket_close(websocket, code=1011, reason="Service unavailable")
+            return
         
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:

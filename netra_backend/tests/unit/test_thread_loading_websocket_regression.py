@@ -8,14 +8,15 @@ This test ensures that:
 
 import sys
 from pathlib import Path
+from unittest.mock import Mock, AsyncMock, MagicMock, patch
+
+import pytest
+
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import TestDatabaseManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
-
-
-import pytest
 
 try:
     from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -30,7 +31,7 @@ async def test_user_joins_thread_room_on_message():
     """Test that users join thread room when sending message with thread_id."""
     # Setup
     # Mock: Generic component isolation for controlled unit testing
-    supervisor_mock = MagicNone  # TODO: Use real service instance
+    supervisor_mock = MagicMock()  # Properly mocked supervisor service
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
     
@@ -44,7 +45,7 @@ async def test_user_joins_thread_room_on_message():
     
     # Mock database session and thread
     # Mock: Session isolation for controlled testing without external state
-    db_session = AsyncNone  # TODO: Use real service instance
+    db_session = AsyncMock()  # Properly mocked database session
     # Mock: Service component isolation for predictable testing behavior
     thread_mock = MagicMock(id=thread_id)
     
@@ -62,7 +63,7 @@ async def test_switch_thread_manages_room_membership():
     """Test that switch_thread properly manages room membership."""
     # Setup
     # Mock: Generic component isolation for controlled unit testing
-    supervisor_mock = MagicNone  # TODO: Use real service instance
+    supervisor_mock = MagicMock()  # Properly mocked supervisor service
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
     
@@ -84,7 +85,7 @@ async def test_switch_thread_requires_thread_id():
     """Test that switch_thread validates thread_id is provided."""
     # Setup
     # Mock: Generic component isolation for controlled unit testing
-    supervisor_mock = MagicNone  # TODO: Use real service instance
+    supervisor_mock = MagicMock()  # Properly mocked supervisor service
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
     

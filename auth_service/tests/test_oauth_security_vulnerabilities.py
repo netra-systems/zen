@@ -178,29 +178,36 @@ class TestOAuthSecurityVulnerabilities:
             result = self.oauth_security.validate_state_parameter(state, session_id)
             assert result is False, "Expired OAuth state should be rejected"
             
-    @pytest.mark.xfail(reason="Complex OAuth security test - cross-session isolation needs implementation")
     def test_concurrent_oauth_flow_isolation(self):
         """Test isolation between concurrent OAuth flows prevents state confusion."""
-        cleanup_manager = OAuthStateCleanupManager()
-        
+        # Use the real OAuth security implementation for cross-session isolation
         session_1 = "user-session-1"
         session_2 = "user-session-2"
-        state = "shared-state-parameter"
         
-        # Both sessions should be able to use different states
-        isolation_1 = cleanup_manager.add_state_isolation(state + "1", session_1)
-        isolation_2 = cleanup_manager.add_state_isolation(state + "2", session_2)
+        # Generate unique states for each session
+        state_1 = self.oauth_security.generate_state_parameter()
+        state_2 = self.oauth_security.generate_state_parameter()
         
-        assert isolation_1 is True, "First session state isolation should succeed"
-        assert isolation_2 is True, "Second session state isolation should succeed"
+        # Store states for different sessions
+        self.oauth_security.store_state_parameter(state_1, session_1)
+        self.oauth_security.store_state_parameter(state_2, session_2)
+        
+        # Verify states are different
+        assert state_1 != state_2, "Each session should have unique state"
         
         # Cross-session validation should fail
-        cross_validation = cleanup_manager.validate_isolated_state(state + "1", session_2)
-        assert cross_validation is False, "Cross-session state validation should fail"
+        cross_validation_1 = self.oauth_security.validate_state_parameter(state_1, session_2)
+        assert cross_validation_1 is False, "Cross-session state validation should fail"
+        
+        cross_validation_2 = self.oauth_security.validate_state_parameter(state_2, session_1)
+        assert cross_validation_2 is False, "Cross-session state validation should fail"
         
         # Correct session validation should succeed
-        correct_validation = cleanup_manager.validate_isolated_state(state + "2", session_2)
-        assert correct_validation is True, "Correct session state validation should succeed"
+        correct_validation_1 = self.oauth_security.validate_state_parameter(state_1, session_1)
+        assert correct_validation_1 is True, "Correct session state validation should succeed"
+        
+        correct_validation_2 = self.oauth_security.validate_state_parameter(state_2, session_2)
+        assert correct_validation_2 is True, "Correct session state validation should succeed"
         
     def test_timing_attack_resistance(self):
         """Test resistance to timing attacks on state validation."""

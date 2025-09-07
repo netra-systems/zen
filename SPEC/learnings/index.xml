@@ -38,6 +38,28 @@
         </prevention>
     </learning>
     
+    <learning id="auth-startup-validation-critical-2025-09-07">
+        <title>CRITICAL: Auth Startup Validation Must Never Be Removed</title>
+        <category>Authentication/Startup/Security/Critical</category>
+        <keywords>auth-startup-validation, startup-sequence, auth-configuration, JWT_SECRET, SERVICE_SECRET, OAuth, CORS, production-security</keywords>
+        <path>auth_startup_validation_critical.xml</path>
+        <critical-takeaway>
+            Auth startup validation MUST run in Phase 2, Step 4 of startup sequence. 
+            System MUST NOT start if auth validation fails. This was previously regressed 
+            causing production outages. Validates JWT_SECRET, SERVICE_ID/SECRET, AUTH_SERVICE_URL,
+            OAuth credentials, CORS config, token expiry, and production HTTPS requirements.
+            Hard failures prevent insecure deployments.
+        </critical-takeaway>
+        <severity>EXTREME</severity>
+        <business-impact>Complete platform outage - users cannot authenticate, WebSocket 403 errors, OAuth 503 errors</business-impact>
+        <prevention>
+            Never remove _validate_auth_configuration() from Phase 2. 
+            Never add try/except that swallows auth errors.
+            Always test startup fails with missing JWT_SECRET.
+            Monitor for HTTP 403 and OAuth 503 errors.
+        </prevention>
+    </learning>
+    
     <learning id="service-authentication-mismatch-fix-2025-01-07">
         <title>Service Authentication Mismatch Between Backend and Auth Service</title>
         <category>Authentication/Service-to-Service/Configuration</category>

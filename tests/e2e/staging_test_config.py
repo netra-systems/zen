@@ -115,10 +115,11 @@ class StagingConfig:
             import os
             env_key = os.environ.get("E2E_OAUTH_SIMULATION_KEY")
             if not env_key:
-                # For testing purposes, set a development bypass key
-                # This enables the staging auth bypass to work in test environments
-                os.environ["E2E_OAUTH_SIMULATION_KEY"] = "dev-e2e-oauth-bypass-key-for-testing-only-change-in-staging"
-                print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for testing")
+                # Set appropriate bypass key based on environment
+                # In staging tests, we need to use a compatible key
+                bypass_key = "staging-e2e-test-bypass-key-2025"
+                os.environ["E2E_OAUTH_SIMULATION_KEY"] = bypass_key
+                print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for staging testing")
             
             # CRITICAL FIX: Use existing SSOT staging auth bypass instead of fabricated tokens
             from tests.e2e.staging_auth_bypass import get_staging_auth

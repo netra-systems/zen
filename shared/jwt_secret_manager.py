@@ -69,9 +69,24 @@ class JWTSecretManager:
             env = self._get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
             
+            # CRITICAL FIX: For staging tests, check os.environ directly if isolated env is out of sync
+            import os
+            os_environment = os.environ.get("ENVIRONMENT", "").lower()
+            if os_environment == "staging" and environment != "staging":
+                logger.warning(f"Environment mismatch detected: isolated_env={environment}, os.environ={os_environment}")
+                logger.warning("Using os.environ ENVIRONMENT for JWT secret resolution")
+                environment = os_environment
+            
             # 1. Try environment-specific secret first (highest priority)
             env_specific_key = f"JWT_SECRET_{environment.upper()}"
             jwt_secret = env.get(env_specific_key)
+            
+            # CRITICAL FIX: Also check os.environ directly if isolated env doesn't have the secret
+            if not jwt_secret:
+                os_jwt_secret = os.environ.get(env_specific_key)
+                if os_jwt_secret:
+                    logger.warning(f"Using {env_specific_key} from os.environ (isolated_env out of sync)")
+                    jwt_secret = os_jwt_secret
             if jwt_secret:
                 logger.info(f"Using environment-specific JWT secret: {env_specific_key}")
                 self._cached_secret = jwt_secret.strip()

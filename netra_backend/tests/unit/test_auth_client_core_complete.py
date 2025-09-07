@@ -118,7 +118,10 @@ class TestAuthServiceClient:
     def test_init_with_env_secret_fallback(self, mock_dependencies):
         """Test initialization with service secret from environment fallback."""
         mock_dependencies['config'].service_secret = None
-        mock_dependencies['env'].get.return_value = "env-secret"
+        mock_dependencies['env'].get.side_effect = lambda key, default='': {
+            'ENVIRONMENT': 'test',
+            'SERVICE_SECRET': 'env-secret'
+        }.get(key, default)
         
         client = AuthServiceClient()
         
@@ -139,7 +142,11 @@ class TestAuthServiceClient:
     def test_init_production_without_auth_service(self, mock_dependencies):
         """Test production initialization without auth service raises error."""
         mock_dependencies['is_production'].return_value = True
-        mock_dependencies['config'].auth_service_enabled = False
+        mock_dependencies['settings'].enabled = False  # Auth service disabled
+        mock_dependencies['env'].get.side_effect = lambda key, default='': {
+            'ENVIRONMENT': 'production',
+            'SERVICE_SECRET': 'prod-secret'
+        }.get(key, default)
         
         with pytest.raises(RuntimeError, match="Auth service must be enabled in production"):
             client = AuthServiceClient()
