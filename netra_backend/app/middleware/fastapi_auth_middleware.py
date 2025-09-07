@@ -15,7 +15,6 @@ Business Value Justification (BVJ):
 - Strategic Impact: Foundation for enterprise-grade security
 """
 
-import jwt
 import time
 import ipaddress
 from datetime import datetime
@@ -239,8 +238,8 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         
         return token
     
-    def _validate_token(self, token: str) -> dict[str, Any]:
-        """Validate JWT token and extract payload.
+    async def _validate_token(self, token: str) -> dict[str, Any]:
+        """Validate JWT token using auth service - SSOT COMPLIANT.
         
         Args:
             token: JWT token string
@@ -253,25 +252,36 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
             TokenExpiredError: If token is expired
         """
         try:
-            # Decode and validate token
-            payload = jwt.decode(
-                token,
-                self.jwt_secret,
-                algorithms=[self.jwt_algorithm],
-                options={"verify_exp": True}
-            )
+            from netra_backend.app.clients.auth_client_core import AuthClientCore
+            auth_client = AuthClientCore()
             
-            # Additional expiration check
-            exp = payload.get("exp")
-            if exp and exp < time.time():
-                raise TokenExpiredError("Token expired")
+            # Use auth service for token validation - SSOT pattern
+            validation_result = await auth_client.validate_token(token)
+            
+            if not validation_result or not validation_result.get('valid'):
+                error = validation_result.get('error', 'Token validation failed') if validation_result else 'Auth service unavailable'
+                if 'expired' in error.lower():
+                    raise TokenExpiredError(error)
+                else:
+                    raise TokenInvalidError(error)
+            
+            # Return payload in expected format
+            payload = validation_result.get('payload', {})
+            if not payload:
+                # Build payload from validation result for backward compatibility
+                payload = {
+                    'user_id': validation_result.get('user_id'),
+                    'sub': validation_result.get('user_id'),
+                    'email': validation_result.get('email'),
+                    'permissions': validation_result.get('permissions', []),
+                    'exp': validation_result.get('exp'),
+                    'iat': validation_result.get('iat')
+                }
             
             return payload
             
-        except jwt.ExpiredSignatureError:
-            raise TokenExpiredError("Token expired")
-        except jwt.InvalidTokenError as e:
-            raise TokenInvalidError(f"Invalid token: {str(e)}")
+        except (TokenExpiredError, TokenInvalidError):
+            raise
         except Exception as e:
             logger.error(f"Token validation error: {str(e)}")
             raise TokenInvalidError("Token validation failed")
@@ -382,9 +392,9 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
                 # Continue to JWT validation if processing fails
                 pass
             
-            # For testing, we'll do basic JWT validation
+            # For testing, we'll do basic JWT validation via auth service
             try:
-                payload = self._validate_token(token)
+                payload = await self._validate_token(token)
             except MemoryError as mem_error:
                 if "Insufficient memory" in str(mem_error):
                     return {
@@ -538,8 +548,8 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
             # Extract token
             token = self._extract_token(request)
             
-            # Validate JWT token
-            payload = self._validate_token(token)
+            # Validate JWT token using auth service
+            payload = await self._validate_token(token)
             
             # Check if it's a service token
             token_type = payload.get("type") or payload.get("token_type")
@@ -624,14 +634,16 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
     def _validate_token_in_database(self, token: str) -> dict:
         """Mock method for database token validation used in tests."""
         # This would normally validate against database
-        # For testing, we'll just decode the token
-        return self._validate_token(token)
+        # For testing, delegate to auth service - SSOT compliant
+        import asyncio
+        return await asyncio.create_task(self._validate_token(token))
     
     def _validate_with_auth_service(self, token: str) -> dict:
         """Mock method for auth service validation used in tests."""
         # This would normally validate with auth service
-        # For testing, we'll just decode the token
-        return self._validate_token(token)
+        # For testing, delegate to auth service - SSOT compliant
+        import asyncio
+        return await asyncio.create_task(self._validate_token(token))
     
     def _process_authentication(self, request) -> dict:
         """Mock method for authentication processing used in tests."""
@@ -639,7 +651,7 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         # We do simplified processing to avoid recursion with authenticate_request
         try:
             token = self._extract_token(request)
-            payload = self._validate_token(token)
+            payload = await self._validate_token(token)
             return {
                 "authenticated": True,
                 "user": {
