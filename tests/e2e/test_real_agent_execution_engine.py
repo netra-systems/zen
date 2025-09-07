@@ -57,7 +57,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 )
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
-from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 
 # Critical WebSocket events that must be sent for business value
 CRITICAL_WEBSOCKET_EVENTS = [
@@ -295,7 +295,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
         
         # Initialize execution engine components
         registry = await get_agent_registry()
-        bridge = await get_agent_websocket_bridge()
+        bridge = create_agent_websocket_bridge(user_context)
         
         # Create request-scoped execution engine
         engine = create_request_scoped_engine(

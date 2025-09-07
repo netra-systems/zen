@@ -196,9 +196,20 @@ class ExampleMessageHandler:
             )
             
         finally:
-            # Cleanup session
+            # Cleanup session and user emitter
             if 'session_id' in locals():
                 self.active_sessions.pop(session_id, None)
+            
+            # SECURITY FIX: Clean up user emitter to prevent memory leaks and isolation issues
+            user_id = raw_message.get('user_id')
+            if user_id and user_id in self._user_emitters:
+                try:
+                    emitter = self._user_emitters.pop(user_id)
+                    if hasattr(emitter, 'cleanup'):
+                        await emitter.cleanup()
+                    logger.debug(f"Cleaned up WebSocket emitter for user {user_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to cleanup WebSocket emitter for user {user_id}: {e}")
 
     def _validate_message(self, raw_message: Dict[str, Any]) -> ExampleMessageRequest:
         """Validate and parse example message request"""
