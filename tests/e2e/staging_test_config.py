@@ -33,7 +33,7 @@ class StagingConfig:
     
     # Feature flags
     skip_auth_tests: bool = True  # Auth service not deployed yet
-    skip_websocket_auth: bool = True  # WebSocket requires auth
+    skip_websocket_auth: bool = False  # WebSocket auth is now enforced in staging
     use_mock_llm: bool = False  # Use real LLM in staging
     
     @property

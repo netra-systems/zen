@@ -120,10 +120,15 @@ class TestRealCriticalWebSocket:
                     auth_enforced = True
                     
         except websockets.exceptions.InvalidStatusCode as e:
+            print(f"Caught InvalidStatusCode: {e.status_code}")
             if e.status_code in [401, 403]:
                 auth_enforced = True
         except Exception as e:
+            print(f"Auth test error type: {type(e).__name__}")
             print(f"Auth test error: {e}")
+            # Check if it's a 403 error in the message
+            if "403" in str(e) or "HTTP 403" in str(e):
+                auth_enforced = True
         
         duration = time.time() - start_time
         print(f"Test duration: {duration:.3f}s")
