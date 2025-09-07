@@ -23,7 +23,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-import jwt  # Still needed for refresh token validation and other operations
+# JWT operations removed - all token operations now delegate to auth service SSOT
 import redis.asyncio as redis
 
 from netra_backend.app.config import get_config
@@ -198,9 +198,14 @@ class TokenService:
             Success status
         """
         try:
-            # Decode token to get JTI
-            secret = self._get_jwt_secret()
-            payload = jwt.decode(token, secret, algorithms=['HS256'], options={"verify_exp": False})
+            # Delegate token decoding to auth service - SSOT compliant
+            from netra_backend.app.clients.auth_client_core import auth_client
+            validation_result = await auth_client.validate_token_jwt(token)
+            
+            if not validation_result or not validation_result.get('valid'):
+                return False
+            
+            payload = validation_result.get('payload', {})
             jti = payload.get('jti')
             
             if jti:
@@ -275,42 +280,35 @@ class TokenService:
         Returns:
             Whether token is valid with old keys
         """
-        # This would typically check against a list of previous keys
-        # For testing purposes, we'll simulate this
-        for old_key in self._old_keys:
-            try:
-                jwt.decode(
-                    token,
-                    old_key,
-                    algorithms=['HS256'],
-                    leeway=timedelta(seconds=self._clock_skew_tolerance)
-                )
-                return True
-            except jwt.InvalidTokenError:
-                continue
+        # Delegate old key validation to auth service - SSOT compliant
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        # Try validation with current key first via auth service
+        try:
+            validation_result = await auth_client.validate_token_jwt(token)
+            return validation_result and validation_result.get('valid', False)
+        except Exception:
+            return False
         
         return False
     
     async def _validate_with_old_keys(self, token: str) -> Dict[str, Any]:
         """Internal method to validate with old keys and return full payload."""
-        for old_key in self._old_keys:
-            try:
-                payload = jwt.decode(
-                    token,
-                    old_key,
-                    algorithms=['HS256'],
-                    leeway=timedelta(seconds=self._clock_skew_tolerance)
-                )
-                
+        # Delegate old key validation to auth service - SSOT compliant
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        try:
+            validation_result = await auth_client.validate_token_jwt(token)
+            if validation_result and validation_result.get('valid'):
                 return {
                     'valid': True,
-                    'user_id': payload.get('sub'),
-                    'email': payload.get('email'),
-                    'permissions': payload.get('permissions', []),
+                    'user_id': validation_result.get('user_id'),
+                    'email': validation_result.get('email'),
+                    'permissions': validation_result.get('permissions', []),
                     'validated_with_old_key': True
                 }
-            except jwt.InvalidTokenError:
-                continue
+        except Exception:
+            pass
         
         return {'valid': False, 'error': 'invalid_with_all_keys'}
     
