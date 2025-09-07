@@ -181,7 +181,8 @@ class E2EAuthHelper:
         token = token or self._get_valid_token()
         
         # Determine environment for header optimization
-        environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        # CRITICAL FIX: Use instance environment if available, then env vars
+        environment = getattr(self, 'environment', None) or self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
         # CRITICAL FIX: Add E2E detection headers that WebSocket route looks for
         headers = {
@@ -548,9 +549,7 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
                 connect_kwargs.update({
                     "ping_interval": None,  # Disable ping during connection
                     "ping_timeout": None,   # Disable ping timeout during handshake
-                    "max_size": 2**16,      # Smaller max message size for faster handshake
-                    "read_limit": 2**16,    # Smaller read buffer
-                    "write_limit": 2**16    # Smaller write buffer
+                    "max_size": 2**16      # Smaller max message size for faster handshake
                 })
             
             websocket = await asyncio.wait_for(

@@ -821,13 +821,25 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
         
         # Register different agent types
         async def data_agent_factory(context: UserExecutionContext, websocket_bridge=None):
-            child_context = context.create_child_context("data_processing")
+            child_context = UserExecutionContext(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=f"run_data_{uuid.uuid4().hex[:8]}",
+                request_id=f"req_data_{uuid.uuid4().hex[:8]}",
+                metadata={'agent_type': "data_processing"}
+            )
             tool_dispatcher = await self._mock_tool_dispatcher_factory(child_context, websocket_bridge)
             agent = MockAgentForTesting("data_agent", child_context, tool_dispatcher, websocket_bridge)
             return agent
         
         async def analysis_agent_factory(context: UserExecutionContext, websocket_bridge=None):
-            child_context = context.create_child_context("analysis")
+            child_context = UserExecutionContext(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=f"run_analysis_{uuid.uuid4().hex[:8]}",
+                request_id=f"req_analysis_{uuid.uuid4().hex[:8]}",
+                metadata={'agent_type': "analysis"}
+            )
             tool_dispatcher = await self._mock_tool_dispatcher_factory(child_context, websocket_bridge)
             agent = MockAgentForTesting("analysis_agent", child_context, tool_dispatcher, websocket_bridge)
             return agent
