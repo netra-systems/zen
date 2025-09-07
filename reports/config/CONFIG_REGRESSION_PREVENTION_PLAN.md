@@ -137,7 +137,7 @@ class TestConfigurationRegression:
         
         # Critical configs that MUST exist
         assert config.service_secret, "SERVICE_SECRET is missing - CRITICAL: Will cause complete auth failure"
-        assert config.database_url, "DATABASE_URL is missing"
+        assert config.database_url, "#removed-legacyis missing"
         assert config.jwt_secret_key, "JWT_SECRET_KEY is missing"
         assert config.environment in ["development", "testing", "staging", "production"]
         

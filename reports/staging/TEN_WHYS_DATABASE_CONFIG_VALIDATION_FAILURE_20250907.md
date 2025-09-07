@@ -31,7 +31,7 @@ The GCP staging environment is throwing **FALSE POSITIVE** configuration validat
 
 **GCP Cloud Run Configuration** (what actually exists):
 ```bash
-- DATABASE_URL (for legacy compatibility)
+- #removed-legacy(for legacy compatibility)
 - POSTGRES_HOST (Cloud SQL socket: /cloudsql/netra-staging:us-central1:staging-shared-postgres)
 - POSTGRES_PORT
 - POSTGRES_DB

@@ -29,7 +29,7 @@
 1. **netra_backend/app/routes/health.py**
    - Added None check before calling `.lower()` on database_url
    - Added proper error handling for missing database configuration
-   - Raises ValueError in non-test environments when DATABASE_URL is missing
+   - Raises ValueError in non-test environments when #removed-legacyis missing
 
 2. **netra_backend/app/schemas/config.py**
    - Fixed StagingConfig to call `_load_database_url_from_unified_config_staging()` in `__init__`
@@ -86,9 +86,9 @@
 
 ## Remaining Considerations
 
-- DATABASE_URL environment variable warning still appears in logs but doesn't affect functionality
+- #removed-legacyenvironment variable warning still appears in logs but doesn't affect functionality
 - System successfully constructs URL from individual POSTGRES_* variables as designed
-- Consider adding DATABASE_URL as a computed secret in Cloud Run for cleaner configuration
+- Consider adding #removed-legacyas a computed secret in Cloud Run for cleaner configuration
 
 ## Deployment Status
 - ✅ Fixes deployed to staging environment

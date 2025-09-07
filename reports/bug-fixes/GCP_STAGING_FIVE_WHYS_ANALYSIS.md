@@ -336,7 +336,7 @@ Analysis of GCP staging logs reveals **14 unique critical error patterns** causi
 **Matches Mission Critical Index:**
 - API endpoint failures align with `/api/threads` critical endpoints
 - WebSocket routing failures match WebSocket event delivery requirements
-- Database issues align with DATABASE_URL configuration criticality
+- Database issues align with #removed-legacyconfiguration criticality
 
 **Matches Recent Learnings:**
 - AsyncGeneratorContextManager errors match `database_asyncio.xml` learning #async-context-manager-dependency-injection

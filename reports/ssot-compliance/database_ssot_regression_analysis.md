@@ -8,7 +8,7 @@
 This analysis reveals **CRITICAL SSOT violations** and **significant logic regressions** across database management components. While some areas demonstrate proper SSOT compliance, several files contain dangerous patterns where good architectural patterns have been replaced with convoluted implementations.
 
 ### Critical Findings Summary
-- **3 Critical SSOT Violations**: Direct DATABASE_URL access bypassing DatabaseURLBuilder
+- **3 Critical SSOT Violations**: Direct #removed-legacyaccess bypassing DatabaseURLBuilder
 - **2 Major Logic Regressions**: Simple patterns replaced with complex implementations
 - **4 Pattern Deteriorations**: Increased coupling and redundancy
 - **Production Risk Level**: HIGH
@@ -17,7 +17,7 @@ This analysis reveals **CRITICAL SSOT violations** and **significant logic regre
 
 ## 1. Critical SSOT Violations
 
-### 1.1 Direct DATABASE_URL Access (VIOLATION)
+### 1.1 Direct #removed-legacyAccess (VIOLATION)
 **File**: `/netra_backend/app/database/__init__.py:34`
 
 **VIOLATION**: Direct call to backend environment instead of using DatabaseURLBuilder as SSOT:

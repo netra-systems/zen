@@ -14,8 +14,8 @@ Multiple critical issues identified in staging deployment preventing services fr
 **Fix**: Implemented lazy initialization pattern with `_lazy_init()` method and `@property` decorator for enabled status.
 **Status**: FIXED - Committed in e4d3c9c62
 
-#### Issue 1.2: DATABASE_URL Requirement
-**Problem**: Auth service required DATABASE_URL to be set directly as environment variable.
+#### Issue 1.2: #removed-legacyRequirement
+**Problem**: Auth service required #removed-legacyto be set directly as environment variable.
 **Root Cause**: Legacy configuration pattern not using DatabaseURLBuilder.
 **Fix**: Updated to use shared DatabaseURLBuilder to construct URL from components (POSTGRES_HOST, PORT, DB, USER, PASSWORD).
 **Status**: FIXED - Committed in 13dfd91be
@@ -69,7 +69,7 @@ All secrets appear to be configured in Secret Manager, but values may be incorre
 
 ### Immediate Actions
 1. ✅ Fix Redis lazy initialization in auth service
-2. ✅ Remove DATABASE_URL requirement, use DatabaseURLBuilder
+2. ✅ Remove #removed-legacyrequirement, use DatabaseURLBuilder
 3. ⏳ Verify SECRET_KEY is properly set in staging secrets
 4. ⏳ Debug backend database connection parameters
 5. ⏳ Implement connection retry logic

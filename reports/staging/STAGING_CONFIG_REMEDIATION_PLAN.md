@@ -150,7 +150,7 @@ Before declaring success, verify ALL of these:
 - [ ] Cloud SQL instance is running
 - [ ] Cloud SQL Admin API is enabled
 - [ ] Cloud Run service account has Cloud SQL Client role
-- [ ] DATABASE_URL uses Unix socket format (/cloudsql/...)
+- [ ] #removed-legacyuses Unix socket format (/cloudsql/...)
 - [ ] Database exists and is initialized
 
 ### Redis/Memorystore

@@ -1162,7 +1162,7 @@ class AuthSecretLoader:
             else:
                 return db_builder.tcp.async_url
         
-        # Fallback to DATABASE_URL environment variable
+        # Fallback to #removed-legacyenvironment variable
         return builder.env.get("DATABASE_URL", "")
 ```
 

@@ -47,7 +47,7 @@ graph TD
     B -->|Staging| D[StagingConfig.__init__]
     B -->|Production| E[ProductionConfig.__init__]
     
-    C --> F{DATABASE_URL set?}
+    C --> F{#removed-legacyset?}
     F -->|Yes| G[Use env var directly]
     F -->|No| H[**VIOLATION**: Manual hardcoded URL]
     H --> I["postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"]

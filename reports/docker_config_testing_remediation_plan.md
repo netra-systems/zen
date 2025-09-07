@@ -499,7 +499,7 @@ class TestEnvironmentVariablePropagation:
     @requires_docker
     @pytest.mark.asyncio
     async def test_database_url_propagation(self):
-        """Test DATABASE_URL propagation to services."""
+        """Test #removed-legacypropagation to services."""
         compose_manager = DockerComposeManager("docker-compose.test.yml", "test-env")
         await compose_manager.initialize()
         
@@ -511,7 +511,7 @@ class TestEnvironmentVariablePropagation:
             # Wait for services to be ready
             await compose_manager.wait_for_healthy(timeout_seconds=60)
             
-            # Check DATABASE_URL in backend container
+            # Check #removed-legacyin backend container
             result = await compose_manager.exec_in_container(
                 "backend-test", 
                 ["python", "-c", "import os; print(os.environ.get('DATABASE_URL'))"]
@@ -520,8 +520,8 @@ class TestEnvironmentVariablePropagation:
             assert result[0] == 0, f"Failed to get DATABASE_URL: {result[2]}"
             database_url = result[1].strip()
             
-            # Verify DATABASE_URL format
-            assert "postgresql://" in database_url, "DATABASE_URL should be PostgreSQL URL"
+            # Verify #removed-legacyformat
+            assert "postgresql://" in database_url, "#removed-legacyshould be PostgreSQL URL"
             assert "postgres-test:5432" in database_url, "Should reference postgres-test service"
             assert "netra_test" in database_url, "Should reference test database"
             

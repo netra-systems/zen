@@ -11,7 +11,7 @@ The `ConfigDependencyMap.check_config_consistency()` method was checking for env
 2. Updated `check_config_consistency()` to:
    - Detect whether it's checking raw environment variables (uppercase keys) or a config object
    - Use the mapping to check the correct attributes in the config object
-   - Handle auto-constructable configs like DATABASE_URL that can be built from components
+   - Handle auto-constructable configs like #removed-legacythat can be built from components
 
 ## Current Status
 - ✅ Fixed the key naming mismatch issue
