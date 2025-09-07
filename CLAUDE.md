@@ -127,6 +127,7 @@ CRITICAL: Develop a globally coherent and modular architecture.
     - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
     - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
     - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
+    - **🚨 AUTH VALIDATION REGRESSION PREVENTION:** See [5-Whys Analysis](./reports/staging/FIVE_WHYS_BACKEND_500_ERROR_20250907.md) - Auth validation MUST NOT be overly strict for hex strings or staging environments. **HEX STRINGS ARE VALID SECRETS** (e.g. SERVICE_SECRET from `openssl rand -hex 32`). OAuth redirect mismatches should be warnings in non-prod, not failures.
   * **"Search First, Create Second":** Always check for existing implementations before writing new code.
   * **ATOMIC SCOPE:** Edits must be complete, functional updates. Delegate tasks to sub-agents with scopes you are certain they can handle. Split and divide work appropriately.
   * **Complete Work:** An update is complete only when all relevant parts of the system are updated, integrated, tested, validated, and documented, and all legacy code has been removed.
