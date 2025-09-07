@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Docker Desktop Crash During Pytest Collection on Windows WSL2</title>
+  <date>2025-01-07</date>
+  <severity>CRITICAL</severity>
+  <category>testing,docker,windows,resource-exhaustion</category>
+  
+  <problem>
+    <description>
+      Running e2e tests with `python tests/e2e/test_real_chat_output_validation.py` or via pytest
+      causes complete Docker Desktop crash on Windows with service exit code 1077.
+    </description>
+    <symptoms>
+      - Docker Desktop service stops with error code 1077
+      - ValueError('I/O operation on closed file.') during pytest collection
+      - Tests crash before any test code executes
+      - Docker containers become unreachable
+      - Windows WSL2 bridge becomes unresponsive
+    </symptoms>
+    <error_messages>
+      <error>ValueError('I/O operation on closed file.')</error>
+      <error>SERVICE_NAME: com.docker.service STATE: 1 STOPPED WIN32_EXIT_CODE: 1077</error>
+      <error>open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified</error>
+    </error_messages>
+  </problem>
+  
+  <root_cause>
+    <analysis method="five-whys">
+      <why level="1">Docker Desktop crashed during test execution</why>
+      <why level="2">File descriptor exhaustion during pytest collection phase</why>
+      <why level="3">Heavy module imports with side effects during collection</why>
+      <why level="4">Multiple connection attempts through Windows/WSL2 bridge</why>
+      <why level="5">Windows WSL2 file descriptor doubling + pytest parallel collection = resource storm</why>
+    </analysis>
+    
+    <technical_details>
+      <detail>
+        Pytest collection imports all test modules before running any tests.
+        Each import triggers initialization code that attempts connections.
+      </detail>
+      <detail>
+        Windows/WSL2 integration doubles file descriptors:
+        - One on Windows side
+        - One on WSL2 bridge side
+        - Each connection attempt creates multiple handles
+      </detail>
+      <detail>
+        The conftest.py chain performs environment checks and conditional imports:
+        - tests/conftest.py imports conftest_base, conftest_mocks
+        - _check_environment() initializes IsolatedEnvironment
+        - Each module import has side effects
+      </detail>
+      <detail>
+        Resource accumulation from:
+        - Loguru logger file handles
+        - Socket connection attempts to Docker services
+        - Subprocess pipes for Docker commands
+        - Memory-mapped files
+        - Pytest timeout handling threads
+      </detail>
+    </technical_details>
+  </root_cause>
+  
+  <solution>
+    <immediate_fixes>
+      <fix priority="1">
+        Run tests without pytest collection:
+        ```python
+        python -c "import asyncio; from tests.e2e.test_real_chat_output_validation import *; asyncio.run(test_function())"
+        ```
+      </fix>
+      <fix priority="2">
+        Disable parallel collection:
+        ```bash
+        pytest tests/e2e/test_real_chat_output_validation.py -p no:xdist --collect-only
+        ```
+      </fix>
+      <fix priority="3">
+        Set resource limits:
+        ```bash
+        set PYTEST_XDIST_WORKER_COUNT=1
+        pytest tests/e2e/test_real_chat_output_validation.py --maxfail=1 -x
+        ```
+      </fix>
+    </immediate_fixes>
+    
+    <permanent_fixes>
+      <fix priority="1">
+        Implement lazy initialization - no connections during import time
+      </fix>
+      <fix priority="2">
+        Remove all side effects from module imports
+      </fix>
+      <fix priority="3">
+        Add @pytest.mark.requires_docker with skip logic
+      </fix>
+      <fix priority="4">
+        Implement pre-flight Docker health checks before tests
+      </fix>
+      <fix priority="5">
+        Add Windows-specific connection pooling and rate limiting
+      </fix>
+      <fix priority="6">
+        Move all initialization to fixture scope, not module scope
+      </fix>
+    </permanent_fixes>
+  </solution>
+  
+  <prevention>
+    <guideline>
+      NEVER initialize connections, clients, or resources at module import time.
+      All initialization must happen within fixtures or test functions.
+    </guideline>
+    <guideline>
+      For Windows development, always use connection pooling and rate limiting
+      when connecting to Docker services through WSL2.
+    </guideline>
+    <guideline>
+      E2E tests must check Docker health before attempting any connections.
+    </guideline>
+    <guideline>
+      Use pytest marks to skip Docker-dependent tests when Docker is unavailable.
+    </guideline>
+  </prevention>
+  
+  <affected_files>
+    <file>tests/e2e/test_real_chat_output_validation.py</file>
+    <file>tests/conftest.py</file>
+    <file>tests/conftest_base.py</file>
+    <file>tests/conftest_mocks.py</file>
+    <file>tests/conftest_services.py</file>
+    <file>tests/e2e/conftest.py</file>
+    <file>test_framework/test_context.py</file>
+    <file>shared/isolated_environment.py</file>
+  </affected_files>
+  
+  <keywords>
+    docker, crash, windows, wsl2, pytest, collection, resource-exhaustion,
+    file-descriptor, connection-storm, e2e, testing
+  </keywords>
+</learning>
