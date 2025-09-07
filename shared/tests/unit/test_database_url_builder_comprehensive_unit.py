@@ -994,9 +994,9 @@ class TestDatabaseValidation:
         valid_cloud_sql = {
             "ENVIRONMENT": "staging",
             "POSTGRES_HOST": "/cloudsql/project-id:us-central1:instance-name",
-            "POSTGRES_USER": "user",
-            "POSTGRES_PASSWORD": "password",
-            "POSTGRES_DB": "database"
+            "POSTGRES_USER": "staging_user",
+            "POSTGRES_PASSWORD": "secure_staging_password_with_32_characters",
+            "POSTGRES_DB": "staging_database"
         }
         
         builder = DatabaseURLBuilder(valid_cloud_sql)
@@ -1201,7 +1201,7 @@ class TestDebugInfoAndLogging:
             # Unknown format
             (
                 "unknown://something",
-                "unknown://***"
+                "unknown://**********"
             )
         ]
         

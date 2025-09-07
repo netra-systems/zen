@@ -112,8 +112,8 @@ def test_auth_helper_headers():
         "X-Auth-Fast-Path"
     ]
     
-    print(f"✅ E2E auth helper should generate headers: {expected_headers}")
-    print(f"✅ Staging should add additional headers: {staging_additional_headers}")
+    print(f"E2E auth helper should generate headers: {expected_headers}")
+    print(f"Staging should add additional headers: {staging_additional_headers}")
     
     # Validate that the headers match what WebSocket route expects
     websocket_expected = ["x-test-type", "x-test-environment", "x-e2e-test", "x-test-mode"]
@@ -121,15 +121,15 @@ def test_auth_helper_headers():
     
     headers_match = set(websocket_expected).issubset(set(auth_helper_provides))
     if headers_match:
-        print("✅ Auth helper headers match WebSocket route expectations")
+        print("PASS Auth helper headers match WebSocket route expectations")
         return True
     else:
-        print("❌ Header mismatch between auth helper and WebSocket route")
+        print("FAIL Header mismatch between auth helper and WebSocket route")
         return False
 
 def test_fast_path_logic():
     """Test the fast path authentication logic."""
-    print("\n🚀 Testing fast path authentication logic...")
+    print("\nTesting fast path authentication logic...")
     
     # Simulate the fast path conditions from user_context_extractor.py
     def should_use_fast_path(environment, fast_path_enabled):
@@ -146,16 +146,16 @@ def test_fast_path_logic():
     for case in test_cases:
         result = should_use_fast_path(case["env"], case["fast_path"])
         if result == case["expected"]:
-            print(f"✅ {case['env']} environment, fast_path={case['fast_path']}: {result}")
+            print(f"PASS {case['env']} environment, fast_path={case['fast_path']}: {result}")
         else:
-            print(f"❌ {case['env']} environment, fast_path={case['fast_path']}: Expected {case['expected']}, got {result}")
+            print(f"FAIL {case['env']} environment, fast_path={case['fast_path']}: Expected {case['expected']}, got {result}")
             all_passed = False
     
     return all_passed
 
 def test_staging_timeout_optimization():
     """Test staging timeout optimization logic."""
-    print("\n⏱️ Testing staging timeout optimization...")
+    print("\nTesting staging timeout optimization...")
     
     # Simulate timeout adjustment from E2E auth helper
     def get_staging_timeout(original_timeout, environment):
