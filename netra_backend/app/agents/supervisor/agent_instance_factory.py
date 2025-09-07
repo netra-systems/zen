@@ -1037,8 +1037,8 @@ class AgentInstanceFactory:
             # Initialize emitter pool if needed
             if self._emitter_pool is None:
                 # Create a new WebSocketEmitterPool instance
-                from netra_backend.app.websocket_core import get_websocket_manager
-                ws_manager = get_websocket_manager()
+                from netra_backend.app.websocket_core import create_websocket_manager
+                ws_manager = create_websocket_manager()
                 self._emitter_pool = WebSocketEmitterPool(
                     manager=ws_manager,
                     max_size=self._performance_config.pool_max_size if self._performance_config else 100

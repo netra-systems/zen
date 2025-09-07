@@ -397,6 +397,84 @@ class TestExecutionEngineInitialization(AsyncBaseTestCase):
         # Same user should get same state
         state2 = await engine._get_user_execution_state(user_id)
         self.assertIs(state, state2)
+        
+    async def test_multiple_user_state_isolation(self):
+        """Test that different users get completely isolated states."""
+        engine = self.create_engine()
+        
+        user1_state = await engine._get_user_execution_state("user1")
+        user2_state = await engine._get_user_execution_state("user2")
+        
+        # States should be different objects
+        self.assertIsNot(user1_state, user2_state)
+        
+        # Modify user1 state and verify user2 is unaffected
+        user1_state['active_runs']['test_run'] = {"status": "running"}
+        self.assertNotIn('test_run', user2_state['active_runs'])
+        
+    def test_execution_tracker_initialization(self):
+        """Test execution tracker initialization."""
+        engine = self.create_engine()
+        
+        self.assertIsNotNone(engine.execution_tracker)
+        # Verify callbacks are registered
+        self.assertTrue(hasattr(engine.execution_tracker, 'register_death_callback'))
+        self.assertTrue(hasattr(engine.execution_tracker, 'register_timeout_callback'))
+        
+    def test_component_initialization_completeness(self):
+        """Test that all required components are properly initialized."""
+        engine = self.create_engine()
+        
+        # Core components
+        self.assertIsNotNone(engine.agent_core)
+        self.assertIsNotNone(engine.flow_logger)
+        self.assertIsNotNone(engine.execution_semaphore)
+        
+        # Removed components should be None
+        self.assertIsNone(engine.fallback_manager)
+        self.assertIsNone(engine.periodic_update_manager)
+        
+        # User isolation components
+        self.assertIsInstance(engine._user_execution_states, dict)
+        self.assertIsInstance(engine._user_state_locks, dict)
+        self.assertIsInstance(engine._state_lock_creation_lock, asyncio.Lock)
+        
+    def test_execution_stats_initialization(self):
+        """Test execution statistics initialization."""
+        engine = self.create_engine()
+        
+        stats = engine.execution_stats
+        expected_keys = [
+            'total_executions', 'concurrent_executions', 'queue_wait_times',
+            'execution_times', 'failed_executions', 'dead_executions', 'timeout_executions'
+        ]
+        
+        for key in expected_keys:
+            self.assertIn(key, stats)
+            
+        # Verify initial values
+        self.assertEqual(stats['total_executions'], 0)
+        self.assertEqual(stats['concurrent_executions'], 0)
+        self.assertEqual(stats['failed_executions'], 0)
+        self.assertEqual(stats['dead_executions'], 0)
+        self.assertEqual(stats['timeout_executions'], 0)
+        self.assertIsInstance(stats['queue_wait_times'], list)
+        self.assertIsInstance(stats['execution_times'], list)
+        
+    def test_death_monitoring_callback_registration(self):
+        """Test death monitoring callback registration."""
+        engine = self.create_engine()
+        
+        # Mock execution tracker to verify callbacks
+        mock_tracker = MagicMock()
+        engine.execution_tracker = mock_tracker
+        
+        # Re-initialize death monitoring
+        engine._init_death_monitoring()
+        
+        # Verify callbacks were registered
+        mock_tracker.register_death_callback.assert_called_once_with(engine._handle_agent_death)
+        mock_tracker.register_timeout_callback.assert_called_once_with(engine._handle_agent_timeout)
 
 
 class TestExecutionEngineValidation(AsyncBaseTestCase):
@@ -511,6 +589,76 @@ class TestExecutionEngineValidation(AsyncBaseTestCase):
             mock_logger.warning.assert_called_once()
             warning_call = mock_logger.warning.call_args[0][0]
             self.assertIn("UserExecutionContext run_id mismatch", warning_call)
+            
+    def test_validation_with_empty_agent_name(self):
+        """Test validation with empty agent name."""
+        context = AgentExecutionContext(
+            run_id="validation_run",
+            thread_id="validation_thread",
+            user_id="validation_user",
+            agent_name=""  # Empty agent name
+        )
+        
+        # Should pass validation (agent_name validation is not in _validate_execution_context)
+        try:
+            self.engine._validate_execution_context(context)
+        except ValueError:
+            self.fail("Empty agent_name should not fail validation in _validate_execution_context")
+            
+    def test_validation_with_special_characters_in_ids(self):
+        """Test validation with special characters in IDs."""
+        context = AgentExecutionContext(
+            run_id="run-with-dashes_and_underscores.123",
+            thread_id="thread@with#special$chars",
+            user_id="user:with:colons",
+            agent_name="test_agent"
+        )
+        
+        # Should pass validation (special characters allowed)
+        self.engine._validate_execution_context(context)
+        
+    def test_validation_with_very_long_ids(self):
+        """Test validation with very long IDs."""
+        long_id = "a" * 1000  # 1000 character ID
+        context = AgentExecutionContext(
+            run_id=long_id,
+            thread_id=long_id,
+            user_id=long_id,
+            agent_name="test_agent"
+        )
+        
+        # Should pass validation (no length limits in current implementation)
+        self.engine._validate_execution_context(context)
+        
+    def test_validation_with_unicode_characters(self):
+        """Test validation with Unicode characters in IDs."""
+        context = AgentExecutionContext(
+            run_id="run_测试_🚀",
+            thread_id="thread_日本語",
+            user_id="user_العربية",
+            agent_name="test_agent"
+        )
+        
+        # Should pass validation (Unicode support)
+        self.engine._validate_execution_context(context)
+        
+    def test_validation_caching_performance(self):
+        """Test validation performance with repeated calls."""
+        context = AgentExecutionContext(
+            run_id="validation_run",
+            thread_id="validation_thread",
+            user_id="validation_user",
+            agent_name="test_agent"
+        )
+        
+        # Time multiple validation calls
+        start_time = time.time()
+        for _ in range(100):
+            self.engine._validate_execution_context(context)
+        end_time = time.time()
+        
+        # Should complete quickly (< 0.1 seconds for 100 calls)
+        self.assertLess(end_time - start_time, 0.1)
 
 
 class TestExecutionEngineWebSocketEvents(AsyncBaseTestCase):

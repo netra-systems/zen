@@ -180,7 +180,8 @@ class TestBaseAgentInitialization:
             
             # Verify deprecation warning was issued
             assert len(w) > 0
-            assert any("DEPRECATED" in str(warning.message) for warning in w)
+            # Check for the actual warning message format from base_agent.py
+            assert any("tool_dispatcher parameter creates global state risks" in str(warning.message) for warning in w)
             assert any("tool_dispatcher" in str(warning.message) for warning in w)
             
         # Verify agent still works with legacy parameter
