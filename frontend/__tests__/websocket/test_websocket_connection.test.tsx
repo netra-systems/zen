@@ -25,7 +25,6 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
-import WS from 'jest-websocket-mock';
 
 // Import WebSocket utilities and test helpers
 import { WebSocketTestHelper, WebSocketEventValidator, WebSocketMockFactory } from '../helpers/websocket-test-helpers';
@@ -206,26 +205,31 @@ const AgentEventTestComponent: React.FC<{ authToken?: string }> = ({ authToken }
 };
 
 describe('WebSocket Connection Tests - Mission Critical', () => {
-  let server: WS;
   let webSocketHelper: WebSocketTestHelper;
   let eventValidator: WebSocketEventValidator;
+  let mockWebSocketInstances: any[];
 
   beforeEach(() => {
-    // Setup real WebSocket server mock for testing
-    server = new WS('ws://localhost:8000/ws');
+    // Setup WebSocket test infrastructure using existing mocks
     webSocketHelper = new WebSocketTestHelper();
     eventValidator = new WebSocketEventValidator();
+    mockWebSocketInstances = [];
     
     // Clear any previous event tracking
     eventValidator.clear();
+    
+    // Track mock WebSocket instances for cleanup
+    global.mockWebSocketInstances = mockWebSocketInstances;
   });
 
   afterEach(async () => {
-    // Cleanup WebSocket server and connections
-    WS.clean();
-    if (server) {
-      server.close();
-    }
+    // Cleanup WebSocket connections
+    mockWebSocketInstances.forEach(ws => {
+      if (ws && typeof ws.cleanup === 'function') {
+        ws.cleanup();
+      }
+    });
+    mockWebSocketInstances.length = 0;
   });
 
   describe('WebSocket Connection Establishment', () => {
@@ -246,7 +250,7 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
       const connectButton = screen.getByTestId('connect-button');
       
       await act(async () => {
-        userEvent.click(connectButton);
+        await userEvent.click(connectButton);
       });
 
       // Wait for connection establishment
@@ -254,22 +258,32 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connecting');
       });
 
-      // Simulate server accepting connection
-      await act(async () => {
-        await server.connected;
-      });
-
+      // Wait for the mock WebSocket to automatically connect
       await waitFor(() => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
         expect(onConnect).toHaveBeenCalledTimes(1);
         expect(onError).not.toHaveBeenCalled();
-      });
+      }, { timeout: 3000 });
     });
 
     test('should reject connection with invalid JWT token', async () => {
       const invalidJWT = 'invalid-jwt-token';
       const onConnect = jest.fn();
       const onError = jest.fn();
+
+      // Mock WebSocket to fail on invalid token
+      const originalWebSocket = global.WebSocket;
+      global.WebSocket = class MockFailingWebSocket extends originalWebSocket {
+        constructor(url) {
+          super(url);
+          // Simulate immediate error for invalid tokens
+          setTimeout(() => {
+            if (url.includes(invalidJWT)) {
+              this.onerror && this.onerror(new ErrorEvent('error', { error: new Error('Invalid token') }));
+            }
+          }, 10);
+        }
+      };
 
       render(
         <MockWebSocketConnection
@@ -283,19 +297,17 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
       const connectButton = screen.getByTestId('connect-button');
       
       await act(async () => {
-        userEvent.click(connectButton);
-      });
-
-      // Simulate server rejecting connection due to invalid token
-      await act(async () => {
-        server.error();
+        await userEvent.click(connectButton);
       });
 
       await waitFor(() => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('error');
         expect(onConnect).not.toHaveBeenCalled();
         expect(onError).toHaveBeenCalledTimes(1);
-      });
+      }, { timeout: 1000 });
+
+      // Restore original WebSocket
+      global.WebSocket = originalWebSocket;
     });
 
     test('should reject connection with expired JWT token', async () => {

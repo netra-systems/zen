@@ -139,7 +139,7 @@ async def test_startup_orchestrator_integration():
 
 async def main():
     """Run all auth startup validation tests."""
-    print("🔐 AUTH STARTUP VALIDATION TESTS")
+    print("AUTH STARTUP VALIDATION TESTS")
     print("Testing that system CANNOT start with bad auth configuration")
     print()
     

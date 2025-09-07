@@ -7,12 +7,14 @@ import asyncio
 import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import Mock, AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import TestDatabaseManager
+from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -47,7 +49,7 @@ class TestThreadSwitchDataLoading:
     @pytest.fixture
     async def handler(self):
         """Create MessageHandlerService with mocks"""
-        supervisor = supervisor_instance  # Initialize appropriate service
+        supervisor = MagicMock()  # Mock supervisor service for testing
         thread_service = Mock(spec=ThreadService)
         websocket_manager = UnifiedWebSocketManager()
         
@@ -67,10 +69,10 @@ class TestThreadSwitchDataLoading:
         
         # Mock WebSocket manager
         with patch('netra_backend.app.services.message_handlers.manager') as mock_manager:
-            mock_manager.send_message = AsyncNone  # TODO: Use real service instance
-            mock_manager.send_error = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.leave_all_rooms = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.join_room = AsyncNone  # TODO: Use real service instance
+            mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
+            mock_manager.send_error = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.leave_all_rooms = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
             
             # Create mock session
             mock_session = Mock(spec=AsyncSession)
@@ -122,7 +124,7 @@ class TestThreadSwitchDataLoading:
         handler.thread_service.get_thread = AsyncMock(return_value=mock_thread)
         
         with patch('netra_backend.app.services.message_handlers.manager') as mock_manager:
-            mock_manager.send_error = AsyncNone  # TODO: Use real service instance
+            mock_manager.send_error = AsyncMock()  # TODO: Use real service instance
             
             # Create mock session
             mock_session = Mock(spec=AsyncSession)
@@ -144,8 +146,8 @@ class TestThreadSwitchDataLoading:
     async def test_switch_thread_no_session(self, handler):
         """Test thread switch without database session"""
         with patch('netra_backend.app.services.message_handlers.manager') as mock_manager:
-            mock_manager.broadcasting.leave_all_rooms = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.join_room = AsyncNone  # TODO: Use real service instance
+            mock_manager.broadcasting.leave_all_rooms = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
             
             # Call switch_thread without session
             payload = {"thread_id": "thread_123"}
@@ -172,8 +174,8 @@ class TestThreadSwitchDataLoading:
         )
         
         with patch('netra_backend.app.services.message_handlers.manager') as mock_manager:
-            mock_manager.broadcasting.leave_all_rooms = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.join_room = AsyncNone  # TODO: Use real service instance
+            mock_manager.broadcasting.leave_all_rooms = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
             
             # Create mock session
             mock_session = Mock(spec=AsyncSession)
@@ -205,9 +207,9 @@ class TestThreadSwitchDataLoading:
         handler.websocket_manager.update_connection_thread = Mock(return_value=True)
         
         with patch('netra_backend.app.services.message_handlers.manager') as mock_manager:
-            mock_manager.send_message = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.leave_all_rooms = AsyncNone  # TODO: Use real service instance
-            mock_manager.broadcasting.join_room = AsyncNone  # TODO: Use real service instance
+            mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.leave_all_rooms = AsyncMock()  # TODO: Use real service instance
+            mock_manager.broadcasting.join_room = AsyncMock()  # TODO: Use real service instance
             
             # Create mock session
             mock_session = Mock(spec=AsyncSession)
