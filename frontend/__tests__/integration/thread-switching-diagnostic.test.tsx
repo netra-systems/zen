@@ -11,15 +11,19 @@ import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import * as threadLoadingService from '@/services/threadLoadingService';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
-// Mock the unified chat store
+// Mock the unified chat store and ThreadOperationManager
 jest.mock('@/store/unified-chat', () => require('../../__mocks__/store/unified-chat'));
+jest.mock('@/lib/thread-operation-manager', () => require('../../__mocks__/lib/thread-operation-manager'));
 
 // Import the mocked store
 import { useUnifiedChatStore, resetMockState } from '@/store/unified-chat';
 // Mock modules
 jest.mock('@/services/threadLoadingService');
 jest.mock('@/lib/retry-manager', () => ({
-  executeWithRetry: jest.fn((fn) => fn())
+  executeWithRetry: jest.fn(async (fn) => {
+    // Actually execute the function passed to it
+    return await fn();
+  })
 }));
 jest.mock('@/lib/operation-cleanup', () => ({
   globalCleanupManager: {
@@ -58,6 +62,12 @@ describe('Thread Switching Diagnostics', () => {
     // Reset the mock store to initial state
     if (typeof resetMockState === 'function') {
       resetMockState();
+    }
+    
+    // Reset ThreadOperationManager
+    const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
+    if (ThreadOperationManager?.reset) {
+      ThreadOperationManager.reset();
     }
   });
 

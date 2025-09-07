@@ -159,8 +159,8 @@ class HealthInterface:
         critical_components = ["postgres", "auth", "core"]
         if any(comp in name.lower() for comp in critical_components):
             return await checker.check_with_timeout()
-        elif self._is_optional_in_development(name):
-            return await self._run_optional_development_check(name, checker)
+        elif self._is_optional_service(name):
+            return await self._run_optional_service_check(name, checker)
         return None
     
     async def _run_all_checks(self) -> Dict[str, HealthCheckResult]:
@@ -247,37 +247,46 @@ class HealthInterface:
         config = unified_config_manager.get_config()
         return config.environment.lower() == "development"
     
-    def _is_optional_in_development(self, component_name: str) -> bool:
-        """Check if component is optional in development mode."""
-        if not self._is_development_environment():
+    def _is_staging_environment(self) -> bool:
+        """Check if running in staging environment."""
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return config.environment.lower() == "staging"
+    
+    def _is_optional_service(self, component_name: str) -> bool:
+        """Check if component is optional in development or staging mode."""
+        # CRITICAL FIX: Allow graceful degradation for optional services in staging
+        # when they are misconfigured (e.g., missing passwords from Secret Manager)
+        if not (self._is_development_environment() or self._is_staging_environment()):
             return False
         
         optional_services = ["redis", "clickhouse"]
         return any(service in component_name.lower() for service in optional_services)
     
-    async def _run_optional_development_check(self, name: str, checker: BaseHealthChecker) -> HealthCheckResult:
-        """Run optional development check with graceful failure."""
+    async def _run_optional_service_check(self, name: str, checker: BaseHealthChecker) -> HealthCheckResult:
+        """Run optional service check with graceful failure for staging/development."""
         try:
             return await checker.check_with_timeout()
         except Exception as e:
-            # In development, treat optional service failures as warnings
-            return self._create_development_warning_result(name, str(e))
+            # In development/staging, treat optional service failures as warnings
+            return self._create_optional_service_warning_result(name, str(e))
     
-    def _create_development_warning_result(self, component_name: str, error_msg: str) -> HealthCheckResult:
-        """Create a warning result for optional development services."""
+    def _create_optional_service_warning_result(self, component_name: str, error_msg: str) -> HealthCheckResult:
+        """Create a warning result for optional services in staging/development."""
         from netra_backend.app.core.health_types import HealthCheckResult
-        details = self._build_development_warning_details(component_name, error_msg)
+        details = self._build_optional_service_warning_details(component_name, error_msg)
         return HealthCheckResult(
             status="healthy",
             response_time=0.0,
             details=details
         )
     
-    def _build_development_warning_details(self, component_name: str, error_msg: str) -> Dict[str, Any]:
-        """Build development warning result details."""
+    def _build_optional_service_warning_details(self, component_name: str, error_msg: str) -> Dict[str, Any]:
+        """Build optional service warning result details."""
+        env_name = "staging" if self._is_staging_environment() else "development"
         return {"component_name": component_name, "success": True, "health_score": 0.8,
-                "error_message": f"Development mode - {component_name} unavailable: {error_msg}",
-                "status": "development_optional", "available": False}
+                "error_message": f"{env_name} mode - {component_name} unavailable: {error_msg}",
+                "status": f"{env_name}_optional", "available": False}
     
     def _count_critical_failures(self, checks: Dict[str, HealthCheckResult]) -> int:
         """Count failures in critical components only."""

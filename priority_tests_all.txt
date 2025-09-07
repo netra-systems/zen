@@ -1,0 +1,51 @@
+
+======================================================================
+STAGING E2E TEST SESSION STARTED
+Time: 2025-09-07 00:26:36
+======================================================================
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'Faker': '37.4.2', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 95 items
+
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_001_websocket_connection_real PASSED [  1%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_002_websocket_authentication_real PASSED [  2%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_003_websocket_message_send_real PASSED [  3%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalWebSocket::test_004_websocket_concurrent_connections_real PASSED [  4%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_005_agent_discovery_real PASSED [  5%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_006_agent_configuration_real PASSED [  6%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_007_agent_execution_endpoints_real PASSED [  7%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_008_agent_streaming_capabilities_real PASSED [  8%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_009_agent_status_monitoring_real PASSED [  9%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_010_tool_execution_endpoints_real PASSED [ 10%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalAgent::test_011_agent_performance_real PASSED [ 11%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_012_message_persistence_real PASSED [ 12%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_013_thread_creation_real PASSED [ 13%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_014_thread_switching_real PASSED [ 14%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_015_thread_history_real PASSED [ 15%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalMessaging::test_016_user_context_isolation_real PASSED [ 16%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_017_concurrent_users_real PASSED [ 17%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_018_rate_limiting_real PASSED [ 18%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_019_error_handling_real PASSED [ 20%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_020_connection_resilience_real PASSED [ 21%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalScalability::test_021_session_persistence_real PASSED [ 22%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalUserExperience::test_022_agent_lifecycle_management_real PASSED [ 23%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalUserExperience::test_023_streaming_partial_results_real PASSED [ 24%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalUserExperience::test_024_message_ordering_real PASSED [ 25%]
+tests/e2e/staging/test_priority1_critical.py::TestCriticalUserExperience::test_025_critical_event_delivery_real PASSED [ 26%]
+tests/e2e/staging/test_priority2_high.py::TestHighAuthentication::test_026_jwt_authentication_real PASSED [ 27%]
+tests/e2e/staging/test_priority2_high.py::TestHighAuthentication::test_027_oauth_google_login_real PASSED [ 28%]
+tests/e2e/staging/test_priority2_high.py::TestHighAuthentication::test_028_token_refresh_real PASSED [ 29%]
+tests/e2e/staging/test_priority2_high.py::TestHighAuthentication::test_029_token_expiry_real PASSED [ 30%]
+tests/e2e/staging/test_priority2_high.py::TestHighAuthentication::test_030_logout_flow_real PASSED [ 31%]
+tests/e2e/staging/test_priority2_high.py::TestHighSecurity::test_031_session_security_real PASSED [ 32%]
+tests/e2e/staging/test_priority2_high.py::TestHighSecurity::test_032_https_certificate_validation_real PASSED [ 33%]
+tests/e2e/staging/test_priority2_high.py::TestHighSecurity::test_033_cors_policy_real 

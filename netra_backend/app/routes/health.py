@@ -165,17 +165,28 @@ async def health(request: Request, response: Response) -> Dict[str, Any]:
         pass  # Continue to normal health check
     
     # Startup is complete, proceed with normal health check
-    health_status = await health_interface.get_health_status(HealthLevel.BASIC)
-    
-    # Add version-specific fields based on requested API version
-    if requested_version in ["1.0", "2024-08-01"]:
-        health_status["version_info"] = {
-            "api_version": requested_version,
-            "service_version": "1.0.0",
-            "supported_versions": ["current", "1.0", "2024-08-01"]
-        }
-    
-    return health_status
+    try:
+        health_status = await health_interface.get_health_status(HealthLevel.BASIC)
+        
+        # Add version-specific fields based on requested API version
+        if requested_version in ["1.0", "2024-08-01"]:
+            health_status["version_info"] = {
+                "api_version": requested_version,
+                "service_version": "1.0.0",
+                "supported_versions": ["current", "1.0", "2024-08-01"]
+            }
+        
+        return health_status
+    except Exception as e:
+        # CRITICAL FIX: Prevent health interface exceptions from causing 500 errors
+        # This should never happen with BASIC level, but provides safety for staging
+        logger.error(f"Health interface failed unexpectedly: {e}")
+        return _create_error_response(503, {
+            "status": "unhealthy",
+            "message": f"Health check system error: {str(e)}",
+            "fallback": True,
+            "timestamp": time.time()
+        })
 
 
 # Add separate endpoint for /health (without trailing slash) to handle direct requests

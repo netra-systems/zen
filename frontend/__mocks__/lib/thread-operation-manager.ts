@@ -73,9 +73,7 @@ class MockThreadOperationManagerImpl {
 
     try {
       // Actually execute the provided function
-      console.log('ThreadOperationManager: About to call executor function');
       const result = await executor(operation.abortController!.signal);
-      console.log('ThreadOperationManager: Executor returned:', result);
       
       // Update operation status based on result
       this.updateOperation(operationId, { 

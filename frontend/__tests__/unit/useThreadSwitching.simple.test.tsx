@@ -23,16 +23,9 @@ jest.mock('@/services/threadLoadingService', () => ({
 }));
 
 jest.mock('@/lib/retry-manager', () => ({
-  executeWithRetry: jest.fn(async (fn, options) => {
-    console.log('executeWithRetry called with fn:', typeof fn);
-    try {
-      const result = await fn();
-      console.log('executeWithRetry result:', result);
-      return result;
-    } catch (error) {
-      console.log('executeWithRetry error:', error);
-      throw error;
-    }
+  executeWithRetry: jest.fn(async (fn) => {
+    // Actually call the function - this was missing in the original mock
+    return await fn();
   })
 }));
 
@@ -92,12 +85,22 @@ describe('useThreadSwitching Hook - Simple', () => {
     const { result } = renderHook(() => useThreadSwitching());
     const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
     const { threadLoadingService } = require('@/services/threadLoadingService');
-
     const { executeWithRetry } = require('@/lib/retry-manager');
     
     ThreadOperationManager.reset();
     threadLoadingService.loadThread.mockClear();
     executeWithRetry.mockClear();
+    
+    // Set up proper mock implementations
+    threadLoadingService.loadThread.mockResolvedValue({
+      success: true,
+      threadId: 'test-123',
+      messages: [{ id: 'msg-1', content: 'Test message' }]
+    });
+    
+    executeWithRetry.mockImplementation(async (fn) => {
+      return await fn();
+    });
 
     let success;
     await act(async () => {
@@ -105,16 +108,6 @@ describe('useThreadSwitching Hook - Simple', () => {
     });
 
     const executions = ThreadOperationManager.getExecutionHistory();
-    console.log('Executions:', executions);
-    console.log('Success:', success);
-    console.log('threadLoadingService.loadThread was called:', threadLoadingService.loadThread.mock.calls.length, 'times');
-    console.log('executeWithRetry was called:', executeWithRetry.mock.calls.length, 'times');
-    
-    // Check if store functions exist
-    const { useUnifiedChatStore } = require('@/store/unified-chat');
-    const state = useUnifiedChatStore.getState();
-    console.log('Store state has startThreadLoading?', typeof state.startThreadLoading);
-    console.log('Store state has completeThreadLoading?', typeof state.completeThreadLoading);
     
     expect(executions).toHaveLength(1);
     expect(executions[0].type).toBe('switch');
