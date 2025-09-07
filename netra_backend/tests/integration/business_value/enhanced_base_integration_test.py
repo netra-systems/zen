@@ -485,8 +485,8 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
             chat_thread_id=thread_id
         )
         
-        # Set user context in context_tracking field after instantiation
-        state.context_tracking["user_context"] = {
+        # Set user context in metadata field after instantiation (SSOT compatible approach)
+        user_context = {
             "subscription_tier": user["subscription_tier"],
             "monthly_spend": user["monthly_spend"],
             "timezone": "UTC",
@@ -494,6 +494,15 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                 "cost_sensitivity": "high" if user["subscription_tier"] in ["early", "mid"] else "medium"
             }
         }
+        
+        # Store in metadata custom_fields (this field definitely exists)
+        if hasattr(state, 'metadata') and state.metadata:
+            state.metadata.custom_fields["user_context"] = user_context
+        else:
+            # Fallback: create metadata if it doesn't exist
+            from netra_backend.app.schemas.agent_models import AgentMetadata
+            state.metadata = AgentMetadata()
+            state.metadata.custom_fields["user_context"] = user_context
         
         return state
         
