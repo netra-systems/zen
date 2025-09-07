@@ -82,8 +82,17 @@ class TestDatabasePhaseComprehensive(BaseIntegrationTest):
         """Cleanup after each test method."""
         super().teardown_method()
         
-        # Clean up database resources
-        asyncio.create_task(self._cleanup_database_resources())
+        # Clean up database resources synchronously
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, schedule cleanup
+                loop.create_task(self._cleanup_database_resources())
+            else:
+                # If no loop, run cleanup in new loop
+                asyncio.run(self._cleanup_database_resources())
+        except Exception as e:
+            self.logger.warning(f"Error during cleanup: {e}")
         
         # Restore original environment
         os.environ.clear()

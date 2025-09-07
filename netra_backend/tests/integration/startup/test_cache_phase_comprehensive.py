@@ -83,8 +83,17 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """Cleanup after each test method."""
         super().teardown_method()
         
-        # Clean up Redis resources
-        asyncio.create_task(self._cleanup_redis_resources())
+        # Clean up Redis resources synchronously
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, schedule cleanup
+                loop.create_task(self._cleanup_redis_resources())
+            else:
+                # If no loop, run cleanup in new loop
+                asyncio.run(self._cleanup_redis_resources())
+        except Exception as e:
+            self.logger.warning(f"Error during cleanup: {e}")
         
         # Restore original environment
         os.environ.clear()

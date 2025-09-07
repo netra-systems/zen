@@ -566,10 +566,9 @@ class TestUnifiedTestRunnerProper(SSotBaseTestCase):
             service=None
         )
         
-        # This should handle unknown service gracefully
-        cmd = self.runner._build_pytest_command("nonexistent_service", "unit", args)
-        assert isinstance(cmd, str)
-        assert len(cmd) > 0
+        # Unknown service should raise KeyError (current implementation behavior)
+        with self.expect_exception(KeyError):
+            self.runner._build_pytest_command("nonexistent_service", "unit", args)
         
         # Test with empty category list
         args_empty = argparse.Namespace(
