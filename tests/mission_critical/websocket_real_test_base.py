@@ -55,7 +55,7 @@ def require_docker_services() -> None:
     CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
     """
     try:
-        manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         if not manager.is_docker_available():
             pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")
     except Exception as e:
@@ -182,7 +182,7 @@ class RealWebSocketTestBase:
         self.env = get_env()
         
         # Docker and service management
-        self.docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+        self.docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         self.services_started = False
         
         # Connection management
