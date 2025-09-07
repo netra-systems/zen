@@ -791,6 +791,70 @@ class TestExecutionEngineWebSocketEvents(AsyncBaseTestCase):
         
         # Should return False since no user context
         self.assertFalse(success)
+        
+    async def test_websocket_event_ordering(self):
+        """Test that WebSocket events are sent in correct order."""
+        # Send multiple events
+        await self.engine.send_agent_thinking(self.context, "First thought", 1)
+        await self.engine.send_tool_executing(self.context, "analysis_tool")
+        await self.engine.send_agent_thinking(self.context, "Second thought", 2)
+        await self.engine.send_final_report(self.context, {"status": "done"}, 1000.0)
+        
+        # Verify events are in order
+        self.assertEqual(len(self.websocket_bridge.events), 4)
+        event_types = [e["type"] for e in self.websocket_bridge.events]
+        self.assertEqual(event_types, ["agent_thinking", "tool_executing", "agent_thinking", "agent_completed"])
+        
+    async def test_websocket_event_data_integrity(self):
+        """Test that WebSocket event data is preserved correctly."""
+        test_data = {
+            "complex_data": {"nested": {"deeply": ["array", "items"]}, "number": 42},
+            "unicode": "测试数据 🚀",
+            "special_chars": "@#$%^&*()"
+        }
+        
+        await self.engine.send_final_report(self.context, test_data, 2500.0)
+        
+        # Verify data integrity
+        self.assertEqual(len(self.websocket_bridge.events), 1)
+        event = self.websocket_bridge.events[0]
+        self.assertEqual(event["result"], test_data)
+        self.assertEqual(event["execution_time"], 2500.0)
+        
+    async def test_websocket_event_error_handling(self):
+        """Test WebSocket event error handling."""
+        # Create bridge that raises errors
+        error_bridge = MockWebSocketBridge()
+        error_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error"))
+        
+        engine_with_error_bridge = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=error_bridge,
+            user_context=self.user_context
+        )
+        
+        # Should not raise exception even if WebSocket fails
+        try:
+            await engine_with_error_bridge.send_agent_thinking(self.context, "Test thought")
+        except Exception as e:
+            self.fail(f"WebSocket error should be handled gracefully: {e}")
+            
+    async def test_partial_result_completion_states(self):
+        """Test partial result with different completion states."""
+        # Test incomplete result
+        await self.engine.send_partial_result(self.context, "Analyzing data...", False)
+        
+        # Test complete result
+        await self.engine.send_partial_result(self.context, "Analysis complete!", True)
+        
+        # Verify both events sent with correct completion markers
+        self.assertEqual(len(self.websocket_bridge.events), 2)
+        
+        incomplete_event = self.websocket_bridge.events[0]
+        complete_event = self.websocket_bridge.events[1]
+        
+        self.assertIn("(In Progress)", incomplete_event["reasoning"])
+        self.assertIn("(Complete)", complete_event["reasoning"])
 
 
 class TestExecutionEngineAgentExecution(AsyncBaseTestCase):
@@ -1742,6 +1806,100 @@ class TestExecutionEngineUserIsolation(AsyncBaseTestCase):
             self.assertIsNot(engine._user_execution_states, engines[0]._user_execution_states if i > 0 else {})
             self.assertIsNot(engine._user_state_locks, engines[0]._user_state_locks if i > 0 else {})
             
+    async def test_user_context_metadata_isolation(self):
+        """Test that user context metadata is properly isolated."""
+        context1 = UserExecutionContext.from_request(
+            user_id="metadata_user_1",
+            thread_id="metadata_thread_1",
+            run_id="metadata_run_1",
+            metadata={"priority": "high", "source": "web_ui"}
+        )
+        
+        context2 = UserExecutionContext.from_request(
+            user_id="metadata_user_2",
+            thread_id="metadata_thread_2",
+            run_id="metadata_run_2",
+            metadata={"priority": "low", "source": "api"}
+        )
+        
+        engine1 = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=MockWebSocketBridge(),
+            user_context=context1
+        )
+        
+        engine2 = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=MockWebSocketBridge(),
+            user_context=context2
+        )
+        
+        # Verify metadata isolation
+        self.assertEqual(engine1.user_context.metadata["priority"], "high")
+        self.assertEqual(engine2.user_context.metadata["priority"], "low")
+        
+        # Modify one metadata and verify other is unaffected
+        # Note: UserExecutionContext is frozen, so we test that they don't share references
+        self.assertIsNot(engine1.user_context.metadata, engine2.user_context.metadata)
+        
+    async def test_isolation_status_reporting_accuracy(self):
+        """Test accuracy of isolation status reporting."""
+        # Test with various user context configurations
+        standard_context = UserExecutionContext.from_request("user1", "thread1", "run1")
+        complex_context = UserExecutionContext.from_request(
+            user_id="complex_user",
+            thread_id="complex_thread", 
+            run_id="complex_run",
+            websocket_connection_id="ws_conn_123",
+            metadata={"env": "production", "features": ["feature_a", "feature_b"]}
+        )
+        
+        standard_engine = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=MockWebSocketBridge(),
+            user_context=standard_context
+        )
+        
+        complex_engine = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=MockWebSocketBridge(),
+            user_context=complex_context
+        )
+        
+        # Test standard isolation status
+        standard_status = standard_engine.get_isolation_status()
+        self.assertEqual(standard_status['isolation_level'], 'user_isolated')
+        self.assertFalse(standard_status['global_state_warning'])
+        self.assertFalse(standard_status['recommended_migration'])
+        
+        # Test complex isolation status
+        complex_status = complex_engine.get_isolation_status()
+        self.assertEqual(complex_status['isolation_level'], 'user_isolated')
+        self.assertEqual(complex_status['user_id'], 'complex_user')
+        
+    def test_user_context_validation_integration(self):
+        """Test UserExecutionContext validation integration."""
+        # Test with invalid user context during engine creation
+        try:
+            invalid_context = UserExecutionContext.from_request(
+                user_id="",  # Invalid empty user_id
+                thread_id="test_thread",
+                run_id="test_run"
+            )
+            self.fail("Should have raised InvalidContextError")
+        except InvalidContextError:
+            pass  # Expected
+            
+        # Test engine handles context validation errors gracefully
+        valid_context = UserExecutionContext.from_request("valid_user", "valid_thread", "valid_run")
+        engine = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=MockWebSocketBridge(),
+            user_context=valid_context
+        )
+        
+        self.assertEqual(engine.user_context.user_id, "valid_user")
+            
     async def test_static_user_isolation_method(self):
         """Test static execute_with_user_isolation method."""
         user_context = UserExecutionContext.from_request(
@@ -1852,6 +2010,66 @@ class TestExecutionEngineShutdownAndCleanup(AsyncBaseTestCase):
         context.flow_id = "test_flow_123"
         flow_id = self.engine._get_context_flow_id(context)
         self.assertEqual(flow_id, "test_flow_123")
+        
+    def test_removed_components_verification(self):
+        """Test that removed components are properly None."""
+        # Verify deprecated components are removed
+        self.assertIsNone(self.engine.fallback_manager)
+        self.assertIsNone(self.engine.periodic_update_manager)
+        
+        # Verify that methods still work without these components
+        self.assertTrue(hasattr(self.engine, 'get_fallback_health_status'))
+        self.assertTrue(hasattr(self.engine, 'reset_fallback_mechanisms'))
+        
+    async def test_cleanup_with_active_runs(self):
+        """Test cleanup behavior with active runs."""
+        # Add some active runs
+        self.engine.active_runs["run1"] = {"status": "running", "agent": "agent1"}
+        self.engine.active_runs["run2"] = {"status": "pending", "agent": "agent2"}
+        
+        initial_count = len(self.engine.active_runs)
+        self.assertGreater(initial_count, 0)
+        
+        # Perform shutdown
+        await self.engine.shutdown()
+        
+        # Verify active runs are cleared
+        self.assertEqual(len(self.engine.active_runs), 0)
+        
+    async def test_memory_management_history_limit(self):
+        """Test memory management through history limits."""
+        # Add results beyond the limit
+        for i in range(ExecutionEngine.MAX_HISTORY_SIZE + 20):
+            result = AgentExecutionResult(
+                success=True,
+                agent_name=f"agent_{i}",
+                execution_time=0.1
+            )
+            self.engine._update_history(result)
+            
+        # Should be limited to MAX_HISTORY_SIZE
+        self.assertEqual(len(self.engine.run_history), ExecutionEngine.MAX_HISTORY_SIZE)
+        
+        # Should keep the most recent entries
+        last_result = self.engine.run_history[-1]
+        self.assertEqual(last_result.agent_name, f"agent_{ExecutionEngine.MAX_HISTORY_SIZE + 19}")
+        
+    async def test_graceful_degradation(self):
+        """Test graceful degradation when components fail."""
+        # Test with failing WebSocket bridge
+        failing_bridge = MockWebSocketBridge()
+        failing_bridge.get_metrics = AsyncMock(side_effect=Exception("Bridge error"))
+        
+        engine_with_failing_bridge = ExecutionEngine._init_from_factory(
+            registry=self.registry,
+            websocket_bridge=failing_bridge,
+            user_context=self.user_context
+        )
+        
+        # Should handle failing bridge gracefully
+        stats = await engine_with_failing_bridge.get_execution_stats()
+        self.assertIn('websocket_bridge_error', stats)
+        self.assertIn('Bridge error', stats['websocket_bridge_error'])
         
     async def test_completion_event_sending(self):
         """Test completion event sending for various scenarios."""

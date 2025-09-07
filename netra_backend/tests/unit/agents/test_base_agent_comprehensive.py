@@ -330,6 +330,20 @@ class TestBaseAgentWebSocketBridge:
         self.mock_bridge = Mock()
         self.mock_context = MockUserExecutionContext()
         
+        # Mock the WebSocket adapter methods for testing
+        self.agent._websocket_adapter.set_websocket_bridge = Mock()
+        self.agent._websocket_adapter.has_websocket_bridge = Mock(return_value=False)
+        self.agent._websocket_adapter.emit_agent_started = AsyncMock()
+        self.agent._websocket_adapter.emit_thinking = AsyncMock()
+        self.agent._websocket_adapter.emit_tool_executing = AsyncMock()
+        self.agent._websocket_adapter.emit_tool_completed = AsyncMock()
+        self.agent._websocket_adapter.emit_agent_completed = AsyncMock()
+        self.agent._websocket_adapter.emit_progress = AsyncMock()
+        self.agent._websocket_adapter.emit_error = AsyncMock()
+        self.agent._websocket_adapter.emit_tool_started = AsyncMock()
+        self.agent._websocket_adapter.emit_subagent_started = AsyncMock()
+        self.agent._websocket_adapter.emit_subagent_completed = AsyncMock()
+        
     def test_websocket_bridge_adapter_initialization(self):
         """Test WebSocket bridge adapter is properly initialized.
         
@@ -533,7 +547,7 @@ class TestBaseAgentTokenManagement:
         """
         self.agent.token_context_manager.optimize_prompt_for_context = Mock()
         enhanced_context = MockUserExecutionContext()
-        enhanced_context.metadata = {"prompt_optimizations": [{"tokens_saved": 20}]}
+        enhanced_context.metadata = {"prompt_optimizations": [{"tokens_saved": 20, "reduction_percent": 15.5}]}
         optimized_prompt = "Shorter prompt"
         self.agent.token_context_manager.optimize_prompt_for_context.return_value = (
             enhanced_context, optimized_prompt
@@ -669,12 +683,20 @@ class TestBaseAgentSessionIsolation:
         """
         mock_manager = Mock()
         mock_db_manager_class.return_value = mock_manager
-        mock_context = MockUserExecutionContext()
         
-        result = self.agent._get_session_manager(mock_context)
+        # Create a real UserExecutionContext for strict type checking
+        real_context = UserExecutionContext(
+            user_id="test-user-123",
+            thread_id="test-thread-456",
+            run_id="test-run-789",
+            metadata={},
+            db_session=Mock()
+        )
+        
+        result = self.agent._get_session_manager(real_context)
         
         # Verify manager was created with context
-        mock_db_manager_class.assert_called_once_with(mock_context)
+        mock_db_manager_class.assert_called_once_with(real_context)
         assert result is mock_manager
         
     def test_get_session_manager_invalid_context_type(self):
