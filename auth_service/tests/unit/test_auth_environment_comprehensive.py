@@ -108,7 +108,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_environment_specific(self):
         """Test JWT secret key tries environment-specific keys first."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
@@ -125,7 +125,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_generates_dev_fallback(self):
         """Test JWT secret generates consistent development fallback."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
@@ -141,7 +141,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_generates_test_fallback(self):
         """Test JWT secret generates consistent test fallback."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
@@ -157,7 +157,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_fails_for_staging_without_config(self):
         """Test JWT secret fails for staging without explicit configuration."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
@@ -171,7 +171,7 @@ class TestJWTConfiguration:
 
     def test_get_jwt_secret_key_fails_for_production_without_config(self):
         """Test JWT secret fails for production without explicit configuration."""
-        with patch('auth_service.auth_core.auth_environment.get_unified_jwt_secret') as mock_unified:
+        with patch('shared.jwt_secret_manager.get_unified_jwt_secret') as mock_unified:
             mock_unified.side_effect = Exception("Unified manager failed")
             
             with patch.object(self.env.env, 'get') as mock_get:
@@ -317,7 +317,7 @@ class TestDatabaseConfiguration:
     def test_get_database_url_uses_builder_for_non_test(self):
         """Test database URL uses DatabaseURLBuilder for non-test environments."""
         with patch.object(self.env, 'get_environment', return_value="development"):
-            with patch('auth_service.auth_core.auth_environment.DatabaseURLBuilder') as mock_builder:
+            with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder:
                 mock_instance = MagicMock()
                 mock_instance.get_url_for_environment.return_value = "postgresql://test"
                 mock_instance.get_safe_log_message.return_value = "Safe log message"
@@ -332,7 +332,7 @@ class TestDatabaseConfiguration:
     def test_get_database_url_fails_gracefully_when_builder_fails(self):
         """Test database URL fails gracefully when DatabaseURLBuilder fails."""
         with patch.object(self.env, 'get_environment', return_value="development"):
-            with patch('auth_service.auth_core.auth_environment.DatabaseURLBuilder') as mock_builder:
+            with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder:
                 mock_instance = MagicMock()
                 mock_instance.get_url_for_environment.return_value = None
                 mock_instance.debug_info.return_value = {"error": "config missing"}
@@ -711,7 +711,8 @@ class TestEnvironmentDetection:
 
     def test_get_environment_defaults_to_development(self):
         """Test get_environment defaults to development."""
-        with patch.object(self.env.env, 'get', return_value=None):
+        with patch.object(self.env.env, 'get') as mock_get:
+            mock_get.side_effect = lambda key, default=None: default if key == "ENVIRONMENT" else None
             assert self.env.get_environment() == "development"
 
     def test_is_production_detection(self):

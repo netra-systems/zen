@@ -490,7 +490,7 @@ class TokenService:
     def create_token(self, user_data: dict) -> str:
         """Create a token with user data.
         
-        Synchronous wrapper for create_access_token for test compatibility.
+        DEPRECATED: Delegates to auth service - SSOT compliant.
         
         Args:
             user_data: Dictionary containing user information
@@ -498,36 +498,48 @@ class TokenService:
         Returns:
             JWT token string
         """
-        secret = self._get_jwt_secret()
+        # Delegate token creation to auth service - SSOT compliant
+        from netra_backend.app.clients.auth_client_core import auth_client
         
-        # Create payload from user_data
-        now = datetime.now(timezone.utc)
+        # Map user_data to auth service format
         expires_in = self._access_token_ttl
         if 'exp' in user_data and isinstance(user_data['exp'], datetime):
-            # If exp is provided as datetime, calculate expires_in
+            now = datetime.now(timezone.utc)
             exp_time = user_data['exp']
             if exp_time.tzinfo is None:
                 exp_time = exp_time.replace(tzinfo=timezone.utc)
             expires_in = int((exp_time - now).total_seconds())
         
-        payload = {
-            'sub': user_data.get('user_id', 'test_user'),
-            'iat': int(now.timestamp()),
-            'exp': int((now + timedelta(seconds=expires_in)).timestamp()),
-            'type': 'access',
-            'jti': str(uuid.uuid4()),
+        token_data = {
+            'user_id': user_data.get('user_id', 'test_user'),
+            'expires_in': expires_in
         }
         
         # Add additional claims from user_data
         for key, value in user_data.items():
-            if key not in ['exp'] and not key.startswith('_'):
-                payload[key] = value
+            if key not in ['exp', 'user_id'] and not key.startswith('_'):
+                token_data[key] = value
         
-        # Create and return token
-        return jwt.encode(payload, secret, algorithm='HS256')
+        # Use synchronous call since this method must be sync for test compatibility
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            result = loop.run_until_complete(auth_client.create_token(token_data))
+            return result.get('access_token') if result else None
+        except RuntimeError:
+            # No event loop running, create new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(auth_client.create_token(token_data))
+                return result.get('access_token') if result else None
+            finally:
+                loop.close()
     
     def create_service_token(self, service_data: dict) -> str:
         """Create a service token with service data.
+        
+        DEPRECATED: Delegates to auth service - SSOT compliant.
         
         Args:
             service_data: Dictionary containing service information
@@ -535,32 +547,44 @@ class TokenService:
         Returns:
             JWT service token string
         """
-        secret = self._get_jwt_secret()
+        # Delegate service token creation to auth service - SSOT compliant
+        from netra_backend.app.clients.auth_client_core import auth_client
         
-        # Create payload from service_data
-        now = datetime.now(timezone.utc)
+        # Map service_data to auth service format
         expires_in = self._access_token_ttl
         if 'exp' in service_data and isinstance(service_data['exp'], datetime):
+            now = datetime.now(timezone.utc)
             exp_time = service_data['exp']
             if exp_time.tzinfo is None:
                 exp_time = exp_time.replace(tzinfo=timezone.utc)
             expires_in = int((exp_time - now).total_seconds())
         
-        payload = {
-            'sub': service_data.get('service_id', 'test_service'),
-            'iat': int(now.timestamp()),
-            'exp': int((now + timedelta(seconds=expires_in)).timestamp()),
-            'type': 'service_token',
-            'jti': str(uuid.uuid4()),
+        token_data = {
+            'service_id': service_data.get('service_id', 'test_service'),
+            'token_type': 'service_token',
+            'expires_in': expires_in
         }
         
         # Add additional claims from service_data
         for key, value in service_data.items():
-            if key not in ['exp'] and not key.startswith('_'):
-                payload[key] = value
+            if key not in ['exp', 'service_id'] and not key.startswith('_'):
+                token_data[key] = value
         
-        # Create and return token
-        return jwt.encode(payload, secret, algorithm='HS256')
+        # Use synchronous call since this method must be sync for test compatibility
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            result = loop.run_until_complete(auth_client.create_service_token(token_data))
+            return result.get('service_token') if result else None
+        except RuntimeError:
+            # No event loop running, create new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(auth_client.create_service_token(token_data))
+                return result.get('service_token') if result else None
+            finally:
+                loop.close()
     
     async def rotate_service_token(self, service_id: str, old_token_version: int, 
                                    new_token_version: int, grace_period_seconds: int = 30):
