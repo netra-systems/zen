@@ -112,8 +112,9 @@ class OptimizationsCoreSubAgent(BaseAgent):
         if not await self._validate_context_data(context):
             raise ValueError("Required data not available for optimization analysis")
         
-        # Get database session manager for this request
-        session_manager = DatabaseSessionManager(context)
+        # Use SSOT database session pattern instead of legacy DatabaseSessionManager
+        # session_manager = DatabaseSessionManager(context)  # LEGACY - removed
+        session_manager = None  # Updated to use SSOT get_db() pattern directly
         
         try:
             if stream_updates:
@@ -145,7 +146,7 @@ class OptimizationsCoreSubAgent(BaseAgent):
                 await session_manager.close()
     
     async def _execute_optimization_workflow(self, context: UserExecutionContext, 
-                                           session_manager: DatabaseSessionManager, 
+                                           session_manager: Any, 
                                            stream_updates: bool) -> Dict[str, Any]:
         """Execute optimization analysis workflow with session isolation."""
         if stream_updates:

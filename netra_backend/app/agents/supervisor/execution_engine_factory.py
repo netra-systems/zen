@@ -39,6 +39,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     UserWebSocketEmitter
 )
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -66,8 +67,24 @@ class ExecutionEngineFactory:
     is completely isolated per user request.
     """
     
-    def __init__(self):
-        """Initialize the execution engine factory."""
+    def __init__(self, websocket_bridge: Optional[AgentWebSocketBridge] = None):
+        """Initialize the execution engine factory.
+        
+        Args:
+            websocket_bridge: WebSocket bridge for agent notifications.
+                             Required for proper agent execution with WebSocket events.
+        """
+        # CRITICAL: Validate dependencies early (fail fast)
+        if not websocket_bridge:
+            raise ExecutionEngineFactoryError(
+                "ExecutionEngineFactory requires websocket_bridge during initialization. "
+                "Ensure AgentWebSocketBridge is created and passed during startup. "
+                "This is required for WebSocket events that enable chat business value."
+            )
+        
+        # Store validated websocket bridge
+        self._websocket_bridge = websocket_bridge
+        
         # Active engines registry for lifecycle management
         self._active_engines: Dict[str, UserExecutionEngine] = {}
         self._engine_lock = asyncio.Lock()
@@ -194,11 +211,11 @@ class ExecutionEngineFactory:
     async def _create_user_websocket_emitter(self, 
                                             context: UserExecutionContext,
                                             agent_factory) -> UserWebSocketEmitter:
-        """Create user WebSocket emitter via agent factory.
+        """Create user WebSocket emitter using validated websocket bridge.
         
         Args:
             context: User execution context
-            agent_factory: Agent instance factory
+            agent_factory: Agent instance factory (unused now, kept for compatibility)
             
         Returns:
             UserWebSocketEmitter: User-specific WebSocket emitter
@@ -207,11 +224,9 @@ class ExecutionEngineFactory:
             ExecutionEngineFactoryError: If emitter creation fails
         """
         try:
-            # Get WebSocket bridge from factory
-            if not hasattr(agent_factory, '_websocket_bridge') or not agent_factory._websocket_bridge:
-                raise ExecutionEngineFactoryError("WebSocket bridge not available in agent factory")
-            
-            websocket_bridge = agent_factory._websocket_bridge
+            # Use the validated websocket_bridge from initialization
+            # This eliminates the late validation that was causing the bug
+            websocket_bridge = self._websocket_bridge
             
             # Create user WebSocket emitter
             emitter = UserWebSocketEmitter(
@@ -221,7 +236,7 @@ class ExecutionEngineFactory:
                 websocket_bridge=websocket_bridge
             )
             
-            logger.debug(f"Created UserWebSocketEmitter for user {context.user_id}")
+            logger.debug(f"Created UserWebSocketEmitter for user {context.user_id} with validated bridge")
             return emitter
             
         except Exception as e:
@@ -488,17 +503,69 @@ _factory_lock = asyncio.Lock()
 
 
 async def get_execution_engine_factory() -> ExecutionEngineFactory:
-    """Get singleton ExecutionEngineFactory instance.
+    """Get configured ExecutionEngineFactory instance.
     
     Returns:
         ExecutionEngineFactory: Configured factory instance
+        
+    Raises:
+        ExecutionEngineFactoryError: If factory not configured during startup
     """
+    # Try to get configured factory from FastAPI app state first
+    try:
+        from fastapi import Request
+        from starlette.middleware.base import BaseHTTPMiddleware
+        import contextvars
+        
+        # Try to get from current app context if available
+        try:
+            from netra_backend.app.main import app
+            if hasattr(app.state, 'execution_engine_factory'):
+                return app.state.execution_engine_factory
+        except (ImportError, AttributeError):
+            pass
+    except ImportError:
+        pass
+    
+    # Fallback to singleton pattern with clear error messaging
     global _factory_instance
     
     async with _factory_lock:
         if _factory_instance is None:
-            _factory_instance = ExecutionEngineFactory()
-            logger.info("Created singleton ExecutionEngineFactory instance")
+            raise ExecutionEngineFactoryError(
+                "ExecutionEngineFactory not configured during startup. "
+                "The factory requires a WebSocket bridge for proper agent execution. "
+                "Check system initialization in smd.py - ensure ExecutionEngineFactory "
+                "is created with websocket_bridge parameter during startup."
+            )
+        
+        return _factory_instance
+
+
+async def configure_execution_engine_factory(websocket_bridge: AgentWebSocketBridge) -> ExecutionEngineFactory:
+    """Configure the singleton ExecutionEngineFactory with dependencies.
+    
+    This function should be called during system startup to properly initialize
+    the ExecutionEngineFactory with required dependencies.
+    
+    Args:
+        websocket_bridge: WebSocket bridge for agent notifications
+        
+    Returns:
+        ExecutionEngineFactory: Configured factory instance
+        
+    Raises:
+        ExecutionEngineFactoryError: If configuration fails
+    """
+    global _factory_instance
+    
+    async with _factory_lock:
+        if _factory_instance is not None:
+            logger.warning("ExecutionEngineFactory already configured - replacing with new instance")
+        
+        # Create new factory with validated dependencies
+        _factory_instance = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
+        logger.info("✅ ExecutionEngineFactory configured with WebSocket bridge")
         
         return _factory_instance
 

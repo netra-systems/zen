@@ -536,9 +536,12 @@ class UnifiedToolDispatcher:
             if self.has_websocket_support:
                 await self._emit_tool_completed(tool_name, result, execution_time)
             
+            # Extract actual result from ToolResult wrapper
+            actual_result = result.payload.result if hasattr(result, 'payload') and hasattr(result.payload, 'result') else result
+            
             return ToolDispatchResponse(
                 success=True,
-                result=result,
+                result=actual_result,
                 metadata={
                     'execution_time_ms': execution_time,
                     'dispatcher_id': self.dispatcher_id
