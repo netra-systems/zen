@@ -205,21 +205,25 @@ class CentralConfigurationValidator:
             error_message="JWT_SECRET_KEY required in development/test environments."
         ),
         
-        # Database Configuration (CRITICAL)
+        # Database Configuration (CRITICAL) 
+        # Note: Support POSTGRES_* variables (GCP/DatabaseURLBuilder SSOT) instead of DATABASE_*
+        # This aligns with actual deployment patterns and DatabaseURLBuilder implementation
         ConfigRule(
-            env_var="DATABASE_PASSWORD",
+            env_var="POSTGRES_PASSWORD",
             requirement=ConfigRequirement.REQUIRED_SECURE,
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=8,
             forbidden_values={"", "password", "postgres", "admin"},
-            error_message="DATABASE_PASSWORD required in staging/production. Must be 8+ characters and not use common defaults."
+            error_message="POSTGRES_PASSWORD required for Cloud SQL connection in staging/production. Must be 8+ characters and not use common defaults."
         ),
         ConfigRule(
-            env_var="DATABASE_HOST",
+            env_var="POSTGRES_HOST",
             requirement=ConfigRequirement.REQUIRED,
             environments={Environment.STAGING, Environment.PRODUCTION},
-            forbidden_values={"localhost", "127.0.0.1", ""},
-            error_message="DATABASE_HOST required in staging/production. Cannot be localhost or empty."
+            # Note: Cloud SQL Unix socket paths are valid (e.g., /cloudsql/project:region:instance)
+            # These should NOT be treated as localhost violations
+            forbidden_values={"localhost", "127.0.0.1"},  # Removed empty string check for Cloud SQL
+            error_message="POSTGRES_HOST required for Cloud SQL connection in staging/production. Cannot be localhost/127.0.0.1 (Cloud SQL Unix sockets are allowed)."
         ),
         
         # Redis Configuration (CRITICAL)
