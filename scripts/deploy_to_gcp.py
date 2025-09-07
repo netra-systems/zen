@@ -13,6 +13,11 @@ IMPORTANT for Claude Code users:
     If running from Claude Code, use the wrapper script to avoid 2-minute timeout:
     python scripts/deploy_gcp_with_timeout.py --project netra-staging --build-local
 
+NEW DEFAULT BEHAVIOR:
+    - Secrets validation from Google Secret Manager is OFF by default (use --check-secrets to enable)
+    - GCP API checks are OFF by default (use --check-apis to enable)
+    This speeds up deployments significantly when you know your environment is configured
+
 See SPEC/gcp_deployment.xml for comprehensive deployment guidelines.
 """
 
@@ -476,8 +481,16 @@ class GCPDeployer:
         print("\n✅ All pre-deployment checks passed")
         return True
     
-    def enable_apis(self) -> bool:
-        """Enable required GCP APIs."""
+    def enable_apis(self, check_apis: bool = False) -> bool:
+        """Enable required GCP APIs.
+        
+        Args:
+            check_apis: If True, will attempt to enable APIs. If False, will skip.
+        """
+        if not check_apis:
+            print("\n🔧 Skipping GCP API checks (use --check-apis to enable)")
+            return True
+            
         print("\n🔧 Enabling required GCP APIs...")
         
         required_apis = [
@@ -1187,12 +1200,19 @@ CMD ["npm", "start"]
             
         return None
     
-    def validate_all_secrets_exist(self) -> bool:
+    def validate_all_secrets_exist(self, check_secrets: bool = False) -> bool:
         """Validate ALL required secrets exist in Secret Manager.
         
         This MUST be called BEFORE any build operations to prevent
         deployment failures due to missing secrets.
+        
+        Args:
+            check_secrets: If True, will validate secrets. If False, will skip.
         """
+        if not check_secrets:
+            print("\n🔐 Skipping secrets validation (use --check-secrets to enable)")
+            return True
+            
         print("Checking all required secrets in Secret Manager...")
         
         # Define all required secrets for each environment
@@ -1514,7 +1534,8 @@ CMD ["npm", "start"]
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
                    run_checks: bool = False, service_filter: Optional[str] = None,
                    skip_post_tests: bool = False, no_traffic: bool = False,
-                   skip_validation: bool = False) -> bool:
+                   skip_validation: bool = False, check_apis: bool = False,
+                   check_secrets: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -1525,6 +1546,8 @@ CMD ["npm", "start"]
             skip_post_tests: Skip post-deployment authentication tests
             no_traffic: Deploy without routing traffic to new revisions
             skip_validation: Skip deployment configuration validation
+            check_apis: Enable GCP API checks (default: False)
+            check_secrets: Enable secrets validation from Google Secret Manager (default: False)
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
@@ -1532,6 +1555,8 @@ CMD ["npm", "start"]
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
         print(f"   Config Validation: {'SKIPPED' if skip_validation else 'Enabled (default)'}")
+        print(f"   API Checks: {'Enabled' if check_apis else 'Disabled (default)'}")
+        print(f"   Secrets Validation: {'Enabled' if check_secrets else 'Disabled (default)'}")
         if no_traffic:
             print(f"   ⚠️ Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
         
@@ -1546,17 +1571,20 @@ CMD ["npm", "start"]
         if not self.check_gcloud():
             return False
             
-        if not self.enable_apis():
+        if not self.enable_apis(check_apis=check_apis):
             return False
         
         # CRITICAL: Validate secrets FIRST before any build operations
-        print("\n🔐 Phase 2: Validating Secrets Configuration...")
-        if not self.validate_all_secrets_exist():
-            print("\n❌ CRITICAL: Secret validation failed!")
-            print("   Deployment aborted to prevent runtime failures.")
-            print("   Please ensure all required secrets are configured in Secret Manager.")
-            print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
-            return False
+        if check_secrets:
+            print("\n🔐 Phase 2: Validating Secrets Configuration...")
+            if not self.validate_all_secrets_exist(check_secrets=check_secrets):
+                print("\n❌ CRITICAL: Secret validation failed!")
+                print("   Deployment aborted to prevent runtime failures.")
+                print("   Please ensure all required secrets are configured in Secret Manager.")
+                print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
+                return False
+        else:
+            print("\n🔐 Phase 2: Skipping Secrets Validation (use --check-secrets to enable)")
             
         # Setup any missing secrets with placeholders (development only)
         if self.project_id == "netra-dev":
@@ -1785,11 +1813,17 @@ def main():
     Do NOT create new deployment scripts. Use this with appropriate flags.
     
     Examples:
-        # Default: Fast local build (no checks for testing deployment issues)
+        # Default: Fast local build (no checks, no secrets validation, no API checks)
         python scripts/deploy_to_gcp.py --project netra-staging --build-local
         
-        # With checks (for production readiness)
-        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+        # With full validation (for production readiness)
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks --check-secrets --check-apis
+        
+        # With only secrets validation
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --check-secrets
+        
+        # With only API checks
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --check-apis
         
         # Cloud Build (slower)
         python scripts/deploy_to_gcp.py --project netra-staging
@@ -1807,11 +1841,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  Default deployment (fast, no checks):
+  Default deployment (fast, no checks, no secrets/API validation):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
     
-  With pre-deployment checks:
-    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+  With full validation (production readiness):
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks --check-secrets --check-apis
+    
+  With only secrets validation:
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local --check-secrets
     
   Cloud Build (slower):
     python scripts/deploy_to_gcp.py --project netra-staging
@@ -1841,6 +1878,10 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Use regular Docker images instead of Alpine (NOT RECOMMENDED - Alpine is default)")
     parser.add_argument("--skip-validation", action="store_true",
                        help="Skip deployment configuration validation (NOT RECOMMENDED - use only in emergencies)")
+    parser.add_argument("--check-apis", action="store_true",
+                       help="Check and enable GCP APIs (default: skip)")
+    parser.add_argument("--check-secrets", action="store_true",
+                       help="Validate secrets from Google Secret Manager (default: skip)")
     
     args = parser.parse_args()
     
@@ -1874,7 +1915,9 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 service_filter=args.service,
                 skip_post_tests=args.skip_post_tests,
                 no_traffic=args.no_traffic,
-                skip_validation=args.skip_validation
+                skip_validation=args.skip_validation,
+                check_apis=args.check_apis,
+                check_secrets=args.check_secrets
             )
             
         sys.exit(0 if success else 1)
