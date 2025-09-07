@@ -116,27 +116,39 @@ class StagingConfig:
             # CRITICAL FIX: Use isolated environment and match backend priority exactly
             env = get_env()
             
-            # Priority order MUST match UserContextExtractor._get_jwt_secret() exactly:
-            # 1. JWT_SECRET_STAGING (environment-specific secret for staging)
-            # 2. E2E_BYPASS_KEY (bypass key for E2E testing)  
-            # 3. STAGING_JWT_SECRET (alternative staging secret)
-            # 4. Known staging secret from config/staging.env (final fallback)
+            # CRITICAL FIX: Priority order MUST match UserContextExtractor._get_jwt_secret() exactly
+            # The backend uses this exact priority, so tests must match it perfectly:
             
-            secret = env.get("JWT_SECRET_STAGING")
+            # Get current environment to determine which secret to use
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # 1. Try environment-specific secret first (JWT_SECRET_STAGING for staging)
+            env_specific_key = f"JWT_SECRET_{environment.upper()}"
+            secret = env.get(env_specific_key)
             if secret:
-                print(f"Using JWT_SECRET_STAGING for test token (staging-specific)")
+                print(f"Using {env_specific_key} for test token (environment-specific)")
                 secret = secret.strip()
+            # 2. Try generic JWT_SECRET_KEY (this is what backend falls back to)
+            elif env.get("JWT_SECRET_KEY"):
+                secret = env.get("JWT_SECRET_KEY").strip()
+                print(f"Using JWT_SECRET_KEY for test token (generic secret)")
+            # 3. Try E2E bypass key
             elif env.get("E2E_BYPASS_KEY"):
                 secret = env.get("E2E_BYPASS_KEY").strip()
                 print(f"Using E2E_BYPASS_KEY for test token (bypass mechanism)")
+            # 4. Try alternative staging secret
             elif env.get("STAGING_JWT_SECRET"):
                 secret = env.get("STAGING_JWT_SECRET").strip()
                 print(f"Using STAGING_JWT_SECRET for test token (alternative)")
+            # 5. Environment-specific defaults (matches backend fallback logic)
+            elif environment in ["testing", "development"]:
+                secret = "test_jwt_secret_key_for_development_only"
+                print(f"Using development default JWT secret for {environment}")
             else:
                 # Final fallback - use the actual staging secret from config/staging.env
-                # This matches the JWT_SECRET_STAGING value that should be in staging environment
+                # This should only be used in actual staging environment
                 secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
-                print("WARNING: Using hardcoded fallback JWT secret - set JWT_SECRET_STAGING environment variable")
+                print("WARNING: Using hardcoded staging secret fallback - this should only happen in staging")
             
             # Create payload with required claims
             payload = {

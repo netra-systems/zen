@@ -68,38 +68,20 @@ class TestWebSocketEventsStaging(StagingTestBase):
         connection_attempted = False
         auth_error_received = False
         
-        try:
-            connection_attempted = True
-            async with websockets.connect(
-                config.websocket_url, 
-                additional_headers=headers
-            ) as ws:
-                print("[SUCCESS] WebSocket connected successfully")
-                # Send ping
-                await ws.send(json.dumps({"type": "ping"}))
-                
-                # Wait for any response
-                try:
-                    response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    print(f"[INFO] WebSocket response: {response[:100]}")
-                except asyncio.TimeoutError:
-                    print("[INFO] WebSocket connected but no response to ping")
-                
-        except websockets.exceptions.InvalidStatus as e:
-            status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-            if status_code in [401, 403]:
-                auth_error_received = True
-                print(f"[SUCCESS] WebSocket auth properly enforced: HTTP {status_code}")
-                print(f"[SUCCESS] This confirms staging auth is working correctly")
-            else:
-                print(f"[ERROR] Unexpected WebSocket status: {status_code}")
-                raise
-        except websockets.exceptions.ConnectionClosedError as e:
-            if e.code == 1011:  # Internal error (auth required)
-                auth_error_received = True
-                print("[INFO] WebSocket requires authentication (expected)")
-            else:
-                raise
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        connection_attempted = True
+        async with websockets.connect(
+            config.websocket_url, 
+            additional_headers=headers
+        ) as ws:
+            print("[SUCCESS] WebSocket connected successfully")
+            # Send ping
+            await ws.send(json.dumps({"type": "ping"}))
+            
+            # Wait for any response
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            response = await asyncio.wait_for(ws.recv(), timeout=5)
+            print(f"[INFO] WebSocket response: {response[:100]}")
         
         # Verify that we at least attempted connection (proves staging is reachable)
         assert connection_attempted, "Should have attempted WebSocket connection"
@@ -146,69 +128,53 @@ class TestWebSocketEventsStaging(StagingTestBase):
         test_message_sent = False
         auth_error_received = False
         
-        try:
-            # Get auth headers for WebSocket connection
-            headers = config.get_websocket_headers()
-            # If no token in config, use our test token
-            if not config.test_jwt_token:
-                headers["Authorization"] = f"Bearer {self.test_token}"
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Get auth headers for WebSocket connection
+        headers = config.get_websocket_headers()
+        # If no token in config, use our test token
+        if not config.test_jwt_token:
+            headers["Authorization"] = f"Bearer {self.test_token}"
+        
+        # Attempt authenticated WebSocket connection and message flow
+        async with websockets.connect(
+            config.websocket_url, 
+            close_timeout=10,
+            additional_headers=headers
+        ) as ws:
+            # Send test message that should trigger events
+            test_message = {
+                "type": "message",
+                "content": "Test WebSocket event flow",
+                "thread_id": f"test_{int(time.time())}",
+                "timestamp": time.time()
+            }
             
-            # Attempt authenticated WebSocket connection and message flow
-            async with websockets.connect(
-                config.websocket_url, 
-                close_timeout=10,
-                additional_headers=headers
-            ) as ws:
-                # Send test message that should trigger events
-                test_message = {
-                    "type": "message",
-                    "content": "Test WebSocket event flow",
-                    "thread_id": f"test_{int(time.time())}",
-                    "timestamp": time.time()
-                }
+            await ws.send(json.dumps(test_message))
+            test_message_sent = True
+            print(f"[INFO] Sent test message: {test_message['type']}")
+            
+            # Listen for events for up to 10 seconds
+            listen_timeout = 10
+            start_listen = time.time()
+            
+            while time.time() - start_listen < listen_timeout:
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await asyncio.wait_for(ws.recv(), timeout=2)
+                event_data = json.loads(response)
+                events_received.append(event_data)
                 
-                await ws.send(json.dumps(test_message))
-                test_message_sent = True
-                print(f"[INFO] Sent test message: {test_message['type']}")
+                event_type = event_data.get("type")
+                print(f"[INFO] Received event: {event_type}")
                 
-                # Listen for events for up to 10 seconds
-                listen_timeout = 10
-                start_listen = time.time()
+                # Check if we got any mission critical events
+                if event_type in MISSION_CRITICAL_EVENTS:
+                    print(f"[SUCCESS] Received mission critical event: {event_type}")
                 
-                while time.time() - start_listen < listen_timeout:
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=2)
-                        event_data = json.loads(response)
-                        events_received.append(event_data)
-                        
-                        event_type = event_data.get("type")
-                        print(f"[INFO] Received event: {event_type}")
-                        
-                        # Check if we got any mission critical events
-                        if event_type in MISSION_CRITICAL_EVENTS:
-                            print(f"[SUCCESS] Received mission critical event: {event_type}")
-                        
-                        # Check for auth errors (expected without proper auth)
-                        if event_type == "error" and "auth" in event_data.get("message", "").lower():
-                            auth_error_received = True
-                            print(f"[SUCCESS] Auth error confirms staging security: {event_data['message']}")
-                            break
-                            
-                    except asyncio.TimeoutError:
-                        continue
-                    except websockets.ConnectionClosed:
-                        print("[INFO] WebSocket connection closed")
-                        break
-                        
-        except websockets.exceptions.InvalidStatus as e:
-            status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-            if status_code in [401, 403]:
-                auth_error_received = True
-                print(f"[SUCCESS] WebSocket auth properly enforced: HTTP {status_code}")
-            else:
-                raise
-        except Exception as e:
-            print(f"[INFO] WebSocket error: {e}")
+                # Check for auth errors (expected without proper auth)
+                if event_type == "error" and "auth" in event_data.get("message", "").lower():
+                    auth_error_received = True
+                    print(f"[SUCCESS] Auth error confirms staging security: {event_data['message']}")
+                    break
         
         duration = time.time() - start_time
         print(f"Test duration: {duration:.3f}s")
@@ -245,69 +211,34 @@ class TestWebSocketEventsStaging(StagingTestBase):
         
         async def test_connection(conn_id: int):
             conn_start = time.time()
-            try:
-                # Get auth headers for WebSocket connection
-                headers = config.get_websocket_headers()
-                # If no token in config, use our test token
-                if not config.test_jwt_token:
-                    headers["Authorization"] = f"Bearer {self.test_token}"
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            # Get auth headers for WebSocket connection
+            headers = config.get_websocket_headers()
+            # If no token in config, use our test token
+            if not config.test_jwt_token:
+                headers["Authorization"] = f"Bearer {self.test_token}"
+            
+            async with websockets.connect(
+                config.websocket_url,
+                close_timeout=5,
+                additional_headers=headers
+            ) as ws:
+                # Send ping message
+                ping_msg = {
+                    "type": "ping",
+                    "id": conn_id,
+                    "timestamp": time.time()
+                }
+                await ws.send(json.dumps(ping_msg))
                 
-                async with websockets.connect(
-                    config.websocket_url,
-                    close_timeout=5,
-                    additional_headers=headers
-                ) as ws:
-                    # Send ping message
-                    ping_msg = {
-                        "type": "ping",
-                        "id": conn_id,
-                        "timestamp": time.time()
-                    }
-                    await ws.send(json.dumps(ping_msg))
-                    
-                    # Try to get response
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=3)
-                        conn_duration = time.time() - conn_start
-                        return {
-                            "id": conn_id,
-                            "status": "success",
-                            "response": response[:100],
-                            "duration": conn_duration
-                        }
-                    except asyncio.TimeoutError:
-                        conn_duration = time.time() - conn_start
-                        return {
-                            "id": conn_id,
-                            "status": "timeout",
-                            "duration": conn_duration
-                        }
-                        
-            except websockets.exceptions.InvalidStatus as e:
-                conn_duration = time.time() - conn_start
-                status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-                if status_code in [401, 403]:
-                    return {
-                        "id": conn_id,
-                        "status": "auth_required",
-                        "error": str(e),
-                        "duration": conn_duration,
-                        "auth_enforced": True,  # This is actually a success
-                        "status_code": status_code
-                    }
-                else:
-                    return {
-                        "id": conn_id,
-                        "status": "error",
-                        "error": str(e),
-                        "duration": conn_duration
-                    }
-            except Exception as e:
+                # Try to get response
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await asyncio.wait_for(ws.recv(), timeout=3)
                 conn_duration = time.time() - conn_start
                 return {
                     "id": conn_id,
-                    "status": "error",
-                    "error": str(e),
+                    "status": "success",
+                    "response": response[:100],
                     "duration": conn_duration
                 }
         
@@ -364,22 +295,21 @@ if __name__ == "__main__":
         # Ensure authentication setup for direct execution (not managed by pytest)
         test_class.ensure_auth_setup()
         
-        try:
-            print("=" * 60)
-            print("WebSocket Events Staging Tests")
-            print("=" * 60)
-            
-            await test_class.test_health_check()
-            await test_class.test_websocket_connection()
-            await test_class.test_api_endpoints_for_agents()
-            await test_class.test_websocket_event_flow_real()
-            await test_class.test_concurrent_websocket_real()
-            
-            print("\n" + "=" * 60)
-            print("[SUCCESS] All tests passed")
-            print("=" * 60)
-            
-        finally:
-            test_class.teardown_class()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        print("=" * 60)
+        print("WebSocket Events Staging Tests")
+        print("=" * 60)
+        
+        await test_class.test_health_check()
+        await test_class.test_websocket_connection()
+        await test_class.test_api_endpoints_for_agents()
+        await test_class.test_websocket_event_flow_real()
+        await test_class.test_concurrent_websocket_real()
+        
+        print("\n" + "=" * 60)
+        print("[SUCCESS] All tests passed")
+        print("=" * 60)
+        
+        test_class.teardown_class()
     
     asyncio.run(run_tests())

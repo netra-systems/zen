@@ -52,6 +52,7 @@ class MockThreadOperationManagerImpl {
 
   /**
    * Mock implementation that actually executes the provided executor function
+   * and properly simulates store state updates for tests
    */
   public async startOperation(
     type: ThreadOperationType,
@@ -90,6 +91,8 @@ class MockThreadOperationManagerImpl {
     // Set as current operation
     this.currentOperation = operation;
     this.updateOperation(operationId, { status: 'running' });
+    
+    // Note: Store state updates are handled by the hook's executor function itself
 
     try {
       // Actually execute the provided function

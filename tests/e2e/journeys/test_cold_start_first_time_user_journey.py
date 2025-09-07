@@ -107,17 +107,20 @@ class FirstTimeUserHelper:
         """Execute complete signup flow for first-time user."""
         start_time = time.time()
         
-        # Mock email verification for testing (only place where we mock)
-        with patch('smtplib.SMTP') as mock_smtp:
-            mock_smtp.return_value.__enter__.return_value.send_message.return_value = None
-            
-            # Create user in database
-            await sqlite_db.execute("""
-                INSERT INTO users (id, email, hashed_password, is_active, is_verified, created_at)
-                VALUES (?, ?, ?, ?, ?, datetime('now'))
-            """, (user_data["user_id"], user_data["email"], 
-                  f"hashed_{user_data['password']}", True, True))
-            await sqlite_db.commit()
+        # REAL email verification disabled for testing - NO MOCKS per CLAUDE.md
+        # In real tests, we would use a test email service or disable email verification
+        email_verification_skipped = True  # For testing environment
+        
+        # Create user in database with verification status
+        await sqlite_db.execute("""
+            INSERT INTO users (id, email, hashed_password, is_active, is_verified, created_at)
+            VALUES (?, ?, ?, ?, ?, datetime('now'))
+        """, (user_data["user_id"], user_data["email"], 
+              f"hashed_{user_data['password']}", True, email_verification_skipped))
+        await sqlite_db.commit()
+        
+        # In a real system, we would make an actual HTTP call to an email service
+        # For E2E testing, we skip email or use a test email service like MailHog
         
         signup_duration = time.time() - start_time
         

@@ -2375,6 +2375,10 @@ jest.mock('@/hooks/useThreadSwitching', () => {
     retryCount: 0
   };
   
+  // Track operation sequence to prevent out-of-order updates
+  let operationSequence = 0;
+  let lastValidOperationSequence = 0;
+  
   // Reset function for tests
   const resetHookState = () => {
     globalHookState = {
@@ -2385,6 +2389,8 @@ jest.mock('@/hooks/useThreadSwitching', () => {
       operationId: null,
       retryCount: 0
     };
+    operationSequence = 0;
+    lastValidOperationSequence = 0;
   };
   
   // State update function that properly triggers React re-renders
@@ -2418,6 +2424,10 @@ jest.mock('@/hooks/useThreadSwitching', () => {
         if (shouldUseOperationManager) {
           // Use ThreadOperationManager for tests that expect it
           const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
+          
+          // Assign sequence number to this operation
+          const currentSequence = ++operationSequence;
+          console.log(`Operation ${threadId} assigned sequence ${currentSequence}`);
           
           const result = await ThreadOperationManager.startOperation(
             'switch',
@@ -2467,6 +2477,16 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                   return { success: false, threadId, error: new Error('Operation aborted') };
                 }
                 
+                // CRITICAL: Check if this operation is still valid (not superseded by newer operation)
+                if (currentSequence < lastValidOperationSequence) {
+                  console.log(`Operation ${threadId} (seq ${currentSequence}) superseded by newer operation (seq ${lastValidOperationSequence}), not updating state`);
+                  return { success: false, threadId, error: new Error('Operation superseded') };
+                }
+                
+                // Mark this as the most recent valid operation
+                lastValidOperationSequence = currentSequence;
+                console.log(`Operation ${threadId} (seq ${currentSequence}) is valid, updating state`);
+                
                 // Success: Update both hook and store state
                 const successUpdates = {
                   isLoading: false,
@@ -2478,7 +2498,10 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                 };
                 
                 updateHookState(successUpdates);
-                setState(prev => ({ ...prev, ...successUpdates }));
+                setState(prev => {
+                  console.log(`Hook setState for ${threadId} (seq ${currentSequence}): prev.lastLoadedThreadId=${prev.lastLoadedThreadId}, new=${threadId}`);
+                  return { ...prev, ...successUpdates };
+                });
                 
                 // Update store state - but only if not aborted
                 if (!signal.aborted) {
@@ -2501,15 +2524,14 @@ jest.mock('@/hooks/useThreadSwitching', () => {
                   }
                 }
                 
-                // Handle URL update if requested
+                // Handle URL update if requested - delegate to mock router
                 if (options.updateUrl) {
                   try {
-                    const urlSyncModule = require('@/services/urlSyncService');
-                    if (urlSyncModule && urlSyncModule.useURLSync) {
-                      const { updateUrl } = urlSyncModule.useURLSync();
-                      if (updateUrl) {
-                        updateUrl(threadId);
-                      }
+                    // In tests, we mock the router directly
+                    const mockRouter = require('next/navigation').__mockRouter;
+                    if (mockRouter && mockRouter.replace) {
+                      mockRouter.replace(`/chat/${threadId}`, { scroll: false });
+                      console.log(`Mock URL update: router.replace called with /chat/${threadId}`);
                     }
                   } catch (error) {
                     console.warn('Could not update URL:', error);

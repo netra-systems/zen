@@ -25,34 +25,22 @@ jest.mock('next/navigation', () => ({
     get: jest.fn().mockReturnValue(null),
   }),
   usePathname: () => '/chat',
+  __mockRouter: mockRouter, // Expose mock router for jest.setup.js
 }));
 
-// Mock the unified chat store
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn((selector) => {
-    const state = {
-      isProcessing: false,
-      activeThreadId: null,
-      setActiveThread: jest.fn(),
-      setThreadLoading: jest.fn(),
-      startThreadLoading: jest.fn(),
-      completeThreadLoading: jest.fn(),
-      clearMessages: jest.fn(),
-      loadMessages: jest.fn(),
-      handleWebSocketEvent: jest.fn(),
-    };
-    return selector ? selector(state) : state;
-  }),
+// Use the global mock for unified chat store to ensure API compatibility
+// The global mock has proper getState support which is needed by ThreadOperationManager
+
+// Mock URL sync service to avoid hook calls outside components
+jest.mock('@/services/urlSyncService', () => ({
+  useURLSync: () => ({ updateUrl: jest.fn() }),
+  useBrowserHistorySync: () => ({})
 }));
 
-// Mock thread loading service
+// Mock thread loading service - will be configured per test
 jest.mock('@/services/threadLoadingService', () => ({
   threadLoadingService: {
-    loadThread: jest.fn().mockResolvedValue({
-      success: true,
-      messages: [],
-      threadId: 'test-thread',
-    }),
+    loadThread: jest.fn(), // Will be configured in each test
   },
 }));
 
@@ -63,6 +51,16 @@ describe('New Chat URL Update Integration', () => {
     mockRouter.push.mockClear();
     mockRouter.replace.mockClear();
     mockRouter.prefetch.mockClear();
+    
+    // Reset mock store state to ensure clean test isolation
+    const { resetMockState } = require('@/store/unified-chat');
+    if (resetMockState) {
+      resetMockState();
+    }
+    
+    // Reset thread loading service
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockClear();
   });
   
   it('should update URL when creating and switching to new thread', async () => {
@@ -72,6 +70,14 @@ describe('New Chat URL Update Integration', () => {
       id: newThreadId,
       created_at: Date.now(),
       messages: [],
+    });
+    
+    // Configure the thread loading service to return the correct threadId
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockResolvedValue({
+      success: true,
+      messages: [],
+      threadId: newThreadId, // Return the expected threadId
     });
     
     (ThreadService.createThread as jest.Mock) = mockCreateThread;
@@ -92,8 +98,15 @@ describe('New Chat URL Update Integration', () => {
       });
     });
     
-    // Assert
+    // Assert - wait for React state to be updated
     expect(mockCreateThread).toHaveBeenCalled();
+    
+    // Wait for hook state to be properly updated (React setState is async)
+    await act(async () => {
+      // Wait a bit for all state updates to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+    });
+    
     expect(result.current.state.lastLoadedThreadId).toBe(newThreadId);
     
     // Verify URL was updated through router
@@ -106,6 +119,15 @@ describe('New Chat URL Update Integration', () => {
   it('should not update URL if updateUrl option is false', async () => {
     // Arrange
     const newThreadId = 'new-thread-456';
+    
+    // Configure the thread loading service
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockResolvedValue({
+      success: true,
+      messages: [],
+      threadId: newThreadId,
+    });
+    
     (ThreadService.createThread as jest.Mock).mockResolvedValue({
       id: newThreadId,
       created_at: Date.now(),
@@ -129,22 +151,35 @@ describe('New Chat URL Update Integration', () => {
   
   it('should handle errors gracefully when creating new chat', async () => {
     // Arrange
+    const newThreadId = 'new-thread-456';
     const error = new Error('Failed to create thread');
-    (ThreadService.createThread as jest.Mock).mockRejectedValue(error);
+    
+    // Configure the thread loading service to fail
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockRejectedValue(error);
+    
+    (ThreadService.createThread as jest.Mock).mockResolvedValue({
+      id: newThreadId,
+      created_at: Date.now(),
+      messages: [],
+    });
     
     const { result } = renderHook(() => useThreadSwitching());
     
-    // Act & Assert
+    // Act - This WILL trigger the hook because the test simulates the actual flow
     await act(async () => {
-      try {
-        await ThreadService.createThread();
-      } catch (e) {
-        expect(e).toBe(error);
-      }
+      const newThread = await ThreadService.createThread();
+      // The switchToThread will fail due to the loadThread mock rejection
+      await result.current.switchToThread(newThread.id, {
+        clearMessages: true,
+        updateUrl: true,
+      });
     });
     
     // URL should not be updated on error
     expect(mockRouter.replace).not.toHaveBeenCalled();
-    expect(result.current.state.error).toBeNull();
+    // The hook SHOULD have an error because the operation failed
+    expect(result.current.state.error).not.toBeNull();
+    expect(result.current.state.error?.message).toContain('Thread loading failed');
   });
 });

@@ -322,8 +322,9 @@ class TestFrontendChatInteractions:
                 
                 if isinstance(response, dict):
                     assert response.get("content") == "Edited message"
-            except:
-                pass  # Editing might not be supported
+            except Exception as e:
+                # Message editing feature may not be implemented
+                print(f"Message editing not supported: {e}")
                 
     @pytest.mark.asyncio
     async def test_36_chat_message_deletion(self):
@@ -344,8 +345,9 @@ class TestFrontendChatInteractions:
                 )
                 
                 # Response handled by UnifiedHTTPClient
-            except:
-                pass  # Deletion might not be supported
+            except Exception as e:
+                # Message deletion feature may not be implemented  
+                print(f"Message deletion not supported: {e}")
                 
     @pytest.mark.asyncio
     async def test_37_chat_typing_indicators(self):
@@ -397,8 +399,9 @@ class TestFrontendChatInteractions:
             
             if isinstance(response, dict):
                 assert response.get("file_url") or response.get("attachment_id")
-        except:
-            pass  # File upload might not be supported
+        except Exception as e:
+            # File upload feature may not be implemented
+            print(f"File upload not supported: {e}")
             
     @pytest.mark.asyncio
     async def test_39_chat_message_reactions(self):
@@ -423,8 +426,9 @@ class TestFrontendChatInteractions:
                 )
                 
                 # Response handled by UnifiedHTTPClient
-            except:
-                pass  # Reactions might not be supported
+            except Exception as e:
+                # Message reactions feature may not be implemented
+                print(f"Message reactions not supported: {e}")
                 
     @pytest.mark.asyncio
     async def test_40_chat_message_search(self):
@@ -456,8 +460,9 @@ class TestFrontendChatInteractions:
             
             if isinstance(response, dict):
                 assert isinstance(response, dict)
-        except:
-            pass  # Search might not be implemented
+        except Exception as e:
+            # Chat search feature may not be implemented
+            print(f"Chat search not supported: {e}")
             
     @pytest.mark.asyncio
     async def test_41_chat_stream_response(self):

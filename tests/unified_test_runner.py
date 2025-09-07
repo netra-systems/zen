@@ -1067,6 +1067,12 @@ class UnifiedTestRunner:
         elif args.real_services or running_e2e:
             # Configure test environment with discovered ports
             env = get_env()
+            
+            # CRITICAL: Enable E2E tests execution when running e2e category
+            # Without this, all e2e tests are skipped per conftest_e2e.py
+            if running_e2e:
+                env.set('RUN_E2E_TESTS', 'true', 'test_runner')
+                logger.info("Enabled E2E tests execution (RUN_E2E_TESTS=true)")
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)

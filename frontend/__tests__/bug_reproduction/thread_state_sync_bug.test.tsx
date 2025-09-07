@@ -206,6 +206,12 @@ describe('BUG REPRODUCTION: Thread State Synchronization', () => {
       const state = useUnifiedChatStore.getState();
       expect(state.threadLoading).toBe(false);
     }, { timeout: 3000 });
+    
+    // CRITICAL: Also wait for hook state to be properly updated
+    // React setState is async, so we need to wait for the hook to reflect the final thread
+    await waitFor(() => {
+      expect(result.current.state.lastLoadedThreadId).toBe('thread-3');
+    }, { timeout: 1000 });
 
     // BUG REPRODUCTION: Final state should be thread-3 consistently
     const finalHookState = result.current.state;

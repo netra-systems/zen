@@ -199,7 +199,7 @@ class RapidReconnectionClient:
             return await self._attempt_connection()
         except Exception as e:
             logger.error(f"Stable connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected stable connection failure in RapidReconnectionClient: {e}")
             
     @pytest.mark.e2e
     async def test_send_test_message(self) -> bool:
@@ -221,7 +221,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Failed to send test message: {e}")
-            return False
+            pytest.fail(f"Unexpected error sending test message in RapidReconnectionClient: {e}")
 
 
 @pytest.mark.asyncio

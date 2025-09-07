@@ -79,25 +79,22 @@ class TestNetworkCallVerification:
         
         start_time = time.time()
         
-        try:
-            # This MUST perform real DNS resolution - no mocks allowed
-            ip_address = socket.gethostbyname(domain)
-            dns_time = time.time() - start_time
-            
-            # Real DNS takes time - if it's instant, it's fake
-            assert dns_time > 0.001, f"DNS resolution too fast ({dns_time}s) - likely mocked"
-            
-            # Validate IP address format
-            socket.inet_aton(ip_address)  # Will raise exception if not valid IP
-            
-            # IP should not be localhost (fake test indicator)
-            assert not ip_address.startswith('127.'), f"DNS resolved to localhost {ip_address} - fake test"
-            assert not ip_address.startswith('0.'), f"DNS resolved to invalid IP {ip_address} - fake test"
-            
-            print(f"✓ REAL DNS: {domain} -> {ip_address} (took {dns_time:.3f}s)")
-            
-        except socket.gaierror as e:
-            pytest.fail(f"DNS resolution failed: {e} - This should work for real staging")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # This MUST perform real DNS resolution - no mocks allowed
+        ip_address = socket.gethostbyname(domain)
+        dns_time = time.time() - start_time
+        
+        # Real DNS takes time - if it's instant, it's fake
+        assert dns_time > 0.001, f"DNS resolution too fast ({dns_time}s) - likely mocked"
+        
+        # Validate IP address format
+        socket.inet_aton(ip_address)  # Will raise exception if not valid IP
+        
+        # IP should not be localhost (fake test indicator)
+        assert not ip_address.startswith('127.'), f"DNS resolved to localhost {ip_address} - fake test"
+        assert not ip_address.startswith('0.'), f"DNS resolved to invalid IP {ip_address} - fake test"
+        
+        print(f"✓ REAL DNS: {domain} -> {ip_address} (took {dns_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_002_tcp_socket_connection_to_staging(self):
@@ -111,23 +108,20 @@ class TestNetworkCallVerification:
         
         start_time = time.time()
         
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(10)
-            
-            result = sock.connect_ex((domain, port))
-            connect_time = time.time() - start_time
-            
-            # Real connections take time
-            assert connect_time > 0.01, f"Connection too fast ({connect_time}s) - likely mocked"
-            
-            assert result == 0, f"TCP connection failed to {domain}:{port} - error code {result}"
-            
-            sock.close()
-            print(f"✓ REAL TCP: Connected to {domain}:{port} (took {connect_time:.3f}s)")
-            
-        except Exception as e:
-            pytest.fail(f"TCP connection failed: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(10)
+        
+        result = sock.connect_ex((domain, port))
+        connect_time = time.time() - start_time
+        
+        # Real connections take time
+        assert connect_time > 0.01, f"Connection too fast ({connect_time}s) - likely mocked"
+        
+        assert result == 0, f"TCP connection failed to {domain}:{port} - error code {result}"
+        
+        sock.close()
+        print(f"✓ REAL TCP: Connected to {domain}:{port} (took {connect_time:.3f}s)")
     
     @pytest.mark.asyncio 
     async def test_003_ssl_certificate_validation(self):
@@ -140,42 +134,39 @@ class TestNetworkCallVerification:
         
         start_time = time.time()
         
-        try:
-            context = ssl.create_default_context()
-            
-            with socket.create_connection((domain, 443), timeout=10) as sock:
-                with context.wrap_socket(sock, server_hostname=domain) as ssock:
-                    cert = ssock.getpeercert()
-                    handshake_time = time.time() - start_time
-                    
-                    # SSL handshake takes time
-                    assert handshake_time > 0.05, f"SSL handshake too fast ({handshake_time}s) - likely mocked"
-                    
-                    # Validate certificate fields
-                    assert 'subject' in cert, "SSL certificate missing subject"
-                    assert 'issuer' in cert, "SSL certificate missing issuer"
-                    assert 'version' in cert, "SSL certificate missing version"
-                    
-                    # Check certificate is for correct domain
-                    subject_alt_names = []
-                    if 'subjectAltName' in cert:
-                        subject_alt_names = [name[1] for name in cert['subjectAltName'] if name[0] == 'DNS']
-                    
-                    # At least one SAN should match our domain or be a wildcard
-                    domain_matched = any(
-                        san == domain or (san.startswith('*.') and domain.endswith(san[1:]))
-                        for san in subject_alt_names
-                    )
-                    
-                    if not domain_matched and subject_alt_names:
-                        # For GCP services, check if it's a valid GCP domain
-                        gcp_matched = any('run.app' in san or 'googleapis.com' in san for san in subject_alt_names)
-                        assert gcp_matched, f"Certificate not valid for {domain}. SANs: {subject_alt_names}"
-                    
-                    print(f"✓ REAL SSL: Valid certificate for {domain} (took {handshake_time:.3f}s)")
-                    
-        except Exception as e:
-            pytest.fail(f"SSL validation failed: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        context = ssl.create_default_context()
+        
+        with socket.create_connection((domain, 443), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                cert = ssock.getpeercert()
+                handshake_time = time.time() - start_time
+                
+                # SSL handshake takes time
+                assert handshake_time > 0.05, f"SSL handshake too fast ({handshake_time}s) - likely mocked"
+                
+                # Validate certificate fields
+                assert 'subject' in cert, "SSL certificate missing subject"
+                assert 'issuer' in cert, "SSL certificate missing issuer"
+                assert 'version' in cert, "SSL certificate missing version"
+                
+                # Check certificate is for correct domain
+                subject_alt_names = []
+                if 'subjectAltName' in cert:
+                    subject_alt_names = [name[1] for name in cert['subjectAltName'] if name[0] == 'DNS']
+                
+                # At least one SAN should match our domain or be a wildcard
+                domain_matched = any(
+                    san == domain or (san.startswith('*.') and domain.endswith(san[1:]))
+                    for san in subject_alt_names
+                )
+                
+                if not domain_matched and subject_alt_names:
+                    # For GCP services, check if it's a valid GCP domain
+                    gcp_matched = any('run.app' in san or 'googleapis.com' in san for san in subject_alt_names)
+                    assert gcp_matched, f"Certificate not valid for {domain}. SANs: {subject_alt_names}"
+                
+                print(f"✓ REAL SSL: Valid certificate for {domain} (took {handshake_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_004_http_response_timing_validation(self):
@@ -190,24 +181,21 @@ class TestNetworkCallVerification:
         for _ in range(3):  # Multiple requests to get average
             start_time = time.time()
             
-            try:
-                async with httpx.AsyncClient(timeout=30) as client:
-                    response = await client.get(config.health_endpoint)
-                    request_time = time.time() - start_time
-                    timings.append(request_time)
-                    
-                    # Real HTTP requests have network latency
-                    assert request_time > 0.05, f"HTTP request too fast ({request_time}s) - likely mocked"
-                    
-                    # Validate response structure
-                    assert response.status_code == 200, f"Health endpoint returned {response.status_code}"
-                    
-                    # Check response headers indicate real server
-                    assert 'server' in response.headers or 'x-cloud-trace-context' in response.headers, \
-                        "Missing server headers - likely mocked response"
-                    
-            except Exception as e:
-                pytest.fail(f"HTTP request failed: {e}")
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.get(config.health_endpoint)
+                request_time = time.time() - start_time
+                timings.append(request_time)
+                
+                # Real HTTP requests have network latency
+                assert request_time > 0.05, f"HTTP request too fast ({request_time}s) - likely mocked"
+                
+                # Validate response structure
+                assert response.status_code == 200, f"Health endpoint returned {response.status_code}"
+                
+                # Check response headers indicate real server
+                assert 'server' in response.headers or 'x-cloud-trace-context' in response.headers, \
+                    "Missing server headers - likely mocked response"
             
             await asyncio.sleep(0.1)  # Brief pause between requests
         
@@ -230,41 +218,29 @@ class TestWebSocketConnectionAuthenticity:
         
         start_time = time.time()
         
-        try:
-            # Use low-level websocket connection to measure handshake
-            async with websockets.connect(
-                config.websocket_url,
-                timeout=15,
-                ping_interval=None  # Disable ping to avoid interference
-            ) as websocket:
-                handshake_time = time.time() - start_time
-                
-                # Real WebSocket handshakes take time
-                assert handshake_time > 0.05, f"WebSocket handshake too fast ({handshake_time}s) - likely mocked"
-                
-                # Verify connection is actually open
-                assert websocket.open, "WebSocket not actually open"
-                
-                # Try to send a test message to verify connection works
-                test_message = {"type": "ping", "timestamp": time.time()}
-                await websocket.send(json.dumps(test_message))
-                
-                # Wait for response or connection close (both indicate real connection)
-                try:
-                    response = await asyncio.wait_for(websocket.recv(), timeout=5)
-                    print(f"✓ REAL WebSocket: Handshake took {handshake_time:.3f}s, got response: {response[:100]}")
-                except asyncio.TimeoutError:
-                    # No response is also valid - server might not echo
-                    print(f"✓ REAL WebSocket: Handshake took {handshake_time:.3f}s, no echo (normal)")
-                
-        except websockets.exceptions.ConnectionClosedError as e:
-            # Connection closed might be auth required - this is still a real connection
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Use low-level websocket connection to measure handshake
+        async with websockets.connect(
+            config.websocket_url,
+            timeout=15,
+            ping_interval=None  # Disable ping to avoid interference
+        ) as websocket:
             handshake_time = time.time() - start_time
-            assert handshake_time > 0.05, f"Even connection close too fast ({handshake_time}s) - likely mocked"
-            print(f"✓ REAL WebSocket: Connection closed after {handshake_time:.3f}s (auth required?)")
             
-        except Exception as e:
-            pytest.fail(f"WebSocket connection failed: {e}")
+            # Real WebSocket handshakes take time
+            assert handshake_time > 0.05, f"WebSocket handshake too fast ({handshake_time}s) - likely mocked"
+            
+            # Verify connection is actually open
+            assert websocket.open, "WebSocket not actually open"
+            
+            # Try to send a test message to verify connection works
+            test_message = {"type": "ping", "timestamp": time.time()}
+            await websocket.send(json.dumps(test_message))
+            
+            # Wait for response or connection close (both indicate real connection)
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            response = await asyncio.wait_for(websocket.recv(), timeout=5)
+            print(f"✓ REAL WebSocket: Handshake took {handshake_time:.3f}s, got response: {response[:100]}")
     
     @pytest.mark.asyncio
     async def test_006_websocket_protocol_upgrade(self):
@@ -283,51 +259,48 @@ class TestWebSocketConnectionAuthenticity:
             host = ws_url
             path = '/ws'
         
-        try:
-            # Manual WebSocket handshake to check headers
-            import base64
-            import hashlib
-            import os
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Manual WebSocket handshake to check headers
+        import base64
+        import hashlib
+        import os
+        
+        # Generate proper 16-byte random key for WebSocket handshake
+        random_bytes = os.urandom(16)
+        key = base64.b64encode(random_bytes).decode()
+        
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        context = ssl.create_default_context()
+        
+        with context.wrap_socket(sock, server_hostname=host) as ssock:
+            ssock.connect((host, 443))
             
-            # Generate proper 16-byte random key for WebSocket handshake
-            random_bytes = os.urandom(16)
-            key = base64.b64encode(random_bytes).decode()
+            # Send WebSocket upgrade request
+            request = (
+                f"GET {path} HTTP/1.1\r\n"
+                f"Host: {host}\r\n"
+                f"Upgrade: websocket\r\n"
+                f"Connection: Upgrade\r\n"
+                f"Sec-WebSocket-Key: {key}\r\n"
+                f"Sec-WebSocket-Version: 13\r\n"
+                f"\r\n"
+            ).encode()
             
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            context = ssl.create_default_context()
+            ssock.send(request)
+            response = ssock.recv(4096).decode()
             
-            with context.wrap_socket(sock, server_hostname=host) as ssock:
-                ssock.connect((host, 443))
-                
-                # Send WebSocket upgrade request
-                request = (
-                    f"GET {path} HTTP/1.1\r\n"
-                    f"Host: {host}\r\n"
-                    f"Upgrade: websocket\r\n"
-                    f"Connection: Upgrade\r\n"
-                    f"Sec-WebSocket-Key: {key}\r\n"
-                    f"Sec-WebSocket-Version: 13\r\n"
-                    f"\r\n"
-                ).encode()
-                
-                ssock.send(request)
-                response = ssock.recv(4096).decode()
-                
-                # Validate real WebSocket upgrade response
-                assert "HTTP/1.1 101 Switching Protocols" in response or \
-                       "HTTP/1.1 401" in response or \
-                       "HTTP/1.1 403" in response, \
-                       f"Invalid WebSocket upgrade response: {response[:200]}"
-                
-                if "101 Switching Protocols" in response:
-                    assert "upgrade: websocket" in response.lower(), "Missing Upgrade header"
-                    assert "connection: upgrade" in response.lower(), "Missing Connection header"
-                    print("✓ REAL WebSocket: Protocol upgrade successful")
-                else:
-                    print(f"✓ REAL WebSocket: Server rejected connection (auth required): {response.split()[1]}")
+            # Validate real WebSocket upgrade response
+            assert "HTTP/1.1 101 Switching Protocols" in response or \
+                   "HTTP/1.1 401" in response or \
+                   "HTTP/1.1 403" in response, \
+                   f"Invalid WebSocket upgrade response: {response[:200]}"
             
-        except Exception as e:
-            pytest.fail(f"WebSocket protocol upgrade test failed: {e}")
+            if "101 Switching Protocols" in response:
+                assert "upgrade: websocket" in response.lower(), "Missing Upgrade header"
+                assert "connection: upgrade" in response.lower(), "Missing Connection header"
+                print("✓ REAL WebSocket: Protocol upgrade successful")
+            else:
+                print(f"✓ REAL WebSocket: Server rejected connection (auth required): {response.split()[1]}")
 
 
 class TestAPIResponseAuthenticity:
@@ -385,11 +358,9 @@ class TestAPIResponseAuthenticity:
                 response = await client.get(config.service_discovery_endpoint)
                 
                 if response.status_code == 200:
-                    try:
-                        data = response.json()
-                        responses.append(data)
-                    except json.JSONDecodeError:
-                        responses.append({"raw": response.text})
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    data = response.json()
+                    responses.append(data)
                 else:
                     responses.append({"status": response.status_code, "text": response.text})
             
@@ -439,30 +410,22 @@ class TestAPIResponseAuthenticity:
         
         for endpoint, expected_codes in test_endpoints:
             async with httpx.AsyncClient(timeout=30) as client:
-                try:
-                    response = await client.get(endpoint)
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await client.get(endpoint)
+                
+                assert response.status_code in expected_codes, \
+                    f"Endpoint {endpoint} returned {response.status_code}, expected one of {expected_codes}"
+                
+                # Real servers have error details
+                if response.status_code >= 400:
+                    assert len(response.content) > 10, f"Error response too short for {endpoint}"
                     
-                    assert response.status_code in expected_codes, \
-                        f"Endpoint {endpoint} returned {response.status_code}, expected one of {expected_codes}"
-                    
-                    # Real servers have error details
-                    if response.status_code >= 400:
-                        assert len(response.content) > 10, f"Error response too short for {endpoint}"
-                        
-                        # Check for server error formatting
-                        try:
-                            error_data = response.json()
-                            assert isinstance(error_data, dict), "Error response not JSON object"
-                        except json.JSONDecodeError:
-                            # HTML error pages are also valid for real servers
-                            assert 'html' in response.text.lower() or len(response.text) > 20, \
-                                "Error response too minimal"
-                    
-                    print(f"✓ REAL API: {endpoint} -> {response.status_code}")
-                    
-                except httpx.RequestError as e:
-                    # Network errors are also valid for non-existent endpoints
-                    print(f"✓ REAL API: {endpoint} -> Network error: {e}")
+                    # Check for server error formatting
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    error_data = response.json()
+                    assert isinstance(error_data, dict), "Error response not JSON object"
+                
+                print(f"✓ REAL API: {endpoint} -> {response.status_code}")
 
 
 class TestTimingBasedAuthenticity:
@@ -554,23 +517,13 @@ class TestTimingBasedAuthenticity:
         # Test with very short timeout
         start_time = time.time()
         
-        try:
-            async with httpx.AsyncClient(timeout=0.001) as client:  # 1ms timeout
-                response = await client.get(config.backend_url)
-                # If we get here with such a short timeout, likely mocked
-                elapsed = time.time() - start_time
-                if elapsed < 0.01:  # Less than 10ms
-                    pytest.fail(f"Request completed in {elapsed}s with 1ms timeout - likely mocked")
-        except httpx.TimeoutException:
-            # This is expected for real network
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with httpx.AsyncClient(timeout=0.001) as client:  # 1ms timeout
+            response = await client.get(config.backend_url)
+            # If we get here with such a short timeout, likely mocked
             elapsed = time.time() - start_time
-            # Should take at least as long as the timeout
-            assert elapsed >= 0.001, f"Timeout too fast ({elapsed}s) - likely fake"
-            print(f"✓ REAL TIMEOUT: Proper timeout after {elapsed:.3f}s")
-        except Exception as e:
-            # Other network errors are also valid
-            elapsed = time.time() - start_time
-            print(f"✓ REAL NETWORK: Error after {elapsed:.3f}s: {e}")
+            if elapsed < 0.01:  # Less than 10ms
+                pytest.fail(f"Request completed in {elapsed}s with 1ms timeout - likely mocked")
 
 
 class TestDataIntegrityAndPersistence:
@@ -633,22 +586,18 @@ class TestDataIntegrityAndPersistence:
         server_signatures = []
         
         for endpoint in endpoints:
-            try:
-                async with httpx.AsyncClient(timeout=30) as client:
-                    response = await client.get(endpoint)
-                    
-                    # Extract server signature
-                    signature = {
-                        'server': response.headers.get('server', ''),
-                        'powered_by': response.headers.get('x-powered-by', ''),
-                        'has_trace': 'x-cloud-trace-context' in response.headers,
-                        'status_code': response.status_code
-                    }
-                    server_signatures.append((endpoint, signature))
-                    
-            except httpx.RequestError:
-                # Some endpoints might not exist - that's valid
-                server_signatures.append((endpoint, {'error': True}))
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.get(endpoint)
+                
+                # Extract server signature
+                signature = {
+                    'server': response.headers.get('server', ''),
+                    'powered_by': response.headers.get('x-powered-by', ''),
+                    'has_trace': 'x-cloud-trace-context' in response.headers,
+                    'status_code': response.status_code
+                }
+                server_signatures.append((endpoint, signature))
         
         # At least one endpoint should work
         working_endpoints = [sig for endpoint, sig in server_signatures if not sig.get('error')]
@@ -807,24 +756,23 @@ class TestAsyncBehaviorValidation:
         
         loop.call_soon = track_call_soon
         
-        try:
-            initial_switches = len(task_switches)
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        initial_switches = len(task_switches)
+        
+        # Make async request
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(config.health_endpoint)
             
-            # Make async request
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.get(config.health_endpoint)
-                
-            switches_during_request = len(task_switches) - initial_switches
-            
-            # Real async operations should cause task switches
-            assert switches_during_request > 0, \
-                "No task switches during async operation - likely synchronous/mocked"
-            
-            print(f"✓ REAL ASYNC: {switches_during_request} task switches during HTTP request")
-            
-        finally:
-            # Restore original
-            loop.call_soon = original_call_soon
+        switches_during_request = len(task_switches) - initial_switches
+        
+        # Real async operations should cause task switches
+        assert switches_during_request > 0, \
+            "No task switches during async operation - likely synchronous/mocked"
+        
+        print(f"✓ REAL ASYNC: {switches_during_request} task switches during HTTP request")
+        
+        # Restore original
+        loop.call_soon = original_call_soon
 
 
 class TestAuthenticationValidation:
@@ -870,35 +818,24 @@ class TestAuthenticationValidation:
         config = get_staging_config()
         
         # Try connecting without auth
-        try:
-            async with websockets.connect(
-                config.websocket_url,
-                timeout=10
-            ) as websocket:
-                # Try to send unauthorized message
-                test_message = {"type": "test", "data": "unauthorized"}
-                await websocket.send(json.dumps(test_message))
-                
-                # Wait for response
-                try:
-                    response = await asyncio.wait_for(websocket.recv(), timeout=5)
-                    
-                    # If we get a response, check if it indicates auth required
-                    if "auth" in response.lower() or "unauthorized" in response.lower():
-                        print("✓ REAL WebSocket AUTH: Connection closed/rejected due to missing auth")
-                    else:
-                        pytest.fail(f"WebSocket accepted unauthorized message: {response}")
-                        
-                except asyncio.TimeoutError:
-                    print("✓ REAL WebSocket AUTH: No response to unauthorized message (good)")
-                    
-        except websockets.exceptions.ConnectionClosedError as e:
-            # Connection closed is good - means auth is enforced
-            print(f"✓ REAL WebSocket AUTH: Connection closed: {e}")
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with websockets.connect(
+            config.websocket_url,
+            timeout=10
+        ) as websocket:
+            # Try to send unauthorized message
+            test_message = {"type": "test", "data": "unauthorized"}
+            await websocket.send(json.dumps(test_message))
             
-        except Exception as e:
-            # Other errors may also indicate auth enforcement
-            print(f"✓ REAL WebSocket AUTH: Connection failed: {e}")
+            # Wait for response
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            response = await asyncio.wait_for(websocket.recv(), timeout=5)
+            
+            # If we get a response, check if it indicates auth required
+            if "auth" in response.lower() or "unauthorized" in response.lower():
+                print("✓ REAL WebSocket AUTH: Connection closed/rejected due to missing auth")
+            else:
+                pytest.fail(f"WebSocket accepted unauthorized message: {response}")
 
 
 # Summary test that ties everything together
@@ -928,42 +865,30 @@ class TestComprehensiveFakeDetection:
         }
         
         # DNS resolution check
-        try:
-            domain = config.backend_url.replace('https://', '').replace('http://', '')
-            socket.gethostbyname(domain)
-            evidence['dns_resolution'] = True
-        except Exception as e:
-            print(f"DNS resolution failed: {e}")
-            # Expected for some staging environments
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        domain = config.backend_url.replace('https://', '').replace('http://', '')
+        socket.gethostbyname(domain)
+        evidence['dns_resolution'] = True
         
         # HTTP timing check  
         start_time = time.time()
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.get(config.health_endpoint)
-                if response.status_code == 200 and time.time() - start_time > 0.02:
-                    evidence['http_timing'] = True
-        except Exception as e:
-            print(f"HTTP timing check failed: {e}")
-            # Expected for unreachable endpoints
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(config.health_endpoint)
+            if response.status_code == 200 and time.time() - start_time > 0.02:
+                evidence['http_timing'] = True
         
         # WebSocket check
-        try:
-            async with websockets.connect(config.websocket_url, timeout=5) as ws:
-                evidence['websocket_handshake'] = True
-        except Exception as e:
-            print(f"WebSocket connection failed: {e}")
-            evidence['websocket_handshake'] = True  # Connection closed also indicates real server
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with websockets.connect(config.websocket_url, timeout=5) as ws:
+            evidence['websocket_handshake'] = True
         
         # Auth enforcement check
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.get(f"{config.api_url}/admin")
-                if response.status_code in [401, 403, 404]:
-                    evidence['auth_enforcement'] = True
-        except Exception as e:
-            print(f"Auth enforcement check failed: {e}")
-            # Expected for some endpoints
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(f"{config.api_url}/admin")
+            if response.status_code in [401, 403, 404]:
+                evidence['auth_enforcement'] = True
         
         # Count evidence
         real_evidence_count = sum(evidence.values())

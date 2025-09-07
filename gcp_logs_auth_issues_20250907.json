@@ -1,0 +1,642 @@
+[
+  {
+    "insertId": "68bd8cef00050704da9e1cd9",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "169",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: No JWT=REDACTED",
+      "timestamp": "2025-09-07T13:47:27.328659+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:47:27.486461689Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T13:47:27.329476Z"
+  },
+  {
+    "insertId": "68bd8ccd0008bd5556264130",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T13:46:53.571989+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:53.850141245Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T13:46:53.572757Z"
+  },
+  {
+    "insertId": "68bd8ccc000749c7b36a252f",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T13:46:52.476837+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:52.518753425Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T13:46:52.477639Z"
+  },
+  {
+    "insertId": "68bd8ccc0001a5ef9334c835",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T13:46:52.107126+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:52.186216355Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T13:46:52.108015Z"
+  },
+  {
+    "insertId": "68bd8cca000306e30a225f73",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/settings | Status: 422 | Duration: 1.08ms | Trace: 9aa3fd04-336e-4038-8899-35ca261dc0d2",
+      "timestamp": "2025-09-07T13:46:50.197117+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:50.517413956Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:50.198371Z"
+  },
+  {
+    "insertId": "68bd8cc700028b8a6a913b60",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "178",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket connection rejected in staging: Invalid JWT=REDACTED",
+      "timestamp": "2025-09-07T13:46:47.165765+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:47.191169222Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "timestamp": "2025-09-07T13:46:47.166794Z"
+  },
+  {
+    "insertId": "68bd8cc6000b9add2aaeb59a",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/messages | Status: 403 | Duration: 1.54ms | Trace: d32ee99b-f9ec-4073-a9f3-31191e299a14",
+      "timestamp": "2025-09-07T13:46:46.759810+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:46.760541Z"
+  },
+  {
+    "insertId": "68bd8cc6000b998d29d97834",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.core.unified_error_handler"
+      },
+      "labels": {
+        "function": "_log_error",
+        "line": "574",
+        "module": "netra_backend.app.core.unified_error_handler"
+      },
+      "message": "api_request: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:46.759295+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:46.760205Z"
+  },
+  {
+    "insertId": "68bd8cc60008e33abd076222",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/threads | Status: 403 | Duration: 2.46ms | Trace: f8225065-4553-46e4-81f2-e6ed28a13680",
+      "timestamp": "2025-09-07T13:46:46.581867+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:46.582458Z"
+  },
+  {
+    "insertId": "68bd8cc60008e128ddd607d8",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.core.unified_error_handler"
+      },
+      "labels": {
+        "function": "_log_error",
+        "line": "574",
+        "module": "netra_backend.app.core.unified_error_handler"
+      },
+      "message": "api_request: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:46.581428+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:46.581928Z"
+  },
+  {
+    "insertId": "68bd8cc60008ded2cc4651d8",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.dependencies"
+      },
+      "labels": {
+        "function": "get_request_scoped_db_session",
+        "line": "218",
+        "module": "netra_backend.app.dependencies"
+      },
+      "message": "Failed to create request-scoped database session req_2f9408620931: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:46.580781+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:46.581330Z"
+  },
+  {
+    "insertId": "68bd8cc60008de42b2a42cc2",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "labels": {
+        "function": "get_request_scoped_session",
+        "line": "283",
+        "module": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "message": "Failed to create request-scoped session for user system: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:46.580646+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:46.581186Z"
+  },
+  {
+    "insertId": "68bd8cc60008ddc2e8d7a699",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "labels": {
+        "function": "get_request_scoped_session",
+        "line": "270",
+        "module": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "message": "Error in request-scoped session system_req_2f9408620931_e4a10b20: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:46.580139+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.855254362Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:46.581058Z"
+  },
+  {
+    "insertId": "68bd8cc5000e0e3f51a31053",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/threads | Status: 403 | Duration: 2.32ms | Trace: 6d500fb6-c01d-4e25-85c9-034e8c2c3134",
+      "timestamp": "2025-09-07T13:46:45.920618+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.191466525Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:45.921151Z"
+  },
+  {
+    "insertId": "68bd8cc5000e0cd468474f1d",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.core.unified_error_handler"
+      },
+      "labels": {
+        "function": "_log_error",
+        "line": "574",
+        "module": "netra_backend.app.core.unified_error_handler"
+      },
+      "message": "api_request: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:45.920199+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.191466525Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:45.920788Z"
+  },
+  {
+    "insertId": "68bd8cc5000e0ad125a3a01d",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.dependencies"
+      },
+      "labels": {
+        "function": "get_request_scoped_db_session",
+        "line": "218",
+        "module": "netra_backend.app.dependencies"
+      },
+      "message": "Failed to create request-scoped database session req_66c13f2a08e6: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:45.919595+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.191466525Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:45.920273Z"
+  },
+  {
+    "insertId": "68bd8cc5000e0acb75fc1e49",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "labels": {
+        "function": "get_request_scoped_session",
+        "line": "283",
+        "module": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "message": "Failed to create request-scoped session for user system: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:45.919476+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.191466525Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:45.920267Z"
+  },
+  {
+    "insertId": "68bd8cc5000e0ac4d17eebce",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "labels": {
+        "function": "get_request_scoped_session",
+        "line": "270",
+        "module": "netra_backend.app.database.request_scoped_session_factory"
+      },
+      "message": "Error in request-scoped session system_req_66c13f2a08e6_0819350f: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:45.919005+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:46.191466525Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T13:46:45.920260Z"
+  },
+  {
+    "insertId": "68bd8cc5000c762bfec636b8",
+    "jsonPayload": {
+      "context": {
+        "name": "api"
+      },
+      "labels": {
+        "function": "log_request_details",
+        "line": "79",
+        "module": "netra_backend.app.core.request_context"
+      },
+      "message": "Request: GET /api/messages | Status: 403 | Duration: 1.84ms | Trace: 477819e3-906c-4744-9039-28004304d1c2",
+      "timestamp": "2025-09-07T13:46:45.816022+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:45.859797200Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:45.816683Z"
+  },
+  {
+    "insertId": "68bd8cc5000c75a051c00495",
+    "jsonPayload": {
+      "context": {
+        "name": "netra_backend.app.core.unified_error_handler"
+      },
+      "labels": {
+        "function": "_log_error",
+        "line": "574",
+        "module": "netra_backend.app.core.unified_error_handler"
+      },
+      "message": "api_request: 403: Not authenticated",
+      "timestamp": "2025-09-07T13:46:45.815440+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a988cfdf862ecf067b8b5cad04024b192ef22630d559d1f8f6cafd04d65ff243afd610a2590637f4570eb765fe4f9ad7f5c3be612e42eeb9d29100331e673e6011cf911fd830988a098df2"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T13:46:45.859797200Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00083-5xw",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2025-09-07T13:46:45.816544Z"
+  }
+]

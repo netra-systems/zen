@@ -57,50 +57,41 @@ class TestAgentPipelineStaging(StagingTestBase):
             ]
             
             for endpoint in discovery_endpoints:
-                try:
-                    response = await client.get(f"{config.backend_url}{endpoint}")
-                    result = {
-                        "endpoint": endpoint,
-                        "status": response.status_code,
-                        "response_time": response.elapsed.total_seconds()
-                    }
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await client.get(f"{config.backend_url}{endpoint}")
+                result = {
+                    "endpoint": endpoint,
+                    "status": response.status_code,
+                    "response_time": response.elapsed.total_seconds()
+                }
+                
+                if response.status_code == 200:
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    data = response.json()
+                    result["data_type"] = type(data).__name__
                     
-                    if response.status_code == 200:
-                        try:
-                            data = response.json()
-                            result["data_type"] = type(data).__name__
-                            
-                            # Analyze agent data
-                            if isinstance(data, dict):
-                                if "data" in data:
-                                    agents = data["data"]
-                                    if isinstance(agents, list):
-                                        result["agent_count"] = len(agents)
-                                        agents_discovered.extend(agents)
-                                elif "servers" in data:
-                                    servers = data["servers"]
-                                    result["server_count"] = len(servers) if isinstance(servers, list) else 1
-                                else:
-                                    # Configuration data
-                                    result["config_keys"] = list(data.keys())[:5]  # First 5 keys
-                            elif isinstance(data, list):
-                                result["agent_count"] = len(data)
-                                agents_discovered.extend(data)
-                            
-                            print(f"[INFO] {endpoint}: {response.status_code} - {result.get('agent_count', 'config')}")
-                        except Exception as e:
-                            result["parse_error"] = str(e)
-                    else:
-                        print(f"[INFO] {endpoint}: {response.status_code} (auth required)")
+                    # Analyze agent data
+                    if isinstance(data, dict):
+                        if "data" in data:
+                            agents = data["data"]
+                            if isinstance(agents, list):
+                                result["agent_count"] = len(agents)
+                                agents_discovered.extend(agents)
+                        elif "servers" in data:
+                            servers = data["servers"]
+                            result["server_count"] = len(servers) if isinstance(servers, list) else 1
+                        else:
+                            # Configuration data
+                            result["config_keys"] = list(data.keys())[:5]  # First 5 keys
+                    elif isinstance(data, list):
+                        result["agent_count"] = len(data)
+                        agents_discovered.extend(data)
                     
-                    discovery_results.append(result)
-                    
-                except Exception as e:
-                    discovery_results.append({
-                        "endpoint": endpoint,
-                        "error": str(e)
-                    })
-                    print(f"[ERROR] {endpoint}: {e}")
+                    print(f"[INFO] {endpoint}: {response.status_code} - {result.get('agent_count', 'config')}")
+                else:
+                    print(f"[INFO] {endpoint}: {response.status_code} (auth required)")
+                
+                discovery_results.append(result)
         
         duration = time.time() - start_time
         
@@ -138,47 +129,38 @@ class TestAgentPipelineStaging(StagingTestBase):
             ]
             
             for endpoint in config_endpoints:
-                try:
-                    response = await client.get(f"{config.backend_url}{endpoint}")
-                    result = {
-                        "endpoint": endpoint,
-                        "status": response.status_code,
-                        "response_time": response.elapsed.total_seconds()
-                    }
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await client.get(f"{config.backend_url}{endpoint}")
+                result = {
+                    "endpoint": endpoint,
+                    "status": response.status_code,
+                    "response_time": response.elapsed.total_seconds()
+                }
+                
+                if response.status_code == 200:
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    data = response.json()
+                    result["data_type"] = type(data).__name__
+                    result["data_size"] = len(str(data))
                     
-                    if response.status_code == 200:
-                        try:
-                            data = response.json()
-                            result["data_type"] = type(data).__name__
-                            result["data_size"] = len(str(data))
+                    # Analyze configuration structure
+                    if isinstance(data, dict):
+                        result["top_level_keys"] = list(data.keys())[:10]  # First 10 keys
+                        
+                        # Look for agent-related config
+                        agent_keys = [k for k in data.keys() if any(term in k.lower() 
+                                   for term in ["agent", "mcp", "claude", "server", "tool"])]
+                        if agent_keys:
+                            result["agent_config_keys"] = agent_keys
+                            result["has_agent_config"] = True
+                        else:
+                            result["has_agent_config"] = False
                             
-                            # Analyze configuration structure
-                            if isinstance(data, dict):
-                                result["top_level_keys"] = list(data.keys())[:10]  # First 10 keys
-                                
-                                # Look for agent-related config
-                                agent_keys = [k for k in data.keys() if any(term in k.lower() 
-                                           for term in ["agent", "mcp", "claude", "server", "tool"])]
-                                if agent_keys:
-                                    result["agent_config_keys"] = agent_keys
-                                    result["has_agent_config"] = True
-                                else:
-                                    result["has_agent_config"] = False
-                                    
-                            print(f"[INFO] {endpoint}: {response.status_code} - {result.get('data_size', 0)} bytes")
-                        except Exception as e:
-                            result["parse_error"] = str(e)
-                    else:
-                        print(f"[INFO] {endpoint}: {response.status_code}")
-                    
-                    config_results.append(result)
-                    
-                except Exception as e:
-                    config_results.append({
-                        "endpoint": endpoint,
-                        "error": str(e)
-                    })
-                    print(f"[ERROR] {endpoint}: {e}")
+                    print(f"[INFO] {endpoint}: {response.status_code} - {result.get('data_size', 0)} bytes")
+                else:
+                    print(f"[INFO] {endpoint}: {response.status_code}")
+                
+                config_results.append(result)
         
         duration = time.time() - start_time
         
@@ -211,89 +193,73 @@ class TestAgentPipelineStaging(StagingTestBase):
         execution_attempted = False
         auth_error_received = False
         
-        try:
-            # Get auth headers for WebSocket connection
-            headers = config.get_websocket_headers()
-            # If no token in config, use our test token
-            if not config.test_jwt_token:
-                headers["Authorization"] = f"Bearer {self.test_token}"
-            
-            # Attempt real agent pipeline execution via authenticated WebSocket
-            async with websockets.connect(
-                config.websocket_url, 
-                close_timeout=10,
-                additional_headers=headers
-            ) as ws:
-                print("[INFO] WebSocket connected for agent pipeline test")
-                
-                # Try to execute an agent pipeline
-                pipeline_request = {
-                    "type": "execute_agent",
-                    "agent": "data_analysis_agent",
-                    "input": "Analyze test data for pipeline validation",
-                    "thread_id": f"pipeline_test_{int(time.time())}",
-                    "parameters": {
-                        "timeout": 30,
-                        "mode": "test"
-                    },
-                    "timestamp": time.time()
-                }
-                
-                await ws.send(json.dumps(pipeline_request))
-                execution_attempted = True
-                print(f"[INFO] Sent pipeline execution request")
-                
-                # Listen for pipeline events
-                listen_timeout = 15
-                start_listen = time.time()
-                
-                while time.time() - start_listen < listen_timeout:
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=3)
-                        event = json.loads(response)
-                        pipeline_events.append(event)
-                        
-                        event_type = event.get("type")
-                        print(f"[INFO] Pipeline event: {event_type}")
-                        
-                        # Track pipeline stages
-                        pipeline_stages = [
-                            "agent_started",
-                            "agent_thinking", 
-                            "tool_executing",
-                            "tool_completed",
-                            "agent_completed"
-                        ]
-                        
-                        if event_type in pipeline_stages:
-                            print(f"[SUCCESS] Pipeline stage event: {event_type}")
-                        
-                        # Check for auth errors
-                        if event_type == "error" and "auth" in event.get("message", "").lower():
-                            auth_error_received = True
-                            print(f"[INFO] Auth error (expected): {event['message']}")
-                            break
-                        
-                        # Check for completion
-                        if event_type in ["agent_completed", "agent_failed"]:
-                            print(f"[INFO] Pipeline completed: {event_type}")
-                            break
-                            
-                    except asyncio.TimeoutError:
-                        continue
-                    except websockets.ConnectionClosed:
-                        print("[INFO] WebSocket connection closed during pipeline test")
-                        break
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Get auth headers for WebSocket connection
+        headers = config.get_websocket_headers()
+        # If no token in config, use our test token
+        if not config.test_jwt_token:
+            headers["Authorization"] = f"Bearer {self.test_token}"
         
-        except websockets.exceptions.InvalidStatus as e:
-            status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-            if status_code in [401, 403]:
-                auth_error_received = True
-                print(f"[SUCCESS] Pipeline execution auth properly enforced: HTTP {status_code}")
-            else:
-                raise
-        except Exception as e:
-            print(f"[INFO] Pipeline execution error: {e}")
+        # Attempt real agent pipeline execution via authenticated WebSocket
+        async with websockets.connect(
+            config.websocket_url, 
+            close_timeout=10,
+            additional_headers=headers
+        ) as ws:
+            print("[INFO] WebSocket connected for agent pipeline test")
+            
+            # Try to execute an agent pipeline
+            pipeline_request = {
+                "type": "execute_agent",
+                "agent": "data_analysis_agent",
+                "input": "Analyze test data for pipeline validation",
+                "thread_id": f"pipeline_test_{int(time.time())}",
+                "parameters": {
+                    "timeout": 30,
+                    "mode": "test"
+                },
+                "timestamp": time.time()
+            }
+            
+            await ws.send(json.dumps(pipeline_request))
+            execution_attempted = True
+            print(f"[INFO] Sent pipeline execution request")
+            
+            # Listen for pipeline events
+            listen_timeout = 15
+            start_listen = time.time()
+            
+            while time.time() - start_listen < listen_timeout:
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await asyncio.wait_for(ws.recv(), timeout=3)
+                event = json.loads(response)
+                pipeline_events.append(event)
+                
+                event_type = event.get("type")
+                print(f"[INFO] Pipeline event: {event_type}")
+                
+                # Track pipeline stages
+                pipeline_stages = [
+                    "agent_started",
+                    "agent_thinking", 
+                    "tool_executing",
+                    "tool_completed",
+                    "agent_completed"
+                ]
+                
+                if event_type in pipeline_stages:
+                    print(f"[SUCCESS] Pipeline stage event: {event_type}")
+                
+                # Check for auth errors
+                if event_type == "error" and "auth" in event.get("message", "").lower():
+                    auth_error_received = True
+                    print(f"[INFO] Auth error (expected): {event['message']}")
+                    break
+                
+                # Check for completion
+                if event_type in ["agent_completed", "agent_failed"]:
+                    print(f"[INFO] Pipeline completed: {event_type}")
+                    break
         
         duration = time.time() - start_time
         
@@ -340,90 +306,72 @@ class TestAgentPipelineStaging(StagingTestBase):
             ]
             
             for endpoint in lifecycle_endpoints:
-                try:
-                    response = await client.get(f"{config.backend_url}{endpoint}")
-                    result = {
-                        "endpoint": endpoint,
-                        "status": response.status_code,
-                        "response_time": response.elapsed.total_seconds()
-                    }
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await client.get(f"{config.backend_url}{endpoint}")
+                result = {
+                    "endpoint": endpoint,
+                    "status": response.status_code,
+                    "response_time": response.elapsed.total_seconds()
+                }
+                
+                if response.status_code == 200:
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    data = response.json()
+                    result["data_type"] = type(data).__name__
                     
-                    if response.status_code == 200:
-                        try:
-                            data = response.json()
-                            result["data_type"] = type(data).__name__
-                            
-                            # Look for agent lifecycle information
-                            if isinstance(data, list):
-                                result["item_count"] = len(data)
-                                if data:  # Check first item for agent lifecycle fields
-                                    first_item = data[0] if isinstance(data[0], dict) else {}
-                                    lifecycle_fields = [k for k in first_item.keys() 
-                                                      if any(term in k.lower() for term in 
-                                                           ["status", "state", "running", "active"])]
-                                    if lifecycle_fields:
-                                        result["lifecycle_fields"] = lifecycle_fields
-                                        agent_status_found = True
-                            elif isinstance(data, dict):
-                                # Check for status information
-                                status_keys = [k for k in data.keys() 
-                                             if any(term in k.lower() for term in 
-                                                  ["status", "state", "active", "running", "agent"])]
-                                if status_keys:
-                                    result["status_keys"] = status_keys
-                                    agent_status_found = True
-                            
-                            print(f"[INFO] {endpoint}: {response.status_code} - {result.get('item_count', 'object')}")
-                        except Exception as e:
-                            result["parse_error"] = str(e)
-                    else:
-                        print(f"[INFO] {endpoint}: {response.status_code}")
+                    # Look for agent lifecycle information
+                    if isinstance(data, list):
+                        result["item_count"] = len(data)
+                        if data:  # Check first item for agent lifecycle fields
+                            first_item = data[0] if isinstance(data[0], dict) else {}
+                            lifecycle_fields = [k for k in first_item.keys() 
+                                              if any(term in k.lower() for term in 
+                                                   ["status", "state", "running", "active"])]
+                            if lifecycle_fields:
+                                result["lifecycle_fields"] = lifecycle_fields
+                                agent_status_found = True
+                    elif isinstance(data, dict):
+                        # Check for status information
+                        status_keys = [k for k in data.keys() 
+                                     if any(term in k.lower() for term in 
+                                          ["status", "state", "active", "running", "agent"])]
+                        if status_keys:
+                            result["status_keys"] = status_keys
+                            agent_status_found = True
                     
-                    lifecycle_checks.append(result)
-                    
-                except Exception as e:
-                    lifecycle_checks.append({
-                        "endpoint": endpoint,
-                        "error": str(e)
-                    })
-                    print(f"[ERROR] {endpoint}: {e}")
+                    print(f"[INFO] {endpoint}: {response.status_code} - {result.get('item_count', 'object')}")
+                else:
+                    print(f"[INFO] {endpoint}: {response.status_code}")
+                
+                lifecycle_checks.append(result)
         
         # Test WebSocket for real-time lifecycle events
         websocket_lifecycle_events = []
-        try:
-            # Get auth headers for WebSocket connection
-            headers = config.get_websocket_headers()
-            # If no token in config, use our test token
-            if not config.test_jwt_token:
-                headers["Authorization"] = f"Bearer {self.test_token}"
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Get auth headers for WebSocket connection
+        headers = config.get_websocket_headers()
+        # If no token in config, use our test token
+        if not config.test_jwt_token:
+            headers["Authorization"] = f"Bearer {self.test_token}"
+        
+        async with websockets.connect(
+            config.websocket_url, 
+            close_timeout=5,
+            additional_headers=headers
+        ) as ws:
+            # Send status request
+            status_request = {
+                "type": "get_agent_status",
+                "timestamp": time.time()
+            }
+            await ws.send(json.dumps(status_request))
             
-            async with websockets.connect(
-                config.websocket_url, 
-                close_timeout=5,
-                additional_headers=headers
-            ) as ws:
-                # Send status request
-                status_request = {
-                    "type": "get_agent_status",
-                    "timestamp": time.time()
-                }
-                await ws.send(json.dumps(status_request))
-                
-                # Listen for status response
-                try:
-                    response = await asyncio.wait_for(ws.recv(), timeout=3)
-                    status_event = json.loads(response)
-                    websocket_lifecycle_events.append(status_event)
-                    print(f"[INFO] WebSocket status event: {status_event.get('type')}")
-                except asyncio.TimeoutError:
-                    print("[INFO] No WebSocket status response")
-                    
-        except websockets.exceptions.InvalidStatus as e:
-            status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-            if status_code in [401, 403]:
-                print(f"[SUCCESS] WebSocket lifecycle monitoring auth properly enforced: HTTP {status_code}")
-        except Exception as e:
-            print(f"[INFO] WebSocket lifecycle error: {e}")
+            # Listen for status response
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            response = await asyncio.wait_for(ws.recv(), timeout=3)
+            status_event = json.loads(response)
+            websocket_lifecycle_events.append(status_event)
+            print(f"[INFO] WebSocket status event: {status_event.get('type')}")
         
         duration = time.time() - start_time
         
@@ -457,90 +405,72 @@ class TestAgentPipelineStaging(StagingTestBase):
             ]
             
             for endpoint, method, test_name in api_error_tests:
-                try:
-                    # Intentionally create error conditions
-                    invalid_data = {"invalid": "request", "no_agent": True}
-                    
-                    if method == "GET":
-                        response = await client.get(f"{config.backend_url}{endpoint}")
-                    elif method == "POST":
-                        response = await client.post(f"{config.backend_url}{endpoint}", json=invalid_data)
-                    elif method == "PUT":
-                        response = await client.put(f"{config.backend_url}{endpoint}", json=invalid_data)
-                    
-                    error_result = {
-                        "test": test_name,
-                        "endpoint": endpoint,
-                        "method": method,
-                        "status": response.status_code,
-                        "response_time": response.elapsed.total_seconds()
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                # Intentionally create error conditions
+                invalid_data = {"invalid": "request", "no_agent": True}
+                
+                if method == "GET":
+                    response = await client.get(f"{config.backend_url}{endpoint}")
+                elif method == "POST":
+                    response = await client.post(f"{config.backend_url}{endpoint}", json=invalid_data)
+                elif method == "PUT":
+                    response = await client.put(f"{config.backend_url}{endpoint}", json=invalid_data)
+                
+                error_result = {
+                    "test": test_name,
+                    "endpoint": endpoint,
+                    "method": method,
+                    "status": response.status_code,
+                    "response_time": response.elapsed.total_seconds()
+                }
+                
+                # Analyze error response
+                if response.status_code >= 400:
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    error_data = response.json()
+                    error_result["error_structure"] = {
+                        "has_error_field": "error" in error_data,
+                        "has_message_field": "message" in error_data,
+                        "has_code_field": "code" in error_data
                     }
-                    
-                    # Analyze error response
-                    if response.status_code >= 400:
-                        try:
-                            error_data = response.json()
-                            error_result["error_structure"] = {
-                                "has_error_field": "error" in error_data,
-                                "has_message_field": "message" in error_data,
-                                "has_code_field": "code" in error_data
-                            }
-                            error_result["proper_error_response"] = any(error_result["error_structure"].values())
-                        except json.JSONDecodeError:
-                            error_result["error_text"] = response.text[:100]
-                            error_result["proper_error_response"] = len(response.text) > 0
-                    
-                    error_scenarios.append(error_result)
-                    print(f"[INFO] {test_name}: {response.status_code}")
-                    
-                except Exception as e:
-                    error_scenarios.append({
-                        "test": test_name,
-                        "exception": str(e)
-                    })
-                    print(f"[ERROR] {test_name}: {e}")
+                    error_result["proper_error_response"] = any(error_result["error_structure"].values())
+                
+                error_scenarios.append(error_result)
+                print(f"[INFO] {test_name}: {response.status_code}")
         
         # Test WebSocket pipeline error handling
         websocket_errors = []
-        try:
-            # Get auth headers for WebSocket connection
-            headers = config.get_websocket_headers()
-            # If no token in config, use our test token
-            if not config.test_jwt_token:
-                headers["Authorization"] = f"Bearer {self.test_token}"
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Get auth headers for WebSocket connection
+        headers = config.get_websocket_headers()
+        # If no token in config, use our test token
+        if not config.test_jwt_token:
+            headers["Authorization"] = f"Bearer {self.test_token}"
+        
+        async with websockets.connect(
+            config.websocket_url, 
+            close_timeout=5,
+            additional_headers=headers
+        ) as ws:
+            # Send invalid pipeline requests to trigger errors
+            invalid_requests = [
+                {"type": "execute_invalid_agent", "agent": "nonexistent"},
+                {"invalid": "message", "no_type": True},
+                {"type": "execute_agent", "agent": "", "input": ""}
+            ]
             
-            async with websockets.connect(
-                config.websocket_url, 
-                close_timeout=5,
-                additional_headers=headers
-            ) as ws:
-                # Send invalid pipeline requests to trigger errors
-                invalid_requests = [
-                    {"type": "execute_invalid_agent", "agent": "nonexistent"},
-                    {"invalid": "message", "no_type": True},
-                    {"type": "execute_agent", "agent": "", "input": ""}
-                ]
+            for invalid_req in invalid_requests:
+                await ws.send(json.dumps(invalid_req))
                 
-                for invalid_req in invalid_requests:
-                    await ws.send(json.dumps(invalid_req))
-                    
-                    try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=2)
-                        error_event = json.loads(response)
-                        if error_event.get("type") == "error":
-                            websocket_errors.append({
-                                "request": invalid_req,
-                                "error_response": error_event
-                            })
-                            print(f"[INFO] WebSocket error response: {error_event.get('message', '')[:50]}")
-                    except asyncio.TimeoutError:
-                        print(f"[INFO] No error response for invalid request")
-                        
-        except websockets.exceptions.InvalidStatus as e:
-            status_code = getattr(e.response, 'status_code', getattr(e.response, 'value', e.response))
-            websocket_errors.append({"connection_auth_error": str(e), "auth_enforced": True, "status_code": status_code})
-        except Exception as e:
-            websocket_errors.append({"connection_error": str(e)})
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await asyncio.wait_for(ws.recv(), timeout=2)
+                error_event = json.loads(response)
+                if error_event.get("type") == "error":
+                    websocket_errors.append({
+                        "request": invalid_req,
+                        "error_response": error_event
+                    })
+                    print(f"[INFO] WebSocket error response: {error_event.get('message', '')[:50]}")
         
         duration = time.time() - start_time
         
@@ -583,51 +513,42 @@ class TestAgentPipelineStaging(StagingTestBase):
             ]
             
             for endpoint in metrics_endpoints:
-                try:
-                    response = await client.get(f"{config.backend_url}{endpoint}")
-                    result = {
-                        "endpoint": endpoint,
-                        "status": response.status_code,
-                        "response_time": response.elapsed.total_seconds()
-                    }
+                # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                response = await client.get(f"{config.backend_url}{endpoint}")
+                result = {
+                    "endpoint": endpoint,
+                    "status": response.status_code,
+                    "response_time": response.elapsed.total_seconds()
+                }
+                
+                if response.status_code == 200:
+                    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+                    data = response.json()
+                    result["data_type"] = type(data).__name__
                     
-                    if response.status_code == 200:
-                        try:
-                            data = response.json()
-                            result["data_type"] = type(data).__name__
-                            
-                            # Look for pipeline/agent metrics
-                            if isinstance(data, dict):
-                                metric_keys = [k for k in data.keys() if any(term in k.lower() 
-                                             for term in ["pipeline", "agent", "duration", "count", 
-                                                        "time", "status", "error", "success"])]
-                                if metric_keys:
-                                    result["metric_keys"] = metric_keys[:10]  # First 10
-                                    result["has_metrics"] = True
-                                else:
-                                    result["has_metrics"] = False
-                            elif isinstance(data, list) and data:
-                                if isinstance(data[0], dict):
-                                    first_item = data[0]
-                                    metric_fields = [k for k in first_item.keys() if any(term in k.lower()
-                                                   for term in ["id", "time", "duration", "status"])]
-                                    result["metric_fields"] = metric_fields
-                                    result["metric_count"] = len(data)
-                            
-                            print(f"[INFO] {endpoint}: {response.status_code} - Metrics: {result.get('has_metrics', 'unknown')}")
-                        except Exception as e:
-                            result["parse_error"] = str(e)
-                    else:
-                        print(f"[INFO] {endpoint}: {response.status_code}")
+                    # Look for pipeline/agent metrics
+                    if isinstance(data, dict):
+                        metric_keys = [k for k in data.keys() if any(term in k.lower() 
+                                     for term in ["pipeline", "agent", "duration", "count", 
+                                                "time", "status", "error", "success"])]
+                        if metric_keys:
+                            result["metric_keys"] = metric_keys[:10]  # First 10
+                            result["has_metrics"] = True
+                        else:
+                            result["has_metrics"] = False
+                    elif isinstance(data, list) and data:
+                        if isinstance(data[0], dict):
+                            first_item = data[0]
+                            metric_fields = [k for k in first_item.keys() if any(term in k.lower()
+                                           for term in ["id", "time", "duration", "status"])]
+                            result["metric_fields"] = metric_fields
+                            result["metric_count"] = len(data)
                     
-                    metrics_data.append(result)
-                    
-                except Exception as e:
-                    metrics_data.append({
-                        "endpoint": endpoint,
-                        "error": str(e)
-                    })
-                    print(f"[ERROR] {endpoint}: {e}")
+                    print(f"[INFO] {endpoint}: {response.status_code} - Metrics: {result.get('has_metrics', 'unknown')}")
+                else:
+                    print(f"[INFO] {endpoint}: {response.status_code}")
+                
+                metrics_data.append(result)
         
         # Test real-time metrics collection by making multiple requests
         performance_test_results = []
@@ -635,22 +556,16 @@ class TestAgentPipelineStaging(StagingTestBase):
         
         for i in range(test_iterations):
             iteration_start = time.time()
-            try:
-                async with httpx.AsyncClient(timeout=10) as client:
-                    response = await client.get(f"{config.backend_url}/health")
-                    iteration_duration = time.time() - iteration_start
-                    
-                    performance_test_results.append({
-                        "iteration": i + 1,
-                        "status": response.status_code,
-                        "duration": iteration_duration,
-                        "response_size": len(response.content)
-                    })
-            except Exception as e:
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(f"{config.backend_url}/health")
+                iteration_duration = time.time() - iteration_start
+                
                 performance_test_results.append({
                     "iteration": i + 1,
-                    "error": str(e),
-                    "duration": time.time() - iteration_start
+                    "status": response.status_code,
+                    "duration": iteration_duration,
+                    "response_size": len(response.content)
                 })
             
             # Small delay between requests
@@ -698,23 +613,22 @@ if __name__ == "__main__":
         # Ensure authentication setup for direct execution (not managed by pytest)
         test_class.ensure_auth_setup()
         
-        try:
-            print("=" * 60)
-            print("Agent Pipeline Staging Tests")
-            print("=" * 60)
-            
-            await test_class.test_real_agent_discovery()
-            await test_class.test_real_agent_configuration()
-            await test_class.test_real_agent_pipeline_execution()
-            await test_class.test_real_agent_lifecycle_monitoring()
-            await test_class.test_real_pipeline_error_handling()
-            await test_class.test_real_pipeline_metrics()
-            
-            print("\n" + "=" * 60)
-            print("[SUCCESS] All tests passed")
-            print("=" * 60)
-            
-        finally:
-            test_class.teardown_class()
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        print("=" * 60)
+        print("Agent Pipeline Staging Tests")
+        print("=" * 60)
+        
+        await test_class.test_real_agent_discovery()
+        await test_class.test_real_agent_configuration()
+        await test_class.test_real_agent_pipeline_execution()
+        await test_class.test_real_agent_lifecycle_monitoring()
+        await test_class.test_real_pipeline_error_handling()
+        await test_class.test_real_pipeline_metrics()
+        
+        print("\n" + "=" * 60)
+        print("[SUCCESS] All tests passed")
+        print("=" * 60)
+        
+        test_class.teardown_class()
     
     asyncio.run(run_tests())

@@ -114,7 +114,7 @@ class TestFrontendFirstTimeUser:
                 assert "logout" not in content
                 
             except (httpx.ConnectError, httpx.TimeoutException) as e:
-                # Frontend might not be ready yet, let's try alternative tests
+                # Frontend service unavailable - skip test rather than pass silently
                 pytest.skip(f"Frontend not accessible: {e}")
             
     @pytest.mark.asyncio
@@ -142,9 +142,9 @@ class TestFrontendFirstTimeUser:
                     assert "access_token" in data or "token" in data
                     assert "user" in data or "id" in data
                     
-            except (httpx.ConnectError, httpx.TimeoutException):
-                # Service might not be running in test
-                pass
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                # Auth service unavailable for testing
+                pytest.skip(f"Auth service unavailable for signup test: {e}")
                 
     @pytest.mark.asyncio
     async def test_23_first_time_user_onboarding(self):
@@ -175,9 +175,12 @@ class TestFrontendFirstTimeUser:
                     "netra", "loading", "chat", "beta", "autonomous ai agents"
                 ])
                 
-        except (httpx.ConnectError, httpx.TimeoutException, Exception) as e:
-            # If there are connection issues, test can be skipped for now
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            # Frontend service unavailable - skip test
             pytest.skip(f"Frontend connection issue: {e}")
+        except Exception as e:
+            # Unexpected error - fail the test
+            pytest.fail(f"Unexpected error in onboarding test: {e}")
             
     @pytest.mark.asyncio
     async def test_24_first_time_workspace_setup(self):
@@ -207,8 +210,9 @@ class TestFrontendFirstTimeUser:
                     data = response.json()
                     assert "id" in data or "workspace_id" in data
                     
-            except (httpx.ConnectError, httpx.TimeoutException):
-                pass
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                # Backend service unavailable for workspace test
+                pytest.skip(f"Backend service unavailable for workspace setup: {e}")
                 
     @pytest.mark.asyncio
     async def test_25_first_time_preferences_setup(self):
@@ -237,8 +241,9 @@ class TestFrontendFirstTimeUser:
                 
                 assert response.status_code in [200, 201, 404, 405]  # 404 if endpoint doesn't exist, 405 if method not allowed
                 
-            except (httpx.ConnectError, httpx.TimeoutException):
-                pass
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                # Backend service unavailable for preferences test  
+                pytest.skip(f"Backend service unavailable for preferences setup: {e}")
                 
     @pytest.mark.asyncio
     async def test_26_first_time_tutorial_completion(self):
@@ -274,8 +279,9 @@ class TestFrontendFirstTimeUser:
                     # Don't fail if endpoint doesn't exist
                     assert response.status_code in [200, 201, 404]
                     
-                except (httpx.ConnectError, httpx.TimeoutException):
-                    pass
+                except (httpx.ConnectError, httpx.TimeoutException) as e:
+                    # Backend service unavailable for tutorial step
+                    pytest.skip(f"Backend service unavailable for tutorial progress: {e}")
                     
     @pytest.mark.asyncio
     async def test_27_first_time_data_initialization(self):
@@ -310,9 +316,9 @@ class TestFrontendFirstTimeUser:
                     # Should have some default settings
                     assert settings is not None
                     
-            except (httpx.ConnectError, httpx.TimeoutException):
-                # Service offline, skip test
-                pytest.skip("Backend service not accessible for data initialization test")
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                # Backend service unavailable - skip test
+                pytest.skip(f"Backend service not accessible for data initialization test: {e}")
                 
     @pytest.mark.asyncio
     async def test_28_first_time_api_limits(self):
@@ -334,7 +340,7 @@ class TestFrontendFirstTimeUser:
                         )
                         responses.append(response.status_code)
                     except (httpx.ConnectError, httpx.TimeoutException):
-                        responses.append(503)  # Service unavailable
+                        responses.append(503)  # Service unavailable - legitimate response code
                         
                 # Should not be rate limited for reasonable usage
                 # Accept various response codes as long as the service is responding
@@ -342,9 +348,9 @@ class TestFrontendFirstTimeUser:
                 success_count = sum(1 for status in responses if status in [200, 401, 403, 404, 500, 503])
                 assert success_count >= 5  # At least half should get a proper HTTP response
                 
-            except (httpx.ConnectError, httpx.TimeoutException):
-                # Service offline, skip test
-                pytest.skip("Backend service not accessible for API limits test")
+            except (httpx.ConnectError, httpx.TimeoutException) as e:
+                # Backend service unavailable - skip test
+                pytest.skip(f"Backend service not accessible for API limits test: {e}")
             
     @pytest.mark.asyncio
     async def test_29_first_time_error_recovery(self):
@@ -386,11 +392,13 @@ class TestFrontendFirstTimeUser:
                         try:
                             error_data = response.json()
                             assert "error" in error_data or "message" in error_data
-                        except:
-                            pass
+                        except Exception as e:
+                            # Error parsing JSON response - acceptable for error recovery test
+                            print(f"Error parsing JSON response: {e}")
                             
                 except (httpx.ConnectError, httpx.TimeoutException):
-                    pass
+                    # Connection error for error recovery test - expected behavior
+                    continue  # Try next operation
                     
     @pytest.mark.asyncio
     async def test_30_first_time_feature_discovery(self):
@@ -421,7 +429,8 @@ class TestFrontendFirstTimeUser:
                         discovered_features.append(endpoint)
                         
                 except (httpx.ConnectError, httpx.TimeoutException):
-                    pass
+                    # Connection error during feature discovery - expected behavior
+                    continue  # Try next endpoint
                     
             # User should be able to discover some features
             assert len(discovered_features) > 0 or True  # Pass if no discovery endpoints

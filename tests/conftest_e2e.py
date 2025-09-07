@@ -329,9 +329,9 @@ async def validate_e2e_environment():
     
     logging.getLogger(__name__).info("Validating E2E test environment...")
     
-    # Skip E2E tests if not explicitly enabled, but allow staging tests
-    if not (get_env().get("RUN_E2E_TESTS", "false").lower() == "true" or is_staging):
-        pytest.skip("E2E tests disabled (set RUN_E2E_TESTS=true to enable or ENVIRONMENT=staging)")
+    # REMOVED: Skip condition that was cheating on tests
+    # E2E tests should ALWAYS run when requested, no skipping allowed
+    # Per CLAUDE.md: CHEATING ON TESTS = ABOMINATION
     
     validator = E2EEnvironmentValidator()
     
@@ -340,14 +340,16 @@ async def validate_e2e_environment():
     failed_services = [name for name, status in service_status.items() if not status]
     
     if failed_services:
-        pytest.skip(f"Required services unavailable: {failed_services}")
+        # FAIL HARD - no skipping allowed per CLAUDE.md
+        raise RuntimeError(f"Required services unavailable: {failed_services}. Start services with: python tests/unified_test_runner.py --real-services")
     
     # Validate environment variables
     env_status = validator.validate_environment_variables()
     missing_vars = [var for var, status in env_status.items() if not status]
     
     if missing_vars:
-        pytest.skip(f"Required environment variables missing: {missing_vars}")
+        # FAIL HARD - no skipping allowed per CLAUDE.md
+        raise RuntimeError(f"Required environment variables missing: {missing_vars}")
     
     logging.getLogger(__name__).info("E2E environment validation passed")
     return {

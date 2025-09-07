@@ -58,7 +58,7 @@ class MockStreamingWebSocket:
         except Exception as e:
             logger.error(f"Connection failed: {e}")
             self.state = ConnectionState.FAILED
-            return False
+            pytest.fail(f"Unexpected connection failure in MockStreamingWebSocket: {e}")
     
     async def disconnect(self) -> None:
         """Disconnect from the WebSocket server."""
@@ -70,7 +70,9 @@ class MockStreamingWebSocket:
                 try:
                     await callback()
                 except Exception as e:
+                    # Log and continue with other callbacks, but track the failure
                     logger.error(f"Disconnect callback failed: {e}")
+                    # In real tests, we'd want to track callback failures but not stop disconnection
             
             logger.info(f"Mock WebSocket disconnected: {self.connection_id[:8]}")
     

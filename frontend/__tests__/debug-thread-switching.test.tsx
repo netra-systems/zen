@@ -37,6 +37,8 @@ jest.mock('@/lib/operation-cleanup', () => ({
   }
 }));
 
+// Using inline mock defined below instead of the file-based mock
+
 jest.mock('@/services/urlSyncService', () => ({
   useURLSync: () => ({ updateUrl: jest.fn() }),
   useBrowserHistorySync: () => ({})
@@ -65,12 +67,19 @@ jest.mock('@/lib/logger', () => ({
 
 jest.mock('@/lib/thread-operation-manager', () => ({
   ThreadOperationManager: {
-    startOperation: jest.fn().mockImplementation(async (type, threadId, fn, options) => {
+    startOperation: jest.fn().mockImplementation(async (type, threadId, executor, options) => {
       console.log(`🔧 ThreadOperationManager.startOperation MOCK EXECUTING:`, { type, threadId });
       
-      // For debugging, let's just return a simple success result without calling the executor
-      console.log('🔧 Returning simple success result');
-      return { success: true, threadId };
+      // Actually execute the function to allow proper hook state flow
+      try {
+        const signal = new AbortController().signal;
+        const result = await executor(signal);
+        console.log('🔧 Executor returned result:', result);
+        return result;
+      } catch (error) {
+        console.log('🔧 Executor threw error:', error);
+        return { success: false, error };
+      }
     })
   }
 }));
@@ -96,6 +105,12 @@ describe('Debug Thread Switching', () => {
       const result = await fn();
       return result;
     });
+    
+    // Reset ThreadOperationManager
+    const { ThreadOperationManager } = require('@/lib/thread-operation-manager');
+    if (ThreadOperationManager?.reset) {
+      ThreadOperationManager.reset();
+    }
     
     console.log('=== BEFORE EACH ===');
     console.log('Mock store state:', useUnifiedChatStore.getState());
