@@ -8,7 +8,6 @@ Each test must be concise and focused as per architecture requirements.
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

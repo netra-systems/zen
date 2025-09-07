@@ -27,7 +27,6 @@ import os
 import pytest
 from typing import Optional
 from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from shared.isolated_environment import get_env

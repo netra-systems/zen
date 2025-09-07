@@ -8,7 +8,6 @@ import pytest
 from unittest.mock import patch, AsyncMock
 from datetime import datetime, timezone
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-# from auth_service.core.auth_manager import AuthManager  # Commented out - not available
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
