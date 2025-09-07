@@ -173,9 +173,9 @@ def test_staging_timeout_optimization():
     for case in test_cases:
         result = get_staging_timeout(case["original"], case["env"])
         if result == case["expected"]:
-            print(f"✅ {case['env']}: {case['original']}s -> {result}s")
+            print(f"PASS {case['env']}: {case['original']}s -> {result}s")
         else:
-            print(f"❌ {case['env']}: Expected {case['expected']}, got {result}")
+            print(f"FAIL {case['env']}: Expected {case['expected']}, got {result}")
             all_passed = False
     
     return all_passed
@@ -194,13 +194,13 @@ def main():
     
     all_passed = True
     for test_name, test_func in tests:
-        print(f"\n🔍 Running: {test_name}")
+        print(f"\nRunning: {test_name}")
         try:
             passed = test_func()
             if passed:
-                print(f"✅ {test_name}: PASSED")
+                print(f"PASS {test_name}: PASSED")
             else:
-                print(f"❌ {test_name}: FAILED")
+                print(f"FAIL {test_name}: FAILED")
                 all_passed = False
         except Exception as e:
             print(f"ERROR {test_name}: {e}")

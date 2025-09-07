@@ -441,6 +441,36 @@ async def service_lifecycle_manager():
 
 
 # =============================================================================
+# TEST APP FACTORY
+# =============================================================================
+
+def create_test_app():
+    """
+    Create a minimal FastAPI test application.
+    
+    This is a SSOT test app factory that provides a clean FastAPI instance
+    for testing without any service dependencies or complex setup.
+    
+    Returns:
+        FastAPI: A minimal FastAPI application instance for testing
+    """
+    try:
+        from fastapi import FastAPI
+        app = FastAPI(
+            title="Test Application",
+            description="Minimal test app for unit testing",
+            version="test"
+        )
+        return app
+    except ImportError:
+        # Fallback mock if FastAPI not available
+        from unittest.mock import MagicMock
+        mock_app = MagicMock()
+        mock_app.include_router = MagicMock()
+        return mock_app
+
+
+# =============================================================================
 # EXPORT ALL FIXTURES
 # =============================================================================
 
@@ -471,6 +501,5 @@ __all__ = [
     'service_health_check',
     'service_lifecycle_manager',
     
-    # Legacy helpers
-    'create_test_app'
+    # Legacy helpers removed
 ]

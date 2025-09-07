@@ -13,8 +13,7 @@ from test_framework.fixtures.real_services import *
 from test_framework.fixtures.websocket_manager_mock import *
 from test_framework.fixtures.websocket_test_helpers import *
 
-# Import additional classes and functions
-from test_framework.fixtures.service_fixtures import _ConfigManagerHelper as ConfigManagerHelper, create_test_app
+# Legacy compatibility classes removed - use unified configuration management
 
 # Import create_test_client from backend route helpers
 try:
