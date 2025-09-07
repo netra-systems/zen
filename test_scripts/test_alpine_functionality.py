@@ -23,7 +23,7 @@ def test_alpine_parameter_functionality():
     # Test 1: Parameter acceptance
     print("1. Testing parameter acceptance...")
     manager_alpine = UnifiedDockerManager(
-        environment_type=EnvironmentType.SHARED,
+        environment_type=EnvironmentType.TEST,
         use_alpine=True
     )
     assert hasattr(manager_alpine, 'use_alpine'), "use_alpine attribute missing"
@@ -32,7 +32,7 @@ def test_alpine_parameter_functionality():
     
     # Test 2: Default value (Alpine is now default)
     print("2. Testing default value...")
-    manager_default = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+    manager_default = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
     assert hasattr(manager_default, 'use_alpine'), "use_alpine attribute missing on default"
     assert manager_default.use_alpine is True, f"Expected True default (Alpine), got {manager_default.use_alpine}"
     print("   ✅ Default value (True for Alpine) working correctly")
@@ -50,12 +50,12 @@ def test_alpine_parameter_functionality():
     # Test 4: Project name differentiation
     print("4. Testing project name isolation...")
     manager_reg = UnifiedDockerManager(
-        environment_type=EnvironmentType.SHARED,
+        environment_type=EnvironmentType.TEST,
         test_id="test_regular",
         use_alpine=False
     )
     manager_alp = UnifiedDockerManager(
-        environment_type=EnvironmentType.SHARED, 
+        environment_type=EnvironmentType.TEST, 
         test_id="test_alpine",
         use_alpine=True
     )

@@ -71,7 +71,7 @@ class CypressTestRunner:
         if use_centralized_docker:
             # Use centralized Docker manager for unified test runner integration
             self.docker_manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.DEDICATED,
                 use_production_images=False  # Use test images for Cypress
             )
         else:
