@@ -242,7 +242,7 @@ const AgentChatInterface: React.FC<{
     
     // Add agent started message to chat
     const message: Message = {
-      id: `agent-start-${Date.now()}`,
+      id: generateUniqueId('agent-start'),
       content: `🤖 ${currentAgent} is analyzing your request...`,
       role: 'assistant',
       timestamp: new Date().toISOString(),
@@ -308,7 +308,7 @@ const AgentChatInterface: React.FC<{
 
     // Add completion message with actionable insights
     const completionMessage: Message = {
-      id: `agent-complete-${Date.now()}`,
+      id: generateUniqueId('agent-complete'),
       content: formatAgentCompletionMessage(result, currentAgent),
       role: 'assistant',
       timestamp: new Date().toISOString(),
@@ -343,7 +343,7 @@ const AgentChatInterface: React.FC<{
     }));
 
     const errorMessage: Message = {
-      id: `agent-error-${Date.now()}`,
+      id: generateUniqueId('agent-error'),
       content: `❌ ${currentAgent} encountered an error: ${payload.message}. Please try again or contact support.`,
       role: 'assistant',
       timestamp: new Date().toISOString(),
