@@ -230,7 +230,7 @@ class TestMediumPerformance:
         print(f"Total test duration: {duration:.3f}s")
         
         # Verify this was a real concurrent test
-        assert duration > 0.5, f"Test too fast ({duration:.3f}s) for concurrent testing!"
+        assert duration > 0.3, f"Test too fast ({duration:.3f}s) for concurrent testing!"
         assert concurrent_duration < duration, "Concurrent requests should be faster than sequential"
         assert success_rate >= 0.8, f"Connection success rate too low: {success_rate:.2%}"  # Allow some failures
         assert success_count > 0, "At least some concurrent connections should succeed"

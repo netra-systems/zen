@@ -42,6 +42,8 @@ class TestMessageQueueResilience:
         """Create message queue with mocked Redis"""
         with patch('netra_backend.app.services.websocket.message_queue.redis_manager', mock_redis):
             queue = MessageQueue()
+            # Override redis attribute directly to ensure our mock is used
+            queue.redis = mock_redis
             # Mock circuit breakers
             queue.message_circuit = MagicMock()
             queue.message_circuit.can_execute.return_value = True
@@ -52,6 +54,9 @@ class TestMessageQueueResilience:
             queue.redis_circuit.can_execute.return_value = True
             queue.redis_circuit.record_success = MagicMock()
             queue.redis_circuit.record_failure = MagicMock()
+            
+            # Reset any calls that happened during initialization
+            mock_redis.reset_mock()
             return queue
 
     @pytest.fixture
@@ -75,22 +80,22 @@ class TestMessageQueueResilience:
         delay = message.calculate_next_retry_delay()
         assert delay == 1  # base_retry_delay
         
-        # Test exponential progression
+        # Test exponential progression (with 0-40% positive jitter)
         message.retry_count = 1
         delay = message.calculate_next_retry_delay()
-        assert 1 <= delay <= 2  # 1s with jitter
+        assert 1 <= delay <= 2  # 1s + up to 40% jitter
         
         message.retry_count = 2
         delay = message.calculate_next_retry_delay()
-        assert 2 <= delay <= 5  # 2s with jitter
+        assert 2 <= delay <= 3  # 2s + up to 40% jitter
         
         message.retry_count = 3
         delay = message.calculate_next_retry_delay()
-        assert 4 <= delay <= 10  # 4s with jitter
+        assert 4 <= delay <= 6  # 4s + up to 40% jitter
         
         message.retry_count = 4
         delay = message.calculate_next_retry_delay()
-        assert 8 <= delay <= 20  # 8s with jitter
+        assert 8 <= delay <= 12  # 8s + up to 40% jitter
         
         # Test max delay cap
         message.retry_count = 10
@@ -210,17 +215,31 @@ class TestMessageQueueResilience:
         """Test dead letter queue storage functionality"""
         error_message = "Final failure"
         
+        # Debug: Check initial state
+        initial_set_count = mock_redis.set.call_count
+        initial_zadd_count = mock_redis.zadd.call_count
+        
         # Test moving message to DLQ
         await message_queue._move_to_dead_letter_queue(sample_message, error_message)
         
-        # Verify Redis operations
-        assert mock_redis.set.call_count == 1  # Store DLQ message
-        assert mock_redis.zadd.call_count == 1  # Add to DLQ index
+        # Verify Redis operations (check delta from initial state)
+        # Note: _move_to_dead_letter_queue calls set twice: once for DLQ storage, once for status update
+        assert mock_redis.set.call_count - initial_set_count == 2  # Store DLQ message + status update
+        assert mock_redis.zadd.call_count - initial_zadd_count == 1  # Add to DLQ index
         
-        # Check the stored data structure
-        set_call = mock_redis.set.call_args
-        dlq_key = set_call[0][0]
-        dlq_data_json = set_call[0][1]
+        # Check the stored data structure (get all calls and find the DLQ one)
+        set_calls = mock_redis.set.call_args_list
+        
+        # Find the DLQ call (the one with key starting with "dlq:")
+        dlq_call = None
+        for call in set_calls:
+            if call[0][0].startswith("dlq:"):
+                dlq_call = call
+                break
+        
+        assert dlq_call is not None, "DLQ set call not found"
+        dlq_key = dlq_call[0][0]
+        dlq_data_json = dlq_call[0][1]
         
         assert dlq_key == f"dlq:{sample_message.id}"
         dlq_data = json.loads(dlq_data_json)

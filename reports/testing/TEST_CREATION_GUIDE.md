@@ -12,6 +12,7 @@
 ## Related Documentation
 
 - **[Test Architecture Visual Overview](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete visual guide to test infrastructure
+- **[Staging E2E Test Index](../../tests/e2e/STAGING_E2E_TEST_INDEX.md)** - Comprehensive index of all staging-ready E2E tests
 - **[CLAUDE.md](CLAUDE.md)** - Prime directives for development and testing
 - **[User Context Architecture](USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and isolation (MANDATORY)
 - **[Docker Orchestration](docs/docker_orchestration.md)** - Docker management and Alpine containers

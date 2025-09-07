@@ -1,0 +1,185 @@
+
+======================================================================
+STAGING E2E TEST SESSION STARTED
+Time: 2025-09-06 22:26:24
+======================================================================
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'Faker': '37.4.2', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 244 items / 121 deselected / 123 selected
+
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_basic_functionality PASSED [  0%]
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_api_endpoints PASSED [  1%]
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_end_to_end_message_flow PASSED [  2%]
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_performance_targets PASSED [  3%]
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_error_handling PASSED [  4%]
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_business_critical_features PASSED [  4%]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_health_check PASSED [  5%]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection PASSED [  6%]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_api_endpoints_for_agents PASSED [  7%]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real FAILED [  8%]
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real PASSED [  8%]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_message_endpoints PASSED [  9%]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_message_api_endpoints PASSED [ 10%]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow FAILED [ 11%]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_thread_management PASSED [ 12%]
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow PASSED [ 13%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_discovery PASSED [ 13%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_configuration PASSED [ 14%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution FAILED [ 15%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_lifecycle_monitoring PASSED [ 16%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_error_handling PASSED [ 17%]
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_metrics PASSED [ 17%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_basic_functionality PASSED [ 18%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_discovery_and_listing PASSED [ 19%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_workflow_states PASSED [ 20%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_communication_patterns PASSED [ 21%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_error_scenarios PASSED [ 21%]
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_multi_agent_coordination_metrics PASSED [ 22%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_basic_functionality PASSED [ 23%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_protocols PASSED [ 24%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_chunk_handling PASSED [ 25%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_performance_metrics PASSED [ 26%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_backpressure_handling PASSED [ 26%]
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_stream_recovery PASSED [ 27%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_basic_functionality PASSED [ 28%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_failure_detection PASSED [ 29%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_retry_strategies FAILED [ 30%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_circuit_breaker PASSED [ 30%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_graceful_degradation PASSED [ 31%]
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_recovery_metrics PASSED [ 32%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_basic_functionality PASSED [ 33%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_sequence PASSED [ 34%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_dependency_validation PASSED [ 34%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_cold_start_performance PASSED [ 35%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_failure_handling PASSED [ 36%]
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_health_check_endpoints PASSED [ 37%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_basic_functionality PASSED [ 38%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_types PASSED [ 39%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_sequencing PASSED [ 39%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_metadata PASSED [ 40%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_filtering PASSED [ 41%]
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_persistence PASSED [ 42%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_basic_functionality PASSED [ 43%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_patterns PASSED [ 43%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_task_distribution PASSED [ 44%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_synchronization_primitives PASSED [ 45%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_consensus_mechanisms PASSED [ 46%]
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_metrics PASSED [ 47%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_auth_google_login_route_returns_404 SKIPPED [ 47%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_multiple_oauth_routes_missing_404_pattern SKIPPED [ 48%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_auth_service_route_registration_incomplete SKIPPED [ 49%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_auth_service_route_mapping_configuration_error SKIPPED [ 50%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_auth_service_oauth_blueprint_not_registered SKIPPED [ 51%]
+tests/e2e/staging/test_auth_routes.py::TestAuthRoutes::test_oauth_route_handler_import_or_dependency_missing SKIPPED [ 52%]
+tests/e2e/staging/test_environment_configuration.py::TestEnvironmentConfiguration::test_critical_environment_variables_missing SKIPPED [ 52%]
+tests/e2e/staging/test_environment_configuration.py::TestEnvironmentConfiguration::test_service_url_configuration_mismatch SKIPPED [ 53%]
+tests/e2e/staging/test_environment_configuration.py::TestEnvironmentConfiguration::test_database_configuration_inconsistent_across_services SKIPPED [ 54%]
+tests/e2e/staging/test_environment_configuration.py::TestEnvironmentConfiguration::test_environment_variable_type_validation_failures SKIPPED [ 55%]
+tests/e2e/staging/test_environment_configuration.py::TestEnvironmentConfiguration::test_staging_specific_configuration_missing SKIPPED [ 56%]
+tests/e2e/staging/test_expose_fake_tests.py::TestNetworkCallVerification::test_001_staging_endpoint_actual_dns_resolution PASSED [ 56%]
+tests/e2e/staging/test_expose_fake_tests.py::TestNetworkCallVerification::test_002_tcp_socket_connection_to_staging PASSED [ 57%]
+tests/e2e/staging/test_expose_fake_tests.py::TestNetworkCallVerification::test_003_ssl_certificate_validation PASSED [ 58%]
+tests/e2e/staging/test_expose_fake_tests.py::TestNetworkCallVerification::test_004_http_response_timing_validation PASSED [ 59%]
+tests/e2e/staging/test_expose_fake_tests.py::TestWebSocketConnectionAuthenticity::test_005_websocket_handshake_timing FAILED [ 60%]
+tests/e2e/staging/test_expose_fake_tests.py::TestWebSocketConnectionAuthenticity::test_006_websocket_protocol_upgrade FAILED [ 60%]
+tests/e2e/staging/test_expose_fake_tests.py::TestAPIResponseAuthenticity::test_007_api_response_headers_validation FAILED [ 61%]
+tests/e2e/staging/test_expose_fake_tests.py::TestAPIResponseAuthenticity::test_008_api_response_content_variation PASSED [ 62%]
+tests/e2e/staging/test_expose_fake_tests.py::TestAPIResponseAuthenticity::test_009_api_error_handling_authenticity PASSED [ 63%]
+tests/e2e/staging/test_expose_fake_tests.py::TestTimingBasedAuthenticity::test_010_sequential_request_timing PASSED [ 64%]
+tests/e2e/staging/test_expose_fake_tests.py::TestTimingBasedAuthenticity::test_011_concurrent_request_timing PASSED [ 65%]
+tests/e2e/staging/test_expose_fake_tests.py::TestTimingBasedAuthenticity::test_012_timeout_behavior_validation PASSED [ 65%]
+tests/e2e/staging/test_expose_fake_tests.py::TestDataIntegrityAndPersistence::test_013_session_state_persistence PASSED [ 66%]
+tests/e2e/staging/test_expose_fake_tests.py::TestDataIntegrityAndPersistence::test_014_server_state_consistency PASSED [ 67%]
+tests/e2e/staging/test_expose_fake_tests.py::TestResourceUsageValidation::test_015_network_io_measurement PASSED [ 68%]
+tests/e2e/staging/test_expose_fake_tests.py::TestResourceUsageValidation::test_016_memory_usage_during_requests FAILED [ 69%]
+tests/e2e/staging/test_expose_fake_tests.py::TestAsyncBehaviorValidation::test_017_async_concurrency_validation FAILED [ 69%]
+tests/e2e/staging/test_expose_fake_tests.py::TestAsyncBehaviorValidation::test_018_event_loop_integration +++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~ Stack of MainThread (37900) ~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(pytest.console_main())
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py", line 201, in console_main
+    code = main()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py", line 175, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 336, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 289, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 343, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\main.py", line 367, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 117, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 136, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 245, in call_and_report
+    call = CallInfo.from_call(
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 344, in from_call
+    result: TResult | None = func()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 246, in <lambda>
+    lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 178, in pytest_runtest_call
+    item.runtest()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py", line 426, in runtest
+    super().runtest()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py", line 1671, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py", line 157, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py", line 642, in inner
+    _loop.run_until_complete(task)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 674, in run_until_complete
+    self.run_forever()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 322, in run_forever
+    super().run_forever()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+  File "C:\Users\antho\miniconda3\Lib\asyncio\base_events.py", line 1949, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 445, in select
+    self._poll(timeout)
+  File "C:\Users\antho\miniconda3\Lib\asyncio\windows_events.py", line 774, in _poll
+    status = _overlapped.GetQueuedCompletionStatus(self._iocp, ms)
++++++++++++++++++++++++++++++++++++ Timeout +++++++++++++++++++++++++++++++++++

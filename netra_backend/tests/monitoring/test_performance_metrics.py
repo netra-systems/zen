@@ -41,6 +41,7 @@ from netra_backend.app.agents.supervisor.comprehensive_observability import (
     SupervisorObservability
 )
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
 class TestPhaseTimer:
@@ -494,7 +495,7 @@ class TestSupervisorObservabilityIntegration:
         observability.stop_phase(context.run_id, "llm_processing")
         
         # Complete workflow
-        result = ExecutionResult(success=True, data={"test": "data"})
+        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id=context.request_id, data={"test": "data"})
         observability.complete_workflow_trace(context, result)
         
         # Check metrics

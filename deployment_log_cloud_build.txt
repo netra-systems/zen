@@ -1,0 +1,128 @@
+
+⚠️ NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.
+   Example: python scripts/deploy_to_gcp.py --project netra-staging --build-local
+
+
+🚀 Using Alpine-optimized images (default):
+   • 78% smaller images (150MB vs 350MB)
+   • 3x faster startup times
+   • 68% cost reduction ($205/month vs $650/month)
+   • Optimized resource limits (512MB RAM vs 2GB)
+
+  Container runtime: Docker
+🚀 Deploying Netra Apex Platform to GCP
+   Project: netra-staging
+   Region: us-central1
+   Build Mode: Cloud Build
+   Pre-checks: Disabled
+   Config Validation: Enabled (default)
+
+✅ Phase 0: Validating Deployment Configuration...
+   Checking against proven working configuration from netra-backend-staging-00035-fnj
+Exception in thread Thread-9 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\threading.py", line 1073, in _bootstrap_inner
+    self.run()
+  File "C:\Users\antho\miniconda3\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\antho\miniconda3\Lib\subprocess.py", line 1599, in _readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+  File "C:\Users\antho\miniconda3\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 309: character maps to <undefined>
+   ✅ Configuration matches proven working setup
+
+🔐 Phase 1: Validating Prerequisites...
+✅ gcloud CLI configured for project: netra-staging
+
+🔧 Enabling required GCP APIs...
+  Enabling run.googleapis.com...
+  Enabling containerregistry.googleapis.com...
+  Enabling cloudbuild.googleapis.com...
+  Enabling secretmanager.googleapis.com...
+  Enabling compute.googleapis.com...
+✅ All required APIs enabled
+
+🔐 Phase 2: Validating Secrets Configuration...
+Checking all required secrets in Secret Manager...
+  ✅ Secret configured: gemini-api-key-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: fernet-key-staging
+  ✅ Secret configured: postgres-password-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: postgres-db-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: jwt-secret-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: google-oauth-client-secret-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: oauth-hmac-secret-staging
+  ✅ Secret configured: jwt-secret-key-staging
+  ✅ Secret configured: google-oauth-client-id-staging
+
+✅ All required secrets are configured
+   Service Filter: backend
+
+🏗️ Phase 4: Building and Deploying Services...
+   All prerequisites validated - proceeding with deployment
+
+   Building backend...
+
+🔨 Building backend Docker image with Cloud Build...
+  Using existing docker/backend.staging.alpine.Dockerfile
+  Building image: gcr.io/netra-staging/netra-backend-staging:latest
+  Note: Cloud Build is slower. Use --build-local for faster builds.
+Creating temporary archive of 6146 file(s) totalling 108.7 MiB before compression.
+Uploading tarball of [.] to [gs://netra-staging_cloudbuild/source/1757219274.74627-8c125ff15d9d41178e5ea6a938c0bc52.tgz]
+Created [https://cloudbuild.googleapis.com/v1/projects/netra-staging/locations/global/builds/1380d183-cdda-40b5-8903-01b5f37a1c04].
+Logs are available at [ https://console.cloud.google.com/cloud-build/builds/1380d183-cdda-40b5-8903-01b5f37a1c04?project=701982941522 ].
+
+gcloud builds submit only displays logs from Cloud Storage. To view logs from Cloud Logging, run:
+gcloud beta builds submit
+
+Waiting for build to complete. Polling interval: 1 second(s).
+ID                                    CREATE_TIME                DURATION  SOURCE                                                                                      IMAGES  STATUS
+1380d183-cdda-40b5-8903-01b5f37a1c04  2025-09-07T04:28:24+00:00  3M11S     gs://netra-staging_cloudbuild/source/1757219274.74627-8c125ff15d9d41178e5ea6a938c0bc52.tgz  -       SUCCESS
+✅ backend image built successfully
+   Deploying backend...
+
+🚀 Deploying backend to Cloud Run...
+      ℹ️ Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder
+✅ backend deployed successfully
+  📡 Updating traffic to latest revision for netra-backend-staging...
+  ⏳ Waiting for netra-backend-staging revision to be ready...
+  ✅ Revision is ready
+  ✅ Traffic updated to latest revision
+
+==================================================
+
+🏥 Running health checks...
+  ⚠️ backend: No URL available
+
+✅ All services deployed successfully!
+
+📋 Deployment Summary:
+==================================================
+
+==================================================
+🔐 Running Post-Deployment Authentication Tests
+==================================================
+
+Testing staging environment...
+⚠️ Post-deployment tests failed with error: name 'env' is not defined
+⚠️ Post-deployment tests failed - authentication may not be working correctly
+   Check that JWT_SECRET_KEY is set to the same value in both services
+
+🔑 Next Steps:
+1. Update secrets in Secret Manager with real values
+2. Configure Cloud SQL and Redis instances
+3. Set up custom domain and SSL certificates
+4. Configure authentication and remove --allow-unauthenticated
+5. Set up monitoring and alerting

@@ -921,25 +921,16 @@ CMD ["npm", "start"]
                 elif env_name == "REDIS_PORT":
                     env_vars[env_name] = "6379"  # Default Redis port
         
-        # Construct DATABASE_URL from components if we have them
+        # IMPORTANT: Do NOT construct DATABASE_URL here!
+        # The backend uses DatabaseURLBuilder as the SSOT to build URLs from POSTGRES_* variables
+        # This ensures Cloud SQL proxy connections work correctly
+        # See: shared/database_url_builder.py and netra_backend/app/core/backend_environment.py
+        
+        # Log that we have the necessary components for DatabaseURLBuilder
         if all(k in env_vars for k in ["POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]):
-            # Handle Cloud SQL Unix socket connection
-            if "/cloudsql/" in env_vars["POSTGRES_HOST"]:
-                database_url = (
-                    f"postgresql+asyncpg://{env_vars['POSTGRES_USER']}:"
-                    f"{env_vars['POSTGRES_PASSWORD']}@/{env_vars['POSTGRES_DB']}"
-                    f"?host={env_vars['POSTGRES_HOST']}"
-                )
-            else:
-                # Standard TCP connection
-                port = env_vars.get("POSTGRES_PORT", "5432")
-                database_url = (
-                    f"postgresql+asyncpg://{env_vars['POSTGRES_USER']}:"
-                    f"{env_vars['POSTGRES_PASSWORD']}@{env_vars['POSTGRES_HOST']}:"
-                    f"{port}/{env_vars['POSTGRES_DB']}"
-                )
-            env_vars["DATABASE_URL"] = database_url
-            print(f"      ✅ Constructed DATABASE_URL")
+            print(f"      ✅ Database configuration provided (POSTGRES_* variables)")
+            if "/cloudsql/" in env_vars.get("POSTGRES_HOST", ""):
+                print(f"      ℹ️ Cloud SQL proxy will be used: {env_vars['POSTGRES_HOST']}")
         
         return env_vars
     
@@ -978,15 +969,13 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
-        # CRITICAL: Retrieve and add DATABASE_URL for backend/auth
-        # Note: Individual POSTGRES_* variables are already mounted as secrets via --set-secrets
-        # We only need to add DATABASE_URL as an environment variable
+        # IMPORTANT: Do NOT add DATABASE_URL for backend/auth services!
+        # The backend and auth services use DatabaseURLBuilder to construct URLs from POSTGRES_* variables
+        # This is critical for Cloud SQL proxy connections to work correctly
+        # Individual POSTGRES_* variables are already mounted as secrets via --set-secrets
+        # See: shared/database_url_builder.py for the SSOT URL construction logic
         if service.name in ["backend", "auth"]:
-            critical_secrets = self.get_critical_env_vars_from_gsm(service.name)
-            # Add DATABASE_URL as an environment variable (required for startup)
-            if "DATABASE_URL" in critical_secrets:
-                env_vars.append(f"DATABASE_URL={critical_secrets['DATABASE_URL']}")
-                print(f"      ✅ Added DATABASE_URL to environment variables")
+            print(f"      ℹ️ Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder")
         
         # NOTE: Other secrets (JWT_*, SECRET_KEY, etc.) are mounted via --set-secrets below
         

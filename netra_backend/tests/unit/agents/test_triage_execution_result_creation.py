@@ -18,6 +18,7 @@ import pytest
 import time
 from unittest.mock import Mock, AsyncMock
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
@@ -49,36 +50,36 @@ class TestExecutionResultCreation:
         }
         
         result = ExecutionResult(
-            is_success=True,
+            status=ExecutionStatus.COMPLETED,
+            request_id=sample_execution_context.request_id,
             data=result_data,
             error_message=None,
-            execution_time=0.1,
-            context=sample_execution_context
+            execution_time_ms=100.0
         )
         
         assert result.is_success is True
         assert result.data == result_data
         assert result.error_message is None
-        assert result.execution_time == 0.1
-        assert result.context == sample_execution_context
+        assert result.execution_time_ms == 100.0
+        assert result.request_id == sample_execution_context.request_id
     
     def test_failure_result_creation(self, sample_execution_context):
         """Test creation of failure ExecutionResult."""
         error_msg = "Triage categorization failed"
         
         result = ExecutionResult(
-            is_success=False,
+            status=ExecutionStatus.FAILED,
+            request_id=sample_execution_context.request_id,
             data=None,
             error_message=error_msg,
-            execution_time=0.05,
-            context=sample_execution_context
+            execution_time_ms=50.0
         )
         
         assert result.is_success is False
-        assert result.data is None
+        assert result.data == {}  # ExecutionResult.__post_init__ converts None to {}
         assert result.error_message == error_msg
-        assert result.execution_time == 0.05
-        assert result.context == sample_execution_context
+        assert result.execution_time_ms == 50.0
+        assert result.request_id == sample_execution_context.request_id
 
 
 class TestResultDataStructures:
@@ -175,11 +176,11 @@ class TestErrorHandling:
     def test_error_result_handling(self, sample_context):
         """Test handling of error results."""
         error_result = ExecutionResult(
-            is_success=False,
+            status=ExecutionStatus.FAILED,
+            request_id=sample_context.request_id,
             data=None,
             error_message="Simulated triage error",
-            execution_time=0.01,
-            context=sample_context
+            execution_time_ms=10.0
         )
         
         assert error_result.is_success is False
@@ -196,11 +197,11 @@ class TestErrorHandling:
         }
         
         result = ExecutionResult(
-            is_success=True,  # Still considered success but with warnings
+            status=ExecutionStatus.COMPLETED,  # Still considered success but with warnings
+            request_id=sample_context.request_id,
             data=partial_data,
             error_message=None,
-            execution_time=0.05,
-            context=sample_context
+            execution_time_ms=50.0
         )
         
         assert result.is_success is True
@@ -286,17 +287,17 @@ class TestMetadataHandling:
     def test_context_continuity(self, context_with_metadata):
         """Test context continuity through result creation."""
         result = ExecutionResult(
-            is_success=True,
+            status=ExecutionStatus.COMPLETED,
+            request_id=context_with_metadata.request_id,
             data={"test": "data"},
             error_message=None,
-            execution_time=0.1,
-            context=context_with_metadata
+            execution_time_ms=100.0
         )
         
-        # Context should be preserved
-        assert result.context.request_id == "metadata_test"
-        assert result.context.agent_name == "MetadataAgent"
-        assert result.context.state["user_id"] == "test_user_123"
+        # Request ID should be preserved
+        assert result.request_id == "metadata_test"
+        assert result.status == ExecutionStatus.COMPLETED
+        assert result.data == {"test": "data"}
 
 
 class TestEdgeCases:

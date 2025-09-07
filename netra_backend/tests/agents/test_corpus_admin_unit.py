@@ -342,9 +342,9 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                 """Test successful execution using modern pattern."""
         # Mock successful execution
                                                                                                                 mock_result = ExecutionResult(
-                                                                                                                success=True,
-                                                                                                                result={"corpus_admin_result": "completed"},
-                                                                                                                status=ExecutionStatus.COMPLETED
+                                                                                                                status=ExecutionStatus.COMPLETED,
+                                                                                                                request_id="test_request_123",
+                                                                                                                data={"corpus_admin_result": "completed"}
                                                                                                                 )
 
                                                                                                                 with patch.object(corpus_admin_agent.reliability_manager, 'execute_with_reliability') as mock_execute:
@@ -372,9 +372,9 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                 async def test_execute_with_stream_updates(self, corpus_admin_agent, sample_state):
                                                                                                                                     """Test execution with streaming updates enabled."""
                                                                                                                                     mock_result = ExecutionResult(
-                                                                                                                                    success=True,
-                                                                                                                                    result={"corpus_admin_result": "completed"},
-                                                                                                                                    status=ExecutionStatus.COMPLETED
+                                                                                                                                    status=ExecutionStatus.COMPLETED,
+                                                                                                                                    request_id="test_request_123",
+                                                                                                                                    data={"corpus_admin_result": "completed"}
                                                                                                                                     )
 
                                                                                                                                     with patch.object(corpus_admin_agent.reliability_manager, 'execute_with_reliability') as mock_execute:
@@ -802,9 +802,9 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                                                                                                                                 )
 
                                                                                                                                                                                                                                                                                                                                                                                 mock_result = ExecutionResult(
-                                                                                                                                                                                                                                                                                                                                                                                success=True,
-                                                                                                                                                                                                                                                                                                                                                                                result={"test": "result"},
-                                                                                                                                                                                                                                                                                                                                                                                status=ExecutionStatus.COMPLETED
+                                                                                                                                                                                                                                                                                                                                                                                status=ExecutionStatus.COMPLETED,
+                                                                                                                                                                                                                                                                                                                                                                                request_id="test_request_123",
+                                                                                                                                                                                                                                                                                                                                                                                data={"test": "result"}
                                                                                                                                                                                                                                                                                                                                                                                 )
 
                                                                                                                                                                                                                                                                                                                                                                                 with patch.object(corpus_admin_agent.reliability_manager, 'execute_with_reliability') as mock_execute:

@@ -6,6 +6,7 @@ the WebSocket endpoint fails properly rather than using a fallback handler.
 """
 
 import pytest
+from unittest.mock import Mock, MagicMock, patch
 from fastapi import WebSocket
 from fastapi.testclient import TestClient
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
@@ -24,7 +25,7 @@ async def test_websocket_no_fallback_in_staging():
     
     # Mock WebSocket with missing dependencies
     mock_websocket = Mock(spec=WebSocket)
-    mock_app_state = mock_app_state_instance  # Initialize appropriate service
+    mock_app_state = Mock()  # Create mock app state
     mock_app_state.agent_supervisor = None  # Missing supervisor
     mock_app_state.thread_service = None    # Missing thread service
     mock_app_state.startup_complete = True  # Set startup as complete to avoid early exit
@@ -54,12 +55,12 @@ async def test_websocket_no_fallback_in_staging():
              patch('netra_backend.app.services.message_handlers.MessageHandlerService') as mock_message_service:
             
             # Setup mocks
-            mock_ws_manager.return_value = return_value_instance  # Initialize appropriate service
-            mock_message_router = mock_message_router_instance  # Initialize appropriate service
-            mock_message_router.add_handler = add_handler_instance  # Initialize appropriate service
+            mock_ws_manager.return_value = Mock()  # Create mock manager
+            mock_message_router = Mock()  # Create mock router
+            mock_message_router.add_handler = Mock()  # Create mock handler method
             mock_message_router.handlers = []
             mock_router.return_value = mock_message_router
-            mock_monitor.return_value = return_value_instance  # Initialize appropriate service
+            mock_monitor.return_value = Mock()  # Create mock monitor
             
             # The current implementation handles missing dependencies by using fallbacks
             # rather than raising errors, so we test that it doesn't raise an exception
@@ -80,7 +81,7 @@ async def test_websocket_no_fallback_in_production():
     
     # Mock WebSocket with missing dependencies
     mock_websocket = Mock(spec=WebSocket)
-    mock_app_state = mock_app_state_instance  # Initialize appropriate service
+    mock_app_state = Mock()  # Create mock app state
     mock_app_state.agent_supervisor = None  # Missing supervisor
     mock_app_state.thread_service = None    # Missing thread service
     mock_app_state.startup_complete = True  # Set startup as complete to avoid early exit
@@ -110,12 +111,12 @@ async def test_websocket_no_fallback_in_production():
              patch('netra_backend.app.services.message_handlers.MessageHandlerService') as mock_message_service:
             
             # Setup mocks
-            mock_ws_manager.return_value = return_value_instance  # Initialize appropriate service
-            mock_message_router = mock_message_router_instance  # Initialize appropriate service
-            mock_message_router.add_handler = add_handler_instance  # Initialize appropriate service
+            mock_ws_manager.return_value = Mock()  # Create mock manager
+            mock_message_router = Mock()  # Create mock router
+            mock_message_router.add_handler = Mock()  # Create mock handler method
             mock_message_router.handlers = []
             mock_router.return_value = mock_message_router
-            mock_monitor.return_value = return_value_instance  # Initialize appropriate service
+            mock_monitor.return_value = Mock()  # Create mock monitor
             
             # The current implementation handles missing dependencies by using fallbacks
             # rather than raising errors, so we test that it doesn't raise an exception
@@ -136,7 +137,7 @@ async def test_websocket_allows_fallback_in_development():
     
     # Mock WebSocket with missing dependencies
     mock_websocket = Mock(spec=WebSocket)
-    mock_app_state = mock_app_state_instance  # Initialize appropriate service
+    mock_app_state = Mock()  # Create mock app state
     mock_app_state.agent_supervisor = None  # Missing supervisor
     mock_app_state.thread_service = None    # Missing thread service
     mock_websocket.app.state = mock_app_state
@@ -162,13 +163,13 @@ async def test_websocket_allows_fallback_in_development():
              patch('netra_backend.app.routes.websocket._create_fallback_agent_handler') as mock_create_fallback:
             
             # Setup mocks
-            mock_ws_manager.return_value = return_value_instance  # Initialize appropriate service
-            mock_message_router = mock_message_router_instance  # Initialize appropriate service
+            mock_ws_manager.return_value = Mock()  # Create mock manager
+            mock_message_router = Mock()  # Create mock router
             mock_router.return_value = mock_message_router
-            mock_monitor.return_value = return_value_instance  # Initialize appropriate service
+            mock_monitor.return_value = Mock()  # Create mock monitor
             
             # Mock fallback handler creation
-            mock_fallback_handler = mock_fallback_handler_instance  # Initialize appropriate service
+            mock_fallback_handler = Mock()  # Create mock fallback handler
             mock_create_fallback.return_value = mock_fallback_handler
             
             # The endpoint should NOT raise an error in development
@@ -188,7 +189,7 @@ async def test_websocket_allows_fallback_when_testing_flag_set():
     
     # Mock WebSocket with missing dependencies
     mock_websocket = Mock(spec=WebSocket)
-    mock_app_state = mock_app_state_instance  # Initialize appropriate service
+    mock_app_state = Mock()  # Create mock app state
     mock_app_state.agent_supervisor = None  # Missing supervisor
     mock_app_state.thread_service = None    # Missing thread service
     mock_websocket.app.state = mock_app_state
@@ -214,13 +215,13 @@ async def test_websocket_allows_fallback_when_testing_flag_set():
              patch('netra_backend.app.routes.websocket._create_fallback_agent_handler') as mock_create_fallback:
             
             # Setup mocks
-            mock_ws_manager.return_value = return_value_instance  # Initialize appropriate service
-            mock_message_router = mock_message_router_instance  # Initialize appropriate service
+            mock_ws_manager.return_value = Mock()  # Create mock manager
+            mock_message_router = Mock()  # Create mock router
             mock_router.return_value = mock_message_router
-            mock_monitor.return_value = return_value_instance  # Initialize appropriate service
+            mock_monitor.return_value = Mock()  # Create mock monitor
             
             # Mock fallback handler creation
-            mock_fallback_handler = mock_fallback_handler_instance  # Initialize appropriate service
+            mock_fallback_handler = Mock()  # Create mock fallback handler
             mock_create_fallback.return_value = mock_fallback_handler
             
             # The endpoint should NOT raise an error when TESTING=1

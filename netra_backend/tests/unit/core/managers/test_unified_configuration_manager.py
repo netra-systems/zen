@@ -60,7 +60,16 @@ class MockUnifiedConfigurationManager:
     
     def has_config(self, key):
         """Check if configuration key exists."""
-        return self.get_config(key) is not None
+        keys = key.split('.')
+        current = self.config_data
+        
+        for k in keys:
+            if isinstance(current, dict) and k in current:
+                current = current[k]
+            else:
+                return False
+        
+        return True
 
 
 class TestUnifiedConfigurationManagerBasics:

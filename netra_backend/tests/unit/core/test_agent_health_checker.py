@@ -110,7 +110,7 @@ class TestAgentHealthCheckExecution:
     """Test the core agent health check execution logic."""
 
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.agent_health_checker.system_metrics_collector')
+    @patch('netra_backend.app.services.metrics.agent_metrics.agent_metrics_collector')
     @patch('netra_backend.app.core.agent_health_checker._calculate_agent_health_score')
     @patch('netra_backend.app.core.agent_health_checker._create_agent_health_success_result')
     @patch('time.time')

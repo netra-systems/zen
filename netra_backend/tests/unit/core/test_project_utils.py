@@ -17,6 +17,7 @@ import os
 import sys
 from pathlib import Path
 import pytest
+from unittest.mock import patch, Mock
 
 from netra_backend.app.core.project_utils import (
     get_project_root,
@@ -196,7 +197,7 @@ class TestEnvironmentDetection:
         """Test that non-test environments return False."""
         # Mock IsolatedEnvironment to return production values
         with patch('shared.isolated_environment.get_env') as mock_get_env:
-            mock_env = mock_env_instance  # Initialize appropriate service
+            mock_env = Mock()  # Initialize appropriate service
             mock_env.get.side_effect = lambda key, default='': {
                 'PYTEST_CURRENT_TEST': None,
                 'TESTING': None,
@@ -251,7 +252,7 @@ class TestEnvironmentDetection:
         """Test behavior with empty environment variables."""
         # Mock IsolatedEnvironment to return empty values
         with patch('shared.isolated_environment.get_env') as mock_get_env:
-            mock_env = mock_env_instance  # Initialize appropriate service
+            mock_env = Mock()  # Initialize appropriate service
             mock_env.get.side_effect = lambda key, default='': {
                 'PYTEST_CURRENT_TEST': None,
                 'TESTING': None,

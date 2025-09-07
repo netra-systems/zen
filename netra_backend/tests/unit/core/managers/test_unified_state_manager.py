@@ -10,6 +10,7 @@ CRITICAL: These tests focus on basic functionality and normal use cases.
 """
 
 import pytest
+import copy
 from unittest.mock import Mock, patch
 
 
@@ -59,7 +60,16 @@ class MockUnifiedStateManager:
     
     def has_state(self, key):
         """Check if state key exists."""
-        return self.get_state(key) is not None
+        keys = key.split('.')
+        current = self.state_data
+        
+        for k in keys:
+            if isinstance(current, dict) and k in current:
+                current = current[k]
+            else:
+                return False
+        
+        return True
     
     def delete_state(self, key):
         """Delete state key."""
@@ -93,7 +103,7 @@ class MockUnifiedStateManager:
     
     def get_state_snapshot(self):
         """Get complete state snapshot."""
-        return dict(self.state_data)
+        return copy.deepcopy(self.state_data)
     
     def clear_state(self):
         """Clear all state."""

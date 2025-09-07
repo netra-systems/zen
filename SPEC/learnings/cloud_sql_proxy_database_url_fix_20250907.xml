@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Cloud SQL Proxy Database URL SSOT Fix</title>
+    <date>2025-09-07</date>
+    <category>database</category>
+    <subcategory>cloud-sql</subcategory>
+    <severity>CRITICAL</severity>
+    <tags>
+      <tag>cloud-sql</tag>
+      <tag>database-url</tag>
+      <tag>ssot</tag>
+      <tag>deployment</tag>
+      <tag>gcp</tag>
+    </tags>
+  </metadata>
+  
+  <problem>
+    <description>
+      Cloud SQL proxy connections were failing because the GCP deployment script
+      was manually constructing DATABASE_URL instead of letting services use
+      DatabaseURLBuilder (the SSOT for URL construction).
+    </description>
+    <symptoms>
+      <symptom>Database connection refused errors in staging/production</symptom>
+      <symptom>Cloud SQL proxy not being used despite correct POSTGRES_HOST</symptom>
+      <symptom>Mismatch between deployment URL format and service expectations</symptom>
+    </symptoms>
+    <root_cause>
+      Deployment script violated SSOT principle by duplicating URL construction logic
+      that should only exist in DatabaseURLBuilder.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <summary>
+      Removed all DATABASE_URL construction from deployment script.
+      Services now use DatabaseURLBuilder to construct URLs from POSTGRES_* variables.
+    </summary>
+    <changes>
+      <change file="scripts/deploy_to_gcp.py">
+        Removed DATABASE_URL construction logic (lines 924-941)
+      </change>
+      <change file="scripts/deploy_to_gcp.py">
+        Removed DATABASE_URL environment variable addition (lines 972-980)
+      </change>
+    </changes>
+    <verification>
+      Services correctly build Cloud SQL URLs using DatabaseURLBuilder from POSTGRES_* variables
+    </verification>
+  </solution>
+  
+  <key_insights>
+    <insight priority="1">
+      NEVER construct database URLs manually outside of DatabaseURLBuilder.
+      It is the SINGLE SOURCE OF TRUTH for all URL construction.
+    </insight>
+    <insight priority="2">
+      Cloud SQL uses Unix socket connections with format:
+      postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance
+    </insight>
+    <insight priority="3">
+      Deployment scripts should provide individual configuration variables (POSTGRES_*),
+      not constructed values (DATABASE_URL).
+    </insight>
+    <insight priority="4">
+      When establishing SSOT patterns, ALL components must be updated to use them.
+      Partial migrations cause critical failures.
+    </insight>
+  </key_insights>
+  
+  <prevention>
+    <rule>Always use DatabaseURLBuilder for database URL construction</rule>
+    <rule>Never set DATABASE_URL in deployment scripts</rule>
+    <rule>Provide POSTGRES_* variables and let services construct URLs</rule>
+    <rule>Add regression tests for Cloud SQL proxy connections</rule>
+  </prevention>
+  
+  <related_files>
+    <file>shared/database_url_builder.py</file>
+    <file>netra_backend/app/core/backend_environment.py</file>
+    <file>auth_service/auth_core/auth_environment.py</file>
+    <file>scripts/deploy_to_gcp.py</file>
+    <file>reports/bugfixes/CLOUD_SQL_PROXY_DATABASE_URL_FIX_20250907.md</file>
+  </related_files>
+  
+  <testing_requirements>
+    <test>Verify Cloud SQL proxy URL construction with /cloudsql/ paths</test>
+    <test>Ensure no DATABASE_URL in deployment environment variables</test>
+    <test>Validate DatabaseURLBuilder handles all connection types</test>
+    <test>Test staging deployment with Cloud SQL proxy</test>
+  </testing_requirements>
+</learning>

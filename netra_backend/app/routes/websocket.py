@@ -150,8 +150,38 @@ async def websocket_endpoint(websocket: WebSocket):
     authenticated = False
     
     try:
-        # CRITICAL FIX: Accept WebSocket FIRST before any authentication or operations
-        # This prevents "WebSocket is not connected" errors during authentication failures
+        # CRITICAL SECURITY FIX: Check environment early for security decisions
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        is_testing = get_env().get("TESTING", "0") == "1"
+        
+        # CRITICAL SECURITY FIX: Pre-connection authentication validation
+        # In staging/production, validate JWT BEFORE accepting WebSocket connection
+        # This ensures authentication is enforced at connection level, not post-acceptance
+        if environment in ["staging", "production"] and not is_testing:
+            from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
+            
+            # Create extractor to validate JWT from headers
+            extractor = UserContextExtractor()
+            jwt_token = extractor.extract_jwt_from_websocket(websocket)
+            
+            if not jwt_token:
+                logger.warning(f"WebSocket connection rejected in {environment}: No JWT token provided")
+                # Reject connection by closing with authentication error
+                # WebSocket close codes: 1008 = Policy Violation, 1011 = Server Error  
+                await websocket.close(code=1008, reason="Authentication required")
+                return
+            
+            # Validate JWT token
+            jwt_payload = extractor.validate_and_decode_jwt(jwt_token)
+            if not jwt_payload:
+                logger.warning(f"WebSocket connection rejected in {environment}: Invalid JWT token")
+                await websocket.close(code=1008, reason="Invalid authentication")
+                return
+                
+            logger.info(f"Pre-connection JWT validation successful in {environment} for user: {jwt_payload.get('sub', 'unknown')[:8]}...")
+        
+        # Prepare subprotocol handling
         subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
         selected_protocol = None
         
@@ -159,18 +189,13 @@ async def websocket_endpoint(websocket: WebSocket):
         if "jwt-auth" in [p.strip() for p in subprotocols]:
             selected_protocol = "jwt-auth"
         
-        # Accept with selected subprotocol BEFORE authentication
+        # Accept WebSocket connection (after authentication validation in staging/production)
         if selected_protocol:
             await websocket.accept(subprotocol=selected_protocol)
             logger.debug(f"WebSocket accepted with subprotocol: {selected_protocol}")
         else:
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
-        
-        # CRITICAL SECURITY FIX: Check environment early for security decisions
-        from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        is_testing = get_env().get("TESTING", "0") == "1"
         
         # CRITICAL SECURITY FIX: Use factory pattern instead of singleton
         # This eliminates the security vulnerabilities in the singleton pattern

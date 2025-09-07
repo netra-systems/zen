@@ -75,15 +75,17 @@ class QueuedMessage:
         if self.retry_count == 0:
             return self.base_retry_delay
         
-        # Exponential backoff with jitter
-        delay = min(
-            self.base_retry_delay * (self.backoff_multiplier ** (self.retry_count - 1)),
-            self.max_retry_delay
-        )
+        # Exponential backoff
+        base_delay = self.base_retry_delay * (self.backoff_multiplier ** (self.retry_count - 1))
         
-        # Add jitter (±20%) to prevent thundering herd
-        jitter = delay * 0.2 * (random.random() - 0.5)
-        return max(1, int(delay + jitter))
+        # Add jitter (0-40%) to prevent thundering herd
+        # Only add positive jitter to avoid reducing delay below expected minimum
+        delay_with_jitter = base_delay * (1 + 0.4 * random.random())
+        
+        # Apply max cap after jitter
+        final_delay = min(delay_with_jitter, self.max_retry_delay)
+        
+        return max(1, int(final_delay))
     
     def should_retry(self) -> bool:
         """Check if message should be retried based on retry count and conditions"""

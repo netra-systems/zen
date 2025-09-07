@@ -50,8 +50,20 @@ class BackendEnvironment:
     
     # Authentication & Security
     def get_jwt_secret_key(self) -> str:
-        """Get JWT secret key for authentication."""
-        return self.env.get("JWT_SECRET_KEY", "")
+        """
+        Get JWT secret key for authentication.
+        
+        Uses unified secrets manager to properly handle environment-specific JWT secrets.
+        This ensures consistency with auth service which uses environment-specific secrets.
+        
+        Priority order:
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
+        2. Generic JWT_SECRET_KEY
+        3. Legacy JWT_SECRET
+        4. Development fallback
+        """
+        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
+        return get_jwt_secret()
     
     def get_secret_key(self) -> str:
         """Get general secret key for session/encryption."""

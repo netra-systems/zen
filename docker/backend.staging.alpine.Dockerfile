@@ -68,8 +68,7 @@ WORKDIR /app
 # Copy Python packages from builder (expensive layer, changes rarely)
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
-# Copy SPEC files for reference (changes less frequently)
-COPY --chown=netra:netra SPEC /app/SPEC
+# SPEC files removed - not present in repository
 
 # Copy shared libraries (changes moderately)
 COPY --chown=netra:netra shared /app/shared

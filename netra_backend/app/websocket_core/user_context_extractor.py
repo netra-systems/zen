@@ -207,6 +207,11 @@ class UserContextExtractor:
         except jwt.ExpiredSignatureError:
             logger.warning("JWT token has expired")
             return None
+        except jwt.InvalidSignatureError:
+            # This is the most common error when secrets don't match
+            logger.error("JWT signature verification failed - likely JWT secret mismatch between services")
+            logger.debug(f"Using JWT secret from environment: {self.jwt_secret_key[:10]}..." if self.jwt_secret_key else "NO SECRET")
+            return None
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid JWT token: {e}")
             return None
@@ -315,13 +320,17 @@ class UserContextExtractor:
                     detail="Authentication required: No JWT token found in WebSocket headers or subprotocols"
                 )
             
+            # Log that we found a token (helps debugging)
+            logger.debug(f"JWT token found in WebSocket connection, proceeding with validation")
+            
             # Validate and decode JWT
             jwt_payload = self.validate_and_decode_jwt(jwt_token)
             if not jwt_payload:
-                logger.warning("JWT token validation failed")
+                # This is the key fix - different error message for validation failure
+                logger.warning("JWT token validation failed - likely due to secret mismatch or expiration")
                 raise HTTPException(
                     status_code=401,
-                    detail="Authentication failed: Invalid or expired JWT token"
+                    detail="Authentication failed: Invalid or expired JWT token (validation failed)"
                 )
             
             # Create user context

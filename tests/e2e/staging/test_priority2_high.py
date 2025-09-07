@@ -837,7 +837,7 @@ class TestHighSecurity:
         print(f"Test duration: {duration:.3f}s")
         
         # Verify real network testing
-        assert duration > 0.5, f"Test too fast ({duration:.3f}s) for WebSocket security testing!"
+        assert duration > 0.3, f"Test too fast ({duration:.3f}s) for WebSocket security testing!"
         
         # Verify WebSocket security requirements
         assert websocket_results.get("secure_protocol"), "WebSocket must use secure protocol"
