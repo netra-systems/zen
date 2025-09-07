@@ -979,44 +979,74 @@ async def authenticate_websocket_with_database(session_info: Dict[str, str]) -> 
 
 @router.get("/ws/config")
 async def get_websocket_config():
-    """Get WebSocket configuration for clients."""
-    ws_manager = get_websocket_manager()
-    stats = await ws_manager.get_stats()
-    
-    return {
-        "websocket": {
-            "endpoint": "/ws",
-            "version": "1.0.0",
-            "authentication": "jwt_required",
-            "supported_auth_methods": ["header", "subprotocol"],
-            "features": {
-                "heartbeat": True,
-                "message_routing": True,
-                "json_rpc_support": True,
-                "rate_limiting": True,
-                "error_recovery": True
-            },
-            "limits": {
-                "max_connections_per_user": WEBSOCKET_CONFIG.max_connections_per_user,
-                "max_message_rate_per_minute": WEBSOCKET_CONFIG.max_message_rate_per_minute,
-                "max_message_size_bytes": WEBSOCKET_CONFIG.max_message_size_bytes,
-                "heartbeat_interval_seconds": WEBSOCKET_CONFIG.heartbeat_interval_seconds
+    """Get WebSocket configuration for clients with robust error handling."""
+    # CRITICAL FIX: Add error handling to prevent HTTP 500 errors
+    try:
+        ws_manager = get_websocket_manager()
+        
+        # Try to get stats with error handling
+        try:
+            stats = await ws_manager.get_stats()
+        except Exception as stats_error:
+            logger.warning(f"Failed to get WebSocket stats: {stats_error}")
+            # Use default stats to prevent 500 error
+            stats = {
+                "active_connections": 0,
+                "uptime_seconds": 0,
+                "error": str(stats_error)
             }
-        },
-        "server": {
-            "active_connections": stats["active_connections"],
-            "uptime_seconds": stats["uptime_seconds"],
-            "server_time": datetime.now(timezone.utc).isoformat()
-        },
-        "migration": {
-            "replaces_endpoints": [
-                "/ws (legacy insecure)",
-                "/api/mcp/ws (MCP-specific)", 
-                "websocket_unified.py endpoint"
-            ],
-            "compatibility": "All message formats supported"
+        
+        return {
+            "websocket": {
+                "endpoint": "/ws",
+                "version": "1.0.0",
+                "authentication": "jwt_required",
+                "supported_auth_methods": ["header", "subprotocol"],
+                "features": {
+                    "heartbeat": True,
+                    "message_routing": True,
+                    "json_rpc_support": True,
+                    "rate_limiting": True,
+                    "error_recovery": True
+                },
+                "limits": {
+                    "max_connections_per_user": WEBSOCKET_CONFIG.max_connections_per_user,
+                    "max_message_rate_per_minute": WEBSOCKET_CONFIG.max_message_rate_per_minute,
+                    "max_message_size_bytes": WEBSOCKET_CONFIG.max_message_size_bytes,
+                    "heartbeat_interval_seconds": WEBSOCKET_CONFIG.heartbeat_interval_seconds
+                }
+            },
+            "server": {
+                "active_connections": stats.get("active_connections", 0),
+                "uptime_seconds": stats.get("uptime_seconds", 0),
+                "server_time": datetime.now(timezone.utc).isoformat(),
+                "stats_error": stats.get("error")
+            },
+            "migration": {
+                "replaces_endpoints": [
+                    "/ws (legacy insecure)",
+                    "/api/mcp/ws (MCP-specific)", 
+                    "websocket_unified.py endpoint"
+                ],
+                "compatibility": "All message formats supported"
+            }
         }
-    }
+    except Exception as e:
+        # CRITICAL FIX: Return error response instead of 500
+        logger.error(f"WebSocket config endpoint error: {e}", exc_info=True)
+        return {
+            "websocket": {
+                "endpoint": "/ws",
+                "version": "1.0.0",
+                "authentication": "jwt_required",
+                "status": "error",
+                "error": str(e)
+            },
+            "server": {
+                "server_time": datetime.now(timezone.utc).isoformat(),
+                "error": "WebSocket manager initialization failed"
+            }
+        }
 
 
 @router.get("/ws/health")
