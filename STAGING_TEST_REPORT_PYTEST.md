@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 07:29:26
+**Generated:** 2025-09-07 07:29:54
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 1.54 seconds
+- **Duration:** 1.60 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_002_websocket_authentication_real | FAIL failed | 0.974s | test_priority1_critical.py |
+| test_002_websocket_authentication_real | FAIL failed | 0.911s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_002_websocket_authentication_real
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_priority1_critical.py
-- **Duration:** 0.974s
+- **Duration:** 0.911s
 - **Error:** tests\e2e\staging\test_priority1_critical.py:136: in test_002_websocket_authentication_real
     async with websockets.connect(
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
@@ -41,7 +41,7 @@
 test_priority1_critical.py::test_002_websocket_authentication_real FAILED
 
 ==================================================
-0 passed, 1 failed in 1.54s
+0 passed, 1 failed in 1.60s
 ```
 
 ## Test Coverage Matrix

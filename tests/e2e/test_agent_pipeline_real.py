@@ -408,10 +408,9 @@ class AgentPipelineInfrastructure:
         """Initialize REAL services using Docker - NO MOCKS."""
         if not self.services_ready:
             # Start real Docker services
-            await self.docker_manager.start_services_async(
+            await self.docker_manager.start_services_smart(
                 services=["postgres", "redis", "backend", "auth"],
-                wait_for_health=True,
-                timeout=120
+                wait_healthy=True
             )
             
             # Wait for services to be fully ready

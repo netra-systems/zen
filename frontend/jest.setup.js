@@ -2464,6 +2464,16 @@ jest.mock('@/hooks/useThreadSwitching', () => {
     const switchToThread = React.useCallback(async (threadId, options = {}) => {
       console.log(`useThreadSwitching: switchToThread called with ${threadId}, options:`, JSON.stringify(options));
       
+      // CRITICAL FIX: Require useUnifiedChatStore ONCE at the beginning to avoid circular references
+      let useUnifiedChatStore, store;
+      try {
+        ({ useUnifiedChatStore } = require('@/store/unified-chat'));
+        store = useUnifiedChatStore.getState();
+      } catch (error) {
+        console.warn('Could not access useUnifiedChatStore:', error);
+        return false;
+      }
+      
       // Track operation for cleanup (using mock variable to avoid scope issues)
       const mockCurrentOperationId = `switch_${threadId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       globalHookState.currentOperationId = mockCurrentOperationId;
