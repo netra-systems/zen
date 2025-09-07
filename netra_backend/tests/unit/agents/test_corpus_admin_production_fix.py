@@ -124,7 +124,7 @@ class RealWebSocketManager:
 
 
 @dataclass
-class TestExecutionMetrics:
+class ExecutionMetrics:
     """Track execution metrics for validation."""
     start_time: float
     end_time: float
@@ -192,13 +192,13 @@ class CorpusAdminTestFixture:
         process = psutil.Process()
         return process.memory_info().rss / 1024 / 1024
     
-    def record_metrics(self, start_time: float, phase_count: int, hook_calls: int) -> TestExecutionMetrics:
+    def record_metrics(self, start_time: float, phase_count: int, hook_calls: int) -> ExecutionMetrics:
         """Record execution metrics."""
         end_time = time.time()
         websocket_events = len(self.websocket_manager.sent_messages)
         memory_mb = self.get_memory_usage_mb()
         
-        self.metrics = TestExecutionMetrics(
+        self.metrics = ExecutionMetrics(
             start_time=start_time,
             end_time=end_time,
             phase_count=phase_count,

@@ -42,7 +42,7 @@ from netra_backend.app.core.managers.unified_configuration_manager import (
 
 
 @dataclass
-class TestMetrics:
+class ConfigTestMetrics:
     """Track test execution metrics."""
     execution_time: float = 0.0
     custom_metrics: Dict[str, Any] = field(default_factory=dict)
@@ -59,7 +59,7 @@ class TestUnifiedConfigurationManagerBasicOperations:
         """Set up test with real configuration manager."""
         # Use isolated environment instead of os.environ
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         
         # Create REAL UnifiedConfigurationManager instance
         self.config_manager = UnifiedConfigurationManager(
@@ -227,7 +227,7 @@ class TestConfigurationValidationAndSecurity:
     def setup_method(self):
         """Set up test with validation-enabled configuration manager."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         
         self.config_manager = UnifiedConfigurationManager(
             user_id="test_validation_user",
@@ -355,7 +355,7 @@ class TestMultiUserIsolationAndFactory:
     def setup_method(self):
         """Set up test with factory pattern."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         self.factory = ConfigurationManagerFactory()
     
     def teardown_method(self):
@@ -464,7 +464,7 @@ class TestThreadSafetyAndConcurrency:
     def setup_method(self):
         """Set up test with thread-safe configuration manager."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         self.config_manager = UnifiedConfigurationManager(
             user_id="concurrent_test_user",
             environment="test",
@@ -622,7 +622,7 @@ class TestErrorHandlingAndEdgeCases:
     def setup_method(self):
         """Set up test with error handling focus."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         self.config_manager = UnifiedConfigurationManager(
             user_id="error_test_user",
             environment="test"
@@ -713,7 +713,7 @@ class TestServiceSpecificConfigurations:
     def setup_method(self):
         """Set up test with service configurations."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         self.config_manager = UnifiedConfigurationManager(
             service_name="test_service",
             environment="test"
@@ -802,7 +802,7 @@ class TestPerformanceCharacteristics:
     def setup_method(self):
         """Set up test for performance testing."""
         self.env = get_env()
-        self.metrics = TestMetrics()
+        self.metrics = ConfigTestMetrics()
         self.config_manager = UnifiedConfigurationManager(
             user_id="perf_test_user",
             environment="test",
