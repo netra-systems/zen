@@ -28,6 +28,11 @@ from abc import ABC, abstractmethod
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.async_test_helpers import (
+    async_cleanup_registry, 
+    AsyncTestFixtureMixin,
+    AsyncMockManager
+)
 
 
 @dataclass
@@ -353,17 +358,21 @@ class MockWebSocketManager:
         return self.connected
 
 
-class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
+class TestAgentFactoryIntegrationOffline(SSotBaseTestCase, AsyncTestFixtureMixin):
     """Offline integration tests for agent factory and registry."""
 
     def setup_method(self, method=None):
         """Setup with mock agent components."""
         super().setup_method(method)
+        self.setup_async_resources()
         
         # Initialize mock components
         self.mock_factory = MockAgentFactory()
         self.mock_registry = MockAgentRegistry()
         self.mock_websocket = MockWebSocketManager()
+        
+        # Track the registry for async cleanup
+        self.track_mock_registry(self.mock_registry)
         
         # Register agent types in factory
         self.mock_factory.register_agent_type("analysis", MockAnalysisAgent)
@@ -372,12 +381,15 @@ class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
     
     def teardown_method(self, method=None):
         """Cleanup agent components."""
-        try:
-            # Cleanup all registered agents
-            for agent_id in list(self.mock_registry.agents.keys()):
-                asyncio.create_task(self.mock_registry.unregister_agent(agent_id))
-        finally:
-            super().teardown_method(method)
+        # Just call parent teardown - async cleanup handled by fixture
+        super().teardown_method(method)
+    
+    @pytest.fixture(autouse=True)
+    async def auto_cleanup_agents(self):
+        """Auto cleanup fixture that runs async cleanup after each test."""
+        yield
+        # Use the SSOT async cleanup helper
+        await self.cleanup_all_async_resources()
 
     @pytest.mark.integration
     async def test_agent_factory_creation_integration(self):

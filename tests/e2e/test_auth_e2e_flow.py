@@ -23,6 +23,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import pytest
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -33,7 +34,7 @@ env.set("TESTING", "1", "test")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 # Mock utility aliases for cleaner code
-MagicNone = Magicwebsocket = TestWebSocketConnection()
+# Removed erroneous MagicNone line - using proper MagicMock instead
 
 
 class TestUnifiedE2EHarness:
@@ -48,7 +49,7 @@ class TestUnifiedE2EHarness:
     async def setup_auth_service(self):
         """Setup mock authentication service"""
         # Mock: Generic component isolation for controlled unit testing
-        self.auth_service = MagicNone  # TODO: Use real service instead of Mock
+        self.auth_service = MagicMock()  # TODO: Use real service instead of Mock
         self._setup_auth_methods()
     
     def _setup_auth_methods(self):
@@ -63,7 +64,7 @@ class TestUnifiedE2EHarness:
     async def setup_websocket_manager(self):
         """Setup WebSocket manager for testing"""
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager = MagicNone  # TODO: Use real service instead of Mock
+        self.websocket_manager = MagicMock()  # TODO: Use real service instead of Mock
         self._setup_websocket_methods()
     
     def _setup_websocket_methods(self):
@@ -97,9 +98,9 @@ class TestAuthE2EFlow:
         self.harness = TestUnifiedE2EHarness()
         # Sync setup for compatibility
         # Mock: Generic component isolation for controlled unit testing
-        self.harness.auth_service = MagicNone  # TODO: Use real service instead of Mock
+        self.harness.auth_service = MagicMock()  # TODO: Use real service instead of Mock
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.harness.websocket_manager = MagicNone  # TODO: Use real service instead of Mock
+        self.harness.websocket_manager = MagicMock()  # TODO: Use real service instead of Mock
     
     @pytest.mark.e2e
     async def test_complete_login_to_chat_ready(self):

@@ -39,6 +39,7 @@ from typing import Optional, Dict, Any, List
 from contextlib import asynccontextmanager
 
 import pytest
+from unittest.mock import MagicMock, AsyncMock, patch
 from shared.isolated_environment import get_env
 
 # CRITICAL: Do NOT import heavy backend modules at module level
@@ -251,7 +252,7 @@ def mock_security_service():
     Memory Impact: LOW - Auth interface mock
     Use for: Unit tests requiring security validation without real authentication
     """
-    return Magic
+    return MagicMock()
 @pytest.fixture
 @memory_profile("Tool dispatcher mock for agent testing without real tool execution", "LOW")
 def mock_tool_dispatcher():
@@ -260,7 +261,7 @@ def mock_tool_dispatcher():
     Memory Impact: LOW - Tool interface mock
     Use for: Unit tests requiring tool execution interface without real operations
     """
-    return Magic
+    return MagicMock()
 @pytest.fixture
 @memory_profile("Agent supervisor mock for testing without spawning real agents", "LOW")
 def mock_agent_supervisor():
@@ -281,7 +282,7 @@ def mock_agent_service():
     Memory Impact: LOW - Agent service interface mock
     Use for: Unit tests requiring agent service interface without LLM execution
     """
-    return Magic
+    return MagicMock()
 # =============================================================================
 # FASTAPI APPLICATION MOCK FIXTURES
 # Memory Impact: MEDIUM - Complete FastAPI app with all mocked dependencies

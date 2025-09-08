@@ -436,7 +436,8 @@ class UnifiedTestRunner:
             # Create execution plan
             self.execution_plan = self.category_system.create_execution_plan(
                 categories_to_run,
-                max_parallel=args.workers
+                max_parallel=args.workers,
+                skip_dependencies=getattr(args, 'no_dependencies', False)
             )
             
             # Start progress tracking
@@ -2726,6 +2727,13 @@ def main():
         "--cov",
         action="store_true",
         help="Enable coverage reporting (legacy compatibility)"
+    )
+    
+    parser.add_argument(
+        "--no-dependencies",
+        "--skip-deps", 
+        action="store_true",
+        help="Skip dependency resolution - run only the specified categories without their dependencies"
     )
     
     parser.add_argument(
