@@ -43,7 +43,8 @@ async def create_supervisor_core(
     websocket_connection_id: Optional[str] = None,
     llm_client: Optional["ResilientLLMClient"] = None,
     websocket_bridge = None,
-    tool_dispatcher = None
+    tool_dispatcher = None,
+    tool_classes = None  # Optional tool classes for UserContext pattern
 ) -> "SupervisorAgent":
     """Core supervisor creation logic - protocol agnostic.
     
@@ -111,13 +112,13 @@ async def create_supervisor_core(
                 detail="WebSocket bridge is required for supervisor creation"
             )
         
-        # Validate tool dispatcher
-        if not tool_dispatcher:
-            logger.error("Tool dispatcher not provided to core supervisor factory")
-            raise HTTPException(
-                status_code=500,
-                detail="Tool dispatcher is required for supervisor creation"
+        # Handle tool dispatcher - can be None for UserContext pattern
+        if not tool_dispatcher and not tool_classes:
+            logger.warning(
+                "Neither tool_dispatcher nor tool_classes provided - "
+                "supervisor may have limited functionality"
             )
+            # Tool dispatcher will be created within SupervisorAgent if tool_classes available
         
         # CRITICAL: Create session factory that returns the scoped session
         # This session will be automatically closed by the calling scope
@@ -133,13 +134,29 @@ async def create_supervisor_core(
         
         # Create isolated SupervisorAgent using factory method
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        supervisor = await SupervisorAgent.create_with_user_context(
-            llm_client=llm_client,
-            websocket_bridge=websocket_bridge,
-            tool_dispatcher=tool_dispatcher,
-            user_context=user_context,
-            db_session_factory=scoped_session_factory  # Returns scoped session
+        
+        # Extract LLM manager from client if needed
+        if hasattr(llm_client, '_llm_manager'):
+            llm_manager = llm_client._llm_manager
+        else:
+            # llm_client might already be an LLMManager
+            from netra_backend.app.llm.llm_manager import LLMManager
+            if isinstance(llm_client, LLMManager):
+                llm_manager = llm_client
+            else:
+                # Create new LLM manager if needed
+                llm_manager = LLMManager()
+        
+        # Create supervisor with UserContext pattern
+        supervisor = SupervisorAgent.create(
+            llm_manager=llm_manager,
+            websocket_bridge=websocket_bridge
         )
+        
+        # Store the user context for later use in execute()
+        # The supervisor will create its own tool_dispatcher during execute()
+        supervisor._pending_user_context = user_context
+        supervisor._tool_classes = tool_classes  # Store for UserContext-based creation
         
         logger.info(
             f"✅ Created isolated SupervisorAgent via core factory: "
