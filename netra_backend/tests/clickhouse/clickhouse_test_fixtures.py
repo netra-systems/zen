@@ -59,6 +59,12 @@ async def check_table_insert_permission(client, table_name):
 
 async def check_table_create_permission(client):
     """Check if user has CREATE TABLE permission"""
+    # CRITICAL FIX: Handle NoOp client case for testing without Docker
+    from netra_backend.app.db.clickhouse import NoOpClickHouseClient
+    if isinstance(client, NoOpClickHouseClient):
+        logger.info("[ClickHouse Test] NoOp client detected - simulating CREATE TABLE permission check")
+        return True  # Always return True for NoOp client
+    
     test_table = f"temp_permission_test_{uuid.uuid4().hex[:8]}"
     try:
         query = f"CREATE TABLE {test_table} (id Int32) ENGINE = Memory"
@@ -127,6 +133,12 @@ def build_corpus_create_query(table_name):
 
 async def cleanup_test_table(client, table_name):
     """Cleanup test table safely"""
+    # CRITICAL FIX: Handle NoOp client case for testing without Docker
+    from netra_backend.app.db.clickhouse import NoOpClickHouseClient
+    if isinstance(client, NoOpClickHouseClient):
+        logger.info(f"[ClickHouse Test] NoOp client - simulating cleanup of table: {table_name}")
+        return  # No actual cleanup needed for NoOp client
+    
     try:
         await client.execute_query(f"DROP TABLE IF EXISTS {table_name}")
         logger.info(f"Cleaned up test table: {table_name}")

@@ -58,7 +58,9 @@ class TestValidationAndSafety:
         service = CorpusService()
 
         # Mock: Generic component isolation for controlled unit testing
-        db = AsyncMock()  # Fixed: Use AsyncMock for async database operations
+        # FIXED: Use Mock for sync methods and AsyncMock for async methods
+        db = Mock()
+        db.execute = AsyncMock()  # db.execute() is async in SQLAlchemy async sessions
 
         # Mock the execute method to return a mock result with proper chaining
         mock_scalars = Mock()
@@ -96,7 +98,12 @@ class TestCorpusCloning:
             mock_client.return_value.__aenter__.return_value = mock_instance
 
             # Mock: Generic component isolation for controlled unit testing
-            db = AsyncMock()  # Fixed: Use AsyncMock for async database operations
+            # FIXED: Use Mock for sync methods (add, delete) and AsyncMock for async methods (commit, refresh, execute)
+            db = Mock()
+            db.add = Mock()  # db.add() is synchronous in SQLAlchemy async sessions
+            db.commit = AsyncMock()  # db.commit() is async
+            db.refresh = AsyncMock()  # db.refresh() is async
+            db.execute = AsyncMock()  # db.execute() is async
 
             # Mock source corpus
             source = _create_source_corpus()

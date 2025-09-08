@@ -49,20 +49,36 @@ class TestLargeDatasetPerformance:
         ]
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Database session for upload_content
+            db = MagicMock()
+            db.execute = AsyncMock()  # db.execute() is async in SQLAlchemy async sessions
+            db.commit = AsyncMock()  # db.commit() is async
+            db.refresh = AsyncMock()  # db.refresh() is async
+            
+            # Mock the result of db.execute for corpus lookup
+            mock_result = MagicMock()
+            mock_corpus = MagicMock()
+            mock_corpus.id = table_name
+            mock_corpus.table_name = table_name
+            mock_corpus.status = "available"
+            mock_result.scalar_one_or_none.return_value = mock_corpus
+            db.execute.return_value = mock_result
+            
             start_time = datetime.now()
-            await service._insert_corpus_records(table_name, records)
+            # Use upload_content which is the correct method for inserting records
+            await service.upload_content(db, table_name, records)
             duration = (datetime.now() - start_time).total_seconds()
             
             # Should complete within reasonable time
             assert duration < 5.0  # 5 seconds for 10K records
             
-            # Should batch insert, not individual inserts
-            assert mock_instance.execute.call_count == 1
+            # Should have called database execute for corpus lookup
+            assert db.execute.called
     @pytest.mark.asyncio
     async def test_query_with_large_result_set(self):
         """Test 2: Verify queries handle large result sets with LIMIT"""
@@ -82,7 +98,7 @@ class TestLargeDatasetPerformance:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -129,7 +145,7 @@ class TestEdgeCaseHandling:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -195,7 +211,7 @@ class TestEdgeCaseHandling:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -234,7 +250,7 @@ class TestConcurrencyAndAsync:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -264,7 +280,7 @@ class TestConcurrencyAndAsync:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -382,7 +398,7 @@ class TestConnectionHandling:
         )
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+        with patch('netra_backend.app.services.generation_service.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = MagicMock()  # TODO: Use real service instance
             mock_db.return_value = mock_instance

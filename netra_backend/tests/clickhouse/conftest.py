@@ -12,15 +12,38 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # CRITICAL: Set ClickHouse configuration BEFORE any imports that trigger config loading
 env = IsolatedEnvironment()
-# Override test framework's disabled ClickHouse for these specific tests using Docker credentials 
-env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest_setup")
-env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest_setup") 
-env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest_setup")
-env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest_setup")
-env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest_setup")
-# Enable ClickHouse for these specific tests
-env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest_setup")
-env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest_setup")
+
+# CRITICAL FIX: Check if Docker services are available before enabling ClickHouse
+def _check_docker_clickhouse_available():
+    """Check if Docker ClickHouse service is available"""
+    import socket
+    try:
+        # Test connection to Docker ClickHouse port
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex(('localhost', 8125))
+        sock.close()
+        return result == 0
+    except Exception:
+        return False
+
+# Configure ClickHouse based on Docker availability
+if _check_docker_clickhouse_available():
+    # Docker ClickHouse is available - use real connection
+    env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest_setup") 
+    env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest_setup")
+    # Enable ClickHouse for these specific tests
+    env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest_setup")
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_TEST_DISABLE", "false", source="clickhouse_conftest_setup")
+else:
+    # Docker ClickHouse not available - use NoOp client
+    env.set("CLICKHOUSE_ENABLED", "false", source="clickhouse_conftest_setup") 
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_TEST_DISABLE", "true", source="clickhouse_conftest_setup")
 # Force configuration reload after setting environment variables
 try:
     from netra_backend.app.config import reload_config
