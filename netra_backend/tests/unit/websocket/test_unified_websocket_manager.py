@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 )
 
 # Test models and enums for serialization testing
-class TestWebSocketState(Enum):
+class WebSocketStateForTesting(Enum):
     """Test enum for WebSocketState serialization testing."""
     CONNECTING = 0
     OPEN = 1
@@ -57,7 +57,7 @@ class TestWebSocketState(Enum):
     CLOSED = 3
 
 
-class TestPydanticModel:
+class PydanticTestModel:
     """Test Pydantic-like model for serialization testing."""
     
     def __init__(self, field1: str, timestamp: datetime):
@@ -86,7 +86,7 @@ def mock_websocket():
     """Create mock WebSocket for testing."""
     websocket = Mock()
     websocket.send_json = AsyncMock()
-    websocket.client_state = TestWebSocketState.OPEN
+    websocket.client_state = WebSocketStateForTesting.OPEN
     return websocket
 
 
@@ -828,23 +828,23 @@ class TestSerializeMessageSafely(unittest.TestCase):
         self.assertEqual(result, data)
     
     def test_serialize_websocket_state_enum(self):
-        """Test TestWebSocketState enum serialization (generic enum behavior)."""
-        # TestWebSocketState is a test enum, not a real WebSocketState
+        """Test WebSocketStateForTesting enum serialization (generic enum behavior)."""
+        # WebSocketStateForTesting is a test enum, not a real WebSocketState
         # It should behave like a generic enum and return its value
-        result = _serialize_message_safely(TestWebSocketState.OPEN)
+        result = _serialize_message_safely(WebSocketStateForTesting.OPEN)
         
         # Should return the enum value for test enums
         self.assertEqual(result, 1)
     
     def test_serialize_generic_enum(self):
         """Test generic enum serialization."""
-        result = _serialize_message_safely(TestWebSocketState.CLOSED)
+        result = _serialize_message_safely(WebSocketStateForTesting.CLOSED)
         self.assertEqual(result, 3)  # Should use .value for generic enums
     
     def test_serialize_pydantic_model(self):
         """Test Pydantic model serialization."""
         timestamp = datetime.now()
-        model = TestPydanticModel("test_value", timestamp)
+        model = PydanticTestModel("test_value", timestamp)
         
         result = _serialize_message_safely(model)
         
@@ -860,12 +860,12 @@ class TestSerializeMessageSafely(unittest.TestCase):
     
     def test_serialize_list(self):
         """Test list serialization."""
-        data = ["string", 42, TestWebSocketState.OPEN]
+        data = ["string", 42, WebSocketStateForTesting.OPEN]
         result = _serialize_message_safely(data)
         
         self.assertEqual(result[0], "string")
         self.assertEqual(result[1], 42)
-        self.assertEqual(result[2], 1)  # TestWebSocketState.OPEN has value 1
+        self.assertEqual(result[2], 1)  # WebSocketStateForTesting.OPEN has value 1
     
     def test_serialize_set(self):
         """Test set serialization (converted to list)."""
@@ -878,7 +878,7 @@ class TestSerializeMessageSafely(unittest.TestCase):
     
     def test_serialize_dict_with_enum_keys(self):
         """Test dict with enum keys serialization."""
-        data = {TestWebSocketState.OPEN: "connected", "normal_key": "value"}
+        data = {WebSocketStateForTesting.OPEN: "connected", "normal_key": "value"}
         result = _serialize_message_safely(data)
         
         self.assertIn("open", result)  # Enum key converted
@@ -889,7 +889,7 @@ class TestSerializeMessageSafely(unittest.TestCase):
         """Test complex nested data structure."""
         data = {
             "user": "test_user",
-            "state": TestWebSocketState.CONNECTING,
+            "state": WebSocketStateForTesting.CONNECTING,
             "connections": [
                 {"id": "conn1", "active": True},
                 {"id": "conn2", "active": False}
@@ -903,7 +903,7 @@ class TestSerializeMessageSafely(unittest.TestCase):
         result = _serialize_message_safely(data)
         
         self.assertEqual(result["user"], "test_user")
-        self.assertEqual(result["state"], 0)  # TestWebSocketState.CONNECTING has value 0
+        self.assertEqual(result["state"], 0)  # WebSocketStateForTesting.CONNECTING has value 0
         self.assertIsInstance(result["connections"], list)
         self.assertEqual(len(result["connections"]), 2)
         self.assertIsInstance(result["metadata"]["timestamp"], str)

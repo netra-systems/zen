@@ -29,7 +29,7 @@ from shared.types import UserID, ConnectionID
 from test_framework.ssot.websocket import WebSocketTestClient
 
 
-class TestConnectionStateCompat:
+class ConnectionStateCompat:
     """Compatibility layer for connection state operations."""
     
     def __init__(self, user_id: str, connection_id: str, websocket):
@@ -55,17 +55,17 @@ class TestConnectionStateCompat:
         return self.status == ConnectionStatus.CONNECTED
 
 
-class TestWebSocketManagerCompat:
+class WebSocketManagerCompat:
     """Compatibility wrapper for UnifiedWebSocketManager to support the test API."""
     
     def __init__(self):
         self.manager = UnifiedWebSocketManager()
-        self.connections_state = {}  # connection_id -> TestConnectionStateCompat
+        self.connections_state = {}  # connection_id -> ConnectionStateCompat
         self.connection_objects = {}  # connection_id -> WebSocketConnection
         
     def create_connection_state(self, user_id: str, connection_id: str, websocket, heartbeat_enabled=False):
         """Create a connection state compatible with the test expectations."""
-        state = TestConnectionStateCompat(user_id, connection_id, websocket)
+        state = ConnectionStateCompat(user_id, connection_id, websocket)
         self.connections_state[connection_id] = state
         return state
         
@@ -240,7 +240,7 @@ class TestWebSocketConnectionLifecycle:
         Connection establishment is the first step in delivering chat business value.
         """
         # Arrange: WebSocket manager and connection parameters
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         user_id = UserID("lifecycle_user")
         connection_id = ConnectionID(str(uuid.uuid4()))
         
@@ -281,7 +281,7 @@ class TestWebSocketConnectionLifecycle:
         continuous AI interaction capability for users.
         """
         # Arrange: Connection with heartbeat monitoring
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         user_id = UserID("heartbeat_user")
         connection_id = ConnectionID(str(uuid.uuid4()))
         
@@ -330,7 +330,7 @@ class TestWebSocketConnectionLifecycle:
         system stability for continuous chat service availability.
         """
         # Arrange: Multiple connections for cleanup testing
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         connections = []
         
         for i in range(5):
@@ -393,7 +393,7 @@ class TestWebSocketConnectionLifecycle:
         feedback about their connection status during chat interactions.
         """
         # Arrange: Connection for state transition testing
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         user_id = UserID("state_user")
         connection_id = ConnectionID(str(uuid.uuid4()))
         
@@ -464,7 +464,7 @@ class TestWebSocketConnectionLifecycle:
         even when network issues or system errors occur.
         """
         # Arrange: Connection with error simulation capabilities
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         user_id = UserID("error_user")
         connection_id = ConnectionID(str(uuid.uuid4()))
         
@@ -539,7 +539,7 @@ class TestWebSocketConnectionLifecycle:
         to handle enterprise-level concurrent user loads without performance degradation.
         """
         # Arrange: Resource monitoring setup
-        manager = TestWebSocketManagerCompat()
+        manager = WebSocketManagerCompat()
         resource_limits = {
             "max_connections_per_user": 3,
             "max_total_connections": 100,

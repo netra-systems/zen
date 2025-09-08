@@ -1,7 +1,16 @@
 """
-Unit tests for base
-Coverage Target: 70%
-Business Value: Long-term maintainability
+Backend Unit Test Base - SSOT Compliant Test Foundation
+
+This module provides SSOT compliant base test classes for backend unit tests.
+All backend unit tests should inherit from BaseUnitTest to ensure consistency 
+with the SSOT testing framework.
+
+Business Value: Platform/Internal - System Stability & Development Velocity
+Ensures all backend unit tests follow SSOT patterns and provide consistent 
+test infrastructure.
+
+CRITICAL: This imports from test_framework.ssot.base_test_case which is the
+canonical SSOT base test implementation per CLAUDE.md requirements.
 """
 
 import pytest
@@ -9,6 +18,20 @@ from sqlalchemy import Column, Integer
 from netra_backend.app.db.base import Base
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
+
+# Import SSOT Base Test Classes
+from test_framework.ssot.base_test_case import (
+    SSotBaseTestCase,
+    SSotAsyncTestCase,
+    BaseTestCase,
+    AsyncTestCase,
+    BaseIntegrationTest
+)
+
+# Backend-specific aliases for SSOT compliance
+BaseUnitTest = SSotBaseTestCase  # The missing class that was being imported
+BackendBaseTest = SSotBaseTestCase
+BackendAsyncTest = SSotAsyncTestCase
 
 class TestBase:
     """Test suite for Base"""
@@ -52,4 +75,15 @@ class TestBase:
         # Test validation logic
         pass
 
-    pass
+# Export all SSOT base test classes for backend unit tests
+__all__ = [
+    'BaseUnitTest',  # The missing class
+    'BackendBaseTest',
+    'BackendAsyncTest', 
+    'SSotBaseTestCase',
+    'SSotAsyncTestCase',
+    'BaseTestCase',
+    'AsyncTestCase',
+    'BaseIntegrationTest',
+    'TestBase'
+]

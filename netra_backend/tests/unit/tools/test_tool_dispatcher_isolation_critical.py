@@ -732,6 +732,6 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
 
 
 # Mark these as critical tool isolation tests
-pytest.mark.critical_tool_isolation = pytest.mark.mark
-pytest.mark.tool_dispatcher_violations = pytest.mark.mark
-pytest.mark.unit_tool_failures = pytest.mark.mark
+pytest.mark.critical_tool_isolation = pytest.mark.critical
+pytest.mark.tool_dispatcher_violations = pytest.mark.unit
+pytest.mark.unit_tool_failures = pytest.mark.mission_critical

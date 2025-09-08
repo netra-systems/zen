@@ -24,7 +24,7 @@ from typing import Dict, Any
 from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
 
-class TestEnum(Enum):
+class SerializationTestEnum(Enum):
     """Test enum for serialization testing."""
     VALUE_ONE = "value1"
     VALUE_TWO = "value2"
@@ -133,10 +133,10 @@ class TestGeneralSerialization:
     
     def test_regular_enum_serialization(self):
         """Test regular Python enum serialization."""
-        result = _serialize_message_safely(TestEnum.VALUE_ONE)
+        result = _serialize_message_safely(SerializationTestEnum.VALUE_ONE)
         assert result == "value1"
         
-        result = _serialize_message_safely(TestEnum.VALUE_TWO)
+        result = _serialize_message_safely(SerializationTestEnum.VALUE_TWO)
         assert result == "value2"
     
     def test_datetime_serialization(self):
@@ -154,7 +154,7 @@ class TestGeneralSerialization:
                 "string",
                 42,
                 WebSocketState.CONNECTED,
-                TestEnum.VALUE_ONE,
+                SerializationTestEnum.VALUE_ONE,
                 datetime(2023, 1, 1, tzinfo=timezone.utc)
             ]
             
@@ -171,7 +171,7 @@ class TestGeneralSerialization:
             data = [
                 "string",
                 42, 
-                TestEnum.VALUE_ONE,
+                SerializationTestEnum.VALUE_ONE,
                 datetime(2023, 1, 1, tzinfo=timezone.utc)
             ]
             
