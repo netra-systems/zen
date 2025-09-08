@@ -7,7 +7,17 @@
       "Bash(docker logs:*)",
       "Bash(curl:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker rmi:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker build:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker cp:*)",
+      "Bash(docker restart:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
