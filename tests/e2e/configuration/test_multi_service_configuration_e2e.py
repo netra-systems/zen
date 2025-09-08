@@ -28,7 +28,7 @@ import json
 from test_framework.fixtures.real_services import real_services_fixture
 from test_framework.fixtures.websocket_test_helpers import WebSocketTestClient
 from test_framework.ssot.configuration_validator import validate_test_config, is_service_enabled
-from test_framework.ssot.e2e_auth_helper import create_test_user_with_auth
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_test_user_with_auth
 from shared.isolated_environment import get_env
 import requests
 import httpx
@@ -68,8 +68,13 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_configuration_consistency_across_services(self, service_health_check):
         """Test configuration consistency across all running services."""
+        # CRITICAL: Real test should fail hard if insufficient services, per CLAUDE.md
         if len(service_health_check) < 2:
-            pytest.skip("Need at least 2 services running for consistency test")
+            raise AssertionError(
+                f"Insufficient services available for configuration consistency test: "
+                f"{len(service_health_check)} < 2 required. Available services: {list(service_health_check.keys())}. "
+                f"This indicates a fundamental service startup failure that must be resolved."
+            )
         
         config_values_by_service = {}
         
@@ -83,13 +88,26 @@ class TestMultiServiceConfigurationE2E:
                         config_data = response.json()
                         config_values_by_service[service_name] = config_data
                     else:
-                        pytest.skip(f"{service_name} doesn't expose config info endpoint")
+                        raise AssertionError(
+                            f"Service {service_name} at {service_url} returned {response.status_code} "
+                            f"for /config/info endpoint. All services MUST expose configuration info for multi-service consistency."
+                        )
             
             except Exception as e:
-                pytest.skip(f"Cannot get config from {service_name}: {e}")
+                raise AssertionError(
+                    f"Failed to retrieve configuration from {service_name} at {service_url}: {e}. "
+                    f"This indicates service configuration endpoint failure or network issues that must be resolved."
+                )
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - service config endpoints are mandatory
         if len(config_values_by_service) < 2:
-            pytest.skip("Need at least 2 services with config endpoints")
+            available_services = list(service_health_check.keys())
+            responding_services = list(config_values_by_service.keys())
+            raise AssertionError(
+                f"Insufficient services responding with configuration data: {len(config_values_by_service)} < 2 required. "
+                f"Available services: {available_services}, Responding services: {responding_services}. "
+                f"All healthy services MUST expose /config/info endpoints for consistency validation."
+            )
         
         # Validate shared configuration values are consistent
         shared_config_keys = [
@@ -116,8 +134,12 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_environment_specific_configuration_loading(self, service_health_check):
         """Test environment-specific configuration across services."""
+        # CRITICAL: Real test should fail hard if no services available
         if len(service_health_check) < 1:
-            pytest.skip("No services available for environment test")
+            raise AssertionError(
+                f"No healthy services available for environment configuration test. "
+                f"This indicates a complete service startup failure that must be resolved before proceeding."
+            )
         
         env = get_env()
         current_environment = env.get("ENVIRONMENT", "development")
@@ -153,16 +175,30 @@ class TestMultiServiceConfigurationE2E:
             
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 404:
-                    pytest.skip(f"{service_name} doesn't expose environment config endpoint")
+                    raise AssertionError(
+                        f"Service {service_name} at {service_url} missing required /config/environment endpoint. "
+                        f"All services MUST expose environment configuration for consistency validation."
+                    )
                 else:
-                    raise
+                    raise AssertionError(
+                        f"Service {service_name} environment config endpoint failed with {e.response.status_code}: {e}"
+                    )
             except Exception as e:
-                pytest.skip(f"Cannot test environment config for {service_name}: {e}")
+                raise AssertionError(
+                    f"Failed to test environment configuration for {service_name}: {e}. "
+                    f"This indicates service communication failure or missing environment configuration."
+                )
     
     async def test_service_dependency_configuration_resolution(self, service_health_check):
         """Test service dependency resolution through configuration."""
+        # CRITICAL: Backend service is mandatory for dependency tests
         if "backend" not in service_health_check:
-            pytest.skip("Backend service required for dependency test")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"Backend service is not available for dependency configuration test. "
+                f"Available services: {available_services}. Backend service is MANDATORY "
+                f"for testing service dependency resolution and configuration coordination."
+            )
         
         backend_url = service_health_check["backend"]
         
@@ -202,15 +238,27 @@ class TestMultiServiceConfigurationE2E:
                                 assert "port" in status
                                 assert status["port"] in [6379, 6381, 6382]  # Known test ports
                 else:
-                    pytest.skip("Backend doesn't expose dependency config endpoint")
+                    raise AssertionError(
+                        f"Backend service at {backend_url} returned {response.status_code} for /config/dependencies endpoint. "
+                        f"Backend MUST expose dependency configuration for service coordination validation."
+                    )
         
         except Exception as e:
-            pytest.skip(f"Cannot test dependency configuration: {e}")
+            raise AssertionError(
+                f"Failed to test dependency configuration on backend at {backend_url}: {e}. "
+                f"This indicates backend service configuration failure or missing dependency endpoints."
+            )
     
     async def test_cross_service_authentication_configuration(self, service_health_check):
         """Test authentication configuration consistency across services."""
+        # CRITICAL: Multiple services required for auth config consistency validation
         if len(service_health_check) < 2:
-            pytest.skip("Need at least 2 services for auth config test")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"Insufficient services for authentication configuration consistency test: "
+                f"{len(service_health_check)} < 2 required. Available services: {available_services}. "
+                f"Cross-service auth validation requires at least 2 healthy services."
+            )
         
         auth_configs = {}
         
@@ -232,8 +280,15 @@ class TestMultiServiceConfigurationE2E:
             except Exception:
                 continue  # Skip services that don't respond
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - auth endpoints are critical for security
         if len(auth_configs) < 2:
-            pytest.skip("Need at least 2 services with auth config endpoints")
+            available_services = list(service_health_check.keys())
+            responding_services = list(auth_configs.keys())
+            raise AssertionError(
+                f"Insufficient services responding with authentication configuration: {len(auth_configs)} < 2 required. "
+                f"Available services: {available_services}, Auth-responding services: {responding_services}. "
+                f"All services MUST expose /config/auth endpoints for security validation."
+            )
         
         # Verify JWT configuration consistency
         jwt_settings_keys = ["algorithm", "token_expire_time", "issuer"]
@@ -263,8 +318,12 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_database_configuration_coordination(self, service_health_check):
         """Test database configuration coordination across services."""
+        # CRITICAL: At least one service required for database config validation
         if len(service_health_check) < 1:
-            pytest.skip("No services available for database config test")
+            raise AssertionError(
+                f"No healthy services available for database configuration test. "
+                f"This indicates complete service failure that must be resolved for database coordination validation."
+            )
         
         database_configs = {}
         
@@ -286,8 +345,13 @@ class TestMultiServiceConfigurationE2E:
             except Exception:
                 continue  # Skip services that don't respond
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - database config is critical for data persistence
         if len(database_configs) == 0:
-            pytest.skip("No services expose database configuration")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"No services expose database configuration endpoints. Available services: {available_services}. "
+                f"At least one service MUST expose /config/database endpoint for data layer validation."
+            )
         
         # Verify database connection settings
         for service_name, db_config in database_configs.items():
@@ -322,8 +386,12 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_service_startup_configuration_validation(self, service_health_check):
         """Test service startup configuration validation."""
+        # CRITICAL: At least one service required for startup validation testing
         if len(service_health_check) < 1:
-            pytest.skip("No services available for startup config test")
+            raise AssertionError(
+                f"No healthy services available for startup configuration validation test. "
+                f"This indicates complete service startup failure that must be resolved."
+            )
         
         startup_validations = {}
         
@@ -345,8 +413,13 @@ class TestMultiServiceConfigurationE2E:
             except Exception:
                 continue  # Skip services that don't respond
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - startup validation is critical for reliability
         if len(startup_validations) == 0:
-            pytest.skip("No services expose startup validation information")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"No services expose startup validation endpoints. Available services: {available_services}. "
+                f"Services MUST expose /config/startup-validation endpoints for reliability validation."
+            )
         
         # Verify startup validation results
         for service_name, validation in startup_validations.items():
@@ -369,8 +442,12 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_configuration_security_and_secrets_management(self, service_health_check):
         """Test security and secrets management across services."""
+        # CRITICAL: At least one service required for security configuration validation
         if len(service_health_check) < 1:
-            pytest.skip("No services available for security config test")
+            raise AssertionError(
+                f"No healthy services available for security configuration test. "
+                f"This indicates complete service failure that must be resolved for security validation."
+            )
         
         security_configs = {}
         
@@ -392,8 +469,13 @@ class TestMultiServiceConfigurationE2E:
             except Exception:
                 continue  # Skip services that don't respond
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - security config is critical for system safety
         if len(security_configs) == 0:
-            pytest.skip("No services expose security configuration")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"No services expose security configuration endpoints. Available services: {available_services}. "
+                f"Services MUST expose /config/security endpoints for security validation."
+            )
         
         # Verify security configuration
         for service_name, security_config in security_configs.items():
@@ -433,8 +515,14 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_configuration_reload_and_coordination(self, service_health_check):
         """Test configuration reload coordination across services."""
+        # CRITICAL: Backend service mandatory for configuration reload testing
         if "backend" not in service_health_check:
-            pytest.skip("Backend service required for reload coordination test")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"Backend service is not available for configuration reload coordination test. "
+                f"Available services: {available_services}. Backend service is MANDATORY "
+                f"for testing configuration reload capabilities and service coordination."
+            )
         
         backend_url = service_health_check["backend"]
         
@@ -468,17 +556,30 @@ class TestMultiServiceConfigurationE2E:
                         health_response = await client.get(f"{backend_url}/health", timeout=10.0)
                         assert health_response.status_code == 200
                     else:
-                        pytest.skip("Configuration reload not supported by backend")
+                        raise AssertionError(
+                            f"Backend service at {backend_url} returned {reload_response.status_code} for /config/reload endpoint. "
+                            f"Configuration reload MUST be supported by backend service for dynamic configuration management."
+                        )
                 else:
-                    pytest.skip("Backend doesn't expose configuration version endpoint")
+                    raise AssertionError(
+                        f"Backend service at {backend_url} returned {initial_response.status_code} for /config/version endpoint. "
+                        f"Backend MUST expose configuration versioning for reload coordination validation."
+                    )
         
         except Exception as e:
-            pytest.skip(f"Cannot test configuration reload: {e}")
+            raise AssertionError(
+                f"Failed to test configuration reload on backend at {backend_url}: {e}. "
+                f"This indicates backend configuration reload failure or missing reload endpoints."
+            )
     
     async def test_configuration_error_handling_and_fallback(self, service_health_check):
         """Test configuration error handling and fallback mechanisms."""
+        # CRITICAL: At least one service required for error handling validation
         if len(service_health_check) < 1:
-            pytest.skip("No services available for error handling test")
+            raise AssertionError(
+                f"No healthy services available for configuration error handling test. "
+                f"This indicates complete service failure that must be resolved for error handling validation."
+            )
         
         error_handling_tests = {}
         
@@ -500,8 +601,13 @@ class TestMultiServiceConfigurationE2E:
             except Exception:
                 continue  # Skip services that don't respond
         
+        # TESTS MUST RAISE ERRORS per CLAUDE.md - error handling config is critical for resilience
         if len(error_handling_tests) == 0:
-            pytest.skip("No services expose error handling configuration")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"No services expose error handling configuration endpoints. Available services: {available_services}. "
+                f"Services MUST expose /config/error-handling endpoints for resilience validation."
+            )
         
         # Verify error handling configuration
         for service_name, error_config in error_handling_tests.items():
@@ -536,8 +642,14 @@ class TestMultiServiceConfigurationE2E:
     
     async def test_real_world_multi_service_scenario(self, service_health_check):
         """Test a real-world multi-service scenario with configuration coordination."""
+        # CRITICAL: Multiple services required for real-world scenario validation
         if len(service_health_check) < 2:
-            pytest.skip("Need at least 2 services for real-world scenario test")
+            available_services = list(service_health_check.keys())
+            raise AssertionError(
+                f"Insufficient services for real-world multi-service scenario test: "
+                f"{len(service_health_check)} < 2 required. Available services: {available_services}. "
+                f"Real-world scenario testing requires at least 2 healthy services for coordination validation."
+            )
         
         # Test scenario: User authentication and data persistence across services
         try:
@@ -547,7 +659,11 @@ class TestMultiServiceConfigurationE2E:
                 name="Multi-Service Test User"
             )
         except Exception as e:
-            pytest.skip(f"Cannot create authenticated user for multi-service test: {e}")
+            raise AssertionError(
+                f"Failed to create authenticated user for multi-service test: {e}. "
+                f"This indicates authentication service failure or missing user creation capabilities "
+                f"that are critical for multi-service coordination testing."
+            )
         
         # Test that services can handle authenticated requests with proper configuration
         if "backend" in service_health_check:
@@ -581,8 +697,12 @@ class TestMultiServiceConfigurationE2E:
                         assert len(validation["failed_services"]) == 0
             
             except Exception as e:
-                # Multi-service scenario might not be fully implemented
-                pytest.skip(f"Multi-service scenario not fully supported: {e}")
+                # TESTS MUST RAISE ERRORS per CLAUDE.md - multi-service scenarios are business-critical
+                raise AssertionError(
+                    f"Multi-service scenario failed with backend at {backend_url}: {e}. "
+                    f"This indicates WebSocket connection failure, authentication issues, or missing "
+                    f"multi-service coordination capabilities that are critical for business value."
+                )
         
         # Test configuration consistency after multi-service operation
         config_consistency_after = {}
