@@ -25,7 +25,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 from unittest.mock import patch, Mock
 
-from auth_service.auth_core.security.jwt_handler import JWTHandler
+from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.security.session_manager import SessionManager
 from auth_service.auth_core.startup.health_checker import HealthChecker
 from auth_service.auth_core.security.cross_service_auth import CrossServiceAuth

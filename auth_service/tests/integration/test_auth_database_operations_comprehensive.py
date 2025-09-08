@@ -30,7 +30,7 @@ from auth_service.auth_core.database.repository import (
     AuthAuditRepository as AuditRepository
 )
 from auth_service.auth_core.database.models import AuthUser as User, AuthSession as UserSession, AuthAuditLog as AuditLog
-from auth_service.auth_core.database.connection import get_database_session
+from auth_service.auth_core.database.connection import get_db_session
 from enum import Enum
 
 # Define missing enums that the test expects
@@ -64,7 +64,7 @@ class TestAuthDatabaseOperationsIntegration(SSotBaseTestCase):
         # Use test database configuration
         env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/test_auth", source="test")
         
-        async with get_database_session() as session:
+        async with get_db_session() as session:
             yield session
             # Cleanup after test
             await session.rollback()
