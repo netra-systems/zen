@@ -301,6 +301,12 @@ class StartupOrchestrator:
         await self._perform_complete_bridge_integration()
         self.logger.info("  ✓ Step 17: Bridge integration completed")
         
+        # CRITICAL FIX: Create app.state.websocket_bridge alias for supervisor_factory compatibility
+        # This ensures supervisor_factory.py can find the bridge at the expected location
+        if hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge:
+            self.app.state.websocket_bridge = self.app.state.agent_websocket_bridge
+            self.logger.info("  ✓ Step 17a: WebSocket bridge alias created for supervisor factory compatibility")
+        
         # Step 18: Verify tool dispatcher has WebSocket support
         await self._verify_tool_dispatcher_websocket_support()
         self.logger.info("  ✓ Step 18: Tool dispatcher WebSocket support verified")

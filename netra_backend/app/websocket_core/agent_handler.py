@@ -129,11 +129,16 @@ class AgentMessageHandler(BaseMessageHandler):
             # Get database session using async generator pattern
             async for db_session in get_request_scoped_db_session():
                 try:
+                    # Get app_state from WebSocket connection for bridge access
+                    app_state = None
+                    if hasattr(websocket, 'scope') and 'app' in websocket.scope:
+                        app_state = websocket.scope['app'].state
+                    
                     # Create WebSocket-scoped supervisor (NO MOCK REQUEST!)
                     supervisor = await get_websocket_scoped_supervisor(
                         context=websocket_context,
                         db_session=db_session,
-                        app_state=None  # WebSocket factory handles component lookup
+                        app_state=app_state  # Pass app_state for bridge access
                     )
                     
                     # Create message handler with WebSocket-scoped supervisor
