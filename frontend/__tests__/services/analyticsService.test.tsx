@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useAnalytics } from '@/services/analyticsService';
+import { useAnalytics } from '../../services/analyticsService';
 import { useStatsigClient } from '@statsig/react-bindings';
 import { useGTM } from '@/hooks/useGTM';
 
