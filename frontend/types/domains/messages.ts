@@ -16,7 +16,7 @@
  */
 
 import { MessageType } from '../shared/enums';
-import { BaseMessage } from '../shared/base';
+import type { BaseMessage } from '../shared/base';
 
 // ============================================================================
 // UNIFIED MESSAGE HIERARCHY - Single Source of Truth

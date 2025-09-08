@@ -258,6 +258,28 @@ export const TestIdUtils = {
 };
 
 /**
+ * Convenience function for simple message ID generation
+ * Used by WebSocketProvider and other components that need basic message IDs
+ * 
+ * @param messageType - Optional message type prefix (defaults to 'message')
+ * @returns Unique message ID
+ */
+export const generateMessageId = (messageType: string = 'message'): string => {
+  return generateUniqueId(messageType);
+};
+
+/**
+ * Temporary ID generation for optimistic updates
+ * Creates IDs that are clearly marked as temporary for reconciliation
+ * 
+ * @param prefix - Prefix for the temporary ID
+ * @returns Unique temporary ID with 'temp' marker
+ */
+export const generateTemporaryId = (prefix: string): string => {
+  return generateUniqueId(`temp-${prefix}`);
+};
+
+/**
  * Default exports for common use cases
  */
 export default {
@@ -269,6 +291,8 @@ export default {
   generateUniqueEventId,
   generateUniqueReactKey,
   generateBatchUniqueIds,
+  generateMessageId,
+  generateTemporaryId,
   isValidUniqueId,
   parseUniqueId,
   getIdAge,

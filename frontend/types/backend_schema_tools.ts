@@ -276,3 +276,6 @@ export interface ReferenceItem {
 }
 
 export interface ReferenceUpdateRequest {}
+
+// Explicit re-export for build compatibility
+export { ReferenceItem };

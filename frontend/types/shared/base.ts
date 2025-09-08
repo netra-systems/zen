@@ -248,6 +248,12 @@ export function isValidEntity(obj: unknown): obj is BaseEntity {
 
 // DEFAULT EXPORT
 
+// Explicit re-exports for interfaces (TypeScript compiler compatibility)
+export type { BaseMessage };
+export type { BaseEntity };
+export type { BaseTimestampEntity };
+export type { BaseMetadata };
+
 export default {
   createBaseMessage,
   createMessageAttachment,
