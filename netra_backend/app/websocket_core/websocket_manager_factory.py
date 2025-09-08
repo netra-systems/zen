@@ -870,6 +870,67 @@ class IsolatedWebSocketManager:
             "error_count": self._connection_error_count,
             "last_error": self._last_error_time.isoformat() if self._last_error_time else None
         }
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
+        """
+        Get connection ID for a given WebSocket instance.
+        
+        This method provides compatibility with the UnifiedWebSocketManager interface.
+        It searches through active connections to find the one matching the WebSocket.
+        
+        Args:
+            websocket: WebSocket instance to search for
+            
+        Returns:
+            Connection ID if found, None otherwise
+        """
+        self._validate_active()
+        
+        for conn_id, connection in self._connections.items():
+            if connection.websocket == websocket:
+                logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
+                return conn_id
+        
+        logger.debug(f"No connection found for WebSocket {id(websocket)}")
+        return None
+    
+    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+        """
+        Update the thread ID associated with a connection.
+        
+        This method provides compatibility with the UnifiedWebSocketManager interface.
+        It updates the thread_id field of the connection if found.
+        
+        Args:
+            connection_id: Connection ID to update
+            thread_id: New thread ID to associate
+            
+        Returns:
+            True if update successful, False if connection not found
+        """
+        self._validate_active()
+        
+        connection = self._connections.get(connection_id)
+        if connection:
+            # Update the thread_id on the connection object
+            if hasattr(connection, 'thread_id'):
+                old_thread_id = connection.thread_id
+                connection.thread_id = thread_id
+                logger.info(
+                    f"Updated thread association for connection {connection_id}: "
+                    f"{old_thread_id} → {thread_id}"
+                )
+                self._update_activity()
+                return True
+            else:
+                logger.warning(
+                    f"Connection {connection_id} does not have thread_id attribute. "
+                    f"WebSocketConnection may need to be updated to support thread tracking."
+                )
+                return False
+        else:
+            logger.warning(f"Connection {connection_id} not found for thread update")
+            return False
 
 
 class WebSocketManagerFactory:
