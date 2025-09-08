@@ -202,7 +202,7 @@ class TestRealAuthCircuitBreaker:
             failure_scenarios = [
                 {"error": "connection_timeout", "status": 503},
                 {"error": "auth_service_unavailable", "status": 503},
-                {"error": "database_connection_failed", status": 500}
+                {"error": "database_connection_failed", "status": 500}
             ]
             
             stored_state = json.loads(await redis_client.get(cb_key))

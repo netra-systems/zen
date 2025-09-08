@@ -1,6 +1,7 @@
 """Test that agents_execute endpoints work with the fixed circuit breaker decorator."""
 
 import pytest
+from unittest.mock import Mock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

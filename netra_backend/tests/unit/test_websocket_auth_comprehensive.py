@@ -19,7 +19,20 @@ These tests validate that our authentication system delivers business value by:
 - Validating that paying customers can always access their AI agents
 - Protecting against security breaches that would damage our reputation
 
-Test Coverage Target: 100% of critical authentication flows in websocket_core/auth.py
+Test Coverage Target: 100% of critical authentication flows in unified_websocket_auth.py
+
+SOOT COMPLIANCE UPDATE:
+This test file has been updated to test the new UnifiedWebSocketAuthenticator instead of
+the eliminated WebSocketAuthenticator. Many tests have been skipped because:
+
+1. ConnectionSecurityManager - eliminated in SSOT consolidation
+2. RateLimiter - moved to dedicated module  
+3. Token extraction methods - moved to UnifiedAuthenticationService
+4. authenticate_websocket() method - replaced with authenticate_websocket_connection()
+5. secure_websocket_context() - eliminated, replaced with direct authentication
+
+The remaining active tests focus on the core WebSocket authentication functionality
+that is now provided by UnifiedWebSocketAuthenticator in SSOT-compliant manner.
 """
 
 import asyncio
@@ -38,16 +51,17 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.jwt_test_utils import JWTTestHelper, generate_test_jwt_token, generate_expired_token
 from shared.isolated_environment import get_env
 
-# Import the module under test
-from netra_backend.app.websocket_core.auth import (
-    AuthInfo,
-    WebSocketAuthenticator,
-    ConnectionSecurityManager,
-    RateLimiter,
-    get_websocket_authenticator,
-    get_connection_security_manager,
-    secure_websocket_context
+# Import the SSOT unified authentication module under test
+from netra_backend.app.websocket_core.unified_websocket_auth import (
+    UnifiedWebSocketAuthenticator,
+    WebSocketAuthResult,
+    get_websocket_authenticator
 )
+
+# Import supporting types and services
+from netra_backend.app.websocket_core.types import AuthInfo
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.services.unified_authentication_service import AuthResult
 
 
 class TestWebSocketAuthComprehensive(BaseIntegrationTest):
@@ -58,10 +72,9 @@ class TestWebSocketAuthComprehensive(BaseIntegrationTest):
         super().setup_method()
         self.jwt_helper = JWTTestHelper()
         
-        # Clear global instances for clean test state
-        import netra_backend.app.websocket_core.auth as auth_module
-        auth_module._authenticator = None
-        auth_module._security_manager = None
+        # Clear global instances for clean test state (SSOT unified auth)
+        import netra_backend.app.websocket_core.unified_websocket_auth as unified_auth_module
+        unified_auth_module._websocket_authenticator = None
         
         # Setup test tokens
         self.valid_token = self.jwt_helper.create_user_token(
@@ -104,314 +117,298 @@ class TestAuthInfo:
 
 
 @pytest.mark.unit
-class TestWebSocketAuthenticator(TestWebSocketAuthComprehensive):
-    """Test WebSocketAuthenticator class comprehensively."""
+class TestUnifiedWebSocketAuthenticator(TestWebSocketAuthComprehensive):
+    """Test UnifiedWebSocketAuthenticator class comprehensively (SSOT compliant)."""
     
     def test_authenticator_initialization(self):
-        """Test WebSocketAuthenticator initialization."""
-        with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient') as mock_auth_client:
-            authenticator = WebSocketAuthenticator()
+        """Test UnifiedWebSocketAuthenticator initialization (SSOT compliant)."""
+        with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_unified_auth_service') as mock_get_auth:
+            # Create mock auth service
+            mock_auth_service = Mock()
+            mock_get_auth.return_value = mock_auth_service
             
-            # Should create AuthServiceClient instance
-            mock_auth_client.assert_called_once()
-            assert authenticator._auth_attempts == 0
-            assert authenticator._successful_auths == 0
-            assert authenticator._failed_auths == 0
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_success(self):
-        """Test successful token authentication with controlled auth service response."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Mock auth client to return successful validation
-        mock_validation_result = {
-            "valid": True,
-            "user_id": "test-user-123",
-            "email": "test@example.com",
-            "permissions": ["read", "write"]
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_validation_result)
-        
-        result = await authenticator.authenticate(self.valid_token)
-        
-        # Verify the auth result structure
-        assert result is not None, "Should return auth result for valid token"
-        assert result["user_id"] == "test-user-123"
-        assert result["email"] == "test@example.com" 
-        assert result["permissions"] == ["read", "write"]
-        assert result["authenticated"] is True
-        assert result["source"] == "jwt_validation"
-        
-        # Stats should be updated
-        assert authenticator._auth_attempts == 1
-        assert authenticator._successful_auths == 1
-        assert authenticator._failed_auths == 0
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_no_token(self):
-        """Test authentication with no token returns None and updates failure stats."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Test empty token
-        result = await authenticator.authenticate("")
-        assert result is None, "Empty token should return None"
-        
-        # Test None token
-        result = await authenticator.authenticate(None)
-        assert result is None, "None token should return None"
-        
-        # Stats should reflect failures (no attempts since tokens were invalid)
-        assert authenticator._auth_attempts == 0
-        assert authenticator._failed_auths == 2
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_invalid_token(self):
-        """Test authentication with invalid token - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Mock auth client to return invalid validation
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=None)
-        
-        result = await authenticator.authenticate(self.invalid_token)
-        
-        # Test with controlled mock response to verify error path
-        assert result is None, "Invalid token should return None"
-        assert authenticator._auth_attempts == 1
-        assert authenticator._failed_auths == 1
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_auth_service_unavailable(self):
-        """Test authentication when auth service is unavailable - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Mock circuit breaker in OPEN state
-        mock_circuit_breaker = Mock()
-        mock_circuit_breaker.state = "OPEN"  # This will fail - need correct enum
-        authenticator.auth_client.circuit_breaker = mock_circuit_breaker
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=None)
-        
-        result = await authenticator.authenticate(self.valid_token)
-        
-        # Test circuit breaker OPEN state handling
-        assert result is None, "Should return None when auth service unavailable"
-        assert authenticator._failed_auths == 1
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_bearer_token_cleaning(self):
-        """Test Bearer token prefix cleaning - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_validation_result = {
-            "valid": True,
-            "user_id": "test-user-123",
-            "email": "test@example.com",
-            "permissions": []
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_validation_result)
-        
-        bearer_token = f"Bearer {self.valid_token}"
-        result = await authenticator.authenticate(bearer_token)
-        
-        # Test Bearer token prefix cleaning
-        assert result is not None, "Should handle Bearer prefix"
-        authenticator.auth_client.validate_token_jwt.assert_called_once_with(self.valid_token)
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_exception_handling(self):
-        """Test authentication exception handling - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Mock auth client to raise exception
-        authenticator.auth_client.validate_token_jwt = AsyncMock(side_effect=Exception("Network error"))
-        
-        result = await authenticator.authenticate(self.valid_token)
-        
-        # This might NOT fail as expected due to exception handling
-        assert result is None, "Exception should result in None"
-        assert authenticator._failed_auths == 1
-    
-    def test_extract_token_from_websocket_authorization_header(self):
-        """Test token extraction from Authorization header - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Mock WebSocket with Authorization header
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        # Test token extraction from Authorization header
-        assert token == self.valid_token, "Should extract token from Authorization header"
-    
-    def test_extract_token_from_websocket_subprotocol(self):
-        """Test token extraction from Sec-WebSocket-Protocol - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        # Create base64 encoded token for subprotocol
-        encoded_token = base64.urlsafe_b64encode(self.valid_token.encode('utf-8')).decode('utf-8')
-        subprotocol_value = f"jwt.{encoded_token}"
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {
-            "authorization": "",  # No auth header
-            "sec-websocket-protocol": subprotocol_value
-        }
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        # Test token extraction from subprotocol with base64 encoding
-        assert token == self.valid_token, "Should extract token from subprotocol"
-    
-    def test_extract_token_from_websocket_query_params(self):
-        """Test token extraction from query parameters - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {"authorization": ""}  # No auth header or subprotocol
-        mock_websocket.query_params = {"token": self.valid_token}
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        # Test token extraction from query parameters (when available)
-        assert token == self.valid_token, "Should extract token from query parameters"
-    
-    def test_extract_token_from_websocket_no_token(self):
-        """Test token extraction when no token present returns None."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {}
-        # Remove query_params to simulate WebSocket without query parameters
-        del mock_websocket.query_params
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        assert token is None, "Should return None when no token found"
-    
-    def test_extract_token_invalid_base64_subprotocol(self):
-        """Test handling of invalid base64 in subprotocol returns None gracefully."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {
-            "authorization": "",
-            "sec-websocket-protocol": "jwt.invalid_base64!!!"
-        }
-        # Ensure query_params doesn't interfere
-        del mock_websocket.query_params
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        assert token is None, "Should handle invalid base64 gracefully"
+            authenticator = UnifiedWebSocketAuthenticator()
+            
+            # Should get unified auth service instance
+            mock_get_auth.assert_called_once()
+            assert authenticator._websocket_auth_attempts == 0
+            assert authenticator._websocket_auth_successes == 0
+            assert authenticator._websocket_auth_failures == 0
+            assert authenticator._auth_service == mock_auth_service
     
     @pytest.mark.asyncio
     async def test_authenticate_websocket_success(self):
-        """Test complete WebSocket authentication success - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+        """Test successful WebSocket authentication with SSOT unified auth service."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
-        # Mock token extraction
+        # Mock WebSocket object
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
+        mock_websocket.client.port = 8080
         
-        # Mock successful authentication
-        mock_validation_result = {
-            "valid": True,
-            "user_id": "test-user-123", 
-            "email": "test@example.com",
-            "permissions": ["read", "write"],
-            "authenticated": True
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_validation_result)
+        # Mock unified auth service to return successful validation
+        mock_auth_result = AuthResult(
+            success=True,
+            user_id="test-user-123",
+            email="test@example.com",
+            permissions=["read", "write"],
+            validated_at=datetime.now(timezone.utc)
+        )
+        mock_user_context = UserExecutionContext(
+            user_id="test-user-123",
+            thread_id="thread-456",
+            run_id="run-789",
+            websocket_client_id="ws-client-123"
+        )
         
-        auth_info = await authenticator.authenticate_websocket(mock_websocket)
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, mock_user_context)
+        )
         
-        # Test complete WebSocket authentication integration
-        assert isinstance(auth_info, AuthInfo), "Should return AuthInfo object"
-        assert auth_info.user_id == "test-user-123"
-        assert auth_info.email == "test@example.com"
-        assert auth_info.permissions == ["read", "write"]
-        assert auth_info.authenticated is True
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Verify the auth result structure (SSOT WebSocketAuthResult)
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is True
+        assert result.user_context is not None
+        assert result.user_context.user_id == "test-user-123"
+        assert result.auth_result is not None
+        assert result.auth_result.email == "test@example.com"
+        assert result.error_message is None
+        
+        # Stats should be updated
+        assert authenticator._websocket_auth_attempts == 1
+        assert authenticator._websocket_auth_successes == 1
+        assert authenticator._websocket_auth_failures == 0
     
     @pytest.mark.asyncio
     async def test_authenticate_websocket_no_token(self):
-        """Test WebSocket authentication with no token raises 401 HTTPException."""
-        authenticator = WebSocketAuthenticator()
+        """Test WebSocket authentication with no token (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
+        # Mock WebSocket object with no authorization header
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {}
-        # Ensure no query_params
-        del mock_websocket.query_params
+        mock_websocket.client_state = "connected"
+        # Create a proper mock client that won't break JSON serialization
+        mock_client = Mock()
+        mock_client.host = "127.0.0.1"
+        mock_client.port = 8080
+        mock_websocket.client = mock_client
         
-        with pytest.raises(HTTPException) as exc_info:
-            await authenticator.authenticate_websocket(mock_websocket)
+        # Mock unified auth service to return failed validation (no token)
+        mock_auth_result = AuthResult(
+            success=False,
+            error="No authentication token provided",
+            error_code="NO_TOKEN"
+        )
         
-        assert exc_info.value.status_code == 401
-        assert "No authentication token provided" in str(exc_info.value.detail)
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
+        
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Should return failure result
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "NO_TOKEN"
+        assert result.user_context is None
+        
+        # Stats should reflect failures
+        assert authenticator._websocket_auth_failures == 1
     
     @pytest.mark.asyncio
-    async def test_authenticate_websocket_auth_service_unavailable(self):
-        """Test WebSocket auth when service unavailable returns 401 HTTPException.
+    async def test_authenticate_websocket_invalid_token(self):
+        """Test WebSocket authentication with invalid token (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
-        Note: The current implementation always returns 401 for auth failures,
-        including service unavailable scenarios, because authenticate() returns None
-        when validation fails, which triggers the 401 path in authenticate_websocket().
-        """
-        authenticator = WebSocketAuthenticator()
+        # Mock WebSocket object with invalid token
+        mock_websocket = Mock(spec=WebSocket)
+        mock_websocket.headers = {"authorization": f"Bearer {self.invalid_token}"}
+        mock_websocket.client_state = "connected"
+        # Create a proper mock client that won't break JSON serialization
+        mock_client = Mock()
+        mock_client.host = "127.0.0.1"
+        mock_client.port = 8080
+        mock_websocket.client = mock_client
         
+        # Mock unified auth service to return failed validation (invalid token)
+        mock_auth_result = AuthResult(
+            success=False,
+            error="Invalid or expired authentication token",
+            error_code="VALIDATION_FAILED"
+        )
+        
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
+        
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Should return failure result
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "VALIDATION_FAILED"
+        assert result.user_context is None
+        
+        # Stats should be updated
+        assert authenticator._websocket_auth_attempts == 1
+        assert authenticator._websocket_auth_failures == 1
+    
+    @pytest.mark.asyncio
+    async def test_authenticate_websocket_auth_service_error(self):
+        """Test WebSocket authentication when auth service has error (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
+        
+        # Mock WebSocket object
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        # Create a proper mock client that won't break JSON serialization
+        mock_client = Mock()
+        mock_client.host = "127.0.0.1"
+        mock_client.port = 8080
+        mock_websocket.client = mock_client
         
-        # Mock auth service failure with service unavailable error
-        mock_result = {
-            "valid": False,
-            "error": "service unavailable",
-            "details": "Circuit breaker open"
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_result)
+        # Mock unified auth service to return service error
+        mock_auth_result = AuthResult(
+            success=False,
+            error="Authentication service temporarily unavailable",
+            error_code="AUTH_SERVICE_ERROR"
+        )
         
-        with pytest.raises(HTTPException) as exc_info:
-            await authenticator.authenticate_websocket(mock_websocket)
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
         
-        # Verify current actual behavior - returns 401 even for service unavailable
-        assert exc_info.value.status_code == 401, "Current implementation returns 401 for all auth failures"
-        assert "Invalid or expired authentication token" in str(exc_info.value.detail)
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Should return failure result
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "AUTH_SERVICE_ERROR"
+        assert authenticator._websocket_auth_failures == 1
     
-    def test_get_auth_stats(self):
-        """Test authentication statistics retrieval - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+    @pytest.mark.skip(reason="Bearer token handling moved to UnifiedAuthenticationService - SSOT compliance")
+    @pytest.mark.asyncio
+    async def test_authenticate_bearer_token_cleaning(self):
+        """Test Bearer token prefix cleaning - SKIPPED (SSOT compliance).
         
-        # Manually set stats
-        authenticator._auth_attempts = 10
-        authenticator._successful_auths = 7
-        authenticator._failed_auths = 3
+        Bearer token handling is now done internally by UnifiedAuthenticationService.
+        """
+        pass
+    
+    @pytest.mark.skip(reason="authenticate method eliminated - replaced with authenticate_websocket_connection")
+    @pytest.mark.asyncio
+    async def test_authenticate_exception_handling(self):
+        """Test authentication exception handling - SKIPPED (SSOT compliance).
         
-        stats = authenticator.get_auth_stats()
+        Direct authenticate() method eliminated. Exception handling tested in authenticate_websocket_connection().
+        """
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_from_websocket_authorization_header(self):
+        """Test token extraction - SKIPPED (SSOT compliance).
+        
+        Token extraction is now handled internally by UnifiedAuthenticationService.
+        """
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_from_websocket_subprotocol(self):
+        """Test token extraction from subprotocol - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_from_websocket_query_params(self):
+        """Test token extraction from query params - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_from_websocket_no_token(self):
+        """Test token extraction with no token - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_invalid_base64_subprotocol(self):
+        """Test invalid base64 handling - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="authenticate_websocket method eliminated - replaced with authenticate_websocket_connection")
+    @pytest.mark.asyncio
+    async def test_authenticate_websocket_success(self):
+        """Test WebSocket authentication - SKIPPED (replaced in SSOT consolidation).
+        
+        This method has been replaced with authenticate_websocket_connection() in the unified system.
+        """
+        pass
+    
+    @pytest.mark.skip(reason="authenticate_websocket method eliminated - replaced with authenticate_websocket_connection")
+    @pytest.mark.asyncio
+    async def test_authenticate_websocket_no_token(self):
+        """Test WebSocket authentication with no token - SKIPPED (replaced in SSOT consolidation).
+        
+        This method has been replaced with authenticate_websocket_connection() in the unified system.
+        """
+        pass
+    
+    @pytest.mark.skip(reason="authenticate_websocket method eliminated - replaced with authenticate_websocket_connection")
+    @pytest.mark.asyncio
+    async def test_authenticate_websocket_auth_service_unavailable(self):
+        """Test WebSocket auth service unavailable - SKIPPED (replaced in SSOT consolidation).
+        
+        This method has been replaced with authenticate_websocket_connection() in the unified system.
+        """
+        pass
+    
+    def test_get_websocket_auth_stats(self):
+        """Test WebSocket authentication statistics retrieval (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
+        
+        # Manually set stats for testing
+        authenticator._websocket_auth_attempts = 10
+        authenticator._websocket_auth_successes = 7
+        authenticator._websocket_auth_failures = 3
+        
+        stats = authenticator.get_websocket_auth_stats()
         
         # Test authentication statistics calculation
-        assert stats["total_attempts"] == 10
-        assert stats["successful_auths"] == 7
-        assert stats["failed_auths"] == 3
-        assert stats["success_rate"] == 0.7  # 7/10
+        assert stats["websocket_auth_statistics"]["total_attempts"] == 10
+        assert stats["websocket_auth_statistics"]["successful_authentications"] == 7
+        assert stats["websocket_auth_statistics"]["failed_authentications"] == 3
+        assert stats["websocket_auth_statistics"]["success_rate_percent"] == 70.0  # (7/10)*100
+        assert stats["ssot_compliance"]["ssot_compliant"] is True
     
-    def test_get_auth_stats_no_attempts(self):
-        """Test auth stats with no attempts to avoid division by zero - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+    def test_get_websocket_auth_stats_no_attempts(self):
+        """Test WebSocket auth stats with no attempts (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
-        stats = authenticator.get_auth_stats()
+        stats = authenticator.get_websocket_auth_stats()
         
-        # Test zero attempts edge case - should use 0.0 success rate
-        assert stats["total_attempts"] == 0
-        assert stats["success_rate"] == 0.0  # Should handle division by zero
+        # Test zero attempts edge case - should handle division by zero
+        assert stats["websocket_auth_statistics"]["total_attempts"] == 0
+        assert stats["websocket_auth_statistics"]["success_rate_percent"] == 0.0  # Should handle division by zero
 
 
 @pytest.mark.unit
+@pytest.mark.skip(reason="ConnectionSecurityManager eliminated in SSOT consolidation - security handled by UnifiedWebSocketAuthenticator")
 class TestConnectionSecurityManager(TestWebSocketAuthComprehensive):
-    """Test ConnectionSecurityManager class comprehensively."""
+    """Test ConnectionSecurityManager class - SKIPPED (SSOT compliance).
+    
+    This class has been eliminated as part of SSOT consolidation.
+    Security management is now handled directly by UnifiedWebSocketAuthenticator.
+    """
     
     def setup_method(self):
         """Setup security manager for each test."""
         super().setup_method()
-        self.security_manager = ConnectionSecurityManager()
+        # ConnectionSecurityManager no longer exists in unified system
+        pass
     
     def test_security_manager_initialization(self):
         """Test ConnectionSecurityManager initialization - SHOULD FAIL initially."""
@@ -574,8 +571,13 @@ class TestConnectionSecurityManager(TestWebSocketAuthComprehensive):
 
 
 @pytest.mark.unit
+@pytest.mark.skip(reason="RateLimiter extracted to separate module - not part of WebSocket auth testing scope")
 class TestRateLimiter(TestWebSocketAuthComprehensive):
-    """Test RateLimiter class."""
+    """Test RateLimiter class - SKIPPED (moved to dedicated rate limiting module).
+    
+    Rate limiting functionality has been moved to dedicated modules and is
+    tested separately from WebSocket authentication.
+    """
     
     def test_rate_limiter_initialization(self):
         """Test RateLimiter initialization with defaults - SHOULD FAIL initially."""
@@ -607,274 +609,278 @@ class TestRateLimiter(TestWebSocketAuthComprehensive):
 
 @pytest.mark.unit
 class TestGlobalFunctions(TestWebSocketAuthComprehensive):
-    """Test global utility functions."""
+    """Test global utility functions (SSOT unified auth)."""
     
     def test_get_websocket_authenticator_singleton(self):
-        """Test WebSocket authenticator singleton pattern - SHOULD FAIL initially."""
+        """Test WebSocket authenticator singleton pattern (SSOT unified auth)."""
         # Clear global state
-        import netra_backend.app.websocket_core.auth as auth_module
-        auth_module._authenticator = None
+        import netra_backend.app.websocket_core.unified_websocket_auth as unified_auth_module
+        unified_auth_module._websocket_authenticator = None
         
         authenticator1 = get_websocket_authenticator()
         authenticator2 = get_websocket_authenticator()
         
         # Test singleton pattern ensures same instance returned
         assert authenticator1 is authenticator2
-        assert isinstance(authenticator1, WebSocketAuthenticator)
+        assert isinstance(authenticator1, UnifiedWebSocketAuthenticator)
     
+    @pytest.mark.skip(reason="ConnectionSecurityManager eliminated in SSOT consolidation")
     def test_get_connection_security_manager_singleton(self):
-        """Test connection security manager singleton pattern - SHOULD FAIL initially."""
-        # Clear global state
-        import netra_backend.app.websocket_core.auth as auth_module
-        auth_module._security_manager = None
+        """Test connection security manager singleton - SKIPPED (SSOT compliance).
         
-        manager1 = get_connection_security_manager()
-        manager2 = get_connection_security_manager()
-        
-        # Test singleton pattern ensures same instance returned
-        assert manager1 is manager2
-        assert isinstance(manager1, ConnectionSecurityManager)
+        ConnectionSecurityManager has been eliminated as part of SSOT consolidation.
+        Security is now handled directly by UnifiedWebSocketAuthenticator.
+        """
+        pass
     
+    @pytest.mark.skip(reason="secure_websocket_context eliminated - replaced with direct authentication")
     @pytest.mark.asyncio
     async def test_secure_websocket_context_string_legacy(self):
-        """Test secure WebSocket context with string parameter (legacy) - SHOULD FAIL initially."""
-        connection_id = "legacy-conn-123"
+        """Test secure WebSocket context - SKIPPED (SSOT compliance).
         
-        async with secure_websocket_context(connection_id):
-            # Should mark connection as secure  
-            manager = get_connection_security_manager()
-            # Test legacy string parameter mode compatibility
-            assert manager.is_secure(connection_id) is True
+        secure_websocket_context has been eliminated. The unified system uses
+        direct authentication through UnifiedWebSocketAuthenticator.
+        """
+        pass
     
+    @pytest.mark.skip(reason="secure_websocket_context eliminated - replaced with direct authentication")
     @pytest.mark.asyncio
     async def test_secure_websocket_context_websocket_object(self):
-        """Test secure WebSocket context with WebSocket object - SHOULD FAIL initially."""
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        """Test secure WebSocket context with WebSocket object - SKIPPED (SSOT compliance).
         
-        # Mock the authenticator
-        with patch('netra_backend.app.websocket_core.auth.get_websocket_authenticator') as mock_get_auth:
-            mock_authenticator = AsyncMock()
-            mock_auth_info = AuthInfo(
-                user_id="test-user",
-                email="test@example.com", 
-                permissions=["read"]
-            )
-            mock_authenticator.authenticate_websocket = AsyncMock(return_value=mock_auth_info)
-            mock_get_auth.return_value = mock_authenticator
-            
-            async with secure_websocket_context(mock_websocket) as (auth_info, security_manager):
-                # Test context manager authentication and security manager return
-                assert isinstance(auth_info, AuthInfo)
-                assert auth_info.user_id == "test-user"
-                assert isinstance(security_manager, ConnectionSecurityManager)
+        secure_websocket_context has been eliminated. The unified system uses
+        direct authentication through UnifiedWebSocketAuthenticator.authenticate_websocket_connection().
+        """
+        pass
 
 
 @pytest.mark.unit
 class TestEdgeCasesAndFailureScenarios(TestWebSocketAuthComprehensive):
-    """Test edge cases and failure scenarios."""
+    """Test edge cases and failure scenarios (SSOT unified auth)."""
     
     def setup_method(self):
-        """Setup security manager for edge case tests."""
+        """Setup for edge case tests."""
         super().setup_method()
-        self.security_manager = ConnectionSecurityManager()
+        # No security manager needed in unified system
     
     @pytest.mark.asyncio
-    async def test_authenticate_missing_user_id_in_valid_token(self):
-        """Test auth failure when valid token missing user_id - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+    async def test_authenticate_websocket_missing_user_id(self):
+        """Test WebSocket auth failure when token missing user_id (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
-        # Mock validation result without user_id
-        mock_result = {
-            "valid": True,
-            "email": "test@example.com",
-            "permissions": ["read"]
-            # Missing user_id field
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_result)
-        
-        result = await authenticator.authenticate(self.valid_token)
-        
-        # Test handling of token validation result missing user_id  
-        assert result is None
-        assert authenticator._failed_auths == 1
-    
-    @pytest.mark.asyncio 
-    async def test_authenticate_validation_returns_invalid_false(self):
-        """Test authentication when validation returns valid=False - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_result = {
-            "valid": False,
-            "error": "Token expired",
-            "details": "Token expired at 2024-01-01"
-        }
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=mock_result)
-        
-        result = await authenticator.authenticate(self.valid_token)
-        
-        # Test handling of validation result with valid=False
-        assert result is None
-        assert authenticator._failed_auths == 1
-    
-    def test_extract_token_malformed_authorization_header(self):
-        """Test token extraction with malformed Authorization header returns None."""
-        authenticator = WebSocketAuthenticator()
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {"authorization": "Malformed header value"}
-        # Ensure query_params doesn't interfere
-        del mock_websocket.query_params
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        assert token is None, "Malformed authorization header should return None"
-    
-    def test_extract_token_multiple_subprotocols(self):
-        """Test token extraction with multiple subprotocols - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
-        
-        encoded_token = base64.urlsafe_b64encode(self.valid_token.encode('utf-8')).decode('utf-8')
-        
-        mock_websocket = Mock(spec=WebSocket)
-        mock_websocket.headers = {
-            "authorization": "",
-            "sec-websocket-protocol": f"protocol1, jwt.{encoded_token}, protocol2"
-        }
-        
-        token = authenticator.extract_token_from_websocket(mock_websocket)
-        
-        # Test subprotocol parsing with multiple comma-separated protocols
-        assert token == self.valid_token
-    
-    def test_security_manager_unregister_nonexistent_connection(self):
-        """Test unregistering connection that doesn't exist - SHOULD FAIL initially."""
-        # This should not raise an exception
-        security_manager = ConnectionSecurityManager()
-        security_manager.unregister_connection("nonexistent-conn")
-        
-        # This might fail due to exception handling
-        # Should pass silently
-        assert True  # Just verify no exception raised
-    
-    def test_security_manager_report_violation_no_details(self):
-        """Test reporting security violation without details - SHOULD FAIL initially."""
-        connection_id = "no-details-conn"
-        
-        security_manager = ConnectionSecurityManager()
-        security_manager.report_security_violation(connection_id, "basic_violation")
-        
-        # Test default details handling
-        violations = security_manager._security_violations[connection_id]
-        assert len(violations) == 1
-        assert violations[0]["details"] == {}  # Should default to empty dict
-    
-    @pytest.mark.asyncio
-    async def test_authenticate_websocket_circuit_breaker_scenario(self):
-        """Test WebSocket auth with circuit breaker open returns 401 (auth failed)."""
-        authenticator = WebSocketAuthenticator()
-        
+        # Mock WebSocket object
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
         
-        # Mock circuit breaker scenario - when circuit breaker is open, validate_token_jwt returns None
-        from netra_backend.app.clients.circuit_breaker import CircuitState
-        mock_circuit_breaker = Mock()
-        mock_circuit_breaker.state = CircuitState.OPEN
-        authenticator.auth_client.circuit_breaker = mock_circuit_breaker
-        authenticator.auth_client.validate_token_jwt = AsyncMock(return_value=None)
+        # Mock validation result without user_id
+        mock_auth_result = AuthResult(
+            success=False,
+            error="Invalid token: missing user_id",
+            error_code="VALIDATION_FAILED"
+        )
         
-        with pytest.raises(HTTPException) as exc_info:
-            await authenticator.authenticate_websocket(mock_websocket)
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
         
-        # Circuit breaker open results in 401 (validation failure) not 503
-        assert exc_info.value.status_code == 401
-        assert "Invalid or expired authentication token" in str(exc_info.value.detail)
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Test handling of token validation result missing user_id  
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "VALIDATION_FAILED"
+        assert authenticator._websocket_auth_failures == 1
     
-    def test_auth_stats_with_zero_attempts_edge_case(self):
-        """Test auth stats calculation edge case - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+    @pytest.mark.asyncio 
+    async def test_authenticate_websocket_token_expired(self):
+        """Test WebSocket authentication when token expired (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
+        
+        # Mock WebSocket object
+        mock_websocket = Mock(spec=WebSocket)
+        mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
+        
+        mock_auth_result = AuthResult(
+            success=False,
+            error="Token expired",
+            error_code="TOKEN_EXPIRED"
+        )
+        
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
+        
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Test handling of validation result with expired token
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "TOKEN_EXPIRED"
+        assert authenticator._websocket_auth_failures == 1
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_malformed_authorization_header(self):
+        """Test malformed auth header - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="Token extraction moved to UnifiedAuthenticationService - SSOT compliance")
+    def test_extract_token_multiple_subprotocols(self):
+        """Test multiple subprotocols - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="ConnectionSecurityManager eliminated in SSOT consolidation")
+    def test_security_manager_unregister_nonexistent_connection(self):
+        """Test unregistering nonexistent connection - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.skip(reason="ConnectionSecurityManager eliminated in SSOT consolidation")
+    def test_security_manager_report_violation_no_details(self):
+        """Test security violation reporting - SKIPPED (SSOT compliance)."""
+        pass
+    
+    @pytest.mark.asyncio
+    async def test_authenticate_websocket_service_unavailable(self):
+        """Test WebSocket auth with service unavailable (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
+        
+        # Mock WebSocket object
+        mock_websocket = Mock(spec=WebSocket)
+        mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
+        
+        # Mock service unavailable scenario
+        mock_auth_result = AuthResult(
+            success=False,
+            error="Authentication service temporarily unavailable",
+            error_code="AUTH_SERVICE_ERROR"
+        )
+        
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, None)
+        )
+        
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
+        
+        # Service unavailable results in auth failure
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is False
+        assert result.error_code == "AUTH_SERVICE_ERROR"
+    
+    def test_websocket_auth_stats_zero_attempts_edge_case(self):
+        """Test WebSocket auth stats calculation edge case (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
         # Verify zero attempts case
-        stats = authenticator.get_auth_stats()
+        stats = authenticator.get_websocket_auth_stats()
         
-        # Test zero attempts case - verify max(1, attempts) logic for success_rate
-        assert stats["total_attempts"] == 0
-        assert stats["success_rate"] == 0.0
-        
-        # The code uses max(1, attempts) to avoid division by zero, so this will fail
-        # because it will calculate 0/1 = 0.0 but total_attempts will show 0
+        # Test zero attempts case - verify division by zero handling
+        assert stats["websocket_auth_statistics"]["total_attempts"] == 0
+        assert stats["websocket_auth_statistics"]["success_rate_percent"] == 0.0
 
 
 # Additional comprehensive coverage tests
 @pytest.mark.unit
 @pytest.mark.comprehensive
 class TestComplexIntegrationScenarios(TestWebSocketAuthComprehensive):
-    """Test complex integration scenarios."""
+    """Test complex integration scenarios (SSOT unified auth)."""
     
     @pytest.mark.asyncio
-    async def test_full_websocket_auth_flow_with_connection_management(self):
-        """Test complete flow: auth -> register -> validate -> cleanup - SHOULD FAIL initially."""
-        # This comprehensive test will definitely fail due to multiple integration points
+    async def test_full_websocket_auth_flow_unified(self):
+        """Test complete WebSocket auth flow with SSOT unified authentication."""
         
+        # Mock WebSocket object
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+        mock_websocket.client_state = "connected"
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
+        mock_websocket.client.port = 8080
         
-        # Step 1: Authenticate
+        # Step 1: Get authenticator and authenticate
         authenticator = get_websocket_authenticator()
-        with patch.object(authenticator, 'auth_client') as mock_client:
-            mock_client.validate_token_jwt = AsyncMock(return_value={
-                "valid": True,
-                "user_id": "integration-user",
-                "email": "integration@example.com",
-                "permissions": ["read", "write"]
-            })
-            
-            auth_info = await authenticator.authenticate_websocket(mock_websocket)
         
-        # Step 2: Register with security manager
-        security_manager = get_connection_security_manager()
-        connection_id = "integration-conn-456"
-        security_manager.register_connection(connection_id, auth_info, mock_websocket)
+        # Mock successful authentication response
+        mock_auth_result = AuthResult(
+            success=True,
+            user_id="integration-user",
+            email="integration@example.com",
+            permissions=["read", "write"],
+            validated_at=datetime.now(timezone.utc)
+        )
+        mock_user_context = UserExecutionContext(
+            user_id="integration-user",
+            thread_id="integration-thread",
+            run_id="integration-run",
+            websocket_client_id="integration-ws-client"
+        )
         
-        # Step 3: Validate security
-        is_secure = security_manager.validate_connection_security(connection_id)
+        authenticator._auth_service.authenticate_websocket = AsyncMock(
+            return_value=(mock_auth_result, mock_user_context)
+        )
         
-        # Step 4: Report violation and test threshold
-        for i in range(3):
-            security_manager.report_security_violation(connection_id, f"test_violation_{i}")
+        # Execute authentication
+        result = await authenticator.authenticate_websocket_connection(mock_websocket)
         
-        still_valid = security_manager.validate_connection_security(connection_id)
+        # Step 2: Verify complete integration
+        assert isinstance(result, WebSocketAuthResult)
+        assert result.success is True
+        assert result.user_context.user_id == "integration-user"
+        assert result.auth_result.email == "integration@example.com"
+        assert result.auth_result.permissions == ["read", "write"]
         
-        # Step 5: Cleanup
-        security_manager.unregister_connection(connection_id)
-        
-        # Test integration between authenticator and security manager
-        assert auth_info.user_id == "integration-user"
-        assert is_secure is True
-        assert still_valid is True  # Should still be valid with only 3 violations
-        assert not security_manager.is_secure(connection_id)  # Should be cleaned up
+        # Step 3: Test statistics tracking
+        stats = authenticator.get_websocket_auth_stats()
+        assert stats["websocket_auth_statistics"]["total_attempts"] == 1
+        assert stats["websocket_auth_statistics"]["successful_authentications"] == 1
+        assert stats["ssot_compliance"]["ssot_compliant"] is True
     
     @pytest.mark.asyncio
-    async def test_concurrent_authentication_race_condition(self):
-        """Test concurrent authentication requests - SHOULD FAIL initially."""
-        authenticator = WebSocketAuthenticator()
+    async def test_concurrent_websocket_authentication_race_condition(self):
+        """Test concurrent WebSocket authentication requests (SSOT unified auth)."""
+        authenticator = UnifiedWebSocketAuthenticator()
         
-        async def auth_task():
-            with patch.object(authenticator, 'auth_client') as mock_client:
-                mock_client.validate_token_jwt = AsyncMock(return_value={
-                    "valid": True,
-                    "user_id": f"user-{asyncio.current_task().get_name()}",
-                    "email": "test@example.com",
-                    "permissions": []
-                })
-                return await authenticator.authenticate(self.valid_token)
+        async def auth_task(task_id):
+            # Mock WebSocket object for each task
+            mock_websocket = Mock(spec=WebSocket)
+            mock_websocket.headers = {"authorization": f"Bearer {self.valid_token}"}
+            mock_websocket.client_state = "connected"
+            mock_websocket.client = Mock()
+            mock_websocket.client.host = "127.0.0.1"
+            
+            # Mock successful auth response with unique user per task
+            mock_auth_result = AuthResult(
+                success=True,
+                user_id=f"concurrent-user-{task_id}",
+                email="test@example.com",
+                permissions=[],
+                validated_at=datetime.now(timezone.utc)
+            )
+            mock_user_context = UserExecutionContext(
+                user_id=f"concurrent-user-{task_id}",
+                thread_id=f"thread-{task_id}",
+                run_id=f"run-{task_id}",
+                websocket_client_id=f"ws-{task_id}"
+            )
+            
+            authenticator._auth_service.authenticate_websocket = AsyncMock(
+                return_value=(mock_auth_result, mock_user_context)
+            )
+            
+            return await authenticator.authenticate_websocket_connection(mock_websocket)
         
         # Run multiple concurrent authentications
-        tasks = [auth_task() for _ in range(5)]
+        tasks = [auth_task(i) for i in range(5)]
         results = await asyncio.gather(*tasks)
         
         # Test concurrent authentication requests for race conditions
-        assert all(result is not None for result in results)
-        assert authenticator._auth_attempts == 5
-        assert authenticator._successful_auths == 5
+        assert all(isinstance(result, WebSocketAuthResult) and result.success for result in results)
+        assert authenticator._websocket_auth_attempts == 5
+        assert authenticator._websocket_auth_successes == 5
