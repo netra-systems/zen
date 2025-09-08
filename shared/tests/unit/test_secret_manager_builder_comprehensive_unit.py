@@ -55,8 +55,11 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
         self.env.reset()
         
         # Clear any JWT secret manager cache for clean tests
-        from shared.jwt_secret_manager import SharedJWTSecretManager
-        SharedJWTSecretManager.clear_cache()
+        from shared.jwt_secret_manager import SharedJWTSecretManager, get_jwt_secret_manager
+        if hasattr(SharedJWTSecretManager, 'clear_cache'):
+            SharedJWTSecretManager.clear_cache()
+        # Also clear the unified manager cache  
+        get_jwt_secret_manager().clear_cache()
         
         # Setup logging for test visibility
         logging.basicConfig(level=logging.DEBUG)
@@ -64,8 +67,11 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
     def tearDown(self):
         """Clean up real environment after tests."""
         self.env.reset()
-        from shared.jwt_secret_manager import SharedJWTSecretManager
-        SharedJWTSecretManager.clear_cache()
+        from shared.jwt_secret_manager import SharedJWTSecretManager, get_jwt_secret_manager
+        if hasattr(SharedJWTSecretManager, 'clear_cache'):
+            SharedJWTSecretManager.clear_cache()
+        # Also clear the unified manager cache  
+        get_jwt_secret_manager().clear_cache()
 
     # ===================== REAL INITIALIZATION TESTS (10 tests) =====================
 
@@ -680,14 +686,12 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
 
     def test_real_business_jwt_configuration_development_flow(self):
         """Test real business scenario: JWT configuration in development flow."""
-        # Real development scenario setup
-        dev_config = {
-            "ENVIRONMENT": "development",
-            "JWT_SECRET_KEY": "development_business_jwt_secret_32_chars",
-            "DEBUG": "true"
-        }
+        # Real development scenario setup - set in global environment
+        self.env.set("ENVIRONMENT", "development", source="test")
+        self.env.set("JWT_SECRET_KEY", "development_business_jwt_secret_32_chars", source="test")
+        self.env.set("DEBUG", "true", source="test")
         
-        builder = SecretManagerBuilder(service="business_dev_test", env_vars=dev_config)
+        builder = SecretManagerBuilder(service="business_dev_test")
         
         # Real business validation
         self.assertTrue(builder.is_development(), "Should detect development environment")
