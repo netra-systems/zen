@@ -686,8 +686,22 @@ class AgentInstanceFactory:
                 if self._performance_config.enable_class_caching:
                     AgentClass = self._get_cached_agent_class(agent_name)
                 
+                # Set dependencies for cached agent class
+                if AgentClass:
+                    # Agent class found in cache - set dependencies
+                    if self._llm_manager:
+                        llm_manager = self._llm_manager
+                        tool_dispatcher = self._tool_dispatcher  # Can be None for per-request creation
+                    elif self._agent_registry:
+                        llm_manager = self._agent_registry.llm_manager
+                        tool_dispatcher = self._agent_registry.tool_dispatcher
+                    else:
+                        # No LLM manager available - this is OK for agents that don't need one
+                        llm_manager = None
+                        tool_dispatcher = None
+                
                 # Fallback to registry lookup if not cached
-                if not AgentClass and self._agent_class_registry:
+                elif not AgentClass and self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
                         # Provide detailed debugging information
@@ -751,6 +765,14 @@ class AgentInstanceFactory:
                 if hasattr(AgentClass, 'create_agent_with_context'):
                     logger.info(f"✅ Using create_agent_with_context factory for {agent_name} ({agent_class_name})")
                     agent = AgentClass.create_agent_with_context(user_context)
+                    
+                    # CRITICAL: Inject dependencies after creation when using factory method
+                    if hasattr(agent, 'llm_manager') and llm_manager is not None:
+                        agent.llm_manager = llm_manager
+                        logger.debug(f"Injected llm_manager into {agent_name}")
+                    if hasattr(agent, 'tool_dispatcher') and tool_dispatcher is not None:
+                        agent.tool_dispatcher = tool_dispatcher
+                        logger.debug(f"Injected tool_dispatcher into {agent_name}")
                 else:
                     # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
                     logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")

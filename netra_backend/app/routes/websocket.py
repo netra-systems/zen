@@ -506,13 +506,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Factory pattern: Create WebSocketConnection and add to isolated manager
                 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
                 connection = WebSocketConnection(
-                    connection_id=user_context.websocket_connection_id,
+                    connection_id=user_context.websocket_client_id,
                     user_id=user_id,
                     websocket=websocket,
                     connected_at=datetime.utcnow()
                 )
                 await ws_manager.add_connection(connection)
-                connection_id = user_context.websocket_connection_id
+                connection_id = user_context.websocket_client_id
                 logger.info(f"Registered connection with isolated manager: {connection_id}")
             else:
                 # Legacy pattern: Use old connect_user method

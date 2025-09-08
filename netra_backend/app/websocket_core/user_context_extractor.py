@@ -413,8 +413,8 @@ class UserContextExtractor:
             # Generate request ID (unique per connection)
             request_id = f"ws_req_{int(connection_timestamp)}_{unique_id[:8]}"
             
-            # Generate WebSocket connection ID (unique per WebSocket connection)
-            websocket_connection_id = f"ws_{user_id[:8]}_{int(connection_timestamp)}_{unique_id[:8]}"
+            # Generate WebSocket client ID (unique per WebSocket connection)
+            websocket_client_id = f"ws_{user_id[:8]}_{int(connection_timestamp)}_{unique_id[:8]}"
             
             # Create UserExecutionContext
             user_context = UserExecutionContext(
@@ -422,12 +422,12 @@ class UserContextExtractor:
                 thread_id=thread_id,
                 run_id=run_id,
                 request_id=request_id,
-                websocket_connection_id=websocket_connection_id
+                websocket_client_id=websocket_client_id
             )
             
             logger.info(
                 f"Created UserExecutionContext for WebSocket connection: "
-                f"user={user_id[:8]}..., conn_id={websocket_connection_id}"
+                f"user={user_id[:8]}..., conn_id={websocket_client_id}"
             )
             
             return user_context
@@ -528,7 +528,7 @@ class UserContextExtractor:
             logger.info(
                 f"Successfully authenticated WebSocket connection: "
                 f"user={user_context.user_id[:8]}..., "
-                f"context={user_context.websocket_connection_id}, "
+                f"context={user_context.websocket_client_id}, "
                 f"permissions={len(auth_info['permissions'])}"
             )
             
@@ -567,7 +567,7 @@ class UserContextExtractor:
             thread_id=additional_metadata.get("thread_id", f"test_thread_{unique_id[:8]}") if additional_metadata else f"test_thread_{unique_id[:8]}",
             run_id=additional_metadata.get("run_id", f"test_run_{unique_id[:8]}") if additional_metadata else f"test_run_{unique_id[:8]}",
             request_id=f"test_req_{int(timestamp)}_{unique_id[:8]}",
-            websocket_connection_id=f"test_ws_{int(timestamp)}_{unique_id[:8]}"
+            websocket_client_id=f"test_ws_{int(timestamp)}_{unique_id[:8]}"
         )
         
         logger.debug(f"Created test UserExecutionContext: {context}")
@@ -615,8 +615,71 @@ async def extract_websocket_user_context(
     return await extractor.extract_user_context_from_websocket(websocket, additional_metadata)
 
 
+class WebSocketUserContextExtractor(UserContextExtractor):
+    """
+    WebSocket-specific user context extractor.
+    
+    This class extends UserContextExtractor with WebSocket-specific functionality
+    for the comprehensive WebSocket phase integration tests.
+    
+    Business Value Justification (BVJ):
+    - Segment: Platform/Internal - Test Infrastructure
+    - Business Goal: Enable comprehensive WebSocket testing
+    - Value Impact: Ensures WebSocket authentication works correctly
+    - Strategic Impact: Prevents WebSocket authentication failures in production
+    """
+    
+    def __init__(self):
+        """Initialize WebSocket-specific context extractor."""
+        super().__init__()
+        self._extraction_count = 0
+        self._successful_extractions = 0
+        self._failed_extractions = 0
+        
+    async def extract_context_with_metrics(self, websocket: WebSocket) -> Tuple[UserExecutionContext, Dict[str, Any]]:
+        """Extract user context with detailed metrics tracking."""
+        self._extraction_count += 1
+        
+        try:
+            context, auth_info = await self.extract_user_context_from_websocket(websocket)
+            self._successful_extractions += 1
+            
+            # Add extraction metrics to auth info
+            auth_info["extraction_metrics"] = {
+                "extraction_count": self._extraction_count,
+                "successful_extractions": self._successful_extractions,
+                "failed_extractions": self._failed_extractions,
+                "success_rate": self._successful_extractions / self._extraction_count
+            }
+            
+            return context, auth_info
+            
+        except Exception as e:
+            self._failed_extractions += 1
+            logger.error(f"Context extraction failed: {e}")
+            raise
+    
+    def get_extraction_stats(self) -> Dict[str, Any]:
+        """Get extraction statistics for monitoring."""
+        total_extractions = max(1, self._extraction_count)  # Avoid division by zero
+        
+        return {
+            "total_extractions": self._extraction_count,
+            "successful_extractions": self._successful_extractions,
+            "failed_extractions": self._failed_extractions,
+            "success_rate": self._successful_extractions / total_extractions
+        }
+    
+    def reset_stats(self):
+        """Reset extraction statistics."""
+        self._extraction_count = 0
+        self._successful_extractions = 0
+        self._failed_extractions = 0
+
+
 __all__ = [
     "UserContextExtractor",
-    "get_user_context_extractor",
+    "WebSocketUserContextExtractor",
+    "get_user_context_extractor", 
     "extract_websocket_user_context"
 ]

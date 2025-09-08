@@ -24,7 +24,6 @@ from fastapi import HTTPException
 
 from netra_backend.app.core.supervisor_factory import create_supervisor_core
 from netra_backend.app.websocket_core.context import WebSocketContext
-from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
@@ -157,16 +156,16 @@ async def _get_websocket_supervisor_components(app_state = None) -> dict:
         if app_state and hasattr(app_state, 'websocket_bridge'):
             components["websocket_bridge"] = app_state.websocket_bridge
         else:
-            # Fallback: try to get from WebSocket manager
-            websocket_manager = get_websocket_manager()
-            if websocket_manager and hasattr(websocket_manager, 'bridge'):
-                components["websocket_bridge"] = websocket_manager.bridge
-            else:
-                logger.error("WebSocket bridge not available for supervisor creation")
-                raise HTTPException(
-                    status_code=500,
-                    detail="WebSocket bridge not configured"
-                )
+            # SECURITY FIX: Remove unsafe singleton fallback to prevent user data leakage
+            # The supervisor factory should not use singleton WebSocket managers
+            logger.error(
+                "WebSocket bridge not available for supervisor creation - "
+                "app_state.websocket_bridge is required for secure operation"
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="WebSocket bridge not configured - app_state.websocket_bridge is required"
+            )
         
     except HTTPException:
         raise
@@ -286,13 +285,22 @@ def get_websocket_supervisor_health() -> dict:
         }
         
         try:
-            websocket_manager = get_websocket_manager()
-            websocket_health["websocket_manager_available"] = websocket_manager is not None
+            # SECURITY FIX: Test factory pattern instead of unsafe singleton
+            # Health check should verify the secure factory pattern is working
+            from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
             
-            if websocket_manager and hasattr(websocket_manager, 'bridge'):
-                websocket_health["websocket_bridge_available"] = True
+            # Test that factory pattern is available (doesn't require user context for health check)
+            factory_available = WebSocketManagerFactory is not None
+            websocket_health["websocket_factory_available"] = factory_available
+            websocket_health["websocket_manager_available"] = factory_available  # Legacy compatibility
+            
+            # Note: Cannot test bridge availability without user context in health check
+            # This is by design for security - bridges are user-scoped
+            websocket_health["websocket_bridge_available"] = "requires_user_context"
+            
         except Exception as e:
-            websocket_health["websocket_manager_error"] = str(e)
+            websocket_health["websocket_factory_error"] = str(e)
+            websocket_health["websocket_manager_available"] = False
         
         # Combine health information
         return {

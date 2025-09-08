@@ -175,6 +175,17 @@ class CorpusService:
             db, source_corpus_id, new_name, user_id
         )
     
+    async def _copy_corpus_content(self, source_table: str, dest_table: str, 
+                                  corpus_id: str, db: AsyncSession) -> None:
+        """Copy corpus content from source table to destination table
+        
+        This method delegates to the modular service's document manager
+        for the actual content copying operation.
+        """
+        # Delegate to the document manager through the modular service
+        document_manager = self._modular_service.crud_service.document_manager
+        await document_manager.copy_corpus_content(source_table, dest_table, corpus_id, db)
+    
     async def search_corpus_content(self, db: AsyncSession, corpus_id: str, search_params: Dict):
         """Search corpus content"""
         return await self._modular_service.search_corpus_content(
