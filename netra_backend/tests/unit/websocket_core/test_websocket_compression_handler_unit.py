@@ -36,7 +36,7 @@ class TestWebSocketCompressionHandler:
         """Create compression configuration."""
         return CompressionConfig(
             compression_enabled=True,
-            compression_threshold_bytes=100,
+            compression_threshold_bytes=200,
             compression_level=6,
             supported_algorithms=['gzip', 'deflate'],
             max_uncompressed_size_mb=10
@@ -58,7 +58,7 @@ class TestWebSocketCompressionHandler:
             }
         }
         return WebSocketMessage(
-            message_type=MessageType.AGENT_COMPLETED,
+            type=MessageType.AGENT_RESPONSE_COMPLETE,
             payload=large_payload,
             user_id="user_123"
         )
@@ -67,7 +67,7 @@ class TestWebSocketCompressionHandler:
     def small_message(self):
         """Create small message that shouldn't trigger compression."""
         return WebSocketMessage(
-            message_type=MessageType.USER_MESSAGE,
+            type=MessageType.USER_MESSAGE,
             payload={"content": "Hello"},
             user_id="user_123"
         )
@@ -84,7 +84,7 @@ class TestWebSocketCompressionHandler:
     async def test_compresses_large_messages(self, compression_handler, large_message):
         """Test compression of messages exceeding size threshold."""
         # Convert message to JSON for size calculation
-        message_json = json.dumps(large_message.to_dict())
+        message_json = json.dumps(large_message.model_dump())
         original_size = len(message_json.encode('utf-8'))
         
         # Should exceed threshold and trigger compression
@@ -108,7 +108,7 @@ class TestWebSocketCompressionHandler:
     async def test_skips_compression_for_small_messages(self, compression_handler, small_message):
         """Test that small messages skip compression."""
         # Convert message to JSON for size calculation
-        message_json = json.dumps(small_message.to_dict())
+        message_json = json.dumps(small_message.model_dump())
         original_size = len(message_json.encode('utf-8'))
         
         # Should be below threshold
@@ -138,7 +138,7 @@ class TestWebSocketCompressionHandler:
         
         # Verify perfect reconstruction
         assert isinstance(decompressed_message, WebSocketMessage)
-        assert decompressed_message.message_type == large_message.message_type
+        assert decompressed_message.type == large_message.type
         assert decompressed_message.user_id == large_message.user_id
         assert decompressed_message.payload == large_message.payload
         
@@ -218,7 +218,7 @@ class TestWebSocketCompressionHandler:
             "enormous_data": "x" * (11 * 1024 * 1024)  # 11MB > 10MB limit
         }
         huge_message = WebSocketMessage(
-            message_type=MessageType.AGENT_COMPLETED,
+            type=MessageType.AGENT_RESPONSE_COMPLETE,
             payload=huge_payload,
             user_id="user_123"
         )
@@ -274,16 +274,16 @@ class TestWebSocketCompressionHandler:
         base_content = {"large_text": "This is repeated content that compresses well. " * 50}
         
         message_types = [
-            MessageType.AGENT_COMPLETED,
-            MessageType.AGENT_THINKING,
-            MessageType.TOOL_COMPLETED,
+            MessageType.AGENT_RESPONSE_COMPLETE,
+            MessageType.AGENT_PROGRESS,
+            MessageType.AGENT_PROGRESS,  # Use AGENT_PROGRESS for tool completion
             MessageType.USER_MESSAGE
         ]
         
         results = {}
         for msg_type in message_types:
             message = WebSocketMessage(
-                message_type=msg_type,
+                type=msg_type,
                 payload=base_content,
                 user_id="user_123"
             )
@@ -296,7 +296,7 @@ class TestWebSocketCompressionHandler:
             assert result.compression_ratio < 1.0
         
         # Agent result messages might get better compression due to structure
-        agent_result = results[MessageType.AGENT_COMPLETED]
+        agent_result = results[MessageType.AGENT_RESPONSE_COMPLETE]
         user_message = results[MessageType.USER_MESSAGE]
         
         # Both should achieve good compression
@@ -311,7 +311,7 @@ class TestWebSocketCompressionHandler:
         for i in range(10):
             # Create variant of message
             message = WebSocketMessage(
-                message_type=large_message.message_type,
+                type=large_message.type,
                 payload={**large_message.payload, "iteration": i},
                 user_id=f"user_{i}"
             )

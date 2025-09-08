@@ -26,8 +26,8 @@ from test_framework.ssot.database import DatabaseTestHelper
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
-from netra_backend.app.agents.agent_registry import get_agent_registry
-from netra_backend.app.agents.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.business.agent_quality_validator import AgentQualityValidator
 from netra_backend.app.business.usage_tracker import UsageTracker
 

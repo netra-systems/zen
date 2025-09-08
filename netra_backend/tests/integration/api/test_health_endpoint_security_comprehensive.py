@@ -28,7 +28,7 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 from netra_backend.app.api.health_checks import health_router
-from netra_backend.app.core.security import get_current_user, verify_api_key
+from netra_backend.app.auth_integration.auth import get_current_user
 
 
 class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
