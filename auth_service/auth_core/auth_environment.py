@@ -125,8 +125,8 @@ class AuthEnvironment:
         elif env == "development":
             # Development: Permissive default for fast iteration
             return self.env.get("JWT_ALGORITHM") or "HS256"
-        elif env == "test":
-            # Test: Fast algorithm for test performance
+        elif env == "test" or env == "testing":
+            # Test: Fast algorithm for test performance, never require explicit setting
             return self.env.get("JWT_ALGORITHM") or "HS256"
         else:
             return "HS256"
@@ -1010,7 +1010,7 @@ class AuthEnvironment:
         
         complexity_str = self.env.get("REQUIRE_PASSWORD_COMPLEXITY")
         if complexity_str:
-            return complexity_str.lower() == "true"
+            return complexity_str.lower() in ("true", "1", "yes", "on")
             
         # Environment-specific defaults (no fallback pattern)
         if env == "production":

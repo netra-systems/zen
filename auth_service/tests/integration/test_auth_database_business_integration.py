@@ -64,7 +64,7 @@ class TestAuthDatabaseBusinessIntegration(BaseIntegrationTest):
         
         # Real Redis cache connection
         self.redis_manager = AuthRedisManager()
-        await self.redis_manager.initialize()
+        await self.redis_manager.connect()
         
         # Test data for business scenarios
         self.test_user_base_email = f"db-integration-test-{uuid.uuid4()}"

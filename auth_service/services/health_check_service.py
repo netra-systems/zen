@@ -14,7 +14,7 @@ from datetime import datetime, UTC
 import asyncio
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.services.redis_service import RedisService
+from auth_service.auth_core.redis_manager import AuthRedisManager
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +27,16 @@ class HealthCheckService:
     including dependencies like Redis and database connections.
     """
     
-    def __init__(self, auth_config: AuthConfig, redis_service: Optional[RedisService] = None):
+    def __init__(self, auth_config: AuthConfig, redis_manager: Optional[AuthRedisManager] = None):
         """
         Initialize HealthCheckService with configuration.
         
         Args:
             auth_config: Authentication configuration
-            redis_service: Optional Redis service instance
+            redis_manager: Optional Redis manager instance
         """
         self.auth_config = auth_config
-        self.redis_service = redis_service or RedisService(auth_config)
+        self.redis_manager = redis_manager or AuthRedisManager()
         
     async def check_service_health(self) -> Dict[str, Any]:
         """
@@ -80,17 +80,31 @@ class HealthCheckService:
     async def _check_redis_health(self) -> Dict[str, Any]:
         """Check Redis service health."""
         try:
+            # Ensure Redis connection is available
+            if not await self.redis_manager.ensure_connected():
+                return {
+                    "status": "unhealthy",
+                    "message": "Redis connection not available"
+                }
+            
+            client = self.redis_manager.get_client()
+            if not client:
+                return {
+                    "status": "unhealthy", 
+                    "message": "Redis client not available"
+                }
+            
             # Test Redis connectivity
             test_key = f"health_check_{datetime.now(UTC).timestamp()}"
             test_value = "health_check_value"
             
             # Try to set and get a test value
-            await self.redis_service.set(test_key, test_value, ex=60)
-            retrieved_value = await self.redis_service.get(test_key)
+            await client.setex(test_key, 60, test_value)
+            retrieved_value = await client.get(test_key)
             
-            if retrieved_value == test_value:
+            if retrieved_value and retrieved_value.decode() == test_value:
                 # Clean up test key
-                await self.redis_service.delete(test_key)
+                await client.delete(test_key)
                 return {
                     "status": "healthy",
                     "message": "Redis connectivity confirmed"
