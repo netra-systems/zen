@@ -725,9 +725,13 @@ class IsolatedWebSocketManager:
                                 failed_connections.append(conn_id)
                                 continue
                         
+                        # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                        safe_message = _serialize_message_safely(message)
+                        
                         # Send with timeout to prevent hanging
                         await asyncio.wait_for(
-                            connection.websocket.send_json(message),
+                            connection.websocket.send_json(safe_message),
                             timeout=5.0
                         )
                         successful_sends += 1

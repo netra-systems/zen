@@ -291,7 +291,10 @@ class WebSocketManagerAdapter:
                 connection = manager.get_connection(connection_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                        safe_message = _serialize_message_safely(message)
+                        await connection.websocket.send_json(safe_message)
                         logger.debug(f"Sent message to connection {connection_id[:8]}... via isolated manager")
                         return True
                     except Exception as e:

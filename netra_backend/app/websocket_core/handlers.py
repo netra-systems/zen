@@ -109,7 +109,7 @@ class ConnectionHandler(BaseMessageHandler):
                 return False
             
             if is_websocket_connected(websocket):
-                await websocket.send_json(response.model_dump())
+                await websocket.send_json(response.model_dump(mode='json'))
             return True
             
         except Exception as e:
@@ -150,7 +150,7 @@ class TypingHandler(BaseMessageHandler):
             )
             
             if is_websocket_connected(websocket):
-                await websocket.send_json(response.model_dump())
+                await websocket.send_json(response.model_dump(mode='json'))
             return True
             
         except Exception as e:
@@ -439,8 +439,12 @@ class TestAgentHandler(BaseMessageHandler):
                     "timestamp": time.time()
                 }
                 
+                # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                safe_response_data = _serialize_message_safely(response_data)
+                
                 # Send to the current websocket as a simulation
-                await websocket.send_json(response_data)
+                await websocket.send_json(safe_response_data)
             
             return True
             
@@ -499,7 +503,7 @@ class AgentHandler(BaseMessageHandler):
             )
             
             if is_websocket_connected(websocket):
-                await websocket.send_json(response.model_dump())
+                await websocket.send_json(response.model_dump(mode='json'))
             return True
             
         except Exception as e:
@@ -642,10 +646,14 @@ class JsonRpcHandler(BaseMessageHandler):
                 "id": request_id
             }
             
+            # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+            safe_response = _serialize_message_safely(response)
+            
             # Check if websocket is connected or is a mock (for testing)
             if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
-                await websocket.send_json(response)
+                await websocket.send_json(safe_response)
         
         return True
     

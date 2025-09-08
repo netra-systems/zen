@@ -398,7 +398,10 @@ class WebSocketDashboard:
         try:
             # Send initial dashboard data
             initial_data = await self.get_dashboard_data()
-            await websocket.send_json(initial_data)
+            # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects  
+            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+            safe_initial_data = _serialize_message_safely(initial_data)
+            await websocket.send_json(safe_initial_data)
             
             # Start sending periodic updates
             while True:
@@ -406,7 +409,9 @@ class WebSocketDashboard:
                 
                 # Get updated dashboard data
                 update_data = await self.get_dashboard_data()
-                await websocket.send_json(update_data)
+                # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                safe_update_data = _serialize_message_safely(update_data)
+                await websocket.send_json(safe_update_data)
                 
         except WebSocketDisconnect:
             self._active_connections.remove(websocket)
