@@ -284,9 +284,19 @@ async def websocket_endpoint(websocket: WebSocket):
                 return
                 
             else:
-                # Development/testing only: Use legacy fallback with warning
-                logger.warning(f"DEVELOPMENT ONLY: Using insecure singleton fallback in {environment}")
-                ws_manager = get_websocket_manager()
+                # Development/testing only: Create test user context for fallback
+                logger.warning(f"DEVELOPMENT ONLY: Creating test user context fallback in {environment}")
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                import uuid
+                
+                # Create a test user context for development/testing
+                test_user_context = UserExecutionContext(
+                    user_id=f"dev-user-{uuid.uuid4().hex[:8]}",
+                    thread_id=f"dev-thread-{uuid.uuid4().hex[:8]}",
+                    run_id=f"dev-run-{uuid.uuid4().hex[:8]}"
+                )
+                ws_manager = create_websocket_manager(test_user_context)
+                logger.warning(f"Created test WebSocket manager for development (user_id: {test_user_context.user_id})")
         
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
@@ -685,7 +695,20 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Legacy pattern: Use old disconnect_user method
                     logger.info(f"Cleaning up legacy WebSocket manager for user {user_id[:8]}...")
                     if 'ws_manager' not in locals():
-                        ws_manager = get_websocket_manager()
+                        # Create context for cleanup - we have user_id available from earlier
+                        if 'user_context' in locals():
+                            ws_manager = create_websocket_manager(user_context)
+                        else:
+                            # If no user context available, create minimal test context for cleanup
+                            logger.warning(f"Creating minimal context for WebSocket cleanup (user_id: {user_id[:8]}...)")
+                            from netra_backend.app.services.user_execution_context import UserExecutionContext
+                            import uuid
+                            cleanup_context = UserExecutionContext(
+                                user_id=user_id if user_id else f"cleanup-user-{uuid.uuid4().hex[:8]}",
+                                thread_id=f"cleanup-thread-{uuid.uuid4().hex[:8]}",
+                                run_id=f"cleanup-run-{uuid.uuid4().hex[:8]}"
+                            )
+                            ws_manager = create_websocket_manager(cleanup_context)
                     await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
                 
                 # Clean up shared services (these are still singleton)
@@ -969,8 +992,11 @@ def _create_fallback_agent_handler(websocket: WebSocket = None):
 
 async def get_websocket_service_discovery():
     """Get WebSocket service discovery configuration for tests."""
-    ws_manager = get_websocket_manager()
-    stats = await ws_manager.get_stats()
+    from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+    
+    # Use factory stats instead of unsafe singleton
+    factory = get_websocket_manager_factory()
+    stats = factory.get_factory_stats()
     
     return {
         "status": "success",
@@ -1017,13 +1043,16 @@ async def get_websocket_config():
     """Get WebSocket configuration for clients with robust error handling."""
     # CRITICAL FIX: Add error handling to prevent HTTP 500 errors
     try:
-        ws_manager = get_websocket_manager()
+        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+        
+        # Use factory stats instead of unsafe singleton
+        factory = get_websocket_manager_factory()
         
         # Try to get stats with error handling
         try:
-            stats = await ws_manager.get_stats()
+            stats = factory.get_factory_stats()
         except Exception as stats_error:
-            logger.warning(f"Failed to get WebSocket stats: {stats_error}")
+            logger.warning(f"Failed to get WebSocket factory stats: {stats_error}")
             # Use default stats to prevent 500 error
             stats = {
                 "active_connections": 0,
@@ -1092,10 +1121,12 @@ async def websocket_health_check():
     errors = []
     metrics = {}
     
-    # Try to get WebSocket manager stats (most basic requirement)
+    # Try to get WebSocket factory stats (most basic requirement)
     try:
-        ws_manager = get_websocket_manager()
-        ws_stats = await ws_manager.get_stats()
+        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+        
+        factory = get_websocket_manager_factory()
+        ws_stats = factory.get_factory_stats()
         metrics["websocket"] = {
             "active_connections": ws_stats["active_connections"],
             "total_connections": ws_stats["total_connections"], 
@@ -1373,7 +1404,10 @@ async def websocket_beacon():
 @router.get("/ws/stats")
 async def websocket_detailed_stats():
     """Detailed WebSocket statistics (for development/monitoring)."""
-    ws_manager = get_websocket_manager()
+    from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+    
+    # Use factory stats instead of unsafe singleton
+    factory = get_websocket_manager_factory()
     message_router = get_message_router()
     authenticator = get_websocket_authenticator()
     security_manager = get_connection_security_manager()
@@ -1381,7 +1415,7 @@ async def websocket_detailed_stats():
     
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "websocket_manager": await ws_manager.get_stats(),
+        "websocket_manager": factory.get_factory_stats(),
         "message_router": message_router.get_stats(),
         "authentication": authenticator.get_auth_stats(),
         "security": security_manager.get_security_summary(),

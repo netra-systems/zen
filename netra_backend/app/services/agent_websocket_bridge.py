@@ -29,7 +29,7 @@ from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
@@ -113,15 +113,24 @@ class AgentWebSocketBridge(MonitorableComponent):
     # _instance: Optional['AgentWebSocketBridge'] = None
     # _lock = asyncio.Lock()
     
-    def __init__(self):
+    def __init__(self, user_context: Optional['UserExecutionContext'] = None):
         """Initialize bridge WITHOUT singleton pattern.
         
         MIGRATION NOTE: This bridge is now non-singleton. For per-user
         event emission, use create_user_emitter() factory method.
+        
+        Args:
+            user_context: Optional UserExecutionContext for per-user isolation
         """
         # Remove singleton initialization check
         # if hasattr(self, '_initialized'):
         #     return
+        
+        # Store user context for validation and isolation
+        self.user_context = user_context
+        
+        # Initialize connection status for test compatibility
+        self.is_connected = True  # Bridge is considered "connected" once initialized
         
         self._initialize_configuration()
         self._initialize_state()
@@ -130,7 +139,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._initialize_monitoring_observers()
         
         self._initialized = True
-        logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
+        if user_context:
+            logger.info(f"AgentWebSocketBridge initialized (non-singleton mode) for user {user_context.user_id}")
+        else:
+            logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
     
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
@@ -2347,7 +2359,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise ValueError("user_id, thread_id, and run_id are all required")
         
         try:
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Create user execution context from IDs
             user_context = UserExecutionContext.from_request(
@@ -2425,7 +2437,7 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     logger = central_logger.get_logger(__name__)
     
     logger.info("Creating isolated AgentWebSocketBridge instance")
-    bridge = AgentWebSocketBridge()
+    bridge = AgentWebSocketBridge(user_context=user_context)
     
     # Note: User emitters are created on-demand via await bridge.create_user_emitter(user_context)
     # when actually needed to avoid sync/async complexity in factory function
