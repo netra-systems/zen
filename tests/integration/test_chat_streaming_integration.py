@@ -20,7 +20,7 @@ import jwt
 
 from netra_backend.app.main import create_app
 from netra_backend.app.logging_config import central_logger
-from test_framework.ssot.e2e_auth_helper import create_test_jwt_token
+from tests.helpers.auth_test_utils import TestAuthHelper
 
 logger = central_logger.get_logger(__name__)
 
@@ -76,7 +76,8 @@ async def test_client(app: FastAPI) -> AsyncIterator[AsyncClient]:
 @pytest.fixture
 def jwt_token() -> str:
     """Create test JWT token."""
-    return create_test_jwt_token(user_id="test-user-123", username="testuser")
+    auth_helper = TestAuthHelper()
+    return auth_helper.create_test_token("test-user-123", "testuser@test.com")
 
 
 @pytest.fixture
