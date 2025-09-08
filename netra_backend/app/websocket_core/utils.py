@@ -742,11 +742,11 @@ def check_rate_limit(client_id: str, max_requests: int = 60, window_seconds: int
     For production use, prefer using RateLimiter class directly from auth module.
     """
     # Import here to avoid circular imports
-    from netra_backend.app.websocket_core.auth import RateLimiter
+    from netra_backend.app.websocket_core.rate_limiter import AdaptiveRateLimiter
     
     # Create temporary rate limiter with specified limits
-    rate_limiter = RateLimiter(max_requests=max_requests, window_seconds=window_seconds)
-    allowed, _ = rate_limiter.is_allowed(client_id)
+    rate_limiter = AdaptiveRateLimiter(base_rate=max_requests, window_seconds=window_seconds)
+    allowed = rate_limiter.is_allowed(client_id)
     return allowed
 
 

@@ -45,7 +45,6 @@ from netra_backend.app.websocket.connection_handler import connection_scope
 # Import authentication and security
 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
 from netra_backend.app.websocket_core import (
-    get_connection_security_manager,
     WebSocketHeartbeat,
     create_server_message,
     create_error_message,
