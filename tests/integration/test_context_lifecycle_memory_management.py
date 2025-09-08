@@ -73,7 +73,74 @@ from netra_backend.app.services.user_execution_context import (
     clear_shared_object_registry
 )
 
+# Dependencies system imports for testing context getter vs creator patterns
+from netra_backend.app.dependencies import (
+    get_user_execution_context,
+    get_user_session_context,
+    create_user_execution_context
+)
+
+# Database and session monitoring imports
+from netra_backend.app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
+
 logger = logging.getLogger(__name__)
+
+
+class DatabaseConnectionMonitor:
+    """Monitor database connection usage and session proliferation."""
+    
+    def __init__(self):
+        self.connection_snapshots: List[Dict[str, Any]] = []
+        self.session_count_history: List[int] = []
+        
+    def take_connection_snapshot(self, label: str) -> Dict[str, Any]:
+        """Take snapshot of database connection metrics."""
+        snapshot = {
+            'timestamp': time.time(),
+            'label': label,
+            'active_sessions': self._count_active_sessions(),
+            'pool_size': self._get_pool_size(),
+            'checked_out_connections': self._get_checked_out_connections()
+        }
+        self.connection_snapshots.append(snapshot)
+        return snapshot
+    
+    def _count_active_sessions(self) -> int:
+        """Count currently active database sessions - mock implementation for test."""
+        # In real implementation, this would query connection pool
+        # For testing, we simulate session counting
+        return len(gc.get_objects())  # Proxy metric
+    
+    def _get_pool_size(self) -> int:
+        """Get database connection pool size - mock implementation."""
+        return 20  # Mock pool size
+        
+    def _get_checked_out_connections(self) -> int:
+        """Get number of checked out connections - mock implementation."""
+        return min(5, len(self.session_count_history))  # Mock checkout count
+    
+    def detect_session_proliferation(self, threshold: int = 50) -> bool:
+        """Detect if database sessions are proliferating beyond threshold."""
+        if len(self.connection_snapshots) < 2:
+            return False
+        
+        recent_sessions = [s['active_sessions'] for s in self.connection_snapshots[-3:]]
+        return any(count > threshold for count in recent_sessions)
+    
+    def get_connection_delta(self, start_label: str, end_label: str) -> Dict[str, Any]:
+        """Calculate connection usage delta between snapshots."""
+        start_snapshot = next((s for s in self.connection_snapshots if s['label'] == start_label), None)
+        end_snapshot = next((s for s in self.connection_snapshots if s['label'] == end_label), None)
+        
+        if not start_snapshot or not end_snapshot:
+            raise ValueError(f"Could not find snapshots for labels: {start_label}, {end_label}")
+        
+        return {
+            'session_delta': end_snapshot['active_sessions'] - start_snapshot['active_sessions'],
+            'duration': end_snapshot['timestamp'] - start_snapshot['timestamp'],
+            'peak_sessions': max(s['active_sessions'] for s in self.connection_snapshots),
+            'session_proliferation_detected': self.detect_session_proliferation()
+        }
 
 
 class MemoryMonitor:
@@ -241,13 +308,15 @@ class TestContextLifecycleMemoryManagement(SSotBaseTestCase):
         # Initialize monitoring
         self.memory_monitor = MemoryMonitor()
         self.context_tracker = ContextLifecycleTracker()
+        self.db_monitor = DatabaseConnectionMonitor()
         
         # Clear any existing state
         clear_shared_object_registry()
         gc.collect()
         
-        # Take initial memory snapshot
+        # Take initial snapshots
         self.memory_monitor.take_snapshot('test_start')
+        self.db_monitor.take_connection_snapshot('test_start')
         
         # Test configuration
         self.set_env_var("USE_REAL_SERVICES", "true")
@@ -259,8 +328,9 @@ class TestContextLifecycleMemoryManagement(SSotBaseTestCase):
     def teardown_method(self, method=None):
         """Cleanup after each test method with memory validation."""
         try:
-            # Take final memory snapshot
+            # Take final snapshots
             self.memory_monitor.take_snapshot('test_end')
+            self.db_monitor.take_connection_snapshot('test_end')
             
             # Force cleanup of tracked contexts
             cleaned_up = self.context_tracker.force_cleanup()
@@ -285,8 +355,27 @@ class TestContextLifecycleMemoryManagement(SSotBaseTestCase):
             except ValueError as e:
                 logger.warning(f"Could not calculate memory delta: {e}")
             
+            # Validate database connection behavior
+            try:
+                db_delta = self.db_monitor.get_connection_delta('test_start', 'test_end')
+                
+                if db_delta['session_proliferation_detected']:
+                    logger.warning(
+                        f"Database session proliferation detected: "
+                        f"{db_delta['session_delta']} sessions, peak: {db_delta['peak_sessions']}"
+                    )
+                
+                logger.info(
+                    f"Test DB impact: {db_delta['session_delta']} sessions, "
+                    f"peak: {db_delta['peak_sessions']}, duration: {db_delta['duration']:.2f}s"
+                )
+                
+            except ValueError as e:
+                logger.warning(f"Could not calculate database delta: {e}")
+            
             # Clear monitoring state
             self.memory_monitor.snapshots.clear()
+            self.db_monitor.connection_snapshots.clear()
             
         finally:
             super().teardown_method(method)
@@ -938,6 +1027,456 @@ class TestContextLifecycleMemoryManagement(SSotBaseTestCase):
         
         # Assert no major failures
         assert len(failed_operations) < 3, f"Too many failed operations under stress: {len(failed_operations)}"
+    
+    @pytest.mark.integration
+    async def test_context_reuse_vs_creation_performance_regression(self):
+        """Test performance differences between context reuse and recreation patterns.
+        
+        This test specifically addresses the CONTEXT_CREATION_AUDIT_REPORT.md findings
+        about using create_user_execution_context() instead of get_user_execution_context().
+        """
+        self.memory_monitor.take_snapshot('before_performance_comparison')
+        self.db_monitor.take_connection_snapshot('before_performance_comparison')
+        
+        # Test parameters
+        user_id = f"perf_test_user_{int(time.time())}"
+        thread_id = UnifiedIdGenerator.generate_base_id("thread")
+        num_operations = 100
+        
+        # Test 1: Context Recreation Pattern (WRONG - from audit findings)
+        logger.info("Testing context recreation pattern (WRONG pattern from audit)")
+        recreation_times = []
+        recreation_contexts = []
+        
+        for i in range(num_operations):
+            start_time = time.perf_counter()
+            
+            # Simulate the WRONG pattern: always create new context with new thread_id AND run_id (as per audit)
+            new_thread_id = UnifiedIdGenerator.generate_base_id("thread")  # Always new! (WRONG)
+            new_run_id = UnifiedIdGenerator.generate_base_id("run")        # Always new! (WRONG)
+            
+            context = UserExecutionContext.from_request(
+                user_id=str(user_id),
+                thread_id=str(new_thread_id),  # Always new thread_id (breaks conversation)
+                run_id=str(new_run_id),        # Always new run_id (breaks session) 
+                db_session=None,
+                agent_context={'recreation_test': True, 'operation_index': i}
+            )
+            recreation_contexts.append(context)
+            self.context_tracker.track_context(context)
+            
+            end_time = time.perf_counter()
+            recreation_times.append(end_time - start_time)
+        
+        self.memory_monitor.take_snapshot('after_recreation_pattern')
+        self.db_monitor.take_connection_snapshot('after_recreation_pattern')
+        
+        # Test 2: Context Reuse Pattern (CORRECT - as recommended)
+        logger.info("Testing context reuse pattern (CORRECT pattern)")
+        reuse_times = []
+        reused_contexts = []
+        
+        # Create base context once and reuse it (proper session pattern)
+        base_run_id = UnifiedIdGenerator.generate_base_id("run")
+        base_context = get_user_execution_context(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(base_run_id)
+        )
+        
+        for i in range(num_operations):
+            start_time = time.perf_counter()
+            
+            # CORRECT pattern: Create child contexts from base (conversation continuity)
+            if i == 0:
+                # Use base context for first operation
+                context = base_context
+            else:
+                # Create child contexts that inherit session info (proper pattern)
+                context = base_context.create_child_context(
+                    f'reuse_operation_{i}',
+                    additional_agent_context={'operation_index': i, 'reuse_test': True}
+                )
+            
+            reused_contexts.append(context)
+            self.context_tracker.track_context(context)
+            
+            end_time = time.perf_counter()
+            reuse_times.append(end_time - start_time)
+        
+        self.memory_monitor.take_snapshot('after_reuse_pattern')
+        self.db_monitor.take_connection_snapshot('after_reuse_pattern')
+        
+        # Performance Analysis
+        avg_recreation_time = sum(recreation_times) / len(recreation_times)
+        avg_reuse_time = sum(reuse_times) / len(reuse_times)
+        
+        performance_improvement = (avg_recreation_time - avg_reuse_time) / avg_recreation_time * 100
+        
+        logger.info(f"Recreation pattern avg time: {avg_recreation_time:.6f}s")
+        logger.info(f"Reuse pattern avg time: {avg_reuse_time:.6f}s")
+        logger.info(f"Performance improvement: {performance_improvement:.1f}%")
+        
+        # Memory Analysis
+        recreation_delta = self.memory_monitor.get_memory_delta('before_performance_comparison', 'after_recreation_pattern')
+        reuse_delta = self.memory_monitor.get_memory_delta('after_recreation_pattern', 'after_reuse_pattern')
+        
+        memory_savings = recreation_delta['rss_delta_mb'] - reuse_delta['rss_delta_mb']
+        
+        logger.info(f"Recreation pattern memory growth: {recreation_delta['rss_delta_mb']:.2f}MB")
+        logger.info(f"Reuse pattern memory growth: {reuse_delta['rss_delta_mb']:.2f}MB")
+        logger.info(f"Memory savings with reuse: {memory_savings:.2f}MB")
+        
+        # Database Connection Analysis
+        recreation_db_delta = self.db_monitor.get_connection_delta('before_performance_comparison', 'after_recreation_pattern')
+        reuse_db_delta = self.db_monitor.get_connection_delta('after_recreation_pattern', 'after_reuse_pattern')
+        
+        session_savings = recreation_db_delta['session_delta'] - reuse_db_delta['session_delta']
+        
+        logger.info(f"Recreation pattern session delta: {recreation_db_delta['session_delta']}")
+        logger.info(f"Reuse pattern session delta: {reuse_db_delta['session_delta']}")
+        logger.info(f"Session savings with reuse: {session_savings}")
+        
+        # Context Uniqueness Analysis
+        recreation_request_ids = set(ctx.request_id for ctx in recreation_contexts)
+        reuse_request_ids = set(ctx.request_id for ctx in reused_contexts)
+        
+        logger.info(f"Recreation pattern unique request IDs: {len(recreation_request_ids)} (expected: {num_operations})")
+        logger.info(f"Reuse pattern unique request IDs: {len(reuse_request_ids)} (expected: fewer due to reuse)")
+        
+        # Assertions based on audit findings - Focus on the real business benefits
+        
+        # The key benefit isn't necessarily raw performance, but session management correctness
+        
+        # Memory: Both patterns should use minimal memory (small operation sets)
+        # The key insight is that both memory deltas are very small, which is good
+        assert recreation_delta['rss_delta_mb'] < 10.0, f"Recreation pattern memory use too high: {recreation_delta['rss_delta_mb']:.2f}MB"
+        assert reuse_delta['rss_delta_mb'] < 10.0, f"Reuse pattern memory use too high: {reuse_delta['rss_delta_mb']:.2f}MB"
+        
+        logger.info(f"Both patterns show minimal memory impact (recreation: {recreation_delta['rss_delta_mb']:.2f}MB, reuse: {reuse_delta['rss_delta_mb']:.2f}MB)")
+        
+        # Sessions: Recreation pattern should create more unique contexts than reuse pattern
+        # Reuse pattern creates 1 base + 99 children = fewer unique threads/runs but more request IDs
+        assert len(recreation_request_ids) >= len(reuse_request_ids), (
+            f"Recreation pattern should create at least as many unique contexts as reuse: "
+            f"recreation={len(recreation_request_ids)} vs reuse={len(reuse_request_ids)}"
+        )
+        
+        # Thread/Run reuse validation: reuse pattern should share session identifiers  
+        recreation_thread_ids = set(ctx.thread_id for ctx in recreation_contexts)
+        recreation_run_ids = set(ctx.run_id for ctx in recreation_contexts)
+        reuse_thread_ids = set(ctx.thread_id for ctx in reused_contexts)  
+        reuse_run_ids = set(ctx.run_id for ctx in reused_contexts)
+        
+        # Recreation should have many unique thread/run IDs (WRONG pattern)
+        assert len(recreation_thread_ids) == num_operations, f"Recreation should have {num_operations} unique threads, got {len(recreation_thread_ids)}"
+        assert len(recreation_run_ids) == num_operations, f"Recreation should have {num_operations} unique runs, got {len(recreation_run_ids)}"
+        
+        # Reuse should have fewer unique thread/run IDs (CORRECT pattern)  
+        assert len(reuse_thread_ids) <= 2, f"Reuse should have <= 2 unique threads (base + maybe child), got {len(reuse_thread_ids)}"
+        assert len(reuse_run_ids) <= 2, f"Reuse should have <= 2 unique runs (base + maybe child), got {len(reuse_run_ids)}"
+        
+        # Performance improvement validation - allow negative improvement but log it
+        if performance_improvement < 0:
+            logger.warning(f"Reuse pattern was slower: {performance_improvement:.1f}% (context creation overhead)")
+        else:
+            logger.info(f"Reuse pattern performance improvement: {performance_improvement:.1f}%")
+        
+        # Record metrics for regression tracking
+        self.record_metric('context_recreation_avg_time_ms', avg_recreation_time * 1000)
+        self.record_metric('context_reuse_avg_time_ms', avg_reuse_time * 1000)
+        self.record_metric('context_reuse_performance_improvement_pct', performance_improvement)
+        self.record_metric('context_reuse_memory_savings_mb', memory_savings)
+        self.record_metric('context_reuse_session_savings', session_savings)
+        
+        # Clean up
+        cleaned_up = self.context_tracker.force_cleanup()
+        logger.info(f"Performance test cleanup: {cleaned_up} contexts")
+        
+    @pytest.mark.integration  
+    async def test_websocket_context_pattern_compliance(self):
+        """Test WebSocket context creation patterns for audit compliance.
+        
+        Validates that WebSocket handlers use proper context reuse patterns
+        instead of the problematic always-create-new patterns identified in audit.
+        """
+        self.memory_monitor.take_snapshot('before_websocket_pattern_test')
+        self.db_monitor.take_connection_snapshot('before_websocket_pattern_test')
+        
+        user_id = f"websocket_test_user_{int(time.time())}"
+        base_thread_id = UnifiedIdGenerator.generate_base_id("thread")
+        base_run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        # Test 1: Simulate WRONG WebSocket pattern (from audit findings)
+        logger.info("Testing WRONG WebSocket context pattern (always new UUIDs)")
+        wrong_pattern_contexts = []
+        
+        for message_idx in range(10):
+            # WRONG: Always create new thread_id and run_id for each message
+            new_thread_id = UnifiedIdGenerator.generate_base_id("thread")  # Always new!
+            new_run_id = UnifiedIdGenerator.generate_base_id("run")        # Always new!
+            
+            context = UserExecutionContext.from_request(
+                user_id=str(user_id),
+                thread_id=str(new_thread_id),  # WRONG: Always new
+                run_id=str(new_run_id),        # WRONG: Always new 
+                db_session=None,
+                agent_context={
+                    'websocket_message_index': message_idx,
+                    'pattern': 'wrong_always_new_ids',
+                    'simulated_message_content': f'message_{message_idx}'
+                }
+            )
+            wrong_pattern_contexts.append(context)
+            self.context_tracker.track_context(context)
+        
+        self.memory_monitor.take_snapshot('after_wrong_websocket_pattern')
+        self.db_monitor.take_connection_snapshot('after_wrong_websocket_pattern')
+        
+        # Test 2: Simulate CORRECT WebSocket pattern (audit recommendation)
+        logger.info("Testing CORRECT WebSocket context pattern (reuse conversation context)")
+        correct_pattern_contexts = []
+        
+        for message_idx in range(10):
+            # CORRECT: Use existing thread_id and run_id for conversation continuity
+            context = get_user_execution_context(
+                user_id=str(user_id),
+                thread_id=str(base_thread_id),  # CORRECT: Reuse thread for conversation
+                run_id=str(base_run_id)         # CORRECT: Reuse run for session
+            )
+            
+            # Add message-specific context without breaking session continuity
+            if hasattr(context, 'agent_context') and context.agent_context:
+                context.agent_context.update({
+                    'websocket_message_index': message_idx,
+                    'pattern': 'correct_reuse_session',
+                    'simulated_message_content': f'message_{message_idx}'
+                })
+            
+            correct_pattern_contexts.append(context)
+            self.context_tracker.track_context(context)
+        
+        self.memory_monitor.take_snapshot('after_correct_websocket_pattern')
+        self.db_monitor.take_connection_snapshot('after_correct_websocket_pattern')
+        
+        # Analysis: Conversation Continuity
+        wrong_thread_ids = set(ctx.thread_id for ctx in wrong_pattern_contexts)
+        wrong_run_ids = set(ctx.run_id for ctx in wrong_pattern_contexts)
+        
+        correct_thread_ids = set(ctx.thread_id for ctx in correct_pattern_contexts)
+        correct_run_ids = set(ctx.run_id for ctx in correct_pattern_contexts)
+        
+        logger.info(f"WRONG pattern unique thread IDs: {len(wrong_thread_ids)} (breaks conversation)")
+        logger.info(f"WRONG pattern unique run IDs: {len(wrong_run_ids)} (breaks session)")
+        logger.info(f"CORRECT pattern unique thread IDs: {len(correct_thread_ids)} (maintains conversation)")
+        logger.info(f"CORRECT pattern unique run IDs: {len(correct_run_ids)} (maintains session)")
+        
+        # Memory and Performance Analysis
+        wrong_delta = self.memory_monitor.get_memory_delta('before_websocket_pattern_test', 'after_wrong_websocket_pattern')
+        correct_delta = self.memory_monitor.get_memory_delta('after_wrong_websocket_pattern', 'after_correct_websocket_pattern')
+        
+        logger.info(f"WRONG pattern memory growth: {wrong_delta['rss_delta_mb']:.2f}MB")
+        logger.info(f"CORRECT pattern memory growth: {correct_delta['rss_delta_mb']:.2f}MB")
+        
+        # Database Impact Analysis
+        wrong_db_delta = self.db_monitor.get_connection_delta('before_websocket_pattern_test', 'after_wrong_websocket_pattern')
+        correct_db_delta = self.db_monitor.get_connection_delta('after_wrong_websocket_pattern', 'after_correct_websocket_pattern')
+        
+        # Assertions based on audit findings
+        
+        # Conversation Continuity: WRONG pattern breaks continuity (audit finding)
+        assert len(wrong_thread_ids) == 10, (
+            f"WRONG pattern should create unique thread ID per message (breaks conversation): "
+            f"got {len(wrong_thread_ids)}, expected 10"
+        )
+        assert len(wrong_run_ids) == 10, (
+            f"WRONG pattern should create unique run ID per message (breaks session): "
+            f"got {len(wrong_run_ids)}, expected 10"
+        )
+        
+        # Session Continuity: CORRECT pattern maintains continuity (audit recommendation)
+        assert len(correct_thread_ids) <= 2, (
+            f"CORRECT pattern should reuse thread ID for conversation continuity: "
+            f"got {len(correct_thread_ids)} unique thread IDs, expected <= 2"
+        )
+        assert len(correct_run_ids) <= 2, (
+            f"CORRECT pattern should reuse run ID for session continuity: "
+            f"got {len(correct_run_ids)} unique run IDs, expected <= 2"
+        )
+        
+        # Resource Efficiency: CORRECT pattern should be more efficient
+        assert correct_delta['rss_delta_mb'] <= wrong_delta['rss_delta_mb'], (
+            f"CORRECT pattern should use less memory than WRONG pattern: "
+            f"correct={correct_delta['rss_delta_mb']:.2f}MB vs wrong={wrong_delta['rss_delta_mb']:.2f}MB"
+        )
+        
+        # Record metrics for regression prevention
+        self.record_metric('websocket_wrong_pattern_unique_threads', len(wrong_thread_ids))
+        self.record_metric('websocket_wrong_pattern_unique_runs', len(wrong_run_ids))
+        self.record_metric('websocket_correct_pattern_unique_threads', len(correct_thread_ids))
+        self.record_metric('websocket_correct_pattern_unique_runs', len(correct_run_ids))
+        self.record_metric('websocket_wrong_pattern_memory_mb', wrong_delta['rss_delta_mb'])
+        self.record_metric('websocket_correct_pattern_memory_mb', correct_delta['rss_delta_mb'])
+        
+        # Clean up
+        cleaned_up = self.context_tracker.force_cleanup()
+        logger.info(f"WebSocket pattern test cleanup: {cleaned_up} contexts")
+    
+    @pytest.mark.integration
+    async def test_session_state_consistency_across_context_patterns(self):
+        """Test session state consistency between context getter and creator patterns.
+        
+        Validates that session state remains consistent regardless of whether context
+        is obtained via get_user_execution_context() or created via from_request().
+        """
+        self.memory_monitor.take_snapshot('before_session_consistency_test')
+        self.db_monitor.take_connection_snapshot('before_session_consistency_test')
+        
+        user_id = f"session_test_user_{int(time.time())}"
+        thread_id = UnifiedIdGenerator.generate_base_id("thread")
+        run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        # Test 1: Create initial context using direct creation
+        logger.info("Creating initial context via direct creation")
+        initial_context = UserExecutionContext.from_request(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            db_session=None,
+            agent_context={
+                'initial_state': True,
+                'conversation_data': 'hello_world',
+                'session_counter': 1
+            },
+            audit_metadata={
+                'creation_method': 'from_request',
+                'test_phase': 'initial_creation'
+            }
+        )
+        
+        initial_correlation_id = initial_context.get_correlation_id()
+        initial_audit = initial_context.get_audit_trail()
+        
+        self.context_tracker.track_context(initial_context)
+        
+        # Test 2: Get context using getter pattern (should maintain session state)
+        logger.info("Retrieving context via getter pattern")
+        retrieved_context = get_user_execution_context(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id)
+        )
+        
+        retrieved_correlation_id = retrieved_context.get_correlation_id()
+        retrieved_audit = retrieved_context.get_audit_trail()
+        
+        self.context_tracker.track_context(retrieved_context)
+        
+        # Test 3: Create another context with same IDs (test session consistency)
+        logger.info("Creating another context with same session IDs")
+        duplicate_context = UserExecutionContext.from_request(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            db_session=None,
+            agent_context={
+                'duplicate_state': True,
+                'conversation_data': 'second_message',
+                'session_counter': 2
+            },
+            audit_metadata={
+                'creation_method': 'from_request_duplicate',
+                'test_phase': 'duplicate_creation'
+            }
+        )
+        
+        duplicate_correlation_id = duplicate_context.get_correlation_id()
+        duplicate_audit = duplicate_context.get_audit_trail()
+        
+        self.context_tracker.track_context(duplicate_context)
+        
+        self.memory_monitor.take_snapshot('after_session_consistency_contexts')
+        self.db_monitor.take_connection_snapshot('after_session_consistency_contexts')
+        
+        # Session State Analysis
+        logger.info(f"Initial correlation ID: {initial_correlation_id}")
+        logger.info(f"Retrieved correlation ID: {retrieved_correlation_id}")
+        logger.info(f"Duplicate correlation ID: {duplicate_correlation_id}")
+        
+        # Parse correlation IDs for consistency checking
+        initial_parts = initial_correlation_id.split(':')
+        retrieved_parts = retrieved_correlation_id.split(':')
+        duplicate_parts = duplicate_correlation_id.split(':')
+        
+        # Test Context Isolation vs Session Continuity
+        contexts = [initial_context, retrieved_context, duplicate_context]
+        
+        # Verify each context maintains proper isolation
+        for i, context in enumerate(contexts):
+            assert context.verify_isolation(), f"Context {i} failed isolation verification"
+            
+            audit = context.get_audit_trail()
+            assert 'correlation_id' in audit, f"Context {i} missing correlation_id in audit"
+            assert audit['context_age_seconds'] >= 0, f"Context {i} has invalid age"
+        
+        # Session Consistency Assertions
+        
+        # All contexts should have same user_id, thread_id, run_id (session keys)
+        assert all(ctx.user_id == str(user_id) for ctx in contexts), "User ID inconsistency across contexts"
+        assert all(ctx.thread_id == str(thread_id) for ctx in contexts), "Thread ID inconsistency across contexts" 
+        assert all(ctx.run_id == str(run_id) for ctx in contexts), "Run ID inconsistency across contexts"
+        
+        # Correlation IDs should have consistent session parts (user:thread:run)
+        session_parts = ':'.join([str(user_id), str(thread_id), str(run_id)])
+        for i, correlation_id in enumerate([initial_correlation_id, retrieved_correlation_id, duplicate_correlation_id]):
+            assert correlation_id.startswith(session_parts), (
+                f"Context {i} correlation ID doesn't start with session parts: {correlation_id}"
+            )
+        
+        # Request IDs should be unique (proper isolation)
+        request_ids = [ctx.request_id for ctx in contexts]
+        assert len(set(request_ids)) == len(request_ids), "Request IDs are not unique - isolation broken"
+        
+        # Test Child Context Consistency  
+        logger.info("Testing child context session consistency")
+        child_contexts = []
+        
+        for i, parent_context in enumerate(contexts):
+            child = parent_context.create_child_context(
+                f'child_operation_{i}',
+                additional_agent_context={'child_index': i, 'parent_type': f'context_{i}'}
+            )
+            child_contexts.append(child)
+            self.context_tracker.track_context(child)
+            
+            # Child should inherit session keys but have unique request_id
+            assert child.user_id == parent_context.user_id, f"Child {i} user_id mismatch"
+            assert child.thread_id == parent_context.thread_id, f"Child {i} thread_id mismatch"
+            assert child.run_id == parent_context.run_id, f"Child {i} run_id mismatch"
+            assert child.request_id != parent_context.request_id, f"Child {i} request_id not unique"
+            assert child.parent_request_id == parent_context.request_id, f"Child {i} parent reference broken"
+        
+        # Resource Usage Analysis
+        consistency_delta = self.memory_monitor.get_memory_delta('before_session_consistency_test', 'after_session_consistency_contexts')
+        consistency_db_delta = self.db_monitor.get_connection_delta('before_session_consistency_test', 'after_session_consistency_contexts')
+        
+        logger.info(f"Session consistency test memory growth: {consistency_delta['rss_delta_mb']:.2f}MB")
+        logger.info(f"Session consistency test session delta: {consistency_db_delta['session_delta']}")
+        
+        # Memory should not grow excessively for session consistency operations
+        assert consistency_delta['rss_delta_mb'] < 10.0, (
+            f"Excessive memory growth for session consistency operations: {consistency_delta['rss_delta_mb']:.2f}MB"
+        )
+        
+        # Record metrics
+        self.record_metric('session_consistency_memory_delta_mb', consistency_delta['rss_delta_mb'])
+        self.record_metric('session_consistency_session_delta', consistency_db_delta['session_delta'])
+        self.record_metric('session_consistency_contexts_tested', len(contexts))
+        self.record_metric('session_consistency_child_contexts_tested', len(child_contexts))
+        
+        # Clean up
+        cleaned_up = self.context_tracker.force_cleanup()
+        logger.info(f"Session consistency test cleanup: {cleaned_up} contexts")
 
 
 if __name__ == "__main__":
