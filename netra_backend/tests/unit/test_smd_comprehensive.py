@@ -230,7 +230,7 @@ class TestPhaseTransitionAndTiming(BaseTestCase):
         
         # Verify INIT phase was completed
         self.assertIn(StartupPhase.INIT, self.orchestrator.completed_phases)
-        self.assertIn(StartupPhase.INIT, self.app.state.startup_completed_phases)
+        self.assertIn("init", self.app.state.startup_completed_phases)
         
         # Verify INIT phase has duration > 0
         init_duration = self.orchestrator.phase_timings[StartupPhase.INIT]['duration']
@@ -265,6 +265,9 @@ class TestPhaseTransitionAndTiming(BaseTestCase):
         """Test phase failure tracking and error recording."""
         self.orchestrator._set_current_phase(StartupPhase.DATABASE)
         test_error = Exception("Database connection failed")
+        
+        # Small delay to ensure duration > 0
+        time.sleep(0.001)
         
         self.orchestrator._fail_phase(StartupPhase.DATABASE, test_error)
         
