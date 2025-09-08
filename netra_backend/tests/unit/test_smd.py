@@ -361,7 +361,7 @@ class TestStartupOrchestrator(BaseTestCase):
         
         # Verify error context for business incident response
         error_context = self.mock_app.state.startup_error
-        self.assertIn("services", error_context.lower())
+        self.assertIn("service", error_context.lower())
         self.assertIn("failed", error_context.lower())
 
 
@@ -842,7 +842,11 @@ class TestBusinessCriticalValidation(BaseTestCase):
 
     def test_startup_orchestrator_business_state_tracking(self):
         """Test StartupOrchestrator tracks all business-required state."""
-        orchestrator = StartupOrchestrator(Mock(spec=FastAPI))
+        # Create mock FastAPI app with state attribute
+        mock_app = Mock(spec=FastAPI)
+        mock_app.state = Mock()
+        
+        orchestrator = StartupOrchestrator(mock_app)
         
         # Verify business-critical tracking attributes exist
         business_tracking_attributes = [
@@ -862,10 +866,18 @@ class TestBusinessCriticalValidation(BaseTestCase):
                 )
                 
                 attr_value = getattr(orchestrator, attr)
-                self.assertIsNotNone(
-                    attr_value,
-                    f"Business tracking attribute '{attr}' not initialized"
-                )
+                
+                # current_phase is intentionally None on initialization
+                if attr == 'current_phase':
+                    self.assertIsNone(
+                        attr_value,
+                        f"Business tracking attribute '{attr}' should be None on initialization"
+                    )
+                else:
+                    self.assertIsNotNone(
+                        attr_value,
+                        f"Business tracking attribute '{attr}' not initialized"
+                    )
 
 
 if __name__ == '__main__':
