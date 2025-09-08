@@ -162,118 +162,138 @@ class DataHelperAgent(BaseAgent):
                 'fallback_message': self._get_fallback_message(context.state.user_request)
             }
     
-    # === Backward Compatibility Methods ===
-    
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
-        """Execute the agent - backward compatibility method that delegates to modern execution.
+    async def _execute_core(self, context: 'UserExecutionContext') -> 'UserExecutionContext':
+        """Execute core data request generation logic with complete user isolation.
+        
+        ✅ MIGRATED: Uses UserExecutionContext for secure, isolated execution.
         
         Args:
-            state: Current agent state
-            run_id: Run ID for tracking
-            stream_updates: Whether to stream updates
-        """
-        # Use UserExecutionContext if available, otherwise create ExecutionContext for backward compatibility
-        if self.context:
-            # Modern pattern: Use UserExecutionContext
-            await self.execute_modern(state, run_id, stream_updates)
-        else:
-            # Legacy pattern: Create ExecutionContext for backward compatibility
-            context = ExecutionContext(
-                run_id=run_id,
-                agent_name=self.name,
-                state=state,
-                stream_updates=stream_updates,
-                thread_id=getattr(state, 'chat_thread_id', None),
-                user_id=getattr(state, 'user_id', None)
-            )
-            
-            # Delegate to BaseAgent's modern execution
-            await self.execute_modern(state, run_id, stream_updates)
-    
-    async def run(
-        self,
-        user_prompt: str,
-        thread_id: str,
-        user_id: str,
-        run_id: str,
-        state: Optional[DeepAgentState] = None
-    ) -> DeepAgentState:
-        """Execute the data helper agent - backward compatibility method.
-        
-        This method maintains backward compatibility while using the golden pattern internally.
-        
-        Args:
-            user_prompt: The user's request
-            thread_id: Thread ID for the conversation
-            user_id: User ID
-            run_id: Run ID for tracking
-            state: Current agent state with context
+            context: UserExecutionContext with complete request isolation
             
         Returns:
-            Updated DeepAgentState with data request
+            Enhanced UserExecutionContext with data request results
         """
-        logger.info(f"DataHelperAgent.run() starting for run_id: {run_id}")
-        
-        # Initialize state if not provided
-        if state is None:
-            state = DeepAgentState()
-            state.user_request = user_prompt
-            state.chat_thread_id = thread_id
-            state.user_id = user_id
-        
-        # Use UserExecutionContext if available, otherwise create ExecutionContext for backward compatibility
-        if self.context:
-            # Modern pattern: Use UserExecutionContext - update metadata for this execution
-            if not hasattr(self.context, 'metadata'):
-                self.context.metadata = {}
-            self.context.metadata.update({
-                'user_request': user_prompt,
-                'run_id': run_id,
-                'thread_id': thread_id,
-                'user_id': user_id
-            })
-            context = self.context
-        else:
-            # Legacy pattern: Create ExecutionContext for backward compatibility
-            context = ExecutionContext(
-                run_id=run_id,
-                agent_name=self.name,
-                state=state,
-                stream_updates=True,  # Default to true for legacy compatibility
-                thread_id=thread_id,
-                user_id=user_id
-            )
+        # Emit thinking event for reasoning visibility
+        await self.notify_event("agent_thinking", {
+            "message": "Analyzing user request to identify data gaps...",
+            "agent": self.name
+        })
         
         try:
-            # Use modern execution pattern through BaseAgent
-            if await self.validate_preconditions(context):
-                result = await self.execute_core_logic(context)
-                logger.info(f"DataHelperAgent.run() completed successfully for run_id: {run_id}")
-            else:
-                # Validation failed - add error to state using context_tracking
-                logger.error(f"Validation failed in DataHelperAgent.run() for run_id: {run_id}")
-                if not state.context_tracking:
-                    state.context_tracking = {}
-                
-                state.context_tracking['data_helper'] = {
-                    'success': False,
-                    'error': 'Validation failed: insufficient or invalid user request',
-                    'fallback_message': self._get_fallback_message(user_prompt)
+            # Extract data from secure context metadata
+            user_request = context.metadata.get('user_request', '')
+            triage_result = context.metadata.get('triage_result', {})
+            
+            # Validate preconditions
+            if not user_request or len(user_request.strip()) < 10:
+                raise ValueError("Insufficient user request for data analysis")
+            
+            # Extract previous agent results from context
+            previous_results = self._extract_previous_results_from_context(context)
+            
+            # Emit tool execution transparency
+            await self.notify_event("tool_executing", {
+                "tool": "data_helper",
+                "params": {
+                    "user_request_length": len(user_request),
+                    "triage_result_available": bool(triage_result),
+                    "previous_results_count": len(previous_results)
                 }
-                
+            })
+            
+            # Generate data request using the tool
+            data_request_result = await self.data_helper_tool.generate_data_request(
+                user_request=user_request,
+                triage_result=triage_result,
+                previous_results=previous_results
+            )
+            
+            # Emit tool completion with sanitized results
+            await self.notify_event("tool_completed", {
+                "tool": "data_helper",
+                "result": {
+                    "success": data_request_result.get('success', False),
+                    "data_request_generated": bool(data_request_result.get('data_request')),
+                    "instructions_count": len(data_request_result.get('data_request', {}).get('user_instructions', '')),
+                    "structured_items_count": len(data_request_result.get('data_request', {}).get('structured_items', []))
+                }
+            })
+            
+            # Store results using SSOT metadata storage (SECURE)
+            self.store_metadata_result(context, 'data_helper_result', data_request_result)
+            self.store_metadata_result(context, 'data_request_generated', True)
+            
+            # Log successful execution
+            logger.info(f"DataHelperAgent completed successfully: user_id={context.user_id}, run_id={context.run_id}")
+            
+            return context
+            
         except Exception as e:
-            # This should rarely happen as execute_core_logic handles its own exceptions
-            logger.error(f"Unexpected error in DataHelperAgent.run() for run_id {run_id}: {str(e)}")
-            if not state.context_tracking:
-                state.context_tracking = {}
-                
-            state.context_tracking['data_helper'] = {
-                'success': False,
-                'error': f"Unexpected error: {str(e)}",
-                'fallback_message': self._get_fallback_message(user_prompt)
-            }
+            # Use unified error handler with proper ErrorContext
+            error_context = ErrorContext(
+                trace_id=ErrorContext.generate_trace_id(),
+                operation="data_request_generation",
+                details={"run_id": context.run_id, "error_type": type(e).__name__},
+                component="DataHelperAgent"
+            )
+            
+            # Log the error through unified system
+            logger.error(f"Error in DataHelperAgent: user_id={context.user_id}, run_id={context.run_id}, error={str(e)}")
+            
+            # Emit error event for WebSocket transparency
+            await self.notify_event("agent_error", {
+                "agent": self.name,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "fallback_available": True
+            })
+            
+            # Store error result using SSOT metadata storage (SECURE)
+            self.store_metadata_result(context, 'data_helper_error', str(e))
+            self.store_metadata_result(context, 'data_helper_fallback_message', 
+                                     self._get_fallback_message(context.metadata.get('user_request', '')))
+            
+            # Return context with error state (don't re-raise - let BaseAgent handle)
+            return context
+    
+    def _extract_previous_results_from_context(self, context: 'UserExecutionContext') -> Dict[str, Any]:
+        """Extract previous agent results from UserExecutionContext metadata.
         
-        return state
+        Args:
+            context: UserExecutionContext with metadata
+            
+        Returns:
+            Dictionary of previous agent results
+        """
+        previous_results = {}
+        
+        # Extract known result types from context metadata
+        result_keys = [
+            'triage_result', 'data_result', 'optimizations_result',
+            'action_plan_result', 'report_result', 'synthetic_data_result'
+        ]
+        
+        for key in result_keys:
+            value = context.metadata.get(key)
+            if value is not None:
+                previous_results[key] = value
+        
+        return previous_results
+    
+    def _get_fallback_message(self, user_request: str) -> str:
+        """Generate a fallback message when data request generation fails.
+        
+        Args:
+            user_request: Original user request
+            
+        Returns:
+            Fallback message for the user
+        """
+        return (
+            "I encountered an issue generating a specific data request. "
+            "Please provide any additional information you think would be helpful "
+            f"for analyzing your request: {user_request[:100]}..."
+        )
     
     def _extract_previous_results(self, state: DeepAgentState) -> list:
         """Extract results from previous agents in the workflow.
