@@ -688,3 +688,8 @@ redis_manager = RedisManager()
 async def get_redis() -> RedisManager:
     """Get Redis manager instance."""
     return redis_manager
+
+
+def get_redis_manager() -> RedisManager:
+    """Get Redis manager instance - synchronous version for compatibility with integration tests."""
+    return redis_manager
