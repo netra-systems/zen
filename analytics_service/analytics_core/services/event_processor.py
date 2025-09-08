@@ -197,15 +197,15 @@ class EventProcessor:
                 return False
             
             # SECURITY CRITICAL: Validate user context matches event user_id
-            if user_context and hasattr(event, 'user_id') and event.user_id != user_context.user_id:
-                logger.error(f"SECURITY VIOLATION: Event user_id {event.user_id} doesn't match context user_id {user_context.user_id}")
+            if user_context and event.context.user_id != user_context.user_id:
+                logger.error(f"SECURITY VIOLATION: Event user_id {event.context.user_id} doesn't match context user_id {user_context.user_id}")
                 return False
             
             # Check rate limiting
             if self.redis and not await self.redis.check_rate_limit(
-                event.user_id, self.config.max_events_per_user_per_minute
+                event.context.user_id, self.config.max_events_per_user_per_minute
             ):
-                logger.warning(f"Rate limit exceeded for user {event.user_id}")
+                logger.warning(f"Rate limit exceeded for user {event.context.user_id}")
                 return False
             
             # Apply privacy filtering
@@ -379,8 +379,8 @@ class EventProcessor:
     def _validate_event(self, event: AnalyticsEvent) -> bool:
         """Validate event data"""
         try:
-            # Required fields check
-            if not event.user_id or not event.session_id:
+            # Required fields check - use context for user data
+            if not event.context.user_id or not event.context.session_id:
                 return False
             
             if not event.event_type or not event.event_category:
@@ -402,8 +402,8 @@ class EventProcessor:
         """Apply privacy filters to event data"""
         try:
             # Hash IP address if present
-            if event.ip_address:
-                event.ip_address = hashlib.sha256(event.ip_address.encode()).hexdigest()
+            if event.context.ip_address:
+                event.context.ip_address = hashlib.sha256(event.context.ip_address.encode()).hexdigest()
             
             # Sanitize prompt text in chat interactions
             if event.event_type == EventType.CHAT_INTERACTION:
@@ -413,8 +413,8 @@ class EventProcessor:
                 event.properties = props
             
             # Remove sensitive user agent details
-            if event.user_agent:
-                event.user_agent = self._sanitize_user_agent(event.user_agent)
+            if event.context.user_agent:
+                event.context.user_agent = self._sanitize_user_agent(event.context.user_agent)
             
             return event
             
@@ -555,17 +555,17 @@ class EventProcessor:
                             'event_label': getattr(event, 'event_label', '') or '',
                             'event_value': getattr(event, 'event_value', 0.0) or 0.0,
                             'properties': json.dumps(event.properties),
-                            'user_id': getattr(event, 'user_id', ''),
-                            'session_id': getattr(event, 'session_id', ''),
-                            'page_path': getattr(event, 'page_path', ''),
-                            'page_title': getattr(event, 'page_title', ''),
-                            'referrer': getattr(event, 'referrer', ''),
-                            'user_agent': getattr(event, 'user_agent', ''),
-                            'ip_address': getattr(event, 'ip_address', ''),
-                            'country_code': getattr(event, 'country_code', ''),
-                            'gtm_container_id': getattr(event, 'gtm_container_id', ''),
-                            'environment': getattr(event, 'environment', 'development'),
-                            'app_version': getattr(event, 'app_version', '')
+                            'user_id': event.context.user_id,
+                            'session_id': event.context.session_id,
+                            'page_path': event.context.page_path,
+                            'page_title': event.context.page_title or '',
+                            'referrer': event.context.referrer or '',
+                            'user_agent': event.context.user_agent or '',
+                            'ip_address': event.context.ip_address or '',
+                            'country_code': event.context.country_code or '',
+                            'gtm_container_id': event.context.gtm_container_id or '',
+                            'environment': event.context.environment,
+                            'app_version': event.context.app_version or ''
                         }
                         events_data.append(event_dict)
                     
@@ -581,7 +581,7 @@ class EventProcessor:
                             'event_id': str(event.event_id),
                             'timestamp': event.timestamp.isoformat(),
                             'event_type': str(event.event_type),
-                            'user_id': getattr(event, 'user_id', ''),
+                            'user_id': event.context.user_id,
                             'properties': event.properties
                         }
                         await self.redis.buffer_event(event_dict)
@@ -658,7 +658,7 @@ class EventProcessor:
                         ).hexdigest()
                         
                         prompt_data = {
-                            'user_id': event.user_id,
+                            'user_id': event.context.user_id,
                             'timestamp': event.timestamp.isoformat(),
                             'prompt_length': props.get('prompt_length', 0),
                             'model_used': props.get('model_used'),
