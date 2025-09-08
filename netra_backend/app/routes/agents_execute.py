@@ -608,13 +608,14 @@ async def stream_agent_execution(
             agent_id = f"stream-agent-{uuid4()}"
             
             # Send initial start event
-            yield f"data: {json.dumps({
+            data = {
                 'event': 'agent_started',
                 'agent_id': agent_id,
                 'agent_type': request.agent_type,
                 'message': request.message,
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield "data: " + json.dumps(data) + "\n\n"
             
             # Simulate processing updates
             if not agent_service:
