@@ -1307,9 +1307,8 @@ class SupervisorAgent(BaseAgent):
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                request_id=UnifiedIdGenerator.generate_request_id(),
-                user_request=user_request,
-                websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+                request_id=UnifiedIdGenerator.generate_base_id("req"),
+                websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
             )
             
             # CRITICAL BUSINESS VALUE: Send agent_started event

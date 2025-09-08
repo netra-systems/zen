@@ -148,7 +148,7 @@ class RequestScopedContext:
     user_id: str
     thread_id: str
     run_id: Optional[str] = None
-    websocket_connection_id: Optional[str] = None
+    websocket_client_id: Optional[str] = None
     request_id: Optional[str] = None
     
     def __post_init__(self):
@@ -339,7 +339,7 @@ async def get_request_scoped_user_context(
     user_id: str,
     thread_id: str,
     run_id: Optional[str] = None,
-    websocket_connection_id: Optional[str] = None
+    websocket_client_id: Optional[str] = None
 ) -> RequestScopedContext:
     """Create request-scoped user context WITHOUT storing database sessions.
     
@@ -369,7 +369,7 @@ async def get_request_scoped_user_context(
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_client_id
         )
         
         logger.info(f"Created RequestScopedContext for user {user_id}, run {run_id} - NO sessions stored")
@@ -386,7 +386,7 @@ def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
                                   db_session: Optional[AsyncSession] = None,
-                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+                                  websocket_client_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
     DEPRECATED: Use get_request_scoped_user_context for new code.
@@ -439,7 +439,7 @@ def create_user_execution_context(user_id: str,
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_client_id  # Fixed parameter name
         )
         
         logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")

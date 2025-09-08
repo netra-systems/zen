@@ -127,7 +127,7 @@ class WebSocketManagerAdapter:
             thread_id=f"thread_{context_id[:8]}",
             run_id=f"run_{context_id[:8]}",
             request_id=f"req_{context_id[:8]}",
-            websocket_connection_id=connection_id
+            websocket_client_id=connection_id
         )
         
         self._legacy_stats["contexts_created"] += 1

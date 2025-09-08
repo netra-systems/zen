@@ -606,16 +606,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 user_id = user_context.user_id
                 authenticated = True
                 
-                # Get security manager (still uses singleton as it doesn't hold user state)
-                from netra_backend.app.websocket_core import get_connection_security_manager
-                security_manager = None  # Legacy security manager removed - SSOT auth handles security
+                # Legacy security manager removed - SSOT auth handles security
+                security_manager = None
                 
                 logger.info(f"WebSocket authenticated using factory pattern for user: {user_id[:8]}...")
                 
             else:
                 # Fallback to legacy authentication for backward compatibility
                 logger.warning("MIGRATION: Using legacy authentication - less secure!")
-                async with secure_websocket_context(websocket) as (auth_info, security_manager):
+                async with secure_websocket_context(websocket) as (auth_info, _):
+                    security_manager = None  # Legacy security manager removed
                     user_id = auth_info.user_id
                     authenticated = True
                 
@@ -665,18 +665,12 @@ async def websocket_endpoint(websocket: WebSocket):
             # Register with security manager
             if 'user_context' in locals():
                 # Factory pattern: Create auth_info from user_context and extracted auth_info
-                # auth_info was extracted and stored earlier, now use it properly
-                factory_auth_info = type('AuthInfo', (), {
-                    'user_id': user_id,
-                    'permissions': auth_info.get('permissions', []) if auth_info else [],
-                    'roles': auth_info.get('roles', []) if auth_info else [],
-                    'token_expires_at': auth_info.get('token_expires_at') if auth_info else None,
-                    'session_id': auth_info.get('session_id') if auth_info else None
-                })()
-                security_manager.register_connection(connection_id, factory_auth_info, websocket)
+                # Legacy security registration removed - handled by SSOT auth
+                # Auth info is already validated and stored in user_context
+                pass
             else:
-                # Legacy pattern: Use existing auth_info from secure_websocket_context
-                security_manager.register_connection(connection_id, auth_info, websocket)
+                # Legacy pattern also doesn't need security registration - handled by SSOT auth
+                pass
                 
             # Register with connection monitor
             connection_monitor.register_connection(connection_id, user_id, websocket)
@@ -855,7 +849,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     security_manager = None  # Legacy security manager removed - SSOT auth handles security
                 
                 connection_monitor.unregister_connection(connection_id)
-                security_manager.unregister_connection(connection_id)
+                # Legacy security unregistration removed - handled by SSOT auth
                 
                 cleanup_pattern = "FACTORY_PATTERN" if ('user_context' in locals() and hasattr(ws_manager, 'remove_connection')) else "LEGACY_SINGLETON"
                 logger.debug(f"WebSocket cleanup completed: {connection_id} using {cleanup_pattern}")
@@ -908,9 +902,10 @@ async def _handle_websocket_messages(
                 
                 # Validate message size
                 if len(raw_message.encode('utf-8')) > WEBSOCKET_CONFIG.max_message_size_bytes:
-                    security_manager.report_security_violation(
-                        connection_id, "message_too_large", 
-                        {"size": len(raw_message)}
+                    # Legacy security reporting removed - log violation instead
+                    logger.warning(
+                        f"Message size violation for {connection_id}: "
+                        f"size={len(raw_message.encode('utf-8'))} exceeds max={WEBSOCKET_CONFIG.max_message_size_bytes}"
                     )
                     continue
                 
@@ -948,10 +943,8 @@ async def _handle_websocket_messages(
                     await asyncio.sleep(min(backoff_delay, max_backoff))
                     backoff_delay = min(backoff_delay * 2, max_backoff)
                 
-                # Check security status
-                if not security_manager.validate_connection_security(connection_id):
-                    logger.warning(f"Security validation failed for {connection_id}")
-                    break
+                # Legacy security validation removed - SSOT auth handles security
+                # Connection security is validated through authentication and rate limiting
                 
                 # Break on too many errors
                 if error_count >= max_errors:
@@ -1671,7 +1664,6 @@ async def websocket_detailed_stats():
     factory = get_websocket_manager_factory()
     message_router = get_message_router()
     authenticator = get_websocket_authenticator()
-    security_manager = None  # Legacy security manager removed - SSOT auth handles security
     connection_monitor = get_connection_monitor()
     
     return {
@@ -1679,7 +1671,7 @@ async def websocket_detailed_stats():
         "websocket_manager": factory.get_factory_stats(),
         "message_router": message_router.get_stats(),
         "authentication": authenticator.get_auth_stats(),
-        "security": security_manager.get_security_summary(),
+        "security": {"status": "handled_by_ssot_auth"},  # Legacy security replaced
         "connection_monitoring": connection_monitor.get_global_stats(),
         "system": {
             "config": WEBSOCKET_CONFIG.model_dump(),

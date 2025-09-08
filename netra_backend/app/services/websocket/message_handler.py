@@ -4,9 +4,11 @@ Uses message queue system for better scalability and error handling.
 """
 
 import json
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.dependencies import create_user_execution_context
 
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -73,8 +75,12 @@ class StartAgentHandler(BaseMessageHandler):
         async with get_unit_of_work() as uow:
             thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
             if not thread:
-                context = UserExecutionContext.get_context(user_id)
-                manager = create_websocket_manager(context=context)
+                context = create_user_execution_context(
+                    user_id=user_id,
+                    thread_id=str(uuid.uuid4()),
+                    run_id=str(uuid.uuid4())
+                )
+                manager = create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
             return await self._create_message_and_run(uow, thread, user_request, user_id)
@@ -128,8 +134,12 @@ class StartAgentHandler(BaseMessageHandler):
     
     async def _send_agent_completion(self, user_id: str, response) -> None:
         """Send agent completion message to user"""
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
@@ -138,8 +148,12 @@ class StartAgentHandler(BaseMessageHandler):
     async def _handle_agent_error(self, user_id: str, error: Exception) -> None:
         """Handle agent processing errors"""
         logger.error(f"Error handling start_agent for user {user_id}: {error}")
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_error(user_id, f"Failed to start agent: {str(error)}")
 
 class UserMessageHandler(BaseMessageHandler):
@@ -184,8 +198,12 @@ class UserMessageHandler(BaseMessageHandler):
         async with get_unit_of_work() as uow:
             thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
             if not thread:
-                context = UserExecutionContext.get_context(user_id)
-                manager = create_websocket_manager(context=context)
+                context = create_user_execution_context(
+                    user_id=user_id,
+                    thread_id=str(uuid.uuid4()),
+                    run_id=str(uuid.uuid4())
+                )
+                manager = create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
             return await self._create_user_message_and_run(uow, thread, text, references)
@@ -234,8 +252,12 @@ class UserMessageHandler(BaseMessageHandler):
     
     async def _send_user_message_completion(self, user_id: str, response) -> None:
         """Send user message completion to user"""
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
@@ -244,8 +266,12 @@ class UserMessageHandler(BaseMessageHandler):
     async def _handle_user_message_error(self, user_id: str, error: Exception) -> None:
         """Handle user message processing errors"""
         logger.error(f"Error processing user message: {error}")
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "error", "payload": {"error": str(error)}
         })
@@ -266,16 +292,24 @@ class ThreadHistoryHandler(BaseMessageHandler):
                 await self._process_thread_history_request(uow, user_id, payload)
         except Exception as e:
             logger.error(f"Error retrieving thread history: {e}")
-            context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(context=context)
+            context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
+            manager = create_websocket_manager(context)
             await manager.send_error(user_id, "Failed to retrieve thread history")
 
     async def _process_thread_history_request(self, uow, user_id: str, payload: Dict[str, Any]) -> None:
         """Process thread history request with database operations."""
         thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
         if not thread:
-            context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(context=context)
+            context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
+            manager = create_websocket_manager(context)
             await manager.send_error(user_id, "Failed to retrieve thread")
             return
         messages = await self._get_thread_messages(uow, thread.id, payload)
@@ -305,8 +339,12 @@ class ThreadHistoryHandler(BaseMessageHandler):
 
     async def _send_thread_history_response(self, user_id: str, thread_id: str, history: list) -> None:
         """Send formatted thread history response."""
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "thread_history",
             "payload": {"thread_id": thread_id, "messages": history}
@@ -325,8 +363,12 @@ class StopAgentHandler(BaseMessageHandler):
         """Handle stop_agent message"""
         logger.info(f"Stopping agent for user {user_id}")
         
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_to_user(
             user_id,
             {
@@ -388,8 +430,12 @@ class MessageHandlerService:
     
     async def _validate_message_format(self, user_id: str, message: Dict[str, Any]) -> bool:
         """Validate incoming message format"""
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         if not manager.validate_message(message):
             await manager.send_error(user_id, "Invalid message format")
             return False
@@ -398,8 +444,12 @@ class MessageHandlerService:
     async def _extract_message_type(self, user_id: str, message: Dict[str, Any]) -> Optional[str]:
         """Extract and validate message type"""
         message_type = message.get("type")
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         if not message_type:
             await manager.send_error(user_id, "Message type not specified")
             return None
@@ -410,8 +460,12 @@ class MessageHandlerService:
     
     async def _sanitize_and_queue_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> None:
         """Sanitize message and add to processing queue"""
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         sanitized_message = manager.sanitize_message(message)
         priority = self._determine_priority(message_type)
         queued_message = self._create_queued_message(user_id, sanitized_message, message_type, priority)
@@ -431,8 +485,12 @@ class MessageHandlerService:
     async def _handle_processing_error(self, user_id: str, error: Exception) -> None:
         """Handle message processing errors"""
         logger.error(f"Error handling message: {error}")
-        context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(context=context)
+        context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        manager = create_websocket_manager(context)
         await manager.send_error(user_id, "Internal server error")
     
     def _determine_priority(self, message_type: str) -> MessagePriority:

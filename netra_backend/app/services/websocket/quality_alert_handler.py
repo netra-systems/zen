@@ -5,8 +5,10 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Any, Dict
+import uuid
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import create_user_execution_context
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
@@ -49,7 +51,11 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle subscribe action for quality alerts."""
         await self.monitoring_service.subscribe_to_updates(user_id)
         message = self._build_subscription_message("subscribed")
-        user_context = UserExecutionContext.get_context(user_id)
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
@@ -57,7 +63,11 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle unsubscribe action for quality alerts."""
         await self.monitoring_service.unsubscribe_from_updates(user_id)
         message = self._build_subscription_message("unsubscribed")
-        user_context = UserExecutionContext.get_context(user_id)
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
@@ -65,7 +75,11 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle invalid subscription action."""
         error_message = f"Invalid action: {action}. Use 'subscribe' or 'unsubscribe'"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
@@ -84,7 +98,11 @@ class QualityAlertHandler(BaseMessageHandler):
         logger.error(f"Error handling quality alert subscription: {str(error)}")
         error_message = f"Failed to handle subscription: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:

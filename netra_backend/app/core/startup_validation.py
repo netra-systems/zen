@@ -289,9 +289,9 @@ class StartupValidator:
                     from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
                     # Test factory availability - don't create actual manager without context
                     ws_manager = "factory_available"  # Placeholder to indicate factory pattern is working
-                    logger.debug("WebSocket factory pattern available for startup validation")
+                    self.logger.debug("WebSocket factory pattern available for startup validation")
                 except ImportError as e:
-                    logger.debug(f"WebSocket factory not available: {e}")
+                    self.logger.debug(f"WebSocket factory not available: {e}")
                     ws_manager = None
             
             if ws_manager:

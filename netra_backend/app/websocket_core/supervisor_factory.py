@@ -79,16 +79,43 @@ async def get_websocket_scoped_supervisor(
         # Update activity timestamp
         context.update_activity()
         
+        # Handle UserContext-based tool_dispatcher creation if needed
+        tool_dispatcher = components.get("tool_dispatcher")
+        
+        if tool_dispatcher is None and "tool_classes" in components:
+            # Create UserContext-based tool_dispatcher
+            logger.debug("Creating UserContext-based tool_dispatcher for WebSocket")
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+            
+            # Create user execution context for tool dispatcher
+            user_context = UserExecutionContext(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id,
+                websocket_client_id=context.connection_id,
+                db_session=db_session
+            )
+            
+            # Create tool dispatcher using factory pattern
+            tool_dispatcher = await UnifiedToolDispatcher.create_for_user(
+                user_context=user_context,
+                websocket_bridge=components["websocket_bridge"],
+                tools=components["tool_classes"]
+            )
+            logger.info(f"Created UserContext tool_dispatcher for user {context.user_id}")
+        
         # Delegate to core supervisor creation logic
         supervisor = await create_supervisor_core(
             user_id=context.user_id,
             thread_id=context.thread_id,
             run_id=context.run_id,
             db_session=db_session,
-            websocket_connection_id=context.connection_id,
+            websocket_client_id=context.connection_id,
             llm_client=components["llm_client"],
             websocket_bridge=components["websocket_bridge"],
-            tool_dispatcher=components["tool_dispatcher"]
+            tool_dispatcher=tool_dispatcher,  # Now properly created or legacy
+            tool_classes=components.get("tool_classes")  # Pass for UserContext pattern
         )
         
         logger.info(
@@ -152,20 +179,41 @@ async def _get_websocket_supervisor_components(app_state = None) -> dict:
         )
     
     try:
-        # Get WebSocket bridge
-        if app_state and hasattr(app_state, 'websocket_bridge'):
-            components["websocket_bridge"] = app_state.websocket_bridge
+        # Get WebSocket bridge with fallback path resolution
+        websocket_bridge = None
+        
+        if app_state:
+            # Primary path: app_state.websocket_bridge (created by startup alias)
+            if hasattr(app_state, 'websocket_bridge') and app_state.websocket_bridge:
+                websocket_bridge = app_state.websocket_bridge
+                logger.debug("Using primary WebSocket bridge path: app_state.websocket_bridge")
+            # Fallback path: app_state.agent_websocket_bridge (original startup location)
+            elif hasattr(app_state, 'agent_websocket_bridge') and app_state.agent_websocket_bridge:
+                websocket_bridge = app_state.agent_websocket_bridge
+                logger.debug("Using fallback WebSocket bridge path: app_state.agent_websocket_bridge")
+        
+        if websocket_bridge:
+            components["websocket_bridge"] = websocket_bridge
         else:
-            # SECURITY FIX: Remove unsafe singleton fallback to prevent user data leakage
-            # The supervisor factory should not use singleton WebSocket managers
-            logger.error(
-                "WebSocket bridge not available for supervisor creation - "
-                "app_state.websocket_bridge is required for secure operation"
-            )
-            raise HTTPException(
-                status_code=500,
-                detail="WebSocket bridge not configured - app_state.websocket_bridge is required"
-            )
+            # Final check - if still no bridge found
+            if "websocket_bridge" not in components:
+                # SECURITY FIX: Remove unsafe singleton fallback to prevent user data leakage
+                # The supervisor factory should not use singleton WebSocket managers
+                bridge_paths_checked = []
+                if app_state:
+                    if hasattr(app_state, 'websocket_bridge'):
+                        bridge_paths_checked.append(f"websocket_bridge={getattr(app_state, 'websocket_bridge', 'missing')}")
+                    if hasattr(app_state, 'agent_websocket_bridge'):
+                        bridge_paths_checked.append(f"agent_websocket_bridge={getattr(app_state, 'agent_websocket_bridge', 'missing')}")
+                
+                logger.error(
+                    "WebSocket bridge not available for supervisor creation - "
+                    f"app_state paths checked: {bridge_paths_checked or 'no app_state provided'}"
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail="WebSocket bridge not configured - app_state.websocket_bridge or app_state.agent_websocket_bridge is required"
+                )
         
     except HTTPException:
         raise
@@ -176,38 +224,64 @@ async def _get_websocket_supervisor_components(app_state = None) -> dict:
             detail="WebSocket bridge not available"
         )
     
+    # CRITICAL FIX: Handle UserContext-based factory pattern for tool_dispatcher
+    # The system has migrated from singleton to per-user factory pattern
+    # tool_dispatcher is now created per-user via UserExecutionContext
     try:
-        # Get tool dispatcher
-        if app_state and hasattr(app_state, 'agent_supervisor'):
+        # Check if we're using the new UserContext-based pattern
+        if app_state and hasattr(app_state, 'tool_classes') and app_state.tool_classes:
+            # UserContext-based pattern - tool_dispatcher created per-request
+            # We'll pass None and let create_supervisor_core handle creation
+            logger.debug("Using UserContext-based tool dispatcher pattern")
+            components["tool_dispatcher"] = None  # Will be created per-user
+            components["tool_classes"] = app_state.tool_classes  # Pass classes for creation
+            
+        elif app_state and hasattr(app_state, 'agent_supervisor'):
+            # Legacy singleton pattern fallback
             legacy_supervisor = app_state.agent_supervisor
             if legacy_supervisor and hasattr(legacy_supervisor, 'tool_dispatcher'):
+                logger.warning("Using legacy singleton tool_dispatcher - migration needed")
                 components["tool_dispatcher"] = legacy_supervisor.tool_dispatcher
             else:
-                raise ValueError("Legacy supervisor missing tool_dispatcher")
+                # Legacy supervisor exists but no tool_dispatcher
+                logger.debug("Legacy supervisor exists but tool_dispatcher is None (UserContext pattern)")
+                components["tool_dispatcher"] = None
+                
         else:
-            logger.error("Tool dispatcher not available - no app state or legacy supervisor")
+            # No tool configuration available
+            logger.error("Neither tool_classes nor legacy supervisor available")
             raise HTTPException(
                 status_code=500,
-                detail="Tool dispatcher not configured"
+                detail="Tool dispatcher configuration not available"
             )
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get tool dispatcher: {e}")
+        logger.error(f"Failed to get tool dispatcher configuration: {e}")
         raise HTTPException(
             status_code=500,
-            detail="Tool dispatcher not available"
+            detail="Tool dispatcher configuration not available"
         )
     
-    # Validate all components are present
-    required_components = ["llm_client", "websocket_bridge", "tool_dispatcher"]
+    # Validate required components (tool_dispatcher can be None for UserContext pattern)
+    required_components = ["llm_client", "websocket_bridge"]
     for component_name in required_components:
         if component_name not in components or components[component_name] is None:
             logger.error(f"Required component {component_name} is missing or None")
             raise HTTPException(
                 status_code=500,
                 detail=f"Required component {component_name} not available"
+            )
+    
+    # Special handling for tool_dispatcher - it can be None for UserContext pattern
+    if "tool_dispatcher" not in components:
+        # Ensure we have tool_classes for UserContext pattern
+        if "tool_classes" not in components or not components["tool_classes"]:
+            logger.error("Neither tool_dispatcher nor tool_classes available")
+            raise HTTPException(
+                status_code=500,
+                detail="Tool dispatcher or tool classes configuration required"
             )
     
     logger.debug("Successfully retrieved all components for WebSocket supervisor creation")

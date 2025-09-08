@@ -28,6 +28,7 @@ class IDType(Enum):
     EXECUTION = "execution"
     TRACE = "trace"
     METRIC = "metric"
+    THREAD = "thread"
 
 
 @dataclass
@@ -345,6 +346,26 @@ class UnifiedIDManager:
         result['valid'] = True
         
         return result
+    
+    @classmethod
+    def generate_thread_id(cls) -> str:
+        """
+        Generate a thread ID using class method pattern for compatibility.
+        
+        Returns:
+            Unique thread ID (without thread_ prefix to prevent double prefixing)
+        """
+        import uuid
+        import time
+        
+        # Generate unique thread ID components
+        uuid_part = str(uuid.uuid4())[:8]
+        timestamp = int(time.time() * 1000) % 100000  # Last 5 digits of timestamp
+        
+        # Return unprefixed ID - calling code will add thread_ prefix
+        thread_id = f"session_{timestamp}_{uuid_part}"
+        
+        return thread_id
 
 
 # Global ID manager instance
@@ -392,6 +413,11 @@ def generate_websocket_id() -> str:
 def generate_execution_id() -> str:
     """Generate an execution context ID"""
     return generate_id(IDType.EXECUTION)
+
+
+def generate_thread_id() -> str:
+    """Generate a thread ID"""
+    return generate_id(IDType.THREAD)
 
 
 def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:

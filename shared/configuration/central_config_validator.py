@@ -13,6 +13,8 @@ CRITICAL: This is the SSOT for configuration requirements - do not duplicate log
 
 import os
 import logging
+import threading
+import time
 from typing import Dict, List, Optional, Set, Tuple, Any
 from enum import Enum
 from dataclasses import dataclass
@@ -169,6 +171,10 @@ class CentralConfigurationValidator:
     
     This is the Single Source of Truth (SSOT) for configuration validation.
     All services must use this validator instead of implementing their own fallback logic.
+    
+    RACE CONDITION PROTECTION: Enhanced with service lifecycle management to prevent
+    race conditions during initialization where environment loading and validation
+    happen concurrently.
     """
     
     # SSOT: Configuration Requirements for ALL Services
@@ -362,6 +368,14 @@ class CentralConfigurationValidator:
             self.env_getter = env_getter_func
         self._current_environment = None
         
+        # RACE CONDITION PROTECTION: Track initialization state
+        self._is_initialized = False
+        self._initialization_lock = threading.RLock()
+        self._readiness_state = "uninitialized"  # uninitialized -> loading -> ready -> failed
+        self._last_error = None
+        self._retry_count = 0
+        self._max_retries = 3
+        
     def get_environment(self) -> Environment:
         """Get the current deployment environment using unified detection logic."""
         # CRITICAL FIX: Use unified environment detection that matches ConfigManager
@@ -453,44 +467,241 @@ class CentralConfigurationValidator:
         """
         self._current_environment = None
     
+    def _wait_for_environment_readiness(self, timeout_seconds: float = 10.0) -> bool:
+        """
+        Wait for the environment to be ready for validation.
+        
+        RACE CONDITION FIX: This prevents validation from running before
+        environment loading is complete, which was causing OAuth validation
+        errors during service startup.
+        
+        Args:
+            timeout_seconds: Maximum time to wait for readiness
+            
+        Returns:
+            bool: True if environment is ready, False if timeout
+        """
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout_seconds:
+            try:
+                # Check if IsolatedEnvironment is properly initialized
+                env = get_env()
+                
+                # Test basic functionality - can we detect test context?
+                test_context = env._is_test_context()
+                
+                # Test environment variable access
+                env_name = env.get("ENVIRONMENT", "development")
+                
+                # DOCKER STARTUP FIX: Check OAuth credentials specifically for development
+                # This prevents the race condition where validation runs before Docker
+                # environment variables are fully available
+                if env_name == "development":
+                    oauth_id = env.get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+                    oauth_secret = env.get("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT")
+                    
+                    # For development, OAuth credentials should be available before validation
+                    if not oauth_id or not oauth_secret:
+                        logger.debug(f"OAuth credentials not yet available in Docker environment (id: {bool(oauth_id)}, secret: {bool(oauth_secret)})")
+                        time.sleep(0.1)
+                        continue
+                    
+                    # Additional validation that they're not placeholder values
+                    if oauth_id in ["", "your-client-id", "REPLACE_WITH"] or oauth_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+                        logger.debug(f"OAuth credentials contain placeholder values, waiting for proper values")
+                        time.sleep(0.1)
+                        continue
+                
+                # If we get here without exceptions and OAuth check passed, environment is ready
+                logger.debug(f"Environment readiness check passed (env: {env_name}, test: {test_context})")
+                return True
+                
+            except Exception as e:
+                logger.debug(f"Environment not ready yet: {e}")
+                time.sleep(0.1)  # Short sleep before retry
+                continue
+        
+        logger.warning(f"Environment readiness timeout after {timeout_seconds}s")
+        return False
+    
+    def _detect_timing_issue(self) -> Optional[str]:
+        """
+        Detect if current failures are due to timing/race conditions.
+        
+        Returns:
+            Optional error message if timing issue detected
+        """
+        try:
+            # Check if environment variables are in an inconsistent state
+            env = get_env()
+            
+            # Test 1: Can we access basic environment variables?
+            basic_vars_accessible = True
+            try:
+                env.get("ENVIRONMENT")
+                env.get("PYTEST_CURRENT_TEST") 
+            except Exception:
+                basic_vars_accessible = False
+            
+            # Test 2: Is isolated environment in a transitional state?
+            debug_info = env.get_debug_info()
+            isolation_enabled = debug_info.get("isolation_enabled", False)
+            isolated_vars_count = debug_info.get("isolated_vars_count", 0)
+            
+            # Test 3: Are we in test context detection limbo?
+            test_context_detection_working = True
+            try:
+                env._is_test_context()
+            except Exception:
+                test_context_detection_working = False
+            
+            # Test 4: OAuth-specific timing issues (DOCKER STARTUP FIX)
+            oauth_timing_issues = []
+            current_env = self.get_environment()
+            
+            # Check if OAuth variables are accessible but validation is failing
+            # This indicates a race condition during Docker container startup
+            if current_env == Environment.DEVELOPMENT:
+                oauth_id = env.get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+                oauth_secret = env.get("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT")
+                
+                # OAuth variables present in environment but validation might be failing
+                # due to initialization timing issues
+                if oauth_id and oauth_secret:
+                    # Variables exist - any validation failure is likely timing-related
+                    oauth_timing_issues.append("OAuth credentials available but validation failing (Docker startup race condition)")
+                elif not oauth_id and not oauth_secret:
+                    # Neither available - might be too early in startup
+                    oauth_timing_issues.append("OAuth credentials not yet loaded (Docker environment loading)")
+                else:
+                    # Partial loading - clear timing issue
+                    oauth_timing_issues.append("OAuth credentials partially loaded (race condition during Docker startup)")
+            
+            # Analyze for timing issues
+            timing_issues = []
+            
+            if not basic_vars_accessible:
+                timing_issues.append("Basic environment variable access failing")
+                
+            if isolation_enabled and isolated_vars_count == 0:
+                timing_issues.append("Isolation enabled but no isolated variables loaded")
+            
+            if not test_context_detection_working:
+                timing_issues.append("Test context detection mechanism failing")
+            
+            if oauth_timing_issues:
+                timing_issues.extend(oauth_timing_issues)
+            
+            if timing_issues:
+                return f"Timing/race condition detected: {'; '.join(timing_issues)}"
+                
+        except Exception as e:
+            return f"Environment access completely failing during timing detection: {e}"
+        
+        return None
+    
     def validate_all_requirements(self) -> None:
         """
         Validate ALL configuration requirements for the current environment.
         
         This is the main entry point that services should call at startup.
         FAILS HARD on any missing or invalid configuration.
+        
+        RACE CONDITION PROTECTION: Now includes timing-aware validation with retry logic.
         """
-        environment = self.get_environment()
-        validation_errors = []
-        
-        logger.info(f"Validating configuration requirements for {environment.value} environment")
-        
-        # Check each configuration rule
-        for rule in self.CONFIGURATION_RULES:
-            if environment in rule.environments:
-                try:
-                    self._validate_single_requirement(rule, environment)
-                    logger.debug(f"✅ {rule.env_var} validation passed")
-                except ValueError as e:
-                    validation_errors.append(str(e))
-                    logger.error(f"❌ {rule.env_var} validation failed: {e}")
-        
-        # CRITICAL: Additional validation for database configuration in staging/production
-        if environment in [Environment.STAGING, Environment.PRODUCTION]:
+        with self._initialization_lock:
+            self._readiness_state = "loading"
+            
             try:
-                self._validate_database_configuration(environment)
-                logger.debug("✅ Database configuration validation passed")
+                # LEVEL 1 FIX: Wait for environment readiness before validation
+                if not self._wait_for_environment_readiness(timeout_seconds=10.0):
+                    timing_issue = self._detect_timing_issue()
+                    if timing_issue:
+                        self._readiness_state = "failed"
+                        self._last_error = f"Environment readiness timeout: {timing_issue}"
+                        raise ValueError(f"RACE CONDITION DETECTED - {self._last_error}")
+                    else:
+                        self._readiness_state = "failed"
+                        self._last_error = "Environment readiness timeout (unknown cause)"
+                        raise ValueError(self._last_error)
+                
+                # LEVEL 2 FIX: Enhanced error attribution for timing issues
+                environment = self.get_environment()
+                validation_errors = []
+                
+                logger.info(f"Validating configuration requirements for {environment.value} environment (readiness verified)")
+                
+                # Check each configuration rule with timing awareness
+                for rule in self.CONFIGURATION_RULES:
+                    if environment in rule.environments:
+                        try:
+                            self._validate_single_requirement_with_timing(rule, environment)
+                            logger.debug(f"✅ {rule.env_var} validation passed")
+                        except ValueError as e:
+                            # Enhanced error attribution
+                            timing_issue = self._detect_timing_issue()
+                            if timing_issue:
+                                error_msg = f"{rule.env_var} validation failed due to race condition: {e} (Timing issue: {timing_issue})"
+                            else:
+                                error_msg = f"{rule.env_var} validation failed: {e}"
+                            validation_errors.append(error_msg)
+                            logger.error(f"❌ {error_msg}")
+                
+                # CRITICAL: Additional validation for database configuration in staging/production
+                if environment in [Environment.STAGING, Environment.PRODUCTION]:
+                    try:
+                        self._validate_database_configuration(environment)
+                        logger.debug("✅ Database configuration validation passed")
+                    except ValueError as e:
+                        timing_issue = self._detect_timing_issue()
+                        if timing_issue:
+                            error_msg = f"Database configuration validation failed due to race condition: {e} (Timing issue: {timing_issue})"
+                        else:
+                            error_msg = f"Database configuration validation failed: {e}"
+                        validation_errors.append(error_msg)
+                        logger.error(f"❌ {error_msg}")
+                
+                # HARD STOP: If any validation fails, prevent startup with detailed attribution
+                if validation_errors:
+                    self._readiness_state = "failed"
+                    error_msg = f"Configuration validation failed for {environment.value} environment:\n" + "\n".join(f"  - {err}" for err in validation_errors)
+                    self._last_error = error_msg
+                    logger.critical(error_msg)
+                    raise ValueError(error_msg)
+                
+                # Success
+                self._readiness_state = "ready" 
+                self._is_initialized = True
+                logger.info(f"✅ All configuration requirements validated for {environment.value}")
+                
+            except Exception as e:
+                self._readiness_state = "failed"
+                self._last_error = str(e)
+                raise
+    
+    def _validate_single_requirement_with_timing(self, rule: ConfigRule, environment: Environment) -> None:
+        """Validate a single configuration requirement with timing awareness and retry logic."""
+        max_retries = 3
+        retry_delay = 0.1  # 100ms
+        
+        for attempt in range(max_retries):
+            try:
+                # Try the original validation
+                self._validate_single_requirement(rule, environment)
+                return  # Success
+                
             except ValueError as e:
-                validation_errors.append(str(e))
-                logger.error(f"❌ Database configuration validation failed: {e}")
-        
-        # HARD STOP: If any validation fails, prevent startup
-        if validation_errors:
-            error_msg = f"Configuration validation failed for {environment.value} environment:\n" + "\n".join(f"  - {err}" for err in validation_errors)
-            logger.critical(error_msg)
-            raise ValueError(error_msg)
-        
-        logger.info(f"✅ All configuration requirements validated for {environment.value}")
+                # Check if this might be a timing issue
+                timing_issue = self._detect_timing_issue()
+                if timing_issue and attempt < max_retries - 1:
+                    logger.debug(f"Retrying {rule.env_var} validation (attempt {attempt + 1}) due to timing issue: {timing_issue}")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    # Final attempt failed or not a timing issue
+                    raise e
     
     def _validate_single_requirement(self, rule: ConfigRule, environment: Environment) -> None:
         """Validate a single configuration requirement."""
@@ -1045,6 +1256,23 @@ def check_config_before_deletion(config_key: str, service_name: Optional[str] = 
             f"Configuration '{config_key}' is not tracked in central validator. Verify with service-specific checks.",
             []
         )
+    
+    def is_ready(self) -> bool:
+        """Check if the validator is ready to perform validations."""
+        return self._readiness_state == "ready"
+    
+    def get_readiness_state(self) -> str:
+        """Get the current readiness state."""
+        return self._readiness_state
+    
+    def get_last_error(self) -> Optional[str]:
+        """Get the last error that occurred during validation."""
+        return self._last_error
+    
+    def force_readiness_check(self) -> bool:
+        """Force a readiness check and return the result."""
+        with self._initialization_lock:
+            return self._wait_for_environment_readiness(timeout_seconds=5.0)
 
 
 def get_legacy_migration_report() -> str:

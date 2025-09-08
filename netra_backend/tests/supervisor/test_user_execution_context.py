@@ -7,6 +7,7 @@ features of the UserExecutionContext class.
 import pytest
 import uuid
 from datetime import datetime, timezone
+from unittest.mock import Mock
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
@@ -43,7 +44,7 @@ class TestUserExecutionContextCreation:
         assert isinstance(context.request_id, str)
         assert len(context.request_id) > 0
         assert context.db_session is None
-        assert context.websocket_connection_id is None
+        assert context.websocket_client_id is None
         assert isinstance(context.created_at, datetime)
         assert context.metadata == {}
     
@@ -63,7 +64,7 @@ class TestUserExecutionContextCreation:
             run_id=run_id,
             request_id=request_id,
             db_session=db_session,
-            websocket_connection_id=websocket_id,
+            websocket_client_id=websocket_id,
             metadata=metadata
         )
         
@@ -72,7 +73,7 @@ class TestUserExecutionContextCreation:
         assert context.run_id == run_id
         assert context.request_id == request_id
         assert context.db_session == db_session
-        assert context.websocket_connection_id == websocket_id
+        assert context.websocket_client_id == websocket_id
         assert context.metadata == metadata
     
     def test_immutability(self):
@@ -191,7 +192,7 @@ class TestFactoryMethods:
             run_id=run_id,
             request_id=request_id,
             db_session=db_session,
-            websocket_connection_id=websocket_id,
+            websocket_client_id=websocket_id,
             metadata=metadata
         )
         
@@ -200,7 +201,7 @@ class TestFactoryMethods:
         assert context.run_id == run_id
         assert context.request_id == request_id
         assert context.db_session == db_session
-        assert context.websocket_connection_id == websocket_id
+        assert context.websocket_client_id == websocket_id
         assert context.metadata == metadata
 
 
@@ -311,10 +312,10 @@ class TestContextModification:
         with_ws = original.with_websocket_connection(connection_id)
         
         # Original is unchanged
-        assert original.websocket_connection_id is None
+        assert original.websocket_client_id is None
         
         # New context has WebSocket connection
-        assert with_ws.websocket_connection_id == connection_id
+        assert with_ws.websocket_client_id == connection_id
         assert with_ws.user_id == original.user_id
         assert with_ws.thread_id == original.thread_id
         assert with_ws.run_id == original.run_id
@@ -381,7 +382,7 @@ class TestSerialization:
             thread_id=thread_id,
             run_id=run_id,
             request_id=request_id,
-            websocket_connection_id=websocket_id,
+            websocket_client_id=websocket_id,
             metadata=metadata
         )
         
@@ -391,7 +392,7 @@ class TestSerialization:
         assert context_dict["thread_id"] == thread_id
         assert context_dict["run_id"] == run_id
         assert context_dict["request_id"] == request_id
-        assert context_dict["websocket_connection_id"] == websocket_id
+        assert context_dict["websocket_client_id"] == websocket_id
         assert context_dict["metadata"] == metadata
         assert isinstance(context_dict["created_at"], str)
         assert context_dict["has_db_session"] is False
