@@ -115,44 +115,62 @@ const MockAuthContext = createContext<MockAuthContextType | undefined>(undefined
 
 const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testLoading, setTestLoading] = React.useState(false);
-  const [testInitialized, setTestInitialized] = React.useState(true);
+  const [testInitialized, setTestInitialized] = React.useState(false);
   const [internalUser, setInternalUser] = React.useState<User | null>(null);
   const [internalToken, setInternalToken] = React.useState<string | null>(null);
   
   // Initialize and handle JWT decode on mount
   React.useEffect(() => {
-    // Check for AUTH CASCADE FAILURES - missing OAuth credentials
-    const authConfig = mockUnifiedAuthService.getAuthConfig();
-    if (authConfig && typeof authConfig.then === 'function') {
-      authConfig.then((config: any) => {
-        if (config?.oauth_enabled && !config?.google_client_id) {
-          // CRITICAL: Missing OAuth config detected - prevent 503 cascade
-          console.error('OAuth enabled but google_client_id is missing - AUTH CASCADE FAILURE', config);
-        }
-      }).catch((error: any) => {
-        console.error('Network error: Failed to fetch auth config', error);
-      });
-    }
-    
-    const token = getMockToken();
-    if (token) {
+    const initAuth = async () => {
       try {
-        // Try to decode the token - this might throw for invalid tokens
-        const user = mockJwtDecode(token) as User;
-        setInternalUser(user);
-        setInternalToken(token);
+        // Check for AUTH CASCADE FAILURES - missing OAuth credentials
+        const authConfig = await mockUnifiedAuthService.getAuthConfig();
+        
+        if (authConfig?.oauth_enabled && !authConfig?.google_client_id) {
+          // CRITICAL: Missing OAuth config detected - prevent 503 cascade
+          console.error('OAuth enabled but google_client_id is missing - AUTH CASCADE FAILURE', authConfig);
+        }
+        
+        const token = getMockToken();
+        if (token) {
+          try {
+            // Try to decode the token - this might throw for invalid tokens
+            const user = mockJwtDecode(token) as User;
+            setInternalUser(user);
+            setInternalToken(token);
+          } catch (error) {
+            // LOUD FAILURE as per CLAUDE.md - SILENT FAILURES = ABOMINATION
+            console.error('Invalid JWT token for WebSocket auth', error);
+            // Clear state on invalid token
+            setInternalUser(null);
+            setInternalToken(null);
+            mockUnifiedAuthService.removeToken();
+          }
+        } else if (authConfig?.development_mode && !authConfig?.oauth_enabled && !mockUnifiedAuthService.getDevLogoutFlag()) {
+          // Auto-login in development mode when OAuth is not configured
+          try {
+            const response = await mockUnifiedAuthService.handleDevLogin(authConfig);
+            if (response?.access_token) {
+              setMockToken(response.access_token);
+              const user = mockJwtDecode(response.access_token) as User;
+              setInternalUser(user);
+              setInternalToken(response.access_token);
+            }
+          } catch (error) {
+            console.error('Dev auto-login failed', error);
+          }
+        } else {
+          setInternalUser(null);
+          setInternalToken(null);
+        }
       } catch (error) {
-        // LOUD FAILURE as per CLAUDE.md - SILENT FAILURES = ABOMINATION
-        console.error('Invalid JWT token for WebSocket auth', error);
-        // Clear state on invalid token
-        setInternalUser(null);
-        setInternalToken(null);
-        mockUnifiedAuthService.removeToken();
+        console.error('Network error: Failed to fetch auth config', error);
+      } finally {
+        setTestInitialized(true);
       }
-    } else {
-      setInternalUser(null);
-      setInternalToken(null);
-    }
+    };
+    
+    initAuth();
   }, []);
   
   const contextValue: MockAuthContextType = {
@@ -162,13 +180,32 @@ const MockAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children })
     initialized: testInitialized,
     authConfig: mockAuthConfig,
     login: async (forceOAuth?: boolean) => {
-      // Mock login logic for testing
-      if (mockUnifiedAuthService.handleLogin) {
-        await mockUnifiedAuthService.handleLogin(mockAuthConfig);
+      setTestLoading(true);
+      try {
+        // Get current auth config
+        const authConfig = await mockUnifiedAuthService.getAuthConfig();
+        
+        if (authConfig?.development_mode && !authConfig?.oauth_enabled && !forceOAuth) {
+          // Use dev login in development mode when OAuth not configured
+          const response = await mockUnifiedAuthService.handleDevLogin(authConfig);
+          if (response?.access_token) {
+            setMockToken(response.access_token);
+            const user = mockJwtDecode(response.access_token) as User;
+            setInternalUser(user);
+            setInternalToken(response.access_token);
+          }
+        } else {
+          // Use regular OAuth login
+          await mockUnifiedAuthService.handleLogin(authConfig || mockAuthConfig);
+          // Update internal state after login
+          setInternalUser(getMockUser());
+          setInternalToken(getMockToken());
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+      } finally {
+        setTestLoading(false);
       }
-      // Update internal state after login
-      setInternalUser(getMockUser());
-      setInternalToken(getMockToken());
     },
     logout: async () => {
       // Mock logout logic for testing - clear ALL state per FAIL SAFE LOGOUT

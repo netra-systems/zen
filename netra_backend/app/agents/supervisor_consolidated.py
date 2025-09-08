@@ -5,8 +5,11 @@ BVJ: ALL segments | Platform Stability | Complete user isolation for production 
 """
 
 import asyncio
-from typing import Any, Dict, Optional, List, Set
+from typing import Any, Dict, Optional, List, Set, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
@@ -17,7 +20,6 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.database.session_manager import (
-    DatabaseSessionManager,
     managed_session,
     validate_agent_session_isolation
 )
@@ -251,7 +253,7 @@ class SupervisorAgent(BaseAgent):
                 # No registry cleanup needed - using factory pattern
     
     async def _orchestrate_agents(self, context: UserExecutionContext, 
-                                 session_manager: DatabaseSessionManager, 
+                                 session_manager: 'DatabaseSessionManager', 
                                  stream_updates: bool) -> Dict[str, Any]:
         """Orchestrate agent execution with proper isolation.
         
@@ -552,7 +554,7 @@ class SupervisorAgent(BaseAgent):
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
                                                    context: UserExecutionContext,
-                                                   session_manager: DatabaseSessionManager,
+                                                   session_manager: 'DatabaseSessionManager',
                                                    flow_id: str) -> Dict[str, Any]:
         """Execute workflow using isolated agent instances with UserExecutionContext.
         

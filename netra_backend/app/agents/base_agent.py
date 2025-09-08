@@ -528,7 +528,8 @@ class BaseAgent(ABC):
         if not isinstance(context, UserExecutionContext):
             raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
         
-        return DatabaseSessionManager(context)
+        # DatabaseSessionManager is now a stub that doesn't take context parameter
+        return DatabaseSessionManager()
     
     # === Abstract Methods ===
     

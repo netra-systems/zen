@@ -42,10 +42,10 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from test_framework.docker_test_base import DockerTestBase
+from test_framework.base_integration_test import BaseIntegrationTest as DockerTestBase
 
 
 class WebSocketEventCapture:

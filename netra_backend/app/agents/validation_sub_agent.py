@@ -115,8 +115,8 @@ class ValidationSubAgent(BaseAgent):
         context = validate_user_context(context)
         
         try:
-            # Create database session manager
-            session_mgr = DatabaseSessionManager(context)
+            # Create database session manager (stub implementation)
+            session_mgr = DatabaseSessionManager()
             
             # Emit thinking event (agent_started is handled by orchestrator)
             await self.emit_thinking("Starting comprehensive validation process")
