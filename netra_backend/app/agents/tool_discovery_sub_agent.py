@@ -24,7 +24,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntiti
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
-# DatabaseSessionManager removed - use SSOT database module get_db() instead
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 logger = central_logger.get_logger(__name__)
 

@@ -96,9 +96,20 @@ class ExecutionEngineFactoryTestManager:
                 
             logger.info("✓ ExecutionEngineFactory configured with WebSocket bridge")
             
-            # Step 4: Configure AgentInstanceFactory (may be needed by some tests)
+            # Step 4: Initialize AgentClassRegistry for tests
+            try:
+                logger.info("Initializing AgentClassRegistry for tests...")
+                from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+                agent_class_registry = initialize_agent_class_registry()
+                logger.info(f"✓ AgentClassRegistry initialized with {len(agent_class_registry)} agent classes")
+            except Exception as e:
+                logger.warning(f"AgentClassRegistry initialization failed: {e}")
+                agent_class_registry = None
+            
+            # Step 5: Configure AgentInstanceFactory (may be needed by some tests)
             try:
                 await configure_agent_instance_factory(
+                    agent_class_registry=agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
                     websocket_manager=None,  # Will be created per-request
                     llm_manager=None,  # Tests can provide their own
@@ -109,7 +120,7 @@ class ExecutionEngineFactoryTestManager:
                 # Non-critical for basic factory functionality
                 logger.warning(f"AgentInstanceFactory configuration skipped: {e}")
             
-            # Step 5: Verify factory functionality
+            # Step 6: Verify factory functionality
             await self._verify_factory_functionality()
             
             logger.info("✅ ExecutionEngineFactory fully initialized for tests")

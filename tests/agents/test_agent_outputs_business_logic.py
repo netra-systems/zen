@@ -24,7 +24,7 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
-from test_framework.environment_isolation import TestEnvironmentManager
+from test_framework.environment_isolation import EnvironmentTestManager
 
 
 @pytest.mark.agents
@@ -36,12 +36,12 @@ class TestOptimizationRecommendationsBusiness:
     @pytest.fixture
     async def business_test_environment(self):
         """Setup environment for business logic testing."""
-        manager = TestEnvironmentManager()
-        env = manager.setup_test_environment(enable_real_llm=True)
+        manager = EnvironmentTestManager()
+        env = manager.setup_test_security_environment()
         try:
             yield env
         finally:
-            manager.teardown_test_environment()
+            manager.restore_env_vars()
     
     @pytest.fixture
     async def optimization_agent(self, business_test_environment):
@@ -323,12 +323,12 @@ class TestActionPlanExecutability:
     @pytest.fixture
     async def business_test_environment(self):
         """Setup environment for business logic testing.""" 
-        env = IsolatedEnvironment()
-        await env.setup()
+        manager = EnvironmentTestManager()
+        manager.setup_test_security_environment()
         try:
-            yield env
+            yield manager
         finally:
-            await env.cleanup()
+            manager.restore_env_vars()
     
     @pytest.mark.asyncio
     async def test_action_plans_have_realistic_timelines(self, actions_agent):
@@ -615,12 +615,12 @@ class TestReportingBusinessValue:
     @pytest.fixture
     async def business_test_environment(self):
         """Setup environment for business logic testing."""
-        manager = TestEnvironmentManager()
-        env = manager.setup_test_environment(enable_real_llm=True)
+        manager = EnvironmentTestManager()
+        env = manager.setup_test_security_environment()
         try:
             yield env
         finally:
-            manager.teardown_test_environment()
+            manager.restore_env_vars()
     
     @pytest.fixture
     async def reporting_agent(self, business_test_environment):

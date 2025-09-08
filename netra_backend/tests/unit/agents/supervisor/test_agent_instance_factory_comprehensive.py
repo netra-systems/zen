@@ -309,7 +309,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         mock_global_registry.__len__ = Mock(return_value=3)
         mock_get_global_registry.return_value = mock_global_registry
         
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         assert factory._agent_class_registry is mock_global_registry
         mock_get_global_registry.assert_called_once()
@@ -426,7 +432,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_user_execution_context_websocket_registration(self):
         """Test 15: Context creation registers WebSocket mapping."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -533,7 +545,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_with_provided_class(self):
         """Test 19: Create agent with directly provided class."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -576,7 +594,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_missing_user_context_raises_error(self):
         """Test 21: Creating agent without context raises error."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         with self.assertRaises(ValueError) as ctx:
             await factory.create_agent_instance("test_agent", None)
@@ -645,7 +669,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_websocket_emitter_creation_success(self):
         """Test 27: WebSocket emitter creation works correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -669,7 +699,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_websocket_emitter_event_delivery(self):
         """Test 28: WebSocket emitter delivers events correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -729,7 +765,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         # Configure bridge to return failure
         self.mock_websocket_bridge.notify_agent_started = AsyncMock(return_value=False)
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -754,7 +796,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_cleanup_user_context_success(self):
         """Test 30: User context cleanup works correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -783,7 +831,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_cleanup_user_context_with_emitter(self):
         """Test 31: Context cleanup includes WebSocket emitter cleanup."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -806,7 +860,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_cleanup_inactive_contexts_by_age(self):
         """Test 32: Cleanup inactive contexts based on age."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         # Create multiple contexts with different ages
         old_context = await factory.create_user_execution_context(
@@ -838,7 +898,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_user_execution_scope_context_manager(self):
         """Test 33: User execution scope context manager works correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context_instance = None
         
@@ -924,7 +990,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_factory_metrics_collection(self):
         """Test 36: Factory collects metrics correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         # Initial metrics
         initial_metrics = factory.get_factory_metrics()
@@ -994,7 +1066,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_active_contexts_summary(self):
         """Test 38: Active contexts summary provides correct information."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         # Create multiple contexts
         context1 = await factory.create_user_execution_context(
@@ -1055,7 +1133,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_cleanup_with_errors_continues(self):
         """Test 40: Cleanup continues even when individual cleanups fail."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         # Mock db session to raise error on close
         faulty_session = Mock(spec=AsyncSession)

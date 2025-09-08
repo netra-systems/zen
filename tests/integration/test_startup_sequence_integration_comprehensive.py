@@ -581,15 +581,18 @@ class TestStartupServiceReadiness(SSotBaseTestCase):
         
         app = FastAPI()
         
-        # Add health endpoints for testing
+        # Add health endpoints for testing with proper FastAPI response handling
+        from fastapi import Response
+        
         @app.get("/health")
-        async def health():
+        async def health(response: Response):
             if not getattr(app.state, 'startup_complete', False):
-                return {"status": "unhealthy", "message": "Startup incomplete"}, 503
+                response.status_code = 503
+                return {"status": "unhealthy", "message": "Startup incomplete"}
             return {"status": "healthy"}
         
         @app.get("/health/ready") 
-        async def ready():
+        async def ready(response: Response):
             # Check various readiness indicators
             readiness_checks = {
                 "config_loaded": hasattr(app.state, 'config_loaded'),
@@ -598,7 +601,8 @@ class TestStartupServiceReadiness(SSotBaseTestCase):
             
             if not all(readiness_checks.values()):
                 failed_checks = [k for k, v in readiness_checks.items() if not v]
-                return {"status": "not_ready", "failed_checks": failed_checks}, 503
+                response.status_code = 503
+                return {"status": "not_ready", "failed_checks": failed_checks}
             
             return {"status": "ready", "checks": readiness_checks}
         

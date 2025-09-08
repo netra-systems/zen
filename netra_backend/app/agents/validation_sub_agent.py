@@ -20,7 +20,7 @@ from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
-# DatabaseSessionManager removed - use SSOT database module get_db() instead
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.shared_types import ValidationResult, NestedJsonDict
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
