@@ -134,6 +134,7 @@ python tests/mission_critical/test_docker_stability_suite.py
 - [ ] Enhance monitoring dashboards
 - [ ] Document new infrastructure features
 - [ ] **ARCHITECTURAL NAMING INITIATIVE:** Manager renaming plan implementation (Phase 1: Critical Infrastructure)
+- [ ] **MIGRATION PATH CONSOLIDATION:** Track-based migration coordination (see [Consolidated Migration Guide](../docs/MIGRATION_PATHS_CONSOLIDATED.md))
 
 ### 📋 Upcoming
 - [ ] Implement automated compliance reporting

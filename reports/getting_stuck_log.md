@@ -40,6 +40,52 @@
 3. Look for session reuse vs. new creation patterns
 4. Focus on business impact first (chat continuity)
 
+## Entry 2: Redis Configuration SSOT Violations - 2025-01-08
+
+### **Issue Pattern**: Test Expectations vs SSOT Implementation Mismatch
+
+**Problem Identified**: Multiple Redis configuration tests were failing because they expected NON-SSOT patterns (direct REDIS_URL usage, insecure production fallbacks) while the system correctly implemented SSOT security patterns.
+
+**Root Cause**: Tests written with wrong assumptions about Redis configuration behavior:
+- WRONG: Expected `get_redis_url()` to use REDIS_URL directly
+- WRONG: Expected production to fall back to localhost (security violation)
+- WRONG: Expected port "0" to be accepted as valid
+- CORRECT: Component-based construction via RedisConfigurationBuilder
+
+**Process Success Factors**:
+✅ **SSOT Principle Applied** - Section 2.1 Single Source of Truth emphasis chosen upfront
+✅ **Security First** - Validated production security requirements against SPEC learnings
+✅ **Learning-Driven** - Used `SPEC/learnings/configuration_issues_2025.xml` to guide decisions
+✅ **Systematic Fix** - Fixed 5 related test issues in logical sequence
+✅ **Comprehensive Testing** - All 14 tests now pass, validating SSOT implementation
+
+**Key Learning**: When tests fail, check if they're testing the RIGHT behavior or testing WRONG expectations.
+
+**Evidence of New Approach** (not repeating old mistakes):
+1. **Learning First** - Checked SPEC/learnings before assuming code was wrong
+2. **Security Analysis** - Validated production fallback requirements from security perspective  
+3. **Architecture Validation** - Confirmed RedisConfigurationBuilder SSOT pattern was correct
+4. **Test Correction** - Fixed test expectations rather than compromising SSOT implementation
+5. **Documentation** - Created comprehensive report with BVJ and security impact
+
+**Files Fixed**:
+- `netra_backend/app/core/backend_environment.py` - Enhanced port validation (security)
+- `tests/integration/test_redis_configuration_integration.py` - 5 test methods corrected for SSOT compliance
+
+**Prevent Repetition**: If similar configuration test failures occur:
+1. Check if tests are validating SSOT patterns or bypassing them
+2. Verify security requirements from SPEC learnings before allowing fallbacks
+3. Look for component-based vs direct URL usage patterns
+4. Focus on production security first (no insecure fallbacks)
+
+### **Process Reflection**
+
+**What Worked Well**:
+- Learning-first approach prevented SSOT compromise  
+- Security-focused analysis aligned with production requirements
+- Systematic test correction maintained system integrity
+- Comprehensive validation confirmed all fixes working together
+
 ### **Process Reflection**
 
 **What Worked Well**:
