@@ -266,3 +266,40 @@ def validate_database_url(database_url: Optional[str], logger) -> bool:
     if _is_database_in_mock_mode(database_url):
         return _log_and_return_for_mock_mode(logger)
     return True
+
+
+class DatabaseMigrator:
+    """Database migrator class that wraps migration utilities."""
+    
+    def __init__(self, database_url: str):
+        """Initialize database migrator."""
+        self.database_url = database_url
+        self.sync_url = get_sync_database_url(database_url)
+        self.logger = get_logger(__name__)
+    
+    def get_current_revision(self) -> Optional[str]:
+        """Get current database revision."""
+        return get_current_revision(self.sync_url)
+    
+    def get_head_revision(self) -> str:
+        """Get head revision from migrations."""
+        cfg = create_alembic_config(self.sync_url)
+        return get_head_revision(cfg)
+    
+    def needs_migration(self) -> bool:
+        """Check if migration is needed."""
+        current = self.get_current_revision()
+        head = self.get_head_revision()
+        return needs_migration(current, head)
+    
+    def execute_migration(self) -> None:
+        """Execute database migration."""
+        execute_migration(self.logger)
+    
+    def validate_url(self) -> bool:
+        """Validate database URL."""
+        return validate_database_url(self.database_url, self.logger)
+    
+    def create_config(self) -> alembic.config.Config:
+        """Create Alembic configuration."""
+        return create_alembic_config(self.sync_url)

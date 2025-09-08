@@ -1177,3 +1177,7 @@ async def send_system_message(websocket: WebSocket, content: str,
     except Exception as e:
         logger.error(f"Failed to send system message to WebSocket: {e}")
         return False
+
+
+# Legacy aliases for backward compatibility
+WebSocketHandler = BaseMessageHandler

@@ -910,9 +910,13 @@ class DatabaseTestManager:
         return await self._utility.create_test_message(session, thread_id, **kwargs)
 
 
+# Legacy alias for backward compatibility
+DatabaseTestHelper = DatabaseTestUtility
+
 # Export SSOT database utilities
 __all__ = [
     'DatabaseTestUtility',
+    'DatabaseTestHelper',   # Legacy alias for DatabaseTestUtility
     'DatabaseTestManager',  # Added for legacy compatibility
     'PostgreSQLTestUtility', 
     'ClickHouseTestUtility',

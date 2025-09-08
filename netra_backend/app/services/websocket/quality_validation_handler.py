@@ -13,7 +13,7 @@ from netra_backend.app.services.quality_gate_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.dependencies import create_user_execution_context
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
@@ -33,6 +33,10 @@ class QualityValidationHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle content validation request."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             validation_params = self._extract_validation_params(payload)
             result = await self._validate_content_with_params(user_id, validation_params)
             await self._send_validation_result(user_id, result)
@@ -83,11 +87,19 @@ class QualityValidationHandler(BaseMessageHandler):
     async def _send_validation_result(self, user_id: str, result) -> None:
         """Send validation result to user."""
         message = self._build_validation_message(result)
-        import uuid
-        user_context = create_user_execution_context(
+        # Use existing context IDs instead of generating new ones
+        thread_id = getattr(self, '_current_thread_id', None)
+        run_id = getattr(self, '_current_run_id', None)
+        
+        if not thread_id or not run_id:
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            thread_id = UnifiedIdGenerator.generate_base_id("validation_thread")
+            run_id = UnifiedIdGenerator.generate_base_id("validation_run")
+        
+        user_context = get_user_execution_context(
             user_id=user_id,
-            thread_id=f"validation_{uuid.uuid4().hex[:8]}",
-            run_id=f"run_{uuid.uuid4().hex[:8]}"
+            thread_id=thread_id,
+            run_id=run_id
         )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
@@ -104,11 +116,19 @@ class QualityValidationHandler(BaseMessageHandler):
         logger.error(f"Error validating content: {str(error)}")
         error_message = f"Failed to validate content: {str(error)}"
         try:
-            import uuid
-            user_context = create_user_execution_context(
+            # Use existing context IDs instead of generating new ones
+            thread_id = getattr(self, '_current_thread_id', None)
+            run_id = getattr(self, '_current_run_id', None)
+            
+            if not thread_id or not run_id:
+                from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+                thread_id = UnifiedIdGenerator.generate_base_id("validation_error_thread")
+                run_id = UnifiedIdGenerator.generate_base_id("validation_error_run")
+            
+            user_context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=f"validation_error_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{uuid.uuid4().hex[:8]}"
+                thread_id=thread_id,
+                run_id=run_id
             )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})

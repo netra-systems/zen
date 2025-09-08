@@ -25,8 +25,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     
     def _generate_request_ids(self, request: Request) -> tuple[str, str]:
         """Generate request and trace IDs."""
-        request_id = str(uuid.uuid4())
-        trace_id = request.headers.get("X-Trace-ID", str(uuid.uuid4()))
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("request")
+        trace_id = request.headers.get("X-Trace-ID", UnifiedIdGenerator.generate_base_id("trace"))
         return request_id, trace_id
 
     def _set_context_ids(self, request_id: str, trace_id: str) -> None:

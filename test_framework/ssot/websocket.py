@@ -1250,10 +1250,14 @@ async def create_test_websocket_manager():
     return mock_manager
 
 
+# Backward compatibility aliases
+RealWebSocketTestClient = WebSocketTestClient
+
 # Export SSOT WebSocket utilities
 __all__ = [
     'WebSocketTestUtility',
     'WebSocketTestClient',
+    'RealWebSocketTestClient',
     'WebSocketMessage', 
     'WebSocketEventType',
     'WebSocketTestMetrics',

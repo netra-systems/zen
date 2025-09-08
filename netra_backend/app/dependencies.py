@@ -382,6 +382,43 @@ async def get_request_scoped_user_context(
             detail=f"Failed to create request-scoped context: {str(e)}"
         )
 
+def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
+    """Get existing user execution context or create if needed - CORRECT PATTERN.
+    
+    This function implements proper session management using the SSOT UnifiedIdGenerator
+    session management methods. It maintains conversation continuity by reusing existing
+    contexts instead of always creating new ones.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation continuity  
+        run_id: Optional run identifier - if provided, determines session behavior:
+                - None: Use existing session run_id or create new session
+                - Matches existing: Use existing session (conversation continues)
+                - Different: Create new run within same thread (new agent execution)
+        
+    Returns:
+        UserExecutionContext with proper session management
+    """
+    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+    
+    # Get or create session using SSOT session management with run_id handling
+    session_data = UnifiedIdGenerator.get_or_create_user_session(
+        user_id=user_id, 
+        thread_id=thread_id,
+        run_id=run_id
+    )
+    
+    # Create UserExecutionContext with session-managed IDs
+    return UserExecutionContext(
+        user_id=user_id,
+        thread_id=session_data["thread_id"],
+        run_id=session_data["run_id"],
+        request_id=session_data["request_id"],
+        websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+    )
+
+
 def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
@@ -389,8 +426,16 @@ def create_user_execution_context(user_id: str,
                                   websocket_client_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
-    DEPRECATED: Use get_request_scoped_user_context for new code.
-    This function is kept for backward compatibility.
+    ⚠️  DEPRECATED: This function breaks conversation continuity!
+    
+    CRITICAL ISSUE: This function always creates NEW contexts instead of maintaining
+    session continuity. This breaks multi-turn conversations and causes memory leaks.
+    
+    USE INSTEAD:
+    - get_user_execution_context() for session-based context management
+    - get_request_scoped_user_context() for HTTP requests
+    
+    This function is kept for backward compatibility but should be replaced.
     
     CRITICAL: When db_session is provided, it must be request-scoped only.
     

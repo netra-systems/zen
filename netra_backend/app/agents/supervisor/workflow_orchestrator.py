@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
+from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig, PipelineStep
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from typing import TYPE_CHECKING

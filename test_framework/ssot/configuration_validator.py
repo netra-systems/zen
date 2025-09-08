@@ -557,9 +557,13 @@ def get_service_port(service_name: str, port_type: str = "postgres") -> Optional
     validator = get_config_validator()
     return validator.get_service_port(service_name, port_type)
 
+# Legacy alias for backward compatibility
+ConfigurationValidator = TestConfigurationValidator
+
 # Export key classes and functions
 __all__ = [
     "TestConfigurationValidator",
+    "ConfigurationValidator",  # Legacy alias
     "get_config_validator", 
     "validate_test_config",
     "is_service_enabled",

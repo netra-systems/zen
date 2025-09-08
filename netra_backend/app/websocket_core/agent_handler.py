@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.dependencies import (
     get_request_scoped_db_session,
-    create_user_execution_context,
+    get_user_execution_context,
     get_request_scoped_supervisor
 )
 from shared.id_generation import UnifiedIdGenerator
@@ -87,22 +87,16 @@ class AgentMessageHandler(BaseMessageHandler):
         and uses honest WebSocket-specific abstractions.
         """
         try:
-            # Extract identifiers from message
+            # Extract identifiers from message - use existing IDs for session continuity
             thread_id = message.payload.get("thread_id") or message.thread_id
-            run_id = message.payload.get("run_id") or str(uuid.uuid4())
+            run_id = message.payload.get("run_id")
             
-            # CRITICAL FIX: Update thread association for WebSocket routing
-            # FIX: Use existing create_user_execution_context function from dependencies (already imported)
-            # Use UnifiedIdGenerator for consistent ID format
-            if not thread_id:
-                thread_id = UnifiedIdGenerator.generate_base_id("thread")
-            if not run_id:
-                run_id = f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
-            
-            context = create_user_execution_context(
+            # CRITICAL FIX: Use get_user_execution_context with existing IDs for session continuity
+            # Pass None for missing IDs - let the session manager handle continuity
+            context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id
+                thread_id=thread_id,  # None if not provided - maintains session continuity
+                run_id=run_id  # None if not provided - allows session reuse
             )
             ws_manager = create_websocket_manager(context)
             connection_id = None
@@ -118,11 +112,12 @@ class AgentMessageHandler(BaseMessageHandler):
                     logger.warning(f"Generated fallback connection ID: {connection_id}")
 
             # Create clean WebSocketContext (no mock objects!)
+            # Use actual context thread_id from get_user_execution_context for session continuity
             websocket_context = WebSocketContext.create_for_user(
                 websocket=websocket,
                 user_id=user_id,
-                thread_id=thread_id or str(uuid.uuid4()),
-                run_id=run_id,
+                thread_id=context.thread_id,  # Use thread_id from execution context for session continuity
+                run_id=context.run_id,  # Use run_id from execution context for session continuity
                 connection_id=connection_id
             )
             
@@ -187,16 +182,15 @@ class AgentMessageHandler(BaseMessageHandler):
             thread_id = message.payload.get("thread_id") or message.thread_id
             if thread_id:
                 # Get WebSocket manager and update thread association
-                # FIX: Use existing create_user_execution_context function from dependencies (already imported)
-                # Use UnifiedIdGenerator for consistent ID format
-                run_id = message.payload.get("run_id")
-                if not run_id:
-                    run_id = f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+                # FIX: Use existing get_user_execution_context function from dependencies (already imported)
+                # Let session manager handle ID generation and continuity
+                run_id = message.payload.get("run_id")  # None if not provided
                 
-                context = create_user_execution_context(
+                # CRITICAL FIX: Let get_user_execution_context handle ID generation and continuity
+                context = get_user_execution_context(
                     user_id=user_id,
-                    thread_id=thread_id,
-                    run_id=run_id
+                    thread_id=thread_id,  # None if not provided - maintains session continuity
+                    run_id=run_id  # None if not provided - allows session reuse
                 )
                 ws_manager = create_websocket_manager(context)
                 if ws_manager:
@@ -212,21 +206,14 @@ class AgentMessageHandler(BaseMessageHandler):
             # CRITICAL: Using v2 factory pattern for complete isolation
             async for db_session in get_request_scoped_db_session():
                 try:
-                    # Create UserExecutionContext for request-scoped isolation
-                    # This ensures complete multi-user safety
-                    run_id = message.payload.get("run_id") or str(uuid.uuid4())
-                    # Use UnifiedIdGenerator for consistent ID format
-                    if not thread_id:
-                        thread_id = UnifiedIdGenerator.generate_base_id("thread")
-                    if not run_id:
-                        run_id = f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+                    # Get UserExecutionContext for session continuity
+                    # Use existing IDs from message context for conversation continuity
+                    run_id = message.payload.get("run_id")  # None if not provided
                     
-                    user_context = create_user_execution_context(
+                    user_context = get_user_execution_context(
                         user_id=user_id,
-                        thread_id=thread_id,
-                        run_id=run_id,
-                        db_session=db_session,
-                        websocket_client_id=connection_id if connection_id else None
+                        thread_id=thread_id,  # From message context, None if not provided
+                        run_id=run_id  # From message context, None if not provided
                     )
                     
                     # Create request-scoped supervisor using v2 factory pattern
@@ -405,15 +392,12 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                # FIX: Use existing create_user_execution_context function from dependencies (already imported)
-                # Use UnifiedIdGenerator for consistent ID format
-                thread_id = message.thread_id or UnifiedIdGenerator.generate_base_id("thread")
-                run_id = message.payload.get("run_id") or f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
-                
-                context = create_user_execution_context(
+                # FIX: Use execution context from WebSocketContext for error handling consistency
+                # Don't generate new IDs - use existing context for session continuity
+                context = get_user_execution_context(
                     user_id=websocket_context.user_id,
-                    thread_id=thread_id,
-                    run_id=run_id
+                    thread_id=websocket_context.thread_id,  # Use existing thread_id from context
+                    run_id=websocket_context.run_id  # Use existing run_id from context
                 )
                 manager = create_websocket_manager(context)
                 await manager.send_error(
@@ -517,15 +501,14 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                # FIX: Use existing create_user_execution_context function from dependencies (already imported)
-                # Use UnifiedIdGenerator for consistent ID format
-                thread_id = message.thread_id or UnifiedIdGenerator.generate_base_id("thread")
-                run_id = payload.get("run_id") or f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+                # FIX: Use message context for error handling - let session manager handle ID generation
+                thread_id = message.thread_id  # From message context, None if not provided
+                run_id = payload.get("run_id")  # From payload context, None if not provided
                 
-                context = create_user_execution_context(
+                context = get_user_execution_context(
                     user_id=user_id,
-                    thread_id=thread_id,
-                    run_id=run_id
+                    thread_id=thread_id,  # None if not provided - maintains session continuity
+                    run_id=run_id  # None if not provided - allows session reuse
                 )
                 manager = create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to start agent. Please try again.")
@@ -568,15 +551,14 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                # FIX: Use existing create_user_execution_context function from dependencies (already imported)
-                # Use UnifiedIdGenerator for consistent ID format
-                thread_id = message.thread_id or UnifiedIdGenerator.generate_base_id("thread")
-                run_id = payload.get("run_id") or f"run_{thread_id}_{UnifiedIdGenerator.generate_base_id('exec', include_random=False)}"
+                # FIX: Use message context for error handling - let session manager handle ID generation
+                thread_id = message.thread_id  # From message context, None if not provided
+                run_id = payload.get("run_id")  # From payload context, None if not provided
                 
-                context = create_user_execution_context(
+                context = get_user_execution_context(
                     user_id=user_id,
-                    thread_id=thread_id,
-                    run_id=run_id
+                    thread_id=thread_id,  # None if not provided - maintains session continuity
+                    run_id=run_id  # None if not provided - allows session reuse
                 )
                 manager = create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to process message. Please try again.")

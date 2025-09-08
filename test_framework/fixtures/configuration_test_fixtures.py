@@ -915,3 +915,7 @@ def config_test_manager():
     """Pytest fixture for configuration test manager."""
     with ConfigurationTestManager() as manager:
         yield manager
+
+
+# Legacy alias for backward compatibility
+isolated_config_env = config_test_env

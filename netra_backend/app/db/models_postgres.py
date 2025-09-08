@@ -53,6 +53,40 @@ from netra_backend.app.db.models_supply import (
 # Import user and authentication models
 from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
+# Import agent execution model
+from netra_backend.app.models.agent_execution import AgentExecution
+
+# Stub models for compatibility
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+
+class CreditTransaction(Base):
+    """Credit transaction model stub."""
+    __tablename__ = 'credit_transactions'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    amount = Column(Float, nullable=False)
+    transaction_type = Column(String(50), nullable=False)  # 'credit' or 'debit'
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", back_populates="credit_transactions")
+
+class Subscription(Base):
+    """Subscription model stub."""
+    __tablename__ = 'subscriptions'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    plan_name = Column(String(100), nullable=False)
+    status = Column(String(50), nullable=False, default='active')
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True))
+    
+    user = relationship("User", back_populates="subscriptions")
+
 # Re-export all models for backward compatibility
 __all__ = [
     # Base class
@@ -62,6 +96,8 @@ __all__ = [
     'User',
     'Secret',
     'ToolUsageLog',
+    'CreditTransaction',
+    'Subscription',
     
     # Supply models
     'Supply',
@@ -73,6 +109,7 @@ __all__ = [
     'SupplyUpdateLog',
     
     # Agent models
+    'AgentExecution',
     'Assistant',
     'Thread',
     'Message',

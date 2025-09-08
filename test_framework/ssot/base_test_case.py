@@ -557,6 +557,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
 # Aliases migrated to SSOT patterns - use SSotBaseTestCase directly
 BaseTestCase = SSotBaseTestCase
 AsyncTestCase = SSotAsyncTestCase
+BaseIntegrationTest = SSotBaseTestCase  # Legacy alias for integration tests
 
 # Legacy compatibility classes removed - use SSotBaseTestCase directly
 
@@ -573,6 +574,7 @@ __all__ = [
     # SSOT Aliases
     "BaseTestCase",
     "AsyncTestCase",
+    "BaseIntegrationTest",  # Legacy alias for integration tests
     
     # Legacy compatibility classes removed
     

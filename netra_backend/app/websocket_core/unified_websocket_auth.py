@@ -498,9 +498,13 @@ async def authenticate_websocket_ssot(websocket: WebSocket) -> WebSocketAuthResu
     return await authenticator.authenticate_websocket_connection(websocket)
 
 
+# Legacy alias for backward compatibility
+WebSocketAuthenticator = UnifiedWebSocketAuthenticator
+
 # SSOT ENFORCEMENT: Export only SSOT-compliant interfaces
 __all__ = [
     "UnifiedWebSocketAuthenticator",
+    "WebSocketAuthenticator",  # Legacy alias
     "WebSocketAuthResult", 
     "get_websocket_authenticator",
     "authenticate_websocket_ssot"

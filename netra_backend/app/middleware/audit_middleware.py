@@ -190,8 +190,8 @@ class AuditMiddleware:
     
     def _generate_audit_id(self) -> str:
         """Generate unique audit ID for request/response correlation."""
-        import uuid
-        return str(uuid.uuid4())
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        return UnifiedIdGenerator.generate_base_id("audit")
     
     async def _default_log_event(self, event: Dict[str, Any]):
         """Default event logging implementation."""

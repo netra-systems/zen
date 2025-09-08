@@ -5,10 +5,10 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Any, Dict
-import uuid
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.dependencies import create_user_execution_context
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
@@ -33,6 +33,10 @@ class QualityMetricsHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality metrics request."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             report = await self._get_quality_report(payload)
             await self._send_metrics_response(user_id, report)
         except Exception as e:
@@ -58,10 +62,19 @@ class QualityMetricsHandler(BaseMessageHandler):
     async def _send_metrics_response(self, user_id: str, report: Dict[str, Any]) -> None:
         """Send quality metrics response to user."""
         message = self._build_metrics_message(report)
-        user_context = create_user_execution_context(
+        
+        # Use existing context IDs instead of generating new ones
+        thread_id = getattr(self, '_current_thread_id', None)
+        run_id = getattr(self, '_current_run_id', None)
+        
+        if not thread_id or not run_id:
+            thread_id = UnifiedIdGenerator.generate_base_id("thread")
+            run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        user_context = get_user_execution_context(
             user_id=user_id,
-            thread_id=str(uuid.uuid4()),
-            run_id=str(uuid.uuid4())
+            thread_id=thread_id,
+            run_id=run_id
         )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
@@ -75,10 +88,18 @@ class QualityMetricsHandler(BaseMessageHandler):
         logger.error(f"Error getting quality metrics: {str(error)}")
         error_message = f"Failed to get quality metrics: {str(error)}"
         try:
-            user_context = create_user_execution_context(
+            # Use existing context IDs instead of generating new ones
+            thread_id = getattr(self, '_current_thread_id', None)
+            run_id = getattr(self, '_current_run_id', None)
+            
+            if not thread_id or not run_id:
+                thread_id = UnifiedIdGenerator.generate_base_id("metrics_error_thread")
+                run_id = UnifiedIdGenerator.generate_base_id("metrics_error_run")
+            
+            user_context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=str(uuid.uuid4()),
-                run_id=str(uuid.uuid4())
+                thread_id=thread_id,
+                run_id=run_id
             )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})

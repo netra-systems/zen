@@ -228,10 +228,11 @@ class MCPClient:
     
     def _create_operation_context(self, connection: MCPConnection, operation: str) -> MCPOperationContext:
         """Create operation context for tracking."""
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
         return MCPOperationContext(
             server_name=connection.server_name,
             operation_type=operation,
-            trace_id=str(uuid.uuid4())
+            trace_id=UnifiedIdGenerator.generate_base_id("mcp_trace")
         )
     
     async def _validate_tool_execution(self, connection: MCPConnection, tool_name: str, arguments: Dict[str, Any]) -> None:

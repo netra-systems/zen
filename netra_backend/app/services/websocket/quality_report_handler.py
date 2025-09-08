@@ -13,7 +13,7 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.dependencies import create_user_execution_context
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
@@ -33,6 +33,10 @@ class QualityReportHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality report generation request."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             report_params = self._extract_report_params(payload)
             report_data = await self._generate_report_data(report_params)
             markdown_report = self._format_quality_report(report_data, report_params["report_type"])
@@ -99,11 +103,20 @@ class QualityReportHandler(BaseMessageHandler):
         """Send formatted report response to user."""
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
-        import uuid
-        user_context = create_user_execution_context(
+        
+        # Use existing context IDs instead of generating new ones
+        thread_id = getattr(self, '_current_thread_id', None)
+        run_id = getattr(self, '_current_run_id', None)
+        
+        if not thread_id or not run_id:
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            thread_id = UnifiedIdGenerator.generate_base_id("report_thread")
+            run_id = UnifiedIdGenerator.generate_base_id("report_run")
+        
+        user_context = get_user_execution_context(
             user_id=user_id,
-            thread_id=f"report_{uuid.uuid4().hex[:8]}",
-            run_id=f"run_{uuid.uuid4().hex[:8]}"
+            thread_id=thread_id,
+            run_id=run_id
         )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
@@ -121,11 +134,19 @@ class QualityReportHandler(BaseMessageHandler):
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
         try:
-            import uuid
-            user_context = create_user_execution_context(
+            # Use existing context IDs instead of generating new ones
+            thread_id = getattr(self, '_current_thread_id', None)
+            run_id = getattr(self, '_current_run_id', None)
+            
+            if not thread_id or not run_id:
+                from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+                thread_id = UnifiedIdGenerator.generate_base_id("report_error_thread")
+                run_id = UnifiedIdGenerator.generate_base_id("report_error_run")
+            
+            user_context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=f"report_error_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{uuid.uuid4().hex[:8]}"
+                thread_id=thread_id,
+                run_id=run_id
             )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
