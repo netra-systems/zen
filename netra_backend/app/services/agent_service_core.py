@@ -27,7 +27,8 @@ from netra_backend.app.services.streaming_service import (
 )
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
-from shared.id_generation import UnifiedIdGenerator, create_user_execution_context_factory
+from shared.id_generation import UnifiedIdGenerator
+from netra_backend.app.dependencies import get_user_session_context
 
 logger = central_logger.get_logger(__name__)
 
@@ -188,27 +189,16 @@ class AgentService(IAgentService):
             if await self._ensure_bridge_ready():
                 status = await self._bridge.get_status()
                 if status["dependencies"]["websocket_manager_available"]:
-                    # Create user context for WebSocket operations using SSOT
-                    context_data = create_user_execution_context_factory(user_id, "stop_agent")
-                    user_context = UserExecutionContext(
-                        user_id=context_data['user_id'],
-                        thread_id=context_data['thread_id'],
-                        run_id=context_data['run_id'],
-                        request_id=context_data['request_id']
-                    )
+                    # Use session-based context to maintain conversation continuity  
+                    user_context = await get_user_session_context(user_id=user_id)
                     websocket_manager = create_websocket_manager(user_context)
                     await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
             # Fallback to direct manager access (preserve existing behavior)
             # Use SSOT for fallback context creation
-            context_data = create_user_execution_context_factory(user_id, "fallback_stop")
-            fallback_context = UserExecutionContext(
-                user_id=context_data['user_id'],
-                thread_id=context_data['thread_id'],
-                run_id=context_data['run_id'],
-                request_id=context_data['request_id']
-            )
+            # Use session-based context for fallback scenario
+            fallback_context = await get_user_session_context(user_id=user_id)
             websocket_manager = create_websocket_manager(fallback_context)
             await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
             return True
@@ -293,14 +283,29 @@ class AgentService(IAgentService):
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle message with comprehensive error handling."""
+        # Extract context data early for use in error handlers
+        context_data = None
+        try:
+            # Attempt to parse message to extract context data for error handling
+            parsed_data = self._parse_message(message)
+            payload = parsed_data.get("payload", {})
+            context_data = {
+                "thread_id": payload.get("thread_id"),
+                "run_id": payload.get("run_id"),
+                "request_id": payload.get("request_id")
+            }
+        except Exception:
+            # If parsing fails, we'll handle it in the JSON decode error handler
+            pass
+        
         try:
             await self._process_websocket_message(user_id, message, db_session)
         except json.JSONDecodeError as e:
-            await self._handle_json_decode_error(user_id, e)
+            await self._handle_json_decode_error(user_id, e, context_data)
         except WebSocketDisconnect:
             self._handle_websocket_disconnect(user_id)
         except Exception as e:
-            await self._handle_general_exception(user_id, e)
+            await self._handle_general_exception(user_id, e, context_data)
     
     async def _process_websocket_message(self, user_id: str, message: Union[str, Dict[str, Any]], 
                                         db_session: Optional[AsyncSession]) -> None:
@@ -357,14 +362,10 @@ class AgentService(IAgentService):
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         # Send error to user for unknown message type (through bridge-managed WebSocket)
         try:
-            # Use SSOT for error context creation
-            context_data = create_user_execution_context_factory(user_id, "error_handling")
-            error_context = UserExecutionContext(
-                user_id=context_data['user_id'],
-                thread_id=context_data['thread_id'],
-                run_id=context_data['run_id'],
-                request_id=context_data['request_id']
-            )
+            # Use session-based context for error handling with available payload context
+            # Extract thread_id from payload if available
+            thread_id = payload.get("thread_id") if payload else None
+            error_context = await get_user_session_context(user_id=user_id, thread_id=thread_id)
             websocket_manager = create_websocket_manager(error_context)
             await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
         except Exception as e:
@@ -387,19 +388,22 @@ class AgentService(IAgentService):
             return False
         return True
     
-    async def _handle_json_decode_error(self, user_id: str, e: json.JSONDecodeError) -> None:
+    async def _handle_json_decode_error(self, user_id: str, e: json.JSONDecodeError, context_data: Optional[Dict[str, Any]] = None) -> None:
         """Handle JSON decode error with user notification (WebSocket boundary)."""
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
             # Use bridge-managed WebSocket communication (preserve boundary)
-            # Use SSOT for JSON error context creation
-            context_data = create_user_execution_context_factory(user_id, "json_error")
-            json_error_context = UserExecutionContext(
-                user_id=context_data['user_id'],
-                thread_id=context_data['thread_id'],
-                run_id=context_data['run_id'],
-                request_id=context_data['request_id']
-            )
+            # Use session-based context with all available context data
+            if context_data and any(context_data.values()):
+                # Use SSOT method with all known context data
+                json_error_context = await get_user_session_context(
+                    user_id=user_id,
+                    thread_id=context_data.get("thread_id"),
+                    run_id=context_data.get("run_id")
+                )
+            else:
+                # Fallback to session-based context for JSON error handling
+                json_error_context = await get_user_session_context(user_id=user_id)
             websocket_manager = create_websocket_manager(json_error_context)
             await websocket_manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
@@ -409,7 +413,7 @@ class AgentService(IAgentService):
         """Handle WebSocket disconnection (WebSocket boundary)."""
         logger.info(f"WebSocket disconnected for user {user_id} during message handling")
     
-    async def _handle_general_exception(self, user_id: str, e: Exception) -> None:
+    async def _handle_general_exception(self, user_id: str, e: Exception, context_data: Optional[Dict[str, Any]] = None) -> None:
         """Handle general exception with error reporting (Agent boundary + WebSocket communication)."""
         logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
         
@@ -424,14 +428,17 @@ class AgentService(IAgentService):
             
         # WebSocket concern: Send error through WebSocket channel
         try:
-            # Use SSOT for exception context creation
-            context_data = create_user_execution_context_factory(user_id, "exception_handling")
-            exception_context = UserExecutionContext(
-                user_id=context_data['user_id'],
-                thread_id=context_data['thread_id'],
-                run_id=context_data['run_id'],
-                request_id=context_data['request_id']
-            )
+            # Use session-based context with all available context data
+            if context_data and any(context_data.values()):
+                # Use SSOT method with all known context data
+                exception_context = await get_user_session_context(
+                    user_id=user_id,
+                    thread_id=context_data.get("thread_id"),
+                    run_id=context_data.get("run_id")
+                )
+            else:
+                # Fallback to session-based context for exception handling
+                exception_context = await get_user_session_context(user_id=user_id)
             websocket_manager = create_websocket_manager(exception_context)
             await websocket_manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):

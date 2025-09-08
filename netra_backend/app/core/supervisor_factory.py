@@ -25,7 +25,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
-from netra_backend.app.dependencies import create_user_execution_context
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
@@ -88,13 +88,11 @@ async def create_supervisor_core(
             f"thread {thread_id}, run {run_id}, session {id(db_session)}"
         )
         
-        # Create UserExecutionContext with scoped session
-        user_context = create_user_execution_context(
+        # Get UserExecutionContext using session management for conversation continuity
+        user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=thread_id,
-            run_id=run_id,
-            db_session=db_session,  # This session will be closed by calling code
-            websocket_client_id=websocket_client_id
+            run_id=run_id
         )
         
         # Get or validate LLM client

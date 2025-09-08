@@ -385,9 +385,11 @@ async def get_request_scoped_user_context(
 def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
     """Get existing user execution context or create if needed - CORRECT PATTERN.
     
-    This function implements proper session management using the SSOT UnifiedIdGenerator
-    session management methods. It maintains conversation continuity by reusing existing
-    contexts instead of always creating new ones.
+    ⚠️  DEPRECATED: Use get_user_session_context() for new code.
+    
+    This function implements proper session management using the SSOT UserSessionManager.
+    It maintains conversation continuity by reusing existing contexts instead of always
+    creating new ones.
     
     Args:
         user_id: Unique user identifier
@@ -400,6 +402,8 @@ def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, ru
     Returns:
         UserExecutionContext with proper session management
     """
+    logger.warning("get_user_execution_context is deprecated - use get_user_session_context() for new code")
+    
     from shared.id_generation.unified_id_generator import UnifiedIdGenerator
     
     # Get or create session using SSOT session management with run_id handling
@@ -417,6 +421,66 @@ def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, ru
         request_id=session_data["request_id"],
         websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
     )
+
+
+async def get_user_session_context(user_id: str, 
+                                  thread_id: Optional[str] = None, 
+                                  run_id: Optional[str] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+    """Get user session context using SSOT UserSessionManager - PREFERRED METHOD.
+    
+    This is the PREFERRED method for getting user execution contexts as it uses the
+    comprehensive UserSessionManager for proper session lifecycle management.
+    
+    Key Features:
+    - Maintains conversation continuity by reusing existing sessions
+    - Integrates with WebSocket lifecycle management
+    - Provides comprehensive logging and monitoring
+    - Handles session cleanup automatically
+    - Thread-safe operations with proper locking
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation continuity (auto-generated if None)
+        run_id: Optional run identifier for specific agent executions
+        websocket_connection_id: Optional WebSocket connection ID
+        
+    Returns:
+        UserExecutionContext: Session-managed execution context
+        
+    Raises:
+        SessionManagerError: If session management fails
+    """
+    from shared.session_management import get_user_session
+    
+    # Generate thread_id if not provided (for new conversations)
+    if not thread_id:
+        from shared.id_generation import UnifiedIdGenerator
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_new")
+        logger.info(f"Generated new thread_id for user {user_id}: {thread_id}")
+    
+    try:
+        # Use SSOT UserSessionManager for session management
+        context = await get_user_session(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_connection_id=websocket_connection_id
+        )
+        
+        logger.debug(f"Retrieved session context for user {user_id}: {context.get_correlation_id()}")
+        return context
+        
+    except Exception as e:
+        logger.error(f"Failed to get user session context for user {user_id}: {e}", exc_info=True)
+        # Fall back to direct creation for robustness
+        logger.warning("Falling back to direct UserExecutionContext creation")
+        return UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id or UnifiedIdGenerator.generate_base_id("run"),
+            websocket_client_id=websocket_connection_id or UnifiedIdGenerator.generate_websocket_client_id(user_id)
+        )
 
 
 def create_user_execution_context(user_id: str,
@@ -613,6 +677,26 @@ async def get_user_supervisor_factory(request: Request,
 
 # Type aliases for dependency injection
 RequestScopedContextDep = Annotated[RequestScopedContext, Depends(get_request_scoped_user_context)]
+
+# New session manager dependencies
+async def get_user_session_context_dependency(
+    user_id: str,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    websocket_connection_id: Optional[str] = None
+) -> UserExecutionContext:
+    """Dependency for getting user session context with SSOT UserSessionManager.
+    
+    This is the PREFERRED dependency for user execution contexts in new code.
+    """
+    return await get_user_session_context(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        websocket_connection_id=websocket_connection_id
+    )
+
+UserSessionContextDep = Annotated[UserExecutionContext, Depends(get_user_session_context_dependency)]
 
 # Type alias for the new isolated supervisor dependency (DEPRECATED)
 IsolatedSupervisorDep = Annotated["Supervisor", Depends(get_user_supervisor_factory)]
@@ -1354,6 +1438,63 @@ async def configure_route_factory_settings(
 
 
 # Helper function for startup configuration
+async def configure_session_manager(app) -> None:
+    """Configure session manager during app startup.
+    
+    This function should be called during FastAPI startup to initialize
+    the UserSessionManager for proper session lifecycle management.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        logger.info("🔄 Configuring UserSessionManager...")
+        
+        from shared.session_management import initialize_session_manager, get_session_manager
+        
+        # Initialize session manager with background cleanup
+        session_manager = await initialize_session_manager()
+        
+        # Store in app state for access in routes
+        app.state.session_manager = session_manager
+        
+        # Get initial metrics for logging
+        metrics = session_manager.get_session_metrics()
+        logger.info(f"✅ UserSessionManager configured successfully - initial metrics: {metrics.to_dict()}")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to configure UserSessionManager: {e}")
+        raise RuntimeError(f"Session manager configuration failed: {e}")
+
+
+async def shutdown_session_manager_app(app) -> None:
+    """Shutdown session manager during app shutdown.
+    
+    This function should be called during FastAPI shutdown to properly
+    cleanup session manager resources.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        logger.info("🔄 Shutting down UserSessionManager...")
+        
+        from shared.session_management import shutdown_session_manager
+        
+        # Shutdown session manager and cleanup
+        await shutdown_session_manager()
+        
+        # Remove from app state
+        if hasattr(app.state, 'session_manager'):
+            delattr(app.state, 'session_manager')
+        
+        logger.info("✅ UserSessionManager shutdown completed")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to shutdown UserSessionManager: {e}")
+        # Don't raise exception during shutdown
+
+
 def configure_factory_dependencies(app) -> None:
     """Configure factory pattern dependencies during app startup.
     
