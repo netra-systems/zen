@@ -23,6 +23,14 @@
 - [ ] Verify no mission-critical tests are failing: `python tests/mission_critical/test_websocket_agent_events_suite.py`
 - [ ] Check compliance score: `python scripts/check_architecture_compliance.py`
 
+### 1.1. 🚨 ARCHITECTURE COMPLEXITY AUDIT (NEW - 2025-09-08)
+**Required for ALL changes involving SSOT classes, managers, or factories:**
+- [ ] **Over-Engineering Check:** Review [Over-Engineering Audit](../reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md) for current violation count (18,264 violations)
+- [ ] **Manager Naming Check:** If creating/modifying manager classes, follow [Business-Focused Naming Conventions](../SPEC/naming_conventions_business_focused.xml)
+- [ ] **Factory Pattern Validation:** Avoid unnecessary factory abstractions - prefer direct instantiation unless proven multi-user isolation need
+- [ ] **SSOT Compliance:** Ensure new classes don't duplicate existing functionality - check for 110 duplicate type definitions
+- [ ] **Mock Usage Audit:** Avoid unjustified mocks (1,147 current violations) - use real services in tests
+
 ### 2. String Literals Validation
 - [ ] Validate all string literals: `python scripts/query_string_literals.py validate "your_string"`
 - [ ] Update index after changes: `python scripts/scan_string_literals.py`
