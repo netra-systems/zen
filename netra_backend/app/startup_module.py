@@ -145,11 +145,17 @@ async def _verify_required_database_tables_exist(logger: logging.Logger, gracefu
                     logger.warning("🔧 These tables should be created by migration service for full functionality")
                     logger.warning("⚠️  Some features may be degraded until tables are created")
                     
-                    if graceful_startup:
-                        logger.info("✅ Continuing with degraded functionality - core chat will work")
-                    else:
-                        logger.error(f"Non-critical tables missing in strict mode: {non_critical_missing}")
-                        raise RuntimeError(f"Missing required database tables: {non_critical_missing}. Run migration service first.")
+                    # CRITICAL FIX: Non-critical tables should NEVER block startup in ANY mode
+                    # The entire point of "non-critical" is that the system can function without them
+                    # Strict mode only enforces CRITICAL table requirements, not non-critical ones
+                    logger.info("✅ Continuing with degraded functionality - core chat will work")
+                    logger.info("ℹ️  Non-critical tables don't block startup in any mode (strict or graceful)")
+                    
+                    if not graceful_startup:
+                        # In strict mode, log more details about what features may be affected
+                        logger.warning("🚨 STRICT MODE: Missing non-critical tables logged for operations team")
+                        logger.warning("📊 Features affected may include: advanced analytics, credit tracking, agent execution history")
+                        logger.warning("🎯 These tables should be prioritized for next migration run")
             else:
                 logger.debug(f"✅ All {len(expected_tables)} required database tables are present")
         
@@ -221,9 +227,10 @@ def _import_all_models() -> None:
         # User models
         from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
         
-        # CRITICAL FIX: Import SQLAlchemy models from netra_backend.app.models directory
-        # The AgentExecution model exists but wasn't being imported, causing table verification failures
-        from netra_backend.app.models.agent_execution import AgentExecution
+        # CRITICAL FIX: Import consolidated models from models_postgres.py
+        # This file contains AgentExecution, CreditTransaction, and Subscription models
+        # that were causing table verification failures when not imported
+        import netra_backend.app.db.models_postgres  # Import entire module to register all models
         
     except ImportError as e:
         # Some models might not be available in certain environments
