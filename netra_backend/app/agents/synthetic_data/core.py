@@ -126,8 +126,9 @@ class SyntheticDataAgentCore(ABC):
             await self._handle_execution_error_with_context(e, context)
             raise
         finally:
-            # Clean up database session
+            # Clean up database session  
             # Session cleanup handled by context manager
+            pass
     
     def _should_execute_synthetic_data(self, user_request: str, context: UserExecutionContext) -> bool:
         """Determine if synthetic data generation should be executed.
