@@ -757,3 +757,161 @@ def measure_configuration_performance(manager: UnifiedConfigurationManager,
         "writes_per_second": config_count / write_time,
         "reads_per_second": config_count / read_time
     }
+
+
+class ConfigurationTestManager:
+    """
+    Comprehensive Configuration Test Manager for System-Wide Testing
+    
+    Business Value Justification (BVJ):
+    - Segment: Platform/Internal - Test Infrastructure
+    - Business Goal: Ensure configuration integrity across all test scenarios
+    - Value Impact: Prevents configuration-related failures in production
+    - Strategic Impact: Enables reliable multi-environment testing
+    
+    SSOT for configuration testing management across all test types.
+    Provides unified interface for test configuration setup, validation, and cleanup.
+    """
+    
+    def __init__(self, environment: str = "test"):
+        self.environment = environment
+        self.test_environments: Dict[str, ConfigurationTestEnvironment] = {}
+        self.managers: Dict[str, UnifiedConfigurationManager] = {}
+        self.cleanup_callbacks: List[callable] = []
+        
+    def create_test_environment(self, name: str) -> ConfigurationTestEnvironment:
+        """Create a new test environment for configuration testing."""
+        if name in self.test_environments:
+            return self.test_environments[name]
+            
+        test_env = ConfigurationTestEnvironment(f"{self.environment}_{name}")
+        self.test_environments[name] = test_env
+        return test_env
+    
+    def get_manager_for_scenario(self, 
+                                scenario: str,
+                                user_id: Optional[str] = None,
+                                service_name: Optional[str] = None) -> UnifiedConfigurationManager:
+        """Get configuration manager for specific test scenario."""
+        key = f"{scenario}_{user_id or 'global'}_{service_name or 'none'}"
+        
+        if key not in self.managers:
+            self.managers[key] = UnifiedConfigurationManager(
+                user_id=user_id,
+                environment=self.environment,
+                service_name=service_name,
+                enable_validation=True,
+                enable_caching=True
+            )
+            
+            # Set up scenario-specific configuration
+            self._setup_scenario_configuration(scenario, self.managers[key])
+        
+        return self.managers[key]
+    
+    def _setup_scenario_configuration(self, scenario: str, manager: UnifiedConfigurationManager):
+        """Set up configuration for specific test scenario."""
+        scenario_configs = {
+            "startup_finalize": {
+                "startup.phase": "finalize",
+                "startup.timeout": 30,
+                "startup.validate_chat": True,
+                "startup.validate_websocket": True,
+                "startup.validate_agents": True
+            },
+            "auth_integration": {
+                "auth.service_url": "http://localhost:8081",
+                "auth.timeout": 15,
+                "auth.validate_tokens": True,
+                "auth.validate_oauth": True
+            },
+            "websocket_integration": {
+                "websocket.host": "localhost",
+                "websocket.port": 8000,
+                "websocket.path": "/ws",
+                "websocket.auth_required": True,
+                "websocket.timeout": 10
+            }
+        }
+        
+        config = scenario_configs.get(scenario, {})
+        for key, value in config.items():
+            manager.set(key, value)
+    
+    def setup_multi_user_scenario(self, user_ids: List[str]) -> Dict[str, UnifiedConfigurationManager]:
+        """Set up configuration managers for multi-user scenarios."""
+        managers = {}
+        
+        for user_id in user_ids:
+            manager = self.get_manager_for_scenario("multi_user", user_id=user_id)
+            managers[user_id] = manager
+            
+            # Set user-specific configuration
+            manager.set("user.id", user_id)
+            manager.set("user.environment", self.environment)
+            
+        return managers
+    
+    def validate_scenario_configuration(self, scenario: str) -> bool:
+        """Validate configuration for specific test scenario."""
+        manager = self.get_manager_for_scenario(scenario)
+        validation_result = manager.validate_all_configurations()
+        
+        # Log validation results
+        if not validation_result.is_valid:
+            logger.warning(f"Configuration validation failed for scenario {scenario}: {validation_result.errors}")
+            
+        return validation_result.is_valid
+    
+    def create_isolated_config_file(self, filename: str, config_data: Dict[str, Any]) -> Path:
+        """Create isolated configuration file for testing."""
+        temp_dir = Path(tempfile.mkdtemp(prefix=f"config_test_{self.environment}_"))
+        config_path = temp_dir / filename
+        
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config_data, f, indent=2)
+        
+        # Register cleanup callback
+        self.cleanup_callbacks.append(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
+        
+        return config_path
+    
+    def cleanup_all(self):
+        """Clean up all test resources."""
+        # Clean up test environments
+        for test_env in self.test_environments.values():
+            try:
+                test_env.__exit__(None, None, None)
+            except Exception as e:
+                logger.warning(f"Error cleaning up test environment: {e}")
+        
+        # Clean up managers
+        self.managers.clear()
+        
+        # Run cleanup callbacks
+        for cleanup_callback in self.cleanup_callbacks:
+            try:
+                cleanup_callback()
+            except Exception as e:
+                logger.warning(f"Error in cleanup callback: {e}")
+        
+        # Clear callbacks
+        self.cleanup_callbacks.clear()
+        
+        # Clear test environments
+        self.test_environments.clear()
+    
+    def __enter__(self):
+        """Enter configuration test manager context."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit configuration test manager context."""
+        self.cleanup_all()
+
+
+@pytest.fixture
+def config_test_manager():
+    """Pytest fixture for configuration test manager."""
+    with ConfigurationTestManager() as manager:
+        yield manager
