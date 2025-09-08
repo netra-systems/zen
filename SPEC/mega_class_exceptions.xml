@@ -2,8 +2,14 @@
 <mega_class_exceptions>
   <metadata>
     <created>2025-08-31</created>
+    <updated>2025-09-08</updated>
     <purpose>Define exceptions for central SSOT classes that can exceed standard module size limits</purpose>
     <rationale>Some central classes serve as Single Source of Truth and must contain comprehensive functionality that cannot be meaningfully split without violating SSOT principles</rationale>
+    <related_documentation>
+      <reference>reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md</reference>
+      <reference>reports/architecture/MANAGER_RENAMING_PLAN_20250908.md</reference>
+      <reference>SPEC/naming_conventions_business_focused.xml</reference>
+    </related_documentation>
   </metadata>
 
   <limits>
@@ -202,4 +208,39 @@
       Mega classes must have dedicated integration tests validating SSOT behavior.
     </note>
   </compliance_notes>
+
+  <planned_improvements>
+    <improvement type="naming_clarity">
+      <description>Business-focused naming to replace confusing "Manager" terminology</description>
+      <reference>reports/architecture/MANAGER_RENAMING_PLAN_20250908.md</reference>
+      <planned_renames>
+        <rename>
+          <current>UnifiedConfigurationManager</current>
+          <proposed>PlatformConfiguration</proposed>
+          <rationale>Name directly reflects business function - this IS the platform's configuration system</rationale>
+        </rename>
+        <rename>
+          <current>UnifiedStateManager</current>
+          <proposed>ApplicationState</proposed>
+          <rationale>Name directly reflects business function - this IS the application's state store</rationale>
+        </rename>
+        <rename>
+          <current>UnifiedLifecycleManager</current>
+          <proposed>SystemLifecycle</proposed>
+          <rationale>Name directly reflects business function - this IS the system's lifecycle controller</rationale>
+        </rename>
+        <rename>
+          <current>UnifiedWebSocketManager</current>
+          <proposed>RealtimeCommunications</proposed>
+          <rationale>Emphasizes business value (real-time communications) over implementation (WebSocket)</rationale>
+        </rename>
+        <rename>
+          <current>DatabaseManager</current>
+          <proposed>DataAccess</proposed>
+          <rationale>Emphasizes what it provides (data access) rather than administrative function</rationale>
+        </rename>
+      </planned_renames>
+      <implementation_status>Planned for Q4 2025</implementation_status>
+    </improvement>
+  </planned_improvements>
 </mega_class_exceptions>

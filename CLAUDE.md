@@ -1,7 +1,7 @@
 # 🚨 ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
 ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work. Have patience. Slow down. Search for existing methods.
 
-## IMPORTANT: YOU **MUST** DO YOUR BEST WORK. 
+## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
 Your mission is to balance engineering with strategic business goals, prioritizing system-wide coherence and maximizing value through multi-agent AI collaboration. This document outlines your
@@ -60,18 +60,24 @@ Especially when dealing with apparent regression issues.
 12. On Windows use UTF-8 encoding for encoding issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
 14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
-15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. NO EXCEPTIONS. This ensures multi-user isolation works. See [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
+15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. See [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
+16. Use Getters and Setters()
+17. Be careful about test code vs system code. Don't let testing needs and concept pollute actual code.
+Use the test decorator when a function has to be in system code.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
-- **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
+- **[Agent Architecture Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
+- **[Manager Renaming Plan](./reports/architecture/MANAGER_RENAMING_PLAN_20250908.md)** - Business-focused naming to replace confusing "Manager" terminology
+- **[Manager Renaming Implementation](./reports/architecture/MANAGER_RENAMING_IMPLEMENTATION_PLAN.md)** - Detailed implementation plan with risk mitigation
+- **[Business-Focused Naming Conventions](./SPEC/naming_conventions_business_focused.xml)** - Comprehensive naming guidelines for future development
 - [Tool Dispatcher Migration Guide](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
 - [WebSocket Modernization Report](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
 
 Expect everything to fail. Add conditional error logging by default whenever possible.
 Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
-Make all errors loud.
+CRITICAL: Make all errors loud.
 Protect against silent errors. NEVER MAKE "fallbacks" unless expressly part of named design and class.
 
 -----
@@ -85,7 +91,7 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Product-Market Fit:** Make Apex indispensable for customers managing AI infrastructure.
   * **Value Capture:** Capture a significant percentage of the value Apex creates.
   * **Customer Segments:** Free, Early, Mid, Enterprise. The goal of the Free tier is conversion to paid tiers.
-  * **Prioritization:** Business goals drive engineering priorities. Rigor enables long-term business velocity.
+  * **Prioritization:** Business goals drive engineering priorities. Rigor enables business velocity.
   * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component MUST justify its existence with immediate business value.
   * **AI Leverage:** Use the AI Factory and specialized agent workflows as force multipliers to automate and augment processes, maximizing throughput and quality.
   * **COMPLETE YOUR TASKS FULLY** You always "finish the job" even when it takes many hours of work, sub agents, many tools or tasks.
@@ -123,7 +129,7 @@ CRITICAL: Develop a globally coherent and modular architecture.
 
   * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
   * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
-    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
+    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
     - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
     - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
     - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
@@ -148,9 +154,13 @@ Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (ab
 ### 2.2. Complexity Management
 
   * **Architectural Simplicity (Anti-Over-Engineering):** Assume a finite complexity budget. Every new service, queue, or abstraction must provide more value than the complexity it adds. Strive for the fewest possible steps between a request's entry point and the business logic.
+    - **⚠️ OVER-ENGINEERING AUDIT:** See [Over-Engineering Audit](./reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md) - System currently has 18,264 violations requiring consolidation
+    - **Current Issues:** 154 manager classes, 78 factory classes, 110 duplicate types - many represent unnecessary abstraction layers
+    - **Success Patterns:** Unified managers (Configuration, State, Lifecycle) represent correct SSOT consolidation approach
   * **"Rule of Two":** Do not abstract or generalize a pattern until you have implemented it at least twice.
   * **Code Clarity:** Aim for concise functions (\<25 lines) and focused modules (\<750 lines). Exceeding these is a signal to re-evaluate for SRP adherence.
   * **Mega Class Exceptions:** Central SSOT classes defined in [`SPEC/mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
+    - **Naming Clarity Initiative:** See [Manager Renaming Plan](./reports/architecture/MANAGER_RENAMING_PLAN_20250908.md) for business-focused naming of unified SSOT classes
   * **Task Decomposition:** If a task is too large or complex, decompose and delegate it to specialized sub-agents with fresh contexts. ALWAYS carefully manage your own context use and agents context use.
 
 ### 2.3. Code Quality Standards
@@ -159,6 +169,8 @@ Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (ab
   * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml).
   * **Configuration Architecture:** Follow the comprehensive configuration system documented in [`docs/configuration_architecture.md`](docs/configuration_architecture.md).
   * **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
+    - **Over-Engineering Monitoring:** Track progress on reducing 18,264 violations identified in [Over-Engineering Audit](./reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md)
+    - **Naming Convention Validation:** Follow [Business-Focused Naming Conventions](./SPEC/naming_conventions_business_focused.xml) for all new classes
 
 ### 2.4. Strategic Trade-offs
 
@@ -264,11 +276,7 @@ CHEATING ON TESTS = ABOMINATION
 - [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
 - [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) for clarification on agent components and relationships.
 
-1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
-    - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
-    - Map all method overrides and their resolution paths
-    - Identify potential diamond inheritance patterns
-    - Save report to `reports/mro_analysis_[module]_[date].md`
+1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring
 
 2.  **Dependency Impact Analysis:**
     - Trace all consumers of classes being refactored
@@ -293,9 +301,6 @@ CHEATING ON TESTS = ABOMINATION
 YOU MUST ULTRA THINK DEEPLY
 
 **Cross-Reference Learnings:**
-- SSOT violations: [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
-- Agent examples: [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
-- WebSocket integration: [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
 
 -----
 
@@ -433,29 +438,14 @@ python tests/unified_test_runner.py --real-services --rebuild-all
 - `docker-compose.alpine.yml` - Development environment
 - Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
 
-**⚠️ CRITICAL WARNING: tmpfs Storage Removed**
-Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. 
-ALL Docker configurations now use named volumes for persistent, stable storage that doesn't consume system RAM.
-Never re-introduce tmpfs mounts - they will crash the system.
+**⚠️ tmpfs Storage Removed**
+Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. Never re-introduce tmpfs mounts - they will crash the system.
 
-**Performance Optimizations in Alpine:**
-- **Minimal base images** (python:3.11-alpine3.19)
-- **Resource limits** (prevents memory exhaustion)
-- **Optimized configurations** (fsync=off for test DB)
 
 #### Development Service Refresh
 ```bash
 # Refresh backend and auth with latest changes
 python scripts/refresh_dev_services.py refresh --services backend auth
-
-# Quick restart without rebuild  
-python scripts/refresh_dev_services.py restart --services backend
-
-# Check status
-python scripts/refresh_dev_services.py status
-
-# View logs
-python scripts/refresh_dev_services.py logs --services backend -f
 ```
 
 ### 7.3. Unified Test Runner
@@ -532,24 +522,31 @@ YOU ARE VERY SMART AND PRACTICAL.
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
 2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
     - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
-3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
-4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
-5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
-6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-7.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
-8.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-9.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
-10. **Update Documentation:** Ensure specs reflect the implemented reality.
-11. **Refresh Indexes:** Update the string literal index if new constants were added.
-12. **Update Status:** Regenerate and refresh reports .mds and learnings.
-13. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
+3.  **🔍 TYPE SAFETY VALIDATION:** **CRITICAL** - Check for type drift issues before any changes:
+    - **Run Type Audit:** `python scripts/type_drift_migration_utility.py --scan` for affected files
+    - **Use SSOT Strongly Typed IDs:** Import from `shared.types` - `UserID`, `ThreadID`, `RunID`, `RequestID`, etc.
+    - **Validate Contexts:** Use `StronglyTypedUserExecutionContext` for all agent operations
+    - **Auth Types:** Use `AuthValidationResult`, `SessionValidationResult` instead of raw dictionaries
+    - **WebSocket Events:** Use `StronglyTypedWebSocketEvent` with proper enum types
+    - **See:** [Type Drift Audit Report](./reports/type_safety/TYPE_DRIFT_AUDIT_REPORT.md) for complete remediation guide
+4.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
+5.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
+6.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
+7.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+8.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
+9.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
+10. **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
+11. **Update Documentation:** Ensure specs reflect the implemented reality.
+12. **Refresh Indexes:** Update the string literal index if new constants were added.
+13. **Update Status:** Regenerate and refresh reports .mds and learnings.
+14. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
 
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**
 **Windows Unicode/emoji issues: See [`SPEC/windows_unicode_handling.xml`](SPEC/windows_unicode_handling.xml).**
 A user asking for "git commit" means: For EACH group of work that's related do a commit. e.g. 1-10 commits as per need.
   * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
-  * **CONCEPT-BASED:** Group changes by concept. NEVER bulk commit massive changes without express orders.
+  * **CONCEPT-BASED:** NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
   * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
 

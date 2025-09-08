@@ -38,6 +38,33 @@
         </prevention>
     </learning>
     
+    <learning id="context-creation-vs-getter-pattern-fix-2025-09-08">
+        <title>CRITICAL: Context Creation vs Getter Pattern Fix - Session Continuity</title>
+        <category>Session-Management/Context/WebSocket/Critical</category>
+        <keywords>context-creation, session-continuity, get_user_execution_context, create_user_execution_context, conversation-continuity, memory-leaks, websocket-handlers, test-isolation</keywords>
+        <path>context_creation_vs_getter_pattern_fix_20250908.xml</path>
+        <critical-takeaway>
+            System incorrectly used create_user_execution_context() everywhere instead of get_user_execution_context(),
+            and generated new IDs when calling get functions. This broke conversation continuity and caused memory leaks.
+            FIXED: Production code uses get_user_execution_context() with existing request context IDs (no generation).
+            Test code uses create_user_execution_context() for isolation. Single entry point for create pattern.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Conversation continuity breaks, memory leaks, multi-turn conversations fail</business-impact>
+        <prevention>
+            Production: Use get_user_execution_context() with existing thread_id/run_id from request context.
+            Tests: Use create_user_execution_context() for isolation. Never generate IDs before calling get functions.
+            Flag any get_user_execution_context() calls with UnifiedIdGenerator.generate_base_id().
+        </prevention>
+        <cross-references>
+            <file>netra_backend/app/dependencies.py</file>
+            <file>netra_backend/app/websocket_core/agent_handler.py</file>
+            <file>shared/id_generation/unified_id_generator.py</file>
+            <test>tests/integration/test_session_continuity_context_management.py</test>
+            <test>tests/unit/test_context_creation_vs_getter_regression_prevention.py</test>
+        </cross-references>
+    </learning>
+    
     <learning id="auth-startup-validation-critical-2025-09-07">
         <title>CRITICAL: Auth Startup Validation Must Never Be Removed</title>
         <category>Authentication/Startup/Security/Critical</category>
