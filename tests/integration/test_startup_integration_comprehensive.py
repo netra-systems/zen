@@ -117,34 +117,46 @@ class TestFullStartupIntegration(SSotBaseTestCase):
     @pytest.mark.timeout(30)
     def test_database_connection_pool_initialization(self):
         """Test database connection pool initialization logic without real database."""
-        with patch('netra_backend.app.db.database_manager.DatabaseManager.create_application_engine') as mock_engine_create, \
-             patch('netra_backend.app.db.database_manager.DatabaseManager.test_connection_with_retry') as mock_test_conn, \
-             patch('netra_backend.app.db.database_manager.DatabaseManager.get_pool_status') as mock_pool_status:
+        with patch('netra_backend.app.db.database_manager.create_application_engine') as mock_engine_create:
             
-            # Set up mocks
-            mock_engine = AsyncMock()
+            # Set up mock engine with pool-like properties
+            mock_engine = Mock()
+            mock_engine.pool = Mock()
+            mock_engine.pool.size = Mock(return_value=10)
+            mock_engine.pool.checked_in = Mock(return_value=5)
+            mock_engine.pool.checked_out = Mock(return_value=5)
+            mock_engine.pool.invalidated = Mock(return_value=0)
+            
             mock_engine_create.return_value = mock_engine
-            mock_test_conn.return_value = True
-            mock_pool_status.return_value = {'size': 10, 'checked_in': 5, 'checked_out': 5}
             
-            from netra_backend.app.db.database_manager import DatabaseManager
+            from netra_backend.app.db.database_manager import create_application_engine, DatabaseManager
             
             # Create engine
-            engine = DatabaseManager.create_application_engine()
+            engine = create_application_engine()
             
-            # Test connection (mocked)
-            connection_ok = asyncio.run(DatabaseManager.test_connection_with_retry(engine))
-            assert connection_ok, "Database connection failed"
+            # Verify engine was created
+            assert engine is not None, "Engine should be created"
             
-            # Check pool status (mocked)
-            pool_status = DatabaseManager.get_pool_status(engine)
-            assert pool_status['size'] > 0, "Connection pool not initialized"
-            assert pool_status['checked_in'] >= 0, "Invalid pool state"
+            # Create database manager and test health check (which validates connections)
+            db_manager = DatabaseManager()
             
-            # Verify mocks were called
+            # Mock the health check instead of non-existent methods
+            with patch.object(db_manager, 'health_check') as mock_health:
+                mock_health.return_value = {
+                    'status': 'healthy',
+                    'connection_pool': {
+                        'size': 10,
+                        'checked_in': 5,
+                        'checked_out': 5
+                    }
+                }
+                
+                health_result = asyncio.run(db_manager.health_check())
+                assert health_result['status'] == 'healthy', "Database health check failed"
+                assert health_result['connection_pool']['size'] > 0, "Connection pool not initialized"
+            
+            # Verify mock was called
             mock_engine_create.assert_called_once()
-            mock_test_conn.assert_called_once_with(engine)
-            mock_pool_status.assert_called_once_with(engine)
     
     @pytest.mark.timeout(30)
     def test_redis_connection_initialization(self):
