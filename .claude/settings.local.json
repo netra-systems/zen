@@ -35,7 +35,9 @@
       "Bash(mv:*)",
       "Bash(mkdir:*)",
       "Bash(chmod:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(lsof:*)",
+      "Bash(open:*)"
     ],
     "deny": [],
     "ask": []

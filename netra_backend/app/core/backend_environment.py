@@ -123,19 +123,58 @@ class BackendEnvironment:
     
     # Redis Configuration
     def get_redis_url(self) -> str:
-        """Get Redis connection URL."""
-        return self.env.get("REDIS_URL", "redis://localhost:6379/0")
+        """Get Redis connection URL using RedisConfigurationBuilder.
+        
+        CRITICAL: Uses RedisConfigurationBuilder SSOT pattern following the 
+        Five Whys solution for unified configuration management.
+        """
+        from shared.redis_configuration_builder import RedisConfigurationBuilder
+        
+        # Use RedisConfigurationBuilder to construct URL from components
+        builder = RedisConfigurationBuilder(self.env.as_dict())
+        
+        # Get URL for current environment
+        redis_url = builder.get_url_for_environment()
+        
+        if redis_url:
+            logger.info(builder.get_safe_log_message())
+            return redis_url
+        
+        # Fallback for development environments only
+        if self.is_development() or self.is_testing():
+            fallback_url = "redis://localhost:6379/0"
+            logger.warning(f"Redis configuration not found, using development fallback: {fallback_url}")
+            return fallback_url
+        
+        # No fallback for staging/production - fail explicitly
+        raise ValueError(f"Redis configuration required but not found for {self.get_environment()} environment")
     
     def get_redis_host(self) -> str:
-        """Get Redis host."""
-        return self.env.get("REDIS_HOST", "localhost")
+        """Get Redis host using RedisConfigurationBuilder for consistency."""
+        from shared.redis_configuration_builder import RedisConfigurationBuilder
+        
+        builder = RedisConfigurationBuilder(self.env.as_dict())
+        redis_host = builder.redis_host
+        
+        if redis_host:
+            return redis_host
+        
+        # Environment-appropriate defaults
+        if self.is_development() or self.is_testing():
+            return "localhost"
+        else:
+            raise ValueError(f"REDIS_HOST required but not configured for {self.get_environment()} environment")
     
     def get_redis_port(self) -> int:
-        """Get Redis port."""
-        port_str = self.env.get("REDIS_PORT", "6379")
+        """Get Redis port using RedisConfigurationBuilder for consistency."""
+        from shared.redis_configuration_builder import RedisConfigurationBuilder
+        
+        builder = RedisConfigurationBuilder(self.env.as_dict())
+        port_str = builder.redis_port
+        
         try:
             return int(port_str)
-        except ValueError:
+        except (ValueError, TypeError):
             logger.warning(f"Invalid REDIS_PORT: {port_str}, using default 6379")
             return 6379
     
