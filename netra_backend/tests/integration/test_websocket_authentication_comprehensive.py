@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 # SSOT imports following TEST_CREATION_GUIDE.md
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.conftest_real_services import real_services
 from test_framework.isolated_environment_fixtures import isolated_env
 
 # Application imports using absolute paths
@@ -270,7 +270,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_jwt_header_authentication_free_tier_user(self, real_services_fixture, isolated_env):
+    async def test_jwt_header_authentication_free_tier_user(self, real_services, isolated_env):
         """
         BVJ: Free tier users must authenticate securely to access basic WebSocket features.
         Validates: JWT header authentication for revenue-generating free-to-paid conversions.
@@ -297,7 +297,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_jwt_header_authentication_enterprise_user(self, real_services_fixture, isolated_env):
+    async def test_jwt_header_authentication_enterprise_user(self, real_services, isolated_env):
         """
         BVJ: Enterprise users need full access rights for premium features and admin functions.
         Validates: Full authentication flow for highest-value customer segment.
@@ -323,7 +323,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_jwt_subprotocol_authentication(self, real_services_fixture, isolated_env):
+    async def test_jwt_subprotocol_authentication(self, real_services, isolated_env):
         """
         BVJ: Alternative authentication method for clients that can't use Authorization header.
         Validates: Subprotocol authentication for broader client compatibility.
@@ -352,7 +352,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services  
-    async def test_invalid_jwt_signature_rejection(self, real_services_fixture, isolated_env):
+    async def test_invalid_jwt_signature_rejection(self, real_services, isolated_env):
         """
         BVJ: Prevents unauthorized access that could lead to data breaches and customer churn.
         Validates: Security protection against tampered authentication tokens.
@@ -382,7 +382,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_expired_jwt_token_rejection(self, real_services_fixture, isolated_env):
+    async def test_expired_jwt_token_rejection(self, real_services, isolated_env):
         """
         BVJ: Prevents session hijacking and ensures users re-authenticate periodically.
         Validates: Time-based security that protects against token replay attacks.
@@ -410,7 +410,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_missing_jwt_token_handling(self, real_services_fixture, isolated_env):
+    async def test_missing_jwt_token_handling(self, real_services, isolated_env):
         """
         BVJ: Ensures unauthenticated users cannot access premium WebSocket features.
         Validates: Access control that drives user registration and subscription conversion.
@@ -433,7 +433,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_multi_user_connection_isolation(self, real_services_fixture, isolated_env):
+    async def test_multi_user_connection_isolation(self, real_services, isolated_env):
         """
         BVJ: Prevents data leakage between users, essential for enterprise trust and compliance.
         Validates: Complete isolation between concurrent user sessions.
@@ -481,7 +481,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_close_codes_for_auth_failures(self, real_services_fixture, isolated_env):
+    async def test_websocket_close_codes_for_auth_failures(self, real_services, isolated_env):
         """
         BVJ: Proper error codes help client applications handle auth failures gracefully.
         Validates: Standard WebSocket error codes for better client UX and debugging.
@@ -525,7 +525,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_rate_limiting_by_user_tier(self, real_services_fixture, isolated_env):
+    async def test_rate_limiting_by_user_tier(self, real_services, isolated_env):
         """
         BVJ: Rate limiting prevents abuse while allowing premium users higher limits.
         Validates: Tiered service model that drives upgrade conversions.
@@ -562,7 +562,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_cross_origin_request_validation(self, real_services_fixture, isolated_env):
+    async def test_cross_origin_request_validation(self, real_services, isolated_env):
         """
         BVJ: CORS validation prevents malicious websites from hijacking user sessions.
         Validates: Security measure that protects customers from XSS and CSRF attacks.
@@ -598,7 +598,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_concurrent_authentication_performance(self, real_services_fixture, isolated_env):
+    async def test_concurrent_authentication_performance(self, real_services, isolated_env):
         """
         BVJ: System must handle realistic concurrent user loads during peak usage.
         Validates: Scalability for business growth and user satisfaction.
@@ -631,7 +631,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration  
     @pytest.mark.real_services
-    async def test_session_persistence_across_reconnects(self, real_services_fixture, isolated_env):
+    async def test_session_persistence_across_reconnects(self, real_services, isolated_env):
         """
         BVJ: Users should maintain their session state during temporary disconnections.
         Validates: User experience continuity that reduces abandonment rates.
@@ -673,7 +673,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_authentication_circuit_breaker_behavior(self, real_services_fixture, isolated_env):
+    async def test_authentication_circuit_breaker_behavior(self, real_services, isolated_env):
         """
         BVJ: System should gracefully handle auth service outages without complete failure.
         Validates: Resilience that maintains availability during infrastructure issues.
@@ -681,7 +681,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         authenticator = get_websocket_authenticator()
         
         # Mock auth service failure
-        with patch.object(authenticator.auth_client, 'validate_token_jwt') as mock_validate:
+        with patch.object(authenticator.auth_client, 'validate_token_jwt', new_callable=AsyncMock) as mock_validate:
             # Simulate service unavailable
             mock_validate.return_value = None
             
@@ -705,7 +705,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_token_extraction_methods(self, real_services_fixture, isolated_env):
+    async def test_websocket_token_extraction_methods(self, real_services, isolated_env):
         """
         BVJ: Multiple token extraction methods ensure broad client compatibility.
         Validates: Flexibility that supports diverse client implementations.
@@ -739,7 +739,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_security_violation_reporting(self, real_services_fixture, isolated_env):
+    async def test_security_violation_reporting(self, real_services, isolated_env):
         """
         BVJ: Security monitoring helps detect and prevent malicious activity.
         Validates: Threat detection capabilities that protect business operations.
@@ -784,7 +784,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_authentication_error_logging(self, real_services_fixture, isolated_env):
+    async def test_authentication_error_logging(self, real_services, isolated_env):
         """
         BVJ: Detailed error logging helps operations team troubleshoot auth issues quickly.
         Validates: Operational excellence that reduces customer support burden.
@@ -811,7 +811,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_jwt_claim_validation_comprehensive(self, real_services_fixture, isolated_env):
+    async def test_jwt_claim_validation_comprehensive(self, real_services, isolated_env):
         """
         BVJ: Proper claim validation ensures tokens contain required user information.
         Validates: Data integrity that supports accurate user management and billing.
@@ -846,7 +846,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_connection_lifecycle_management(self, real_services_fixture, isolated_env):
+    async def test_websocket_connection_lifecycle_management(self, real_services, isolated_env):
         """
         BVJ: Proper connection lifecycle prevents resource leaks and billing inaccuracies.
         Validates: Resource management that supports sustainable business operations.
@@ -881,7 +881,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_authentication_consistency_with_rest_api(self, real_services_fixture, isolated_env):
+    async def test_authentication_consistency_with_rest_api(self, real_services, isolated_env):
         """
         BVJ: Consistent authentication across all endpoints reduces user confusion.
         Validates: Unified security model that improves developer and user experience.
@@ -906,7 +906,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services  
-    async def test_websocket_auth_middleware_integration(self, real_services_fixture, isolated_env):
+    async def test_websocket_auth_middleware_integration(self, real_services, isolated_env):
         """
         BVJ: Middleware integration ensures all authentication features work together.
         Validates: Complete authentication pipeline for production readiness.
