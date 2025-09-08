@@ -128,10 +128,24 @@ class AuthStartupValidator:
             is_default_secret = jwt_secret in [
                 None, '', 'your-secret-key', 'test-secret', 'secret', 
                 'emergency_jwt_secret_please_configure_properly',
-                'fallback_jwt_secret_for_emergency_only'
+                'fallback_jwt_secret_for_emergency_only',
+                'test-jwt-secret-key-32-characters-long-for-testing-only',  # IsolatedEnvironment fallback
+                'dev-jwt-secret-key-must-be-at-least-32-characters',  # IsolatedEnvironment development fallback
+                'development-jwt-secret-minimum-32-characters-long'  # Another IsolatedEnvironment fallback
             ]
             
-            if is_default_secret or not jwt_secret:
+            # Check if JWT manager fell back to deterministic test secret (32-char hex from sha256)
+            # The JWT manager might use a different environment detection, so check multiple possibilities
+            import hashlib
+            possible_envs = [self.environment, 'development', 'testing']
+            is_deterministic_fallback = False
+            for env in possible_envs:
+                expected_test_secret = hashlib.sha256(f"netra_{env}_jwt_key".encode()).hexdigest()[:32]
+                if jwt_secret == expected_test_secret:
+                    is_deterministic_fallback = True
+                    break
+            
+            if is_default_secret or not jwt_secret or is_deterministic_fallback:
                 result.error = "No JWT secret configured (JWT_SECRET, JWT_SECRET_KEY, or JWT_SECRET_STAGING)"
                 debug_info = jwt_manager.get_debug_info()
                 result.details = {
@@ -203,13 +217,26 @@ class AuthStartupValidator:
                 if len(service_secret) < 32:
                     validation_errors.append(f"Too short ({len(service_secret)} chars, minimum 32)")
                 
-                # Check for default/weak values
+                # Check for default/weak values (more intelligent for test environments)
                 weak_patterns = [
-                    'secret', 'password', 'test', 'demo', 'example',
-                    '12345', 'admin', 'default', 'changeme'
+                    'password', 'demo', 'example', '12345', 'admin', 'default', 'changeme'
                 ]
-                if any(pattern in service_secret.lower() for pattern in weak_patterns):
-                    validation_errors.append("Contains weak/default pattern")
+                
+                # For test environments, be more permissive with "test" patterns if they're part of longer, structured strings
+                if self.environment in ["testing", "development"]:
+                    # In test/dev, only flag truly weak patterns, not structured test strings
+                    truly_weak_patterns = ['password', 'demo', 'example', '12345', 'admin', 'default', 'changeme']
+                    # Allow "secret" and "test" in test environments if part of longer strings
+                    if any(pattern in service_secret.lower() for pattern in truly_weak_patterns):
+                        validation_errors.append("Contains weak/default pattern")
+                    # Only flag bare "secret" or "test" as weak, not when part of structured strings
+                    elif service_secret.lower() in ['secret', 'test', 'password']:
+                        validation_errors.append("Contains weak/default pattern")
+                else:
+                    # Production/staging: stricter validation including "secret" and "test"
+                    production_weak_patterns = weak_patterns + ['secret', 'test']
+                    if any(pattern in service_secret.lower() for pattern in production_weak_patterns):
+                        validation_errors.append("Contains weak/default pattern")
                 
                 # Check for proper entropy (hex strings are valid, alphanumeric is sufficient)
                 has_upper = any(c.isupper() for c in service_secret)
