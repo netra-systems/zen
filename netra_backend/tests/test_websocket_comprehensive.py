@@ -33,6 +33,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -50,9 +51,9 @@ class TestWebSocketConnectionEstablishment:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         
@@ -76,7 +77,7 @@ class TestWebSocketAuthValidation:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         
@@ -94,7 +95,7 @@ class TestWebSocketAuthValidation:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         
@@ -119,9 +120,9 @@ class TestWebSocketMessageRouting:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect_user("routing_user", websocket)
@@ -163,9 +164,9 @@ class TestWebSocketBroadcasting:
             # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
-            websocket.accept = AsyncNone  # TODO: Use real service instance
+            websocket.accept = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            websocket.send_json = AsyncNone  # TODO: Use real service instance
+            websocket.send_json = AsyncMock()  # TODO: Use real service instance
             
             conn_id = await conn_manager.connect_user(f"broadcast_user_{i}", websocket)
             connections.append({"connection_id": conn_id, "websocket": websocket})
@@ -198,9 +199,9 @@ class TestWebSocketErrorHandling:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect_user("error_test_user", websocket)
@@ -217,7 +218,7 @@ class TestWebSocketErrorHandling:
         # Test error recovery - reset the mock
         websocket.send_json.side_effect = None
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Should work again after recovery
         await websocket.send_json({"type": "recovery", "data": "success"})
@@ -237,7 +238,7 @@ class TestWebSocketReconnection:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket1 = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket1.accept = AsyncNone  # TODO: Use real service instance
+        websocket1.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
         websocket1.application_state = 1  # WebSocketState.CONNECTED
         
@@ -250,7 +251,7 @@ class TestWebSocketReconnection:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket2 = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket2.accept = AsyncNone  # TODO: Use real service instance
+        websocket2.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
         websocket2.application_state = 1  # WebSocketState.CONNECTED
         
@@ -271,9 +272,9 @@ class TestWebSocketRateLimiting:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect_user("rate_limit_user", websocket)
@@ -305,9 +306,9 @@ class TestWebSocketMessageOrdering:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_json = AsyncNone  # TODO: Use real service instance
+        websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect_user("ordering_user", websocket)
@@ -339,9 +340,9 @@ class TestWebSocketBinaryMessages:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.send_bytes = AsyncNone  # TODO: Use real service instance
+        websocket.send_bytes = AsyncMock()  # TODO: Use real service instance
         
         conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect_user("binary_user", websocket)
@@ -364,9 +365,9 @@ class TestWebSocketConnectionCleanup:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
-        websocket.accept = AsyncNone  # TODO: Use real service instance
+        websocket.accept = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        websocket.close = AsyncNone  # TODO: Use real service instance
+        websocket.close = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
         websocket.application_state = 1  # WebSocketState.CONNECTED
         
@@ -407,9 +408,9 @@ class TestWebSocketMultiRoom:
             # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
-            websocket.accept = AsyncNone  # TODO: Use real service instance
+            websocket.accept = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            websocket.send_json = AsyncNone  # TODO: Use real service instance
+            websocket.send_json = AsyncMock()  # TODO: Use real service instance
             conn_id = await conn_manager.connect_user(f"room_a_user_{i}", websocket)
             room_a_users.append({"connection_id": conn_id, "websocket": websocket})
             
@@ -418,9 +419,9 @@ class TestWebSocketMultiRoom:
             # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
-            websocket.accept = AsyncNone  # TODO: Use real service instance
+            websocket.accept = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            websocket.send_json = AsyncNone  # TODO: Use real service instance
+            websocket.send_json = AsyncMock()  # TODO: Use real service instance
             conn_id = await conn_manager.connect_user(f"room_b_user_{i}", websocket)
             room_b_users.append({"connection_id": conn_id, "websocket": websocket})
             
@@ -462,9 +463,9 @@ class TestWebSocketPerformance:
             # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
-            websocket.accept = AsyncNone  # TODO: Use real service instance
+            websocket.accept = AsyncMock()  # TODO: Use real service instance
             # Mock: Generic component isolation for controlled unit testing
-            websocket.send_json = AsyncNone  # TODO: Use real service instance
+            websocket.send_json = AsyncMock()  # TODO: Use real service instance
             
             conn_id = await conn_manager.connect_user(f"perf_user_{i}", websocket)
             connections.append({"connection_id": conn_id, "user_id": f"perf_user_{i}", "websocket": websocket})
