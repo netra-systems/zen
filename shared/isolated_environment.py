@@ -373,10 +373,10 @@ class IsolatedEnvironment:
             'FERNET_KEY': 'test-fernet-key-for-encryption-32-characters-long-base64-encoded=',
             'SECRET_KEY': 'test-secret-key-for-test-environment-only-32-chars-min',
             
-            # API Keys for testing (placeholder values)
-            'ANTHROPIC_API_KEY': 'test-anthropic-api-key',
-            'OPENAI_API_KEY': 'test-openai-api-key', 
-            'GEMINI_API_KEY': 'test-gemini-api-key',
+            # API Keys for testing (placeholder values for unit tests, staging uses Secret Manager)
+            'ANTHROPIC_API_KEY': 'test-anthropic-api-key-placeholder-for-unit-tests',
+            'OPENAI_API_KEY': 'test-openai-api-key-placeholder-for-unit-tests', 
+            'GEMINI_API_KEY': 'test-gemini-api-key-placeholder-for-unit-tests',
             
             # Database defaults for testing
             'POSTGRES_HOST': 'localhost',

@@ -458,6 +458,15 @@ def get_env():
         return manager.env if manager.env else manager
 
 
+# SSOT Compatibility: Export IsolatedEnvironment class for direct imports
+try:
+    from shared.isolated_environment import IsolatedEnvironment
+except ImportError:
+    logger.warning("Could not import IsolatedEnvironment from shared.isolated_environment")
+    # Fallback to None - tests should handle this gracefully
+    IsolatedEnvironment = None
+
+
 # =============================================================================
 # EXPORT ALL FUNCTIONS AND CLASSES
 # =============================================================================
@@ -473,6 +482,7 @@ __all__ = [
     
     # SSOT Environment Access (CRITICAL)
     'get_env',
+    'IsolatedEnvironment',  # SSOT unified environment class
     
     # Context managers
     'isolated_test_session',

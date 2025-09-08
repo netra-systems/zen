@@ -1,0 +1,166 @@
+{
+  "timestamp": "2025-09-08T01:50:54.572181+00:00",
+  "environment": "staging",
+  "test_purpose": "Reproduce 1008 policy violation",
+  "attempts": [
+    {
+      "scenario": "direct_staging_connection",
+      "start_time": 1757296254.572181,
+      "jwt_source": "staging_config.create_test_jwt_token()",
+      "headers_used": [
+        "X-Test-Type",
+        "X-Test-Environment",
+        "X-E2E-Test",
+        "X-Test-Mode",
+        "X-Test-Session",
+        "User-Agent",
+        "X-Staging-E2E",
+        "X-Test-Priority",
+        "X-Auth-Fast-Path",
+        "Authorization"
+      ],
+      "connection_result": "CLOSED_WITH_ERROR",
+      "error_details": {
+        "exception_type": "ConnectionClosedError",
+        "code": 1011,
+        "reason": "Internal error",
+        "is_1008_policy_violation": false,
+        "reason_contains_ssot": false
+      },
+      "duration": 10.221778392791748
+    },
+    {
+      "scenario": "manual_jwt_validation",
+      "start_time": 1757296264.7939594,
+      "validation_steps": [
+        {
+          "step": "format_validation",
+          "result": true,
+          "details": "JWT format valid: True"
+        },
+        {
+          "step": "unified_auth_service",
+          "result": false,
+          "details": {
+            "success": false,
+            "error": "auth_service_unreachable | Debug: 373 chars, 2 dots",
+            "error_code": "VALIDATION_FAILED",
+            "metadata": {
+              "context": "websocket",
+              "method": "jwt_token",
+              "details": "Auth service is not available - check if service is running",
+              "failure_debug": {
+                "validation_result_exists": true,
+                "validation_result_keys": [
+                  "valid",
+                  "error",
+                  "details",
+                  "user_notification",
+                  "resilience_metadata"
+                ],
+                "error_from_auth_service": "auth_service_unreachable",
+                "details_from_auth_service": "Auth service is not available - check if service is running",
+                "token_characteristics": {
+                  "length": 373,
+                  "prefix": "eyJhbGciOiJI",
+                  "suffix": "B7_FSO8w",
+                  "dot_count": 2,
+                  "has_bearer_prefix": false
+                },
+                "context": "websocket",
+                "method": "jwt_token",
+                "timestamp": "2025-09-08T01:51:16.551036+00:00",
+                "auth_service_response_status": "present"
+              }
+            }
+          }
+        },
+        {
+          "step": "websocket_authenticator_stats",
+          "result": true,
+          "details": {
+            "ssot_compliance": {
+              "service": "UnifiedWebSocketAuthenticator",
+              "ssot_compliant": true,
+              "authentication_service": "UnifiedAuthenticationService",
+              "duplicate_paths_eliminated": 4
+            },
+            "websocket_auth_statistics": {
+              "total_attempts": 0,
+              "successful_authentications": 0,
+              "failed_authentications": 0,
+              "success_rate_percent": 0.0
+            },
+            "connection_states_seen": {},
+            "timestamp": "2025-09-08T01:51:16.649720+00:00"
+          }
+        }
+      ],
+      "final_result": "AUTH_FAILED_VALIDATION_FAILED",
+      "duration": 11.855761289596558
+    },
+    {
+      "scenario": "environment_analysis",
+      "start_time": 1757296276.6497207,
+      "environment_checks": [
+        {
+          "check": "critical_environment_variables",
+          "results": {
+            "ENVIRONMENT": {
+              "set": true,
+              "value_length": 4,
+              "value_preview": "test"
+            },
+            "AUTH_SERVICE_URL": {
+              "set": true,
+              "value_length": 21,
+              "value_preview": "http://localhost:808..."
+            },
+            "SERVICE_ID": {
+              "set": true,
+              "value_length": 13,
+              "value_preview": "netra-backend"
+            },
+            "SERVICE_SECRET": {
+              "set": true,
+              "value_length": 68,
+              "value_preview": "mock-service-auth-ke..."
+            },
+            "JWT_SECRET": {
+              "set": false,
+              "value_length": 0,
+              "value_preview": null
+            },
+            "E2E_OAUTH_SIMULATION_KEY": {
+              "set": true,
+              "value_length": 32,
+              "value_preview": "staging-e2e-test-byp..."
+            },
+            "TESTING": {
+              "set": true,
+              "value_length": 4,
+              "value_preview": "true"
+            }
+          }
+        },
+        {
+          "check": "auth_client_configuration",
+          "results": {
+            "base_url": "http://localhost:8081",
+            "enabled": true,
+            "service_id_set": true,
+            "service_secret_set": true
+          }
+        }
+      ],
+      "differences_found": [
+        {
+          "issue": "Environment is 'test' not 'staging'",
+          "impact": "May be using wrong configuration for staging tests",
+          "severity": "MEDIUM"
+        }
+      ],
+      "duration": 0.0005388259887695312
+    }
+  ]
+}
