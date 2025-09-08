@@ -117,12 +117,13 @@ async def stream_events(
                     # Send events based on counter
                     if event_counter % 10 == 0:
                         # Send heartbeat every 10 seconds
-                        yield f"data: {json.dumps({
+                        heartbeat_data = {
                             'event': 'heartbeat',
                             'connection_id': connection_id,
                             'count': event_counter,
                             'timestamp': datetime.now(timezone.utc).isoformat()
-                        })}\n\n"
+                        }
+                        yield f"data: {json.dumps(heartbeat_data)}\n\n"
                     
                     elif event_counter % 5 == 0:
                         # Send sample event every 5 seconds
