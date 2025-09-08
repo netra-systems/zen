@@ -3,6 +3,8 @@ Service mock implementations.
 Reusable mock classes for various services.
 """
 
+import asyncio
+import time
 from unittest.mock import AsyncMock, MagicMock
 from typing import Any, Dict, List, Optional
 
@@ -401,3 +403,207 @@ def setup_slow_validation_mock():
 def create_metrics_storage_error(quality_service):
     """Create error condition for metrics storage"""
     quality_service.metrics_history = None
+
+
+class MockServiceDependency:
+    """
+    Standardized mock service dependency for testing service initialization.
+    
+    This provides a consistent interface for all service mocking, including:
+    - Proper initialization lifecycle 
+    - Health checking
+    - Startup timing simulation
+    - Error injection for failure testing
+    
+    Used by service container tests to ensure proper initialization patterns.
+    """
+    
+    def __init__(self, name: str, startup_delay: float = 0.1):
+        self.name = name
+        self.startup_delay = startup_delay
+        self.initialized = False
+        self.started = False
+        self.healthy = False
+        self.initialization_time = None
+        self._startup_error = None
+    
+    async def initialize(self) -> bool:
+        """Initialize the service dependency."""
+        if self._startup_error:
+            raise self._startup_error
+        
+        start_time = time.time()
+        await asyncio.sleep(self.startup_delay)
+        self.initialized = True
+        self.initialization_time = time.time() - start_time
+        return True
+    
+    async def start(self) -> bool:
+        """Start the service dependency."""
+        if not self.initialized:
+            raise RuntimeError(f"{self.name} not initialized before start")
+        
+        if self._startup_error:
+            raise self._startup_error
+        
+        self.started = True
+        self.healthy = True
+        return True
+    
+    async def stop(self) -> bool:
+        """Stop the service dependency.""" 
+        self.started = False
+        self.healthy = False
+        return True
+    
+    def is_healthy(self) -> bool:
+        """Check if service is healthy."""
+        return self.healthy and self.started
+    
+    def set_startup_error(self, error: Exception):
+        """Set error to be raised during startup."""
+        self._startup_error = error
+
+
+class MockConfigurationManager:
+    """
+    Standardized mock configuration manager for testing.
+    
+    This provides consistent configuration patterns across all tests:
+    - Proper initialization with initialize() method (required for service containers)
+    - Environment-specific configuration loading
+    - Configuration validation patterns
+    - Loaded state tracking
+    
+    Key fix: Has initialize() method that calls load_configuration() to set loaded=True
+    This ensures compatibility with service container initialization patterns.
+    """
+    
+    def __init__(self):
+        self.loaded = False
+        self.config = {}
+        self.load_errors = []
+        self.validation_errors = []
+    
+    async def initialize(self) -> bool:
+        """
+        Initialize the configuration manager by loading configuration.
+        
+        This method is required for service container compatibility.
+        It ensures that the 'loaded' flag is properly set to True.
+        """
+        await self.load_configuration()
+        return True
+    
+    async def load_configuration(self, config_paths: List[str] = None) -> Dict[str, Any]:
+        """Load configuration with environment-specific overrides."""
+        await asyncio.sleep(0.05)  # Simulate loading time
+        
+        # Default test configuration following SSOT patterns
+        self.config = {
+            "SERVICE_NAME": "test_service",
+            "ENVIRONMENT": "test", 
+            "DATABASE_URL": "postgresql://test:test@localhost:5434/test_db",
+            "AUTH_SERVICE_URL": "http://localhost:8081",
+            "REDIS_URL": "redis://localhost:6381",
+            "LOG_LEVEL": "INFO",
+            "DEBUG": "true",
+            "SECRET_KEY": "test_secret_key_for_initialization",
+            "JWT_SECRET_KEY": "test_jwt_secret_key_for_initialization"
+        }
+        
+        # Environment-specific configuration overrides
+        if config_paths:
+            for path in config_paths:
+                if "staging" in path:
+                    self.config.update({
+                        "ENVIRONMENT": "staging",
+                        "DEBUG": "false"
+                    })
+                elif "production" in path:
+                    self.config.update({
+                        "ENVIRONMENT": "production", 
+                        "DEBUG": "false"
+                    })
+        
+        self.loaded = True
+        return self.config.copy()
+    
+    def get_config(self, key: str, default: Any = None) -> Any:
+        """Get configuration value."""
+        return self.config.get(key, default)
+    
+    def validate_configuration(self) -> List[str]:
+        """Validate configuration against requirements."""
+        errors = []
+        
+        required_keys = ["SERVICE_NAME", "DATABASE_URL", "SECRET_KEY"]
+        for key in required_keys:
+            if key not in self.config:
+                errors.append(f"Missing required configuration: {key}")
+        
+        # Check for insecure configurations
+        if self.config.get("DEBUG") == "true" and self.config.get("ENVIRONMENT") == "production":
+            errors.append("Debug mode should not be enabled in production")
+        
+        self.validation_errors = errors
+        return errors
+
+
+class MockServiceContainer:
+    """
+    Standardized mock dependency injection container.
+    
+    This provides consistent service container patterns:
+    - Singleton and factory service registration
+    - Proper initialization order tracking
+    - Service lifecycle management
+    - Consistent service retrieval patterns
+    
+    Compatible with the fixed MockConfigurationManager that has initialize() method.
+    """
+    
+    def __init__(self):
+        self.services = {}
+        self.singletons = {}
+        self.factories = {}
+        self.initialization_order = []
+    
+    def register_singleton(self, service_type: str, instance: Any):
+        """Register singleton service."""
+        self.singletons[service_type] = instance
+    
+    def register_factory(self, service_type: str, factory: callable):
+        """Register service factory."""
+        self.factories[service_type] = factory
+    
+    async def get_service(self, service_type: str) -> Any:
+        """Get service instance."""
+        if service_type in self.singletons:
+            return self.singletons[service_type]
+        elif service_type in self.factories:
+            if service_type not in self.services:
+                self.services[service_type] = await self.factories[service_type]()
+            return self.services[service_type]
+        else:
+            raise ValueError(f"Service {service_type} not registered")
+    
+    async def initialize_all_services(self):
+        """
+        Initialize all registered services in proper order.
+        
+        This method looks for services with initialize() method and calls them.
+        The MockConfigurationManager now has this method, fixing the original issue.
+        """
+        # Initialize singletons first
+        for service_type, instance in self.singletons.items():
+            if hasattr(instance, 'initialize'):
+                await instance.initialize()
+                self.initialization_order.append(service_type)
+        
+        # Initialize factory-created services
+        for service_type in self.factories.keys():
+            service = await self.get_service(service_type)
+            if hasattr(service, 'initialize'):
+                await service.initialize()
+                self.initialization_order.append(service_type)

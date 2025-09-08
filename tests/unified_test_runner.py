@@ -1442,7 +1442,6 @@ class UnifiedTestRunner:
             'database',  # Database tests need PostgreSQL
             'api',  # API tests typically need backend services
             'websocket',  # WebSocket tests need backend
-            'integration',  # Integration tests often need services
             'post_deployment',  # Post-deployment tests need services
         }
         
@@ -1455,6 +1454,7 @@ class UnifiedTestRunner:
             'performance',  # Performance tests can run on mock data
             'security',  # Security tests can run on static analysis
             'startup',  # Startup tests are about service initialization
+            'integration',  # Integration tests can run offline with mocks
         }
         
         # Check if any of the selected categories require Docker
