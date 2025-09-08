@@ -42,8 +42,31 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
 logger = central_logger.get_logger(__name__)
+
+
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
+    
+    CRITICAL FIX: GCP Cloud Run structured logging cannot serialize WebSocketState
+    enum objects directly. This causes JSON serialization errors that manifest 
+    as 1011 internal server errors.
+    
+    Args:
+        state: WebSocketState enum or any object that needs safe logging
+        
+    Returns:
+        String representation safe for JSON serialization
+    """
+    try:
+        if hasattr(state, 'name') and hasattr(state, 'value'):
+            return str(state.name).lower()  # CONNECTED -> "connected"
+        return str(state)
+    except Exception:
+        return "<serialization_error>"
 
 
 @dataclass
@@ -153,13 +176,13 @@ class UnifiedWebSocketAuthenticator:
             "attempt_number": self._websocket_auth_attempts
         }
         
-        logger.info(f"SSOT WEBSOCKET AUTH: Starting authentication (state: {connection_state})")
+        logger.info(f"SSOT WEBSOCKET AUTH: Starting authentication (state: {_safe_websocket_state_for_logging(connection_state)})")
         logger.debug(f"🔐 WEBSOCKET AUTH ATTEMPT DEBUG: {json.dumps(auth_attempt_debug, indent=2)}")
         
         try:
             # Validate WebSocket connection state first
             if not self._is_websocket_valid_for_auth(websocket):
-                error_msg = f"WebSocket in invalid state for authentication: {connection_state}"
+                error_msg = f"WebSocket in invalid state for authentication: {_safe_websocket_state_for_logging(connection_state)}"
                 logger.error(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 self._websocket_auth_failures += 1
                 

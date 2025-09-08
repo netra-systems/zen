@@ -47,6 +47,20 @@ from netra_backend.app.websocket_core import (
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 
 logger = central_logger.get_logger(__name__)
+
+
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
+    """
+    try:
+        if hasattr(state, 'name') and hasattr(state, 'value'):
+            return str(state.name).lower()  # CONNECTED -> "connected"
+        return str(state)
+    except Exception:
+        return "<serialization_error>"
+
+
 router = APIRouter(tags=["WebSocket"])
 tracing_manager = TracingManager()
 
@@ -643,7 +657,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # Additional connection validation for Cloud Run
                 if websocket.client_state != WebSocketState.CONNECTED:
-                    logger.warning(f"WebSocket not in CONNECTED state after registration: {websocket.client_state.name}")
+                    logger.warning(f"WebSocket not in CONNECTED state after registration: {_safe_websocket_state_for_logging(websocket.client_state)}")
                     await asyncio.sleep(0.05)  # Additional 50ms if not connected
             elif environment == "testing":
                 await asyncio.sleep(0.01)  # Minimal delay for tests
@@ -717,7 +731,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # Main message handling loop
             logger.debug(f"Starting message handling loop for connection: {connection_id}")
             # Debug: Check WebSocket state before entering loop
-            logger.debug(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+            logger.debug(f"WebSocket state before loop - client_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'N/A'))}, application_state: {_safe_websocket_state_for_logging(getattr(websocket, 'application_state', 'N/A'))}")
             await _handle_websocket_messages(
                 websocket, user_id, connection_id, ws_manager, 
                 message_router, connection_monitor, security_manager, heartbeat
@@ -870,7 +884,7 @@ async def _handle_websocket_messages(
     logger.info(f"Entering message handling loop for connection: {connection_id} (user: {user_id})")
     
     # Debug WebSocket state at loop entry
-    logger.info(f"WebSocket state at loop entry - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+    logger.info(f"WebSocket state at loop entry - client_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'N/A'))}, application_state: {_safe_websocket_state_for_logging(getattr(websocket, 'application_state', 'N/A'))}")
     
     try:
         first_check = True
@@ -881,7 +895,7 @@ async def _handle_websocket_messages(
             try:
                 # Track loop iteration with detailed state
                 loop_duration = time.time() - loop_start_time
-                logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {websocket.application_state}, duration: {loop_duration:.1f}s")
+                logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {_safe_websocket_state_for_logging(websocket.application_state)}, duration: {loop_duration:.1f}s")
                 
                 # Receive message with timeout
                 raw_message = await asyncio.wait_for(
