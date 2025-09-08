@@ -79,7 +79,7 @@ class TestCorpusQueries:
         # Mock the client to capture the query
 
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -118,7 +118,7 @@ class TestCorpusQueries:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -181,7 +181,7 @@ class TestCorpusQueries:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -232,7 +232,7 @@ class TestCorpusQueries:
         service = CorpusService()
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.services.corpus_service.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -530,11 +530,12 @@ class TestGenerationServiceQueries:
         from netra_backend.app.services.generation_service import (
 
             get_corpus_from_clickhouse,
+            save_corpus_to_clickhouse,
 
         )
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+        with patch('netra_backend.app.services.generation_job_manager.ClickHouseDatabase') as mock_db:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -566,9 +567,10 @@ class TestGenerationServiceQueries:
     @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
+        from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+        with patch('netra_backend.app.services.generation_job_manager.ClickHouseDatabase') as mock_db:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -610,7 +612,7 @@ class TestTableInitializationQueries:
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance
@@ -630,7 +632,7 @@ class TestTableInitializationQueries:
             ]
             
             # Mock: ClickHouse external database isolation for unit testing performance
-            with patch('app.db.clickhouse_init.settings') as mock_settings:
+            with patch('netra_backend.app.db.clickhouse_init.settings') as mock_settings:
 
                 mock_settings.environment = "production"
                 
@@ -651,7 +653,7 @@ class TestTableInitializationQueries:
         from netra_backend.app.db.clickhouse_init import verify_workload_events_table
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()  # TODO: Use real service instance

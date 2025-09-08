@@ -95,7 +95,14 @@ class TestAgentExecutionCoreIntegration:
     @pytest.fixture
     def real_registry(self):
         """Real agent registry for integration testing."""
-        registry = AgentRegistry()
+        # Create a minimal LLM manager for integration testing
+        from netra_backend.app.llm.llm_manager import LLMManager
+        
+        # Create LLM manager without user context for testing
+        # This is acceptable for integration tests as warned in the manager
+        llm_manager = LLMManager(user_context=None)
+        
+        registry = AgentRegistry(llm_manager)
         return registry
 
     @pytest.fixture

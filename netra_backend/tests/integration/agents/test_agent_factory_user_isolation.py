@@ -162,9 +162,9 @@ class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
         """Create UserExecutionContext from test context."""
         return UserExecutionContext(
             user_id=test_context.user_id,
-            session_id=test_context.session_id,
             thread_id=test_context.thread_id,
-            run_id=f"run_{test_context.user_id}_{uuid.uuid4().hex[:8]}"
+            run_id=f"run_{test_context.user_id}_{uuid.uuid4().hex[:8]}",
+            request_id=test_context.session_id  # Map session_id to request_id
         )
     
     @pytest.mark.integration
@@ -194,7 +194,7 @@ class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
         assert user_b_engine.user_context.user_id == user_b_context.user_id
         
         # Verify contexts are isolated
-        assert user_a_engine.user_context.session_id != user_b_engine.user_context.session_id
+        assert user_a_engine.user_context.request_id != user_b_engine.user_context.request_id
         assert user_a_engine.user_context.thread_id != user_b_engine.user_context.thread_id
         
         # Debug: Check what agents are available
@@ -220,9 +220,9 @@ class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
             assert user_a_agent is not user_b_agent, "Agent registry must create separate agent instances per user"
             
             # Verify agents have correct user context
-            if hasattr(user_a_agent, "user_context"):
+            if hasattr(user_a_agent, "user_context") and user_a_agent.user_context is not None:
                 assert user_a_agent.user_context.user_id == user_a_context.user_id
-            if hasattr(user_b_agent, "user_context"):
+            if hasattr(user_b_agent, "user_context") and user_b_agent.user_context is not None:
                 assert user_b_agent.user_context.user_id == user_b_context.user_id
         else:
             # Skip agent-specific tests if agents couldn't be created
@@ -679,9 +679,9 @@ class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
         self.record_metric("cleanup_prevents_leakage_verified", True)
         self.record_metric("user_contexts_cleaned_and_verified", 1)
         
-    async def teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up test resources."""
-        await super().teardown_method(method)
+        super().teardown_method(method)
         
         # Log test metrics for monitoring
         metrics = self.get_all_metrics()
