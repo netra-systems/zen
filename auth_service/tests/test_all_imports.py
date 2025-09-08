@@ -128,21 +128,25 @@ def test_auth_service_independence():
 
 
 def test_critical_auth_imports():
-    """Test that critical auth modules have their required imports."""
-    # Check that JWT handling has proper imports
+    """Test that critical auth modules have their required functionality."""
+    # Check that auth routes has proper architecture components
     from auth_service.auth_core.routes import auth_routes
     
-    # These should be available in the module
-    critical_imports = [
-        'jwt',  # For JWT handling
-        'OAuth2Session',  # For OAuth
-        'FastAPI' if hasattr(auth_routes, 'router') else None,  # For routing
+    # These should be available in the module (architecture components, not direct imports)
+    critical_components = [
+        'AuthService',  # For JWT and auth handling (architecture correct)
+        'OAuthManager',  # For OAuth handling
+        'router',  # For FastAPI routing
     ]
     
-    for imp in critical_imports:
-        if imp:  # Skip None values
-            assert imp in dir(auth_routes) or hasattr(auth_routes, imp), \
-                f"auth_routes is missing critical import: {imp}"
+    for component in critical_components:
+        assert component in dir(auth_routes) or hasattr(auth_routes, component), \
+            f"auth_routes is missing critical component: {component}"
+            
+    # Verify JWT functionality is available through AuthService
+    # This is the correct architecture - JWT should not be imported directly in routes
+    assert hasattr(auth_routes, 'AuthService'), \
+        "auth_routes must have AuthService for JWT functionality"
 
 
 def test_jwt_secret_key_usage():

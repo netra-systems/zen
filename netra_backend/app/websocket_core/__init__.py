@@ -32,7 +32,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 )
 
 # Backward compatibility function using factory pattern
-def get_websocket_manager(user_context=None):
+async def get_websocket_manager(user_context=None):
     """
     SECURITY MIGRATION: Compatibility wrapper for get_websocket_manager.
     
@@ -61,7 +61,7 @@ def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
     
-    return create_websocket_manager(user_context)
+    return await create_websocket_manager(user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     WebSocketManagerAdapter,
@@ -89,14 +89,7 @@ from netra_backend.app.websocket_core.handlers import (
     get_message_router,
 )
 
-# Import auth
-from netra_backend.app.websocket_core.auth import (
-    WebSocketAuthenticator,
-    ConnectionSecurityManager,
-    get_websocket_authenticator,
-    get_connection_security_manager,
-    secure_websocket_context,
-)
+# Auth imports removed - using SSOT unified_websocket_auth instead
 
 # Try to import existing types (if available)
 try:
@@ -201,12 +194,7 @@ __all__ = [
     "UserMessageHandler",
     "get_message_router",
     
-    # Auth
-    "WebSocketAuthenticator",
-    "ConnectionSecurityManager",
-    "get_websocket_authenticator",
-    "get_connection_security_manager",
-    "secure_websocket_context",
+    # Auth - Removed legacy auth, using SSOT unified_websocket_auth instead
     
     # Rate limiting
     "RateLimiter",

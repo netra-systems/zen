@@ -420,10 +420,17 @@ class DatabaseURLBuilder:
             # PRIORITY 1: Use memory if explicitly requested
             if self.parent.env.get("USE_MEMORY_DB") == "true":
                 return self.memory_url
-            # PRIORITY 2: Try PostgreSQL config
+            # PRIORITY 2: Use direct DATABASE_URL if provided (for test environment variable overrides)
+            database_url = self.parent.env.get("DATABASE_URL")
+            if database_url and database_url != "sqlite+aiosqlite:///:memory:":
+                # Normalize and ensure proper async driver format for SQLAlchemy
+                if database_url.startswith("postgresql://"):
+                    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+                return database_url
+            # PRIORITY 3: Try PostgreSQL config from components
             if self.postgres_url:
                 return self.postgres_url
-            # PRIORITY 3: Default to memory
+            # PRIORITY 4: Default to memory
             return self.memory_url
     
     class DockerBuilder:

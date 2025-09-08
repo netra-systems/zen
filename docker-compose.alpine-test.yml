@@ -73,7 +73,7 @@ services:
           memory: 512M
 
   alpine-test-clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
+    image: clickhouse/clickhouse-server:25.7.6.21-alpine
     environment:
       CLICKHOUSE_DB: test_analytics
       CLICKHOUSE_USER: test

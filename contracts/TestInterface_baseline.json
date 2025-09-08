@@ -1,0 +1,30 @@
+{
+  "interface_name": "TestInterface",
+  "version": "1.0",
+  "created_at": "2025-09-08T17:52:50.774852",
+  "class_docstring": null,
+  "methods": [
+    {
+      "method_name": "create_manager",
+      "parameters": [
+        {
+          "name": "user_context",
+          "annotation": null,
+          "default_value": null,
+          "is_required": true,
+          "position": 1
+        },
+        {
+          "name": "required_param",
+          "annotation": "<class 'str'>",
+          "default_value": null,
+          "is_required": true,
+          "position": 2
+        }
+      ],
+      "return_annotation": null,
+      "is_async": false,
+      "docstring": null
+    }
+  ]
+}

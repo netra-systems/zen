@@ -447,18 +447,20 @@ class AgentInstanceFactory:
                 if self._agent_class_registry:
                     registry_size = len(self._agent_class_registry)
                     if registry_size == 0:
-                        logger.error("❌ AgentClassRegistry is empty - no agents registered!")
-                        logger.error("    Ensure initialize_agent_class_registry() was called during startup")
-                        raise ValueError("AgentClassRegistry is empty - startup initialization may have failed")
+                        logger.warning("⚠️ AgentClassRegistry is empty - no agents registered!")
+                        logger.warning("    Ensure initialize_agent_class_registry() was called during startup")
+                        logger.warning("    Factory will continue without registry (limited functionality)")
+                        self._agent_class_registry = None
                     else:
                         logger.info(f"✅ AgentInstanceFactory configured with global AgentClassRegistry ({registry_size} agents)")
                 else:
-                    raise ValueError("Global AgentClassRegistry is None")
-            except ValueError:
-                raise  # Re-raise our validation errors
+                    logger.warning("⚠️ Global AgentClassRegistry is None - factory will have limited functionality")
+                    logger.warning("    Agent creation will not be available, but other factory functions will work")
+                    self._agent_class_registry = None
             except Exception as e:
-                logger.error(f"❌ Failed to get global agent class registry: {e}")
-                raise ValueError(f"Could not access agent class registry: {e}")
+                logger.warning(f"⚠️ Failed to get global agent class registry: {e}")
+                logger.warning("    Factory will continue without registry (limited functionality)")
+                self._agent_class_registry = None
         
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
@@ -540,7 +542,7 @@ class AgentInstanceFactory:
                                            thread_id: str,
                                            run_id: str,
                                            db_session: Optional[AsyncSession] = None,
-                                           websocket_connection_id: Optional[str] = None,
+                                           websocket_client_id: Optional[str] = None,
                                            metadata: Optional[Dict[str, Any]] = None) -> UserExecutionContext:
         """
         Create isolated user execution context with all required resources.
@@ -550,7 +552,7 @@ class AgentInstanceFactory:
             thread_id: Thread identifier for WebSocket routing
             run_id: Unique run identifier for this execution
             db_session: Optional request-scoped database session
-            websocket_connection_id: Optional WebSocket connection ID
+            websocket_client_id: Optional WebSocket client ID
             metadata: Optional metadata for the context
             
         Returns:
@@ -575,13 +577,13 @@ class AgentInstanceFactory:
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
-            # Create user execution context using the supervisor-compatible method
+            # Create user execution context using the standard from_request method
             context = UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
                 db_session=db_session,
-                websocket_connection_id=websocket_connection_id,
+                websocket_connection_id=websocket_client_id,
                 metadata=metadata or {}
             )
             
@@ -1008,7 +1010,7 @@ class AgentInstanceFactory:
                                   thread_id: str,
                                   run_id: str,
                                   db_session: Optional[AsyncSession] = None,
-                                  websocket_connection_id: Optional[str] = None,
+                                  websocket_client_id: Optional[str] = None,
                                   metadata: Optional[Dict[str, Any]] = None):
         """
         Context manager for user execution scope with automatic cleanup.
@@ -1026,7 +1028,7 @@ class AgentInstanceFactory:
                 thread_id=thread_id,
                 run_id=run_id,
                 db_session=db_session,
-                websocket_connection_id=websocket_connection_id,
+                websocket_client_id=websocket_client_id,
                 metadata=metadata
             )
             
@@ -1048,10 +1050,23 @@ class AgentInstanceFactory:
             asyncio.Semaphore: User-specific semaphore
         """
         async with self._semaphore_lock:
-            if user_id not in self._user_semaphores:
-                self._user_semaphores[user_id] = asyncio.Semaphore(self._max_concurrent_per_user)
-                logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
-            return self._user_semaphores[user_id]
+            # Handle both regular dict and WeakValueDictionary cases
+            try:
+                existing_semaphore = self._user_semaphores.get(user_id)
+                if existing_semaphore is not None:
+                    return existing_semaphore
+            except AttributeError:
+                # Fallback for WeakValueDictionary which doesn't have .get() method
+                try:
+                    return self._user_semaphores[user_id]
+                except KeyError:
+                    pass
+            
+            # Create new semaphore if not found
+            semaphore = asyncio.Semaphore(self._max_concurrent_per_user)
+            self._user_semaphores[user_id] = semaphore
+            logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
+            return semaphore
     
     async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UserWebSocketEmitter:
         """Create WebSocket emitter with optional pooling."""

@@ -73,7 +73,7 @@ class SupplyResearcherAgent(BaseAgent):
         phase_4 = AgentMethodExecutionPhase("results_processing", self, "_execute_processing_phase", ["research_execution"])
         
         # Build execution engine with sequential strategy (research needs to be sequential)
-        self.execution_engine = ExecutionWorkflowBuilder() \
+        self._execution_engine = ExecutionWorkflowBuilder() \
             .add_phases([phase_1, phase_2, phase_3, phase_4]) \
             .set_strategy(ExecutionStrategy.SEQUENTIAL) \
             .add_pre_execution_hook(self._pre_execution_hook) \

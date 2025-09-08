@@ -97,6 +97,7 @@ sequenceDiagram
     participant S as Supervisor
     participant R as Registry
     participant CB as Circuit Breaker
+    participant UC as UserExecutionContext
     participant A as Sub-Agent
     participant LLM as LLM Manager
     participant T as Tool Dispatcher
@@ -104,18 +105,22 @@ sequenceDiagram
 
     C->>WS: Send Request
     WS->>S: Forward Message
+    S->>UC: Create/Get Context
+    Note right of UC: user_id, thread_id,<br/>run_id, request_id
     S->>R: Get Agent
     R-->>S: Agent Instance
     S->>CB: Check Circuit Status
     CB-->>S: Status OK
     S->>ST: Load State
     ST-->>S: Previous Context
-    S->>A: Delegate Task
-    A->>LLM: Process with LLM
+    S->>A: Delegate Task with UserContext
+    Note over A,UC: Child context creation<br/>for sub-operations
+    A->>UC: create_child_context("operation")
+    A->>LLM: Process with LLM (child context)
     LLM-->>A: LLM Response
-    A->>T: Execute Tools (if needed)
+    A->>T: Execute Tools (child context)
     T-->>A: Tool Results
-    A->>ST: Save Progress
+    A->>ST: Save Progress (with context)
     A-->>S: Task Result
     S->>ST: Update Global State
     S->>WS: Send Response
@@ -290,3 +295,6 @@ graph TB
 - **Tool Dispatcher** provides unified interface for external tool access
 - Each agent is specialized for specific domain tasks, enabling efficient parallel processing
 - WebSocket connections enable real-time streaming of agent responses to clients
+- **UserExecutionContext** provides complete user isolation with child context support for sub-agent operations
+- **Child Context Creation** enables hierarchical agent execution while maintaining proper isolation and traceability
+- All contexts include full metadata inheritance and operation depth tracking for comprehensive observability

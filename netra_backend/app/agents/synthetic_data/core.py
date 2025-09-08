@@ -14,7 +14,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     ApprovalFlowOrchestrator,
@@ -126,8 +126,9 @@ class SyntheticDataAgentCore(ABC):
             await self._handle_execution_error_with_context(e, context)
             raise
         finally:
-            # Clean up database session
+            # Clean up database session  
             # Session cleanup handled by context manager
+            pass
     
     def _should_execute_synthetic_data(self, user_request: str, context: UserExecutionContext) -> bool:
         """Determine if synthetic data generation should be executed.

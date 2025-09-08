@@ -2,6 +2,10 @@
 
 This is the master index for all organized reports in the Netra Apex project.
 
+## 📚 Documentation Archive
+
+- **[Documentation Archive 2025-09-08](../docs_archive_20250908/MASTER_INDEX_BY_IMPORTANCE.md)** 📁 - **COMPREHENSIVE ARCHIVE**: ~400+ documentation files organized by business importance and technical category (P1 Critical → P4 Low documentation)
+
 ## Directory Structure
 
 All reports have been organized into categorized folders for better navigation and maintenance:

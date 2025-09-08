@@ -1,92 +1,84 @@
-# REMOVED_SYNTAX_ERROR: '''
-# REMOVED_SYNTAX_ERROR: E2E Test: Cross-Service Authentication Flow
+'''
+E2E Test: Cross-Service Authentication Flow
 
-# REMOVED_SYNTAX_ERROR: This test validates that authentication flows work correctly across all services
-# REMOVED_SYNTAX_ERROR: including token generation, validation, and propagation.
+This test validates that authentication flows work correctly across all services
+including token generation, validation, and propagation.
 
-# REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-    # REMOVED_SYNTAX_ERROR: - Segment: All customer segments (Free, Early, Mid, Enterprise)
-    # REMOVED_SYNTAX_ERROR: - Business Goal: Secure user authentication and authorization
-    # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures users can securely access all platform features
-    # REMOVED_SYNTAX_ERROR: - Strategic/Revenue Impact: Authentication failures block user engagement and conversion
-    # REMOVED_SYNTAX_ERROR: '''
+Business Value Justification (BVJ):
+- Segment: All customer segments (Free, Early, Mid, Enterprise)
+- Business Goal: Secure user authentication and authorization
+- Value Impact: Ensures users can securely access all platform features
+- Strategic/Revenue Impact: Authentication failures block user engagement and conversion
+'''
 
-    # Setup test path for absolute imports following CLAUDE.md standards
-    # REMOVED_SYNTAX_ERROR: import sys
-    # REMOVED_SYNTAX_ERROR: from pathlib import Path
-    # REMOVED_SYNTAX_ERROR: project_root = Path(__file__).parent.parent.parent
-    # REMOVED_SYNTAX_ERROR: if str(project_root) not in sys.path:
-        # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
+import asyncio
+import aiohttp
+import pytest
+import json
+import time
+from typing import Dict, Any, Optional
+import uuid
+import logging
 
-        # Absolute imports following CLAUDE.md standards
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: import aiohttp
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: import json
-        # REMOVED_SYNTAX_ERROR: import time
-        # REMOVED_SYNTAX_ERROR: from typing import Dict, Any, Optional
-        # REMOVED_SYNTAX_ERROR: import uuid
-        # REMOVED_SYNTAX_ERROR: import logging
+# Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
+from shared.isolated_environment import get_env
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-        # Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
-        # REMOVED_SYNTAX_ERROR: from tests.e2e.test_harness import UnifiedE2ETestHarness
+logger = logging.getLogger(__name__)
 
-        # REMOVED_SYNTAX_ERROR: logger = logging.getLogger(__name__)
-
-# REMOVED_SYNTAX_ERROR: async def check_service_availability(session: aiohttp.ClientSession, service_name: str, url: str) -> bool:
-    # REMOVED_SYNTAX_ERROR: """Check if a service is available by testing its health endpoint."""
-    # REMOVED_SYNTAX_ERROR: try:
+async def check_service_availability(session: aiohttp.ClientSession, service_name: str, url: str) -> bool:
+    """Check if a service is available by testing its health endpoint."""
+    try:
         # First try health endpoint
-        # REMOVED_SYNTAX_ERROR: async with session.get("formatted_string", timeout=aiohttp.ClientTimeout(total=5)) as response:
-            # REMOVED_SYNTAX_ERROR: if response.status == 200:
-                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                # REMOVED_SYNTAX_ERROR: return True
-                # REMOVED_SYNTAX_ERROR: except Exception:
-                    # REMOVED_SYNTAX_ERROR: pass
+        health_url = f"{url}/health"
+        async with session.get(health_url, timeout=aiohttp.ClientTimeout(total=5)) as response:
+            if response.status == 200:
+                logger.info(f"✅ {service_name} health check passed at {health_url}")
+                return True
+    except Exception:
+        pass
 
-                    # If health endpoint fails, try root endpoint
-                    # REMOVED_SYNTAX_ERROR: try:
-                        # REMOVED_SYNTAX_ERROR: async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
-                            # REMOVED_SYNTAX_ERROR: if response.status == 200:
-                                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                # REMOVED_SYNTAX_ERROR: return True
-                                # REMOVED_SYNTAX_ERROR: except Exception:
-                                    # REMOVED_SYNTAX_ERROR: pass
+    # If health endpoint fails, try root endpoint
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
+            if response.status in [200, 404]:  # 404 is acceptable for root endpoint
+                logger.info(f"✅ {service_name} root endpoint accessible at {url}")
+                return True
+    except Exception:
+        pass
 
-                                    # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-                                    # REMOVED_SYNTAX_ERROR: return False
+    logger.warning(f"❌ {service_name} not available at {url}")
+    return False
 
-                                    # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
-                                    # Removed problematic line: @pytest.mark.asyncio
-                                    # Removed problematic line: async def test_cross_service_authentication_flow():
-                                        # REMOVED_SYNTAX_ERROR: '''Test complete authentication flow across all services.
+@pytest.mark.e2e
+@pytest.mark.asyncio
+async def test_cross_service_authentication_flow():
+    '''
+    Test complete authentication flow across all services.
+    
+    CRITICAL SECURITY TEST: This validates multi-service authentication security.
+    Uses REAL authentication without any mocks or bypasses.
+    '''
 
-                                        # REMOVED_SYNTAX_ERROR: This test should FAIL until cross-service authentication is properly implemented.
-                                        # REMOVED_SYNTAX_ERROR: '''
-
-                                        # Use IsolatedEnvironment for environment management as required by CLAUDE.md
-                                        # REMOVED_SYNTAX_ERROR: env = get_env()
-                                        # REMOVED_SYNTAX_ERROR: env.set("ENVIRONMENT", "test", "test_cross_service_authentication_flow")
-                                        # REMOVED_SYNTAX_ERROR: env.set("NETRA_ENVIRONMENT", "test", "test_cross_service_authentication_flow")
-
-                                        # Set correct service ports for real running services BEFORE harness initialization
-                                        # REMOVED_SYNTAX_ERROR: import os
-                                        # REMOVED_SYNTAX_ERROR: env.set("TEST_AUTH_PORT", "8082", "test_cross_service_authentication_flow")
-                                        # REMOVED_SYNTAX_ERROR: env.set("TEST_BACKEND_PORT", "8002", "test_cross_service_authentication_flow")
-
-                                        # Initialize test harness for real service integration
-                                        # REMOVED_SYNTAX_ERROR: harness = UnifiedE2ETestHarness()
-
-                                        # Use properly running dev services on standard ports
-                                        # REMOVED_SYNTAX_ERROR: auth_service_url = "http://localhost:8081"  # Dev auth service on standard port
-                                        # REMOVED_SYNTAX_ERROR: backend_service_url = "http://localhost:8000"  # Dev backend service on standard port
-                                        # REMOVED_SYNTAX_ERROR: frontend_service_url = "http://localhost:3000"
-
-                                        # Debug: print actual URLs being used
-                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
+    # Use IsolatedEnvironment for environment management as required by CLAUDE.md
+    env = get_env()
+    env.set("ENVIRONMENT", "test", "test_cross_service_authentication_flow")
+    env.set("NETRA_ENVIRONMENT", "test", "test_cross_service_authentication_flow")
+    
+    # CRITICAL: Use SSOT E2E Auth Helper - NO MOCKS ALLOWED
+    auth_helper = E2EAuthHelper(environment="test")
+    websocket_helper = E2EWebSocketAuthHelper(environment="test")
+    
+    # Use properly running dev services on standard ports
+    auth_service_url = "http://localhost:8081"  # Dev auth service on standard port
+    backend_service_url = "http://localhost:8000"  # Dev backend service on standard port
+    frontend_service_url = "http://localhost:3000"
+    
+    # Debug: print actual URLs being used
+    print(f"🔧 Auth Service URL: {auth_service_url}")
+    print(f"🔧 Backend Service URL: {backend_service_url}")
+    print(f"🔧 Frontend Service URL: {frontend_service_url}")
 
                                         # Test user credentials
                                         # REMOVED_SYNTAX_ERROR: test_user = { )
@@ -512,5 +504,5 @@
                                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: await harness.cleanup()
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                                                                                                                                                                                                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

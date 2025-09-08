@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>SSOT.DuplicateAgentRegistryViolationFix</name>
+        <type>SSOT-Regression-Prevention</type>
+        <version>1.0</version>
+        <created>2025-09-08</created>
+        <description>Critical SSOT violation fix - duplicate agent registry implementation removed</description>
+    </metadata>
+
+    <violation-discovered>
+        <title>Duplicate Agent Registry SSOT Violation</title>
+        <location>netra_backend/app/agents/agent_registry.py</location>
+        <severity>CRITICAL</severity>
+        <violation-type>SSOT_DUPLICATE_IMPLEMENTATION</violation-type>
+        
+        <problem-description>
+            Someone created a "simple" duplicate agent registry implementation that bypassed the established SSOT architecture:
+            
+            1. **Duplicate Implementation**: Created basic AgentRegistry class with dictionary storage
+            2. **Anti-Pattern**: Implemented global singleton pattern (lines 59-67)  
+            3. **Missing Architecture**: No user isolation, WebSocket integration, or validation
+            4. **SSOT Bypass**: Ignored existing UniversalRegistry SSOT in universal_registry.py
+            5. **Multi-User Violation**: No UserAgentSession or factory patterns for isolation
+            
+            This violated the fundamental CLAUDE.MD principle: "CREATION OF 'SIMPLE' OR 'STANDALONE' ETC. TYPE FILES IS STRICTLY FORBIDDEN"
+        </problem-description>
+        
+        <business-impact>
+            - **Chat Value Loss**: Missing WebSocket integration breaks real-time agent notifications
+            - **Multi-User Failure**: No user isolation causes cross-contamination in concurrent execution
+            - **System Fragmentation**: Duplicate patterns increase complexity and maintenance burden
+            - **Security Risk**: Global singletons violate factory-based isolation requirements
+        </business-impact>
+    </violation-discovered>
+
+    <ssot-architecture>
+        <title>Proper SSOT Agent Registry Architecture</title>
+        <canonical-implementation>netra_backend/app/core/registry/universal_registry.py</canonical-implementation>
+        <extension-point>netra_backend/app/agents/supervisor/agent_registry.py</extension-point>
+        
+        <correct-pattern>
+            <base-registry>
+                <class>AgentRegistry(UniversalRegistry['BaseAgent'])</class>
+                <location>universal_registry.py:524-558</location>
+                <features>
+                    - WebSocket manager integration
+                    - Agent-specific validation  
+                    - Automatic WebSocket bridge setup
+                    - Tool dispatcher enhancement
+                </features>
+            </base-registry>
+            
+            <enhanced-registry>
+                <class>AgentRegistry(UniversalAgentRegistry)</class>
+                <location>agents/supervisor/agent_registry.py:247+</location>
+                <features>
+                    - User isolation with UserAgentSession
+                    - Factory-based patterns  
+                    - Memory leak prevention
+                    - Thread-safe concurrent execution
+                    - WebSocket bridge per user session
+                </features>
+            </enhanced-registry>
+        </correct-pattern>
+        
+        <proper-import-usage>
+            <global-registry>from netra_backend.app.core.registry.universal_registry import get_global_registry</global-registry>
+            <usage>agent_registry = get_global_registry('agent')</usage>
+            <enhanced-factory>from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry</enhanced-factory>
+        </proper-import-usage>
+    </ssot-architecture>
+
+    <fix-implementation>
+        <title>SSOT Violation Remediation</title>
+        
+        <step id="1" action="DELETE_DUPLICATE">
+            <description>Remove duplicate agent_registry.py file</description>
+            <command>rm netra_backend/app/agents/agent_registry.py</command>
+            <rationale>Eliminate SSOT violation source</rationale>
+        </step>
+        
+        <step id="2" action="FIX_IMPORTS">
+            <description>Redirect imports to SSOT implementation</description>
+            <changes>
+                <file>netra_backend/app/monitoring/staging_health_monitor.py:110</file>
+                <old>from netra_backend.app.agents.agent_registry import agent_registry</old>
+                <new>from netra_backend.app.core.registry.universal_registry import get_global_registry</new>
+                <usage>agent_registry = get_global_registry('agent')</usage>
+                
+                <file>netra_backend/tests/e2e/websocket_core/test_websocket_agent_communication_e2e.py:32</file>
+                <old>from netra_backend.app.agents.agent_registry import get_agent_registry</old>
+                <new>from netra_backend.app.core.registry.universal_registry import get_global_registry</new>
+            </changes>
+        </step>
+        
+        <step id="3" action="VALIDATE_MIGRATION">
+            <description>Verify SSOT migration works correctly</description>
+            <validation-command>python -c "from netra_backend.app.core.registry.universal_registry import get_global_registry; print(get_global_registry('agent'))"</validation-command>
+            <expected-output>Registry type: AgentRegistry, Registry name: AgentRegistry</expected-output>
+        </step>
+    </fix-implementation>
+
+    <prevention-measures>
+        <title>SSOT Violation Prevention</title>
+        
+        <detection-patterns>
+            <pattern>Looking for files with "simple", "standalone", "basic" in comments</pattern>
+            <pattern>Global singleton patterns (_instance variables)</pattern>
+            <pattern>Duplicate class names (AgentRegistry, ToolRegistry, etc.)</pattern>
+            <pattern>Dictionary-based storage without validation frameworks</pattern>
+            <pattern>Missing user context or isolation patterns</pattern>
+        </detection-patterns>
+        
+        <mandatory-checks>
+            <check>Before creating any Registry class, search for existing implementations</check>
+            <check>All registry patterns must extend UniversalRegistry or approved SSOT base</check>
+            <check>User isolation patterns mandatory for multi-user system components</check>
+            <check>WebSocket integration required for agent-related registries</check>
+            <check>Factory patterns preferred over global singletons</check>
+        </mandatory-checks>
+        
+        <code-review-flags>
+            <flag>Any new file in agents/ directory without SSOT compliance review</flag>
+            <flag>Import patterns bypassing established SSOT implementations</flag>
+            <flag>Missing references to UniversalRegistry in registry classes</flag>
+            <flag>Global variables with _instance naming patterns</flag>
+        </code-review-flags>
+    </prevention-measures>
+
+    <regression-prevention>
+        <title>Future Regression Prevention</title>
+        
+        <automated-detection>
+            <script>scripts/detect_ssot_violations.py</script>
+            <checks>
+                - Scan for duplicate class names across services
+                - Detect global singleton patterns
+                - Validate registry inheritance chains
+                - Check for missing SSOT imports
+            </checks>
+        </automated-detection>
+        
+        <education-points>
+            <point>CLAUDE.MD principle: "SEARCH FIRST, CREATE SECOND" - always check existing implementations</point>
+            <point>Multi-user system requires factory patterns, not global singletons</point>
+            <point>WebSocket integration mandatory for chat value delivery</point>
+            <point>SSOT violations cause cascade failures across system</point>
+        </education-points>
+        
+        <architectural-guidance>
+            <principle>Extend existing SSOT implementations rather than creating new ones</principle>
+            <principle>User isolation patterns mandatory for all agent-related components</principle>
+            <principle>Factory-based creation preferred over global state</principle>
+            <principle>WebSocket integration required for real-time business value</principle>
+        </architectural-guidance>
+    </regression-prevention>
+
+    <business-value-recovered>
+        <chat-functionality>
+            <restored>Real-time WebSocket agent notifications for chat interactions</restored>
+            <enabled>Proper user isolation for concurrent multi-user sessions</enabled>
+            <improved>System coherence through unified registry architecture</improved>
+        </chat-functionality>
+        
+        <system-stability>
+            <removed>Global singleton anti-patterns causing cross-user contamination</removed>
+            <implemented>Thread-safe concurrent execution patterns</implemented>
+            <reduced>Architectural complexity through SSOT consolidation</reduced>
+        </system-stability>
+    </business-value-recovered>
+</specification>

@@ -56,3 +56,57 @@ class ErrorSeverity(Enum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
+
+class ErrorCodeMap:
+    """Maps error codes to severity levels and HTTP status codes."""
+    
+    _ERROR_SEVERITY_MAP = {
+        # General errors
+        ErrorCode.INTERNAL_ERROR: ErrorSeverity.CRITICAL,
+        ErrorCode.CONFIGURATION_ERROR: ErrorSeverity.HIGH,
+        ErrorCode.VALIDATION_ERROR: ErrorSeverity.MEDIUM,
+        
+        # Authentication errors
+        ErrorCode.AUTHENTICATION_FAILED: ErrorSeverity.HIGH,
+        ErrorCode.AUTHORIZATION_FAILED: ErrorSeverity.HIGH,
+        ErrorCode.TOKEN_EXPIRED: ErrorSeverity.MEDIUM,
+        ErrorCode.TOKEN_INVALID: ErrorSeverity.MEDIUM,
+        ErrorCode.SECURITY_VIOLATION: ErrorSeverity.CRITICAL,
+        
+        # Database errors
+        ErrorCode.DATABASE_ERROR: ErrorSeverity.CRITICAL,
+        ErrorCode.DATABASE_CONNECTION_FAILED: ErrorSeverity.CRITICAL,
+        ErrorCode.DATABASE_QUERY_FAILED: ErrorSeverity.HIGH,
+        ErrorCode.DATABASE_CONSTRAINT_VIOLATION: ErrorSeverity.MEDIUM,
+        ErrorCode.RECORD_NOT_FOUND: ErrorSeverity.LOW,
+        ErrorCode.RECORD_ALREADY_EXISTS: ErrorSeverity.MEDIUM,
+        
+        # Service errors
+        ErrorCode.SERVICE_UNAVAILABLE: ErrorSeverity.HIGH,
+        ErrorCode.SERVICE_TIMEOUT: ErrorSeverity.MEDIUM,
+        ErrorCode.EXTERNAL_SERVICE_ERROR: ErrorSeverity.MEDIUM,
+        ErrorCode.HTTP_ERROR: ErrorSeverity.MEDIUM,
+        
+        # Agent/LLM errors
+        ErrorCode.AGENT_EXECUTION_FAILED: ErrorSeverity.HIGH,
+        ErrorCode.LLM_REQUEST_FAILED: ErrorSeverity.MEDIUM,
+        ErrorCode.LLM_RATE_LIMIT_EXCEEDED: ErrorSeverity.MEDIUM,
+        ErrorCode.AGENT_TIMEOUT: ErrorSeverity.MEDIUM,
+        
+        # WebSocket errors
+        ErrorCode.WEBSOCKET_CONNECTION_FAILED: ErrorSeverity.MEDIUM,
+        ErrorCode.WEBSOCKET_MESSAGE_INVALID: ErrorSeverity.LOW,
+        ErrorCode.WEBSOCKET_AUTHENTICATION_FAILED: ErrorSeverity.HIGH,
+        
+        # File/Data errors
+        ErrorCode.FILE_NOT_FOUND: ErrorSeverity.LOW,
+        ErrorCode.FILE_ACCESS_DENIED: ErrorSeverity.MEDIUM,
+        ErrorCode.DATA_PARSING_ERROR: ErrorSeverity.MEDIUM,
+        ErrorCode.DATA_VALIDATION_ERROR: ErrorSeverity.MEDIUM,
+    }
+    
+    @classmethod
+    def get_severity(cls, error_code: ErrorCode) -> ErrorSeverity:
+        """Get severity level for an error code."""
+        return cls._ERROR_SEVERITY_MAP.get(error_code, ErrorSeverity.MEDIUM)

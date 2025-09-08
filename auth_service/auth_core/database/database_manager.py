@@ -45,8 +45,13 @@ class AuthDatabaseManager:
         environment = env.get("ENVIRONMENT", "development").lower()
         
         if fast_test_mode:
-            logger.info("AUTH_FAST_TEST_MODE enabled - using in-memory SQLite database")
-            return "sqlite+aiosqlite:///:memory:"
+            logger.info("AUTH_FAST_TEST_MODE enabled - using file-based SQLite database for test isolation")
+            # Use a temporary file-based SQLite database to ensure shared state across sessions
+            import tempfile
+            import os
+            temp_dir = tempfile.gettempdir()
+            db_file = os.path.join(temp_dir, f"auth_service_test_{os.getpid()}.db")
+            return f"sqlite+aiosqlite:///{db_file}"
         
         logger.debug(f"AUTH_FAST_TEST_MODE={fast_test_mode}, ENVIRONMENT={environment}")
         

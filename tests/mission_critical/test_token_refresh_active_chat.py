@@ -22,6 +22,7 @@ import jwt
 import pytest
 import websockets
 from fastapi.testclient import TestClient
+from unittest.mock import patch, AsyncMock
 
 from netra_backend.app.auth_integration.auth import auth_client
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -193,7 +194,7 @@ class TestTokenRefreshDuringActiveChat:
             new_token = scenarios.create_refreshed_token(initial_token)
             
             # Update auth client with new token
-            with patch.object(auth_client, 'validate_token_jwt') as mock_validate:
+            with patch.object(auth_client, 'validate_token_jwt', new_callable=AsyncMock) as mock_validate:
                 mock_validate.return_value = {
                     "valid": True,
                     "user_id": "test_user_123",

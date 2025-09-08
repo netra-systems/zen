@@ -67,7 +67,7 @@ from netra_backend.app.services.message_processing import (
 )
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -100,7 +100,7 @@ class MessageHandlerService(IMessageHandlerService):
             return
         
         # Create isolated WebSocket manager for this user context
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         self.handler_base = MessageHandlerBase(websocket_manager)
         
         # CRITICAL FIX: Ensure thread association before agent processing
@@ -235,8 +235,13 @@ class MessageHandlerService(IMessageHandlerService):
             self._bridge_for_supervisor = bridge
                 
         except Exception as e:
-            logger.error(f"🚨 Error registering run-thread mapping: {e}")
-            # Continue execution even if registration fails
+            logger.critical(f"🚨 CRITICAL: Error registering run-thread mapping: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent events may be lost! User will not see AI working.")
+            logger.critical(f"🚨 Context: run_id={run.id}, thread_id={thread.id}, user_id={user_id[:8]}...")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            # Continue execution even if registration fails, but with loud warnings
         
         # Create UserExecutionContext for the new pattern
         from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -285,13 +290,24 @@ class MessageHandlerService(IMessageHandlerService):
                     delattr(self, '_bridge_for_supervisor')
                     
                 except Exception as emitter_error:
-                    logger.error(f"🚨 Failed to create user emitter: {emitter_error}")
+                    logger.critical(f"🚨 CRITICAL: Failed to create user emitter: {emitter_error}")
+                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: Real-time agent events will be lost!")
+                    logger.critical(f"🚨 Impact: Users will not see AI working on their problems")
+                    logger.critical(f"🚨 Context: run_id={run.id}, user_id={user_id[:8]}..., thread_id={thread.id}")
+                    # LOUD ERROR: Log stack trace for debugging
+                    import traceback
+                    logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
                     # Continue execution without WebSocket events rather than failing completely
                     if hasattr(self, '_bridge_for_supervisor'):
                         delattr(self, '_bridge_for_supervisor')
         except Exception as e:
-            logger.error(f"🚨 Failed to create UserExecutionContext: {e}")
-            logger.error(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            logger.critical(f"🚨 CRITICAL: Failed to create UserExecutionContext: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent execution cannot proceed!")
+            logger.critical(f"🚨 Impact: User request will fail completely")
+            logger.critical(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
             # Cleanup bridge reference on error
             if hasattr(self, '_bridge_for_supervisor'):
                 delattr(self, '_bridge_for_supervisor')
@@ -312,18 +328,23 @@ class MessageHandlerService(IMessageHandlerService):
             logger.info(f"📊 Result type: {type(result)}, has content: {result is not None}")
             return result
         except AttributeError as e:
-            logger.error(f"🚨 AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
-            logger.error(f"🚨 This likely means the supervisor is missing a required method")
-            logger.error(f"🚨 Supervisor type: {type(self.supervisor)}")
+            logger.critical(f"🚨 CRITICAL: AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent execution failed - supervisor missing required method")
+            logger.critical(f"🚨 Impact: User will receive no AI response")
+            logger.critical(f"🚨 Supervisor type: {type(self.supervisor)}")
+            logger.critical(f"🚨 Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
             raise
         except ValueError as e:
-            logger.error(f"🚨 ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
-            logger.error(f"🚨 This likely means UserExecutionContext validation failed")
-            logger.error(f"🚨 Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
+            logger.critical(f"🚨 CRITICAL: ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: UserExecutionContext validation failed")
+            logger.critical(f"🚨 Impact: User request cannot be processed")
+            logger.critical(f"🚨 Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
             raise
         except Exception as e:
-            logger.error(f"❌ SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
-            logger.error(f"❌ Exception type: {type(e).__name__}")
+            logger.critical(f"🚨 CRITICAL: SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Complete agent execution failure")
+            logger.critical(f"🚨 Impact: User will receive no AI response")
+            logger.critical(f"🚨 Exception type: {type(e).__name__}")
             raise
     
     async def _save_response(
@@ -365,13 +386,18 @@ class MessageHandlerService(IMessageHandlerService):
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
         
         # Create isolated WebSocket manager for this user context
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         self.handler_base = MessageHandlerBase(websocket_manager)
         
         # Don't process empty messages - prevents wasted agent resources
         if not text or not text.strip():
-            logger.warning(f"Empty message from {user_id}, not starting agent")
-            await websocket_manager.send_to_user({"type": "error", "message": "Please enter a message"})
+            logger.error(f"🚨 ERROR: Empty message from user {user_id[:8]}... - potential UI/frontend issue")
+            logger.error(f"🚨 BUSINESS VALUE IMPACT: User attempted to send empty request")
+            logger.error(f"🚨 This may indicate frontend validation failure or API misuse")
+            try:
+                await websocket_manager.send_to_user({"type": "error", "message": "Please enter a message"})
+            except Exception as send_error:
+                logger.critical(f"🚨 CRITICAL: Failed to send error message to user {user_id[:8]}...: {send_error}")
             return
         
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
@@ -413,7 +439,12 @@ class MessageHandlerService(IMessageHandlerService):
                 return None, None
             return await self._initialize_conversation(thread, text, references, user_id, db_session)
         except Exception as e:
-            logger.error(f"Error setting up thread/run: {e}")
+            logger.critical(f"🚨 CRITICAL: Error setting up thread/run for user {user_id[:8]}...: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User message processing cannot proceed")
+            logger.critical(f"🚨 Impact: User will receive no response to their message")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
             return None, None
     
     async def _get_validated_thread(
@@ -443,7 +474,10 @@ class MessageHandlerService(IMessageHandlerService):
         """Create new thread for user"""
         thread = await self.thread_service.get_or_create_thread(user_id, db_session)
         if not thread:
-            logger.warning(f"Could not get/create thread for user {user_id}")
+            logger.critical(f"🚨 CRITICAL: Could not get/create thread for user {user_id[:8]}...")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User cannot engage with system")
+            logger.critical(f"🚨 Impact: User will be unable to start conversations")
+            logger.critical(f"🚨 This is a DATABASE or SYSTEM FAILURE requiring immediate attention")
         return thread
     
     async def _initialize_conversation(
@@ -505,12 +539,12 @@ class MessageHandlerService(IMessageHandlerService):
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_thread_history message type"""
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         await _handle_thread_history(self.thread_service, user_context.user_id, db_session, websocket_manager)
     
     async def handle_stop_agent(self, user_context: UserExecutionContext) -> None:
         """Handle stop_agent message type"""
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         await _handle_stop_agent(user_context.user_id, websocket_manager)
     
     async def handle_switch_thread(
@@ -522,7 +556,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle switch_thread message type - join room AND load thread data"""
         user_id = user_context.user_id
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         
         thread_id = payload.get("thread_id")
         if not thread_id:
@@ -552,7 +586,12 @@ class MessageHandlerService(IMessageHandlerService):
                 await websocket_manager.send_to_user(thread_data)
                 logger.info(f"Sent {len(messages)} messages to user {user_id} for thread {thread_id}")
             except Exception as e:
-                logger.error(f"Error loading thread messages: {e}")
+                logger.error(f"🚨 ERROR: Error loading thread messages for user {user_id[:8]}..., thread {thread_id}: {e}")
+                logger.error(f"🚨 BUSINESS VALUE IMPACT: User cannot see conversation history")
+                logger.error(f"🚨 This degrades user experience - investigate database connectivity")
+                # LOUD ERROR: Log stack trace for debugging
+                import traceback
+                logger.error(f"🚨 Stack trace: {traceback.format_exc()}")
                 # Continue with thread switch even if message loading fails
         
         # Execute room switch (handled by isolated manager)
@@ -623,7 +662,7 @@ class MessageHandlerService(IMessageHandlerService):
         elif message_type == "example_message":
             await self.handle_example_message(user_context, payload, None)
         else:
-            websocket_manager = create_websocket_manager(user_context)
+            websocket_manager = await create_websocket_manager(user_context)
             await websocket_manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
 
     async def process_user_message(self, user_id: str, message: str, thread_id: str = None):
@@ -653,7 +692,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle get_conversation_history message type."""
         user_id = user_context.user_id
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         
         try:
             session_token = payload.get("session_token", user_id)
@@ -682,7 +721,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle get_agent_context message type."""
         user_id = user_context.user_id
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         
         try:
             session_token = payload.get("session_token", user_id)
@@ -779,7 +818,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle example_message message type."""
         user_id = user_context.user_id
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         
         try:
             logger.info(f"Processing example message for user {user_id}")

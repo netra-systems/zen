@@ -28,6 +28,11 @@ from abc import ABC, abstractmethod
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.async_test_helpers import (
+    async_cleanup_registry, 
+    AsyncTestFixtureMixin,
+    AsyncMockManager
+)
 
 
 @dataclass
@@ -58,6 +63,10 @@ class MockBaseAgent(ABC):
         self.capabilities = config.capabilities.copy()
         self.metadata = config.metadata.copy()
         self._execution_context = None
+        # Add concurrency support
+        self._active_executions = 0
+        self._max_concurrent = config.max_concurrent_executions
+        self._execution_lock = asyncio.Lock()
     
     @abstractmethod
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -80,106 +89,159 @@ class MockBaseAgent(ABC):
     
     def is_available(self) -> bool:
         """Check if agent is available for execution."""
-        return self.state == "ready"
+        return self.state == "ready" and self._active_executions < self._max_concurrent
+    
+    async def _acquire_execution_slot(self) -> bool:
+        """Acquire an execution slot if available."""
+        async with self._execution_lock:
+            if self._active_executions < self._max_concurrent:
+                self._active_executions += 1
+                return True
+            return False
+    
+    async def _release_execution_slot(self):
+        """Release an execution slot."""
+        async with self._execution_lock:
+            if self._active_executions > 0:
+                self._active_executions -= 1
 
 
 class MockAnalysisAgent(MockBaseAgent):
     """Mock analysis agent for testing."""
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Mock analysis execution."""
-        self.execution_count += 1
-        self.last_execution_time = time.time()
-        self.state = "executing"
+        """Mock analysis execution with proper concurrency support."""
+        # Acquire execution slot for concurrency control
+        slot_acquired = await self._acquire_execution_slot()
+        if not slot_acquired:
+            raise RuntimeError(f"Agent {self.agent_id} execution slot not available")
         
-        # Simulate analysis work
-        await asyncio.sleep(0.1)
-        
-        analysis_result = {
-            "agent_id": self.agent_id,
-            "agent_type": self.agent_type,
-            "analysis": {
-                "input_data": context.get("data", "no_data"),
-                "analysis_type": context.get("analysis_type", "default"),
-                "findings": ["finding_1", "finding_2"],
-                "confidence": 0.95,
-                "recommendations": ["recommendation_1"]
-            },
-            "execution_metadata": {
-                "execution_count": self.execution_count,
-                "execution_time": self.last_execution_time,
-                "processing_duration": 0.1
+        try:
+            # Track execution count and time
+            async with self._execution_lock:
+                self.execution_count += 1
+                execution_count = self.execution_count
+            
+            self.last_execution_time = time.time()
+            
+            # Simulate analysis work
+            await asyncio.sleep(0.1)
+            
+            analysis_result = {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type,
+                "analysis": {
+                    "input_data": context.get("data", "no_data"),
+                    "analysis_type": context.get("analysis_type", "default"),
+                    "findings": ["finding_1", "finding_2"],
+                    "confidence": 0.95,
+                    "recommendations": ["recommendation_1"]
+                },
+                "execution_metadata": {
+                    "execution_count": execution_count,
+                    "execution_time": self.last_execution_time,
+                    "processing_duration": 0.1,
+                    "concurrent_executions": self._active_executions
+                }
             }
-        }
-        
-        self.state = "ready"
-        return analysis_result
+            
+            return analysis_result
+            
+        finally:
+            # Always release the execution slot
+            await self._release_execution_slot()
 
 
 class MockOptimizationAgent(MockBaseAgent):
     """Mock optimization agent for testing."""
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Mock optimization execution."""
-        self.execution_count += 1
-        self.last_execution_time = time.time()
-        self.state = "executing"
+        """Mock optimization execution with proper concurrency support."""
+        # Acquire execution slot for concurrency control
+        slot_acquired = await self._acquire_execution_slot()
+        if not slot_acquired:
+            raise RuntimeError(f"Agent {self.agent_id} execution slot not available")
         
-        # Simulate optimization work
-        await asyncio.sleep(0.15)
-        
-        optimization_result = {
-            "agent_id": self.agent_id,
-            "agent_type": self.agent_type,
-            "optimization": {
-                "input_parameters": context.get("parameters", {}),
-                "optimization_type": context.get("optimization_type", "default"),
-                "optimized_values": {"param_1": 1.5, "param_2": 2.3},
-                "improvement_percentage": 15.7,
-                "iterations": 25
-            },
-            "execution_metadata": {
-                "execution_count": self.execution_count,
-                "execution_time": self.last_execution_time,
-                "processing_duration": 0.15
+        try:
+            # Track execution count and time
+            async with self._execution_lock:
+                self.execution_count += 1
+                execution_count = self.execution_count
+            
+            self.last_execution_time = time.time()
+            
+            # Simulate optimization work
+            await asyncio.sleep(0.15)
+            
+            optimization_result = {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type,
+                "optimization": {
+                    "input_parameters": context.get("parameters", {}),
+                    "optimization_type": context.get("optimization_type", "default"),
+                    "optimized_values": {"param_1": 1.5, "param_2": 2.3},
+                    "improvement_percentage": 15.7,
+                    "iterations": 25
+                },
+                "execution_metadata": {
+                    "execution_count": execution_count,
+                    "execution_time": self.last_execution_time,
+                    "processing_duration": 0.15,
+                    "concurrent_executions": self._active_executions
+                }
             }
-        }
-        
-        self.state = "ready"
-        return optimization_result
+            
+            return optimization_result
+            
+        finally:
+            # Always release the execution slot
+            await self._release_execution_slot()
 
 
 class MockReportingAgent(MockBaseAgent):
     """Mock reporting agent for testing."""
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Mock reporting execution."""
-        self.execution_count += 1
-        self.last_execution_time = time.time()
-        self.state = "executing"
+        """Mock reporting execution with proper concurrency support."""
+        # Acquire execution slot for concurrency control
+        slot_acquired = await self._acquire_execution_slot()
+        if not slot_acquired:
+            raise RuntimeError(f"Agent {self.agent_id} execution slot not available")
         
-        # Simulate report generation
-        await asyncio.sleep(0.05)
-        
-        report_result = {
-            "agent_id": self.agent_id,
-            "agent_type": self.agent_type,
-            "report": {
-                "report_type": context.get("report_type", "summary"),
-                "data_sources": context.get("data_sources", []),
-                "sections": ["executive_summary", "details", "recommendations"],
-                "format": context.get("format", "json"),
-                "generated_at": self.last_execution_time
-            },
-            "execution_metadata": {
-                "execution_count": self.execution_count,
-                "execution_time": self.last_execution_time,
-                "processing_duration": 0.05
+        try:
+            # Track execution count and time
+            async with self._execution_lock:
+                self.execution_count += 1
+                execution_count = self.execution_count
+            
+            self.last_execution_time = time.time()
+            
+            # Simulate report generation
+            await asyncio.sleep(0.05)
+            
+            report_result = {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type,
+                "report": {
+                    "report_type": context.get("report_type", "summary"),
+                    "data_sources": context.get("data_sources", []),
+                    "sections": ["executive_summary", "details", "recommendations"],
+                    "format": context.get("format", "json"),
+                    "generated_at": self.last_execution_time
+                },
+                "execution_metadata": {
+                    "execution_count": execution_count,
+                    "execution_time": self.last_execution_time,
+                    "processing_duration": 0.05,
+                    "concurrent_executions": self._active_executions
+                }
             }
-        }
-        
-        self.state = "ready"
-        return report_result
+            
+            return report_result
+            
+        finally:
+            # Always release the execution slot
+            await self._release_execution_slot()
 
 
 class MockAgentFactory:
@@ -281,26 +343,33 @@ class MockAgentRegistry:
         if not agent:
             raise ValueError(f"Agent {agent_id} not found")
         
-        if not agent.is_available():
-            raise RuntimeError(f"Agent {agent_id} not available")
+        # Check basic availability (not stopped)
+        if agent.state == "stopped":
+            raise RuntimeError(f"Agent {agent_id} is stopped")
         
-        # Execute the agent
+        # Execute the agent (it will handle its own concurrency slots)
         start_time = time.time()
-        result = await agent.execute(context)
-        execution_time = time.time() - start_time
-        
-        # Track execution history
-        execution_record = {
-            "agent_id": agent_id,
-            "agent_type": agent.agent_type,
-            "execution_time": start_time,
-            "duration": execution_time,
-            "context_keys": list(context.keys()),
-            "success": True
-        }
-        self.execution_history.append(execution_record)
-        
-        return result
+        success = False
+        try:
+            result = await agent.execute(context)
+            success = True
+            return result
+        except Exception as e:
+            success = False
+            raise e
+        finally:
+            execution_time = time.time() - start_time
+            
+            # Track execution history
+            execution_record = {
+                "agent_id": agent_id,
+                "agent_type": agent.agent_type,
+                "execution_time": start_time,
+                "duration": execution_time,
+                "context_keys": list(context.keys()),
+                "success": success
+            }
+            self.execution_history.append(execution_record)
     
     def get_registry_stats(self) -> Dict[str, Any]:
         """Get registry statistics."""
@@ -353,17 +422,21 @@ class MockWebSocketManager:
         return self.connected
 
 
-class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
+class TestAgentFactoryIntegrationOffline(SSotBaseTestCase, AsyncTestFixtureMixin):
     """Offline integration tests for agent factory and registry."""
 
     def setup_method(self, method=None):
         """Setup with mock agent components."""
         super().setup_method(method)
+        self.setup_async_resources()
         
         # Initialize mock components
         self.mock_factory = MockAgentFactory()
         self.mock_registry = MockAgentRegistry()
         self.mock_websocket = MockWebSocketManager()
+        
+        # Track the registry for async cleanup
+        self.track_mock_registry(self.mock_registry)
         
         # Register agent types in factory
         self.mock_factory.register_agent_type("analysis", MockAnalysisAgent)
@@ -372,12 +445,15 @@ class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
     
     def teardown_method(self, method=None):
         """Cleanup agent components."""
-        try:
-            # Cleanup all registered agents
-            for agent_id in list(self.mock_registry.agents.keys()):
-                asyncio.create_task(self.mock_registry.unregister_agent(agent_id))
-        finally:
-            super().teardown_method(method)
+        # Just call parent teardown - async cleanup handled by fixture
+        super().teardown_method(method)
+    
+    @pytest.fixture(autouse=True)
+    async def auto_cleanup_agents(self):
+        """Auto cleanup fixture that runs async cleanup after each test."""
+        yield
+        # Use the SSOT async cleanup helper
+        await self.cleanup_all_async_resources()
 
     @pytest.mark.integration
     async def test_agent_factory_creation_integration(self):
@@ -561,7 +637,8 @@ class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
         """
         # Create and register test agents
         analysis_config = MockAgentConfig("analysis_exec_001", "analysis", 
-                                        "Execution Test Analysis Agent")
+                                        "Execution Test Analysis Agent",
+                                        max_concurrent_executions=10)  # Support concurrent execution
         optimization_config = MockAgentConfig("optimization_exec_001", "optimization", 
                                             "Execution Test Optimization Agent")
         reporting_config = MockAgentConfig("reporting_exec_001", "reporting", 
@@ -825,7 +902,8 @@ class TestAgentFactoryIntegrationOffline(SSotBaseTestCase):
         """
         # Test Case 1: Full lifecycle for multiple agents
         lifecycle_configs = [
-            MockAgentConfig("lifecycle_analysis_001", "analysis", "Lifecycle Analysis Agent"),
+            MockAgentConfig("lifecycle_analysis_001", "analysis", "Lifecycle Analysis Agent", 
+                           max_concurrent_executions=5),  # Support concurrent execution
             MockAgentConfig("lifecycle_optimization_001", "optimization", "Lifecycle Optimization Agent"),
             MockAgentConfig("lifecycle_reporting_001", "reporting", "Lifecycle Reporting Agent")
         ]

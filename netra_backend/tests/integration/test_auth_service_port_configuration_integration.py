@@ -298,7 +298,7 @@ class TestAuthServicePortConfigurationIntegration(BaseIntegrationTest):
             websocket_manager = get_websocket_manager()
             
             # Mock authentication flow to test port usage
-            with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth_client:
+            with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_auth_client:
                 # Mock successful token validation
                 mock_auth_client.validate_token_jwt.return_value = {
                     "valid": True,

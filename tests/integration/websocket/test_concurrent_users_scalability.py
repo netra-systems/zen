@@ -137,7 +137,7 @@ class TestConcurrentUsersScalability(BaseIntegrationTest):
             timeout=30.0  # Longer timeout for scalability tests
         )
         
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
         self.user_sessions: Dict[str, Dict[str, Any]] = {}
         
         # Test environment readiness

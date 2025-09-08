@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio

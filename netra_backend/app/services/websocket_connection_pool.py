@@ -40,6 +40,18 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
+    """
+    try:
+        if hasattr(state, 'name') and hasattr(state, 'value'):
+            return str(state.name).lower()  # CONNECTED -> "connected"
+        return str(state)
+    except Exception:
+        return "<serialization_error>"
+
+
 @dataclass
 class ConnectionInfo:
     """Information about a WebSocket connection with security metadata."""
@@ -169,7 +181,7 @@ class WebSocketConnectionPool:
             
             # Validate WebSocket is in correct state
             if websocket.client_state != WebSocketState.CONNECTED:
-                logger.error(f"WebSocket not in connected state: {websocket.client_state}")
+                logger.error(f"WebSocket not in connected state: {_safe_websocket_state_for_logging(websocket.client_state)}")
                 return False
             
             # Create connection info

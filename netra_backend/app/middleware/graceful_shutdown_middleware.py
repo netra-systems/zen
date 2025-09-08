@@ -38,7 +38,8 @@ class GracefulShutdownMiddleware(BaseHTTPMiddleware):
             return await self._handle_shutdown_request(request)
         
         # Generate unique request ID
-        request_id = str(uuid.uuid4())[:8]
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("shutdown_req", random_suffix=True)[:12]  # Keep shortened format
         
         # Track request in shutdown manager
         async with self.shutdown_manager.request_context(request_id):

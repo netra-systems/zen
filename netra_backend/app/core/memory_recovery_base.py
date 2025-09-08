@@ -75,3 +75,7 @@ class MemoryRecoveryStrategy(ABC):
     def get_priority(self) -> int:
         """Get strategy priority (lower = higher priority)."""
         pass
+
+
+# Alias for backward compatibility
+MemoryRecoveryBase = MemoryRecoveryStrategy

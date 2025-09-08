@@ -28,6 +28,7 @@ class IDType(Enum):
     EXECUTION = "execution"
     TRACE = "trace"
     METRIC = "metric"
+    THREAD = "thread"
 
 
 @dataclass
@@ -345,6 +346,26 @@ class UnifiedIDManager:
         result['valid'] = True
         
         return result
+    
+    @classmethod
+    def generate_thread_id(cls) -> str:
+        """
+        Generate a thread ID using class method pattern for compatibility.
+        
+        Returns:
+            Unique thread ID (without thread_ prefix to prevent double prefixing)
+        """
+        import uuid
+        import time
+        
+        # Generate unique thread ID components
+        uuid_part = str(uuid.uuid4())[:8]
+        timestamp = int(time.time() * 1000) % 100000  # Last 5 digits of timestamp
+        
+        # Return unprefixed ID - calling code will add thread_ prefix
+        thread_id = f"session_{timestamp}_{uuid_part}"
+        
+        return thread_id
 
 
 # Global ID manager instance
@@ -394,8 +415,72 @@ def generate_execution_id() -> str:
     return generate_id(IDType.EXECUTION)
 
 
+def generate_thread_id() -> str:
+    """Generate a thread ID"""
+    return generate_id(IDType.THREAD)
+
+
 def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:
     """Convenience function to validate ID"""
     return get_id_manager().is_valid_id(id_value, id_type)
+
+
+def is_valid_id_format(id_value: str) -> bool:
+    """
+    Validate ID format without requiring registration.
+    
+    Recognizes both UUID format and UnifiedIDManager structured format.
+    
+    Args:
+        id_value: ID to validate format
+        
+    Returns:
+        True if ID has valid format
+    """
+    if not id_value or not isinstance(id_value, str) or not id_value.strip():
+        return False
+    
+    # Try standard UUID format first
+    try:
+        uuid.UUID(id_value)
+        return True
+    except ValueError:
+        pass
+    
+    # Check UnifiedIDManager structured format: [prefix_]idtype_counter_uuid8
+    parts = id_value.split('_')
+    if len(parts) >= 3:
+        # Extract the UUID part (last 8 characters should be hex)
+        uuid_part = parts[-1]
+        if len(uuid_part) == 8 and all(c in '0123456789abcdefABCDEF' for c in uuid_part):
+            # Check if counter part is numeric (can be one or two parts back)
+            counter_part = parts[-2]
+            if counter_part.isdigit():
+                # For complex IDs, check if we have known prefixes or patterns
+                has_known_prefix = False
+                
+                # Check for known prefixes
+                if parts[0] in {'req', 'run', 'thread'}:
+                    has_known_prefix = True
+                
+                # Check for valid ID types anywhere in the parts
+                valid_id_types = {id_type.value for id_type in IDType}
+                for part in parts[:-2]:  # Exclude counter and uuid parts
+                    if part in valid_id_types:
+                        has_known_prefix = True
+                        break
+                
+                # Also allow compound patterns like 'websocket_factory'
+                compound_patterns = ['websocket_factory', 'websocket_manager', 'agent_executor']
+                id_without_counters = '_'.join(parts[:-2])
+                for pattern in compound_patterns:
+                    if pattern in id_without_counters:
+                        has_known_prefix = True
+                        break
+                
+                if has_known_prefix:
+                    return True
+    
+    return False
 
 

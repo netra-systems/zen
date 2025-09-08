@@ -70,8 +70,8 @@ class TestColdStartCriticalIssues:
                 connect_timeout=5
             )
         except psycopg2.OperationalError as e:
-            pytest.skip(f"Test database not available: {e}")
-            return
+            # CLAUDE.md: TESTS MUST RAISE ERRORS - No skipping for critical system functionality
+            raise AssertionError(f"Test database must be available for E2E cold start validation: {e}") from e
         cursor = conn.cursor()
         cursor.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
         conn.commit()
@@ -260,12 +260,14 @@ class TestColdStartCriticalIssues:
             "Host": "localhost:8000"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers
             ) as ws:
-                pass
+                # CLAUDE.md: E2E tests must attempt real operations, not just pass
+                # This should fail due to 403 auth error - connection attempt validates the error occurs
+                await ws.send(json.dumps({"type": "test", "data": "unauthorized_attempt"}))
                 
         assert exc_info.value.status_code == 403
 
@@ -284,12 +286,14 @@ class TestColdStartCriticalIssues:
             "Authorization": f"Bearer {token}"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers
             ) as ws:
-                pass
+                # CLAUDE.md: E2E tests must attempt real operations, not just pass
+                # This should fail due to 403 auth error - connection attempt validates the error occurs
+                await ws.send(json.dumps({"type": "test", "data": "unauthorized_attempt"}))
                 
         assert exc_info.value.status_code == 403
 
@@ -504,12 +508,18 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
-        # Create required dependencies
-        db_session = AsyncNone  # TODO: Use real service instead of Mock
+        # CLAUDE.md: E2E tests MUST use real services - No mocks/fakes allowed
+        # Create real service dependencies for E2E testing
+        from netra_backend.app.db.database_manager import DatabaseManager
+        from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+        from netra_backend.app.tools.dispatcher import ToolDispatcher
+        
         config = get_config()
+        database_manager = DatabaseManager(config)
+        db_session = await database_manager.get_session()
         llm_manager = LLMManager(config)
-        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
-        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
+        websocket_manager = WebSocketManagerFactory.create_manager()
+        tool_dispatcher = ToolDispatcher(config)
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
@@ -548,12 +558,18 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
-        # Create required dependencies
-        db_session = AsyncNone  # TODO: Use real service instead of Mock
+        # CLAUDE.md: E2E tests MUST use real services - No mocks/fakes allowed
+        # Create real service dependencies for E2E testing
+        from netra_backend.app.db.database_manager import DatabaseManager
+        from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+        from netra_backend.app.tools.dispatcher import ToolDispatcher
+        
         config = get_config()
+        database_manager = DatabaseManager(config)
+        db_session = await database_manager.get_session()
         llm_manager = LLMManager(config)
-        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
-        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
+        websocket_manager = WebSocketManagerFactory.create_manager()
+        tool_dispatcher = ToolDispatcher(config)
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         

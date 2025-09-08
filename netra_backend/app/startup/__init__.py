@@ -7,7 +7,7 @@ Addresses GAP-001 (CRITICAL) and GAP-005 (MEDIUM) from startup_coverage.xml.
 
 from netra_backend.app.startup.error_aggregator import ErrorAggregator, error_aggregator
 from netra_backend.app.startup.migration_models import FailedMigration, MigrationState
-from netra_backend.app.startup.migration_state_manager import MigrationStateManager
+# from netra_backend.app.startup.migration_state_manager import MigrationStateManager  # Module not found
 from netra_backend.app.startup.migration_tracker import MigrationTracker
 from netra_backend.app.startup.status_manager import (
     StartupStatusManager,
@@ -15,6 +15,6 @@ from netra_backend.app.startup.status_manager import (
 )
 
 __all__ = [
-    "MigrationTracker", "FailedMigration", "MigrationState", "MigrationStateManager",
+    "MigrationTracker", "FailedMigration", "MigrationState",  # "MigrationStateManager",
     "ErrorAggregator", "error_aggregator", "StartupStatusManager", "startup_status_manager"
 ]

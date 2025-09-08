@@ -68,6 +68,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 import uuid
 from dataclasses import dataclass
+from netra_backend.app.logging_config import central_logger
 
 # SSOT imports - absolute paths required per CLAUDE.md
 from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager, get_db_session
@@ -83,8 +84,8 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.startup_module import initialize_backend_services
-from netra_backend.app.dependencies import get_current_user
+from netra_backend.app.startup_module import run_complete_startup
+# Dependencies not needed for integration tests
 from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message
@@ -1060,12 +1061,12 @@ class TestBackendServiceIntegrationComprehensive(BaseIntegrationTest):
         """
         async with self._create_test_environment() as env:
             # Test service initialization process
-            with patch('netra_backend.app.startup_module.initialize_backend_services') as mock_init:
-                mock_init.return_value = True
+            with patch('netra_backend.app.startup_module.run_complete_startup') as mock_init:
+                mock_init.return_value = (0.0, central_logger.get_logger(__name__))
                 
                 # Test startup sequence
-                startup_result = await initialize_backend_services()
-                assert startup_result == True, "Backend service initialization failed"
+                startup_result = await run_complete_startup(None)
+                assert startup_result is not None, "Backend service initialization failed"
                 mock_init.assert_called_once()
             
             # Test individual service initialization

@@ -37,7 +37,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 
@@ -337,7 +337,7 @@ class ConnectionHandler:
             "events_received": self.context.events_received,
             "events_sent": self.context.events_sent, 
             "events_filtered": self.context.events_filtered,
-            "connection_state": str(self.context.websocket.client_state)
+            "connection_state": self.context.websocket.client_state.name
         }
     
     async def cleanup(self):

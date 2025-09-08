@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning xmlns="urn:netra:architecture:learning" 
+         id="context-creation-vs-getter-pattern-fix-20250908"
+         severity="CRITICAL"
+         category="session-management">
+  <metadata>
+    <title>Context Creation vs Getter Pattern - Critical Session Continuity Fix</title>
+    <created_date>2025-09-08</created_date>
+    <business_impact>CRITICAL - Breaks conversation continuity, causes memory leaks</business_impact>
+    <cross_reference>
+      <related_files>
+        <file>netra_backend/app/dependencies.py</file>
+        <file>netra_backend/app/websocket_core/agent_handler.py</file>
+        <file>netra_backend/app/services/websocket/quality_*.py</file>
+        <file>shared/id_generation/unified_id_generator.py</file>
+      </related_files>
+      <related_specs>
+        <spec>SPEC/learnings/ssot_consolidation_20250825.xml</spec>
+        <spec>SPEC/learnings/websocket_agent_integration_critical.xml</spec>
+      </related_specs>
+      <related_reports>
+        <report>reports/architecture/CONTEXT_FACTORY_VS_GETTER_ANALYSIS.md</report>
+        <report>reports/architecture/CONTEXT_CREATION_ARCHITECTURE_ANALYSIS.md</report>
+        <report>reports/architecture/RUN_ID_SESSION_BEHAVIOR_GUIDE.md</report>
+      </related_reports>
+    </cross_reference>
+  </metadata>
+
+  <problem_statement>
+    <root_cause>
+      System incorrectly uses create_user_execution_context() everywhere instead of 
+      get_user_execution_context(), and even when using get_user_execution_context(),
+      passes newly generated IDs instead of existing request context IDs.
+    </root_cause>
+    
+    <manifestation>
+      1. Always creates new contexts instead of reusing existing sessions
+      2. Generates new thread_id/run_id when calling get_user_execution_context()
+      3. Breaks conversation continuity across WebSocket messages
+      4. Causes memory leaks from abandoned session contexts
+      5. Test files also incorrectly changed from create to get pattern
+    </manifestation>
+    
+    <business_impact>
+      - Users lose conversation context between agent interactions
+      - Memory consumption increases due to abandoned sessions
+      - Multi-turn conversations fail to maintain state
+      - Agent workflows restart instead of continuing
+    </business_impact>
+  </problem_statement>
+
+  <analysis>
+    <correct_patterns>
+      <pattern type="production_code">
+        <name>Session-Aware Context Retrieval</name>
+        <implementation>
+          ```python
+          # CORRECT: Use existing IDs from request context, allow None for missing
+          context = get_user_execution_context(
+              user_id=message.user_id,  # From request
+              thread_id=message.thread_id,  # From request or None
+              run_id=message.run_id  # From request or None  
+          )
+          ```
+        </implementation>
+        <rationale>
+          get_user_execution_context() uses UnifiedIdGenerator.get_or_create_user_session()
+          which maintains session continuity by reusing existing thread/run contexts.
+        </rationale>
+      </pattern>
+      
+      <pattern type="test_code">
+        <name>Test Context Creation</name>
+        <implementation>
+          ```python
+          # CORRECT: Tests create fresh contexts for isolation
+          def create_user_execution_context(self, ...):
+              # Always create new context for test isolation
+              return UserExecutionContext(...)
+          ```
+        </implementation>
+        <rationale>
+          Test methods should use create_user_execution_context() to ensure 
+          test isolation and predictable state.
+        </rationale>
+      </pattern>
+
+      <pattern type="single_entry_point">
+        <name>Initial Session Creation</name>
+        <implementation>
+          ```python
+          # ONLY at initial user session establishment (e.g., auth login)
+          context = create_user_execution_context(
+              user_id=user_id,
+              thread_id=None,  # Will be generated
+              run_id=None   # Will be generated
+          )
+          ```
+        </implementation>
+        <rationale>
+          Only the single entry point for new user sessions should use create_user_execution_context().
+        </rationale>
+      </pattern>
+    </correct_patterns>
+
+    <incorrect_patterns>
+      <anti_pattern type="generated_ids_in_getter">
+        <name>Generating IDs in Getter Calls</name>
+        <bad_implementation>
+          ```python
+          # WRONG: Defeats purpose of getter pattern
+          context = get_user_execution_context(
+              user_id=user_id,
+              thread_id=UnifiedIdGenerator.generate_base_id("thread"),  # WRONG!
+              run_id=UnifiedIdGenerator.generate_base_id("run")  # WRONG!
+          )
+          ```
+        </bad_implementation>
+        <why_wrong>
+          Generating new IDs breaks session continuity. The getter should receive
+          existing IDs or None to maintain conversation state.
+        </why_wrong>
+      </anti_pattern>
+
+      <anti_pattern type="always_create_pattern">
+        <name>Always Using create_user_execution_context</name>
+        <bad_implementation>
+          ```python
+          # WRONG: Always creates new contexts
+          context = create_user_execution_context(
+              user_id=user_id,
+              thread_id=existing_thread_id,
+              run_id=existing_run_id
+          )
+          ```
+        </bad_implementation>
+        <why_wrong>
+          create_user_execution_context() always creates new contexts, ignoring
+          existing session state and breaking conversation continuity.
+        </why_wrong>
+      </anti_pattern>
+
+      <anti_pattern type="test_using_getter">
+        <name>Tests Using get_user_execution_context</name>
+        <bad_implementation>
+          ```python
+          # WRONG: Tests should create, not get
+          def test_agent_execution(self):
+              context = get_user_execution_context(...)  # WRONG in tests!
+          ```
+        </bad_implementation>
+        <why_wrong>
+          Tests need isolated contexts. Using getter can cause cross-test 
+          contamination and unpredictable test behavior.
+        </why_wrong>
+      </anti_pattern>
+    </incorrect_patterns>
+  </analysis>
+
+  <solution>
+    <implementation_plan>
+      <step order="1">
+        <action>Identify all files incorrectly using create_user_execution_context in production</action>
+        <criteria>Non-test files that should maintain session continuity</criteria>
+      </step>
+      
+      <step order="2">
+        <action>Fix production files to use get_user_execution_context with existing request IDs</action>
+        <details>
+          - Pass thread_id/run_id from WebSocket message context
+          - Pass None for missing IDs, not generated ones
+          - Never generate new IDs when calling get_user_execution_context
+        </details>
+      </step>
+      
+      <step order="3">
+        <action>Revert test files back to create_user_execution_context pattern</action>
+        <criteria>Files in tests/ directories or with test_ prefixes</criteria>
+      </step>
+      
+      <step order="4">
+        <action>Identify legitimate single entry point for create_user_execution_context</action>
+        <criteria>Initial user authentication/session establishment</criteria>
+      </step>
+    </implementation_plan>
+
+    <validation_checklist>
+      <check>All WebSocket handlers use existing thread_id/run_id from message context</check>
+      <check>No calls to get_user_execution_context() generate new IDs</check>
+      <check>Test files use create_user_execution_context() for isolation</check>
+      <check>Production files use get_user_execution_context() for continuity</check>
+      <check>Single entry point identified and preserved</check>
+    </validation_checklist>
+  </solution>
+
+  <prevention>
+    <architectural_rule>
+      Production code: Use get_user_execution_context() with request context IDs
+      Test code: Use create_user_execution_context() for isolation
+      Entry points: Single create_user_execution_context() per user session
+    </architectural_rule>
+    
+    <code_review_guidelines>
+      - Flag any get_user_execution_context() calls with UnifiedIdGenerator.generate_base_id()
+      - Ensure test methods use create_user_execution_context()
+      - Verify production code preserves existing thread_id/run_id
+    </code_review_guidelines>
+  </prevention>
+</learning>

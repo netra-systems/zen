@@ -118,10 +118,10 @@ class TestUnifiedDataAgent:
     def user_context(self):
         """Create test user context."""
         return UserExecutionContext(
-            user_id="test_user",
-            request_id="test_request",
-            thread_id="test_thread",
-            run_id="test_run"
+            user_id="user_12345_data_agent_test",
+            request_id="req_12345_data_agent_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test"
         )
     
     @pytest.fixture
@@ -133,7 +133,7 @@ class TestUnifiedDataAgent:
     def test_agent_initialization(self, agent, user_context):
         """Test agent initializes with correct context."""
         assert agent.context == user_context
-        assert agent.agent_id == "test_user_test_request"
+        assert agent.agent_id == "user_12345_data_agent_test_req_12345_data_agent_test"
         assert len(agent.strategies) == 5
         assert 'performance' in agent.strategies
         assert 'anomaly' in agent.strategies
@@ -144,24 +144,24 @@ class TestUnifiedDataAgent:
     def test_extract_analysis_type(self):
         """Test analysis type extraction from context."""
         # Test with metadata
-        context1 = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_request",
-            thread_id="test_thread",
-            run_id="test_run",
-            metadata={'analysis_type': 'anomaly'}
+        context1 = UserExecutionContext.from_request(
+            user_id="user_12345_data_agent_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test",
+            request_id="req_12345_data_agent_test",
+            agent_context={'analysis_type': 'anomaly'}
         )
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             agent1 = UnifiedDataAgent(context=context1)
             assert agent1._extract_analysis_type(context1) == 'anomaly'
         
         # Test with metadata analysis_type
-        context2 = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_request2",
-            thread_id="test_thread",
-            run_id="test_run2",
-            metadata={'analysis_type': 'correlation'}
+        context2 = UserExecutionContext.from_request(
+            user_id="user_12345_data_agent_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test2",
+            request_id="req_12345_data_agent_test2",
+            agent_context={'analysis_type': 'correlation'}
         )
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             agent2 = UnifiedDataAgent(context=context2)
@@ -169,10 +169,10 @@ class TestUnifiedDataAgent:
         
         # Test default
         context3 = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_request3",
-            thread_id="test_thread",
-            run_id="test_run3"
+            user_id="user_12345_data_agent_test",
+            request_id="req_12345_data_agent_test3",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test3"
         )
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             agent3 = UnifiedDataAgent(context=context3)
@@ -228,8 +228,8 @@ class TestUnifiedDataAgent:
         # Create context with WebSocket manager - UserExecutionContext is frozen, so use dict for testing
         class MockContext:
             def __init__(self):
-                self.user_id = "test_user"
-                self.request_id = "test_request"
+                self.user_id = "user_12345_data_agent_test"
+                self.request_id = "req_12345_data_agent_test"
                 self.websocket_manager = mock_ws_manager
         
         context = MockContext()
@@ -237,23 +237,23 @@ class TestUnifiedDataAgent:
         # Create agent
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):
             agent = UnifiedDataAgent(context=UserExecutionContext(
-                user_id="test_user",
-                request_id="test_request",
-                thread_id="test_thread",
-                run_id="test_run"
+                user_id="user_12345_data_agent_test",
+                request_id="req_12345_data_agent_test",
+                thread_id="thread_12345_data_agent_test",
+                run_id="run_12345_data_agent_test"
             ))
         
         # Emit event
         await agent._emit_websocket_event(
             context,
             "agent_started",
-            {"run_id": "test_run", "agent_name": "UnifiedDataAgent"}
+            {"run_id": "run_12345_data_agent_test", "agent_name": "UnifiedDataAgent"}
         )
         
         # Verify event sent
         mock_ws_manager.send_event.assert_called_once_with(
             "agent_started",
-            {"run_id": "test_run", "agent_name": "UnifiedDataAgent"}
+            {"run_id": "run_12345_data_agent_test", "agent_name": "UnifiedDataAgent"}
         )
     
     @pytest.mark.asyncio
@@ -389,12 +389,12 @@ class TestUnifiedDataAgentExecution:
     
     async def test_execute_performance_analysis(self):
         """Test full execution with performance analysis."""
-        context = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_req_perf",
-            thread_id="test_thread",
-            run_id="test_run_perf",
-            metadata={
+        context = UserExecutionContext.from_request(
+            user_id="user_12345_data_agent_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test_perf",
+            request_id="req_12345_perf_data_agent",
+            agent_context={
                 "analysis_type": "performance",
                 "timeframe": "24h"
             }
@@ -420,11 +420,11 @@ class TestUnifiedDataAgentExecution:
     async def test_execute_with_websocket_events(self):
         """Test execution emits all required WebSocket events."""
         context = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_req_ws",
-            thread_id="test_thread",
-            run_id="test_run_ws",
-            websocket_client_id="test_ws_connection"
+            user_id="user_12345_data_agent_test",
+            request_id="req_12345_websocket_events_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test_ws",
+            websocket_client_id="ws_conn_12345_test"
         )
         
         # Mock WebSocket manager (this should be patched at the agent level)
@@ -455,10 +455,10 @@ class TestUnifiedDataAgentExecution:
     async def test_execute_error_handling(self):
         """Test execution handles errors gracefully."""
         context = UserExecutionContext(
-            user_id="test_user",
-            request_id="test_req_error",
-            thread_id="test_thread",
-            run_id="test_run_error"
+            user_id="user_12345_data_agent_test",
+            request_id="req_12345_error_handling_test",
+            thread_id="thread_12345_data_agent_test",
+            run_id="run_12345_data_agent_test_error"
         )
         
         with patch('netra_backend.app.agents.data.unified_data_agent.DataAccessCapabilities'):

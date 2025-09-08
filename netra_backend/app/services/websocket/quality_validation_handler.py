@@ -13,6 +13,7 @@ from netra_backend.app.services.quality_gate_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
@@ -32,6 +33,10 @@ class QualityValidationHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle content validation request."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             validation_params = self._extract_validation_params(payload)
             result = await self._validate_content_with_params(user_id, validation_params)
             await self._send_validation_result(user_id, result)
@@ -82,8 +87,13 @@ class QualityValidationHandler(BaseMessageHandler):
     async def _send_validation_result(self, user_id: str, result) -> None:
         """Send validation result to user."""
         message = self._build_validation_message(result)
-        user_context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(user_context)
+        # ✅ CORRECT - Maintains session continuity
+        user_context = get_user_execution_context(
+            user_id=user_id,
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
+        )
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     def _build_validation_message(self, result) -> Dict[str, Any]:
@@ -98,8 +108,13 @@ class QualityValidationHandler(BaseMessageHandler):
         logger.error(f"Error validating content: {str(error)}")
         error_message = f"Failed to validate content: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send validation error to user {user_id}: {e}")

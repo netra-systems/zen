@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naming_conventions>
+  <metadata>
+    <created>2025-09-08</created>
+    <purpose>Define business-focused naming conventions to replace confusing "Manager" terminology</purpose>
+    <scope>All future classes, especially SSOT implementations</scope>
+    <rationale>Clear names reduce cognitive load and immediately convey business purpose</rationale>
+    <references>
+      <reference>reports/architecture/MANAGER_RENAMING_PLAN_20250908.md</reference>
+      <reference>reports/architecture/MANAGER_RENAMING_IMPLEMENTATION_PLAN.md</reference>
+    </references>
+  </metadata>
+
+  <core_principles>
+    <principle id="business_function_first">
+      <name>Business Function First</name>
+      <description>Class names should immediately convey the business function, not implementation details</description>
+      <examples>
+        <good>RealtimeCommunications, SecurityVault, PolicyEngine</good>
+        <bad>CommunicationsManager, SecurityManager, PolicyManager</bad>
+      </examples>
+    </principle>
+    
+    <principle id="domain_clarity">
+      <name>Domain Clarity</name>
+      <description>Names should clearly indicate the business domain they serve</description>
+      <examples>
+        <good>PlatformConfiguration, ApplicationState, SystemLifecycle</good>
+        <bad>ConfigManager, StateHandler, LifecycleController</bad>
+      </examples>
+    </principle>
+    
+    <principle id="ssot_naming">
+      <name>SSOT Naming Clarity</name>
+      <description>SSOT classes should be named after their domain, not their pattern</description>
+      <examples>
+        <good>ApplicationState, DataAccess, SecurityVault</good>
+        <bad>UnifiedStateManager, DatabaseManager, SecretsManager</bad>
+      </examples>
+    </principle>
+    
+    <principle id="api_readability">
+      <name>API Readability</name>
+      <description>Class names should work well in method calls and variable names</description>
+      <examples>
+        <good>configuration.get(), state.set(), communications.send()</good>
+        <bad>config_manager.get(), state_manager.set(), comms_manager.send()</bad>
+      </examples>
+    </principle>
+  </core_principles>
+
+  <naming_patterns>
+    <pattern id="infrastructure_ssot">
+      <name>Infrastructure SSOT Classes</name>
+      <description>Central infrastructure classes that are SSOT for their domain</description>
+      <naming_rules>
+        <rule>Use domain name directly: Configuration, State, Lifecycle</rule>
+        <rule>Add scope qualifier if needed: PlatformConfiguration, ApplicationState</rule>
+        <rule>Avoid "Manager", "Handler", "Controller" suffixes</rule>
+      </naming_rules>
+      <examples>
+        <example domain="Configuration">
+          <current>UnifiedConfigurationManager</current>
+          <new>PlatformConfiguration</new>
+          <rationale>This IS the platform's configuration system</rationale>
+        </example>
+        <example domain="State">
+          <current>UnifiedStateManager</current>
+          <new>ApplicationState</new>
+          <rationale>This IS the application's state store</rationale>
+        </example>
+        <example domain="Lifecycle">
+          <current>UnifiedLifecycleManager</current>
+          <new>SystemLifecycle</new>
+          <rationale>This IS the system's lifecycle controller</rationale>
+        </example>
+      </examples>
+    </pattern>
+
+    <pattern id="communication_classes">
+      <name>Communication Classes</name>
+      <description>Classes handling communication, messaging, and real-time features</description>
+      <naming_rules>
+        <rule>Use communication type: RealtimeCommunications, MessageBroker</rule>
+        <rule>Be specific about protocol: WebSocketCommunications, HTTPClient</rule>
+        <rule>Emphasize business function: RealtimeCommunications over WebSocketManager</rule>
+      </naming_rules>
+      <examples>
+        <example domain="WebSocket">
+          <current>UnifiedWebSocketManager</current>
+          <new>RealtimeCommunications</new>
+          <rationale>Emphasizes business value (real-time) over protocol (WebSocket)</rationale>
+        </example>
+        <example domain="Messaging">
+          <current>MessageManager</current>
+          <new>MessageBroker</new>
+          <rationale>Broker clearly indicates message routing functionality</rationale>
+        </example>
+      </examples>
+    </pattern>
+
+    <pattern id="data_access_classes">
+      <name>Data Access Classes</name>
+      <description>Classes handling data operations, database connections, and persistence</description>
+      <naming_rules>
+        <rule>Use access pattern: DataAccess, DatabaseConnectivity</rule>
+        <rule>Be specific about data type: UserData, ConfigurationData</rule>
+        <rule>Avoid generic "Manager" suffix</rule>
+      </naming_rules>
+      <examples>
+        <example domain="Database">
+          <current>DatabaseManager</current>
+          <new>DataAccess</new>
+          <rationale>Emphasizes what it provides (data access) not what it manages</rationale>
+        </example>
+        <example domain="Cache">
+          <current>CacheManager</current>
+          <new>DataCache</new>
+          <rationale>Clearly indicates caching functionality</rationale>
+        </example>
+      </examples>
+    </pattern>
+
+    <pattern id="security_classes">
+      <name>Security Classes</name>
+      <description>Classes handling security, authentication, authorization, and secrets</description>
+      <naming_rules>
+        <rule>Use security metaphors: Vault, Guard, Shield</rule>
+        <rule>Be specific about security function: AuthenticationService, SecurityVault</rule>
+        <rule>Emphasize protection aspect: SecretVault over SecretsManager</rule>
+      </naming_rules>
+      <examples>
+        <example domain="Secrets">
+          <current>UnifiedSecretsManager</current>
+          <new>SecurityVault</new>
+          <rationale>Vault metaphor clearly indicates secure storage</rationale>
+        </example>
+        <example domain="Authentication">
+          <current>AuthManager</current>
+          <new>AuthenticationService</new>
+          <rationale>Service indicates it provides authentication capability</rationale>
+        </example>
+      </examples>
+    </pattern>
+
+    <pattern id="reliability_classes">
+      <name>Reliability Classes</name>
+      <description>Classes handling reliability patterns, circuit breakers, retries</description>
+      <naming_rules>
+        <rule>Use infrastructure terms: Infrastructure, Engine, Circuit</rule>
+        <rule>Be direct about function: CircuitBreaker not CircuitBreakerManager</rule>
+        <rule>Group related patterns: ReliabilityInfrastructure</rule>
+      </naming_rules>
+      <examples>
+        <example domain="Circuit Breaker">
+          <current>UnifiedCircuitBreakerManager</current>
+          <new>CircuitBreaker</new>
+          <rationale>This IS the circuit breaker implementation</rationale>
+        </example>
+        <example domain="Retry">
+          <current>UnifiedRetryManager</current>
+          <new>RetryInfrastructure</new>
+          <rationale>Provides retry infrastructure across the system</rationale>
+        </example>
+      </examples>
+    </pattern>
+
+    <pattern id="policy_engine_classes">
+      <name>Policy Engine Classes</name>
+      <description>Classes handling business rules, policies, and enforcement</description>
+      <naming_rules>
+        <rule>Use engine metaphor: PolicyEngine, RuleEngine</rule>
+        <rule>Emphasize execution: Engine over Manager</rule>
+        <rule>Be specific about policy type: AccessPolicyEngine</rule>
+      </naming_rules>
+      <examples>
+        <example domain="Policy">
+          <current>UnifiedPolicyManager</current>
+          <new>PolicyEngine</new>
+          <rationale>Engine indicates active policy execution</rationale>
+        </example>
+      </examples>
+    </pattern>
+  </naming_patterns>
+
+  <forbidden_patterns>
+    <forbidden_pattern id="generic_manager">
+      <name>Generic Manager Suffix</name>
+      <description>Avoid using "Manager" suffix unless truly managing resources</description>
+      <forbidden_terms>
+        <term>Manager</term>
+        <term>Handler</term>
+        <term>Controller (unless MVC pattern)</term>
+        <term>Helper (unless truly helper class)</term>
+      </forbidden_terms>
+      <alternatives>
+        <alternative>Use domain name directly</alternative>
+        <alternative>Use business function name</alternative>
+        <alternative>Use metaphors (Engine, Vault, Broker)</alternative>
+      </alternatives>
+    </forbidden_pattern>
+
+    <forbidden_pattern id="implementation_details">
+      <name>Implementation Detail Names</name>
+      <description>Avoid names that expose implementation rather than business function</description>
+      <forbidden_examples>
+        <example>WebSocketManager → RealtimeCommunications</example>
+        <example>DatabaseConnectionManager → DataAccess</example>
+        <example>ThreadPoolManager → ConcurrencyInfrastructure</example>
+      </forbidden_examples>
+    </forbidden_pattern>
+
+    <forbidden_pattern id="redundant_unified">
+      <name>Redundant "Unified" Prefix</name>
+      <description>Avoid "Unified" prefix when class is already SSOT</description>
+      <rationale>If class is SSOT, it's already unified by definition</rationale>
+      <alternatives>
+        <alternative>Use scope qualifier: PlatformConfiguration</alternative>
+        <alternative>Use domain name directly: ApplicationState</alternative>
+      </alternatives>
+    </forbidden_pattern>
+  </forbidden_patterns>
+
+  <domain_specific_conventions>
+    <domain name="configuration">
+      <description>Configuration and settings management</description>
+      <naming_pattern>
+        <primary>Configuration (with scope qualifier)</primary>
+        <examples>
+          <example>PlatformConfiguration</example>
+          <example>ServiceConfiguration</example>
+          <example>UserConfiguration</example>
+        </examples>
+      </naming_pattern>
+      <avoid>ConfigManager, SettingsManager, ConfigurationManager</avoid>
+    </domain>
+
+    <domain name="state_management">
+      <description>Application and user state management</description>
+      <naming_pattern>
+        <primary>State (with scope qualifier)</primary>
+        <examples>
+          <example>ApplicationState</example>
+          <example>UserState</example>
+          <example>SessionState</example>
+        </examples>
+      </naming_pattern>
+      <avoid>StateManager, StateHandler, StateController</avoid>
+    </domain>
+
+    <domain name="lifecycle">
+      <description>System lifecycle and orchestration</description>
+      <naming_pattern>
+        <primary>Lifecycle (with scope qualifier)</primary>
+        <examples>
+          <example>SystemLifecycle</example>
+          <example>ServiceLifecycle</example>
+          <example>ComponentLifecycle</example>
+        </examples>
+      </naming_pattern>
+      <avoid>LifecycleManager, OrchestrationManager, StartupManager</avoid>
+    </domain>
+
+    <domain name="communications">
+      <description>Real-time and async communications</description>
+      <naming_pattern>
+        <primary>Communications (with type qualifier)</primary>
+        <examples>
+          <example>RealtimeCommunications</example>
+          <example>AsyncCommunications</example>
+          <example>InterserviceCommunications</example>
+        </examples>
+      </naming_pattern>
+      <avoid>WebSocketManager, MessageManager, CommunicationManager</avoid>
+    </domain>
+
+    <domain name="data_access">
+      <description>Database and persistence operations</description>
+      <naming_pattern>
+        <primary>DataAccess or specific data type</primary>
+        <examples>
+          <example>DataAccess</example>
+          <example>UserData</example>
+          <example>ConfigurationData</example>
+        </examples>
+      </naming_pattern>
+      <avoid>DatabaseManager, DataManager, PersistenceManager</avoid>
+    </domain>
+
+    <domain name="security">
+      <description>Security, authentication, and secrets</description>
+      <naming_pattern>
+        <primary>Security metaphors (Vault, Guard, Service)</primary>
+        <examples>
+          <example>SecurityVault</example>
+          <example>AuthenticationService</example>
+          <example>AuthorizationGuard</example>
+        </examples>
+      </naming_pattern>
+      <avoid>SecretsManager, AuthManager, SecurityManager</avoid>
+    </domain>
+  </domain_specific_conventions>
+
+  <migration_guidelines>
+    <guideline id="backward_compatibility">
+      <name>Maintain Backward Compatibility During Migration</name>
+      <description>Use aliases during transition period</description>
+      <implementation>
+        <code_example>
+# New class with business-focused name
+class PlatformConfiguration:
+    pass
+
+# Backward compatibility alias with deprecation warning
+import warnings
+def _deprecated_manager_warning():
+    warnings.warn("UnifiedConfigurationManager is deprecated, use PlatformConfiguration", 
+                  DeprecationWarning, stacklevel=3)
+    
+class UnifiedConfigurationManager(PlatformConfiguration):
+    def __init__(self, *args, **kwargs):
+        _deprecated_manager_warning()
+        super().__init__(*args, **kwargs)
+        </code_example>
+      </implementation>
+    </guideline>
+
+    <guideline id="gradual_migration">
+      <name>Gradual Migration Strategy</name>
+      <description>Migrate one class at a time with full testing</description>
+      <steps>
+        <step>1. Create new class with business-focused name</step>
+        <step>2. Add backward compatibility alias</step>
+        <step>3. Update imports within same service</step>
+        <step>4. Update cross-service imports</step>
+        <step>5. Update tests and documentation</step>
+        <step>6. Remove aliases after transition period</step>
+      </steps>
+    </guideline>
+  </migration_guidelines>
+
+  <validation_rules>
+    <rule id="name_clarity_test">
+      <name>Name Clarity Test</name>
+      <description>New developer should understand class purpose in &lt;10 seconds</description>
+      <test_questions>
+        <question>What business function does this class serve?</question>
+        <question>What domain does this class own?</question>
+        <question>How would I use this class in a sentence?</question>
+      </test_questions>
+    </rule>
+
+    <rule id="api_readability_test">
+      <name>API Readability Test</name>
+      <description>Class name should work well in method calls</description>
+      <test_examples>
+        <example>configuration.get_database_url()</example>
+        <example>state.set_user_context()</example>
+        <example>communications.send_message()</example>
+      </test_examples>
+    </rule>
+
+    <rule id="business_value_test">
+      <name>Business Value Test</name>
+      <description>Name should reflect business value, not implementation</description>
+      <good_indicators>
+        <indicator>Name appears in business requirements</indicator>
+        <indicator>Non-technical stakeholder understands purpose</indicator>
+        <indicator>Name reflects user-facing functionality</indicator>
+      </good_indicators>
+    </rule>
+  </validation_rules>
+
+  <examples_by_business_function>
+    <business_function name="chat_functionality">
+      <description>Core chat and real-time communication features</description>
+      <classes>
+        <class>RealtimeCommunications (WebSocket management)</class>
+        <class>MessageBroker (Message routing)</class>
+        <class>ConversationState (Chat state management)</class>
+      </classes>
+    </business_function>
+
+    <business_function name="user_management">
+      <description>User accounts, authentication, and personalization</description>
+      <classes>
+        <class>AuthenticationService (Login/logout)</class>
+        <class>UserProfile (User data and preferences)</class>
+        <class>SecurityVault (User credentials and secrets)</class>
+      </classes>
+    </business_function>
+
+    <business_function name="system_operations">
+      <description>Platform infrastructure and operations</description>
+      <classes>
+        <class>SystemLifecycle (Startup/shutdown)</class>
+        <class>PlatformConfiguration (System settings)</class>
+        <class>DataAccess (Database operations)</class>
+      </classes>
+    </business_function>
+
+    <business_function name="ai_operations">
+      <description>AI agent execution and management</description>
+      <classes>
+        <class>AgentExecution (Agent running)</class>
+        <class>AgentRegistry (Agent discovery)</class>
+        <class>ToolDispatcher (Tool execution)</class>
+      </classes>
+    </business_function>
+  </examples_by_business_function>
+
+  <enforcement>
+    <automated_checks>
+      <check id="manager_suffix_check">
+        <description>Flag new classes with "Manager" suffix for review</description>
+        <implementation>scripts/check_naming_conventions.py</implementation>
+      </check>
+      
+      <check id="business_clarity_check">
+        <description>Validate class names against business function mapping</description>
+        <implementation>scripts/validate_business_naming.py</implementation>
+      </check>
+    </automated_checks>
+
+    <code_review_checklist>
+      <item>Does the class name immediately convey business purpose?</item>
+      <item>Would a new developer understand the class function in &lt;10 seconds?</item>
+      <item>Does the name work well in API calls and variable names?</item>
+      <item>Is the name free of implementation details?</item>
+      <item>Does the name reflect business value rather than technical pattern?</item>
+    </code_review_checklist>
+
+    <exceptions>
+      <exception>
+        <name>True Resource Managers</name>
+        <description>Classes that actually manage system resources can use "Manager" suffix</description>
+        <examples>
+          <example>ConnectionPoolManager (manages connection pool resources)</example>
+          <example>MemoryManager (manages memory allocation)</example>
+        </examples>
+        <criteria>Must actually manage lifecycle of system resources</criteria>
+      </exception>
+    </exceptions>
+  </enforcement>
+
+  <success_metrics>
+    <metric id="developer_comprehension">
+      <name>Developer Comprehension Time</name>
+      <target>&lt;10 seconds to understand class purpose</target>
+      <measurement>New developer onboarding feedback</measurement>
+    </metric>
+
+    <metric id="api_discoverability">
+      <name>API Discoverability</name>
+      <target>Intuitive method discovery through class names</target>
+      <measurement>IDE usage patterns and developer feedback</measurement>
+    </metric>
+
+    <metric id="code_readability">
+      <name>Code Readability</name>
+      <target>Self-documenting code through clear naming</target>
+      <measurement>Code review efficiency and documentation needs</measurement>
+    </metric>
+  </success_metrics>
+</naming_conventions>

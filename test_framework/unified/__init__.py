@@ -30,7 +30,7 @@ class TestExecutionState(str, Enum):
     ERROR = "error"
 
 
-class TestCategory(str, Enum):
+class CategoryType(str, Enum):
     """Test category classification."""
     UNIT = "unit"
     INTEGRATION = "integration"
@@ -46,7 +46,7 @@ class TestResult:
     """Individual test execution result."""
     test_id: str
     name: str
-    category: TestCategory
+    category: CategoryType
     state: TestExecutionState
     duration: float = 0.0
     error_message: Optional[str] = None
@@ -134,11 +134,11 @@ class TestDiscovery:
     
     def __init__(self, config: TestConfiguration):
         self.config = config
-        self._discovered_tests: Dict[TestCategory, List[str]] = {}
+        self._discovered_tests: Dict[CategoryType, List[str]] = {}
     
-    def discover_tests(self, paths: List[str]) -> Dict[TestCategory, List[str]]:
+    def discover_tests(self, paths: List[str]) -> Dict[CategoryType, List[str]]:
         """Discover and categorize tests from given paths."""
-        discovered = {category: [] for category in TestCategory}
+        discovered = {category: [] for category in CategoryType}
         
         for path in paths:
             category = self._categorize_test(path)
@@ -147,26 +147,26 @@ class TestDiscovery:
         self._discovered_tests = discovered
         return discovered
     
-    def _categorize_test(self, test_path: str) -> TestCategory:
+    def _categorize_test(self, test_path: str) -> CategoryType:
         """Categorize a test based on its path and content."""
         path_lower = test_path.lower()
         
         if "integration" in path_lower:
-            return TestCategory.INTEGRATION
+            return CategoryType.INTEGRATION
         elif "e2e" in path_lower or "end_to_end" in path_lower:
-            return TestCategory.E2E
+            return CategoryType.E2E
         elif "performance" in path_lower or "perf" in path_lower:
-            return TestCategory.PERFORMANCE
+            return CategoryType.PERFORMANCE
         elif "security" in path_lower or "sec" in path_lower:
-            return TestCategory.SECURITY
+            return CategoryType.SECURITY
         elif "agent" in path_lower:
-            return TestCategory.AGENTS
+            return CategoryType.AGENTS
         elif "critical" in path_lower:
-            return TestCategory.CRITICAL
+            return CategoryType.CRITICAL
         else:
-            return TestCategory.UNIT
+            return CategoryType.UNIT
     
-    def get_tests_by_category(self, category: TestCategory) -> List[str]:
+    def get_tests_by_category(self, category: CategoryType) -> List[str]:
         """Get all tests in a specific category."""
         return self._discovered_tests.get(category, [])
 
@@ -201,7 +201,7 @@ class UnifiedTestOrchestrator:
         
         return self._generate_report(all_results)
     
-    def execute_category(self, category: TestCategory, test_paths: List[str]) -> TestReport:
+    def execute_category(self, category: CategoryType, test_paths: List[str]) -> TestReport:
         """Execute tests in a specific category."""
         discovered = self.discovery.discover_tests(test_paths)
         category_tests = discovered.get(category, [])
@@ -218,15 +218,15 @@ class UnifiedTestOrchestrator:
         
         return self._generate_report(all_results)
     
-    def _should_execute_category(self, category: TestCategory) -> bool:
+    def _should_execute_category(self, category: CategoryType) -> bool:
         """Check if category should be executed based on config."""
-        if category == TestCategory.INTEGRATION:
+        if category == CategoryType.INTEGRATION:
             return self.config.enable_integration_tests
-        elif category == TestCategory.E2E:
+        elif category == CategoryType.E2E:
             return self.config.enable_e2e_tests
-        elif category == TestCategory.PERFORMANCE:
+        elif category == CategoryType.PERFORMANCE:
             return self.config.enable_performance_tests
-        elif category == TestCategory.AGENTS:
+        elif category == CategoryType.AGENTS:
             return self.config.enable_agent_tests
         else:
             return True  # Unit, security, critical always enabled
@@ -272,7 +272,7 @@ class BaseInterfaces:
         return TestResult(
             test_id=test_id,
             name=name,
-            category=TestCategory.UNIT,
+            category=CategoryType.UNIT,
             state=state,
             duration=duration
         )
@@ -280,3 +280,26 @@ class BaseInterfaces:
 
 # Commonly used aliases
 base_interfaces = BaseInterfaces()
+
+# CRITICAL FIX: Avoid pytest collection warning by not importing TestCategory class
+# Comment out to prevent pytest from collecting TestCategory as a test class
+# from test_framework.category_system import TestCategory
+
+# Provide backward compatibility alias to prevent import errors
+TestCategory = CategoryType  # Backward compatibility alias
+
+# Export all main classes
+__all__ = [
+    'TestExecutionState',
+    'CategoryType',
+    'TestResult', 
+    'TestReport',
+    'TestExecutor',
+    'BaseTestInterface',
+    'TestConfiguration',
+    'TestDiscovery',
+    'UnifiedTestOrchestrator',
+    'BaseInterfaces',
+    'base_interfaces',
+    'TestCategory'  # For backward compatibility
+]

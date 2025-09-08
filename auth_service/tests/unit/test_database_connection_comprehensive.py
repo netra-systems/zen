@@ -124,8 +124,8 @@ class TestAuthDatabaseConnectionInitialization:
     @pytest.mark.unit
     async def test_database_connection_initialization_failure(self):
         """Test handling of initialization failures"""
-        with patch('auth_service.auth_core.database.connection.AuthConfig') as mock_config:
-            mock_config.get_database_url.side_effect = Exception("Database config error")
+        with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.get_database_url') as mock_get_url:
+            mock_get_url.side_effect = Exception("Database config error")
             
             db_conn = AuthDatabaseConnection()
             

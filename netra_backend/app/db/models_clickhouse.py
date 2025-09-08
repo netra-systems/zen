@@ -224,3 +224,83 @@ def get_llm_events_table_schema(table_name: str) -> str:
     return f"""CREATE TABLE IF NOT EXISTS {table_name} (
 {columns}
     ) {engine};"""
+
+
+# Data model classes for ClickHouse records
+from dataclasses import dataclass
+from typing import Dict, Any, Optional
+from datetime import datetime
+import uuid
+
+@dataclass
+class EventRecord:
+    """Event record for ClickHouse storage."""
+    event_id: str
+    timestamp: datetime
+    event_type: str
+    event_data: Dict[str, Any]
+    user_id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    
+    @classmethod
+    def create(cls, event_type: str, event_data: Dict[str, Any], 
+               user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+        """Create a new event record."""
+        return cls(
+            event_id=str(uuid.uuid4()),
+            timestamp=datetime.utcnow(),
+            event_type=event_type,
+            event_data=event_data,
+            user_id=user_id,
+            metadata=metadata or {}
+        )
+
+@dataclass  
+class MetricsRecord:
+    """Metrics record for ClickHouse storage."""
+    metric_id: str
+    timestamp: datetime
+    metric_name: str
+    metric_value: float
+    metric_unit: str
+    dimensions: Dict[str, str]
+    tags: Optional[Dict[str, str]] = None
+    
+    @classmethod
+    def create(cls, metric_name: str, metric_value: float, metric_unit: str,
+               dimensions: Dict[str, str], tags: Optional[Dict[str, str]] = None):
+        """Create a new metrics record."""
+        return cls(
+            metric_id=str(uuid.uuid4()),
+            timestamp=datetime.utcnow(),
+            metric_name=metric_name,
+            metric_value=metric_value,
+            metric_unit=metric_unit,
+            dimensions=dimensions,
+            tags=tags or {}
+        )
+
+@dataclass
+class UserActivityRecord:
+    """User activity record for ClickHouse storage."""
+    activity_id: str
+    timestamp: datetime
+    user_id: str
+    activity_type: str
+    activity_details: Dict[str, Any]
+    session_id: Optional[str] = None
+    ip_address: Optional[str] = None
+    
+    @classmethod
+    def create(cls, user_id: str, activity_type: str, activity_details: Dict[str, Any],
+               session_id: Optional[str] = None, ip_address: Optional[str] = None):
+        """Create a new user activity record."""
+        return cls(
+            activity_id=str(uuid.uuid4()),
+            timestamp=datetime.utcnow(),
+            user_id=user_id,
+            activity_type=activity_type,
+            activity_details=activity_details,
+            session_id=session_id,
+            ip_address=ip_address
+        )

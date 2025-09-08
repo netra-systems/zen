@@ -23,7 +23,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_services_fixture
+# Lightweight services fixture will be loaded from integration/conftest.py
 from shared.isolated_environment import get_env
 
 # Auth service imports
@@ -77,8 +77,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         self.mock_security_service = None  # Will be set by fixtures
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_user_session_persistence(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_user_session_persistence(self, lightweight_services_fixture):
         """
         Test session storage in Redis and database.
         
@@ -112,6 +112,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         
         # Test session activity update
         original_time = session.last_activity
+        await asyncio.sleep(0.001)  # Small delay to ensure time difference
         session.update_activity()
         updated_time = session.last_activity
         assert updated_time > original_time
@@ -134,8 +135,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         assert session.get_data("nonexistent", "default") == "default"
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_token_validation_and_expiry(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_token_validation_and_expiry(self, lightweight_services_fixture):
         """
         Test JWT token validation logic.
         
@@ -146,7 +147,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Invalid token rejection
         """
         # Mock auth service client for token validation
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_client:
             # Test valid token
             valid_token = "valid.jwt.token"
             mock_validation_result = {
@@ -203,8 +204,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             assert "Invalid token payload" in str(exc_info.value.detail)
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_user_registration_flow(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_user_registration_flow(self, lightweight_services_fixture):
         """
         Test user creation and validation.
         
@@ -215,7 +216,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Security service integration
         """
         # Mock auth service for password operations and database
-        with patch('netra_backend.app.services.security_service.auth_client') as mock_client:
+        with patch('netra_backend.app.services.security_service.auth_client', new_callable=AsyncMock) as mock_client:
             # Mock database session
             mock_db_session = AsyncMock()
             
@@ -266,8 +267,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             assert not hasattr(user_model, 'password')  # Original password should be excluded
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_permission_and_role_management(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_permission_and_role_management(self, lightweight_services_fixture):
         """
         Test RBAC and permissions.
         
@@ -300,7 +301,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         )
         
         # Test JWT claims extraction for admin
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_client:
             mock_client.validate_token_jwt.return_value = {
                 "valid": True,
                 "user_id": admin_user_id,
@@ -370,8 +371,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         _validate_user_permission(admin_user, "system:create")
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_auth_middleware_behavior(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_auth_middleware_behavior(self, lightweight_services_fixture):
         """
         Test authentication middleware.
         
@@ -400,7 +401,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             is_active=True
         )
         
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_auth_client:
             # Mock successful token validation
             mock_auth_client.validate_token_jwt.return_value = {
                 "valid": True,
@@ -412,7 +413,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             
             # Mock database query to return test user
             from sqlalchemy import select
-            mock_result = AsyncMock()
+            from unittest.mock import MagicMock
+            mock_result = MagicMock()  # Use MagicMock instead of AsyncMock for query result
             mock_result.scalar_one_or_none.return_value = test_user
             mock_db_session.execute.return_value = mock_result
             
@@ -445,8 +447,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             assert exc_info.value.status_code == 401
 
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_enhanced_admin_validation(self, real_services_fixture):
+    @pytest.mark.lightweight_services
+    async def test_enhanced_admin_validation(self, lightweight_services_fixture):
         """
         Test enhanced admin validation with dual JWT and database checks.
         
@@ -456,7 +458,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Dual validation security pattern
         - Error handling for insufficient privileges
         """
-        db_session = real_services_fixture.get("db")
+        db_session = lightweight_services_fixture.get("db")
         if not db_session:
             pytest.skip("Real database service not available")
         
@@ -473,6 +475,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         
         db_session.add(admin_user)
         await db_session.commit()
+        await db_session.refresh(admin_user)  # Ensure attributes are loaded
         
         try:
             # Test database admin validation passes
@@ -492,6 +495,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             
             db_session.add(regular_user)
             await db_session.commit()
+            await db_session.refresh(regular_user)  # Ensure attributes are loaded
             
             # Test database non-admin validation fails
             assert _check_admin_permissions(regular_user) == False
@@ -547,8 +551,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             await db_session.commit()
 
     @pytest.mark.integration
-    @pytest.mark.real_services 
-    async def test_oauth_user_flow(self, real_services_fixture):
+    @pytest.mark.lightweight_services 
+    async def test_oauth_user_flow(self, lightweight_services_fixture):
         """
         Test OAuth user creation and update flow.
         
@@ -557,12 +561,12 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Existing user update with OAuth profile
         - User data synchronization
         """
-        db_session = real_services_fixture.get("db")
+        db_session = lightweight_services_fixture.get("db")
         if not db_session:
             pytest.skip("Real database service not available")
         
         # Mock auth service client
-        with patch('netra_backend.app.services.security_service.auth_client') as mock_client:
+        with patch('netra_backend.app.services.security_service.auth_client', new_callable=AsyncMock) as mock_client:
             security_service = SecurityService()
             
             # Test new OAuth user creation

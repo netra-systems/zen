@@ -188,18 +188,26 @@ class EnvironmentDetector:
         return None
     
     def _detect_from_database_url(self) -> Optional[Environment]:
-        """Detect environment from database URL patterns."""
-        db_url = get_env().get("DATABASE_URL", "").lower()
+        """Detect environment from database URL patterns using DatabaseURLBuilder SSOT."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        env = get_env()
+        builder = DatabaseURLBuilder(env.get_all())
+        
+        # Get the database URL through SSOT pattern
+        db_url = builder.get_url_for_environment()
         if not db_url:
             return None
         
-        if any(pattern in db_url for pattern in ["localhost", "127.0.0.1", "dev"]):
+        db_url_lower = db_url.lower()
+        
+        if any(pattern in db_url_lower for pattern in ["localhost", "127.0.0.1", "dev"]):
             return Environment.DEVELOPMENT
-        elif "staging" in db_url:
+        elif "staging" in db_url_lower:
             return Environment.STAGING
-        elif any(pattern in db_url for pattern in ["prod", "production"]):
+        elif any(pattern in db_url_lower for pattern in ["prod", "production"]):
             return Environment.PRODUCTION
-        elif "test" in db_url:
+        elif "test" in db_url_lower:
             return Environment.TESTING
         
         return None
@@ -236,11 +244,16 @@ class EnvironmentDetector:
         issues = []
         env_config = self.get_environment_config()
         
-        # Validate SSL requirements
+        # Validate SSL requirements using DatabaseURLBuilder SSOT
         if env_config.ssl_required:
-            db_url = get_env().get("DATABASE_URL", "")
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            env = get_env()
+            builder = DatabaseURLBuilder(env.get_all())
+            db_url = builder.get_url_for_environment()
+            
             if db_url and "sslmode=" not in db_url and "ssl=" not in db_url:
-                issues.append(f"SSL required for {env_config.environment.value} but #removed-legacyhas no SSL config")
+                issues.append(f"SSL required for {env_config.environment.value} but database URL has no SSL config")
         
         # Validate service requirements
         if env_config.clickhouse_required:
@@ -281,12 +294,22 @@ class EnvironmentDetector:
             },
             "environment_variables": {
                 "ENVIRONMENT": get_env().get("ENVIRONMENT"),
-                "DATABASE_URL": self._mask_sensitive_url(get_env().get("DATABASE_URL", "")),
+                "DATABASE_URL": self._get_masked_database_url(),
                 "CLICKHOUSE_URL": self._mask_sensitive_url(get_env().get("CLICKHOUSE_URL", "")),
                 "REDIS_URL": self._mask_sensitive_url(get_env().get("REDIS_URL", "")),
                 "DEBUG": get_env().get("DEBUG")
             }
         }
+    
+    def _get_masked_database_url(self) -> str:
+        """Get masked database URL using DatabaseURLBuilder SSOT."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        env = get_env()
+        builder = DatabaseURLBuilder(env.get_all())
+        db_url = builder.get_url_for_environment()
+        
+        return DatabaseURLBuilder.mask_url_for_logging(db_url)
     
     def _mask_sensitive_url(self, url: str) -> str:
         """Mask sensitive information in URLs for logging."""

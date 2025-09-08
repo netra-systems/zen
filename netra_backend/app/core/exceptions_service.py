@@ -54,21 +54,8 @@ class ExternalServiceError(ServiceError):
         )
 
 
-# Import AgentExecutionError from canonical location - CONSOLIDATED
-from netra_backend.app.core.exceptions_agent import AgentExecutionError
-
-
-class AgentTimeoutError(AgentExecutionError):
-    """Raised when agent execution times out."""
-    
-    def __init__(self, message: str = None, **kwargs):
-        super().__init__(
-            message=message or "Agent execution timed out",
-            code=ErrorCode.AGENT_TIMEOUT,
-            severity=ErrorSeverity.HIGH,
-            user_message="The operation took too long to complete",
-            **kwargs
-        )
+# AgentTimeoutError is now consolidated in exceptions_agent.py (SSOT compliance)
+# This eliminates the circular import while maintaining backward compatibility
 
 
 class LLMRequestError(NetraException):

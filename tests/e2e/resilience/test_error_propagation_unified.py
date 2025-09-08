@@ -125,7 +125,7 @@ class AuthErrorPropagationValidator:
         """Test that expired token errors provide actionable messages."""
         # Create expired token (if test infrastructure supports it)
         try:
-            from test_framework.auth_helpers import (
+            from test_framework.helpers.auth_helpers import (
                 create_expired_test_token,
             )
             expired_token = create_expired_test_token("test_user")
@@ -308,8 +308,8 @@ class WebSocketErrorRecoveryValidator:
         
         try:
             # Create test token for authentication
-            from test_framework.auth_helpers import (
-                create_test_token,
+            from test_framework.helpers.auth_helpers import (
+                create_test_jwt_token as create_test_token,
             )
             test_token = create_test_token("error_recovery_user")
         except ImportError:
@@ -371,6 +371,7 @@ class WebSocketErrorRecoveryValidator:
         ws_url = self.tester.orchestrator.get_websocket_url()
         
         try:
+            from test_framework.helpers.auth_helpers import create_test_jwt_token as create_test_token
             test_token = create_test_token("malformed_test_user")
         except ImportError:
             test_token = "mock-token-malformed_test_user"

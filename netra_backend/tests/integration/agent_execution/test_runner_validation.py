@@ -31,7 +31,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestValidationReport:
+class ValidationReport:
     """Report on test validation results."""
     
     def __init__(self):
@@ -145,7 +145,7 @@ class AgentExecutionTestValidator:
     """Validator for agent execution integration tests."""
     
     def __init__(self):
-        self.report = TestValidationReport()
+        self.report = ValidationReport()
         
     def validate_test_file(self, file_path: Path) -> None:
         """Validate a single test file for compliance."""
@@ -392,7 +392,7 @@ class AgentExecutionTestValidator:
             )
 
 
-async def run_agent_execution_tests() -> TestValidationReport:
+async def run_agent_execution_tests() -> ValidationReport:
     """Run all agent execution integration tests and validate compliance."""
     validator = AgentExecutionTestValidator()
     

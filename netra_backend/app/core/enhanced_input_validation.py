@@ -15,12 +15,16 @@ from netra_backend.app.core.input_validators import (
 )
 from netra_backend.app.core.validation_rules import SecurityThreat, ValidationLevel
 
+# Create alias for backward compatibility
+InputValidator = EnhancedInputValidator
+
 # Re-export for backward compatibility
 __all__ = [
     'ValidationLevel',
     'SecurityThreat', 
     'SecurityValidationResult',
     'EnhancedInputValidator',
+    'InputValidator',  # Alias
     'validate_input_data',
     'strict_validator',
     'moderate_validator', 

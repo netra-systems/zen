@@ -125,7 +125,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         # Cleanup after test
         logger.info(f"Test completed. Captured {len(self.event_capture.events)} WebSocket events")
     
-    async def _establish_websocket_connection(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_websocket_connection(self) -> websockets.ServerConnection:
         """Establish authenticated WebSocket connection"""
         try:
             # Create test authentication token
@@ -190,7 +190,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         token_data = login_response.json()
         return token_data['access_token']
     
-    async def _listen_websocket_events(self, websocket: websockets.WebSocketServerProtocol):
+    async def _listen_websocket_events(self, websocket: websockets.ServerConnection):
         """Listen for WebSocket events and capture them"""
         try:
             async for message in websocket:

@@ -24,9 +24,9 @@ try:
         ReconnectionConfig,
         ReconnectionReason,
     )
-    from test_framework.auth_helpers import (
+    from test_framework.helpers.auth_helpers import (
         create_expired_token,
-        create_test_token,
+        create_test_jwt_token as create_test_token,
     )
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:

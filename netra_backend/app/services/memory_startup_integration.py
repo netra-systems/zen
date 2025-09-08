@@ -141,16 +141,14 @@ async def _setup_memory_monitoring_hooks(memory_service) -> None:
     """Set up memory monitoring and cleanup hooks."""
     logger.info("🔗 Setting up memory monitoring hooks...")
     
-    # Hook into WebSocket disconnection events
+    # Hook into WebSocket disconnection events (if available)
     try:
-        from netra_backend.app.websocket_core import get_websocket_manager
-        websocket_manager = get_websocket_manager()
-        
-        if hasattr(websocket_manager, 'add_disconnect_hook'):
-            websocket_manager.add_disconnect_hook(_on_websocket_disconnect)
-            logger.info("✅ WebSocket disconnect cleanup hook installed")
+        # Note: WebSocket manager is user-scoped in factory pattern
+        # Hooks should be installed per-user via the factory, not globally
+        logger.info("ℹ️ WebSocket cleanup hooks managed per-user via factory pattern")
+        logger.debug("Memory cleanup will be handled by user-scoped WebSocket managers")
     except Exception as e:
-        logger.warning(f"Could not install WebSocket hooks: {e}")
+        logger.warning(f"Note: WebSocket hook installation deferred to user context: {e}")
     
     # Hook into HTTP request completion
     # This would be integrated with FastAPI middleware in a real implementation

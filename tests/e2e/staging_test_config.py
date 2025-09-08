@@ -11,10 +11,13 @@ from dataclasses import dataclass
 class StagingConfig:
     """Configuration for staging environment tests"""
     
-    # Backend URLs - Using proper staging domain
+    # Backend URLs - Using proper staging domain (cross-linked to GCP backends)
     backend_url: str = "https://api.staging.netrasystems.ai"
     api_url: str = "https://api.staging.netrasystems.ai/api"
     websocket_url: str = "wss://api.staging.netrasystems.ai/ws"
+    
+    # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
+    base_url: str = "https://api.staging.netrasystems.ai"
     
     # Auth service URLs (when deployed)
     auth_url: str = "https://auth.staging.netrasystems.ai"
@@ -80,6 +83,10 @@ class StagingConfig:
         
         CRITICAL FIX: These headers enable the WebSocket route to detect E2E tests
         and bypass full JWT validation, preventing timeout failures in staging.
+        
+        Supports WebSocket subprotocol authentication method as per unified auth service:
+        - Authorization header with Bearer token
+        - sec-websocket-protocol header with jwt.<base64url_token> format
         """
         headers = {
             # CRITICAL: E2E detection headers that match WebSocket route logic
@@ -106,12 +113,30 @@ class StagingConfig:
             jwt_token = self.create_test_jwt_token()
             
         if jwt_token:
+            # Method 1: Authorization header (primary)
             headers["Authorization"] = f"Bearer {jwt_token}"
-            print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers")
+            
+            # Method 2: WebSocket subprotocol header (secondary)
+            # CRITICAL FIX: Add sec-websocket-protocol header to prevent "[MISSING]" error
+            try:
+                import base64
+                # Remove "Bearer " prefix if present for subprotocol encoding
+                clean_token = jwt_token.replace("Bearer ", "").strip()
+                # Base64url encode the token for WebSocket subprotocol
+                encoded_token = base64.urlsafe_b64encode(clean_token.encode()).decode().rstrip('=')
+                headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
+                print(f"[STAGING AUTH FIX] Added WebSocket subprotocol: jwt.{encoded_token[:20]}...")
+            except Exception as e:
+                print(f"[WARNING] Could not encode JWT for WebSocket subprotocol: {e}")
+                # Fallback: set a recognizable subprotocol for debugging
+                headers["sec-websocket-protocol"] = "jwt.staging-test-token"
+            
+            print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
         else:
-            # Fallback test header (will likely be rejected but enables auth flow testing)
+            # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
-            print(f"[WARNING] No JWT token available - using test header fallback")
+            headers["sec-websocket-protocol"] = "jwt.test-fallback"
+            print(f"[WARNING] No JWT token available - using test header fallback with subprotocol")
             
         print(f"[STAGING AUTH FIX] WebSocket headers include E2E detection: {list(headers.keys())}")
         return headers

@@ -260,6 +260,50 @@ class TestRealServices(SSotBaseTestCase):
             assert response["status"] == "success"
 ```
 
+### Test-Only Guard Protection (CRITICAL)
+```python
+# SSOT Pattern: Protect mock creation functions from production use
+from shared.test_only_guard import require_test_mode, test_only
+
+class UserExecutionEngine:
+    """Example of protected mock creation using SSOT guards"""
+    
+    def _create_mock_tool_dispatcher(self):
+        """Create mock tool dispatcher using SSOT mock protection."""
+        from shared.test_only_guard import require_test_mode
+        from test_framework.ssot.mocks import get_mock_factory
+        
+        # SSOT Guard: This function should only run in test mode
+        require_test_mode("_create_mock_tool_dispatcher", 
+                         "Mock tool dispatcher creation should only happen in tests")
+        
+        # Use SSOT MockFactory for consistent mock creation
+        mock_factory = get_mock_factory()
+        mock_dispatcher = mock_factory.create_tool_executor_mock()
+        
+        # Configure user context for this mock
+        mock_dispatcher.user_context = self.context
+        return mock_dispatcher
+
+# Alternative pattern using decorator
+@test_only("Mock creation should only happen in tests")
+def create_test_mock():
+    """Example using @test_only decorator"""
+    from test_framework.ssot.mocks import get_mock_factory
+    return get_mock_factory().create_agent_mock()
+```
+
+**Key Benefits:**
+- **Production Safety**: Prevents accidental mock usage in production
+- **SSOT Compliance**: Enforces single mock factory usage
+- **Runtime Protection**: Hard failures for misuse with clear error messages
+- **Test Isolation**: Ensures proper test/production boundaries
+
+**Files Updated with SSOT Mock Protection:**
+- `netra_backend/app/agents/supervisor/user_execution_engine.py:171`
+- `netra_backend/app/services/unified_tool_registry/execution_engine.py:77`
+- `netra_backend/app/core/registry/universal_registry.py` (already protected)
+
 ### Mock Configuration Patterns
 ```python
 class TestMockConfiguration(SSotBaseTestCase):

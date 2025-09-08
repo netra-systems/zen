@@ -1,0 +1,16 @@
+{
+  "alert_days_before_deadline": 2,
+  "p0_default_deadline_hours": 24,
+  "p1_default_deadline_hours": 72,
+  "business_impact_tracking_enabled": true,
+  "integration_settings": {
+    "test_runner_integration": true,
+    "docker_monitoring": true,
+    "websocket_validation": true
+  },
+  "notification_settings": {
+    "email_alerts": false,
+    "slack_alerts": false,
+    "log_alerts": true
+  }
+}

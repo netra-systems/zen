@@ -54,7 +54,7 @@ class ExecutionRecord:
     error: Optional[str] = None
     result: Optional[Any] = None
     heartbeat_count: int = 0
-    timeout_seconds: int = 30
+    timeout_seconds: int = 15  # WEBSOCKET OPTIMIZATION: Reduced from 30s to 15s for faster failure detection
     metadata: Dict[str, Any] = field(default_factory=dict)
     
     @property
@@ -111,7 +111,7 @@ class AgentExecutionTracker:
     
     def __init__(self, 
                  heartbeat_timeout: int = 10,
-                 execution_timeout: int = 30,
+                 execution_timeout: int = 15,  # WEBSOCKET OPTIMIZATION: Reduced from 30s to 15s for faster failure detection
                  cleanup_interval: int = 60):
         """
         Initialize execution tracker.

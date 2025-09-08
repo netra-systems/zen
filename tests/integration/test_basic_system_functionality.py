@@ -32,6 +32,13 @@ import websockets
 from websockets import connect, ConnectionClosedError
 from shared.isolated_environment import IsolatedEnvironment
 
+# Import service availability detection
+from test_framework.ssot.service_availability_detector import (
+    require_services, 
+    get_service_detector,
+    ServiceStatus
+)
+
 # Add project root to path for imports
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
@@ -57,6 +64,16 @@ class TestBasicSystemFunctionality:
     
     def test_backend_health_endpoint(self, environment_info):
         """Test that backend service health endpoint responds correctly."""
+        # Use service availability detector for intelligent skipping
+        services = require_services(["backend"], timeout=5.0)
+        detector = get_service_detector()
+        
+        skip_msg = detector.generate_skip_message(services, ["backend"])
+        if skip_msg:
+            pytest.skip(skip_msg)
+        
+        # Service is confirmed available, proceed with test
+        backend_result = services["backend"]
         backend_url = environment_info["backend_url"]
         health_url = f"{backend_url}{URLConstants.HEALTH_PATH}"
         
@@ -74,19 +91,27 @@ class TestBasicSystemFunctionality:
             assert "status" in health_data, "Health response missing 'status' field"
             assert health_data["status"] in ["healthy", "ok"], f"Unexpected health status: {health_data['status']}"
             
-            # Log success
+            # Log success with timing information
             print(f"[PASS] Backend health check passed: {health_url}")
             print(f"   Response: {health_data}")
+            print(f"   Service check took: {backend_result.response_time_ms:.1f}ms")
             
-        except requests.exceptions.ConnectionError as e:
-            pytest.skip(f"Backend service not running at {health_url}: {e}")
-        except requests.exceptions.Timeout as e:
-            pytest.skip(f"Backend health endpoint timeout (service may be starting): {e}")
         except Exception as e:
-            pytest.fail(f"Backend health check failed: {e}")
+            # This should rarely happen now due to pre-check
+            pytest.fail(f"Backend health check failed despite service being available: {e}")
     
     def test_auth_service_health_endpoint(self, environment_info):
         """Test that auth service health endpoint responds correctly."""
+        # Use service availability detector for intelligent skipping
+        services = require_services(["auth"], timeout=5.0)
+        detector = get_service_detector()
+        
+        skip_msg = detector.generate_skip_message(services, ["auth"])
+        if skip_msg:
+            pytest.skip(skip_msg)
+        
+        # Service is confirmed available, proceed with test
+        auth_result = services["auth"]
         auth_url = environment_info["auth_service_url"]
         health_url = f"{auth_url}{URLConstants.HEALTH_PATH}"
         
@@ -104,16 +129,14 @@ class TestBasicSystemFunctionality:
             assert "status" in health_data, "Auth health response missing 'status' field"
             assert health_data["status"] in ["healthy", "ok"], f"Unexpected auth health status: {health_data['status']}"
             
-            # Log success
+            # Log success with timing information
             print(f"[PASS] Auth service health check passed: {health_url}")
             print(f"   Response: {health_data}")
+            print(f"   Service check took: {auth_result.response_time_ms:.1f}ms")
             
-        except requests.exceptions.ConnectionError as e:
-            pytest.skip(f"Auth service not running at {health_url}: {e}")
-        except requests.exceptions.Timeout as e:
-            pytest.skip(f"Auth service health endpoint timeout (service may be starting): {e}")
         except Exception as e:
-            pytest.fail(f"Auth service health check failed: {e}")
+            # This should rarely happen now due to pre-check
+            pytest.fail(f"Auth service health check failed despite service being available: {e}")
     
     def test_database_connectivity(self, environment_info):
         """Test that database connectivity works using DatabaseURLBuilder."""
@@ -181,6 +204,18 @@ class TestBasicSystemFunctionality:
     @pytest.mark.asyncio
     async def test_websocket_basic_connection(self, environment_info):
         """Test basic WebSocket connection capability."""
+        # Use service availability detector for intelligent skipping
+        from test_framework.ssot.service_availability_detector import require_services_async
+        
+        services = await require_services_async(["websocket"], timeout=5.0)
+        detector = get_service_detector()
+        
+        skip_msg = detector.generate_skip_message(services, ["websocket"])
+        if skip_msg:
+            pytest.skip(skip_msg)
+        
+        # Service is confirmed available, proceed with test
+        websocket_result = services["websocket"]
         backend_url = environment_info["backend_url"]
         
         # Convert HTTP URL to WebSocket URL
@@ -190,71 +225,48 @@ class TestBasicSystemFunctionality:
         else:
             ws_scheme = "ws"
         
-        # Try different WebSocket endpoints that might be available
-        websocket_endpoints = [
-            f"{ws_scheme}://{parsed_url.netloc}/ws",
-            f"{ws_scheme}://{parsed_url.netloc}/ws/test",
-            f"{ws_scheme}://{parsed_url.netloc}/websocket"
-        ]
+        ws_url = f"{ws_scheme}://{parsed_url.netloc}/ws"
         
-        connection_successful = False
-        
-        for ws_url in websocket_endpoints:
-            try:
-                print(f"Attempting WebSocket connection to: {ws_url}")
+        try:
+            print(f"Attempting WebSocket connection to: {ws_url}")
+            print(f"Service availability check took: {websocket_result.response_time_ms:.1f}ms")
+            
+            # Attempt connection with proper timeout parameter
+            async with connect(
+                ws_url,
+                open_timeout=10,  # Correct parameter name for websockets.connect
+                ping_interval=20,
+                ping_timeout=10
+            ) as websocket:
+                print(f"[PASS] WebSocket connected successfully to: {ws_url}")
                 
-                # Attempt connection with timeout
-                async with connect(
-                    ws_url,
-                    timeout=10,
-                    ping_interval=20,
-                    ping_timeout=10
-                ) as websocket:
-                    print(f"[PASS] WebSocket connected successfully to: {ws_url}")
-                    connection_successful = True
+                # Try to send a simple ping message
+                ping_message = {
+                    "type": "ping",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "data": {"test": "basic_functionality_test"}
+                }
+                
+                await websocket.send(json.dumps(ping_message))
+                print(f"Sent ping message: {ping_message}")
+                
+                # Try to receive a response with timeout
+                try:
+                    response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                    response_data = json.loads(response)
+                    print(f"Received response: {response_data}")
                     
-                    # Try to send a simple ping message
-                    ping_message = {
-                        "type": "ping",
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "data": {"test": "basic_functionality_test"}
-                    }
+                    # Basic validation of response
+                    assert "type" in response_data, "WebSocket response missing 'type' field"
                     
-                    await websocket.send(json.dumps(ping_message))
-                    print(f"Sent ping message: {ping_message}")
-                    
-                    # Try to receive a response with timeout
-                    try:
-                        response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                        response_data = json.loads(response)
-                        print(f"Received response: {response_data}")
-                        
-                        # Basic validation of response
-                        assert "type" in response_data, "WebSocket response missing 'type' field"
-                        
-                    except asyncio.TimeoutError:
-                        print("[WARN] No response received within timeout (may be expected)")
-                    except json.JSONDecodeError:
-                        print("[WARN] Received non-JSON response (may be expected)")
-                    
-                    break  # Successfully connected, no need to try other endpoints
-                    
-            except ConnectionClosedError as e:
-                print(f"[WARN] WebSocket connection closed: {e}")
-                continue  # Try next endpoint
-            except OSError as e:
-                if "refused" in str(e).lower():
-                    print(f"[WARN] Connection refused to {ws_url}")
-                    continue  # Try next endpoint
-                else:
-                    print(f"[WARN] Network error: {e}")
-                    continue
-            except Exception as e:
-                print(f"[WARN] WebSocket connection failed to {ws_url}: {e}")
-                continue  # Try next endpoint
-        
-        if not connection_successful:
-            pytest.skip("WebSocket service not available (backend may not be running)")
+                except asyncio.TimeoutError:
+                    print("[WARN] No response received within timeout (may be expected)")
+                except json.JSONDecodeError:
+                    print("[WARN] Received non-JSON response (may be expected)")
+                
+        except Exception as e:
+            # This should rarely happen now due to pre-check
+            pytest.fail(f"WebSocket connection failed despite service being available: {e}")
         
         print(f"[PASS] WebSocket basic connectivity test completed successfully")
     

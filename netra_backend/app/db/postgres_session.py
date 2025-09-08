@@ -78,7 +78,7 @@ def _validate_async_session_factory():
     from netra_backend.app.db.postgres_core import async_session_factory
     if async_session_factory is None:
         logger.error("async_session_factory is not initialized.")
-        raise RuntimeError("Database not configured")
+        raise RuntimeError("Database unavailable (session factory initialization failed - check database URL and connectivity)")
 
 
 def _validate_async_session(session):

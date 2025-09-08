@@ -28,10 +28,21 @@ RUN apk del gcc musl-dev && \
     rm -rf /var/cache/apk/*
 
 # Copy migration files and minimal code needed
-COPY alembic /app/alembic
+# CRITICAL: Use correct path structure to match alembic.ini expectations
+COPY netra_backend/app/alembic /app/netra_backend/app/alembic
 COPY netra_backend/alembic.ini /app/netra_backend/alembic.ini
-COPY netra_backend/app/models /app/netra_backend/app/models
-COPY shared/isolated_environment.py /app/shared/isolated_environment.py
+
+# Copy all necessary shared modules for DatabaseURLBuilder and environment handling
+COPY shared/ /app/shared/
+
+# Copy ALL necessary backend app modules required by migrations
+COPY netra_backend/app/ /app/netra_backend/app/
+
+# Create empty __init__.py files to make directories proper Python packages
+RUN touch /app/__init__.py && \
+    touch /app/netra_backend/__init__.py && \
+    touch /app/netra_backend/app/__init__.py && \
+    touch /app/shared/__init__.py
 
 # Set environment
 ENV PYTHONPATH=/app
@@ -40,5 +51,5 @@ ENV PYTHONUNBUFFERED=1
 ENV RUNNING_IN_DOCKER=true
 ENV BUILD_ENV=test
 
-# Run migrations and exit
-CMD ["sh", "-c", "alembic -c netra_backend/alembic.ini upgrade head && echo 'Migrations completed successfully'"]
+# Run migrations with proper error handling for staging deployment
+CMD ["sh", "-c", "set -e; echo 'Starting migration job...'; python -c 'from shared.isolated_environment import get_env; print(f\"Environment: {get_env().get(\"ENVIRONMENT\", \"unknown\")}\"'); python -m alembic -c netra_backend/alembic.ini current; python -m alembic -c netra_backend/alembic.ini upgrade head && echo 'Migrations completed successfully'"]

@@ -249,35 +249,64 @@ class AuthService:
             return None
     
     async def blacklist_token(self, token: str) -> None:
-        """Add a token to the blacklist."""
+        """Add a token to the blacklist.
+        
+        SSOT: This is the single async interface for blacklist operations.
+        Handles both sync JWT handler methods and async Redis operations.
+        """
         try:
-            # Simple blacklist implementation
+            # Check if JWT handler has blacklist_token method
             if hasattr(self.jwt_handler, 'blacklist_token'):
-                await self.jwt_handler.blacklist_token(token)
+                # JWT handler's blacklist_token is synchronous - do NOT await
+                # Five Whys Fix: Properly handle sync/async boundary
+                result = self.jwt_handler.blacklist_token(token)
+                logger.debug(f"Token blacklisted via JWT handler: {result}")
             else:
                 # Fallback to in-memory blacklist
                 if not hasattr(self, '_blacklisted_tokens'):
                     self._blacklisted_tokens = set()
                 self._blacklisted_tokens.add(token)
+                logger.debug("Token blacklisted in memory")
         except Exception as e:
+            # Log but don't fail - blacklisting is best-effort
             logger.error(f"Token blacklist error: {e}")
+            # Fallback to in-memory blacklist on any error
+            if not hasattr(self, '_blacklisted_tokens'):
+                self._blacklisted_tokens = set()
+            self._blacklisted_tokens.add(token)
     
     async def is_token_blacklisted(self, token: str) -> bool:
-        """Check if a token is blacklisted."""
+        """Check if a token is blacklisted.
+        
+        SSOT: This is the single async interface for blacklist checking.
+        Handles both sync JWT handler methods and async Redis operations.
+        """
         try:
-            # Check JWT handler blacklist first
+            # Check JWT handler blacklist first (synchronous)
             if hasattr(self.jwt_handler, 'is_token_blacklisted'):
-                return await self.jwt_handler.is_token_blacklisted(token)
+                # JWT handler's is_token_blacklisted is synchronous - do NOT await
+                # Five Whys Fix: Properly handle sync/async boundary
+                is_blacklisted = self.jwt_handler.is_token_blacklisted(token)
+                if is_blacklisted:
+                    logger.debug(f"Token found in JWT handler blacklist")
+                    return True
             elif hasattr(self.jwt_handler, 'blacklisted_tokens'):
-                return token in self.jwt_handler.blacklisted_tokens
+                # Direct check on blacklisted_tokens set
+                if token in self.jwt_handler.blacklisted_tokens:
+                    logger.debug(f"Token found in JWT handler blacklisted_tokens set")
+                    return True
             
-            # Fallback to in-memory blacklist
-            if hasattr(self, '_blacklisted_tokens'):
-                return token in self._blacklisted_tokens
+            # Check in-memory blacklist
+            if hasattr(self, '_blacklisted_tokens') and token in self._blacklisted_tokens:
+                logger.debug(f"Token found in memory blacklist")
+                return True
             
+            # Token not found in any blacklist
             return False
+            
         except Exception as e:
-            logger.error(f"Token blacklist check error: {e}")
+            # Log error but return False (fail-open for availability)
+            logger.error(f"Token blacklist check error: {e}", exc_info=True)
             return False
     
     async def verify_password(self, password: str, hash_value: str) -> bool:
@@ -321,74 +350,6 @@ class AuthService:
         service_name = await self._get_service_name(service_id)
         return self.jwt_handler.create_service_token(service_id, service_name)
         
-    async def login(self, request: LoginRequest, 
-                   client_info: Dict) -> LoginResponse:
-        """Process user login"""
-        try:
-            # Validate credentials based on provider
-            user = await self._validate_credentials(request)
-            if not user:
-                raise AuthException(
-                    error="invalid_credentials",
-                    error_code="AUTH001",
-                    message="Invalid credentials provided"
-                )
-            
-            # Check account status
-            if not await self._check_account_status(user["id"]):
-                raise AuthException(
-                    error="account_locked",
-                    error_code="AUTH002",
-                    message="Account is locked or disabled"
-                )
-            
-            # Generate tokens
-            access_token = self.jwt_handler.create_access_token(
-                user_id=user["id"],
-                email=user["email"],
-                permissions=user.get("permissions", [])
-            )
-            
-            refresh_token = self.jwt_handler.create_refresh_token(
-                user_id=user["id"],
-                email=user["email"],
-                permissions=user.get("permissions", [])
-            )
-            
-            # Create session
-            session_id = self.create_session(
-                user_id=user["id"],
-                user_data={
-                    "email": user["email"],
-                    "ip_address": client_info.get("ip"),
-                    "user_agent": client_info.get("user_agent")
-                }
-            )
-            
-            # Log successful login
-            await self._audit_log(
-                event_type="login",
-                user_id=user["id"],
-                success=True,
-                metadata={"provider": request.provider},
-                client_info=client_info
-            )
-            
-            return LoginResponse(
-                access_token=access_token,
-                refresh_token=refresh_token,
-                expires_in=15 * 60,  # 15 minutes
-                user={
-                    "id": user["id"],
-                    "email": user["email"],
-                    "name": user.get("name"),
-                    "session_id": session_id
-                }
-            )
-            
-        except Exception as e:
-            logger.error(f"Login failed: {e}")
-            raise
     
     async def logout(self, token: str, 
                     session_id: Optional[str] = None) -> bool:
@@ -423,6 +384,11 @@ class AuthService:
     def register_test_user(self, email: str, password: str) -> Dict:
         """Register a test user in memory"""
         import uuid
+        
+        # Check if user already exists
+        if email in self._test_users:
+            raise ValueError("User with this email already registered")
+        
         user_id = str(uuid.uuid4())
         
         self._test_users[email] = {
@@ -487,53 +453,198 @@ class AuthService:
         # Hash the password
         password_hash = self.password_hasher.hash(password)
         
-        # Create user in database
-        if not self.db_session:
-            # Fallback to test registration if no database
-            logger.warning("No database session available, falling back to test registration")
+        # Try to get a database session
+        if not self._db_connection:
+            # Fallback to test registration if no database connection
+            logger.warning("No database connection available, falling back to test registration")
             return self.register_test_user(email, password)
         
         try:
-            user_repo = AuthUserRepository(self.db_session)
-            
-            # Check if user already exists
-            existing_user = await user_repo.get_by_email(email)
-            if existing_user:
-                raise ValueError("User with this email already exists")
-            
-            # Create the user
-            try:
-                new_user = await user_repo.create_local_user(
-                    email=email,
-                    password_hash=password_hash,
-                    full_name=full_name
-                )
-            except ValueError as e:
-                # This is a race condition - user was created between our check and create attempt
-                error_msg = str(e)
-                logger.error(f"Race condition detected during user registration: {e}")
-                if self.db_session:
-                    await self.db_session.rollback()
-                raise RuntimeError(f"Registration failed: {error_msg}")
-            
-            await self.db_session.commit()
-            
-            return {
-                "user_id": new_user.id,
-                "email": new_user.email,
-                "message": "User registered successfully",
-                "requires_verification": not new_user.is_verified
-            }
+            # Use the database connection to get a session
+            async with self._db_connection.get_session() as session:
+                user_repo = AuthUserRepository(session)
+                
+                # Check if user already exists
+                existing_user = await user_repo.get_by_email(email)
+                if existing_user:
+                    raise ValueError("User with this email already registered")
+                
+                # Create the user
+                try:
+                    new_user = await user_repo.create_local_user(
+                        email=email,
+                        password_hash=password_hash,
+                        full_name=full_name
+                    )
+                except ValueError as e:
+                    # This is a race condition - user was created between our check and create attempt
+                    error_msg = str(e)
+                    logger.error(f"Race condition detected during user registration: {e}")
+                    await session.rollback()
+                    raise RuntimeError(f"Registration failed: {error_msg}")
+                
+                await session.commit()
+                
+                return {
+                    "user_id": new_user.id,
+                    "email": new_user.email,
+                    "message": "User registered successfully",
+                    "requires_verification": not new_user.is_verified
+                }
             
         except ValueError as e:
             # Re-raise validation errors (from our own duplicate check or validation)
             raise e
         except Exception as e:
             logger.error(f"Failed to register user: {e}")
-            if self.db_session:
-                await self.db_session.rollback()
             raise RuntimeError(f"Registration failed: {str(e)}")
     
+    async def login(self, email: str, password: str) -> Optional[LoginResponse]:
+        """Simplified login method for tests that accepts email/password strings"""
+        try:
+            # Create a LoginRequest object from the email/password with LOCAL provider
+            from auth_service.auth_core.models.auth_models import LoginRequest, AuthProvider
+            request = LoginRequest(email=email, password=password, provider=AuthProvider.LOCAL)
+            client_info = {}  # Empty client info for tests
+            
+            # Call the full login method
+            return await self.login_with_request(request, client_info)
+        except Exception as e:
+            logger.error(f"Login failed: {e}")
+            return None
+    
+    async def login_with_request(self, request: LoginRequest, 
+                   client_info: Dict) -> LoginResponse:
+        """Process user login with full request object"""
+        try:
+            # Validate credentials based on provider
+            user = await self._validate_credentials(request)
+            if not user:
+                raise AuthException(
+                    error="invalid_credentials",
+                    error_code="AUTH001",
+                    message="Invalid credentials provided"
+                )
+            
+            # Check account status
+            if not await self._check_account_status(user["id"]):
+                raise AuthException(
+                    error="account_locked",
+                    error_code="AUTH002",
+                    message="Account is locked or disabled"
+                )
+            
+            # Generate tokens
+            access_token = self.jwt_handler.create_access_token(
+                user_id=user["id"],
+                email=user["email"],
+                permissions=user.get("permissions", [])
+            )
+            
+            refresh_token = self.jwt_handler.create_refresh_token(
+                user_id=user["id"],
+                email=user["email"],
+                permissions=user.get("permissions", [])
+            )
+            
+            # Create session
+            session_id = self.create_session(user["id"], user)
+            
+            # Log successful login
+            await self._audit_log(
+                event_type="login_success",
+                user_id=user["id"],
+                success=True,
+                client_info=client_info
+            )
+            
+            return LoginResponse(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="Bearer",
+                expires_in=self.jwt_handler.access_token_expire_minutes * 60,
+                user_id=user["id"],
+                email=user["email"],
+                permissions=user.get("permissions", []),
+                session_id=session_id
+            )
+            
+        except AuthException as e:
+            # Log failed login
+            await self._audit_log(
+                event_type="login_failed",
+                success=False,
+                metadata={"error": e.message},
+                client_info=client_info
+            )
+            raise e
+        except Exception as e:
+            # Log general error
+            await self._audit_log(
+                event_type="login_error",
+                success=False,
+                metadata={"error": str(e)},
+                client_info=client_info
+            )
+            raise AuthException(
+                error="login_error",
+                error_code="AUTH003",
+                message="Login processing failed"
+            ) from e
+
+    async def get_user_by_id(self, user_id: str) -> Optional[Dict]:
+        """Get user by ID"""
+        if not self._db_connection:
+            # Check test users store first
+            for email, user in self._test_users.items():
+                if user["id"] == user_id:
+                    return user
+            return None
+        
+        try:
+            async with self._db_connection.get_session() as session:
+                user_repo = AuthUserRepository(session)
+                user = await user_repo.get_by_id(user_id)
+                if user:
+                    return {
+                        "id": user.id,
+                        "email": user.email,
+                        "name": user.full_name,
+                        "provider": user.auth_provider,
+                        "is_active": user.is_active,
+                        "is_verified": user.is_verified
+                    }
+                return None
+        except Exception as e:
+            logger.error(f"Failed to get user by ID: {e}")
+            return None
+    
+    async def get_user_by_email(self, email: str) -> Optional[Dict]:
+        """Get user by email"""
+        if not self._db_connection:
+            # Check test users store first
+            if email in self._test_users:
+                return self._test_users[email]
+            return None
+        
+        try:
+            async with self._db_connection.get_session() as session:
+                user_repo = AuthUserRepository(session)
+                user = await user_repo.get_by_email(email)
+                if user:
+                    return {
+                        "id": user.id,
+                        "email": user.email,
+                        "name": user.full_name,
+                        "provider": user.auth_provider,
+                        "is_active": user.is_active,
+                        "is_verified": user.is_verified
+                    }
+                return None
+        except Exception as e:
+            logger.error(f"Failed to get user by email: {e}")
+            return None
+
     async def validate_token(self, token: str, token_type: str = "access") -> TokenResponse:
         """Validate token of specified type"""
         payload = self.jwt_handler.validate_token(token, token_type)

@@ -81,7 +81,7 @@ services:
 
   # Dev ClickHouse Analytics (Optional - can be ephemeral)
   dev-clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:25.7.6.21-stable
     # No profile specified - runs by default
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
@@ -223,9 +223,10 @@ services:
 
       # Secrets
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}
+      SERVICE_ID: ${BACKEND_SERVICE_ID:-netra-backend}
       SERVICE_SECRET: ${SERVICE_SECRET:-dev-service-secret-for-cross-service-auth}
       FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
-      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development-32-chars}
       
       # AI/LLM Configuration
       GEMINI_API_KEY: ${GEMINI_API_KEY}
@@ -365,7 +366,7 @@ services:
 
   # Test ClickHouse Analytics
   test-clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:25.7.6.21-stable
     profiles: ["test"]
     environment:
       CLICKHOUSE_DB: netra_test_analytics

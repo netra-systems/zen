@@ -31,13 +31,13 @@ from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.tool_dispatcher_consolidated import UnifiedToolDispatcher
 
 from pydantic import BaseModel, Field
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.agent_execution_tracker import (
     get_execution_tracker,
     ExecutionState
@@ -89,7 +89,7 @@ class AgentExecutionContext(BaseModel):
     request_id: Optional[str] = None
     thread_id: Optional[str] = None
     session_id: Optional[str] = None
-    state: Optional[DeepAgentState] = None
+    user_context: Optional['UserExecutionContext'] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
     class Config:
@@ -404,7 +404,7 @@ class ExecutionEngine:
         self,
         agent_name: str,
         task: Any,
-        state: Optional[DeepAgentState] = None,
+        user_context: Optional['UserExecutionContext'] = None,
         context_override: Optional[AgentExecutionContext] = None
     ) -> AgentExecutionResult:
         """Execute an agent with all extensions.
@@ -420,13 +420,14 @@ class ExecutionEngine:
         """
         start_time = time.perf_counter()
         
-        # Create or use context
+        # Use UserExecutionContext if available, otherwise fallback to override
+        effective_user_context = user_context or self.user_context
         context = context_override or AgentExecutionContext(
             agent_name=agent_name,
             task=task,
-            state=state,
-            user_id=self.user_context.user_id if self.user_context else None,
-            request_id=self.user_context.request_id if self.user_context else None
+            user_context=effective_user_context,
+            user_id=effective_user_context.user_id if effective_user_context else None,
+            request_id=effective_user_context.request_id if effective_user_context else None
         )
         
         # Store in active runs
@@ -490,7 +491,7 @@ class ExecutionEngine:
         # Execute with timeout
         try:
             result = await asyncio.wait_for(
-                agent.execute(context.task, context.state),
+                agent.execute(context.task, effective_user_context),
                 timeout=self.config.agent_execution_timeout
             )
             
@@ -583,23 +584,24 @@ class RequestScopedExecutionEngine:
         self,
         agent_name: str,
         task: Any,
-        state: Optional[DeepAgentState] = None
+        user_context: Optional['UserExecutionContext'] = None
     ) -> AgentExecutionResult:
         """Execute with request isolation."""
         if self._closed:
             raise RuntimeError("RequestScopedExecutionEngine has been closed")
         
-        # Create request-specific context
+        # Use provided or engine user context
+        effective_user_context = user_context or self.engine.user_context
         context = AgentExecutionContext(
             agent_name=agent_name,
             task=task,
-            state=state,
+            user_context=effective_user_context,
             request_id=self.request_id,
-            user_id=self.engine.user_context.user_id if self.engine.user_context else None
+            user_id=effective_user_context.user_id if effective_user_context else None
         )
         
         # Execute with context override
-        return await self.engine.execute(agent_name, task, state, context)
+        return await self.engine.execute(agent_name, task, effective_user_context, context)
     
     async def close(self) -> None:
         """Close the request scope."""
@@ -784,7 +786,7 @@ async def execute_agent(
     
     try:
         await engine.initialize()
-        return await engine.execute(agent_name, task)
+        return await engine.execute(agent_name, task, user_context)
     finally:
         await engine.cleanup()
 

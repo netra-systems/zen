@@ -23,8 +23,8 @@ from dataclasses import dataclass
 if TYPE_CHECKING:
     pass  # Legacy session manager imports removed - using SSOT database module
 
-# NEW: Split architecture imports
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+# SSOT COMPLIANCE FIX: Import UserExecutionContext from services (SSOT) instead of models
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import (
     validate_user_context
 )
@@ -148,14 +148,17 @@ class RequestScopedContext:
     user_id: str
     thread_id: str
     run_id: Optional[str] = None
-    websocket_connection_id: Optional[str] = None
+    websocket_client_id: Optional[str] = None
     request_id: Optional[str] = None
     
     def __post_init__(self):
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID generation
+        from shared.id_generation import UnifiedIdGenerator
+        
         if not self.run_id:
-            self.run_id = str(uuid.uuid4())
+            self.run_id = UnifiedIdGenerator.generate_base_id("run")
         if not self.request_id:
-            self.request_id = str(uuid.uuid4())
+            self.request_id = UnifiedIdGenerator.generate_base_id("req")
             
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
@@ -172,12 +175,61 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     from netra_backend.app.database.request_scoped_session_factory import get_session_factory
     
-    # Generate unique request ID for this session
-    request_id = f"req_{uuid.uuid4().hex[:12]}"
-    # Use placeholder user ID - will be overridden by actual user context when available
+    # SSOT COMPLIANCE FIX: Generate unique request ID using UnifiedIdGenerator
+    from shared.id_generation import UnifiedIdGenerator
+    request_id = UnifiedIdGenerator.generate_base_id("req")
+    correlation_id = UnifiedIdGenerator.generate_base_id("corr")  # For tracing across services
+    
+    # ENHANCED DEBUG: Use placeholder user ID - will be overridden by actual user context when available
     user_id = "system"  # This gets overridden in practice by request context
     
-    logger.debug(f"Creating new request-scoped database session {request_id}")
+    # ENHANCED DEBUGGING: Log the exact moment and values at function start
+    logger.info(
+        f"📍 FUNCTION_START: get_request_scoped_db_session called | "
+        f"Generated IDs: request_id='{request_id}', correlation_id='{correlation_id}' | "
+        f"Hardcoded user_id='{user_id}' (THIS IS WHERE 'system' COMES FROM!) | "
+        f"Function: netra_backend.app.dependencies.get_request_scoped_db_session:182"
+    )
+    
+    # CRITICAL DEBUG CONTEXT: This is where the 'system' user_id originates!
+    session_init_context = {
+        "user_id": user_id,
+        "request_id": request_id,
+        "correlation_id": correlation_id,  # For cross-service tracing
+        "source": "get_request_scoped_db_session",
+        "auth_note": "user_id='system' is a placeholder - will be overridden by actual auth context",
+        "function_location": "netra_backend.app.dependencies:182",
+        "potential_auth_failure_point": "If this 'system' user_id causes auth errors, check if request context override is failing",
+        "trace_info": {
+            "session_factory_call": "about_to_call_factory.get_request_scoped_session",
+            "auth_middleware_status": "unknown_at_this_point",
+            "user_context_override_status": "not_yet_attempted"
+        }
+    }
+    
+    logger.info(
+        f"🚀 INITIALIZING: Request-scoped database session {request_id} with placeholder user_id='{user_id}'. "
+        f"IMPORTANT: This 'system' user_id should be overridden by actual authenticated user context. "
+        f"If you see auth errors with user_id='system', the context override may be failing. "
+        f"Context: {session_init_context}"
+    )
+    
+    # INITIALIZATION CONTEXT DUMP - trace the start of session creation
+    try:
+        from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+        log_authentication_context_dump(
+            user_id=user_id,
+            request_id=request_id,
+            operation="initialize_request_scoped_db_session",
+            correlation_id=correlation_id,
+            function_location="netra_backend.app.dependencies.get_request_scoped_db_session:182",
+            user_id_source="hardcoded_system_placeholder",
+            auth_stage="pre_session_creation",
+            expected_behavior="user_id_should_be_overridden_by_auth_context",
+            warning="if_system_user_causes_403_check_context_override_failure"
+        )
+    except Exception:
+        pass  # Don't fail initialization due to logging issues
     
     try:
         # Get the factory and use its method directly (which is decorated with @asynccontextmanager)
@@ -186,11 +238,136 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
         # we use it with async with
         async with factory.get_request_scoped_session(user_id, request_id) as session:
             _validate_session_type(session)
-            logger.debug(f"Created database session: {id(session)} for request {request_id}")
+            
+            # ENHANCED SUCCESS LOGGING with authentication context
+            session_success_context = {
+                "session_id": id(session),
+                "user_id": user_id,
+                "request_id": request_id,
+                "session_type": type(session).__name__,
+                "factory_source": "RequestScopedSessionFactory",
+                "auth_warning": "SUCCESS with user_id='system' means either: 1) This is a service-to-service call, or 2) Auth context override worked properly"
+            }
+            
+            logger.info(
+                f"✅ SUCCESS: Database session {id(session)} created for request {request_id} with user_id='{user_id}'. "
+                f"Context: {session_success_context}"
+            )
+            
+            # Special logging for system user - this helps debug authentication issues
+            if user_id == "system":
+                logger.info(
+                    f"🔧 SYSTEM USER SESSION: Created session for user_id='system'. "
+                    f"This could indicate: 1) Service-to-service authentication, 2) Default fallback user, or 3) Missing auth context override. "
+                    f"If this causes 403 errors, check authentication middleware and request context setup. "
+                    f"Session: {id(session)}, Request: {request_id}"
+                )
+            
             yield session
-            logger.debug(f"Request-scoped session {id(session)} completed")
+            
+            logger.info(
+                f"✅ COMPLETED: Request-scoped session {id(session)} completed successfully for user_id='{user_id}', request_id='{request_id}'"
+            )
     except Exception as e:
-        logger.error(f"Failed to create request-scoped database session {request_id}: {e}")
+        # ENHANCED ERROR LOGGING with 10x more authentication context
+        error_context = {
+            "request_id": request_id,
+            "user_id": user_id,
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "function_location": "netra_backend.app.dependencies.get_request_scoped_db_session",
+            "auth_analysis": {
+                "using_system_user": user_id == "system",
+                "likely_auth_failure": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
+                "potential_causes": [
+                    "Authentication middleware failed to validate user_id='system'",
+                    "Service-to-service authentication not properly configured",
+                    "JWT token validation failed for system requests",
+                    "Database connection auth failed",
+                    "Request context override mechanism failed"
+                ],
+                "debugging_steps": [
+                    "Check if SERVICE_SECRET is properly configured",
+                    "Verify JWT_SECRET configuration",
+                    "Check authentication middleware logs",
+                    "Verify database connection credentials",
+                    "Check if request context override is working",
+                    "Look for authentication dependency injection issues"
+                ]
+            }
+        }
+        
+        logger.error(
+            f"❌ CRITICAL ERROR: Failed to create request-scoped database session {request_id} for user_id='{user_id}'. "
+            f"Error: {e}. This may be an authentication failure! Full context: {error_context}"
+        )
+        
+        # COMPREHENSIVE CONTEXT DUMP with all IDs and authentication info
+        try:
+            from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+            log_authentication_context_dump(
+                user_id=user_id,
+                request_id=request_id,
+                operation="create_request_scoped_db_session",
+                error=e,
+                correlation_id=correlation_id,
+                function_location="netra_backend.app.dependencies.get_request_scoped_db_session",
+                session_factory_call="factory.get_request_scoped_session",
+                user_id_source="hardcoded_system_placeholder",
+                auth_middleware_status="unknown_at_session_creation_time",
+                database_connection_status="failed",
+                session_creation_stage="database_session_factory",
+                potential_root_cause="authentication_middleware_rejection"
+            )
+        except ImportError:
+            logger.error(
+                f"🚨 FALLBACK_DEBUG: Auth trace logger not available. "
+                f"user_id='{user_id}', request_id='{request_id}', correlation_id='{correlation_id}', error='{e}'"
+            )
+        except Exception as trace_error:
+            logger.error(
+                f"🚨 TRACE_ERROR: Failed to log comprehensive context: {trace_error}. "
+                f"Original error: {e}, user_id='{user_id}', request_id='{request_id}'"
+            )
+        
+        # Extra debugging for authentication-related errors with comprehensive dump
+        if "403" in str(e) or "Not authenticated" in str(e):
+            logger.error(
+                f"🔴 AUTHENTICATION FAILURE DETECTED: The error '{e}' suggests an authentication problem. "
+                f"Since user_id='{user_id}', this could be a service-to-service auth issue or missing auth context. "
+                f"Check: 1) SERVICE_SECRET config, 2) JWT validation, 3) Auth middleware setup, 4) Request context override mechanism. "
+                f"Request ID: {request_id}"
+            )
+            
+            # CRITICAL 403 ERROR COMPREHENSIVE DUMP
+            try:
+                from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+                log_authentication_context_dump(
+                    user_id=user_id,
+                    request_id=request_id,
+                    operation="CRITICAL_403_NOT_AUTHENTICATED_ERROR",
+                    error=e,
+                    correlation_id=correlation_id,
+                    error_type="403_not_authenticated",
+                    function_location="netra_backend.app.dependencies.get_request_scoped_db_session",
+                    auth_failure_stage="session_factory_call",
+                    user_id_type="system" if user_id == "system" else "regular",
+                    likely_cause="authentication_middleware_blocked_system_user",
+                    debugging_priority="CRITICAL",
+                    next_steps=[
+                        "Check authentication middleware logs",
+                        "Verify SERVICE_SECRET configuration", 
+                        "Check JWT_SECRET consistency",
+                        "Validate system user authentication bypass",
+                        "Review authentication dependency injection"
+                    ]
+                )
+            except Exception as critical_trace_error:
+                logger.error(
+                    f"🚨 CRITICAL_TRACE_FAILED: Could not dump 403 error context: {critical_trace_error}. "
+                    f"This 403 'Not authenticated' error is the main issue you're debugging!"
+                )
+        
         raise
     finally:
         logger.debug(f"Request-scoped database session {request_id} lifecycle completed")
@@ -226,7 +403,9 @@ async def get_user_scoped_db_session(
     from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
     
     if not request_id:
-        request_id = f"req_{uuid.uuid4().hex[:12]}"
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for request ID generation
+        from shared.id_generation import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("req")
     
     logger.debug(f"Creating user-scoped database session for user {user_id}, request {request_id}")
     
@@ -315,26 +494,14 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
         logger.error("CRITICAL: Global supervisor has stored database session - this violates request scoping!")
         raise RuntimeError("Global supervisor must never store database sessions")
     
-    # Verify supervisor has WebSocket capabilities
+    # Verify supervisor has WebSocket capabilities - CRITICAL: Avoid creation during startup
     if supervisor and hasattr(supervisor, 'agent_registry'):
-        # Create user context for proper isolation
-        user_context = UserExecutionContext(
-            user_id="system",
-            request_id=f"supervisor_init_{time.time()}",
-            thread_id="supervisor_main",
-            run_id=f"run_{time.time()}"
-        )
-        websocket_manager = create_websocket_manager(user_context)
-        if websocket_manager and hasattr(supervisor.agent_registry, 'set_websocket_manager'):
-            # Ensure WebSocket manager is properly configured
-            if asyncio.iscoroutinefunction(supervisor.agent_registry.set_websocket_manager):
-                # Handle async set_websocket_manager
-                logger.warning("Cannot await set_websocket_manager in sync context - WebSocket events may be limited")
-            else:
-                supervisor.agent_registry.set_websocket_manager(websocket_manager)
-                logger.debug("Verified WebSocket manager is set on supervisor agent registry")
+        # SSOT COMPLIANCE FIX: Don't create WebSocket manager during startup/dependency injection
+        # WebSocket managers should only be created per-request with valid UserExecutionContext
+        if hasattr(supervisor.agent_registry, 'websocket_manager') and supervisor.agent_registry.websocket_manager:
+            logger.debug("Supervisor agent registry already has WebSocket manager configured")
         else:
-            logger.warning("WebSocket manager not available or supervisor lacks agent_registry")
+            logger.info("WebSocket manager will be set per-request via factory pattern - SSOT compliance")
     else:
         logger.warning("Supervisor lacks agent_registry - WebSocket events may not work")
     
@@ -345,7 +512,7 @@ async def get_request_scoped_user_context(
     user_id: str,
     thread_id: str,
     run_id: Optional[str] = None,
-    websocket_connection_id: Optional[str] = None
+    websocket_client_id: Optional[str] = None
 ) -> RequestScopedContext:
     """Create request-scoped user context WITHOUT storing database sessions.
     
@@ -365,16 +532,17 @@ async def get_request_scoped_user_context(
         HTTPException: If context creation fails
     """
     try:
-        # Generate run_id if not provided
+        # SSOT COMPLIANCE FIX: Generate run_id using UnifiedIdGenerator if not provided
         if not run_id:
-            run_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
         
         # Create request-scoped context (no session storage)
         context = RequestScopedContext(
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_client_id
         )
         
         logger.info(f"Created RequestScopedContext for user {user_id}, run {run_id} - NO sessions stored")
@@ -387,15 +555,124 @@ async def get_request_scoped_user_context(
             detail=f"Failed to create request-scoped context: {str(e)}"
         )
 
+def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
+    """Get existing user execution context or create if needed - CORRECT PATTERN.
+    
+    ⚠️  DEPRECATED: Use get_user_session_context() for new code.
+    
+    This function implements proper session management using the SSOT UserSessionManager.
+    It maintains conversation continuity by reusing existing contexts instead of always
+    creating new ones.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation continuity  
+        run_id: Optional run identifier - if provided, determines session behavior:
+                - None: Use existing session run_id or create new session
+                - Matches existing: Use existing session (conversation continues)
+                - Different: Create new run within same thread (new agent execution)
+        
+    Returns:
+        UserExecutionContext with proper session management
+    """
+    logger.warning("get_user_execution_context is deprecated - use get_user_session_context() for new code")
+    
+    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+    
+    # Get or create session using SSOT session management with run_id handling
+    session_data = UnifiedIdGenerator.get_or_create_user_session(
+        user_id=user_id, 
+        thread_id=thread_id,
+        run_id=run_id
+    )
+    
+    # Create UserExecutionContext with session-managed IDs
+    return UserExecutionContext(
+        user_id=user_id,
+        thread_id=session_data["thread_id"],
+        run_id=session_data["run_id"],
+        request_id=session_data["request_id"],
+        websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+    )
+
+
+async def get_user_session_context(user_id: str, 
+                                  thread_id: Optional[str] = None, 
+                                  run_id: Optional[str] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+    """Get user session context using SSOT UserSessionManager - PREFERRED METHOD.
+    
+    This is the PREFERRED method for getting user execution contexts as it uses the
+    comprehensive UserSessionManager for proper session lifecycle management.
+    
+    Key Features:
+    - Maintains conversation continuity by reusing existing sessions
+    - Integrates with WebSocket lifecycle management
+    - Provides comprehensive logging and monitoring
+    - Handles session cleanup automatically
+    - Thread-safe operations with proper locking
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation continuity (auto-generated if None)
+        run_id: Optional run identifier for specific agent executions
+        websocket_connection_id: Optional WebSocket connection ID
+        
+    Returns:
+        UserExecutionContext: Session-managed execution context
+        
+    Raises:
+        SessionManagerError: If session management fails
+    """
+    from shared.session_management import get_user_session
+    
+    # Generate thread_id if not provided (for new conversations)
+    if not thread_id:
+        from shared.id_generation import UnifiedIdGenerator
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_new")
+        logger.info(f"Generated new thread_id for user {user_id}: {thread_id}")
+    
+    try:
+        # Use SSOT UserSessionManager for session management
+        context = await get_user_session(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_connection_id=websocket_connection_id
+        )
+        
+        logger.debug(f"Retrieved session context for user {user_id}: {context.get_correlation_id()}")
+        return context
+        
+    except Exception as e:
+        logger.error(f"Failed to get user session context for user {user_id}: {e}", exc_info=True)
+        # Fall back to direct creation for robustness
+        logger.warning("Falling back to direct UserExecutionContext creation")
+        return UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id or UnifiedIdGenerator.generate_base_id("run"),
+            websocket_client_id=websocket_connection_id or UnifiedIdGenerator.generate_websocket_client_id(user_id)
+        )
+
+
 def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
                                   db_session: Optional[AsyncSession] = None,
-                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+                                  websocket_client_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
-    DEPRECATED: Use get_request_scoped_user_context for new code.
-    This function is kept for backward compatibility.
+    ⚠️  DEPRECATED: This function breaks conversation continuity!
+    
+    CRITICAL ISSUE: This function always creates NEW contexts instead of maintaining
+    session continuity. This breaks multi-turn conversations and causes memory leaks.
+    
+    USE INSTEAD:
+    - get_user_execution_context() for session-based context management
+    - get_request_scoped_user_context() for HTTP requests
+    
+    This function is kept for backward compatibility but should be replaced.
     
     CRITICAL: When db_session is provided, it must be request-scoped only.
     
@@ -424,16 +701,19 @@ def create_user_execution_context(user_id: str,
             if hasattr(db_session, 'info'):
                 if not db_session.info:
                     db_session.info = {}
+                # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for ID generation
+                from shared.id_generation import UnifiedIdGenerator
                 db_session.info.update({
                     'user_id': user_id,
-                    'run_id': run_id or str(uuid.uuid4()),
-                    'request_id': str(uuid.uuid4()),
+                    'run_id': run_id or UnifiedIdGenerator.generate_base_id("run"),
+                    'request_id': UnifiedIdGenerator.generate_base_id("req"),
                     'tagged_at': time.time()
                 })
         
-        # Generate run_id if not provided
+        # SSOT COMPLIANCE FIX: Generate run_id using UnifiedIdGenerator if not provided
         if not run_id:
-            run_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
         
         # Create user execution context
         user_context = UserExecutionContext.from_request(
@@ -441,7 +721,7 @@ def create_user_execution_context(user_id: str,
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_client_id  # Fixed parameter name
         )
         
         logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")
@@ -495,7 +775,7 @@ async def get_request_scoped_supervisor(
             logger.error("WebSocket bridge not available in app state")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocket bridge not configured"
+                detail="WebSocket bridge unavailable (startup failed or invalid configuration - check app startup logs)"
             )
         
         # Get tool dispatcher from legacy supervisor for now
@@ -505,7 +785,7 @@ async def get_request_scoped_supervisor(
             logger.error("Tool dispatcher not available")
             raise HTTPException(
                 status_code=500,
-                detail="Tool dispatcher not configured"
+                detail="Tool dispatcher unavailable (check supervisor initialization and configuration validity)"
             )
         
         # Use core supervisor factory for consistency with WebSocket pattern
@@ -570,6 +850,26 @@ async def get_user_supervisor_factory(request: Request,
 
 # Type aliases for dependency injection
 RequestScopedContextDep = Annotated[RequestScopedContext, Depends(get_request_scoped_user_context)]
+
+# New session manager dependencies
+async def get_user_session_context_dependency(
+    user_id: str,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    websocket_connection_id: Optional[str] = None
+) -> UserExecutionContext:
+    """Dependency for getting user session context with SSOT UserSessionManager.
+    
+    This is the PREFERRED dependency for user execution contexts in new code.
+    """
+    return await get_user_session_context(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        websocket_connection_id=websocket_connection_id
+    )
+
+UserSessionContextDep = Annotated[UserExecutionContext, Depends(get_user_session_context_dependency)]
 
 # Type alias for the new isolated supervisor dependency (DEPRECATED)
 IsolatedSupervisorDep = Annotated["Supervisor", Depends(get_user_supervisor_factory)]
@@ -857,23 +1157,11 @@ def get_message_handler_service(request: Request):
     supervisor = get_agent_supervisor(request)  # This validates no stored sessions
     thread_service = get_thread_service(request)
     
-    # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
-    # This ensures WebSocket events work in all scenarios, not just direct WebSocket routes
-    try:
-        # Create user context for proper isolation
-        user_context = UserExecutionContext(
-            user_id="system",
-            request_id=f"message_handler_{time.time()}",
-            thread_id="message_handler_main",
-            run_id=f"run_{time.time()}"
-        )
-        websocket_manager = create_websocket_manager(user_context)
-        logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
-        return MessageHandlerService(supervisor, thread_service, websocket_manager)
-    except Exception as e:
-        # Backward compatibility: if WebSocket manager isn't available, still work without it
-        logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
-        return MessageHandlerService(supervisor, thread_service)
+    # SSOT COMPLIANCE FIX: Don't create WebSocket managers during global dependency injection
+    # WebSocket managers should only be created per-request with proper UserExecutionContext
+    # This legacy service will have limited WebSocket capabilities - use request-scoped alternatives
+    logger.info("Creating legacy MessageHandlerService without WebSocket manager - use request-scoped message handlers for WebSocket events")
+    return MessageHandlerService(supervisor, thread_service)
 
 
 async def get_request_scoped_message_handler(
@@ -906,7 +1194,16 @@ async def get_request_scoped_message_handler(
             thread_id=context.thread_id,
             run_id=context.run_id
         )
-        websocket_manager = create_websocket_manager(user_context)
+        
+        # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling
+        try:
+            websocket_manager = await create_websocket_manager(user_context)
+            if not websocket_manager:
+                logger.warning(f"WebSocket manager creation returned None for user {context.user_id}")
+                websocket_manager = None
+        except Exception as e:
+            logger.error(f"Failed to create WebSocket manager for user {context.user_id}: {e}")
+            websocket_manager = None
         
         # Create MessageHandlerService with request-scoped components
         from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -984,7 +1281,7 @@ def get_execution_engine_factory(request: Request) -> ExecutionEngineFactory:
             logger.error("ExecutionEngineFactory not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="ExecutionEngineFactory not configured"
+                detail="ExecutionEngineFactory unavailable (startup initialization failed or configuration invalid)"
             )
         
         return factory
@@ -1015,7 +1312,7 @@ def get_websocket_bridge_factory(request: Request) -> WebSocketBridgeFactory:
             logger.error("WebSocketBridgeFactory not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocketBridgeFactory not configured"
+                detail="WebSocketBridgeFactory unavailable (startup initialization failed or configuration invalid)"
             )
         
         return factory
@@ -1046,7 +1343,7 @@ def get_factory_adapter(request: Request) -> FactoryAdapter:
             logger.error("FactoryAdapter not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="FactoryAdapter not configured"
+                detail="FactoryAdapter unavailable (startup initialization failed or configuration invalid)"
             )
         
         return adapter
@@ -1088,9 +1385,10 @@ async def get_factory_execution_engine(
         # Get factory from app state
         factory = get_execution_engine_factory(request)
         
-        # Create user execution context
+        # SSOT COMPLIANCE FIX: Create user execution context with UnifiedIdGenerator
         if not request_id:
-            request_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            request_id = UnifiedIdGenerator.generate_base_id("req")
         
         user_context = FactoryUserExecutionContext(
             user_id=user_id,
@@ -1140,9 +1438,10 @@ async def get_factory_websocket_emitter(
         # Get factory from app state
         factory = get_websocket_bridge_factory(request)
         
-        # Generate connection ID if not provided
+        # SSOT COMPLIANCE FIX: Generate connection ID using UnifiedIdGenerator
         if not connection_id:
-            connection_id = f"conn_{user_id}_{int(time.time() * 1000)}"
+            from shared.id_generation import UnifiedIdGenerator
+            connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         
         # Create isolated WebSocket emitter
         emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
@@ -1312,6 +1611,63 @@ async def configure_route_factory_settings(
 
 
 # Helper function for startup configuration
+async def configure_session_manager(app) -> None:
+    """Configure session manager during app startup.
+    
+    This function should be called during FastAPI startup to initialize
+    the UserSessionManager for proper session lifecycle management.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        logger.info("🔄 Configuring UserSessionManager...")
+        
+        from shared.session_management import initialize_session_manager, get_session_manager
+        
+        # Initialize session manager with background cleanup
+        session_manager = await initialize_session_manager()
+        
+        # Store in app state for access in routes
+        app.state.session_manager = session_manager
+        
+        # Get initial metrics for logging
+        metrics = session_manager.get_session_metrics()
+        logger.info(f"✅ UserSessionManager configured successfully - initial metrics: {metrics.to_dict()}")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to configure UserSessionManager: {e}")
+        raise RuntimeError(f"Session manager configuration failed: {e}")
+
+
+async def shutdown_session_manager_app(app) -> None:
+    """Shutdown session manager during app shutdown.
+    
+    This function should be called during FastAPI shutdown to properly
+    cleanup session manager resources.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        logger.info("🔄 Shutting down UserSessionManager...")
+        
+        from shared.session_management import shutdown_session_manager
+        
+        # Shutdown session manager and cleanup
+        await shutdown_session_manager()
+        
+        # Remove from app state
+        if hasattr(app.state, 'session_manager'):
+            delattr(app.state, 'session_manager')
+        
+        logger.info("✅ UserSessionManager shutdown completed")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to shutdown UserSessionManager: {e}")
+        # Don't raise exception during shutdown
+
+
 def configure_factory_dependencies(app) -> None:
     """Configure factory pattern dependencies during app startup.
     

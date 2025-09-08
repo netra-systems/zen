@@ -12,13 +12,15 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 def generate_thread_id() -> str:
     """Generate unique thread ID using UnifiedIDManager for SSOT compliance.
     
-    Returns the full thread ID with 'thread_' prefix included.
-    UnifiedIDManager.generate_thread_id() returns unprefixed ID to prevent double prefixing.
+    Uses the proper SSOT pattern: instance method with IDType enum.
+    Returns properly formatted thread ID with consistent naming.
     """
-    # UnifiedIDManager returns unprefixed ID like "session_1234_abcd"
-    # We add the thread_ prefix here for the full ID
-    base_id = UnifiedIDManager.generate_thread_id()
-    return f"thread_{base_id}"
+    from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+    
+    # Use SSOT pattern: instance method with IDType for consistency
+    # No prefix needed as IDType.THREAD already includes "thread" in the ID
+    id_manager = get_id_manager()
+    return id_manager.generate_id(IDType.THREAD)
 
 
 def prepare_thread_metadata(thread_data, user_id: str) -> Dict[str, Any]:

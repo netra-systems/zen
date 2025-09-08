@@ -17,13 +17,13 @@ import time
 import uuid
 from typing import Any, Dict, List
 
-from tests.e2e.auth_flow_testers import AuthFlowE2ETester
+from tests.e2e.auth_flow_manager import AuthFlowTester
 
 
 class AdminUserOperations:
     """Core admin operations for user management."""
     
-    def __init__(self, auth_tester: AuthFlowE2ETester):
+    def __init__(self, auth_tester: AuthFlowTester):
         self.auth_tester = auth_tester
         self.admin_user_id = None
         self.test_user_id = None

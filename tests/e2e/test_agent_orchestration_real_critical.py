@@ -44,8 +44,9 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 
-# Import test framework for REAL services
+# Import test framework for REAL services with SSOT authentication
 from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
@@ -202,64 +203,63 @@ class RealWebSocketEventValidator:
 # ============================================================================
 
 class RealServiceChatTester:
-    """Tests real chat flow using actual services."""
+    """Tests real chat flow using actual services with SSOT authentication."""
     
     def __init__(self):
-        self.auth_client = None
+        self.auth_helper = None
+        self.ws_auth_helper = None
         self.backend_client = None 
         self.ws_client = None
         self.test_user_token = None
+        self.test_user_data = None
         self.test_env = None
         
     async def setup_real_services(self, isolated_env) -> None:
-        """Setup real service connections."""
+        """Setup real service connections using SSOT authentication patterns."""
         self.test_env = isolated_env
         
         # Ensure we're using REAL services, not mocks
         assert isolated_env.get("USE_REAL_SERVICES") != "false", "Must use real services"
         assert isolated_env.get("TESTING") == "1", "Must be in test mode"
         
-        # Get service endpoints
-        auth_host = isolated_env.get("AUTH_SERVICE_HOST", "localhost")
-        auth_port = isolated_env.get("AUTH_SERVICE_PORT", "8081")
+        # Determine test environment
+        test_environment = isolated_env.get("TEST_ENV", isolated_env.get("ENVIRONMENT", "test"))
+        
+        # CRITICAL: Use SSOT E2E authentication helper
+        self.auth_helper = E2EAuthHelper(environment=test_environment)
+        self.ws_auth_helper = E2EWebSocketAuthHelper(environment=test_environment)
+        
+        # Create authenticated user using SSOT pattern
+        unique_email = f"test_chat_{uuid.uuid4().hex[:8]}@example.com"
+        self.test_user_token, self.test_user_data = await create_authenticated_user(
+            environment=test_environment,
+            email=unique_email
+        )
+        
+        # Validate token was created successfully
+        assert self.test_user_token, "CRITICAL: Failed to create authenticated user token"
+        assert self.test_user_data, "CRITICAL: Failed to create authenticated user data"
+        
+        # Get service endpoints from environment
         backend_host = isolated_env.get("BACKEND_HOST", "localhost")
         backend_port = isolated_env.get("BACKEND_PORT", "8000")
         
-        # Initialize real service clients
-        self.auth_client = AuthTestClient(f"http://{auth_host}:{auth_port}")
-        self.backend_client = BackendTestClient(f"http://{backend_host}:{backend_port}")
+        # Initialize backend client with authentication
+        backend_url = f"http://{backend_host}:{backend_port}"
+        self.backend_client = BackendTestClient(backend_url)
         
-        # Create test user and get token
-        test_user_data = {
-            "email": f"test_chat_{uuid.uuid4().hex[:8]}@example.com",
-            "password": "TestPassword123!"
-        }
-        
-        # Register test user
-        register_response = await self.auth_client.register(
-            email=test_user_data["email"],
-            password=test_user_data["password"]
-        )
-        # Check if registration was successful (auth service returns user data on success)
-        assert register_response, f"Failed to register test user: {register_response}"
-        assert "id" in register_response or "user_id" in register_response or register_response.get("success"), f"Registration response missing user ID: {register_response}"
-        
-        # Login to get token (auth_client.login returns the token string directly)
-        self.test_user_token = await self.auth_client.login(
-            email=test_user_data["email"],
-            password=test_user_data["password"]
-        )
-        assert self.test_user_token, f"Failed to get login token"
-        
-        # Setup WebSocket client
+        # Setup WebSocket client using SSOT auth helper
         ws_url = f"ws://{backend_host}:{backend_port}/ws"
         self.ws_client = WebSocketTestClient(ws_url)
         
-        # Connect WebSocket with authentication
+        # CRITICAL: Connect WebSocket with SSOT authentication - using token for now
+        # Note: WebSocket client uses Authorization header internally when token is provided
         connected = await self.ws_client.connect(token=self.test_user_token, timeout=10.0)
-        assert connected, "Failed to establish WebSocket connection"
+        assert connected, "CRITICAL: Failed to establish authenticated WebSocket connection"
         
-        logger.info("Real services setup complete")
+        logger.info(f"✅ Real services setup complete with SSOT auth (environment: {test_environment})")
+        logger.info(f"✅ User authenticated: {self.test_user_data.get('email')}")
+        logger.info(f"✅ WebSocket connected with proper authentication headers")
         
     async def test_critical_chat_flow(self, user_message: str, timeout: float = 5.0) -> tuple[bool, RealWebSocketEventValidator]:
         """Test the critical chat flow with real services."""
@@ -295,29 +295,23 @@ class RealServiceChatTester:
         agent_completed = False
         
         while not agent_completed and (time.time() - start_time) < timeout:
-            try:
-                # Receive message with short timeout for responsiveness
-                message = await self.ws_client.receive(timeout=0.5)
+            # CRITICAL: Receive message with short timeout - MUST NOT swallow exceptions
+            message = await self.ws_client.receive(timeout=0.5)
+            
+            if message:
+                validator.record_event(message)
                 
-                if message:
-                    validator.record_event(message)
+                # Check if agent flow is complete
+                if message.get("type") == "agent_completed":
+                    agent_completed = True
+                    logger.info("Agent execution completed")
                     
-                    # Check if agent flow is complete
-                    if message.get("type") == "agent_completed":
-                        agent_completed = True
-                        logger.info("Agent execution completed")
-                        
-                    # Also check for final_report as an alternative completion
-                    elif message.get("type") == "final_report":
-                        agent_completed = True  
-                        logger.info("Final report received, considering flow complete")
-                        
-            except asyncio.TimeoutError:
-                # Continue collecting - this is expected
-                continue
-            except Exception as e:
-                logger.error(f"Error collecting WebSocket events: {e}")
-                break
+                # Also check for final_report as an alternative completion
+                elif message.get("type") == "final_report":
+                    agent_completed = True  
+                    logger.info("Final report received, considering flow complete")
+            
+            # CRITICAL: No exception swallowing - let real errors propagate
                 
         if not agent_completed:
             logger.warning(f"Agent execution did not complete within {timeout}s")
@@ -353,6 +347,9 @@ class TestRealAgentOrchestrationCritical:
         """
         tester = RealServiceChatTester()
         
+        # CRITICAL: Start timing validation to prevent 0.00s execution
+        test_start_time = time.time()
+        
         try:
             # Setup real services 
             await tester.setup_real_services(isolated_test_env)
@@ -368,6 +365,10 @@ class TestRealAgentOrchestrationCritical:
             )
             execution_time = time.time() - start_time
             
+            # CRITICAL: Validate test actually executed (not 0.00s bypass)
+            total_test_time = time.time() - test_start_time
+            assert total_test_time >= 0.1, f"CRITICAL: E2E test executed too fast ({total_test_time:.3f}s) - indicates mocking or bypassing"
+            
             # CRITICAL ASSERTIONS
             assert is_valid, f"CRITICAL FAILURE: Basic chat flow failed: {validator.errors}"
             
@@ -377,6 +378,7 @@ class TestRealAgentOrchestrationCritical:
             
             # Validate execution time for chat UX
             assert execution_time <= 5.0, f"Chat response too slow: {execution_time:.2f}s"
+            assert execution_time >= 0.1, f"CRITICAL: Chat execution too fast ({execution_time:.3f}s) - indicates mocking"
             
             # Validate event counts make sense
             assert validator.event_counts.get("agent_started", 0) >= 1, "No agent_started events"
@@ -388,6 +390,7 @@ class TestRealAgentOrchestrationCritical:
             # Validate event timing
             total_flow_time = validator.event_timeline[-1][0] if validator.event_timeline else 0
             assert total_flow_time <= 3.0, f"Total flow time too slow: {total_flow_time:.2f}s"
+            assert total_flow_time >= 0.1, f"CRITICAL: Event flow too fast ({total_flow_time:.3f}s) - indicates mocking"
             
             logger.info(f"✅ CRITICAL TEST PASSED: Basic chat flow completed in {execution_time:.2f}s with {len(validator.events)} events")
             
@@ -407,6 +410,9 @@ class TestRealAgentOrchestrationCritical:
         """
         tester = RealServiceChatTester()
         
+        # CRITICAL: Start timing validation to prevent 0.00s execution
+        test_start_time = time.time()
+        
         try:
             await tester.setup_real_services(isolated_test_env)
             
@@ -417,6 +423,10 @@ class TestRealAgentOrchestrationCritical:
                 user_message=analysis_query,
                 timeout=8.0  # Longer timeout for analysis
             )
+            
+            # CRITICAL: Validate test actually executed (not bypassed)
+            total_test_time = time.time() - test_start_time
+            assert total_test_time >= 0.1, f"CRITICAL: E2E test executed too fast ({total_test_time:.3f}s) - indicates mocking or bypassing"
             
             # CRITICAL: Must have thinking events
             thinking_count = validator.event_counts.get("agent_thinking", 0)
@@ -446,6 +456,9 @@ class TestRealAgentOrchestrationCritical:
         """
         tester = RealServiceChatTester()
         
+        # CRITICAL: Start timing validation to prevent 0.00s execution
+        test_start_time = time.time()
+        
         try:
             await tester.setup_real_services(isolated_test_env)
             
@@ -456,6 +469,10 @@ class TestRealAgentOrchestrationCritical:
                 user_message=tool_query,
                 timeout=10.0
             )
+            
+            # CRITICAL: Validate test actually executed (not bypassed)
+            total_test_time = time.time() - test_start_time
+            assert total_test_time >= 0.1, f"CRITICAL: E2E test executed too fast ({total_test_time:.3f}s) - indicates mocking or bypassing"
             
             # CRITICAL: Must have tool execution events
             tool_executing_count = validator.event_counts.get("tool_executing", 0)
@@ -486,6 +503,9 @@ class TestRealAgentOrchestrationCritical:
         """
         tester = RealServiceChatTester()
         
+        # CRITICAL: Start timing validation to prevent 0.00s execution
+        test_start_time = time.time()
+        
         try:
             await tester.setup_real_services(isolated_test_env)
             
@@ -496,6 +516,10 @@ class TestRealAgentOrchestrationCritical:
                 user_message=simple_query,
                 timeout=5.0
             )
+            
+            # CRITICAL: Validate test actually executed (not bypassed)
+            total_test_time = time.time() - test_start_time
+            assert total_test_time >= 0.1, f"CRITICAL: E2E test executed too fast ({total_test_time:.3f}s) - indicates mocking or bypassing"
             
             # CRITICAL: Must end with completion event
             assert len(validator.event_timeline) > 0, "No events received"
@@ -528,6 +552,9 @@ class TestRealAgentOrchestrationCritical:
         # This test simulates what happens when multiple users are chatting
         testers = []
         
+        # CRITICAL: Start timing validation to prevent 0.00s execution
+        test_start_time = time.time()
+        
         try:
             # Setup 3 concurrent chat sessions
             for i in range(3):
@@ -555,6 +582,10 @@ class TestRealAgentOrchestrationCritical:
             
             # Wait for all to complete
             results = await asyncio.gather(*tasks)
+            
+            # CRITICAL: Validate test actually executed (not bypassed)
+            total_test_time = time.time() - test_start_time
+            assert total_test_time >= 0.1, f"CRITICAL: E2E test executed too fast ({total_test_time:.3f}s) - indicates mocking or bypassing"
             
             # CRITICAL: All sessions should succeed
             for i, (is_valid, validator) in enumerate(results):

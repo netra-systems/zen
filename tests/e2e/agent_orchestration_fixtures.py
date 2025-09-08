@@ -19,19 +19,8 @@ import pytest
 from tests.e2e.config import CustomerTier
 
 
-@pytest.fixture
-async def mock_supervisor_agent():
-    """DEPRECATED: Mock supervisor agent - MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md
-    Use real_supervisor_agent instead for e2e testing
-    """
-    import warnings
-    warnings.warn(
-        "mock_supervisor_agent is deprecated. Use real_supervisor_agent for e2e tests. "
-        "MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    raise NotImplementedError("MOCKS ARE FORBIDDEN in e2e tests. Use real_supervisor_agent instead.")
+# REMOVED: mock_supervisor_agent deprecated fixture per CLAUDE.md
+# Use real_supervisor_agent instead for e2e testing
 
 
 @pytest.fixture
@@ -74,19 +63,8 @@ async def real_supervisor_agent():
     return supervisor
 
 
-@pytest.fixture
-async def mock_sub_agents():
-    """DEPRECATED: Mock sub-agents - MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md
-    Use real_sub_agents instead for e2e testing
-    """
-    import warnings
-    warnings.warn(
-        "mock_sub_agents is deprecated. Use real_sub_agents for e2e tests. "
-        "MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    raise NotImplementedError("MOCKS ARE FORBIDDEN in e2e tests. Use real_sub_agents instead.")
+# REMOVED: mock_sub_agents deprecated fixture per CLAUDE.md  
+# Use real_sub_agents instead for e2e testing
 
 
 @pytest.fixture
@@ -167,19 +145,8 @@ def sample_agent_state():
     return state
 
 
-@pytest.fixture
-async def websocket_mock():
-    """DEPRECATED: Mock WebSocket - MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md
-    Use real_websocket instead for e2e testing
-    """
-    import warnings
-    warnings.warn(
-        "websocket_mock is deprecated. Use real_websocket for e2e tests. "
-        "MOCKS ARE FORBIDDEN in e2e tests per CLAUDE.md",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    raise NotImplementedError("MOCKS ARE FORBIDDEN in e2e tests. Use real_websocket instead.")
+# REMOVED: websocket_mock deprecated fixture per CLAUDE.md
+# Use real_websocket instead for e2e testing
 
 
 @pytest.fixture

@@ -6,6 +6,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch, MagicMock, AsyncMock
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -27,163 +28,58 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 env = get_env()
-class TestSyntaxFix:
-    """Test class for orphaned methods"""
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
+# =============================================================================
+# FIXTURES FOR CROSS-SERVICE INTEGRATION TESTS
+# =============================================================================
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
+@pytest.fixture
+def service_discovery():
+    """Create test service discovery."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        discovery = ServiceDiscovery(Path(temp_dir))
+        # Register test services
+        discovery.write_backend_info(8000)
+        discovery.write_frontend_info(3000)
+        discovery.write_auth_info({
+            'port': 8081,
+            'url': 'http://localhost:8081',
+            'api_url': 'http://localhost:8081/api'
+        })
+        yield discovery
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
+@pytest.fixture
+def health_monitor():
+    """Create test health monitor."""
+    return HealthMonitor(check_interval=1)
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
+@pytest.fixture
+def launcher_config():
+    """Create test launcher configuration."""
+    return LauncherConfig()
 
-    def health_monitor(self):
-        """Create test health monitor."""
-        return HealthMonitor(check_interval=1)
+@pytest.fixture
+def app():
+    """Create test FastAPI app."""
+    app = FastAPI()
+    
+    @app.get("/test")
+    async def test_endpoint():
+        return {"message": "test"}
+    
+    @app.options("/test")
+    async def test_options():
+        return Response(status_code=200)
+    
+    return app
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
+# =============================================================================
+# CROSS-SERVICE INTEGRATION TEST CLASS
+# =============================================================================
 
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
-
-    def health_monitor(self):
-        """Create test health monitor."""
-        return HealthMonitor(check_interval=1)
-
-    def app(self):
-        """Create test FastAPI app."""
-        app = FastAPI()
-        
-        @app.get("/test")
-        async def test_endpoint():
-            return {"message": "test"}
-        
-        @app.options("/test")
-        async def test_options():
-            return Response(status_code=200)
-        
-        return app
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            yield discovery
-
+class TestCrossServiceIntegrationCore1:
+    """Core cross-service integration tests."""
+    
     def test_cors_middleware_initialization(self, app, service_discovery):
         """Test CORS middleware initializes with unified configuration."""
         # CORS now handled by FastAPI's built-in CORSMiddleware with unified config
@@ -301,34 +197,6 @@ class TestSyntaxFix:
         # This test would require actual running services
         # Enable when doing full integration testing
         pass
-
-    def app(self):
-        """Create test FastAPI app."""
-        app = FastAPI()
-        
-        @app.get("/test")
-        async def test_endpoint():
-            return {"message": "test"}
-        
-        @app.options("/test")
-        async def test_options():
-            return Response(status_code=200)
-        
-        return app
-
-    def service_discovery(self):
-        """Create test service discovery."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            discovery = ServiceDiscovery(Path(temp_dir))
-            # Register test services
-            discovery.write_backend_info(8000)
-            discovery.write_frontend_info(3000)
-            discovery.write_auth_info({
-                'port': 8081,
-                'url': 'http://localhost:8081',
-                'api_url': 'http://localhost:8081/api'
-            })
-            yield discovery
 
     def test_cors_middleware_initialization(self, app, service_discovery):
         """Test CORS middleware initializes with unified configuration."""

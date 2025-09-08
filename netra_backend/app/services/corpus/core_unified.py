@@ -14,7 +14,7 @@ from netra_backend.app.services.corpus.content_operations import (
 )
 from netra_backend.app.services.corpus.corpus_creation import CorpusCreationService
 from netra_backend.app.services.corpus.corpus_crud import CorpusCrudService
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class CorpusService:

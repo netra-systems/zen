@@ -79,7 +79,11 @@ class WebSocketTestClient:
     
     def __init__(self, url: str, user_id: str = None):
         self.url = url
-        self.user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
+        if not user_id:
+            from shared.id_generation import generate_uuid_replacement
+            user_id = f"test_user_{generate_uuid_replacement()}"
+        self.user_id = user_id
         self.websocket = None
         self.events_received = []
         
@@ -162,8 +166,14 @@ class MockWebSocketConnection:
         self.state.name = "OPEN"
         self._sent_messages = []
         self._receive_queue = asyncio.Queue()
-        self.user_id = user_id or f"mock_user_{uuid.uuid4().hex[:8]}"
-        self.connection_id = f"conn_{uuid.uuid4().hex[:8]}"
+        
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
+        from shared.id_generation import generate_uuid_replacement, UnifiedIdGenerator
+        
+        if not user_id:
+            user_id = f"mock_user_{generate_uuid_replacement()}"
+        self.user_id = user_id
+        self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         
         # Track sequence numbers for ordering tests
         self._sequence_number = 0
@@ -413,7 +423,7 @@ class WebSocketTestHelpers:
                 return connection
                 
             except (websockets.exceptions.ConnectionClosedError, 
-                   websockets.exceptions.InvalidStatusCode,
+                   websockets.exceptions.InvalidStatus,
                    asyncio.TimeoutError) as e:
                 last_error = e
                 if attempt < max_retries - 1:

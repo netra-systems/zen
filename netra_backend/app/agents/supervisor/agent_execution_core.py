@@ -25,7 +25,8 @@ from netra_backend.app.core.execution_tracker import get_execution_tracker, Exec
 # from netra_backend.app.core.trace_persistence import get_execution_persistence
 from netra_backend.app.core.unified_trace_context import (
     UnifiedTraceContext,
-    get_current_trace_context
+    get_current_trace_context,
+    TraceContextManager
 )
 from netra_backend.app.core.logging_context import (
     get_unified_trace_context,
@@ -210,6 +211,7 @@ class AgentExecutionCore:
                 
                 return AgentExecutionResult(
                     success=False,
+                    agent_name=context.agent_name,
                     error=f"Agent execution failed: {str(e)}"
                 )
     
@@ -253,7 +255,7 @@ class AgentExecutionCore:
                     # Agent didn't return proper result format
                     return AgentExecutionResult(
                         success=True,
-                        state=state,
+                        agent_name=context.agent_name,
                         duration=duration,
                         metrics=self._calculate_performance_metrics(start_time, heartbeat)
                     )
@@ -263,6 +265,7 @@ class AgentExecutionCore:
             logger.error(f"Agent {context.agent_name} timed out after {timeout_seconds}s")
             return AgentExecutionResult(
                 success=False,
+                agent_name=context.agent_name,
                 error=f"Agent execution timeout after {timeout_seconds}s",
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
@@ -273,6 +276,7 @@ class AgentExecutionCore:
             logger.error(f"Agent {context.agent_name} failed with error: {e}")
             return AgentExecutionResult(
                 success=False,
+                agent_name=context.agent_name,
                 error=str(e),
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
@@ -291,24 +295,27 @@ class AgentExecutionCore:
         # Set up websocket context on agent
         await self._setup_agent_websocket(agent, context, state, trace_context)
         
-        # Create execution wrapper that sends heartbeats
+        # Create execution wrapper that conditionally sends heartbeats
         async def execute_with_heartbeat():
-            # Send initial heartbeat
-            await heartbeat.pulse({"status": "executing"})
+            # Send initial heartbeat if heartbeat is enabled
+            if heartbeat:
+                await heartbeat.pulse({"status": "executing"})
             
             # Execute the agent
             try:
                 # CRITICAL: This is where agent.execute() is called
                 result = await agent.execute(state, context.run_id, True)
                 
-                # Send final heartbeat
-                await heartbeat.pulse({"status": "completed"})
+                # Send final heartbeat if heartbeat is enabled
+                if heartbeat:
+                    await heartbeat.pulse({"status": "completed"})
                 
                 return result
                 
             except Exception as e:
-                # Send error heartbeat
-                await heartbeat.pulse({"status": "error", "error": str(e)})
+                # Send error heartbeat if heartbeat is enabled
+                if heartbeat:
+                    await heartbeat.pulse({"status": "error", "error": str(e)})
                 # Log the error with full context for debugging
                 logger.error(f"Agent {context.agent_name} execution failed: {e}", extra={
                     "run_id": str(context.run_id),
@@ -318,7 +325,7 @@ class AgentExecutionCore:
                 })
                 raise
         
-        # Execute with heartbeat wrapper
+        # Execute with heartbeat wrapper (heartbeat may be None/disabled)
         result = await execute_with_heartbeat()
         
         # Ensure result is properly structured
@@ -400,6 +407,7 @@ class AgentExecutionCore:
         if not agent:
             return AgentExecutionResult(
                 success=False,
+                agent_name=agent_name,
                 error=f"Agent {agent_name} not found"
             )
         return agent
@@ -466,17 +474,22 @@ class AgentExecutionCore:
         state: DeepAgentState
     ):
         """Persist performance metrics to ClickHouse."""
-        try:
-            # Prepare metric record with context
-            metric_record = {
-                'execution_id': exec_id,
-                'agent_name': agent_name,
-                'user_id': getattr(state, 'user_id', None),
-            }
-            
-            # Write individual metrics
-            for metric_type, metric_value in metrics.items():
-                if isinstance(metric_value, (int, float)):
+        # Skip persistence if not configured
+        if not self.persistence:
+            logger.debug(f"Metrics persistence disabled for execution {exec_id}")
+            return
+        
+        # Prepare metric record with context
+        metric_record = {
+            'execution_id': exec_id,
+            'agent_name': agent_name,
+            'user_id': getattr(state, 'user_id', None),
+        }
+        
+        # Write individual metrics with per-metric error handling
+        for metric_type, metric_value in metrics.items():
+            if isinstance(metric_value, (int, float)):
+                try:
                     await self.persistence.write_performance_metrics(
                         exec_id, 
                         {
@@ -485,5 +498,5 @@ class AgentExecutionCore:
                             'metric_value': float(metric_value)
                         }
                     )
-        except Exception as e:
-            logger.error(f"Failed to persist metrics for execution {exec_id}: {e}")
+                except Exception as e:
+                    logger.error(f"Failed to persist metric '{metric_type}' for execution {exec_id}: {e}")

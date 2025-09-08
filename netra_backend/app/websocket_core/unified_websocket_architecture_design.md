@@ -353,7 +353,7 @@ from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 

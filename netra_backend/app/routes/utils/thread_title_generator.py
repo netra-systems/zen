@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core import get_websocket_manager
+# WebSocket manager accessed via factory pattern for security
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.message_repository import MessageRepository
 
@@ -68,14 +68,29 @@ async def update_thread_with_title(db: AsyncSession, thread, title: str) -> None
     await db.commit()
 
 
-async def send_thread_rename_notification(user_id: str, thread_id: str, title: str) -> None:
-    """Send WebSocket notification for thread rename."""
+async def send_thread_rename_notification(user_id: str, thread_id: str, title: str, user_context=None) -> None:
+    """Send WebSocket notification for thread rename.
+    
+    Args:
+        user_id: User identifier
+        thread_id: Thread identifier
+        title: New title
+        user_context: Optional user execution context for WebSocket notifications
+    """
     event = {
         "type": "thread_renamed", "thread_id": thread_id,
         "new_title": title, "timestamp": int(time.time())
     }
-    websocket_manager = get_websocket_manager()
-    await websocket_manager.send_to_user(str(user_id), event)
+    
+    if user_context:
+        try:
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            websocket_manager = await create_websocket_manager(user_context)
+            await websocket_manager.send_to_user(str(user_id), event)
+        except Exception as e:
+            logger.error(f"Failed to send thread rename notification: {e}")
+    else:
+        logger.debug(f"Thread renamed without WebSocket notification (no user context): {thread_id} -> {title}")
 
 
 async def create_final_thread_response(db: AsyncSession, thread, title: str):

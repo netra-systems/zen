@@ -19,13 +19,13 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from tests.e2e.auth_flow_testers import AuthFlowE2ETester
+from tests.e2e.auth_flow_manager import AuthFlowTester
 
 
 class AdminAuditTrailValidator:
     """Comprehensive audit trail validation for admin operations."""
     
-    def __init__(self, auth_tester: AuthFlowE2ETester):
+    def __init__(self, auth_tester: AuthFlowTester):
         self.auth_tester = auth_tester
         self.expected_audit_entries = []
         self.actual_audit_entries = []

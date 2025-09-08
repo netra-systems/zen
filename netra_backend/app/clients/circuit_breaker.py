@@ -38,7 +38,7 @@ class CircuitBreakerConfig:
     """Configuration for circuit breaker behavior."""
     failure_threshold: int = 5  # Number of failures before opening
     success_threshold: int = 2  # Number of successes in half-open before closing
-    timeout: float = 60.0  # Seconds before attempting half-open from open
+    timeout: float = 15.0  # CRITICAL FIX: Reduced from 60s to prevent WebSocket blocking
     half_open_max_calls: int = 3  # Max concurrent calls in half-open state
     
     # Failure detection
@@ -48,8 +48,8 @@ class CircuitBreakerConfig:
     # Timeouts
     call_timeout: float = 5.0  # Timeout for individual calls
     
-    # Recovery
-    reset_timeout: float = 300.0  # Reset statistics after this many seconds of success
+    # Recovery - CRITICAL FIX: Reduced from 300s to prevent WebSocket blocking
+    reset_timeout: float = 60.0  # Reset statistics after this many seconds of success
 
 
 @dataclass

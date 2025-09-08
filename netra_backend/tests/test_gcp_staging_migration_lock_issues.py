@@ -24,6 +24,7 @@ import pytest
 import time
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import OperationalError
@@ -50,13 +51,13 @@ class TestMigrationLockIssues:
         """
         # Mock database connection for migration
         with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-            mock_conn = AsyncNone  # TODO: Use real service instance
+            mock_conn = AsyncMock()  # TODO: Use real service instance
             
             # Mock advisory lock acquisition failure
             async def mock_execute_with_lock_failure(query, *args):
                 if 'pg_advisory_lock' in str(query).lower():
                     raise OperationalError("could not obtain lock", None, None)
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             mock_conn.execute.side_effect = mock_execute_with_lock_failure
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
@@ -88,7 +89,7 @@ class TestMigrationLockIssues:
             """Simulate a migration attempt that might deadlock."""
             try:
                 with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-                    mock_conn = AsyncNone  # TODO: Use real service instance
+                    mock_conn = AsyncMock()  # TODO: Use real service instance
                     
                     # Mock database operations that might cause deadlock
                     async def mock_deadlock_execute(query, *args):
@@ -132,7 +133,7 @@ class TestMigrationLockIssues:
         """Test stale migration locks preventing new deployments."""
         # Mock stale lock from previous failed deployment
         with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-            mock_conn = AsyncNone  # TODO: Use real service instance
+            mock_conn = AsyncMock()  # TODO: Use real service instance
             
             # Mock existing advisory lock that won't release
             lock_held = True
@@ -142,7 +143,7 @@ class TestMigrationLockIssues:
                 
                 if 'pg_try_advisory_lock' in query_str:
                     # Return false - lock is held by another process
-                    result = MagicNone  # TODO: Use real service instance
+                    result = MagicMock()  # TODO: Use real service instance
                     result.fetchone.return_value = (False,)
                     return result
                 elif 'pg_advisory_lock' in query_str and lock_held:
@@ -150,7 +151,7 @@ class TestMigrationLockIssues:
                     await asyncio.sleep(0.2)
                     raise OperationalError("canceling statement due to statement timeout", None, None)
                 
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             mock_conn.execute.side_effect = mock_execute_with_stale_lock
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
@@ -188,7 +189,7 @@ class TestMigrationLockIssues:
         """Test migration lock timeout handling and recovery mechanisms."""
         # Mock migration that times out but should recover
         with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-            mock_conn = AsyncNone  # TODO: Use real service instance
+            mock_conn = AsyncMock()  # TODO: Use real service instance
             
             attempt_count = 0
             async def mock_execute_with_timeout_recovery(query, *args):
@@ -203,9 +204,9 @@ class TestMigrationLockIssues:
                         raise OperationalError("statement timeout", None, None)
                     else:
                         # Third attempt succeeds (recovery)
-                        return MagicNone  # TODO: Use real service instance
+                        return MagicMock()  # TODO: Use real service instance
                 
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             mock_conn.execute.side_effect = mock_execute_with_timeout_recovery
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
@@ -242,12 +243,12 @@ class TestMigrationLockIssues:
     async def test_alembic_migration_state_consistency_issues(self):
         """Test Alembic migration state consistency issues during deployment."""
         # Mock Alembic configuration
-        mock_alembic_cfg = MagicNone  # TODO: Use real service instance
+        mock_alembic_cfg = MagicMock()  # TODO: Use real service instance
         mock_alembic_cfg.get_main_option.return_value = "alembic/versions"
         
         with patch('alembic.config.Config', return_value=mock_alembic_cfg):
             with patch.object(DatabaseManager, 'create_sync_engine') as mock_sync_engine:
-                mock_conn = MagicNone  # TODO: Use real service instance
+                mock_conn = MagicMock()  # TODO: Use real service instance
                 
                 # Mock inconsistent migration state
                 migration_state = {
@@ -265,12 +266,12 @@ class TestMigrationLockIssues:
                 mock_sync_engine.return_value.begin.return_value.__enter__.return_value = mock_conn
                 
                 with patch('alembic.runtime.migration.MigrationContext') as mock_migration_context:
-                    mock_context = MagicNone  # TODO: Use real service instance
+                    mock_context = MagicMock()  # TODO: Use real service instance
                     mock_context.get_current_revision.return_value = migration_state['current_revision']
                     mock_migration_context.configure.return_value = mock_context
                     
                     with patch('alembic.script.ScriptDirectory') as mock_script_dir:
-                        mock_script = MagicNone  # TODO: Use real service instance
+                        mock_script = MagicMock()  # TODO: Use real service instance
                         mock_script.get_current_head.return_value = migration_state['head_revision']
                         mock_script_dir.from_config.return_value = mock_script
                         
@@ -311,7 +312,7 @@ class TestMigrationLockIssues:
         lock_acquired = False
         
         with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-            mock_conn = AsyncNone  # TODO: Use real service instance
+            mock_conn = AsyncMock()  # TODO: Use real service instance
             
             async def mock_execute_with_cleanup_test(query, *args):
                 nonlocal lock_acquired
@@ -319,17 +320,17 @@ class TestMigrationLockIssues:
                 
                 if 'pg_advisory_lock' in query_str:
                     lock_acquired = True
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 elif 'pg_advisory_unlock' in query_str:
                     if not lock_acquired:
                         raise Exception("Attempting to unlock without holding lock")
                     lock_acquired = False
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 elif 'create table' in query_str:
                     # Simulate migration operation failure
                     raise OperationalError("relation already exists", None, None)
                 
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             mock_conn.execute.side_effect = mock_execute_with_cleanup_test
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
@@ -386,7 +387,7 @@ class TestMigrationLockIssues:
         """Test migration rollback when lock issues occur."""
         # Mock migration that needs to rollback due to lock issues
         with patch.object(DatabaseManager, 'create_application_engine') as mock_engine:
-            mock_conn = AsyncNone  # TODO: Use real service instance
+            mock_conn = AsyncMock()  # TODO: Use real service instance
             
             rollback_executed = False
             async def mock_execute_with_rollback(query, *args):
@@ -394,21 +395,21 @@ class TestMigrationLockIssues:
                 query_str = str(query).lower()
                 
                 if 'begin' in query_str or 'pg_advisory_lock' in query_str:
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 elif 'rollback' in query_str:
                     rollback_executed = True
-                    return MagicNone  # TODO: Use real service instance
+                    return MagicMock()  # TODO: Use real service instance
                 elif 'alter table' in query_str:
                     # Simulate migration operation that fails after acquiring lock
                     raise OperationalError("lock timeout", None, None)
                 
-                return MagicNone  # TODO: Use real service instance
+                return MagicMock()  # TODO: Use real service instance
             
             mock_conn.execute.side_effect = mock_execute_with_rollback
             
             # Mock transaction rollback
-            mock_transaction = AsyncNone  # TODO: Use real service instance
-            mock_transaction.rollback = AsyncNone  # TODO: Use real service instance
+            mock_transaction = AsyncMock()  # TODO: Use real service instance
+            mock_transaction.rollback = AsyncMock()  # TODO: Use real service instance
             mock_conn.begin.return_value = mock_transaction
             
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn

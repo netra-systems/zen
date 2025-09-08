@@ -24,7 +24,7 @@ import warnings
 from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 from langchain_core.tools import BaseTool

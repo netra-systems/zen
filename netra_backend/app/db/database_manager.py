@@ -90,9 +90,34 @@ class DatabaseManager:
             raise
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
-        """Get database engine by name."""
+        """Get database engine by name with auto-initialization safety.
+        
+        CRITICAL FIX: Auto-initializes if not initialized to prevent 
+        "DatabaseManager not initialized" errors in staging.
+        """
         if not self._initialized:
-            raise RuntimeError("DatabaseManager not initialized")
+            # CRITICAL FIX: Auto-initialize on first access
+            logger.warning("DatabaseManager accessed before initialization - auto-initializing now")
+            import asyncio
+            try:
+                # Try to initialize synchronously if possible
+                asyncio.create_task(self.initialize())
+                # Give the initialization task a moment to complete
+                # Note: In production, this should be handled by proper startup sequencing
+                import time
+                time.sleep(0.1)  # Brief pause for initialization
+                
+                if not self._initialized:
+                    raise RuntimeError(
+                        "DatabaseManager auto-initialization failed. "
+                        "Ensure proper startup sequence calls await manager.initialize()"
+                    )
+            except Exception as init_error:
+                logger.error(f"Auto-initialization failed: {init_error}")
+                raise RuntimeError(
+                    f"DatabaseManager not initialized and auto-initialization failed: {init_error}. "
+                    "Fix: Call await manager.initialize() in startup sequence."
+                ) from init_error
         
         if name not in self._engines:
             raise ValueError(f"Engine '{name}' not found")
@@ -101,8 +126,13 @@ class DatabaseManager:
     
     @asynccontextmanager
     async def get_session(self, engine_name: str = 'primary'):
-        """Get async database session with automatic cleanup."""
+        """Get async database session with automatic cleanup and initialization safety.
+        
+        CRITICAL FIX: Auto-initializes if needed to prevent "not initialized" errors.
+        """
+        # CRITICAL FIX: Enhanced initialization safety
         if not self._initialized:
+            logger.info("Auto-initializing DatabaseManager for session access")
             await self.initialize()
         
         engine = self.get_engine(engine_name)
@@ -128,8 +158,16 @@ class DatabaseManager:
                     # Don't raise close errors - they shouldn't prevent completion
     
     async def health_check(self, engine_name: str = 'primary') -> Dict[str, Any]:
-        """Perform health check on database connection."""
+        """Perform health check on database connection with initialization safety.
+        
+        CRITICAL FIX: Ensures database manager is initialized before health check.
+        """
         try:
+            # CRITICAL FIX: Ensure initialization before health check
+            if not self._initialized:
+                logger.info("Initializing DatabaseManager for health check")
+                await self.initialize()
+            
             engine = self.get_engine(engine_name)
             
             async with AsyncSession(engine) as session:
@@ -224,6 +262,8 @@ class DatabaseManager:
         """
         Class method for backward compatibility with code expecting DatabaseManager.get_async_session().
         
+        CRITICAL FIX: Enhanced with auto-initialization safety for staging environment.
+        
         This method provides the expected static/class method interface while using
         the instance method internally for proper session management.
         
@@ -239,7 +279,9 @@ class DatabaseManager:
             - instance.get_session() for direct usage
         """
         manager = get_database_manager()
+        # CRITICAL FIX: Ensure initialization - manager should auto-initialize, but double-check
         if not manager._initialized:
+            logger.info("Ensuring DatabaseManager initialization for class method access")
             await manager.initialize()
         
         async with manager.get_session(name) as session:
@@ -274,10 +316,41 @@ _database_manager: Optional[DatabaseManager] = None
 
 
 def get_database_manager() -> DatabaseManager:
-    """Get or create global database manager instance."""
+    """Get or create global database manager instance with SSOT auto-initialization.
+    
+    CRITICAL FIX: Auto-initializes the database manager to prevent 
+    "DatabaseManager not initialized" errors in staging environment.
+    
+    This hotfix ensures that the legacy DatabaseManager pattern works
+    with SSOT compliance while we migrate to the canonical database module.
+    """
     global _database_manager
     if _database_manager is None:
         _database_manager = DatabaseManager()
+        # CRITICAL FIX: Auto-initialize using SSOT pattern
+        # This prevents "DatabaseManager not initialized" errors in staging
+        try:
+            import asyncio
+            # Check if we're in an async context and have an event loop
+            loop = None
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                # No running loop, we'll handle initialization on first async use
+                logger.debug("No event loop available for immediate DatabaseManager initialization")
+            
+            if loop is not None:
+                # We have an event loop, schedule initialization as a task
+                try:
+                    asyncio.create_task(_database_manager.initialize())
+                    logger.debug("Scheduled DatabaseManager initialization as async task")
+                except Exception as init_error:
+                    logger.warning(f"Could not schedule immediate initialization: {init_error}")
+                    # Still return the manager - it will auto-initialize on first async use
+        except Exception as e:
+            logger.warning(f"Auto-initialization setup failed, will initialize on first use: {e}")
+            # This is safe - the manager will still work, just initialize on first async call
+    
     return _database_manager
 
 

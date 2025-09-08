@@ -333,7 +333,7 @@ services:
       - "com.netra.alpine=true"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.8-alpine  # Alpine variant
+    image: clickhouse/clickhouse-server:25.7.6.21-alpine  # Alpine variant
     environment:
       CLICKHOUSE_DB: netra_staging
       CLICKHOUSE_USER: staging_user

@@ -160,7 +160,7 @@ class TestReconnectionResilience(BaseIntegrationTest):
         
         await super().async_teardown()
     
-    async def establish_initial_connection(self) -> Tuple[websockets.WebSocketServerProtocol, str]:
+    async def establish_initial_connection(self) -> Tuple[websockets.ServerConnection, str]:
         """
         Establish initial WebSocket connection with session state.
         
@@ -199,7 +199,7 @@ class TestReconnectionResilience(BaseIntegrationTest):
     
     async def simulate_connection_interruption(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         interruption_duration: float
     ) -> None:
         """
@@ -225,7 +225,7 @@ class TestReconnectionResilience(BaseIntegrationTest):
         # Wait for interruption duration
         await asyncio.sleep(interruption_duration)
     
-    async def attempt_reconnection(self, original_token: str) -> Tuple[Optional[websockets.WebSocketServerProtocol], bool]:
+    async def attempt_reconnection(self, original_token: str) -> Tuple[Optional[websockets.ServerConnection], bool]:
         """
         Attempt to reconnect WebSocket with session recovery.
         
@@ -288,7 +288,7 @@ class TestReconnectionResilience(BaseIntegrationTest):
     
     async def send_test_message_with_tracking(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         message_content: Dict[str, Any],
         message_id: str = None
     ) -> str:
@@ -326,7 +326,7 @@ class TestReconnectionResilience(BaseIntegrationTest):
     
     async def collect_messages_with_continuity_check(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         expected_message_count: int,
         timeout: float = 20.0
     ) -> List[Dict[str, Any]]:

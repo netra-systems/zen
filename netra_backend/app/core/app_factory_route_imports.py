@@ -106,7 +106,9 @@ def _import_core_routers() -> dict:
     from netra_backend.app.routes.mcp import router as mcp_router
     from netra_backend.app.routes.threads_route import router as threads_router
     from netra_backend.app.routes.messages import router as messages_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router, "messages_router": messages_router}
+    from netra_backend.app.routes.messages_root import router as messages_root_router
+    from netra_backend.app.routes.events_stream import router as events_stream_router
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router, "messages_router": messages_router, "messages_root_router": messages_root_router, "events_stream_router": events_stream_router}
 
 
 def _import_extended_routers() -> dict:

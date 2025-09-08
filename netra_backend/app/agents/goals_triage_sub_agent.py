@@ -16,7 +16,7 @@ from enum import Enum
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,

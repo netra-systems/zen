@@ -434,6 +434,40 @@ def validate_test_environment():
 
 
 # =============================================================================
+# SSOT ENVIRONMENT ACCESS FUNCTION
+# =============================================================================
+
+def get_env():
+    """
+    Get the SSOT environment manager instance for test framework compatibility.
+    
+    This function provides a bridge between the test framework and the unified
+    environment management system, ensuring SSOT compliance per CLAUDE.md.
+    
+    Returns:
+        IsolatedEnvironment instance from shared.isolated_environment
+    """
+    try:
+        from shared.isolated_environment import get_env as get_unified_env
+        return get_unified_env()
+    except ImportError as e:
+        logger.error(f"Failed to import unified environment manager: {e}")
+        logger.info("Falling back to test environment manager")
+        # Fallback to test environment manager if unified is not available
+        manager = get_test_env_manager()
+        return manager.env if manager.env else manager
+
+
+# SSOT Compatibility: Export IsolatedEnvironment class for direct imports
+try:
+    from shared.isolated_environment import IsolatedEnvironment
+except ImportError:
+    logger.warning("Could not import IsolatedEnvironment from shared.isolated_environment")
+    # Fallback to None - tests should handle this gracefully
+    IsolatedEnvironment = None
+
+
+# =============================================================================
 # EXPORT ALL FUNCTIONS AND CLASSES
 # =============================================================================
 
@@ -445,6 +479,10 @@ __all__ = [
     
     # Global instance
     'get_test_env_manager',
+    
+    # SSOT Environment Access (CRITICAL)
+    'get_env',
+    'IsolatedEnvironment',  # SSOT unified environment class
     
     # Context managers
     'isolated_test_session',

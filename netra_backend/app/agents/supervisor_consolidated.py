@@ -15,7 +15,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
 # UserExecutionContext pattern imports
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
@@ -1298,7 +1298,7 @@ class SupervisorAgent(BaseAgent):
         
         try:
             # Import necessary modules for context creation
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             from shared.id_generation import UnifiedIdGenerator
             
             # Create UserExecutionContext from legacy parameters
@@ -1307,9 +1307,8 @@ class SupervisorAgent(BaseAgent):
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                request_id=UnifiedIdGenerator.generate_request_id(),
-                user_request=user_request,
-                websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+                request_id=UnifiedIdGenerator.generate_base_id("req"),
+                websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
             )
             
             # CRITICAL BUSINESS VALUE: Send agent_started event
@@ -1354,8 +1353,8 @@ class SupervisorAgent(BaseAgent):
         This provides immediate feedback and builds trust in the AI system.
         """
         try:
-            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
-                websocket_manager = self.websocket_bridge._websocket_manager
+            if self.websocket_bridge and hasattr(self.websocket_bridge, 'websocket_manager'):
+                websocket_manager = self.websocket_bridge.websocket_manager
                 if websocket_manager:
                     event_data = {
                         "type": "agent_started", 
@@ -1388,8 +1387,8 @@ class SupervisorAgent(BaseAgent):
         This completes the user experience loop and signals results availability.
         """
         try:
-            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
-                websocket_manager = self.websocket_bridge._websocket_manager
+            if self.websocket_bridge and hasattr(self.websocket_bridge, 'websocket_manager'):
+                websocket_manager = self.websocket_bridge.websocket_manager
                 if websocket_manager:
                     # Determine completion status
                     status = "completed"

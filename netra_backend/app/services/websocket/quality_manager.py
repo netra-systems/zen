@@ -3,6 +3,7 @@
 from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.quality_enhanced_start_handler import (
     QualityEnhancedStartAgentHandler,
 )
@@ -77,9 +78,22 @@ class QualityMessageHandler:
     async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
         """Route message to appropriate handler"""
         message_type = message.get("type")
+        
+        # Extract and store context IDs for session continuity
+        self._current_thread_id = message.get("thread_id")
+        self._current_run_id = message.get("run_id")
+        
         if message_type in self.handlers:
             handler = self.handlers[message_type]
-            await handler.handle(user_id, message.get("payload", {}))
+            payload = message.get("payload", {})
+            
+            # Ensure context IDs are available to handlers for session continuity
+            if self._current_thread_id:
+                payload["thread_id"] = self._current_thread_id
+            if self._current_run_id:
+                payload["run_id"] = self._current_run_id
+            
+            await handler.handle(user_id, payload)
         else:
             await self._handle_unknown_message(user_id, message_type)
 
@@ -87,8 +101,13 @@ class QualityMessageHandler:
         """Handle unknown message type."""
         logger.warning(f"Unknown message type: {message_type}")
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
         except Exception as e:
             logger.error(f"Failed to send unknown message error to user {user_id}: {e}")
@@ -103,8 +122,14 @@ class QualityMessageHandler:
         """Send quality update to a subscriber."""
         try:
             message = self._build_update_message(update)
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(message)
         except Exception as e:
             logger.error(f"Error broadcasting to {user_id}: {str(e)}")
@@ -123,8 +148,14 @@ class QualityMessageHandler:
         """Send quality alert to a single subscriber."""
         try:
             alert_message = self._build_alert_message(alert)
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(alert_message)
         except Exception as e:
             logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")

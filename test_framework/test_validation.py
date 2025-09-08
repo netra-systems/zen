@@ -4,6 +4,8 @@ Test Validation - Test structure and naming validation
 Validates test files follow expected conventions
 """
 
+import py_compile
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -46,6 +48,88 @@ class TestValidation:
                 issues["empty_files"].append(test_path)
         except FileNotFoundError:
             issues["missing_files"].append(test_path)
+    
+    def validate_syntax(self, project_root: Optional[Path] = None, quick_mode: bool = True) -> Dict[str, any]:
+        """
+        Validate Python syntax for test files and recently modified files
+        
+        Args:
+            project_root: Root directory to scan. If None, scans entire project.
+            quick_mode: If True, only check test files and recent changes (default: True)
+            
+        Returns:
+            Dictionary with syntax validation results
+        """
+        if project_root is None:
+            # Default to project root
+            current_file = Path(__file__)
+            project_root = current_file.parent.parent
+        
+        syntax_errors = []
+        files_checked = 0
+        
+        if quick_mode:
+            # Quick mode: only check test files and configuration
+            python_files = []
+            
+            # Add all test files
+            test_dirs = ['tests', 'netra_backend/tests', 'auth_service/tests', 'test_framework']
+            for test_dir in test_dirs:
+                test_path = project_root / test_dir
+                if test_path.exists():
+                    python_files.extend(list(test_path.rglob("*.py")))
+            
+            # Add critical configuration files
+            config_files = [
+                'tests/unified_test_runner.py',
+                'scripts/deploy_to_gcp.py',
+                'test_framework/test_validation.py'
+            ]
+            for config_file in config_files:
+                config_path = project_root / config_file
+                if config_path.exists():
+                    python_files.append(config_path)
+            
+            # Remove duplicates
+            python_files = list(set(python_files))
+        else:
+            # Full mode: check all Python files (legacy behavior)
+            python_files = list(project_root.rglob("*.py"))
+        
+        # Filter out cache, build, and virtual environment directories
+        python_files = [
+            f for f in python_files 
+            if not any(part.startswith('.') or part in ['__pycache__', 'build', 'dist', 'venv', 'node_modules'] 
+                      for part in f.parts)
+        ]
+        
+        mode_description = "test files and critical configuration" if quick_mode else "all Python files"
+        print(f"Checking syntax for {len(python_files)} {mode_description}...")
+        
+        for py_file in python_files:
+            try:
+                # Use py_compile to check syntax without importing
+                # Skip temporary file creation - just do syntax check
+                py_compile.compile(str(py_file), doraise=True)
+                files_checked += 1
+            except py_compile.PyCompileError as e:
+                syntax_errors.append({
+                    'file': str(py_file),
+                    'error': str(e)
+                })
+            except Exception as e:
+                syntax_errors.append({
+                    'file': str(py_file), 
+                    'error': f"Unexpected error: {str(e)}"
+                })
+        
+        return {
+            "success": len(syntax_errors) == 0,
+            "files_checked": files_checked,
+            "syntax_errors": syntax_errors,
+            "total_files": len(python_files),
+            "quick_mode": quick_mode
+        }
     
     def validate_circular_imports(self, project_root: Optional[Path] = None) -> Dict[str, any]:
         """

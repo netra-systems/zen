@@ -228,7 +228,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             if agent_name != agent_names[-1]:  # Not the last agent
                 current_context = current_context.create_child_context(
                     operation_name=f"handoff_to_next_agent",
-                    additional_metadata={
+                    additional_agent_context={
                         f"{agent_name}_result": result,
                         "handoff_sequence": len(handoff_chain)
                     }
@@ -333,7 +333,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Create new context with accumulated data
             shared_context = shared_context.create_child_context(
                 operation_name=f"context_sharing_stage_{i+1}",
-                additional_metadata=agent_contribution
+                additional_agent_context=agent_contribution
             )
             
             # Capture context state after agent execution
@@ -399,8 +399,12 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
         initial_metadata_count = len(business_context.metadata)
         final_metadata_count = len(shared_context.metadata)
         
-        assert final_metadata_count > initial_metadata_count * 2, \
-            "Final context should have significantly more business data from agent contributions"
+        # Expect significant growth in metadata from agent contributions
+        # Each of 3 agents should contribute at least 3 pieces of data (insights, recommendations, timestamp)
+        expected_minimum_growth = initial_metadata_count + (3 * 3)  # 3 agents × 3 contributions
+        assert final_metadata_count >= expected_minimum_growth, \
+            f"Final context should have significantly more business data from agent contributions. " \
+            f"Got {final_metadata_count}, expected >= {expected_minimum_growth} (initial {initial_metadata_count} + 9 agent contributions)"
 
     @pytest.mark.asyncio
     async def test_multi_agent_workflow_coordination(self):
@@ -572,7 +576,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Update context with result for next agent
             current_context = current_context.create_child_context(
                 operation_name=f"coordination_{agent_name}_complete",
-                additional_metadata={f"{agent_name}_result": result}
+                additional_agent_context={f"{agent_name}_result": result}
             )
         
         # Validate coordinated workflow results
@@ -681,7 +685,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Update context with evolved state
             current_context = current_context.create_child_context(
                 operation_name=f"state_sync_{agent_name}",
-                additional_metadata={
+                additional_agent_context={
                     "workflow_state": workflow_state.copy(),
                     f"{agent_name}_result": result
                 }
@@ -859,7 +863,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             if agent_name in communication_results:
                 current_context = current_context.create_child_context(
                     operation_name=f"communication_handling_{agent_name}",
-                    additional_metadata={
+                    additional_agent_context={
                         f"{agent_name}_result": communication_results[agent_name],
                         "error_count": len(error_log)
                     }

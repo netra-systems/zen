@@ -10,7 +10,7 @@ import time
 import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from dataclasses import dataclass
 
 
@@ -92,7 +92,7 @@ def mock_jwt_validation(valid: bool = True, user_data: Optional[Dict[str, Any]] 
     if user_data is None:
         user_data = create_test_user_data()
     
-    def mock_validate(token: str):
+    async def mock_validate(token: str):
         if valid:
             return {
                 "valid": True,
@@ -103,7 +103,7 @@ def mock_jwt_validation(valid: bool = True, user_data: Optional[Dict[str, Any]] 
         else:
             return {"valid": False, "error": "Invalid token"}
     
-    return patch('netra_backend.app.auth_integration.auth.validate_token_jwt', side_effect=mock_validate)
+    return patch('netra_backend.app.auth_integration.auth.validate_token_jwt', new_callable=AsyncMock, side_effect=mock_validate)
 
 
 def create_session_data(

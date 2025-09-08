@@ -34,22 +34,28 @@ class SyntheticDataProgressTracker:
         batch_start: int,
         batch_size: int,
         thread_id: Optional[str] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        user_context=None
     ) -> None:
         """Handle progress update if needed"""
         if stream_updates and self.should_send_update(batch_start, batch_size):
-            await self.send_progress_update(run_id, status, thread_id, user_id)
+            await self.send_progress_update(run_id, status, thread_id, user_id, user_context)
     
     async def send_progress_update(self, run_id: str, status: GenerationStatus,
                                   thread_id: Optional[str] = None,
-                                  user_id: Optional[str] = None) -> None:
+                                  user_id: Optional[str] = None,
+                                  user_context=None) -> None:
         """Send progress update via WebSocket manager"""
         try:
-            from netra_backend.app.websocket_core import get_websocket_manager
-            websocket_manager = get_websocket_manager()
-            await self._send_websocket_update(websocket_manager, run_id, status, thread_id, user_id)
+            if user_context:
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                websocket_manager = await create_websocket_manager(user_context)
+                await self._send_websocket_update(websocket_manager, run_id, status, thread_id, user_id)
+            else:
+                logger.debug("WebSocket update not sent - no user context provided")
+                self._log_progress_update(status)
         except ImportError:
-            logger.debug("WebSocket manager not available, logging progress locally")
+            logger.debug("WebSocket manager factory not available, logging progress locally")
             self._log_progress_update(status)
         except Exception as e:
             logger.debug(f"Failed to send WebSocket update: {e}")

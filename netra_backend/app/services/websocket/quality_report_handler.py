@@ -13,6 +13,7 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
@@ -32,6 +33,10 @@ class QualityReportHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality report generation request."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             report_params = self._extract_report_params(payload)
             report_data = await self._generate_report_data(report_params)
             markdown_report = self._format_quality_report(report_data, report_params["report_type"])
@@ -98,8 +103,14 @@ class QualityReportHandler(BaseMessageHandler):
         """Send formatted report response to user."""
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
-        user_context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(user_context)
+        
+        # ✅ CORRECT - Maintains session continuity
+        user_context = get_user_execution_context(
+            user_id=user_id,
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
+        )
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     def _build_report_payload(self, markdown_report: str, report_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -115,8 +126,13 @@ class QualityReportHandler(BaseMessageHandler):
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send report error to user {user_id}: {e}")

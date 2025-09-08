@@ -231,3 +231,40 @@ class DocumentationCalculator:
         elif score >= 20:
             return QualityLevel.NEEDS_IMPROVEMENT
         return QualityLevel.POOR
+
+
+# Stub imports for compatibility
+from enum import Enum
+from dataclasses import dataclass
+from typing import Any, Dict
+
+class ContentType(Enum):
+    """Content type enumeration for quality validation."""
+    TEXT = "text"
+    CODE = "code"
+    JSON = "json"
+    MARKDOWN = "markdown"
+
+@dataclass
+class QualityMetrics:
+    """Quality metrics dataclass."""
+    score: float = 0.0
+    details: Dict[str, Any] = None
+    
+    def __post_init__(self):
+        if self.details is None:
+            self.details = {}
+
+@dataclass
+class ValidationResult:
+    """Validation result dataclass."""
+    is_valid: bool = True
+    score: float = 0.0
+    errors: List[str] = None
+    warnings: List[str] = None
+    
+    def __post_init__(self):
+        if self.errors is None:
+            self.errors = []
+        if self.warnings is None:
+            self.warnings = []

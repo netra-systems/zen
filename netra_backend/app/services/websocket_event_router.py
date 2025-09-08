@@ -48,11 +48,11 @@ class WebSocketEventRouter:
     infrastructure and does not emit events itself.
     """
     
-    def __init__(self, websocket_manager: WebSocketManager):
+    def __init__(self, websocket_manager: Optional[WebSocketManager]):
         """Initialize router with WebSocket manager dependency.
         
         Args:
-            websocket_manager: WebSocket manager instance for actual connection management
+            websocket_manager: Optional WebSocket manager instance for actual connection management
         """
         self.websocket_manager = websocket_manager
         
@@ -101,7 +101,12 @@ class WebSocketEventRouter:
                 return True
                 
             except Exception as e:
-                logger.error(f"Failed to register connection {connection_id} for user {user_id}: {e}")
+                logger.critical(f"🚨 CRITICAL: Failed to register connection {connection_id} for user {user_id[:8]}...: {e}")
+                logger.critical(f"🚨 BUSINESS VALUE FAILURE: WebSocket connection registration failed")
+                logger.critical(f"🚨 Impact: User will not receive real-time agent events")
+                # LOUD ERROR: Log stack trace for debugging
+                import traceback
+                logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
                 return False
     
     async def unregister_connection(self, connection_id: str) -> bool:
@@ -139,7 +144,12 @@ class WebSocketEventRouter:
                 return True
                 
             except Exception as e:
-                logger.error(f"Failed to unregister connection {connection_id}: {e}")
+                logger.error(f"🚨 ERROR: Failed to unregister connection {connection_id}: {e}")
+                logger.error(f"🚨 IMPACT: Connection pool may have stale entries")
+                logger.error(f"🚨 This could lead to memory leaks or incorrect event routing")
+                # LOUD ERROR: Log stack trace for debugging
+                import traceback
+                logger.error(f"🚨 Stack trace: {traceback.format_exc()}")
                 return False
     
     async def route_event(self, user_id: str, connection_id: str, event: Dict[str, Any]) -> bool:
@@ -156,7 +166,10 @@ class WebSocketEventRouter:
         try:
             # Validate connection belongs to user
             if not await self._validate_connection(user_id, connection_id):
-                logger.error(f"Invalid connection {connection_id} for user {user_id}")
+                logger.critical(f"🚨 CRITICAL SECURITY: Invalid connection {connection_id} for user {user_id[:8]}...")
+                logger.critical(f"🚨 SECURITY BREACH ATTEMPT: Connection validation failed")
+                logger.critical(f"🚨 Impact: Potential cross-user event leakage prevented")
+                logger.critical(f"🚨 This indicates a serious security issue requiring immediate investigation")
                 return False
             
             # Update last activity
@@ -173,7 +186,13 @@ class WebSocketEventRouter:
             return success
             
         except Exception as e:
-            logger.error(f"Error routing event to {user_id}:{connection_id}: {e}")
+            logger.critical(f"🚨 CRITICAL: Error routing event to {user_id[:8]}...:{connection_id}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Event routing failed")
+            logger.critical(f"🚨 Impact: User will not receive this real-time update")
+            logger.critical(f"🚨 Event type: {event.get('type', 'unknown')}")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
             return False
     
     async def broadcast_to_user(self, user_id: str, event: Dict[str, Any]) -> int:
@@ -190,7 +209,10 @@ class WebSocketEventRouter:
         
         user_connections = self.connection_pool.get(user_id, [])
         if not user_connections:
-            logger.warning(f"No connections found for user {user_id}")
+            logger.error(f"🚨 ERROR: No connections found for user {user_id[:8]}...")
+            logger.error(f"🚨 BUSINESS VALUE IMPACT: User will not receive event")
+            logger.error(f"🚨 Event type: {event.get('type', 'unknown')}")
+            logger.error(f"🚨 This indicates disconnected user or connection pool corruption")
             return 0
         
         for conn_info in user_connections:
@@ -198,7 +220,12 @@ class WebSocketEventRouter:
                 if await self.route_event(user_id, conn_info.connection_id, event):
                     successful_sends += 1
             except Exception as e:
-                logger.error(f"Failed to broadcast to connection {conn_info.connection_id}: {e}")
+                logger.error(f"🚨 ERROR: Failed to broadcast to connection {conn_info.connection_id}: {e}")
+                logger.error(f"🚨 BUSINESS VALUE IMPACT: One connection missed the event")
+                logger.error(f"🚨 User: {user_id[:8]}..., Event: {event.get('type', 'unknown')}")
+                # Log stack trace for debugging
+                import traceback
+                logger.error(f"🚨 Stack trace: {traceback.format_exc()}")
         
         logger.debug(f"Broadcasted to {successful_sends}/{len(user_connections)} connections for user {user_id}")
         return successful_sends
@@ -296,9 +323,13 @@ class WebSocketEventRouter:
     async def _send_to_connection(self, connection_id: str, event: Dict[str, Any]) -> bool:
         """Send event to specific connection via WebSocket manager."""
         try:
-            # For now, delegate to the WebSocket manager
-            # This would need to be implemented based on the manager's API
-            # Placeholder implementation
+            # Check if WebSocket manager is available
+            if not self.websocket_manager:
+                logger.critical(f"🚨 CRITICAL: Cannot send event to connection {connection_id}: WebSocket manager not initialized")
+                logger.critical(f"🚨 BUSINESS VALUE FAILURE: WebSocket infrastructure missing")
+                logger.critical(f"🚨 Impact: All real-time events will fail")
+                logger.critical(f"🚨 This is a SYSTEM FAILURE requiring immediate attention")
+                return False
             
             # Extract thread_id from event or connection info if needed
             thread_id = event.get('thread_id')
@@ -318,11 +349,21 @@ class WebSocketEventRouter:
             elif hasattr(self.websocket_manager, 'send_message_to_thread') and thread_id:
                 return await self.websocket_manager.send_message_to_thread(thread_id, event)
             else:
-                logger.error("WebSocket manager does not have expected send methods")
+                logger.critical(f"🚨 CRITICAL: WebSocket manager does not have expected send methods")
+                logger.critical(f"🚨 BUSINESS VALUE FAILURE: WebSocket manager API mismatch")
+                logger.critical(f"🚨 Impact: All real-time events will fail")
+                logger.critical(f"🚨 Manager type: {type(self.websocket_manager).__name__}")
+                logger.critical(f"🚨 Available methods: {[m for m in dir(self.websocket_manager) if not m.startswith('_')]}")
                 return False
                 
         except Exception as e:
-            logger.error(f"Failed to send event to connection {connection_id}: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to send event to connection {connection_id}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: WebSocket send operation failed")
+            logger.critical(f"🚨 Impact: User will not receive this real-time update")
+            logger.critical(f"🚨 Event type: {event.get('type', 'unknown')}")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
             return False
 
 
@@ -330,18 +371,29 @@ class WebSocketEventRouter:
 _router_instance: Optional[WebSocketEventRouter] = None
 
 
-def get_websocket_router() -> WebSocketEventRouter:
+def get_websocket_router(websocket_manager=None) -> WebSocketEventRouter:
     """Get the WebSocket event router instance.
     
+    Args:
+        websocket_manager: Optional WebSocket manager instance for dependency injection
+        
     Returns:
         WebSocketEventRouter: Router instance
     """
     global _router_instance
     
     if _router_instance is None:
-        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-        websocket_manager = get_websocket_manager()
-        _router_instance = WebSocketEventRouter(websocket_manager)
+        if websocket_manager is None:
+            # SECURITY FIX: This should only be called with proper context
+            # Log warning when fallback is used
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("WebSocketEventRouter: No WebSocket manager provided, using factory pattern")
+            
+            # Create router without manager - it will need to be initialized later
+            _router_instance = WebSocketEventRouter(None)
+        else:
+            _router_instance = WebSocketEventRouter(websocket_manager)
     
     return _router_instance
 

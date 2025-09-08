@@ -160,7 +160,8 @@ class HttpTransport(MCPTransport):
     async def send_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Send JSON-RPC request over HTTP POST."""
         self._validate_connection()
-        request_id = str(uuid.uuid4())
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("mcp_http_req")
         request_data = await self._build_request_data(request_id, method, params)
         return await self._execute_with_retries(request_data)
 

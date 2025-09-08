@@ -126,11 +126,17 @@ async def validate_configuration(
         from shared.isolated_environment import IsolatedEnvironment
         env = IsolatedEnvironment()
         
-        # Check required environment variables
+        # Check required environment variables - using component validation for database
         required_vars = [
-            "DATABASE_URL",
             "JWT_SECRET_KEY",
             "OPENAI_API_KEY"
+        ]
+        
+        # Validate database configuration using DatabaseURLBuilder SSOT
+        database_config_vars = [
+            "POSTGRES_HOST",
+            "POSTGRES_USER", 
+            "POSTGRES_DB"
         ]
         
         for var in required_vars:
@@ -158,11 +164,25 @@ async def validate_configuration(
         if get_env().get("ENVIRONMENT"):
             config_sources["ENVIRONMENT"] = get_env().get("ENVIRONMENT")
         
-        # Validate database URL format
-        db_url = env.get("DATABASE_URL")
+        # Validate database configuration using DatabaseURLBuilder SSOT
+        from shared.database_url_builder import DatabaseURLBuilder
+        builder = DatabaseURLBuilder(env.get_all())
+        
+        # Validate database configuration
+        is_valid, db_error = builder.validate()
+        if not is_valid:
+            errors.append(f"Database configuration invalid: {db_error}")
+        
+        # Get database URL for format validation
+        db_url = builder.get_url_for_environment()
         if db_url:
-            if not db_url.startswith(("postgresql://", "postgres://")):
-                errors.append("#removed-legacymust be a PostgreSQL connection string")
+            if not (db_url.startswith(("postgresql://", "postgres://")) or "memory" in db_url):
+                errors.append("Database URL must be a PostgreSQL connection string or SQLite memory URL")
+        
+        # Check individual database configuration variables
+        for var in database_config_vars:
+            if not env.get(var):
+                warnings.append(f"Database component {var} not configured - using defaults or environment detection")
         
         # Check for development mode warnings
         if env.get("ENVIRONMENT") == "development":

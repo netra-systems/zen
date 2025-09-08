@@ -41,7 +41,7 @@ class TestStartupValidationer:
     def __init__(self):
         self.services = {
             "backend": {"url": "http://localhost:8000", "process": None},
-            "auth": {"url": "http://localhost:8080", "process": None}
+            "auth": {"url": "http://localhost:8081", "process": None}
         }
         self.startup_timeouts = {
             "service_start": 30.0,
@@ -271,7 +271,7 @@ class TestStartupValidationer:
 @pytest.fixture
 def startup_tester():
     """Create startup validation tester fixture."""
-    tester = StartupValidationTester()
+    tester = TestStartupValidationer()
     yield tester
     tester.cleanup()
 

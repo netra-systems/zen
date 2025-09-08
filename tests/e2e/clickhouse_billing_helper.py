@@ -20,12 +20,11 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.schemas.user_plan import PlanTier
-# Import IsolatedEnvironment per CLAUDE.md requirements
+# Import IsolatedEnvironment per CLAUDE.md requirements - SSOT unified access
 from test_framework.environment_isolation import get_env
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import get_env
 
 
 class MockClickHouseBillingClient:

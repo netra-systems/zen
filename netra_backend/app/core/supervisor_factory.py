@@ -25,7 +25,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
-from netra_backend.app.dependencies import create_user_execution_context
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
@@ -40,10 +40,11 @@ async def create_supervisor_core(
     thread_id: str,
     run_id: str,
     db_session: AsyncSession,
-    websocket_connection_id: Optional[str] = None,
+    websocket_client_id: Optional[str] = None,
     llm_client: Optional["ResilientLLMClient"] = None,
     websocket_bridge = None,
-    tool_dispatcher = None
+    tool_dispatcher = None,
+    tool_classes = None  # Optional tool classes for UserContext pattern
 ) -> "SupervisorAgent":
     """Core supervisor creation logic - protocol agnostic.
     
@@ -59,7 +60,7 @@ async def create_supervisor_core(
         thread_id: Thread identifier for conversation routing
         run_id: Run identifier for this session
         db_session: Request/connection-scoped database session
-        websocket_connection_id: Optional WebSocket connection identifier
+        websocket_client_id: Optional WebSocket connection identifier
         llm_client: Optional LLM client (will get default if not provided)
         websocket_bridge: Optional WebSocket bridge (required for WebSocket functionality)
         tool_dispatcher: Optional tool dispatcher (required for agent operations)
@@ -87,13 +88,11 @@ async def create_supervisor_core(
             f"thread {thread_id}, run {run_id}, session {id(db_session)}"
         )
         
-        # Create UserExecutionContext with scoped session
-        user_context = create_user_execution_context(
+        # Get UserExecutionContext using session management for conversation continuity
+        user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=thread_id,
-            run_id=run_id,
-            db_session=db_session,  # This session will be closed by calling code
-            websocket_connection_id=websocket_connection_id
+            run_id=run_id
         )
         
         # Get or validate LLM client
@@ -111,13 +110,13 @@ async def create_supervisor_core(
                 detail="WebSocket bridge is required for supervisor creation"
             )
         
-        # Validate tool dispatcher
-        if not tool_dispatcher:
-            logger.error("Tool dispatcher not provided to core supervisor factory")
-            raise HTTPException(
-                status_code=500,
-                detail="Tool dispatcher is required for supervisor creation"
+        # Handle tool dispatcher - can be None for UserContext pattern
+        if not tool_dispatcher and not tool_classes:
+            logger.warning(
+                "Neither tool_dispatcher nor tool_classes provided - "
+                "supervisor may have limited functionality"
             )
+            # Tool dispatcher will be created within SupervisorAgent if tool_classes available
         
         # CRITICAL: Create session factory that returns the scoped session
         # This session will be automatically closed by the calling scope
@@ -133,13 +132,29 @@ async def create_supervisor_core(
         
         # Create isolated SupervisorAgent using factory method
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        supervisor = await SupervisorAgent.create_with_user_context(
-            llm_client=llm_client,
-            websocket_bridge=websocket_bridge,
-            tool_dispatcher=tool_dispatcher,
-            user_context=user_context,
-            db_session_factory=scoped_session_factory  # Returns scoped session
+        
+        # Extract LLM manager from client if needed
+        if hasattr(llm_client, '_llm_manager'):
+            llm_manager = llm_client._llm_manager
+        else:
+            # llm_client might already be an LLMManager
+            from netra_backend.app.llm.llm_manager import LLMManager
+            if isinstance(llm_client, LLMManager):
+                llm_manager = llm_client
+            else:
+                # Create new LLM manager if needed
+                llm_manager = LLMManager()
+        
+        # Create supervisor with UserContext pattern
+        supervisor = SupervisorAgent.create(
+            llm_manager=llm_manager,
+            websocket_bridge=websocket_bridge
         )
+        
+        # Store the user context for later use in execute()
+        # The supervisor will create its own tool_dispatcher during execute()
+        supervisor._pending_user_context = user_context
+        supervisor._tool_classes = tool_classes  # Store for UserContext-based creation
         
         logger.info(
             f"✅ Created isolated SupervisorAgent via core factory: "
@@ -198,6 +213,103 @@ def validate_supervisor_components(
     
     is_valid = len(missing_components) == 0
     return is_valid, missing_components
+
+
+async def create_streaming_supervisor(
+    user_id: str,
+    thread_id: str,
+    run_id: Optional[str] = None
+) -> "SupervisorAgent":
+    """Create supervisor for streaming endpoints without FastAPI request dependency.
+    
+    This function creates a supervisor for streaming endpoints that don't have access
+    to FastAPI request objects. It handles all required dependencies internally and
+    provides proper session lifecycle management.
+    
+    Business Value: Enables streaming chat functionality for investor demos ($120K+ MRR)
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation routing  
+        run_id: Optional run identifier (auto-generated if not provided)
+        
+    Returns:
+        SupervisorAgent: Isolated supervisor instance for streaming
+        
+    Raises:
+        HTTPException: If supervisor creation fails
+        RuntimeError: If required components are not available
+    """
+    try:
+        # Generate run_id if not provided using SSOT pattern
+        if not run_id:
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        logger.info(
+            f"Creating streaming supervisor for user {user_id[:8]}..., "
+            f"thread {thread_id[:8]}..., run {run_id[:8]}..."
+        )
+        
+        # Create request-scoped database session
+        from netra_backend.app.dependencies import get_request_scoped_db_session
+        
+        # Use async context manager to get database session
+        async for db_session in get_request_scoped_db_session():
+            try:
+                # Get required components for supervisor creation
+                
+                # Create LLM client
+                from netra_backend.app.llm.client_unified import ResilientLLMClient
+                from netra_backend.app.llm.llm_manager import LLMManager
+                llm_manager = LLMManager()
+                llm_client = ResilientLLMClient(llm_manager)
+                
+                # Create WebSocket bridge using factory pattern
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                
+                user_context = UserExecutionContext.from_request(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                websocket_manager = await create_websocket_manager(user_context)
+                
+                # Get tool classes for UserContext pattern
+                from netra_backend.app.tools import get_default_tool_classes
+                tool_classes = get_default_tool_classes()
+                
+                # Create supervisor using core factory
+                supervisor = await create_supervisor_core(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id,
+                    db_session=db_session,
+                    websocket_client_id=user_context.websocket_client_id,
+                    llm_client=llm_client,
+                    websocket_bridge=websocket_manager,
+                    tool_dispatcher=None,  # Will be created via UserContext pattern
+                    tool_classes=tool_classes
+                )
+                
+                logger.info(
+                    f"✅ Created streaming supervisor for user {user_id[:8]}..., "
+                    f"run {run_id[:8]}..."
+                )
+                return supervisor
+                
+            except Exception as e:
+                logger.error(f"Failed to create streaming supervisor: {e}", exc_info=True)
+                raise
+            
+    except Exception as e:
+        logger.error(f"Failed to create streaming supervisor for user {user_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create streaming supervisor: {str(e)}"
+        )
 
 
 def get_supervisor_health_info() -> dict:

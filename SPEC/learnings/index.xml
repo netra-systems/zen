@@ -38,6 +38,122 @@
         </prevention>
     </learning>
     
+    <learning id="context-creation-vs-getter-pattern-fix-2025-09-08">
+        <title>CRITICAL: Context Creation vs Getter Pattern Fix - Session Continuity</title>
+        <category>Session-Management/Context/WebSocket/Critical</category>
+        <keywords>context-creation, session-continuity, get_user_execution_context, create_user_execution_context, conversation-continuity, memory-leaks, websocket-handlers, test-isolation</keywords>
+        <path>context_creation_vs_getter_pattern_fix_20250908.xml</path>
+        <critical-takeaway>
+            System incorrectly used create_user_execution_context() everywhere instead of get_user_execution_context(),
+            and generated new IDs when calling get functions. This broke conversation continuity and caused memory leaks.
+            FIXED: Production code uses get_user_execution_context() with existing request context IDs (no generation).
+            Test code uses create_user_execution_context() for isolation. Single entry point for create pattern.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Conversation continuity breaks, memory leaks, multi-turn conversations fail</business-impact>
+        <prevention>
+            Production: Use get_user_execution_context() with existing thread_id/run_id from request context.
+            Tests: Use create_user_execution_context() for isolation. Never generate IDs before calling get functions.
+            Flag any get_user_execution_context() calls with UnifiedIdGenerator.generate_base_id().
+        </prevention>
+        <cross-references>
+            <file>netra_backend/app/dependencies.py</file>
+            <file>netra_backend/app/websocket_core/agent_handler.py</file>
+            <file>shared/id_generation/unified_id_generator.py</file>
+            <test>tests/integration/test_session_continuity_context_management.py</test>
+            <test>tests/unit/test_context_creation_vs_getter_regression_prevention.py</test>
+        </cross-references>
+    </learning>
+    
+    <learning id="redis-terraform-instance-migration-2025-09-08">
+        <title>Redis Terraform Instance Migration and Authentication Fix</title>
+        <category>Infrastructure/Configuration/Redis</category>
+        <keywords>redis, terraform, authentication, staging, configuration, secrets, gcp</keywords>
+        <path>redis_terraform_instance_migration_20250908.xml</path>
+        <critical-takeaway>
+            Staging services failing due to old Redis instance (10.78.53.20) instead of Terraform instance (10.166.204.83).
+            CRITICAL: GCP Redis auth format is redis://:password@host:port/db (no username). RedisConfigurationBuilder 
+            password validation logic needed fix to handle empty/whitespace passwords correctly.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete staging environment non-functional, blocking E2E testing and development workflows</business-impact>
+        <prevention>
+            Always use Terraform-managed Redis instances. Monitor Redis connection logs for reconnection failures.
+            GCP secrets must have correct auth format. Both backend and auth services share Redis configuration.
+        </prevention>
+        <cross-references>
+            <file>shared/redis_configuration_builder.py</file>
+            <file>netra_backend/app/core/backend_environment.py</file>
+            <file>auth_service/auth_core/auth_environment.py</file>
+            <secret>redis-host-staging</secret>
+            <secret>redis-password-staging</secret>
+            <secret>redis-url-staging</secret>
+        </cross-references>
+    </learning>
+    
+    <learning id="migration-job-infrastructure-fix-2025-09-08">
+        <title>CRITICAL: Migration Job Infrastructure Five Whys Fix - PostgreSQL Casting & Docker Integration</title>
+        <category>Infrastructure/Migration/Database/Docker/Staging/Critical</category>
+        <keywords>migration-jobs, postgresql-array-casting, docker-infrastructure, staging-deployment, five-whys-analysis, array-to-json, cloud-run-jobs, alembic-migrations, requirements-completeness, gcp-deployment</keywords>
+        <path>migration_job_infrastructure_fix_20250908.xml</path>
+        <critical-takeaway>
+            Migration jobs in staging were completely failing due to: 1) PostgreSQL array-to-json casting error requiring 
+            array_to_json() function instead of direct casting, 2) Incomplete Docker requirements (missing loguru, fastapi, etc.),
+            3) Wrong Dockerfile paths (alembic/ instead of netra_backend/app/alembic), 4) Incorrect GCP deployment parameters 
+            (--timeout vs --task-timeout), 5) Wrong service account permissions. FIXED via Five Whys methodology with complete
+            infrastructure overhaul ensuring staging parity.
+        </critical-takeaway>
+        <severity>EXTREME</severity>
+        <business-impact>All staging deployments blocked, database schema updates impossible, production deployment risk</business-impact>
+        <prevention>
+            Migration containers need complete backend dependencies, not minimal subsets. Use array_to_json() for PostgreSQL 
+            array-to-json conversions with null handling. Test migration infrastructure end-to-end in cloud environment.
+            Use --task-timeout not --timeout for Cloud Run jobs. Ensure service account permissions match authenticated account.
+        </prevention>
+        <cross-references>
+            <file>docker/migration.alpine.Dockerfile</file>
+            <file>requirements-migration.txt</file>
+            <file>scripts/run_cloud_migrations.py</file>
+            <file>netra_backend/app/alembic/versions/882759db46ce_add_missing_tables_for_agent_executions_.py</file>
+            <file>netra_backend/app/alembic/versions/fix_json_column_casting_20250908.py</file>
+            <test>tests/integration/test_migration_job_infrastructure.py</test>
+            <report>reports/bugs/MIGRATION_JOBS_FIVE_WHYS_ANALYSIS_20250908.md</report>
+        </cross-references>
+        <anti-repetition-signals>
+            <signal>ModuleNotFoundError in migration job logs → incomplete requirements</signal>
+            <signal>psycopg2.errors.CannotCoerce array casting → need array_to_json() function</signal>  
+            <signal>gcloud unrecognized arguments → wrong parameter names for Cloud Run jobs</signal>
+            <signal>Permission denied on service accounts → check actAs permissions</signal>
+        </anti-repetition-signals>
+    </learning>
+    
+    <learning id="ssot-duplicate-agent-registry-violation-fix-2025-09-08">
+        <title>CRITICAL: SSOT Duplicate Agent Registry Violation Fix</title>
+        <category>SSOT/Architecture/Registry/Violation/Critical</category>
+        <keywords>ssot-violation, duplicate-agent-registry, agent-registry-duplication, simple-standalone-files, global-singleton, multi-user-isolation, websocket-integration, universal-registry</keywords>
+        <path>ssot_duplicate_agent_registry_violation_fix_20250908.xml</path>
+        <critical-takeaway>
+            Someone created a "simple" duplicate AgentRegistry in netra_backend/app/agents/agent_registry.py that 
+            bypassed SSOT architecture. This violated CLAUDE.MD principle: "CREATION OF 'SIMPLE' OR 'STANDALONE' 
+            ETC. TYPE FILES IS STRICTLY FORBIDDEN". Duplicate used global singleton pattern, lacked user isolation,
+            and missing WebSocket integration breaking chat value delivery. FIXED by deleting duplicate and 
+            redirecting imports to proper SSOT: universal_registry.py → get_global_registry('agent').
+        </critical-takeaway>
+        <severity>EXTREME</severity>
+        <business-impact>Chat functionality broken, multi-user cross-contamination, system fragmentation, security risk from global singletons</business-impact>
+        <prevention>
+            Never create duplicate registry implementations. Always search existing SSOT before creating.
+            All registries must extend UniversalRegistry. Multi-user systems require factory patterns.
+            WebSocket integration mandatory for agent registries. Flag "simple" or "standalone" file creation.
+        </prevention>
+        <cross-references>
+            <file>netra_backend/app/core/registry/universal_registry.py</file>
+            <file>netra_backend/app/agents/supervisor/agent_registry.py</file>
+            <file>SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml</file>
+            <deleted-file>netra_backend/app/agents/agent_registry.py</deleted-file>
+        </cross-references>
+    </learning>
+    
     <learning id="auth-startup-validation-critical-2025-09-07">
         <title>CRITICAL: Auth Startup Validation Must Never Be Removed</title>
         <category>Authentication/Startup/Security/Critical</category>
@@ -3229,6 +3345,43 @@
         <related-learnings>
             <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
             <learning-ref>type_safety.xml</learning-ref>
+        </related-learnings>
+    </learning>
+
+    <learning id="startup-table-validation-anti-regression-2025-09-08">
+        <title>🚨 ANTI-REGRESSION: Startup Table Validation Critical vs Non-Critical Logic</title>
+        <category>Startup/Database/Anti-Regression/Critical</category>
+        <keywords>startup-validation, non-critical-tables, semantic-behavioral-contradiction, strict-mode, graceful-startup, table-validation, business-logic, anti-regression</keywords>
+        <path>startup_table_validation_anti_regression_20250908.xml</path>
+        <critical-takeaway>
+            CRITICAL REGRESSION PREVENTION: startup_module.py contained contradictory logic where tables
+            identified as "non-critical" were incorrectly treated as "required" in strict mode, blocking
+            startup for optional features. This violated semantic meaning of "non-critical" and blocked
+            core chat functionality (90% of business value) when optional features were missing.
+            FIXED: Non-critical tables never block startup in any mode, enhanced logging in strict mode.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Core chat functionality blocked by optional features, false startup failures, reduced deployment velocity</business-impact>
+        <prevention>
+            Non-critical tables must NEVER block startup in any mode. Semantic consistency required:
+            if named "non-critical" must behave as non-critical. Strict mode affects logging verbosity,
+            not fundamental business logic. Optional features should never block core functionality.
+        </prevention>
+        <anti-regression-measures>
+            <test-file>netra_backend/tests/unit/test_startup_non_critical_table_fix_validation.py</test-file>
+            <monitoring>startup_blocked_by_non_critical_tables</monitoring>
+            <code-review>Any startup table validation changes require two-engineer review</code-review>
+        </anti-regression-measures>
+        <cross-references>
+            <file>netra_backend/app/startup_module.py</file>
+            <file>SPEC/learnings/startup_non_critical_table_fix_validation_20250908.xml</file>
+            <report>reports/validation/STARTUP_NON_CRITICAL_TABLE_FIX_PROOF_REPORT.md</report>
+            <getting-stuck-log>reports/getting_stuck_log.md#entry-7</getting-stuck-log>
+        </cross-references>
+        <related-learnings>
+            <learning-ref>cold_start_audit.xml</learning-ref>
+            <learning-ref>auth_startup_validation_critical.xml</learning-ref>
+            <learning-ref>clickhouse_graceful_failure.xml</learning-ref>
         </related-learnings>
     </learning>
 </specification>

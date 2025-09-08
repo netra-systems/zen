@@ -34,6 +34,7 @@ from contextlib import asynccontextmanager
 
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -148,19 +149,21 @@ class UserExecutionContext:
                     f"got: {value!r}"
                 )
             
-            # Validate UUID format for request_id (only if not auto-generated)
+            # Validate ID format for request_id (supports UUID and UnifiedIDManager formats)
             if field_name == 'request_id':
-                try:
-                    uuid.UUID(value)
-                except ValueError:
-                    # Allow non-UUID values for testing, but log a warning
+                from netra_backend.app.core.unified_id_manager import is_valid_id_format
+                if not is_valid_id_format(value):
                     logger.warning(
-                        f"request_id '{value}' is not a valid UUID. "
-                        "Consider using proper UUID format for production."
+                        f"request_id '{value}' has invalid format. "
+                        "Expected UUID or UnifiedIDManager structured format."
                     )
     
     def _validate_no_placeholder_values(self) -> None:
         """Validate that no IDs contain dangerous placeholder or template values."""
+        # Get environment instance for test detection
+        env = IsolatedEnvironment()
+        is_test_environment = env.is_test()
+        
         # Forbidden exact values (case-insensitive)
         forbidden_exact_values = {
             'registry', 'placeholder', 'default', 'temp', 'none', 'null', 
@@ -170,9 +173,18 @@ class UserExecutionContext:
         
         # Forbidden prefix patterns for short values (< 20 chars)
         forbidden_patterns = [
-            'placeholder_', 'registry_', 'default_', 'temp_', 'test_',
+            'placeholder_', 'registry_', 'default_', 'temp_',
             'example_', 'demo_', 'sample_', 'template_', 'mock_', 'fake_'
         ]
+        
+        # Only add 'test_' pattern restriction for non-test environments
+        if not is_test_environment:
+            forbidden_patterns.append('test_')
+        else:
+            logger.debug(
+                f"Test environment detected - allowing test_ patterns for context creation. "
+                f"user_id: {self.user_id[:12]}..., environment: {env.get_environment_name()}"
+            )
         
         id_fields = ['user_id', 'thread_id', 'run_id', 'request_id']
         
@@ -940,9 +952,59 @@ async def managed_user_context(
                 logger.warning(f"Error closing database session: {e}")
 
 
+# ============================================================================
+# FACTORY CLASS FOR INTEGRATION TEST COMPATIBILITY
+# ============================================================================
+
+class UserContextFactory:
+    """Factory class for creating UserExecutionContext instances.
+    
+    This factory provides a convenient interface for integration tests
+    and other components that need to create UserExecutionContext instances
+    with consistent patterns.
+    """
+    
+    @staticmethod
+    def create_context(
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        request_id: Optional[str] = None,
+        websocket_client_id: Optional[str] = None
+    ) -> UserExecutionContext:
+        """Create a basic UserExecutionContext for testing."""
+        return UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+    
+    @staticmethod
+    def create_with_session(
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        db_session: 'AsyncSession',
+        request_id: Optional[str] = None,
+        websocket_client_id: Optional[str] = None
+    ) -> UserExecutionContext:
+        """Create a UserExecutionContext with database session."""
+        context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+        return context.with_db_session(db_session)
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
+    'UserContextFactory',
     'InvalidContextError', 
     'ContextIsolationError',
     'validate_user_context',

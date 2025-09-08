@@ -37,7 +37,7 @@ from contextlib import contextmanager
 import weakref
 import threading
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
     IsolatedWebSocketManager,
@@ -127,7 +127,7 @@ class WebSocketManagerAdapter:
             thread_id=f"thread_{context_id[:8]}",
             run_id=f"run_{context_id[:8]}",
             request_id=f"req_{context_id[:8]}",
-            websocket_connection_id=connection_id
+            websocket_client_id=connection_id
         )
         
         self._legacy_stats["contexts_created"] += 1
@@ -291,7 +291,10 @@ class WebSocketManagerAdapter:
                 connection = manager.get_connection(connection_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                        safe_message = _serialize_message_safely(message)
+                        await connection.websocket.send_json(safe_message)
                         logger.debug(f"Sent message to connection {connection_id[:8]}... via isolated manager")
                         return True
                     except Exception as e:

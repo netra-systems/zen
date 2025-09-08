@@ -32,9 +32,8 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
-# Import base test framework
+# Import base test framework - SSOT test configuration
 from test_framework.conftest_base import *
-from test_framework.docker_test_manager import get_test_manager
 
 # Analytics service isolated environment
 try:

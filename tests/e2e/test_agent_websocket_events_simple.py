@@ -210,7 +210,7 @@ async def test_agent_websocket_events_mission_critical():
                 # Cancel listener
                 listener_task.cancel()
                 
-        except (websockets.exceptions.InvalidStatusCode, 
+        except (websockets.exceptions.InvalidStatus, 
                 websockets.exceptions.ConnectionClosedError, 
                 ConnectionRefusedError) as e:
             logger.warning(f"WebSocket connection failed: {e}")

@@ -27,7 +27,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, TypeVar, Generic
 from uuid import uuid4
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 

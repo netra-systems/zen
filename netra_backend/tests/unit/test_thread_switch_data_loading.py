@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.models_postgres import Message, Thread

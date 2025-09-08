@@ -395,7 +395,7 @@ class WebSocketV2Migrator:
                     else:
                         if in_imports and line.strip():
                             # Add UserExecutionContext import before first non-import
-                            import_lines.append("from netra_backend.app.models.user_execution_context import UserExecutionContext")
+                            import_lines.append("from netra_backend.app.services.user_execution_context import UserExecutionContext")
                             in_imports = False
                         other_lines.append(line)
                 

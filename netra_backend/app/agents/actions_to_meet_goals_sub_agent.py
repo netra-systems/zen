@@ -14,7 +14,7 @@ import time
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.actions_goals_plan_builder_uvs import ActionPlanBuilderUVS
 from netra_backend.app.agents.base_agent import BaseAgent

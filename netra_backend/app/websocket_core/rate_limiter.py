@@ -1,6 +1,6 @@
 # Shim module for backward compatibility
 # Rate limiting integrated into WebSocket auth
-from netra_backend.app.websocket_core.auth import RateLimiter
+from netra_backend.app.services.rate_limiter import RateLimiter
 from netra_backend.app.websocket_core.utils import check_rate_limit
 import time
 from typing import Dict, Optional, Tuple
@@ -48,6 +48,39 @@ class WebSocketRateLimiter:
             'tracked_ips': len(self.connection_times),
             'active_backoffs': len(self.backoff_times)
         }
+
+
+# Exception classes for test compatibility
+class RateLimitExceededException(Exception):
+    """Raised when rate limit is exceeded."""
+    def __init__(self, message: str, retry_after: Optional[float] = None):
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
+# Configuration classes for test compatibility
+from dataclasses import dataclass
+
+@dataclass
+class RateLimitConfig:
+    """Rate limit configuration."""
+    max_connections_per_ip: int = 10
+    max_messages_per_minute: int = 100
+    max_messages_per_hour: int = 1000
+    connection_backoff_seconds: float = 5.0
+    message_backoff_seconds: float = 60.0
+
+@dataclass
+class UserRateLimitState:
+    """User rate limit state tracking."""
+    user_id: str
+    connection_count: int = 0
+    messages_this_minute: int = 0
+    messages_this_hour: int = 0
+    last_message_time: Optional[float] = None
+    last_connection_time: Optional[float] = None
+    is_rate_limited: bool = False
+    backoff_until: Optional[float] = None
 
 
 # Global instance

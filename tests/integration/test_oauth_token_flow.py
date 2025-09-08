@@ -22,7 +22,8 @@ import pytest
 
 # Absolute imports as per CLAUDE.md requirements
 from shared.isolated_environment import get_env
-from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token
+from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
+from tests.helpers.auth_test_utils import create_admin_token
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.repository import AuthUserRepository

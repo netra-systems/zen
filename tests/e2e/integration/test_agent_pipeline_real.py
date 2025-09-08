@@ -46,21 +46,17 @@ E2EServiceValidator.enforce_real_services()
 # Validate critical dependencies at module level
 def _validate_real_service_requirements():
     """Validate real service requirements and fail fast if missing."""
+    from test_framework.ssot.llm_config_helper import LLMConfigHelper
+    
     missing_deps = []
     
-    # Check for real LLM capability
-    if not any([
-        get_env().get("OPENAI_API_KEY"),
-        get_env().get("ANTHROPIC_API_KEY"), 
-        get_env().get("GEMINI_API_KEY"),
-        get_env().get("GOOGLE_API_KEY")
-    ]):
-        missing_deps.append("LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)")
+    # Setup LLM configuration for testing
+    LLMConfigHelper.setup_test_environment()
     
-    # Ensure real LLM is enabled
-    if get_env().get("USE_REAL_LLM", "false").lower() != "true":
-        get_env().set("USE_REAL_LLM", "true")
-        get_env().set("TEST_USE_REAL_LLM", "true")
+    # Validate LLM configuration with environment-aware logic
+    is_llm_valid, llm_error = LLMConfigHelper.validate_for_pipeline_test()
+    if not is_llm_valid:
+        missing_deps.append(f"LLM Configuration: {llm_error}")
     
     # Set the JWT secret for backend compatibility
     get_env().set("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
@@ -70,13 +66,41 @@ def _validate_real_service_requirements():
         missing_deps.append("JWT_SECRET_KEY for authentication")
     
     if missing_deps:
+        # Get LLM status for detailed error reporting
+        llm_status = LLMConfigHelper.get_llm_status_summary()
+        current_env = llm_status["environment"]
+        
+        env_context = f" (Environment: {current_env})" if current_env != "development" else ""
         error_msg = (
-            "CRITICAL: Real Agent Pipeline test requires real services but dependencies are missing:\n"
+            f"CRITICAL: Real Agent Pipeline test requires real services but dependencies are missing{env_context}:\n"
             + "\n".join(f"  - {dep}" for dep in missing_deps) +
             "\n\nThis test validates the complete agent pipeline with real LLM APIs."
             "\nPer CLAUDE.md: MOCKS ARE FORBIDDEN in E2E tests."
-            "\nEither provide the required dependencies or fix the underlying service configuration."
+            f"\n\nLLM Configuration Status:"
+            f"\n  Environment: {llm_status['environment']}"
+            f"\n  LLM Available: {llm_status['llm_available']}"
+            f"\n  Found API Keys: {llm_status['found_api_keys']}"
+            f"\n  USE_REAL_LLM: {llm_status['use_real_llm']}"
+            f"\n  TEST_USE_REAL_LLM: {llm_status['test_use_real_llm']}"
         )
+        
+        if current_env == "staging":
+            error_msg += (
+                f"\n\nFor staging environment: Ensure LLM API keys are configured in GCP Secret Manager:"
+                f"\n  - openai-api-key-staging"
+                f"\n  - anthropic-api-key-staging"  
+                f"\n  - gemini-api-key-staging"
+                f"\nOr set USE_REAL_LLM=true if Secret Manager keys are available."
+            )
+        else:
+            error_msg += (
+                f"\n\nFor {current_env} environment: Set at least one of:"
+                f"\n  - OPENAI_API_KEY"
+                f"\n  - ANTHROPIC_API_KEY"
+                f"\n  - GEMINI_API_KEY" 
+                f"\n  - GOOGLE_API_KEY"
+            )
+        
         raise RuntimeError(error_msg)
 
 # Validate requirements on import

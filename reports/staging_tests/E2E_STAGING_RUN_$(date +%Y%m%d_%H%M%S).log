@@ -1,0 +1,600 @@
+
+======================================================================
+STAGING E2E TEST SESSION STARTED
+Time: 2025-09-07 05:56:58
+======================================================================
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'Faker': '37.4.2', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 243 items
+
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_api_endpoints PASSED
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_end_to_end_message_flow PASSED
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_performance_targets PASSED
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_critical_error_handling PASSED
+tests/e2e/staging/test_10_critical_path_staging.py::TestCriticalPathStaging::test_business_critical_features PASSED
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_health_check PASSED
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_connection PASSED
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_api_endpoints_for_agents PASSED
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_websocket_event_flow_real PASSED
+tests/e2e/staging/test_1_websocket_events_staging.py::TestWebSocketEventsStaging::test_concurrent_websocket_real PASSED
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_message_endpoints PASSED
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_message_api_endpoints PASSED
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_websocket_message_flow PASSED
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_thread_management PASSED
+tests/e2e/staging/test_2_message_flow_staging.py::TestMessageFlowStaging::test_real_error_handling_flow PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_discovery PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_configuration PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_pipeline_execution PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_agent_lifecycle_monitoring PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_error_handling PASSED
+tests/e2e/staging/test_3_agent_pipeline_staging.py::TestAgentPipelineStaging::test_real_pipeline_metrics PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_discovery_and_listing PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_workflow_states PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_agent_communication_patterns PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_orchestration_error_scenarios PASSED
+tests/e2e/staging/test_4_agent_orchestration_staging.py::TestAgentOrchestrationStaging::test_multi_agent_coordination_metrics PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_protocols PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_chunk_handling PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_streaming_performance_metrics PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_backpressure_handling PASSED
+tests/e2e/staging/test_5_response_streaming_staging.py::TestResponseStreamingStaging::test_stream_recovery PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_failure_detection PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_retry_strategies PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_circuit_breaker PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_graceful_degradation PASSED
+tests/e2e/staging/test_6_failure_recovery_staging.py::TestFailureRecoveryStaging::test_recovery_metrics PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_sequence [PASS] Basic functionality test
+[PASS] /health returned 200
+[PASS] /api/health returned 200
+[PASS] /api/discovery/services returned 200
+[PASS] /api/mcp/config returned 200
+[PASS] /api/mcp/servers returned 200
+[PASS] All 5 critical endpoints working
+[INFO] Critical path flow:
+  1. user_input_received
+  2. message_validated
+  3. agent_selected
+  4. agent_executed
+  5. response_generated
+  6. response_delivered
+[PASS] End-to-end message flow validated
+[PASS] api_response_time_ms: 85ms (target: 100ms)
+[PASS] websocket_latency_ms: 42ms (target: 50ms)
+[PASS] agent_startup_time_ms: 380ms (target: 500ms)
+[PASS] message_processing_time_ms: 165ms (target: 200ms)
+[PASS] total_request_time_ms: 872ms (target: 1000ms)
+[PASS] All performance targets met
+[INFO] Error AUTH_FAILED: redirect_to_login
+[INFO] Error RATE_LIMITED: exponential_backoff
+[INFO] Error SERVICE_UNAVAILABLE: failover
+[INFO] Error INVALID_REQUEST: return_error
+[INFO] Error INTERNAL_ERROR: log_and_retry
+[PASS] Validated 5 critical error handlers
+[INFO] Critical features: 5/5 enabled
+[PASS] chat_functionality: enabled
+[PASS] agent_execution: enabled
+[PASS] real_time_updates: enabled
+[PASS] error_recovery: enabled
+[PASS] performance_monitoring: enabled
+[PASS] All business critical features enabled
+[PASS] Health checks successful
+[SUCCESS] WebSocket auth properly enforced: HTTP 403
+[SUCCESS] This confirms staging auth is working correctly
+[PASS] WebSocket connection test completed - staging connectivity verified
+[PASS] Service discovery working
+[PASS] MCP config available
+[PASS] MCP servers endpoint working
+[SUCCESS] WebSocket auth properly enforced: HTTP 403
+Test duration: 0.581s
+Events received: 0
+[SUCCESS] Auth error confirms staging authentication is properly enforced
+[PASS] Real WebSocket event flow test completed
+Concurrent WebSocket test results:
+  Total connections: 7
+  Successful: 0
+  Auth required: 7
+  Timeouts: 0
+  Errors: 0
+  Total test duration: 3.837s
+  Average connection time: 3.809s
+[SUCCESS] 7 connections properly rejected by auth - staging security working
+[PASS] Real concurrent WebSocket test completed
+[PASS] Endpoint /api/health responding
+[PASS] Endpoint /api/discovery/services responding
+[INFO] /api/messages: 403
+[INFO] /api/threads: 403
+[INFO] /api/conversations: 404
+[INFO] /api/chat: 404
+[INFO] /api/chat/messages: 404
+Message API test duration: 1.120s
+[INFO] Accessible endpoints: 2/5
+[PASS] Real message API endpoints tested
+[SUCCESS] WebSocket auth properly enforced: HTTP 403
+Message flow test results:
+  Connection established: False
+  Messages sent: 0
+  Events received: 0
+  Auth error detected: True
+  Test duration: 0.666s
+[SUCCESS] Auth error confirms staging authentication is properly enforced
+[PASS] Real WebSocket message flow tested
+[INFO] List threads: 403 (auth required)
+[INFO] List conversations: 404 (auth required)
+[INFO] List messages: 403 (auth required)
+Thread management test results:
+  List threads: 403
+  List conversations: 404
+  List messages: 403
+Test duration: 0.832s
+[PASS] Real thread management tested
+[INFO] Not Found Test: 404
+[INFO] Invalid ID Test: 403
+[INFO] Unauthorized Execution Test: 422
+[INFO] Security Test: 403
+[INFO] Missing Auth Test: 403
+Error handling test results:
+  API error tests: 5
+  WebSocket error tests: 1
+  Test duration: 1.753s
+[PASS] Real error handling flow tested
+[INFO] /api/mcp/servers: 200 - 1
+[INFO] /api/agents: 404 (auth required)
+[INFO] /api/agents/list: 404 (auth required)
+[INFO] /api/mcp/config: 200 - config
+[INFO] /api/discovery/agents: 404 (auth required)
+Agent discovery test results:
+  Endpoints tested: 5
+  Successful responses: 2
+  Agents discovered: 1
+  Test duration: 1.126s
+[PASS] Real agent discovery tested
+[INFO] /api/mcp/config: 200 - 649 bytes
+[INFO] /api/agents/config: 404
+[INFO] /api/configuration: 404
+[INFO] /api/settings: 422
+Agent configuration test results:
+  /api/mcp/config: 200 - Agent config: True
+  /api/agents/config: 404 - Agent config: False
+  /api/configuration: 404 - Agent config: False
+  /api/settings: 422 - Agent config: False
+Test duration: 0.950s
+[SUCCESS] Found 1 accessible configuration endpoints
+[PASS] Real agent configuration tested
+[SUCCESS] Pipeline execution auth properly enforced: HTTP 403
+Agent pipeline test results:
+  Execution attempted: False
+  Pipeline events received: 0
+  Auth error received: True
+  Test duration: 0.801s
+[SUCCESS] Auth error confirms staging authentication is properly enforced
+[PASS] Real agent pipeline execution tested
+[INFO] /api/agents/status: 404
+[INFO] /api/agents/active: 404
+[INFO] /api/execution/status: 404
+[INFO] /api/jobs: 404
+[INFO] /api/tasks: 404
+[SUCCESS] WebSocket lifecycle monitoring auth properly enforced: HTTP 403
+Agent lifecycle monitoring results:
+  Endpoints tested: 5
+  Agent status found: False
+  WebSocket events: 0
+  Test duration: 1.723s
+[PASS] Real agent lifecycle monitoring tested
+[INFO] Nonexistent Agent Error: 404
+[INFO] Invalid Execution Request: 422
+[INFO] Invalid Pipeline ID: 404
+[INFO] Wrong HTTP Method: 405
+Pipeline error handling results:
+  API error tests: 4
+  WebSocket error tests: 1
+  Proper API error responses: 0/4
+  Test duration: 1.755s
+[PASS] Real pipeline error handling tested
+[INFO] /api/metrics: 404
+[INFO] /api/metrics/agents: 404
+[INFO] /api/metrics/pipeline: 404
+[INFO] /api/stats: 404
+[INFO] /api/health/metrics: 404
+[INFO] /api/performance: 404
+Pipeline metrics test results:
+  Metrics endpoints tested: 6
+  Endpoints with metrics: 0
+  Performance test iterations: 5
+  Successful requests: 5/5
+  Response time - Avg: 0.652s, Min: 0.597s, Max: 0.698s
+  Total test duration: 5.586s
+[PASS] Real pipeline metrics tested
+[PASS] Basic functionality test
+[INFO] Found agent: netra-mcp (status: connected)
+[PASS] Agent discovery and listing test
+[INFO] Testing workflow state transitions:
+  pending -> initializing
+  initializing -> running
+  running -> coordinating
+  coordinating -> waiting_for_agents
+  waiting_for_agents -> aggregating_results
+  aggregating_results -> completed
+[PASS] Orchestration workflow states test
+[INFO] Pattern 'broadcast': Send message to all agents
+[INFO] Pattern 'round_robin': Distribute tasks evenly
+[INFO] Pattern 'priority': Send to highest priority agent
+[INFO] Pattern 'parallel': Execute on all agents simultaneously
+[INFO] Pattern 'sequential': Execute one after another
+[PASS] Validated 5 communication patterns
+[PASS] Tested 5 error scenarios
+[INFO] Coordination efficiency: 70.0%
+[PASS] Multi-agent coordination metrics test
+[PASS] Basic functionality test
+[INFO] Protocol 'websocket' configuration validated
+[INFO] Protocol 'server-sent-events' configuration validated
+[INFO] Protocol 'chunked-transfer' configuration validated
+[PASS] Tested 3 streaming protocols
+[PASS] Validated 5 chunk sizes
+[INFO] Streaming success rate: 95.0%
+[PASS] Streaming performance metrics test
+[INFO] Backpressure scenario: slow_consumer
+[INFO] Backpressure scenario: fast_producer
+[INFO] Backpressure scenario: network_congestion
+[INFO] Backpressure scenario: buffer_overflow
+[PASS] Tested 4 backpressure scenarios
+[PASS] Validated 3 recovery checkpoints
+[PASS] Basic functionality test
+[PASS] Tested 5 failure detection types
+[INFO] Strategy 'exponential_backoff': {'initial_delay': 1, 'max_delay': 32, 'multiplier': 2}
+[INFO] Strategy 'linear_backoff': {'delay': 5, 'max_attempts': 3}
+[INFO] Strategy 'immediate': {'delay': 0, 'max_attempts': 1}
+[INFO] Strategy 'jittered': {'base_delay': 2, 'jitter_range': 1}
+[PASS] Validated 4 retry strategies
+[INFO] Circuit breaker state: closed
+[INFO] Circuit breaker state: open
+[INFO] Circuit breaker state: half_open
+[PASS] Circuit breaker pattern test
+[INFO] Level 0: Full functionality
+[INFO] Level 1: Non-critical features disabled
+[INFO] Level 2: Read-only mode
+[INFO] Level 3: Minimal functionality
+[INFO] Level 4: Maintenance mode
+[PASS] Tested 5 degradation levels
+[INFO] Recovery rate: 90.0%
+[INFO] Availability: 99.5%
+[PASS] Recovery metrics test
+[PASS] Basic functionality test
+PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_dependency_validation PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_cold_start_performance PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_startup_failure_handling PASSED
+tests/e2e/staging/test_7_startup_resilience_staging.py::TestStartupResilienceStaging::test_health_check_endpoints PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_types PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_sequencing PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_metadata PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_filtering PASSED
+tests/e2e/staging/test_8_lifecycle_events_staging.py::TestLifecycleEventsStaging::test_event_persistence PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_basic_functionality PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_patterns PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_task_distribution PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_synchronization_primitives PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_consensus_mechanisms PASSED
+tests/e2e/staging/test_9_coordination_staging.py::TestCoordinationStaging::test_coordination_metrics PASSED
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_001_basic_optimization_agent_flow ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_002_multi_turn_optimization_conversation ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_003_concurrent_user_isolation ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_004_realtime_agent_status_events ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_005_tool_execution_transparency ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_006_error_recovery_graceful_degradation ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_007_performance_optimization_workflow ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_008_data_analysis_visualization ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_009_long_running_optimization_progress ERROR
+tests/e2e/staging/test_ai_optimization_business_value.py::TestAIOptimizationBusinessValue::test_010_full_pipeline_cost_analysis ERROR
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_001_basic_optimization_agent_flow _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_002_multi_turn_optimization_conversation _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_003_concurrent_user_isolation _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_004_realtime_agent_status_events _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_005_tool_execution_transparency _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_006_error_recovery_graceful_degradation _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_007_performance_optimization_workflow _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_008_data_analysis_visualization _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+----------------------------- Captured log setup ------------------------------
+ERROR    test_framework.ssot.websocket:websocket.py:596 WebSocket test utility initialization failed: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+_ ERROR at setup of TestAIOptimizationBusinessValue.test_009_long_running_optimization_progress _
+test_framework\ssot\websocket.py:604: in _verify_server_availability
+    test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await self.connection.handshake(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:114: in handshake
+    raise self.protocol.handshake_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:325: in parse
+    self.process_response(response)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\client.py:142: in process_response
+    raise InvalidStatus(response)
+E   websockets.exceptions.InvalidStatus: server rejected WebSocket connection: HTTP 403
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_ai_optimization_business_value.py:60: in setup
+    await self.ws_utility.initialize()
+test_framework\ssot\websocket.py:589: in initialize
+    await self._verify_server_availability()
+test_framework\ssot\websocket.py:608: in _verify_server_availability
+    raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")
+E   RuntimeError: WebSocket server not available at wss://api.staging.netrasystems.ai/ws: server rejected WebSocket connection: HTTP 403
+[INFO] Startup sequence:
+  -> config_loading
+  -> dependency_check
+  -> database_connection
+  -> service_initialization
+  -> health_check
+  -> ready
+[PASS] Validated 6 startup steps
+[INFO] Dependencies: 3/4 available
+[INFO] Required: 3 services
+[INFO] Checking required dependency: database
+[INFO] Checking required dependency: redis
+[INFO] Checking required dependency: llm_service
+[PASS] Dependency validation test
+[PASS] config_load_ms: 85ms (target: 100ms)
+[PASS] db_connect_ms: 420ms (target: 500ms)
+[PASS] service_init_ms: 890ms (target: 1000ms)
+[PASS] total_startup_ms: 2500ms (target: 3000ms)
+[PASS] Cold start performance test
+[INFO] Scenario: config_missing -> Fallback to defaults
+[INFO] Scenario: db_unavailable -> Retry with exponential backoff
+[INFO] Scenario: port_conflict -> Try alternative ports
+[INFO] Scenario: memory_insufficient -> Reduce cache size
+[INFO] Scenario: service_conflict -> Wait for service availability
+[PASS] Tested 5 failure scenarios
+[INFO] Service reported as healthy
+[INFO] Service: netra-ai-platform
+[INFO] Version: 1.0.0
+[PASS] Health check endpoints test
+[PASS] Basic functionality test
+[PASS] Validated 9 event types
+[INFO] Valid sequence: agent_started -> agent_thinking -> agent_completed
+[INFO] Valid sequence: agent_started -> tool_executing -> tool_completed -> agent_completed
+[INFO] Valid sequence: agent_started -> agent_failed
+[INFO] Valid sequence: system_startup -> agent_initialized -> agent_started
+[PASS] Validated 4 event sequences
+[INFO] Event metadata validated
+[INFO] Duration: 1500ms
+[INFO] Tokens: 250
+[PASS] Event metadata test
+[INFO] Filter: by_type
+[INFO] Filter: by_time_range
+[INFO] Filter: by_agent
+[INFO] Filter: by_status
+[PASS] Validated 4 filter types
+[INFO] Retention: 30 days
+[INFO] Max events: 10000
+[PASS] Event persistence test
+[PASS] Basic functionality test
+[INFO] Pattern: master_slave
+[INFO] Pattern: peer_to_peer
+[INFO] Pattern: publish_subscribe
+[INFO] Pattern: request_reply
+[INFO] Pattern: pipeline
+[PASS] Tested 5 coordination patterns
+[INFO] Strategy 'round_robin': {'index': 0, 'agents': 3}
+[INFO] Strategy 'least_loaded': {'load_threshold': 0.8}
+[INFO] Strategy 'random': {'seed': 42}
+[INFO] Strategy 'weighted': {'weights': [0.5, 0.3, 0.2]}
+[INFO] Strategy 'sticky': {'session_affinity': True}
+[PASS] Validated 5 distribution strategies
+[INFO] Primitive: mutex
+[INFO] Primitive: semaphore
+[INFO] Primitive: barrier
+[INFO] Primitive: event
+[INFO] Primitive: condition
+[PASS] Tested 5 synchronization primitives
+[INFO] Consensus: voting
+[INFO] Consensus: quorum
+[INFO] Consensus: leader_election
+[INFO] Consensus: two_phase_commit
+[PASS] Tested 4 consensus mechanisms
+[INFO] Coordination efficiency: 95.0%
+[INFO] Throughput: 20.5 tasks/sec
+[PASS] Coordination metrics test
+
+Test report saved to: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\STAGING_TEST_REPORT_PYTEST.md
+
+=== Memory Usage Report ===
+Loaded fixture modules: base, mocks
+Peak memory usage: 191.9 MB
+Test run completed with code: 1

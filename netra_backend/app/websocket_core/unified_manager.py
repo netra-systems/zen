@@ -4,23 +4,197 @@ This module is the single source of truth for WebSocket connection management.
 """
 
 import asyncio
-from typing import Dict, Optional, Set, Any, List
+import json
+from enum import Enum
+from typing import Dict, Optional, Set, Any, List, Union
 from dataclasses import dataclass
 from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger
+from shared.types.core_types import (
+    UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
+    ensure_user_id, ensure_thread_id, ensure_websocket_id
+)
 
+# Import the protocol after it's defined to avoid circular imports
 logger = central_logger.get_logger(__name__)
+
+
+def _get_enum_key_representation(enum_key: Enum) -> str:
+    """
+    Get string representation for enum keys in dictionaries.
+    
+    For enum keys, we always want readable string representation to ensure
+    JSON serialization compatibility. Enum keys should use lowercase names
+    for better readability in JSON, regardless of whether they're WebSocketState
+    or generic enums.
+    
+    Args:
+        enum_key: Enum object to convert to string key
+        
+    Returns:
+        String representation suitable for JSON dict keys
+    """
+    if hasattr(enum_key, 'name') and hasattr(enum_key, 'value'):
+        # For enum keys, always use lowercase names for better JSON readability
+        # This makes the JSON more human-readable: {"open": "connected"} vs {"1": "connected"}
+        return str(enum_key.name).lower()
+    else:
+        # Fallback to string representation
+        return str(enum_key)
+
+
+def _serialize_message_safely(message: Any) -> Dict[str, Any]:
+    """
+    Safely serialize message data for WebSocket transmission with comprehensive fallback strategies.
+    
+    CRITICAL FIX: Handles all serialization edge cases including:
+    - Enum objects (WebSocketState, etc.) → converted to string values
+    - Pydantic models → model_dump(mode='json') for datetime handling  
+    - Complex objects with to_dict() method
+    - Datetime objects → ISO string format
+    - Dataclasses → converted to dict
+    - Fallback to string representation for unhandled types
+    
+    Args:
+        message: Any message object that needs JSON serialization
+        
+    Returns:
+        JSON-serializable dictionary
+        
+    Raises:
+        TypeError: Only if all fallback strategies fail (should be extremely rare)
+    """
+    # Quick path for already serializable dicts
+    if isinstance(message, dict):
+        try:
+            # Test if it's already JSON serializable
+            json.dumps(message)
+            return message
+        except (TypeError, ValueError):
+            # Dict contains non-serializable objects, need to process recursively
+            # Process both keys AND values for enum objects
+            result = {}
+            for key, value in message.items():
+                # Convert enum keys consistently with enum value handling
+                if isinstance(key, Enum):
+                    # For WebSocketState enums, use name.lower() to match value handling
+                    try:
+                        from starlette.websockets import WebSocketState as StarletteWebSocketState
+                        if isinstance(key, StarletteWebSocketState):
+                            safe_key = key.name.lower()
+                        else:
+                            safe_key = _get_enum_key_representation(key)
+                    except (ImportError, AttributeError):
+                        try:
+                            from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
+                            if isinstance(key, FastAPIWebSocketState):
+                                safe_key = key.name.lower()
+                            else:
+                                safe_key = _get_enum_key_representation(key)
+                        except (ImportError, AttributeError):
+                            safe_key = _get_enum_key_representation(key)
+                else:
+                    safe_key = key
+                # Recursively serialize values
+                result[safe_key] = _serialize_message_safely(value)
+            return result
+    
+    # CRITICAL FIX: Handle WebSocketState enum specifically (from FastAPI/Starlette)
+    # CLOUD RUN FIX: More resilient import handling to prevent startup failures
+    try:
+        from starlette.websockets import WebSocketState as StarletteWebSocketState
+        if isinstance(message, StarletteWebSocketState):
+            return message.name.lower()  # CONNECTED → "connected"
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"Starlette WebSocketState import failed (non-critical): {e}")
+    
+    try:
+        from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
+        if isinstance(message, FastAPIWebSocketState):
+            return message.name.lower()  # CONNECTED → "connected"
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"FastAPI WebSocketState import failed (non-critical): {e}")
+    
+    # Handle enum objects - CONSISTENT LOGIC: Return .value for generic enums  
+    if isinstance(message, Enum):
+        # CLOUD RUN FALLBACK: Handle generic WebSocket state patterns ONLY for actual framework WebSocketState enums
+        # Only check for WebSocketState behavior if we couldn't match the specific framework imports above
+        # This avoids false positives with test enums that happen to have WebSocket-like names
+        if hasattr(message, 'name') and hasattr(message, 'value'):
+            # More specific check: only treat as WebSocketState if it's actually from a WebSocket framework
+            module_name = getattr(message.__class__, '__module__', '')
+            # Only match actual WebSocket framework modules, not test modules
+            framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
+            is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
+            
+            if is_framework_websocket:
+                enum_name = str(message.name).upper()
+                websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
+                if enum_name in websocket_state_names:
+                    return str(message.name).lower()
+        
+        # For all other enums (including test enums), return the value
+        return message.value if hasattr(message, 'value') else str(message)
+    
+    # Handle Pydantic models with proper datetime serialization
+    if hasattr(message, 'model_dump'):
+        try:
+            return message.model_dump(mode='json')
+        except Exception as e:
+            logger.warning(f"Pydantic model_dump failed: {e}, falling back to dict")
+            return message.model_dump()
+    
+    # Handle objects with to_dict method (DeepAgentState, etc.)
+    if hasattr(message, 'to_dict'):
+        return message.to_dict()
+    
+    # Handle dataclasses
+    if hasattr(message, '__dataclass_fields__'):
+        from dataclasses import asdict
+        # Convert dataclass to dict, then recursively serialize the result
+        dict_data = asdict(message)
+        return _serialize_message_safely(dict_data)
+    
+    # Handle datetime objects
+    if hasattr(message, 'isoformat'):
+        return message.isoformat()
+    
+    # Handle lists and tuples recursively
+    if isinstance(message, (list, tuple)):
+        return [_serialize_message_safely(item) for item in message]
+    
+    # Handle sets (convert to list)
+    if isinstance(message, set):
+        return [_serialize_message_safely(item) for item in message]
+    
+    # Test direct JSON serialization for basic types
+    try:
+        json.dumps(message)
+        return message
+    except (TypeError, ValueError):
+        pass
+    
+    # Final fallback - convert to string (prevents total failure)
+    logger.warning(f"Using string fallback for object of type {type(message)}: {message}")
+    return str(message)
 
 
 @dataclass
 class WebSocketConnection:
-    """Represents a WebSocket connection."""
+    """Represents a WebSocket connection with type safety."""
     connection_id: str
     user_id: str
     websocket: Any
     connected_at: datetime
     metadata: Dict[str, Any] = None
+    thread_id: Optional[str] = None
+    
+    def __post_init__(self):
+        """Validate connection data after initialization."""
+        # Validate user_id is properly formatted
+        if self.user_id:
+            self.user_id = ensure_user_id(self.user_id)
 
 
 class RegistryCompat:
@@ -55,6 +229,13 @@ class RegistryCompat:
 
 class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
+    
+    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
+    as WebSocketManagerProtocol to ensure consistency with IsolatedWebSocketManager.
+    
+    While this class predates the protocol, it provides all required methods to
+    maintain interface compatibility and prevent the root cause identified in
+    Five Whys analysis: "lack of formal interface contracts."
     
     ENHANCED: Eliminates race conditions by providing connection-level isolation:
     - Per-user connection locks prevent race conditions during concurrent operations
@@ -119,7 +300,13 @@ class UnifiedWebSocketManager:
         return self._user_connection_locks[user_id]
     
     async def add_connection(self, connection: WebSocketConnection) -> None:
-        """Add a new WebSocket connection with thread safety."""
+        """Add a new WebSocket connection with thread safety and type validation."""
+        # Validate connection before adding
+        if not connection.user_id:
+            raise ValueError("Connection must have a valid user_id")
+        if not connection.connection_id:
+            raise ValueError("Connection must have a valid connection_id")
+            
         # Use user-specific lock for connection operations
         user_lock = await self._get_user_connection_lock(connection.user_id)
         
@@ -154,15 +341,27 @@ class UnifiedWebSocketManager:
             queued_messages = self._message_recovery_queue.get(connection.user_id, [])
             if queued_messages:
                 logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
-                # Create task AFTER releasing the lock to prevent deadlock
-                asyncio.create_task(self._process_queued_messages(connection.user_id))
+                # HANG FIX: Await the processing to ensure messages are sent before method returns
+                # This prevents test hanging where the test expects messages but they're still processing
+                try:
+                    await asyncio.wait_for(
+                        self._process_queued_messages(connection.user_id), 
+                        timeout=5.0  # Reasonable timeout to prevent infinite hang
+                    )
+                except asyncio.TimeoutError:
+                    logger.error(f"Timeout processing queued messages for user {connection.user_id}")
+                except Exception as e:
+                    logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
     
-    async def remove_connection(self, connection_id: str) -> None:
-        """Remove a WebSocket connection with thread safety."""
+    async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:
+        """Remove a WebSocket connection with thread safety and type validation."""
+        # Convert to string for internal use
+        validated_connection_id = str(connection_id)
+        
         # First get the connection to determine user_id
-        connection = self._connections.get(connection_id)
+        connection = self._connections.get(validated_connection_id)
         if not connection:
-            logger.debug(f"Connection {connection_id} not found for removal")
+            logger.debug(f"Connection {validated_connection_id} not found for removal")
             return
         
         # Use user-specific lock for connection operations
@@ -189,13 +388,15 @@ class UnifiedWebSocketManager:
                     
                     logger.info(f"Removed connection {connection_id} (thread-safe)")
     
-    def get_connection(self, connection_id: str) -> Optional[WebSocketConnection]:
-        """Get a specific connection."""
-        return self._connections.get(connection_id)
+    def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
+        """Get a specific connection with type validation."""
+        validated_connection_id = str(connection_id)
+        return self._connections.get(validated_connection_id)
     
-    def get_user_connections(self, user_id: str) -> Set[str]:
-        """Get all connections for a user."""
-        return self._user_connections.get(user_id, set()).copy()
+    def get_user_connections(self, user_id: Union[str, UserID]) -> Set[str]:
+        """Get all connections for a user with type validation."""
+        validated_user_id = ensure_user_id(user_id)
+        return self._user_connections.get(validated_user_id, set()).copy()
     
     async def wait_for_connection(self, user_id: str, timeout: float = 5.0, check_interval: float = 0.1) -> bool:
         """
@@ -218,8 +419,16 @@ class UnifiedWebSocketManager:
             # Check if user has any connections
             if self.get_user_connections(user_id):
                 logger.debug(f"Connection established for user {user_id} after {asyncio.get_event_loop().time() - start_time:.2f}s")
-                # Process any queued messages for this user
-                await self.process_recovery_queue(user_id)
+                # HANG FIX: Process queued messages with timeout to prevent infinite wait
+                try:
+                    await asyncio.wait_for(
+                        self.process_recovery_queue(user_id), 
+                        timeout=min(2.0, timeout - (asyncio.get_event_loop().time() - start_time))
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning(f"Timeout processing recovery queue for user {user_id}")
+                except Exception as e:
+                    logger.error(f"Error processing recovery queue for user {user_id}: {e}")
                 return True
             
             # Wait before next check
@@ -228,10 +437,13 @@ class UnifiedWebSocketManager:
         logger.warning(f"Timeout waiting for connection for user {user_id} after {timeout}s")
         return False
     
-    async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> None:
-        """Send a message to all connections for a user with thread safety and loud error handling."""
+    async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
+        """Send a message to all connections for a user with thread safety and type validation."""
+        # Validate user_id
+        validated_user_id = ensure_user_id(user_id)
+        
         # Use user-specific lock to prevent race conditions during message sending
-        user_lock = await self._get_user_connection_lock(user_id)
+        user_lock = await self._get_user_connection_lock(validated_user_id)
         
         async with user_lock:
             connection_ids = self.get_user_connections(user_id)
@@ -266,7 +478,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # CRITICAL FIX: Use safe serialization to handle enums, Pydantic models, etc.
+                        safe_message = _serialize_message_safely(message)
+                        await connection.websocket.send_json(safe_message)
                         logger.debug(f"Sent message to connection {conn_id} (thread-safe)")
                         successful_sends += 1
                     except Exception as e:
@@ -302,47 +516,57 @@ class UnifiedWebSocketManager:
                     f"Failed: {[f'{conn_id}: {error}' for conn_id, error in failed_connections]}"
                 )
             
-            # Remove failed connections outside the send loop to avoid race conditions
-            for failed_conn_id, error in failed_connections:
-                try:
-                    await self.remove_connection(failed_conn_id)
-                    logger.info(f"Removed failed connection {failed_conn_id} due to: {error}")
-                except Exception as e:
-                    # LOUD ERROR: Failed to clean up failed connection
-                    logger.critical(
-                        f"CLEANUP FAILURE: Failed to remove failed connection {failed_conn_id} "
-                        f"for user {user_id}: {e}. This may cause connection leaks."
-                    )
+            # DEADLOCK FIX: Schedule failed connection removal as background task to avoid nested locks
+            # This prevents deadlock when send_to_user is called from within add_connection's user lock
+            if failed_connections:
+                async def cleanup_failed_connections():
+                    for failed_conn_id, error in failed_connections:
+                        try:
+                            await self.remove_connection(failed_conn_id)
+                            logger.info(f"Removed failed connection {failed_conn_id} due to: {error}")
+                        except Exception as e:
+                            # LOUD ERROR: Failed to clean up failed connection
+                            logger.critical(
+                                f"CLEANUP FAILURE: Failed to remove failed connection {failed_conn_id} "
+                                f"for user {user_id}: {e}. This may cause connection leaks."
+                            )
+                
+                # Create background task for cleanup to avoid deadlock
+                asyncio.create_task(cleanup_failed_connections())
     
-    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+    async def send_to_thread(self, thread_id: Union[str, ThreadID], message: Dict[str, Any]) -> bool:
         """
-        Send a message to a thread (compatibility method).
+        Send a message to a thread (compatibility method) with type validation.
         Routes to send_to_user using thread_id as user_id.
         """
         try:
-            await self.send_to_user(thread_id, message)
+            # For compatibility, treat thread_id as user_id
+            validated_thread_id = ensure_thread_id(thread_id)
+            await self.send_to_user(validated_thread_id, message)
             return True
         except Exception as e:
             logger.error(f"Failed to send to thread {thread_id}: {e}")
             return False
     
-    async def emit_critical_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> None:
+    async def emit_critical_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
         """
-        Emit a critical event to a specific user with guaranteed delivery tracking.
+        Emit a critical event to a specific user with guaranteed delivery tracking and type validation.
         This is the main interface for sending WebSocket events.
         
         CRITICAL FIX: Adds retry logic for staging/production environments to handle
         race conditions during connection establishment.
         
         Args:
-            user_id: Target user ID
+            user_id: Target user ID (accepts both str and UserID)
             event_type: Event type (e.g., 'agent_started', 'tool_executing')
             data: Event payload
         """
-        # Validate critical event parameters
-        if not user_id or not user_id.strip():
-            logger.critical(f"INVALID USER_ID: Cannot emit {event_type} to empty user_id")
-            raise ValueError(f"user_id cannot be empty for critical event {event_type}")
+        # Validate and convert user_id
+        try:
+            validated_user_id = ensure_user_id(user_id)
+        except ValueError as e:
+            logger.critical(f"INVALID USER_ID: Cannot emit {event_type} to invalid user_id {user_id}: {e}")
+            raise ValueError(f"Invalid user_id for critical event {event_type}: {e}")
         
         if not event_type or not event_type.strip():
             logger.critical(f"INVALID EVENT_TYPE: Cannot emit empty event_type to user {user_id}")
@@ -443,9 +667,11 @@ class UnifiedWebSocketManager:
     
     async def broadcast(self, message: Dict[str, Any]) -> None:
         """Broadcast a message to all connections."""
+        # CRITICAL FIX: Use safe serialization for broadcast messages
+        safe_message = _serialize_message_safely(message)
         for connection in list(self._connections.values()):
             try:
-                await connection.websocket.send_json(message)
+                await connection.websocket.send_json(safe_message)
             except Exception as e:
                 logger.error(f"Failed to broadcast to {connection.connection_id}: {e}")
                 await self.remove_connection(connection.connection_id)
@@ -461,19 +687,23 @@ class UnifiedWebSocketManager:
             }
         }
     
-    def is_connection_active(self, user_id: str) -> bool:
+    def is_connection_active(self, user_id: Union[str, UserID]) -> bool:
         """
-        Check if user has active WebSocket connections.
+        Check if user has active WebSocket connections with type validation.
         CRITICAL for authentication event validation.
         
         Args:
-            user_id: User ID to check
+            user_id: User ID to check (accepts both str and UserID)
             
         Returns:
             True if user has at least one active connection, False otherwise
         """
-        connection_ids = self.get_user_connections(user_id)
-        if not connection_ids:
+        try:
+            connection_ids = self.get_user_connections(user_id)
+            if not connection_ids:
+                return False
+        except ValueError as e:
+            logger.warning(f"Invalid user_id for connection check: {user_id}: {e}")
             return False
         
         # Check if at least one connection is still valid
@@ -485,20 +715,29 @@ class UnifiedWebSocketManager:
         
         return False
     
-    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
+    def get_connection_health(self, user_id: Union[str, UserID]) -> Dict[str, Any]:
         """
-        Get detailed connection health information for a user.
+        Get detailed connection health information for a user with type validation.
         
         Args:
-            user_id: User ID to check
+            user_id: User ID to check (accepts both str and UserID)
             
         Returns:
             Dictionary with connection health details
         """
-        connection_ids = self.get_user_connections(user_id)
-        total_connections = len(connection_ids)
-        active_connections = 0
-        connection_details = []
+        try:
+            validated_user_id = ensure_user_id(user_id)
+            connection_ids = self.get_user_connections(validated_user_id)
+            total_connections = len(connection_ids)
+            active_connections = 0
+            connection_details = []
+        except ValueError as e:
+            logger.warning(f"Invalid user_id for health check: {user_id}: {e}")
+            return {
+                'user_id': str(user_id),
+                'error': 'invalid_user_id',
+                'message': f'Invalid user_id format: {e}'
+            }
         
         for conn_id in connection_ids:
             connection = self.get_connection(conn_id)
@@ -515,7 +754,7 @@ class UnifiedWebSocketManager:
                 })
         
         return {
-            'user_id': user_id,
+            'user_id': validated_user_id,
             'total_connections': total_connections,
             'active_connections': active_connections,
             'has_active_connections': active_connections > 0,
@@ -669,17 +908,31 @@ class UnifiedWebSocketManager:
     # ============================================================================
     
     def _get_connection_diagnostics(self, connection: WebSocketConnection) -> Dict[str, Any]:
-        """Get detailed diagnostics for a connection."""
+        """Get detailed diagnostics for a connection with safe serialization."""
         try:
             websocket = connection.websocket
-            return {
+            diagnostics = {
                 'has_websocket': websocket is not None,
                 'websocket_type': type(websocket).__name__ if websocket else None,
                 'connection_age_seconds': (datetime.utcnow() - connection.connected_at).total_seconds(),
                 'metadata_present': bool(connection.metadata),
-                # Add more WebSocket-specific diagnostics if available
-                'websocket_state': getattr(websocket, 'client_state', 'unknown') if websocket else None,
             }
+            
+            # CRITICAL FIX: Safe WebSocketState handling
+            if websocket:
+                try:
+                    client_state = getattr(websocket, 'client_state', None)
+                    if client_state is not None:
+                        # Use safe serialization to convert WebSocketState enum to string
+                        diagnostics['websocket_state'] = _serialize_message_safely(client_state)
+                    else:
+                        diagnostics['websocket_state'] = 'unknown'
+                except Exception as state_error:
+                    diagnostics['websocket_state'] = f'error_getting_state_{str(state_error)}'
+            else:
+                diagnostics['websocket_state'] = 'no_websocket'
+                
+            return diagnostics
         except Exception as e:
             return {'diagnostics_error': str(e)}
     
@@ -741,7 +994,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(error_message)
+                        # CRITICAL FIX: Use safe serialization for error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
                         logger.info(f"Sent connection error notification to user {user_id}")
                         return
                     except Exception:
@@ -780,7 +1035,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(error_message)
+                        # CRITICAL FIX: Use safe serialization for system error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
                         logger.info(f"Sent system error notification to user {user_id}")
                         return
                     except Exception:
@@ -1158,7 +1415,7 @@ class UnifiedWebSocketManager:
         # Small delay to ensure connection is fully established
         await asyncio.sleep(0.1)
         
-        # Send each queued message
+        # Send each queued message with timeout to prevent hanging
         for msg in messages:
             try:
                 # Remove recovery metadata before sending
@@ -1168,9 +1425,15 @@ class UnifiedWebSocketManager:
                 # Add a flag indicating this is a recovered message
                 clean_msg['recovered'] = True
                 
-                await self.send_to_user(user_id, clean_msg)
+                # HANG FIX: Add timeout to prevent infinite wait on send_to_user
+                await asyncio.wait_for(
+                    self.send_to_user(user_id, clean_msg),
+                    timeout=3.0  # Reasonable timeout per message
+                )
                 logger.debug(f"Successfully delivered queued message type '{clean_msg.get('type')}' to user {user_id}")
                 
+            except asyncio.TimeoutError:
+                logger.error(f"Timeout delivering queued message to user {user_id}: {clean_msg.get('type', 'unknown')}")
             except Exception as e:
                 logger.error(f"Failed to deliver queued message to user {user_id}: {e}")
         
@@ -1673,6 +1936,73 @@ class UnifiedWebSocketManager:
             )
             
         return restart_status
+    
+    # ===========================================================================
+    # FIVE WHYS ROOT CAUSE PREVENTION METHODS
+    # ===========================================================================
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[ConnectionID]:
+        """
+        FIVE WHYS CRITICAL METHOD: Get connection ID for a given WebSocket instance with type safety.
+        
+        This method was identified as missing in the Five Whys analysis and is
+        essential for WebSocket manager interface compatibility.
+        
+        Args:
+            websocket: WebSocket instance to search for
+            
+        Returns:
+            Strongly typed ConnectionID if found, None otherwise
+        """
+        for conn_id, connection in self._connections.items():
+            if connection.websocket == websocket:
+                logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
+                return ConnectionID(conn_id)
+        
+        logger.debug(f"No connection found for WebSocket {id(websocket)}")
+        return None
+    
+    def update_connection_thread(self, connection_id: Union[str, ConnectionID], thread_id: Union[str, ThreadID]) -> bool:
+        """
+        FIVE WHYS CRITICAL METHOD: Update thread association for a connection with type validation.
+        
+        This method works with get_connection_id_by_websocket to manage thread
+        associations, as identified in the Five Whys analysis.
+        
+        Args:
+            connection_id: Connection ID to update (accepts both str and ConnectionID)
+            thread_id: New thread ID to associate (accepts both str and ThreadID)
+            
+        Returns:
+            True if update successful, False if connection not found
+        """
+        # Validate and convert IDs
+        try:
+            validated_connection_id = str(connection_id)
+            validated_thread_id = ensure_thread_id(thread_id)
+        except ValueError as e:
+            logger.error(f"Invalid ID in update_connection_thread: {e}")
+            return False
+        
+        connection = self._connections.get(validated_connection_id)
+        if connection:
+            # Update the thread_id on the connection object
+            if hasattr(connection, 'thread_id'):
+                old_thread_id = getattr(connection, 'thread_id', None)
+                connection.thread_id = validated_thread_id
+                logger.info(
+                    f"Updated thread association for connection {validated_connection_id}: "
+                    f"{old_thread_id} → {validated_thread_id}"
+                )
+                return True
+            else:
+                # Add thread_id attribute if it doesn't exist
+                setattr(connection, 'thread_id', validated_thread_id)
+                logger.info(f"Added thread association for connection {validated_connection_id}: {validated_thread_id}")
+                return True
+        else:
+            logger.warning(f"Connection {validated_connection_id} not found for thread update")
+            return False
 
 
 # SECURITY FIX: Replace singleton with factory pattern

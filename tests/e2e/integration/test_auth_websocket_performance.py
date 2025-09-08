@@ -29,8 +29,7 @@ import pytest
 from typing import List, Dict, Any
 from shared.isolated_environment import IsolatedEnvironment
 
-from test_framework.auth_helpers import (
-    WebSocketAuthTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance,
+from test_framework.helpers.auth_helpers import (
     WebSocketAuthTester,
     AuthTestConfig,
     skip_if_services_unavailable,

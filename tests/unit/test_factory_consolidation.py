@@ -119,9 +119,9 @@ async def mock_agent_class_registry():
 
 @pytest.fixture
 async def mock_db_session():
-    """Mock database session for testing."""
+    """Mock database session for testing using AsyncMock for async operations."""
     await asyncio.sleep(0)
-    return MagicMock(spec=AsyncSession)
+    return AsyncMock(spec=AsyncSession)
 
 
 @pytest.fixture

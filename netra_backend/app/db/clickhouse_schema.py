@@ -15,6 +15,7 @@ from clickhouse_driver.errors import ServerException, ErrorCodes
 logger = logging.getLogger(__name__)
 
 
+
 class ClickHouseTraceSchema:
     """
     Manages ClickHouse schema for trace data persistence.
@@ -442,3 +443,7 @@ async def verify_clickhouse_schema(
         return await schema.verify_schema()
     finally:
         schema.close()
+
+
+# Backward compatibility alias
+ClickHouseSchema = ClickHouseTraceSchema

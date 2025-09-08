@@ -204,9 +204,13 @@ class LogFormatter:
             function = record.get("function", "")
             line = record.get("line", "")
             
+            # Ensure message is single-line by replacing newlines
+            filtered_message = self._filter.filter_message(message)
+            single_line_message = filtered_message.replace('\n', '\\n').replace('\r', '\\r')
+            
             gcp_entry = {
                 'severity': severity_mapping.get(level_name, 'DEFAULT'),
-                'message': self._filter.filter_message(message),
+                'message': single_line_message,
                 'timestamp': timestamp,
                 'labels': {
                     'module': str(module) if module else "",
@@ -218,16 +222,21 @@ class LogFormatter:
             # Fallback for any unexpected record structure
             import traceback
             # datetime already imported at top of function
+            # Ensure error message is single-line  
+            error_message = f"Logging formatter error: {str(e)} | Original message: {record.get('message', 'N/A') if isinstance(record, dict) else 'N/A'}"
+            single_line_error_message = error_message.replace('\n', '\\n').replace('\r', '\\r')
+            single_line_traceback = traceback.format_exc().replace('\n', '\\n').replace('\r', '\\r')
+            
             gcp_entry = {
                 'severity': 'ERROR',
-                'message': f"Logging formatter error: {str(e)} | Original message: {record.get('message', 'N/A') if isinstance(record, dict) else 'N/A'}",
+                'message': single_line_error_message,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
                 'labels': {
                     'module': 'logging_formatter',
                     'function': 'gcp_json_formatter',
                     'line': '0',
-                    'formatter_error': str(e),
-                    'traceback': traceback.format_exc().replace('\n', '\\n')
+                    'formatter_error': str(e).replace('\n', '\\n').replace('\r', '\\r'),
+                    'traceback': single_line_traceback
                 }
             }
         
@@ -254,7 +263,7 @@ class LogFormatter:
                         traceback_str = None
                         if hasattr(exc, 'traceback') and exc.traceback:
                             # Replace newlines with \n to keep JSON on single line
-                            traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '')
+                            traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '\\r')
                         
                         gcp_entry['error'] = {
                             'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
@@ -355,7 +364,9 @@ class LogHandlerConfig:
                 record = message.record if hasattr(message, 'record') else message
                 try:
                     json_output = self.formatter.gcp_json_formatter(record)
-                    sys.stderr.write(json_output + "\n")
+                    # Ensure single-line output by removing any embedded newlines
+                    single_line_json = json_output.replace('\n', '\\n').replace('\r', '\\r')
+                    sys.stderr.write(single_line_json + "\n")
                     sys.stderr.flush()
                 except Exception as e:
                     # Fallback to ensure logging doesn't fail completely
@@ -379,7 +390,9 @@ class LogHandlerConfig:
                         'error_type': 'LogFormatterError'
                     }
                     json_output = json.dumps(fallback_entry, separators=(',', ':'))
-                    sys.stderr.write(json_output + "\n")
+                    # Ensure single-line output by removing any embedded newlines
+                    single_line_json = json_output.replace('\n', '\\n').replace('\r', '\\r')
+                    sys.stderr.write(single_line_json + "\n")
                     sys.stderr.flush()
             
             logger.add(

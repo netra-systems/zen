@@ -39,7 +39,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture, with_test_database
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionStatus
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_factory import get_agent_service

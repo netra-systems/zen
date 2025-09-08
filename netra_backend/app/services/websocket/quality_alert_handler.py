@@ -7,6 +7,7 @@ Follows 450-line limit with 25-line function limit.
 from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
@@ -31,6 +32,10 @@ class QualityAlertHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality alert subscription."""
         try:
+            # Extract context IDs from payload to ensure session continuity
+            self._current_thread_id = payload.get("thread_id")
+            self._current_run_id = payload.get("run_id")
+            
             action = payload.get("action", "subscribe")
             await self._process_subscription_action(user_id, action)
         except Exception as e:
@@ -49,24 +54,41 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle subscribe action for quality alerts."""
         await self.monitoring_service.subscribe_to_updates(user_id)
         message = self._build_subscription_message("subscribed")
-        user_context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(user_context)
+        
+        # ✅ CORRECT - Maintains session continuity
+        user_context = get_user_execution_context(
+            user_id=user_id,
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
+        )
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     async def _handle_unsubscribe_action(self, user_id: str) -> None:
         """Handle unsubscribe action for quality alerts."""
         await self.monitoring_service.unsubscribe_from_updates(user_id)
         message = self._build_subscription_message("unsubscribed")
-        user_context = UserExecutionContext.get_context(user_id)
-        manager = create_websocket_manager(user_context)
+        
+        # ✅ CORRECT - Maintains session continuity
+        user_context = get_user_execution_context(
+            user_id=user_id,
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
+        )
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     async def _handle_invalid_action(self, user_id: str, action: str) -> None:
         """Handle invalid subscription action."""
         error_message = f"Invalid action: {action}. Use 'subscribe' or 'unsubscribe'"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send action error to user {user_id}: {e}")
@@ -84,8 +106,13 @@ class QualityAlertHandler(BaseMessageHandler):
         logger.error(f"Error handling quality alert subscription: {str(error)}")
         error_message = f"Failed to handle subscription: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send subscription error to user {user_id}: {e}")

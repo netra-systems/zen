@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from netra_backend.app.routes.agent_route_helpers import delegate_streaming
 from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

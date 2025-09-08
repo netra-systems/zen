@@ -179,12 +179,51 @@ class AdvancedWebSocketManager:
     def simulate_connection_failure(self, failure_rate: float = 0.1):
         """Simulate connection failures for testing."""
         self.failure_rate = failure_rate
+    
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """
+        Send message to a thread (required by WebSocketManagerProtocol).
+        
+        This method is required by the AgentWebSocketBridge interface validation.
+        For testing purposes, we simply log the message and return success.
+        
+        Args:
+            thread_id: Thread ID to send to
+            message: Message to send
+            
+        Returns:
+            bool: True if message was sent successfully
+        """
+        try:
+            # For advanced testing, we track thread-specific messages
+            if not hasattr(self, 'thread_messages'):
+                self.thread_messages = {}
+            
+            if thread_id not in self.thread_messages:
+                self.thread_messages[thread_id] = []
+            
+            self.thread_messages[thread_id].append({
+                'message': message,
+                'timestamp': time.time(),
+                'thread_id': thread_id
+            })
+            
+            # Simulate small network delay for realistic testing
+            await asyncio.sleep(0.005)
+            
+            return True
+        except Exception as e:
+            # Track failures for advanced testing scenarios
+            self.performance_metrics["failed_emissions"] += 1
+            return False
         
     def clear_events(self):
         """Clear all events and reset metrics."""
         self.emitted_events.clear()
         self.event_sequence.clear()
         self.concurrent_sessions.clear()
+        if hasattr(self, 'thread_messages'):
+            self.thread_messages.clear()
         self.performance_metrics = {
             "total_events": 0,
             "events_by_type": {},

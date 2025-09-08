@@ -15,6 +15,7 @@ All e2e tests MUST use this helper for authentication.
 
 import asyncio
 import json
+import logging
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -23,6 +24,8 @@ import httpx
 import aiohttp
 import jwt
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
@@ -51,7 +54,7 @@ class E2EAuthConfig:
             websocket_url=staging_config.urls.websocket_url,
             test_user_email=staging_config.test_user_email,
             test_user_password="staging_test_password_123",
-            jwt_secret="staging-jwt-secret-key",  # Will be overridden from env
+            jwt_secret="7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A",  # Staging JWT secret - matches auth service
             timeout=staging_config.timeout
         )
     
@@ -100,10 +103,19 @@ class E2EAuthHelper:
         else:
             self.config = config
             
-        # Override JWT secret from environment if available
-        env_jwt_secret = self.env.get("JWT_SECRET_KEY")
-        if env_jwt_secret:
-            self.config.jwt_secret = env_jwt_secret
+        # CRITICAL FIX: Use unified JWT secret manager for consistency across ALL services
+        try:
+            from shared.jwt_secret_manager import get_unified_jwt_secret
+            unified_jwt_secret = get_unified_jwt_secret()
+            self.config.jwt_secret = unified_jwt_secret
+            logger.info("✅ E2EAuthHelper using UNIFIED JWT secret manager - ensures consistency with auth service")
+        except Exception as e:
+            logger.error(f"❌ Failed to use unified JWT secret manager in E2EAuthHelper: {e}")
+            logger.warning("🔄 Falling back to environment-based JWT secret resolution (less secure)")
+            # Override JWT secret from environment if available
+            env_jwt_secret = self.env.get("JWT_SECRET_KEY")
+            if env_jwt_secret:
+                self.config.jwt_secret = env_jwt_secret
             
         self.jwt_helper = JWTTestHelper(environment=environment)
         self._cached_token: Optional[str] = None
@@ -417,12 +429,20 @@ class E2EAuthHelper:
         Returns:
             Staging-compatible JWT token
         """
-        # Use staging JWT secret if available
-        staging_jwt_secret = (
-            self.env.get("JWT_SECRET_STAGING") or 
-            self.env.get("JWT_SECRET_KEY") or 
-            self.config.jwt_secret
-        )
+        # CRITICAL FIX: Use unified JWT secret manager for consistency across ALL services
+        try:
+            from shared.jwt_secret_manager import get_unified_jwt_secret
+            staging_jwt_secret = get_unified_jwt_secret()
+            logger.info("✅ Using UNIFIED JWT secret manager for E2E token creation - ensures consistency with auth service")
+        except Exception as e:
+            logger.error(f"❌ Failed to use unified JWT secret manager: {e}")
+            logger.warning("🔄 Falling back to direct environment resolution (less secure)")
+            # Fallback to direct resolution if unified manager fails
+            staging_jwt_secret = (
+                self.env.get("JWT_SECRET_STAGING") or 
+                self.env.get("JWT_SECRET_KEY") or 
+                "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"  # Actual staging secret
+            )
         
         # Create staging-specific user ID
         staging_user_id = f"e2e-staging-{hash(email) & 0xFFFFFFFF:08x}"

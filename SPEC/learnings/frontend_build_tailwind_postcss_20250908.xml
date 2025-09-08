@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <meta>
+        <timestamp>2025-01-23T00:00:00Z</timestamp>
+        <priority>CRITICAL</priority>
+        <category>frontend_build_dependency_management</category>
+        <regression_risk>HIGH</regression_risk>
+    </meta>
+    
+    <context>
+        <situation>Frontend Docker build failing during ultimate-test-deploy-loop with Tailwind CSS PostCSS plugin errors</situation>
+        <error_symptoms>
+            <symptom>Cannot find module '@tailwindcss/postcss' during Docker build</symptom>
+            <symptom>PostCSS plugin configuration mismatch between Tailwind v4 and Next.js 15</symptom>
+            <symptom>TypeScript dependency missing during build process</symptom>
+        </error_symptoms>
+        <business_impact>Staging deployment blocked, preventing e2e test loop execution</business_impact>
+    </context>
+    
+    <root_cause>
+        <primary>Tailwind CSS v4 requires specific PostCSS plugin configuration format</primary>
+        <secondary>TypeScript needs to be in production dependencies for Docker build process</secondary>
+        <configuration_drift>PostCSS config was using incompatible plugin format for Tailwind v4</configuration_drift>
+    </root_cause>
+    
+    <solution>
+        <step_1>Move TypeScript from devDependencies to dependencies in package.json for Docker build</step_1>
+        <step_2>Update postcss.config.mjs to use correct Tailwind v4 plugin format: ["@tailwindcss/postcss", "autoprefixer"]</step_2>
+        <step_3>Ensure @tailwindcss/postcss dependency is properly installed</step_3>
+        <step_4>Add autoprefixer as production dependency for PostCSS processing</step_4>
+    </solution>
+    
+    <prevention_measures>
+        <checklist>
+            <item>Always verify PostCSS configuration matches Tailwind CSS version</item>
+            <item>Docker builds require build-time dependencies in production dependencies</item>
+            <item>Test frontend Docker builds locally before staging deployment</item>
+            <item>Validate all PostCSS plugins are properly declared in package.json</item>
+        </checklist>
+        <monitoring>Monitor frontend build process for PostCSS plugin resolution errors</monitoring>
+    </prevention_measures>
+    
+    <dependencies>
+        <critical_files>
+            <file>frontend/package.json</file>
+            <file>frontend/postcss.config.mjs</file>
+            <file>docker/frontend.staging.alpine.Dockerfile</file>
+        </critical_files>
+        <related_systems>Ultimate test deploy loop, GCP staging deployment</related_systems>
+    </dependencies>
+    
+    <validation>
+        <test>Frontend Docker build completes successfully</test>
+        <test>PostCSS processes Tailwind CSS without errors</test>
+        <test>Next.js build generates optimized production bundle</test>
+    </validation>
+</learning>

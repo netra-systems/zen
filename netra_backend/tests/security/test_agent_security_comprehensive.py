@@ -387,7 +387,7 @@ class TestAgentDataProtection:
     async def test_agent_sql_injection_protection(self):
         """Test agent protects against SQL injection attacks."""
         # Mock database manager with injection detection
-        mock_db_manager = DatabaseTestManager().get_session()
+        mock_db_manager = DatabaseTestManager().create_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         
         injection_attempts = []

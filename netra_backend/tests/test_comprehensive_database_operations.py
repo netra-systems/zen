@@ -16,6 +16,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import psutil
 import pytest
@@ -32,15 +33,15 @@ class TestComprehensiveDatabaseOperations:
         # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
         # Mock: Session isolation for controlled testing without external state
-        session.execute = AsyncNone  # TODO: Use real service instance
+        session.execute = AsyncMock()  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.commit = AsyncNone  # TODO: Use real service instance
+        session.commit = AsyncMock()  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.rollback = AsyncNone  # TODO: Use real service instance
+        session.rollback = AsyncMock()  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.add = MagicNone  # TODO: Use real service instance
+        session.add = MagicMock()  # TODO: Use real service instance
         # Mock: Session isolation for controlled testing without external state
-        session.close = AsyncNone  # TODO: Use real service instance
+        session.close = AsyncMock()  # TODO: Use real service instance
         try:
             yield session
         finally:
@@ -51,7 +52,7 @@ class TestComprehensiveDatabaseOperations:
     async def mock_database_pool(self):
         """Setup mock database pool for connection tests."""
         # Mock: Generic component isolation for controlled unit testing
-        pool = MagicNone  # TODO: Use real service instance
+        pool = MagicMock()  # TODO: Use real service instance
         # Mock: Service component isolation for predictable testing behavior
         pool.size = MagicMock(return_value=10)
         # Mock: Service component isolation for predictable testing behavior
@@ -68,7 +69,7 @@ class TestComprehensiveDatabaseOperations:
         
         # Test pool acquisition simulation
         # Mock: Database isolation for unit testing without external database connections
-        mock_database_pool.acquire = AsyncNone  # TODO: Use real service instance
+        mock_database_pool.acquire = AsyncMock()  # TODO: Use real service instance
         for _ in range(5):
             await mock_database_pool.acquire()
                 
@@ -95,13 +96,13 @@ class TestComprehensiveDatabaseOperations:
         """Test transaction commit and rollback operations."""
         # Test successful commit
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = "tx_user"
         mock_db_session.execute.return_value = mock_result
         
         # Simulate transaction operations
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
@@ -115,19 +116,19 @@ class TestComprehensiveDatabaseOperations:
         """Test nested transaction handling."""
         # Setup nested transaction mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_savepoint = AsyncNone  # TODO: Use real service instance
+        mock_savepoint = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.begin_nested = AsyncMock(return_value=mock_savepoint)
         
         # Outer transaction
         # Mock: Generic component isolation for controlled unit testing
-        mock_user1 = MagicNone  # TODO: Use real service instance
+        mock_user1 = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user1)
         
         # Inner transaction (rollback)
         savepoint = await mock_db_session.begin_nested()
         # Mock: Generic component isolation for controlled unit testing
-        mock_user2 = MagicNone  # TODO: Use real service instance
+        mock_user2 = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user2)
         await savepoint.rollback()
         
@@ -140,7 +141,7 @@ class TestComprehensiveDatabaseOperations:
         """Test query execution time optimization."""
         # Mock fast query response
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = 100
         mock_db_session.execute.return_value = mock_result
         
@@ -185,7 +186,7 @@ class TestComprehensiveDatabaseOperations:
         
         # Mock inspector for verification
         # Mock: Generic component isolation for controlled unit testing
-        mock_inspector = MagicNone  # TODO: Use real service instance
+        mock_inspector = MagicMock()  # TODO: Use real service instance
         mock_inspector.get_columns.return_value = [
             {'name': 'id'}, {'name': 'username'}, {'name': 'test_migration_col'}
         ]
@@ -213,13 +214,13 @@ class TestComprehensiveDatabaseOperations:
         """Test backup operation simulation."""
         # Mock backup data counting
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = 150
         mock_db_session.execute.return_value = mock_result
         
         # Create test data for backup
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
@@ -233,7 +234,7 @@ class TestComprehensiveDatabaseOperations:
         """Test restore verification simulation."""
         # Mock restore verification
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = "backup_test"
         mock_db_session.execute.return_value = mock_result
         
@@ -250,14 +251,14 @@ class TestComprehensiveDatabaseOperations:
         """Test read/write split handling simulation."""
         # Mock write operation
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Mock read operation with minimal delay
         await asyncio.sleep(0.1)
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = "rw_test"
         mock_db_session.execute.return_value = mock_result
         
@@ -271,7 +272,7 @@ class TestComprehensiveDatabaseOperations:
         """Test replication lag monitoring simulation."""
         # Mock fast response
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = 1
         mock_db_session.execute.return_value = mock_result
         
@@ -305,15 +306,15 @@ class TestComprehensiveDatabaseOperations:
     async def test_deadlock_simulation(self, mock_db_session):
         """Test deadlock detection simulation."""
         # Mock successful update without deadlock
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.rowcount = 2
         mock_db_session.execute.return_value = mock_result
         
         # Create test data that might cause conflicts
         # Mock: Generic component isolation for controlled unit testing
-        mock_user1 = MagicNone  # TODO: Use real service instance
+        mock_user1 = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_user2 = MagicNone  # TODO: Use real service instance
+        mock_user2 = MagicMock()  # TODO: Use real service instance
         
         mock_db_session.add(mock_user1)
         mock_db_session.add(mock_user2)
@@ -331,7 +332,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_index_performance_comparison(self, mock_db_session):
         """Test query performance with and without indexes."""
         # Mock indexed query performance
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.fetchone.return_value = None
         mock_db_session.execute.return_value = mock_result
         
@@ -351,7 +352,7 @@ class TestComprehensiveDatabaseOperations:
         """Test that indexes are being used correctly."""
         # Mock inspector for index verification
         # Mock: Generic component isolation for controlled unit testing
-        mock_inspector = MagicNone  # TODO: Use real service instance
+        mock_inspector = MagicMock()  # TODO: Use real service instance
         mock_inspector.get_indexes.return_value = [
             {'name': 'idx_users_email', 'unique': True},
             {'name': 'idx_users_username', 'unique': True}
@@ -369,7 +370,7 @@ class TestComprehensiveDatabaseOperations:
         
         # First user should succeed
         # Mock: Generic component isolation for controlled unit testing
-        mock_user1 = MagicNone  # TODO: Use real service instance
+        mock_user1 = MagicMock()  # TODO: Use real service instance
         mock_db_session.add(mock_user1)
         await mock_db_session.commit()
         
@@ -378,7 +379,7 @@ class TestComprehensiveDatabaseOperations:
         
         with pytest.raises(IntegrityError):
             # Mock: Generic component isolation for controlled unit testing
-            mock_user2 = MagicNone  # TODO: Use real service instance
+            mock_user2 = MagicMock()  # TODO: Use real service instance
             mock_db_session.add(mock_user2)
             await mock_db_session.commit()
     
@@ -387,14 +388,14 @@ class TestComprehensiveDatabaseOperations:
         """Test foreign key constraint enforcement."""
         # Mock user and thread creation
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_user.id = 1
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Create thread referencing the user
         # Mock: Generic component isolation for controlled unit testing
-        mock_thread = MagicNone  # TODO: Use real service instance
+        mock_thread = MagicMock()  # TODO: Use real service instance
         mock_thread.id = 100
         mock_thread.user_id = 1
         mock_db_session.add(mock_thread)
@@ -414,7 +415,7 @@ class TestComprehensiveDatabaseOperations:
         
         # Mock fast query execution
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = 250
         mock_db_session.execute.return_value = mock_result
         
@@ -440,7 +441,7 @@ class TestComprehensiveDatabaseOperations:
         
         # Simulate database operation
         # Mock: Database isolation for unit testing without external database connections
-        mock_database_pool.acquire = AsyncNone  # TODO: Use real service instance
+        mock_database_pool.acquire = AsyncMock()  # TODO: Use real service instance
         await mock_database_pool.acquire()
         
         # Mock increased connection count
@@ -456,7 +457,7 @@ class TestComprehensiveDatabaseOperations:
         """Test database schema validation."""
         # Mock inspector for schema validation
         # Mock: Generic component isolation for controlled unit testing
-        mock_inspector = MagicNone  # TODO: Use real service instance
+        mock_inspector = MagicMock()  # TODO: Use real service instance
         mock_inspector.get_table_names.return_value = [
             'users', 'threads', 'messages', 'alembic_version'
         ]
@@ -472,14 +473,14 @@ class TestComprehensiveDatabaseOperations:
         """Test data type validations."""
         # Mock successful user creation with correct types
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_user.username = "type_test"
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Mock verification query
         # Mock: Generic component isolation for controlled unit testing
-        mock_result = MagicNone  # TODO: Use real service instance
+        mock_result = MagicMock()  # TODO: Use real service instance
         mock_result.scalar.return_value = "type_test"
         mock_db_session.execute.return_value = mock_result
         
@@ -495,7 +496,7 @@ class TestComprehensiveDatabaseOperations:
         """Test audit trail and logging functionality."""
         # Create user with timestamp tracking
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_user.created_at = datetime.now(timezone.utc)
         mock_user.updated_at = datetime.now(timezone.utc)
         
@@ -515,7 +516,7 @@ class TestComprehensiveDatabaseOperations:
         original_time = datetime.now(timezone.utc)
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicNone  # TODO: Use real service instance
+        mock_user = MagicMock()  # TODO: Use real service instance
         mock_user.full_name = "Original Name"
         mock_user.updated_at = original_time
         

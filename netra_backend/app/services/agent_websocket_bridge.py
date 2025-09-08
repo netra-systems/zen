@@ -185,6 +185,33 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         return self._websocket_manager
     
+    @websocket_manager.setter
+    def websocket_manager(self, manager):
+        """Set websocket manager (primarily for testing scenarios).
+        
+        CRITICAL: This setter is primarily for test scenarios to inject mock managers.
+        Production code should use factory methods (create_user_emitter, create_scoped_emitter)
+        for proper user isolation and per-request instantiation patterns.
+        
+        Args:
+            manager: WebSocket manager instance or None. Must implement send_to_thread method
+                    if not None.
+                    
+        Raises:
+            ValueError: If manager doesn't implement required interface
+        """
+        if manager is not None and not hasattr(manager, 'send_to_thread'):
+            raise ValueError(
+                "Invalid websocket manager - must implement send_to_thread method. "
+                "For production use, prefer factory methods for proper user isolation."
+            )
+        
+        self._websocket_manager = manager
+        logger.debug(
+            f"WebSocket manager {'set' if manager else 'cleared'} "
+            f"(type: {type(manager).__name__ if manager else 'None'})"
+        )
+    
     def _initialize_health_monitoring(self) -> None:
         """Initialize health monitoring and metrics."""
         self.metrics = IntegrationMetrics()
@@ -370,6 +397,11 @@ class AgentWebSocketBridge(MonitorableComponent):
         """Start background health monitoring task."""
         if self._health_check_task is None or self._health_check_task.done():
             self._health_check_task = asyncio.create_task(self._health_monitoring_loop())
+            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
+            self._health_check_task.add_done_callback(
+                lambda t: logger.error(f"Health monitoring failed: {t.exception()}") 
+                if t.exception() else logger.debug("Health monitoring task completed")
+            )
             logger.debug("Health monitoring task started")
     
     async def health_check(self) -> HealthStatus:
@@ -2329,7 +2361,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             validated_context = validate_user_context(user_context)
             
             # Create isolated WebSocket manager for this user context
-            isolated_manager = create_websocket_manager(validated_context)
+            isolated_manager = await create_websocket_manager(validated_context)
             
             # Create isolated emitter using the factory pattern
             emitter = WebSocketEmitterFactory.create_scoped_emitter(isolated_manager, validated_context)
@@ -2409,7 +2441,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         from netra_backend.app.websocket_core import create_websocket_manager
         
         # Create scoped emitter using the factory pattern for user isolation
-        manager = create_websocket_manager(user_context)
+        manager = await create_websocket_manager(user_context)
         emitter = UnifiedWebSocketEmitter.create_scoped_emitter(manager, user_context)
         try:
             yield emitter

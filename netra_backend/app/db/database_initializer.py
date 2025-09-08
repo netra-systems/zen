@@ -943,7 +943,7 @@ class DatabaseInitializer:
     async def health_check(self, db_type: DatabaseType) -> Tuple[bool, Dict[str, Any]]:
         """Check health of a specific database"""
         if db_type not in self.configs:
-            return False, {"error": "Not configured"}
+            return False, {"error": f"Database {db_type.value} not configured or initialization failed"}
         
         config = self.configs[db_type]
         details = {

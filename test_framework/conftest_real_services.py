@@ -41,6 +41,22 @@ from test_framework.real_services import (
     load_test_fixtures
 )
 
+# Import real service fixtures
+from test_framework.fixtures.real_services import (
+    real_postgres_connection,
+    with_test_database,
+    real_services_fixture
+)
+
+# Import lightweight service fixtures for non-Docker integration testing
+from test_framework.fixtures.lightweight_services import (
+    lightweight_postgres_connection,
+    lightweight_test_database,  
+    lightweight_services_fixture,
+    lightweight_auth_context,
+    integration_services
+)
+
 # Import environment isolation
 from test_framework.environment_isolation import (
     get_test_env_manager,
@@ -87,11 +103,11 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
         env.set("TEST_REDIS_HOST", "localhost", source="real_services_conftest") 
         env.set("TEST_REDIS_PORT", "6381", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_HOST", "localhost", source="real_services_conftest")
-        env.set("TEST_CLICKHOUSE_HTTP_PORT", "8125", source="real_services_conftest")  # Test HTTP port
-        env.set("TEST_CLICKHOUSE_TCP_PORT", "9002", source="real_services_conftest")   # Test TCP port
-        env.set("TEST_CLICKHOUSE_USER", "test_user", source="real_services_conftest")
-        env.set("TEST_CLICKHOUSE_PASSWORD", "test_pass", source="real_services_conftest")
-        env.set("TEST_CLICKHOUSE_DB", "netra_test_analytics", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_HTTP_PORT", "8126", source="real_services_conftest")  # Test HTTP port - matches ALPINE_TEST_CLICKHOUSE_HTTP_PORT
+        env.set("TEST_CLICKHOUSE_TCP_PORT", "9003", source="real_services_conftest")   # Test TCP port - matches ALPINE_TEST_CLICKHOUSE_TCP_PORT
+        env.set("TEST_CLICKHOUSE_USER", "test", source="real_services_conftest")  # Matches Docker container config
+        env.set("TEST_CLICKHOUSE_PASSWORD", "test", source="real_services_conftest")  # Matches Docker container config
+        env.set("TEST_CLICKHOUSE_DB", "test_analytics", source="real_services_conftest")  # Matches Docker container config
 
 
 # =============================================================================

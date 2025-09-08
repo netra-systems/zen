@@ -7,6 +7,7 @@ Follows 450-line limit with 25-line function limit.
 from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.quality_enhanced_start_handler import (
     QualityEnhancedStartAgentHandler,
 )
@@ -83,6 +84,10 @@ class QualityMessageRouter:
         """Route message to appropriate handler."""
         message_type = message.get("type")
         
+        # Extract and store context IDs for session continuity
+        self._current_thread_id = message.get("thread_id")
+        self._current_run_id = message.get("run_id")
+        
         if self._is_valid_message_type(message_type):
             await self._route_to_handler(user_id, message, message_type)
         else:
@@ -96,6 +101,13 @@ class QualityMessageRouter:
         """Route message to specific handler."""
         handler = self.handlers[message_type]
         payload = message.get("payload", {})
+        
+        # Ensure context IDs are available to handlers for session continuity
+        if self._current_thread_id:
+            payload["thread_id"] = self._current_thread_id
+        if self._current_run_id:
+            payload["run_id"] = self._current_run_id
+        
         await handler.handle(user_id, payload)
 
     async def _handle_unknown_message_type(self, user_id: str, message_type: str) -> None:
@@ -103,8 +115,13 @@ class QualityMessageRouter:
         logger.warning(f"Unknown message type: {message_type}")
         error_message = f"Unknown message type: {message_type}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send error message to user {user_id}: {e}")
@@ -120,8 +137,14 @@ class QualityMessageRouter:
         """Send quality update to a single subscriber."""
         try:
             message = self._build_update_message(update)
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(message)
         except Exception as e:
             logger.error(f"Error broadcasting to {user_id}: {str(e)}")
@@ -144,8 +167,14 @@ class QualityMessageRouter:
         """Send quality alert to a single subscriber."""
         try:
             alert_message = self._build_alert_message(alert)
-            user_context = UserExecutionContext.get_context(user_id)
-            manager = create_websocket_manager(user_context)
+            
+            # ✅ CORRECT - Maintains session continuity
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(alert_message)
         except Exception as e:
             logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")

@@ -236,3 +236,30 @@ def check_transaction_alerts(alerts: List[Dict], metrics: DatabaseMetrics, thres
 async def handle_alert(alert: Dict[str, Any], storage, callback=None) -> None:
     """Handle alert (backward compatibility)."""
     await AlertHandler.handle_alert(alert, storage, callback)
+
+
+class AlertManager:
+    """High-level alert management interface."""
+    
+    def __init__(self, storage=None, callback=None):
+        self.thresholds = AlertThresholds()
+        self.storage = storage
+        self.callback = callback
+        self.orchestrator = AlertOrchestrator()
+    
+    def set_thresholds(self, **thresholds) -> None:
+        """Update alert thresholds."""
+        for key, value in thresholds.items():
+            if hasattr(self.thresholds, key):
+                setattr(self.thresholds, key, value)
+    
+    async def check_alerts(self, metrics: DatabaseMetrics) -> List[Dict[str, Any]]:
+        """Check all alerts for given metrics."""
+        return self.orchestrator.collect_all_alerts(metrics, self.thresholds)
+    
+    async def process_alerts(self, metrics: DatabaseMetrics) -> None:
+        """Check and process all alerts."""
+        if self.storage:
+            await self.orchestrator.check_and_process_alerts(
+                metrics, self.thresholds, self.storage, self.callback
+            )

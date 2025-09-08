@@ -49,7 +49,7 @@
 
     # REMOVED_SYNTAX_ERROR: import pytest
     # REMOVED_SYNTAX_ERROR: import websockets
-    # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+    # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosed, InvalidStatus
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

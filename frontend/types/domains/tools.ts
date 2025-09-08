@@ -17,7 +17,7 @@
 
 // Import base types for consistency
 import { BaseWebSocketPayload } from '../shared/base';
-import { ReferenceItem } from '../backend_schema_tools';
+import type { ReferenceItem } from '../backend_schema_tools';
 
 // Re-export ReferenceItem for consumers of this module
 export { ReferenceItem };

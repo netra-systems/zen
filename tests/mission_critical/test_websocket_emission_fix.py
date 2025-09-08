@@ -32,8 +32,8 @@ from datetime import datetime, timezone
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add paths
@@ -43,7 +43,7 @@ root_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(root_dir))
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -70,9 +70,7 @@ class TestWebSocketEmissionFix:
         
         # Create supervisor
         supervisor = SupervisorAgent.create(
-            llm_client=mock_llm,
-            tool_dispatcher=mock_tool_dispatcher,
-            agent_registry=mock_agent_registry,
+            llm_manager=mock_llm,
             websocket_bridge=mock_bridge
         )
         
@@ -105,9 +103,11 @@ class TestWebSocketEmissionFix:
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
         mock_bridge.emit_agent_event = AsyncMock(side_effect=Exception("WebSocket error"))
         
-        # Create supervisor
+        # Create supervisor with required LLM manager
+        from netra_backend.app.llm.llm_manager import LLMManager
+        mock_llm_manager = LLMManager()
         supervisor = SupervisorAgent.create(
-            websocket=TestWebSocketConnection(),
+            llm_manager=mock_llm_manager,
             websocket_bridge=mock_bridge
         )
         
@@ -135,8 +135,11 @@ class TestWebSocketEmissionFix:
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
         mock_bridge.websocket = TestWebSocketConnection()
         
+        # Create supervisor with required LLM manager
+        from netra_backend.app.llm.llm_manager import LLMManager
+        mock_llm_manager = LLMManager()
         supervisor = SupervisorAgent.create(
-            websocket=TestWebSocketConnection(),
+            llm_manager=mock_llm_manager,
             websocket_bridge=mock_bridge
         )
         
@@ -156,9 +159,11 @@ class TestWebSocketEmissionFix:
         mock_bridge._validate_event_context = MagicMock(return_value=True)
         mock_bridge._resolve_thread_id_from_run_id = AsyncMock(return_value="test_thread")
         
-        # Create supervisor
+        # Create supervisor with required LLM manager
+        from netra_backend.app.llm.llm_manager import LLMManager
+        mock_llm_manager = LLMManager()
         supervisor = SupervisorAgent.create(
-            websocket=TestWebSocketConnection(),
+            llm_manager=mock_llm_manager,
             websocket_bridge=mock_bridge
         )
         

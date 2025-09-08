@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, parse_qs
 from shared.isolated_environment import get_env
+from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -375,7 +376,10 @@ class PreDeploymentValidator:
         
         try:
             # This is primarily covered in database validation, but we add specific SSL checks here
-            database_url = get_env().get("DATABASE_URL", "")
+            # Use DatabaseURLBuilder SSOT for database URL
+            env_vars = get_env().get_all()
+            builder = DatabaseURLBuilder(env_vars)
+            database_url = builder.get_url_for_environment() or ""
             
             if database_url:
                 # Check SSL parameter format
@@ -790,7 +794,10 @@ class PreDeploymentValidator:
             
             # Check SSL/TLS configuration
             if env in ["staging", "production"]:
-                database_url = get_env().get("DATABASE_URL", "")
+                # Use DatabaseURLBuilder SSOT for database URL
+                env_vars = get_env().get_all()
+                builder = DatabaseURLBuilder(env_vars)
+                database_url = builder.get_url_for_environment() or ""
                 redis_url = AuthConfig.get_redis_url()
                 
                 # Check database SSL

@@ -470,7 +470,7 @@ class CategorySystem:
         return [cat for cat in self.categories.values() if cat.is_root_category()]
     
     def create_execution_plan(self, selected_categories: List[str], 
-                            max_parallel: int = 8) -> ExecutionPlan:
+                            max_parallel: int = 8, skip_dependencies: bool = False) -> ExecutionPlan:
         """Create optimized execution plan with dependency resolution"""
         # Validate categories exist
         valid_categories = [name for name in selected_categories if name in self.categories]
@@ -478,8 +478,11 @@ class CategorySystem:
         if not valid_categories:
             return ExecutionPlan()
         
-        # Add dependencies automatically
-        all_required = self._resolve_dependencies(valid_categories)
+        # Add dependencies automatically (unless skipped)
+        if skip_dependencies:
+            all_required = valid_categories
+        else:
+            all_required = self._resolve_dependencies(valid_categories)
         
         # Topological sort for dependency order
         execution_order = self._topological_sort(all_required)

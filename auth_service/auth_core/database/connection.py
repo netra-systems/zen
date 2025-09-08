@@ -156,8 +156,10 @@ class AuthDatabaseConnection:
             return "unknown"
     
     async def _get_database_url_async(self, AuthConfig) -> str:
-        """Get database URL asynchronously."""
-        return AuthConfig.get_database_url()
+        """Get database URL asynchronously - SSOT compliance via AuthDatabaseManager."""
+        # SSOT FIX: Use AuthDatabaseManager as the single source of truth for database URL
+        # This ensures AUTH_FAST_TEST_MODE is properly respected for in-memory SQLite
+        return AuthDatabaseManager.get_database_url()
     
     async def _create_async_engine_with_timeout(self, database_url: str):
         """Create async engine with timeout-optimized settings."""
@@ -178,18 +180,30 @@ class AuthDatabaseConnection:
         
         # Create engine directly using SQLAlchemy since we have the database URL
         from sqlalchemy.ext.asyncio import create_async_engine
-        from sqlalchemy.pool import AsyncAdaptedQueuePool
+        from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
         
-        return create_async_engine(
-            database_url,
-            poolclass=AsyncAdaptedQueuePool,
-            connect_args=connect_args,
-            pool_size=5,
-            max_overflow=10, 
-            pool_timeout=30,  # Pool checkout timeout
-            pool_recycle=3600,  # Recycle connections after 1 hour
-            pool_pre_ping=True  # Test connections before use
-        )
+        # Use different pool strategies for different database types
+        if database_url.startswith('sqlite'):
+            # For SQLite (especially in-memory), use NullPool to avoid connection reuse issues
+            # This prevents the greenlet errors that can occur with SQLite connection pooling
+            return create_async_engine(
+                database_url,
+                poolclass=NullPool,
+                connect_args=connect_args,
+                echo=False  # Disable echo for cleaner test output
+            )
+        else:
+            # For PostgreSQL, use proper connection pooling
+            return create_async_engine(
+                database_url,
+                poolclass=AsyncAdaptedQueuePool,
+                connect_args=connect_args,
+                pool_size=5,
+                max_overflow=10, 
+                pool_timeout=30,  # Pool checkout timeout
+                pool_recycle=3600,  # Recycle connections after 1 hour
+                pool_pre_ping=True  # Test connections before use
+            )
     
     async def _cleanup_partial_initialization(self):
         """Clean up partially initialized resources."""

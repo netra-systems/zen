@@ -217,7 +217,8 @@ class WebSocketTransport(MCPTransport):
         if not self._connected or not self.websocket:
             raise MCPConnectionError("Not connected")
             
-        request_id = str(uuid.uuid4())
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("mcp_ws_req")
         request_data = await self._build_request(request_id, method, params)
         return await self._execute_request(request_id, request_data, method)
 

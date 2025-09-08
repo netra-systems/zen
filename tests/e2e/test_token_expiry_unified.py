@@ -295,7 +295,7 @@ class TestExpiryPerformance(TestTokenExpiryUnified):
             ) as ws:
                 await ws.ping()
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError, 
-                websockets.exceptions.InvalidStatusCode):
+                websockets.exceptions.InvalidStatus):
             # Expected for expired token
             pass
         

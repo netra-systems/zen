@@ -44,12 +44,13 @@ from netra_backend.app.database.session_manager import (
     SessionScopeValidator
 )
 
+# Import SSOT session metrics 
+from shared.metrics.session_metrics import SessionState, DatabaseSessionMetrics
+
 # Import request scoped session factory with mocked dependencies
 try:
     from netra_backend.app.database.request_scoped_session_factory import (
         RequestScopedSessionFactory,
-        SessionState,
-        SessionMetrics,
         ConnectionPoolMetrics,
         get_session_factory,
         get_isolated_session,
@@ -60,8 +61,6 @@ try:
 except ImportError:
     # Mock the imports if they fail during unit testing
     RequestScopedSessionFactory = MagicMock
-    SessionState = MagicMock
-    SessionMetrics = MagicMock
     ConnectionPoolMetrics = MagicMock
     get_session_factory = AsyncMock
     get_isolated_session = AsyncMock
@@ -172,17 +171,16 @@ class TestSessionScopeValidator(BaseIntegrationTest):
         SessionScopeValidator.validate_request_scoped(mock_session)
 
 
-class TestSessionMetrics(BaseIntegrationTest):
-    """Test SessionMetrics data class functionality."""
+class TestDatabaseSessionMetrics(BaseIntegrationTest):
+    """Test DatabaseSessionMetrics data class functionality."""
     
     def test_session_metrics_initialization(self):
-        """Test SessionMetrics initializes with correct defaults."""
+        """Test DatabaseSessionMetrics initializes with correct defaults."""
         # BVJ: Validates metrics tracking foundation
-        metrics = SessionMetrics(
+        metrics = DatabaseSessionMetrics(
             session_id="test_session",
             request_id="test_request",
             user_id="test_user", 
-            created_at=datetime.now(timezone.utc)
         )
         
         assert metrics.session_id == "test_session"
@@ -196,11 +194,10 @@ class TestSessionMetrics(BaseIntegrationTest):
     def test_session_metrics_mark_activity(self):
         """Test marking session activity updates timestamp."""
         # BVJ: Validates activity tracking for leak detection
-        metrics = SessionMetrics(
+        metrics = DatabaseSessionMetrics(
             session_id="test_session",
             request_id="test_request", 
-            user_id="test_user",
-            created_at=datetime.now(timezone.utc)
+            user_id="test_user"
         )
         
         before_activity = datetime.now(timezone.utc)
@@ -213,11 +210,10 @@ class TestSessionMetrics(BaseIntegrationTest):
     def test_session_metrics_record_error(self):
         """Test error recording updates metrics correctly."""
         # BVJ: Validates error tracking for debugging and monitoring
-        metrics = SessionMetrics(
+        metrics = DatabaseSessionMetrics(
             session_id="test_session",
             request_id="test_request",
             user_id="test_user",
-            created_at=datetime.now(timezone.utc)
         )
         
         error_message = "Database connection failed"
@@ -232,7 +228,7 @@ class TestSessionMetrics(BaseIntegrationTest):
         """Test closing session calculates total lifetime."""
         # BVJ: Validates session lifetime tracking for performance monitoring
         created_at = datetime.now(timezone.utc)
-        metrics = SessionMetrics(
+        metrics = DatabaseSessionMetrics(
             session_id="test_session",
             request_id="test_request",
             user_id="test_user",
@@ -379,11 +375,10 @@ class TestRequestScopedSessionFactory(BaseIntegrationTest):
         """Test session registration and cleanup."""
         # BVJ: Validates proper session tracking for leak prevention
         session_id = "test_session_123"
-        session_metrics = SessionMetrics(
+        session_metrics = DatabaseSessionMetrics(
             session_id=session_id,
             request_id="req_456",
             user_id="user_789",
-            created_at=datetime.now(timezone.utc)
         )
         mock_session = MagicMock()
         
@@ -478,11 +473,10 @@ class TestRequestScopedSessionFactory(BaseIntegrationTest):
         # BVJ: Validates proper resource cleanup prevents memory leaks
         # Add a mock session to test cleanup
         session_id = "test_session"
-        session_metrics = SessionMetrics(
+        session_metrics = DatabaseSessionMetrics(
             session_id=session_id,
             request_id="req",
             user_id="user",
-            created_at=datetime.now(timezone.utc)
         )
         self.factory._active_sessions[session_id] = session_metrics
         
@@ -509,12 +503,11 @@ class TestConcurrentSessionIsolation(BaseIntegrationTest):
             async def create_mock_session(user_id: str):
                 """Mock session creation for concurrent test."""
                 session_id = f"{user_id}_session_{uuid.uuid4().hex[:8]}"
-                metrics = SessionMetrics(
+                metrics = DatabaseSessionMetrics(
                     session_id=session_id,
                     request_id=f"req_{uuid.uuid4().hex[:8]}",
                     user_id=user_id,
-                    created_at=datetime.now(timezone.utc)
-                )
+                        )
                 mock_session = MagicMock()
                 mock_session.info = {}
                 
@@ -554,12 +547,11 @@ class TestConcurrentSessionIsolation(BaseIntegrationTest):
             
             # Create session for user1
             session1_id = f"{user1_id}_session"
-            session1_metrics = SessionMetrics(
+            session1_metrics = DatabaseSessionMetrics(
                 session_id=session1_id,
                 request_id="req1",
                 user_id=user1_id,
-                created_at=datetime.now(timezone.utc)
-            )
+                )
             mock_session1 = MagicMock()
             mock_session1.info = {
                 'user_id': user1_id,
@@ -592,7 +584,7 @@ class TestConcurrentSessionIsolation(BaseIntegrationTest):
             # Create an "old" session by backdating it
             old_time = datetime.now(timezone.utc) - timedelta(minutes=10)  # 10 minutes old
             session_id = "old_session"
-            session_metrics = SessionMetrics(
+            session_metrics = DatabaseSessionMetrics(
                 session_id=session_id,
                 request_id="req",
                 user_id="user",
@@ -700,8 +692,8 @@ class TestSessionValidationUtilities(BaseIntegrationTest):
         # BVJ: Validates validation utility works with real sessions
         from sqlalchemy.ext.asyncio import AsyncSession
         
-        # Create a mock that looks like AsyncSession
-        mock_session = MagicMock(spec=AsyncSession)
+        # Create a mock that looks like AsyncSession using AsyncMock for async operations
+        mock_session = AsyncMock(spec=AsyncSession)
         
         # Should not raise exception
         validate_db_session(mock_session, "test_context")
@@ -742,12 +734,11 @@ class TestErrorHandlingAndRecovery(BaseIntegrationTest):
         
         try:
             session_id = "error_session"
-            session_metrics = SessionMetrics(
+            session_metrics = DatabaseSessionMetrics(
                 session_id=session_id,
                 request_id="req",
                 user_id="user",
-                created_at=datetime.now(timezone.utc)
-            )
+                )
             
             # Simulate error during session usage
             error_message = "Database operation failed"
@@ -793,7 +784,7 @@ class TestErrorHandlingAndRecovery(BaseIntegrationTest):
             session_id = f"{user_id}_{request_id}_session"
             # Create metrics with backdated time to ensure total_time_ms > 0
             created_time = datetime.now(timezone.utc) - timedelta(milliseconds=100)
-            session_metrics = SessionMetrics(
+            session_metrics = DatabaseSessionMetrics(
                 session_id=session_id,
                 request_id=request_id,
                 user_id=user_id,
@@ -848,12 +839,11 @@ class TestSessionManagerPerformance(BaseIntegrationTest):
             
             async def create_and_cleanup_session(user_id: str):
                 session_id = f"{user_id}_session"
-                metrics = SessionMetrics(
+                metrics = DatabaseSessionMetrics(
                     session_id=session_id,
                     request_id=f"req_{user_id}",
                     user_id=user_id,
-                    created_at=datetime.now(timezone.utc)
-                )
+                        )
                 mock_session = MagicMock()
                 mock_session.info = {}
                 
@@ -905,12 +895,11 @@ class TestSessionManagerPerformance(BaseIntegrationTest):
                 # Create batch of sessions
                 for i in range(10):  # 10 sessions per batch
                     session_id = f"batch_{batch}_session_{i}"
-                    metrics = SessionMetrics(
+                    metrics = DatabaseSessionMetrics(
                         session_id=session_id,
                         request_id=f"req_{i}",
                         user_id=f"user_{i}",
-                        created_at=datetime.now(timezone.utc)
-                    )
+                                )
                     mock_session = MagicMock()
                     mock_session.info = {}
                     

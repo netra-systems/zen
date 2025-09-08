@@ -35,7 +35,7 @@ export BACKEND_PORT="${BACKEND_PORT:-8000}"
 export SERVICE_SECRET="${SERVICE_SECRET:-test-secret-for-local-development-only-32chars}"
 export JWT_SECRET_KEY="${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}"
 export FERNET_KEY="${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}"
-export SECRET_KEY="${SECRET_KEY:-dev-secret-key-for-development}"
+export SECRET_KEY="${SECRET_KEY:-dev-secret-key-for-development-32-chars}"
 
 # Function to print colored output
 print_status() {

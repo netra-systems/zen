@@ -282,7 +282,7 @@ class WebSocketConnectionManager:
     
     def __init__(self, base_url: str = None):
         self.base_url = base_url or self._get_websocket_url()
-        self.connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.connections: Dict[str, websockets.ServerConnection] = {}
         self.event_capture = WebSocketEventCapture()
         
     def _get_websocket_url(self) -> str:
@@ -303,7 +303,7 @@ class WebSocketConnectionManager:
         return f"ws://{local_host}:{local_port}/ws"
     
     @asynccontextmanager
-    async def connect(self, user_id: str, auth_token: str = None) -> websockets.WebSocketServerProtocol:
+    async def connect(self, user_id: str, auth_token: str = None) -> websockets.ServerConnection:
         """Create a real WebSocket connection."""
         connection_id = f"{user_id}_{uuid.uuid4().hex[:8]}"
         
@@ -331,13 +331,13 @@ class WebSocketConnectionManager:
                     await websocket.close()
                 del self.connections[connection_id]
     
-    async def send_message(self, websocket: websockets.WebSocketServerProtocol, message: Dict[str, Any]) -> float:
+    async def send_message(self, websocket: websockets.ServerConnection, message: Dict[str, Any]) -> float:
         """Send a message and return the send latency."""
         start_time = time.time()
         await websocket.send(json.dumps(message))
         return (time.time() - start_time) * 1000  # Return latency in ms
     
-    async def receive_events(self, websocket: websockets.WebSocketServerProtocol, timeout: float = 30.0) -> List[ValidatedEvent]:
+    async def receive_events(self, websocket: websockets.ServerConnection, timeout: float = 30.0) -> List[ValidatedEvent]:
         """Receive and validate events from WebSocket."""
         events = []
         start_time = time.time()

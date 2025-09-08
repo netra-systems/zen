@@ -21,16 +21,32 @@ from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.corpus import ContentCorpus
 from netra_backend.app.services.job_store import job_store
-from netra_backend.app.websocket_core import get_websocket_manager
+# WebSocket manager import moved to function level for security
 
 logger = central_logger.get_logger(__name__)
 
 
-async def update_job_status(job_id: str, status: str, **kwargs):
-    """Updates the status and other attributes of a generation job and sends a WebSocket message."""
+async def update_job_status(job_id: str, status: str, user_context=None, **kwargs):
+    """Updates the status and other attributes of a generation job and sends a WebSocket message.
+    
+    Args:
+        job_id: The job identifier
+        status: New job status
+        user_context: Optional user execution context for WebSocket notifications
+        **kwargs: Additional status attributes
+    """
     await job_store.update(job_id, status, **kwargs)
-    websocket_manager = get_websocket_manager()
-    await websocket_manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
+    
+    # Send WebSocket notification if user context is available
+    if user_context:
+        try:
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            websocket_manager = await create_websocket_manager(user_context)
+            await websocket_manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
+        except Exception as e:
+            logger.error(f"Failed to send WebSocket job status update: {e}")
+    else:
+        logger.debug(f"Job status updated without WebSocket notification (no user context): {job_id} -> {status}")
 
 
 def _build_clickhouse_config() -> dict:

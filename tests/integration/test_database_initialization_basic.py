@@ -27,6 +27,7 @@ sys.path.insert(0, project_root)
 
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
+from test_framework.ssot.database_skip_conditions import skip_if_postgresql_unavailable
 
 
 class TestDatabaseInitializationBasic:
@@ -52,6 +53,7 @@ class TestDatabaseInitializationBasic:
             "environment": env.get("ENVIRONMENT", "development")
         }
     
+    @skip_if_postgresql_unavailable
     def test_database_exists_and_connectable(self, database_config):
         """Test that the database exists and can be connected to - THIS SHOULD FAIL."""
         database_url = database_config["url"]
@@ -84,6 +86,7 @@ class TestDatabaseInitializationBasic:
             else:
                 pytest.fail(f"CRITICAL: Database connection failed with unexpected error: {e}")
     
+    @skip_if_postgresql_unavailable
     def test_database_has_required_tables(self, database_config):
         """Test that database has basic required tables for system functionality."""
         database_url = database_config["url"]
@@ -128,6 +131,7 @@ class TestDatabaseInitializationBasic:
             else:
                 pytest.fail(f"Failed to inspect database tables: {e}")
     
+    @skip_if_postgresql_unavailable
     def test_database_basic_crud_operations(self, database_config):
         """Test that database supports basic CRUD operations on a test table."""
         database_url = database_config["url"]
@@ -218,6 +222,7 @@ class TestDatabaseInitializationBasic:
             else:
                 pytest.fail(f"Basic database CRUD operations failed: {e}")
     
+    @skip_if_postgresql_unavailable
     def test_database_permissions_basic(self, database_config):
         """Test that database user has basic required permissions."""
         database_url = database_config["url"]

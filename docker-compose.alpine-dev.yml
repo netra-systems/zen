@@ -31,7 +31,7 @@ services:
       retries: 5
 
   dev-clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
+    image: clickhouse/clickhouse-server:25.7.6.21-alpine
     environment:
       CLICKHOUSE_DB: netra_analytics
       CLICKHOUSE_USER: netra

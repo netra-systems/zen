@@ -153,6 +153,26 @@ class OAuthUserFactory:
         }
     
     @staticmethod
+    def create_google_user() -> Dict[str, Any]:
+        """Create Google OAuth user test data"""
+        return GoogleOAuthProvider.get_user_info()
+    
+    @staticmethod
+    def create_github_user() -> Dict[str, Any]:
+        """Create GitHub OAuth user test data"""
+        return GitHubOAuthProvider.get_user_info()
+    
+    @staticmethod
+    def create_generic_user() -> Dict[str, Any]:
+        """Create generic OAuth user test data"""
+        return {
+            "id": "generic_oauth_123",
+            "email": "oauth.user@test.com",
+            "name": "Generic OAuth User",
+            "verified_email": True
+        }
+    
+    @staticmethod
     def create_existing_user(email: str) -> Dict[str, Any]:
         """Create existing user for merge scenarios"""
         return {

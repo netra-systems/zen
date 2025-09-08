@@ -35,14 +35,14 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-# DISABLED: fallback_manager module removed
-# from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
-# DISABLED: periodic_update_manager module removed
-# from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+# DISABLED: fallback_manager module removed - using minimal adapter
+# DISABLED: periodic_update_manager module removed - using minimal adapter
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
@@ -56,6 +56,106 @@ from netra_backend.app.agents.supervisor.data_access_integration import (
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+class MinimalPeriodicUpdateManager:
+    """Minimal adapter for periodic update manager interface compatibility.
+    
+    This class provides the minimal interface required by UserExecutionEngine
+    without the full complexity of the original periodic update manager.
+    Maintains SSOT compliance by providing only essential functionality.
+    """
+    
+    @asynccontextmanager
+    async def track_operation(
+        self, 
+        context: 'AgentExecutionContext', 
+        operation_name: str, 
+        operation_type: str,
+        expected_duration_ms: int,
+        operation_description: str
+    ) -> AsyncGenerator[None, None]:
+        """Track operation with minimal overhead - simple pass-through context manager.
+        
+        Args:
+            context: Agent execution context
+            operation_name: Name of the operation
+            operation_type: Type of operation (e.g., 'agent_execution')
+            expected_duration_ms: Expected duration in milliseconds
+            operation_description: Human-readable description
+        
+        Yields:
+            None: Simple pass-through for operation execution
+        """
+        logger.debug(f"Starting tracked operation: {operation_name} ({operation_description})")
+        start_time = time.time()
+        try:
+            yield
+        finally:
+            duration_ms = (time.time() - start_time) * 1000
+            logger.debug(f"Completed tracked operation: {operation_name} in {duration_ms:.1f}ms")
+    
+    async def shutdown(self) -> None:
+        """Shutdown method for compatibility - no-op for minimal implementation."""
+        logger.debug("MinimalPeriodicUpdateManager shutdown - no action needed")
+
+
+class MinimalFallbackManager:
+    """Minimal adapter for fallback manager interface compatibility.
+    
+    This class provides the minimal interface required by UserExecutionEngine
+    without the full complexity of the original fallback manager.
+    Maintains SSOT compliance by providing essential error handling.
+    """
+    
+    def __init__(self, user_context: UserExecutionContext):
+        """Initialize minimal fallback manager with user context.
+        
+        Args:
+            user_context: User execution context for isolated fallback handling
+        """
+        self.user_context = user_context
+        logger.debug(f"Initialized MinimalFallbackManager for user {user_context.user_id}")
+    
+    async def create_fallback_result(
+        self, 
+        context: 'AgentExecutionContext', 
+        state: 'DeepAgentState', 
+        error: Exception, 
+        start_time: float
+    ) -> 'AgentExecutionResult':
+        """Create a fallback result for failed agent execution.
+        
+        Args:
+            context: Agent execution context
+            state: Deep agent state
+            error: The exception that caused the failure
+            start_time: When execution started (for timing)
+        
+        Returns:
+            AgentExecutionResult: Fallback result indicating failure with context
+        """
+        execution_time = time.time() - start_time
+        
+        logger.warning(
+            f"Creating fallback result for user {self.user_context.user_id} "
+            f"after {context.agent_name} execution failed: {error}"
+        )
+        
+        return AgentExecutionResult(
+            success=False,
+            agent_name=context.agent_name,
+            execution_time=execution_time,
+            error=f"Agent execution failed: {str(error)}",
+            state=state,
+            metadata={
+                'fallback_result': True,
+                'original_error': str(error),
+                'user_isolated': True,
+                'user_id': self.user_context.user_id,
+                'error_type': type(error).__name__
+            }
+        )
 
 
 class UserExecutionEngine:
@@ -213,11 +313,11 @@ class UserExecutionEngine:
                 raise ValueError("WebSocket bridge not available in factory")
             
             # Initialize components with user-scoped bridge
-            # periodic_update_manager removed - no longer needed
-            self.periodic_update_manager = None
+            # Use minimal adapters to maintain interface compatibility
+            self.periodic_update_manager = MinimalPeriodicUpdateManager()
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
-            # fallback_manager removed - no longer needed
-            self.fallback_manager = None
+            # Use minimal fallback manager with user context
+            self.fallback_manager = MinimalFallbackManager(self.context)
             self.flow_logger = get_supervisor_flow_logger()
             self.execution_tracker = get_execution_tracker()
             
@@ -623,16 +723,17 @@ class UserExecutionEngine:
             )
             
             # Create agent state from input data
-            state = DeepAgentState()
-            state.initialize_from_dict({
-                'user_request': input_data,
-                'current_state': 'initialized',
-                'agent_context': {
+            state = DeepAgentState(
+                user_request=input_data,
+                user_id=execution_context.user_id,
+                chat_thread_id=execution_context.thread_id,
+                run_id=execution_context.run_id,
+                agent_input={
                     'agent_name': agent_name,
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id
                 }
-            })
+            )
             
             # Execute agent with the created context and state
             result = await self.execute_agent(agent_context, state)
@@ -644,23 +745,21 @@ class UserExecutionEngine:
             logger.error(f"Error in execute_agent_pipeline for {agent_name}: {e}")
             # Return a failed result instead of raising the exception
             return AgentExecutionResult(
-                context=AgentExecutionContext(
-                    user_id=execution_context.user_id,
-                    thread_id=execution_context.thread_id,
-                    run_id=execution_context.run_id,
-                    request_id=execution_context.request_id,
-                    agent_name=agent_name,
-                    step=PipelineStep.ERROR,
-                    execution_timestamp=datetime.now(timezone.utc),
-                    pipeline_step_num=1,
-                    metadata={"error": str(e)}
-                ),
-                result={'error': str(e), 'success': False},
                 success=False,
-                error_message=str(e),
-                execution_time_ms=0.0,
-                pipeline_steps=[],
-                final_state=None
+                error=str(e),
+                duration=0.0,
+                state=None,
+                metadata={
+                    'user_id': execution_context.user_id,
+                    'thread_id': execution_context.thread_id,
+                    'run_id': execution_context.run_id,
+                    'request_id': execution_context.request_id,
+                    'agent_name': agent_name,
+                    'step': PipelineStep.ERROR.value,
+                    'execution_timestamp': datetime.now(timezone.utc).isoformat(),
+                    'pipeline_step_num': 1,
+                    'error': str(e)
+                }
             )
     
     async def cleanup(self) -> None:
@@ -688,7 +787,7 @@ class UserExecutionEngine:
                         logger.error(f"Error cancelling execution {execution_id}: {e}")
             
             # Shutdown components
-            if hasattr(self, 'periodic_update_manager'):
+            if hasattr(self, 'periodic_update_manager') and self.periodic_update_manager:
                 await self.periodic_update_manager.shutdown()
             
             # Clean up user WebSocket emitter

@@ -279,7 +279,7 @@ class TestEndpointValidation:
         mock_context.__aexit__.return_value = None
         
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = DatabaseTestManager().get_session()
+        mock_session = DatabaseTestManager().create_session()
         mock_session.head.return_value = mock_context
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")
@@ -301,7 +301,7 @@ class TestEndpointValidation:
         mock_context.__aexit__.return_value = None
         
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_session = DatabaseTestManager().get_session()
+        mock_session = DatabaseTestManager().create_session()
         mock_session.head.return_value = mock_context
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")

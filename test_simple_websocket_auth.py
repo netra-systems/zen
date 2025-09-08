@@ -67,7 +67,7 @@ async def test_websocket_auth():
                 return False
             return False
             
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.exceptions.InvalidStatus as e:
             print(f"[FAILED] HTTP Status: {e.status_code}")
             if e.status_code == 403:
                 print("[REPRODUCED] HTTP 403 authentication failure!")

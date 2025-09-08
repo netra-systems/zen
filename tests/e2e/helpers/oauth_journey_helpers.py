@@ -38,7 +38,7 @@
     # REMOVED_SYNTAX_ERROR: import websockets
 
     # REMOVED_SYNTAX_ERROR: from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient
-    # REMOVED_SYNTAX_ERROR: from test_framework.auth_helpers import OAuthFlowTester
+    # REMOVED_SYNTAX_ERROR: from test_framework.helpers.auth_helpers import OAuthFlowTester
     # REMOVED_SYNTAX_ERROR: from tests.e2e.oauth_test_providers import GoogleOAuthProvider
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

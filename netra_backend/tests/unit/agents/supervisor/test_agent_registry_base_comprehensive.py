@@ -73,6 +73,13 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 class TestAgentRegistryInitialization(SSotAsyncTestCase):
     """Test AgentRegistry initialization and basic configuration."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     async def test_init_creates_registry_with_required_components(self):
         """Test that AgentRegistry initializes with all required components.
         
@@ -169,13 +176,20 @@ class TestAgentRegistryInitialization(SSotAsyncTestCase):
 class TestUserAgentSessionManagement(SSotAsyncTestCase):
     """Test UserAgentSession lifecycle management and isolation features."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     async def test_user_agent_session_initialization(self):
         """Test that UserAgentSession initializes correctly.
         
         Business Value: Ensures user isolation foundation works correctly.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         # Act
         user_session = UserAgentSession(test_user_id)
@@ -223,7 +237,7 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
         mock_llm_manager = AsyncMock()
         mock_llm_manager._initialized = True
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         # Act
         user_session = await registry.get_user_session(test_user_id)
@@ -245,7 +259,7 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         session1 = await registry.get_user_session(test_user_id)
         
@@ -268,15 +282,15 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         
         # Test empty string
-        with self.expect_exception(ValueError, "user_id must be a non-empty string"):
+        with self.expect_exception(ValueError, "user_id is required and must be non-empty string"):
             await registry.get_user_session("")
         
         # Test None
-        with self.expect_exception(ValueError, "user_id must be a non-empty string"):
+        with self.expect_exception(ValueError, "user_id is required and must be non-empty string"):
             await registry.get_user_session(None)
         
         # Test non-string
-        with self.expect_exception(ValueError, "user_id must be a non-empty string"):
+        with self.expect_exception(ValueError, "user_id is required and must be non-empty string"):
             await registry.get_user_session(123)
         
         self.record_metric("get_session_validation_working", True)
@@ -289,7 +303,7 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         await registry.get_user_session(test_user_id)
         assert test_user_id in registry._user_sessions
@@ -347,13 +361,20 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
 class TestUserAgentSessionBehavior(SSotAsyncTestCase):
     """Test UserAgentSession behavior and lifecycle management."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     async def test_register_and_get_agent(self):
         """Test registering and retrieving agents from user session.
         
         Business Value: Enables agent-based workflow execution for users.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         mock_agent = Mock()
         mock_agent.name = "test_agent"
@@ -375,7 +396,7 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
         Business Value: Prevents memory leaks and ensures clean user sessions.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         mock_agent = Mock()
@@ -402,7 +423,7 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
         Business Value: Ensures system stability even when individual agents fail.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         mock_agent = Mock()
@@ -424,7 +445,7 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
         Business Value: Provides operational visibility and monitoring capability.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         # Act
@@ -452,13 +473,14 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
         Business Value: Enables proper agent isolation and execution tracking.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Act
@@ -476,7 +498,14 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
 
 class TestWebSocketManagerIntegration(SSotAsyncTestCase):
     """Test WebSocket manager integration and propagation."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_set_websocket_manager_stores_manager(self):
         """Test that set_websocket_manager properly stores the manager.
         
@@ -504,16 +533,21 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         mock_websocket_manager = Mock()
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         user_session = await registry.get_user_session(test_user_id)
         
-        # Act
-        with patch.object(user_session, 'set_websocket_manager', new_callable=AsyncMock) as mock_set_ws:
-            await registry.set_websocket_manager_async(mock_websocket_manager)
-        
-        # Assert
-        mock_set_ws.assert_called_once()
+        # Mock the create_agent_websocket_bridge function to avoid import issues
+        with patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge') as mock_create_bridge:
+            mock_bridge = Mock()
+            mock_create_bridge.return_value = mock_bridge
+            
+            # Act - Mock set_websocket_manager to test propagation
+            with patch.object(user_session, 'set_websocket_manager', new_callable=AsyncMock) as mock_set_ws:
+                await registry.set_websocket_manager_async(mock_websocket_manager)
+            
+            # Assert
+            mock_set_ws.assert_called_once()
         
         self.record_metric("async_websocket_propagation_working", True)
     
@@ -540,29 +574,42 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         Business Value: Ensures per-user WebSocket isolation and proper resource management.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         mock_websocket_manager = Mock()
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
-        # Act
-        await user_session.set_websocket_manager(mock_websocket_manager, test_user_context)
-        
-        # Assert
-        assert user_session._websocket_manager == mock_websocket_manager
-        assert user_session._websocket_bridge is not None
+        # Mock the create_agent_websocket_bridge function
+        with patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge') as mock_create_bridge:
+            mock_bridge = Mock()
+            mock_create_bridge.return_value = mock_bridge
+            
+            # Act
+            await user_session.set_websocket_manager(mock_websocket_manager, test_user_context)
+            
+            # Assert
+            assert user_session._websocket_manager == mock_websocket_manager
+            assert user_session._websocket_bridge is not None
         
         self.record_metric("user_websocket_integration_working", True)
 
 
 class TestAgentCreationAndManagement(SSotAsyncTestCase):
     """Test agent creation, registration, and management."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_create_agent_for_user_validates_parameters(self):
         """Test that create_agent_for_user validates required parameters.
         
@@ -571,12 +618,13 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Test missing user_id
@@ -597,12 +645,13 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Mock get_async to return None (no factory found)
@@ -626,7 +675,7 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         mock_agent = Mock()
         mock_agent.name = "test_agent"
@@ -667,7 +716,7 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         await registry.get_user_session(test_user_id)
         
@@ -687,7 +736,7 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         mock_agent = Mock()
         mock_agent.cleanup = AsyncMock()
@@ -726,6 +775,13 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
 class TestToolDispatcherIntegration(SSotAsyncTestCase):
     """Test tool dispatcher creation and enhancement."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
     async def test_create_tool_dispatcher_for_user_creates_isolated_dispatcher(self, mock_unified_dispatcher):
         """Test that create_tool_dispatcher_for_user creates isolated dispatcher.
@@ -735,12 +791,13 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         mock_dispatcher = Mock()
@@ -772,12 +829,13 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         mock_dispatcher = Mock()
@@ -808,12 +866,13 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         mock_dispatcher = Mock()
@@ -987,7 +1046,14 @@ class TestAgentFactoryRegistration(SSotAsyncTestCase):
 
 class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
     """Test registry health monitoring and diagnostic methods."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_get_registry_health_returns_complete_status(self):
         """Test that get_registry_health returns comprehensive health information.
         
@@ -1116,7 +1182,14 @@ class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
 
 class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
     """Test concurrent access and thread safety."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_concurrent_user_session_creation(self):
         """Test that concurrent user session creation is thread-safe.
         
@@ -1197,7 +1270,14 @@ class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
 
 class TestMemoryLeakPrevention(SSotAsyncTestCase):
     """Test memory leak prevention features."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_monitor_all_users_detects_memory_issues(self):
         """Test that monitor_all_users detects potential memory issues.
         
@@ -1286,7 +1366,7 @@ class TestMemoryLeakPrevention(SSotAsyncTestCase):
         """
         # Arrange
         lifecycle_manager = AgentLifecycleManager()
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         # Act - Test monitoring memory usage
         memory_report = await lifecycle_manager.monitor_memory_usage(test_user_id)
@@ -1349,12 +1429,13 @@ class TestBackwardCompatibility(SSotAsyncTestCase):
         # Arrange
         mock_llm_manager = AsyncMock()
         registry = AgentRegistry(llm_manager=mock_llm_manager)
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Act
@@ -1434,20 +1515,28 @@ class TestModuleExports(SSotAsyncTestCase):
 
 class TestEdgeCasesAndErrorHandling(SSotAsyncTestCase):
     """Test edge cases and error handling scenarios."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_user_session_with_websocket_manager_none(self):
         """Test user session behavior when WebSocket manager is None.
         
         Business Value: Ensures graceful degradation when WebSocket is unavailable.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         test_user_context = UserExecutionContext(
             user_id=test_user_id,
-            request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+            request_id=f"unit_testing_request_{uuid.uuid4().hex[:8]}",
+            thread_id=f"unit_testing_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Act - should not raise exception
@@ -1465,7 +1554,7 @@ class TestEdgeCasesAndErrorHandling(SSotAsyncTestCase):
         Business Value: Ensures robust cleanup even with incomplete agent implementations.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         mock_agent = Mock(spec=[])  # Agent without cleanup method
@@ -1507,7 +1596,7 @@ class TestEdgeCasesAndErrorHandling(SSotAsyncTestCase):
         Business Value: Ensures thread safety in multi-user scenarios.
         """
         # Arrange
-        test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        test_user_id = f"unit_testing_user_{uuid.uuid4().hex[:8]}"
         user_session = UserAgentSession(test_user_id)
         
         mock_agents = [Mock() for _ in range(5)]

@@ -1188,13 +1188,21 @@ class NetraTestingConfig(AppConfig):
         """Initialize test configuration using DatabaseURLBuilder."""
         from shared.database_url_builder import DatabaseURLBuilder
         from shared.isolated_environment import get_env
+        import os
         
         env = get_env()
         
-        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
-        builder = DatabaseURLBuilder(env.as_dict())
+        # CRITICAL FIX: For test scenarios using patch.dict(os.environ), we need to 
+        # merge isolated variables with os.environ, giving priority to os.environ
+        env_dict = env.as_dict()
+        for key, value in os.environ.items():
+            if key not in env_dict or env_dict[key] != value:
+                env_dict[key] = value
         
-        # Get URL for test environment - uses test.auto_url which handles #removed-legacyor test defaults
+        # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
+        builder = DatabaseURLBuilder(env_dict)
+        
+        # Get URL for test environment - uses DatabaseURLBuilder SSOT test.auto_url which handles environment variables or test defaults
         database_url = builder.test.auto_url
         
         if database_url:
@@ -1205,10 +1213,96 @@ class NetraTestingConfig(AppConfig):
             logger = logging.getLogger(__name__)
             logger.warning("No database URL available from DatabaseURLBuilder for test environment")
         
-        # Load API keys from environment for testing
-        self._load_api_keys_from_environment(env, data)
+        # Load API keys from environment for testing (use corrected environment)
+        self._load_api_keys_from_environment_corrected(env_dict, data)
         
         super().__init__(**data)
+    
+    def _load_api_keys_from_environment_corrected(self, env_dict: dict, data: dict) -> None:
+        """Load API keys from corrected environment dictionary for testing."""
+        # Helper function to get values from environment dictionary
+        def get_env_value(key):
+            return env_dict.get(key)
+        
+        # Load API keys from environment variables
+        api_key_mappings = {
+            'GEMINI_API_KEY': 'gemini_api_key',
+            'ANTHROPIC_API_KEY': 'anthropic_api_key', 
+            'OPENAI_API_KEY': 'openai_api_key',
+        }
+        
+        for env_var, field_name in api_key_mappings.items():
+            api_key = get_env_value(env_var)
+            if api_key:
+                data[field_name] = api_key
+        
+        # Load security keys from environment (override defaults)
+        security_key_mappings = {
+            'SECRET_KEY': 'secret_key',  # CRITICAL FIX: Load SECRET_KEY for FastAPI sessions
+            'JWT_SECRET_KEY': 'jwt_secret_key',
+            'FERNET_KEY': 'fernet_key',
+            'SERVICE_SECRET': 'service_secret',
+        }
+        
+        for env_var, field_name in security_key_mappings.items():
+            key_value = get_env_value(env_var)
+            if key_value:
+                data[field_name] = key_value
+        
+        # Load OAuth credentials from environment (test environment uses TEST suffix)
+        oauth_client_id = get_env_value('GOOGLE_OAUTH_CLIENT_ID_TEST')
+        oauth_client_secret = get_env_value('GOOGLE_OAUTH_CLIENT_SECRET_TEST')
+        
+        if oauth_client_id or oauth_client_secret:
+            if 'google_cloud' not in data:
+                data['google_cloud'] = {}
+            if 'oauth_config' not in data:
+                data['oauth_config'] = {}
+            
+            if oauth_client_id:
+                data['google_cloud']['client_id'] = oauth_client_id
+                data['oauth_config']['client_id'] = oauth_client_id
+            if oauth_client_secret:
+                data['google_cloud']['client_secret'] = oauth_client_secret
+                data['oauth_config']['client_secret'] = oauth_client_secret
+        
+        # Load REDIS_URL from corrected environment
+        redis_url = get_env_value('REDIS_URL')
+        if redis_url:
+            data['redis_url'] = redis_url
+        
+        # Load ClickHouse configuration from corrected environment
+        clickhouse_host = get_env_value('CLICKHOUSE_HOST')
+        clickhouse_port = get_env_value('CLICKHOUSE_PORT')
+        clickhouse_user = get_env_value('CLICKHOUSE_USER')
+        clickhouse_password = get_env_value('CLICKHOUSE_PASSWORD')
+        clickhouse_database = get_env_value('CLICKHOUSE_DATABASE') or get_env_value('CLICKHOUSE_DB')
+        
+        if clickhouse_host or clickhouse_port or clickhouse_user or clickhouse_password or clickhouse_database:
+            if 'clickhouse_native' not in data:
+                data['clickhouse_native'] = {}
+            if 'clickhouse_https' not in data:
+                data['clickhouse_https'] = {}
+            if clickhouse_host:
+                data['clickhouse_native']['host'] = clickhouse_host
+                data['clickhouse_https']['host'] = clickhouse_host
+            if clickhouse_port:
+                try:
+                    port_value = int(clickhouse_port)
+                    data['clickhouse_native']['port'] = port_value
+                    # Also set HTTPS port for test compatibility
+                    data['clickhouse_https']['port'] = port_value
+                except (ValueError, TypeError):
+                    pass
+            if clickhouse_user:
+                data['clickhouse_native']['user'] = clickhouse_user
+                data['clickhouse_https']['user'] = clickhouse_user
+            if clickhouse_password:
+                data['clickhouse_native']['password'] = clickhouse_password
+                data['clickhouse_https']['password'] = clickhouse_password
+            if clickhouse_database:
+                data['clickhouse_native']['database'] = clickhouse_database
+                data['clickhouse_https']['database'] = clickhouse_database
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
         """Load API keys from environment variables for testing."""
@@ -1226,6 +1320,7 @@ class NetraTestingConfig(AppConfig):
         
         # Load security keys from environment (override defaults)
         security_key_mappings = {
+            'SECRET_KEY': 'secret_key',  # CRITICAL FIX: Load SECRET_KEY for FastAPI sessions
             'JWT_SECRET_KEY': 'jwt_secret_key',
             'FERNET_KEY': 'fernet_key',
             'SERVICE_SECRET': 'service_secret',
@@ -1315,9 +1410,7 @@ class NetraTestingConfig(AppConfig):
             data['clickhouse_mode'] = clickhouse_mode
         
         # Load database configuration
-        database_url = env.get('DATABASE_URL')
-        if database_url:
-            data['database_url'] = database_url
+        # NOTE: Database configuration is handled by DatabaseURLBuilder in __init__ via SSOT patterns - don't override it here
         
         redis_url = env.get('REDIS_URL')
         if redis_url:

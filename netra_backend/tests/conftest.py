@@ -15,9 +15,26 @@ except ImportError:
     # Fallback if dev_launcher is not available
     from shared.isolated_environment import get_env
 
-# CRITICAL: Set OAuth test credentials immediately to prevent validation errors
+# CRITICAL: Set test environment early to prevent backend environment validation errors
 # This must happen before any validator is called during conftest execution
 _env = get_env()
+
+# CRITICAL FIX: Always set basic test environment variables during pytest import
+# This ensures BackendEnvironment has test defaults available during singleton creation
+import sys
+if "pytest" in sys.modules:
+    # Set test collection mode and basic environment variables immediately
+    _env.set("TEST_COLLECTION_MODE", "1", source="early_conftest_pytest_import")
+    _env.set("TESTING", "true", source="early_conftest_pytest_import")
+    _env.set("ENVIRONMENT", "test", source="early_conftest_pytest_import")
+    
+    # Set essential environment variables to prevent validation warnings during import
+    if not _env.get("SECRET_KEY"):
+        _env.set("SECRET_KEY", "test-secret-key-for-test-environment-only-32-chars-min", source="early_conftest_pytest_import")
+    if not _env.get("JWT_SECRET_KEY"):
+        _env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars", source="early_conftest_pytest_import")
+
+# Set OAuth test credentials immediately to prevent validation errors
 if not _env.get("GOOGLE_OAUTH_CLIENT_ID_TEST"):
     _env.set("GOOGLE_OAUTH_CLIENT_ID_TEST", "test-oauth-client-id-for-automated-testing", source="early_conftest_setup")
 if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):

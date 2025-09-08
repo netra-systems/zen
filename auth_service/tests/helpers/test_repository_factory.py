@@ -4,6 +4,7 @@ Provides repository instances for testing without direct database access
 """
 import asyncio
 from typing import AsyncGenerator, Optional
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 # Removed non-existent AuthManager import - using AuthDatabaseManager instead
 from shared.isolated_environment import IsolatedEnvironment
@@ -66,13 +67,13 @@ class RepositoryFactory:
         self._session = AsyncMock(spec=AsyncSession)
         
         # Setup basic mock behaviors
-        self._session.commit = AsyncNone  # TODO: Use real service instance
-        self._session.rollback = AsyncNone  # TODO: Use real service instance
-        self._session.close = AsyncNone  # TODO: Use real service instance
-        self._session.flush = AsyncNone  # TODO: Use real service instance
-        self._session.add = MagicNone  # TODO: Use real service instance
-        self._session.execute = AsyncNone  # TODO: Use real service instance
-        self._session.begin = AsyncNone  # TODO: Use real service instance
+        self._session.commit = AsyncMock()  # TODO: Use real service instance
+        self._session.rollback = AsyncMock()  # TODO: Use real service instance
+        self._session.close = AsyncMock()  # TODO: Use real service instance
+        self._session.flush = AsyncMock()  # TODO: Use real service instance
+        self._session.add = MagicMock()  # TODO: Use real service instance
+        self._session.execute = AsyncMock()  # TODO: Use real service instance
+        self._session.begin = AsyncMock()  # TODO: Use real service instance
     
     async def get_session(self) -> AsyncSession:
         """Get database session."""

@@ -259,3 +259,38 @@ class MetricsSummaryBuilder:
         performance_summary = MetricsSummaryBuilder.build_performance_summary(metrics_history)
         base_data = MetricsSummaryBuilder._build_dashboard_base_data(current_metrics, metrics_history, alerts)
         return MetricsSummaryBuilder._add_dashboard_extras(base_data, performance_summary, cache_metrics, transaction_stats)
+
+
+class MetricsCollector:
+    """Main metrics collection and aggregation system."""
+    
+    def __init__(self):
+        self.storage = MetricsStorage()
+        self.calculator = PerformanceCalculator()
+        self.summary_builder = MetricsSummaryBuilder()
+        self.thresholds = AlertThresholds()
+    
+    def collect_database_metrics(self) -> DatabaseMetrics:
+        """Collect current database metrics."""
+        return DatabaseMetrics(timestamp=datetime.now())
+    
+    def store_metrics(self, metrics: DatabaseMetrics) -> None:
+        """Store collected metrics."""
+        self.storage.store_metrics(metrics)
+    
+    def get_dashboard_data(self) -> Dict[str, Any]:
+        """Get data for monitoring dashboard."""
+        if not self.storage.metrics_history:
+            return {}
+        
+        current_metrics = list(self.storage.metrics_history)[-1]
+        metrics_history = self.storage.get_recent_metrics(60)
+        alerts = list(self.storage.alerts)
+        
+        return self.summary_builder.build_dashboard_data(
+            current_metrics=current_metrics,
+            metrics_history=metrics_history,
+            alerts=alerts,
+            cache_metrics={},
+            transaction_stats={}
+        )

@@ -15,7 +15,10 @@ Be careful here this must fill gap between unit and e2e tests.
 2) Spawn a new sub agent to audit and edit the test
 3) Run the test
 4) If needed, fix the system under test based on the failure
-5) Save work in progress to report log
+5) PROVE THAT YOUR CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
+do not introduce new problems.
+6) Save work in progress to report log
 
 Keep going and repeating the entire test creation process until all tests are created 
 YOU MUST create at least 100 real high quality tests in total.

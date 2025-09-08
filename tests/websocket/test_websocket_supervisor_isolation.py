@@ -80,7 +80,7 @@ class TestWebSocketSupervisorIsolation(SSotBaseTestCase):
         user_id: str,
         thread_id: str,
         run_id: Optional[str] = None
-    ) -> Tuple[WebSocketContext, websockets.WebSocketServerProtocol]:
+    ) -> Tuple[WebSocketContext, websockets.ServerConnection]:
         """
         Create a REAL WebSocket context with authenticated connection.
         

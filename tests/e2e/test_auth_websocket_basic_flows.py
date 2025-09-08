@@ -265,8 +265,10 @@ class TestCoreServiceCommunication:
     """Test 9-10: Core service communication"""
     
     @pytest.mark.e2e
-# COMMENTED OUT: Mock-dependent test -     async def test_9_auth_service_validates_backend_requests(self):
-# COMMENTED OUT: Mock-dependent test -         """Test 9: Auth service properly validates requests from backend"""
+    async def test_9_auth_service_validates_backend_requests_real(self):
+        """Test 9: Auth service properly validates requests from backend"""
+        # This test is disabled due to mock dependencies
+        pytest.skip("Test disabled - requires refactoring to remove mocks")
 # COMMENTED OUT: Mock-dependent test -         jwt_helper = JWTTestHelper()
 # COMMENTED OUT: Mock-dependent test -         token = jwt_helper.create_access_token(
 # COMMENTED OUT: Mock-dependent test -             user_id="test_user_9",

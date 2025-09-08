@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.agent_error_types import AgentValidationError
 from netra_backend.app.agents.prompts import reporting_prompt_template
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState, ReportResult
@@ -144,7 +144,7 @@ class ReportingSubAgent(BaseAgent):
         - Every response has actionable next_steps
         """
         # Handle legacy call pattern: execute(state, run_id, stream_updates)
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext as UEC
+        from netra_backend.app.services.user_execution_context import UserExecutionContext as UEC
         
         if not isinstance(context_or_state, UEC):
             # Legacy pattern: execute(state, run_id, stream_updates)
@@ -194,7 +194,7 @@ class ReportingSubAgent(BaseAgent):
     async def _execute_modern_pattern(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
         """Execute using modern UVS pattern."""
         # UVS: Handle invalid context gracefully
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext as UEC
+        from netra_backend.app.services.user_execution_context import UserExecutionContext as UEC
         import uuid
         
         if not context or not isinstance(context, UEC):
@@ -959,7 +959,7 @@ class ReportingSubAgent(BaseAgent):
         Returns:
             UserExecutionContext for UVS logic
         """
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Convert state to metadata format expected by existing logic
         metadata = {

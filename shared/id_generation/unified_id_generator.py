@@ -92,6 +92,10 @@ class UnifiedIdGenerator:
     def generate_user_context_ids(user_id: str, operation: str = "context") -> Tuple[str, str, str]:
         """Generate consistent IDs for UserExecutionContext creation.
         
+        CRITICAL FIX: Thread ID consistency to prevent WebSocket Factory resource leaks.
+        This addresses the root cause where thread_id and run_id have different patterns,
+        causing cleanup logic to fail to find the right manager during disconnection.
+        
         This is the SSOT method for creating UserExecutionContext IDs,
         replacing all scattered uuid.uuid4().hex[:8] patterns.
         
@@ -100,15 +104,20 @@ class UnifiedIdGenerator:
             operation: Operation type for context naming
             
         Returns:
-            Tuple of (thread_id, run_id, request_id)
+            Tuple of (thread_id, run_id, request_id) with CONSISTENT patterns
         """
         base_timestamp = int(time.time() * 1000)
         counter_base = _get_next_counter()
         
-        # Generate related but unique IDs using sequential counters
-        thread_id = f"thread_{operation}_{base_timestamp}_{counter_base}_{secrets.token_hex(4)}"
-        run_id = f"run_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
-        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 2}_{secrets.token_hex(4)}"
+        # CRITICAL FIX: Use consistent ID pattern for both thread_id and run_id
+        # This prevents the pattern mismatch that causes WebSocket manager cleanup failures
+        base_id = f"{operation}_{base_timestamp}"
+        random_part = secrets.token_hex(4)
+        
+        # Generate related but CONSISTENT IDs - thread_id contains same base as run_id
+        thread_id = f"thread_{base_id}_{counter_base}_{random_part}"
+        run_id = f"{base_id}"  # run_id is the base that thread_id contains
+        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
         
         return thread_id, run_id, request_id
     
@@ -330,6 +339,169 @@ class UnifiedIdGenerator:
         
         current_time = int(time.time() * 1000)
         return current_time - parsed.timestamp
+    
+    # Session Management Methods - SSOT for Context Lifecycle
+    _active_sessions: Dict[str, Dict[str, Any]] = {}
+    _session_lock = Lock()
+    
+    @classmethod
+    def get_or_create_user_session(cls, user_id: str, thread_id: Optional[str] = None, 
+                                  run_id: Optional[str] = None, operation: str = "session") -> Dict[str, str]:
+        """Get existing session or create new one - SSOT for session lifecycle.
+        
+        This method addresses the critical architectural issue where the system
+        creates new contexts for every message instead of maintaining continuity.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Optional thread identifier for conversation continuity
+            run_id: Optional run identifier - determines session behavior:
+                   - None: Use existing session run_id or create new
+                   - Matches existing: Continue with existing session  
+                   - Different: Create new run within thread (new agent execution)
+            operation: Operation type for context naming
+            
+        Returns:
+            Dictionary with session identifiers (thread_id, run_id, request_id)
+        """
+        with cls._session_lock:
+            # Generate session key
+            if thread_id:
+                session_key = f"{user_id}:{thread_id}"
+            else:
+                session_key = f"{user_id}:default"
+            
+            # Check if session exists
+            if session_key in cls._active_sessions:
+                existing_session = cls._active_sessions[session_key]
+                
+                # Handle run_id logic
+                if run_id is None:
+                    # No run_id specified - use existing session's run_id
+                    session_run_id = existing_session["run_id"]
+                elif run_id == existing_session["run_id"]:
+                    # Same run_id - continue existing session
+                    session_run_id = existing_session["run_id"]
+                else:
+                    # Different run_id - create new run within same thread
+                    session_run_id = run_id
+                    existing_session["run_id"] = session_run_id
+                    existing_session["operation"] = f"{operation}_new_run"
+                
+                # Update last activity
+                existing_session["last_activity"] = int(time.time() * 1000)
+                return {
+                    "thread_id": existing_session["thread_id"],
+                    "run_id": session_run_id,
+                    "request_id": cls.generate_base_id("req", True, 8)  # Always new request ID
+                }
+            
+            # Create new session
+            if thread_id:
+                session_thread_id = thread_id
+            else:
+                session_thread_id = cls.generate_base_id(f"thread_{operation}", True, 8)
+            
+            # Handle run_id for new session
+            if run_id:
+                session_run_id = run_id
+            else:
+                session_run_id = cls.generate_base_id(f"run_{operation}", True, 8)
+                
+            session_request_id = cls.generate_base_id("req", True, 8)
+            
+            # Store session
+            cls._active_sessions[session_key] = {
+                "user_id": user_id,
+                "thread_id": session_thread_id,
+                "run_id": session_run_id,
+                "created_at": int(time.time() * 1000),
+                "last_activity": int(time.time() * 1000),
+                "operation": operation
+            }
+            
+            return {
+                "thread_id": session_thread_id,
+                "run_id": session_run_id,
+                "request_id": session_request_id
+            }
+    
+    @classmethod
+    def get_existing_session(cls, user_id: str, thread_id: str) -> Optional[Dict[str, str]]:
+        """Get existing session without creating new one.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            
+        Returns:
+            Session identifiers if exists, None otherwise
+        """
+        with cls._session_lock:
+            session_key = f"{user_id}:{thread_id}"
+            if session_key in cls._active_sessions:
+                existing_session = cls._active_sessions[session_key]
+                existing_session["last_activity"] = int(time.time() * 1000)
+                return {
+                    "thread_id": existing_session["thread_id"],
+                    "run_id": existing_session["run_id"],
+                    "request_id": cls.generate_base_id("req", True, 8)
+                }
+            return None
+    
+    @classmethod
+    def cleanup_expired_sessions(cls, max_age_hours: int = 24) -> int:
+        """Clean up expired sessions to prevent memory leaks.
+        
+        Args:
+            max_age_hours: Maximum age of sessions in hours
+            
+        Returns:
+            Number of sessions cleaned up
+        """
+        with cls._session_lock:
+            current_time = int(time.time() * 1000)
+            max_age_ms = max_age_hours * 60 * 60 * 1000
+            
+            expired_keys = []
+            for session_key, session_data in cls._active_sessions.items():
+                age = current_time - session_data["last_activity"]
+                if age > max_age_ms:
+                    expired_keys.append(session_key)
+            
+            for key in expired_keys:
+                del cls._active_sessions[key]
+                
+            return len(expired_keys)
+    
+    @classmethod
+    def get_active_sessions_count(cls) -> int:
+        """Get count of active sessions for monitoring.
+        
+        Returns:
+            Number of active sessions
+        """
+        with cls._session_lock:
+            return len(cls._active_sessions)
+    
+    @classmethod
+    def invalidate_user_sessions(cls, user_id: str) -> int:
+        """Invalidate all sessions for a specific user.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            Number of sessions invalidated
+        """
+        with cls._session_lock:
+            keys_to_remove = [key for key in cls._active_sessions.keys() 
+                             if key.startswith(f"{user_id}:")]
+            
+            for key in keys_to_remove:
+                del cls._active_sessions[key]
+                
+            return len(keys_to_remove)
 
 
 # Convenience functions for common use cases

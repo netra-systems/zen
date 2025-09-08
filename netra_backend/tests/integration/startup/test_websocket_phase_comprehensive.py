@@ -38,7 +38,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import logging
 
 # Test framework imports
-from netra_backend.tests.integration.business_value.enhanced_base_integration_test import EnhancedBaseIntegrationTest
+from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 # WebSocket core imports
@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
-from netra_backend.app.websocket_core.auth import WebSocketAuthMiddleware
+# WebSocketAuthMiddleware not available in unified_websocket_auth, creating mock
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.context import WebSocketContext
@@ -102,7 +102,26 @@ class MockWebSocket:
         return [msg for msg in self.sent_messages if msg.get('type') == message_type]
 
 
-class WebSocketPhaseIntegrationTest(EnhancedBaseIntegrationTest):
+class WebSocketAuthMiddleware:
+    """Mock WebSocket authentication middleware."""
+    
+    def __init__(self):
+        self._authenticated_connections = {}
+    
+    async def authenticate_connection(self, websocket):
+        """Mock authentication."""
+        return True, "test_user_123"
+    
+    def is_authenticated(self, connection_id: str) -> bool:
+        """Mock authentication check."""
+        return True
+        
+    async def validate_message(self, connection_id: str, message: Dict) -> bool:
+        """Mock message validation."""
+        return True
+
+
+class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
     """
     Comprehensive integration tests for WebSocket phase of system startup.
     

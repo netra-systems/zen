@@ -18,6 +18,31 @@ from netra_backend.app.db.observability_metrics import (
     MetricsStorage,
     MetricsSummaryBuilder,
 )
+
+
+class ObservabilityCore:
+    """Core observability coordination class - main interface for database monitoring."""
+    
+    def __init__(self):
+        """Initialize observability core with all components."""
+        self.alert_orchestrator = AlertOrchestrator()
+        self.metrics_collector = MetricsCollectionOrchestrator()
+        self.cycle_manager = MonitoringCycleManager()
+        self.metrics_storage = MetricsStorage()
+        self.summary_builder = MetricsSummaryBuilder()
+    
+    async def initialize_monitoring(self) -> None:
+        """Initialize all monitoring systems."""
+        await self.metrics_collector.initialize()
+        await self.alert_orchestrator.initialize()
+    
+    async def collect_all_metrics(self) -> DatabaseMetrics:
+        """Collect all database metrics."""
+        return await self.metrics_collector.collect_metrics()
+    
+    async def check_alerts(self, metrics: DatabaseMetrics) -> None:
+        """Check and process any alerts based on metrics."""
+        await self.alert_orchestrator.process_metrics(metrics)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.user_context_extractor import get_user_con
 logger = central_logger.get_logger(__name__)
 router = APIRouter(tags=["Messages"])
 
+
 # Security
 security = HTTPBearer()
 
@@ -339,19 +340,22 @@ async def stream_chat(
     Business Value: $120K+ MRR investor demo capability
     """
     from fastapi.responses import StreamingResponse
-    from netra_backend.app.dependencies import get_request_scoped_supervisor_dependency
-    from netra_backend.app.agents.supervisor.user_execution_context import create_user_execution_context
+    from netra_backend.app.core.supervisor_factory import create_streaming_supervisor
     
     try:
         logger.info(f"Starting chat stream for user {current_user[:8]}... in thread {request.thread_id}")
         
-        # Get request-scoped supervisor
-        supervisor_dep = get_request_scoped_supervisor_dependency()
-        supervisor = await supervisor_dep(None)  # Request will be None in streaming context
+        # Create streaming supervisor without FastAPI request dependency
+        supervisor = await create_streaming_supervisor(
+            user_id=current_user,
+            thread_id=request.thread_id
+        )
         
         async def generate_chat_stream():
             """Generate streaming chat response with agent execution."""
-            run_id = str(uuid4())
+            # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for run_id generation
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
             
             try:
                 # Send initial connection confirmation
@@ -359,7 +363,7 @@ async def stream_chat(
                 
                 # Create message and store it
                 message = MessageResponse(
-                    id=str(uuid4()),
+                    id=UnifiedIdGenerator.generate_base_id("msg"),
                     content=request.content,
                     user_id=current_user,
                     thread_id=request.thread_id,
@@ -415,7 +419,7 @@ async def stream_chat(
                     
                     # Create assistant response message
                     assistant_message = MessageResponse(
-                        id=str(uuid4()),
+                        id=UnifiedIdGenerator.generate_base_id("msg"),
                         content=response_content,
                         user_id="assistant",
                         thread_id=request.thread_id,
@@ -447,8 +451,54 @@ async def stream_chat(
                 # Emit error event
                 yield f"data: {json.dumps({'type': 'error', 'run_id': run_id, 'error': str(stream_error), 'timestamp': datetime.now(timezone.utc).isoformat()})}\n\n"
         
+        # Create timeout-protected streaming generator
+        async def timeout_protected_stream():
+            """Generate streaming response with timeout protection."""
+            try:
+                # Use asyncio.wait_for with 30-second timeout for streaming operations
+                async for chunk in asyncio.wait_for(
+                    generate_chat_stream(), 
+                    timeout=30.0  # 30-second timeout protection
+                ):
+                    yield chunk
+                    
+            except asyncio.TimeoutError:
+                logger.error(
+                    f"🚨 STREAMING TIMEOUT: Chat stream timed out after 30 seconds for user {current_user[:8]}..., "
+                    f"thread {request.thread_id[:8]}... - This indicates potential system overload or infinite loops"
+                )
+                
+                # Send timeout error event to client
+                timeout_event = {
+                    'type': 'timeout_error',
+                    'error': 'Streaming response timed out after 30 seconds',
+                    'user_id': current_user,
+                    'thread_id': request.thread_id,
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'troubleshooting': 'This may indicate system overload or processing issues. Please try again.'
+                }
+                yield f"data: {json.dumps(timeout_event)}\n\n"
+                
+            except Exception as stream_outer_error:
+                logger.error(
+                    f"🚨 STREAMING ERROR: Outer streaming error for user {current_user[:8]}...: {stream_outer_error}",
+                    exc_info=True
+                )
+                
+                # Send comprehensive error event to client
+                error_event = {
+                    'type': 'streaming_error',
+                    'error': str(stream_outer_error),
+                    'error_type': type(stream_outer_error).__name__,
+                    'user_id': current_user,
+                    'thread_id': request.thread_id,
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'debug_info': 'Check server logs for detailed error information'
+                }
+                yield f"data: {json.dumps(error_event)}\n\n"
+
         return StreamingResponse(
-            generate_chat_stream(),
+            timeout_protected_stream(),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -460,10 +510,30 @@ async def stream_chat(
         )
         
     except Exception as e:
-        logger.error(f"Failed to create chat stream for user {current_user}: {e}", exc_info=True)
+        logger.error(
+            f"🚨 CRITICAL STREAMING FAILURE: Failed to create chat stream for user {current_user[:8]}..., "
+            f"thread {request.thread_id[:8]}..., error: {e}. "
+            f"Error type: {type(e).__name__}. "
+            f"This indicates a fundamental streaming infrastructure issue that prevents investor demo functionality.",
+            exc_info=True
+        )
+        
+        # Enhanced error context for debugging
+        error_context = {
+            "user_id": current_user[:8] + "...",
+            "thread_id": request.thread_id[:8] + "...", 
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "endpoint": "/messages/stream",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "business_impact": "Prevents $120K+ MRR investor demo capability"
+        }
+        
+        logger.error(f"STREAMING ERROR CONTEXT: {json.dumps(error_context, indent=2)}")
+        
         raise HTTPException(
             status_code=500,
-            detail="Failed to create chat stream"
+            detail=f"Failed to create chat stream: {type(e).__name__}: {str(e)}"
         )
 
 # Agent Lifecycle Control Endpoints

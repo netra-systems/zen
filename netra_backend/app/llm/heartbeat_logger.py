@@ -26,7 +26,8 @@ class HeartbeatLogger:
 
     def generate_correlation_id(self) -> str:
         """Generate unique correlation ID for tracking."""
-        return str(uuid.uuid4())
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        return UnifiedIdGenerator.generate_base_id("llm_heartbeat")
 
     def start_heartbeat(self, correlation_id: str, agent_name: str) -> None:
         """Start heartbeat logging for an LLM operation."""

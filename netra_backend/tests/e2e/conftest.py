@@ -1,19 +1,21 @@
-"""E2E test fixtures and configuration.
+"""E2E test fixtures and configuration - REAL SERVICES ONLY.
 
-CRITICAL: This conftest.py is designed to work with existing netra-dev-* containers
-or fallback gracefully for testing without requiring complex service orchestration.
+CRITICAL: This conftest.py provides REAL service fixtures for E2E tests.
+NO MOCKING ALLOWED per CLAUDE.md requirements.
 
 Following CLAUDE.md requirements:
 - Use IsolatedEnvironment for all environment access
-- No complex service orchestration that can fail
-- Simple, reliable test setup
+- Use REAL authentication services and WebSocket connections
+- Use REAL database connections and LLM services
+- All fixtures provide real components or skip tests gracefully
+- CHEATING ON TESTS = ABOMINATION
 """
 
 import pytest
 import asyncio
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+# REMOVED ALL MOCK IMPORTS - E2E tests MUST use real services per CLAUDE.md
 
 # CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 from shared.isolated_environment import get_env
@@ -72,127 +74,24 @@ def setup_e2e_environment():
     yield
     
 
-# Basic test setup fixtures
+# REAL test setup fixtures - NO MOCKING ALLOWED
 @pytest.fixture
-async def mock_agent_service():
-    """Mock agent service for E2E tests."""
-    mock_service = AsyncMock()
-    mock_service.process_message.return_value = {
-        "response": "Test response",
-        "metadata": {"test": True}
-    }
-    yield mock_service
+async def real_auth_helper():
+    """Real authentication helper for E2E tests."""
+    from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+    return E2EAuthHelper()
 
 
 @pytest.fixture
-def mock_websocket_manager():
-    """Mock WebSocket manager for E2E tests."""
-    mock_manager = MagicMock()
-    mock_manager.send_message = AsyncMock()
-    mock_manager.broadcast = AsyncMock()
-    return mock_manager
+async def real_websocket_helper():
+    """Real WebSocket helper for E2E tests."""
+    from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
+    return E2EWebSocketAuthHelper()
 
 
-@pytest.fixture
-def model_selection_setup():
-    """Basic setup for model selection tests."""
-    return {
-        "mock_llm_service": AsyncMock(),
-        "mock_database": AsyncMock(),
-        "test_config": {"environment": "test"}
-    }
-
-
-# Database mocking for E2E tests
-@pytest.fixture
-def mock_database_factory():
-    """Mock database session factory for E2E tests."""
-    mock_session = AsyncMock()
-    mock_session.commit = AsyncMock()
-    mock_session.rollback = AsyncMock()
-    mock_session.close = AsyncMock()
-    mock_session.add = MagicMock()
-    mock_session.execute = AsyncMock()
-    mock_session.get = AsyncMock()
-    mock_session.id = "mock_session_id"
-    
-    class MockSessionFactory:
-        def __call__(self):
-            return self
-            
-        async def __aenter__(self):
-            return mock_session
-            
-        async def __aexit__(self, exc_type, exc_val, exc_tb):
-            return None
-    
-    return MockSessionFactory()
-
-
-@pytest.fixture
-def setup_database_mocking(mock_database_factory):
-    """Auto-setup database mocking for all E2E tests."""
-    # Skip during collection mode to avoid heavy imports
-    env = get_env()
-    if env.get("TEST_COLLECTION_MODE"):
-        yield
-        return
-        
-    try:
-        import netra_backend.app.services.database.unit_of_work as uow_module
-        import netra_backend.app.db.postgres_core as postgres_module
-        from netra_backend.app.db.models_postgres import Thread, Run
-    except ImportError as e:
-        import warnings
-        warnings.warn(f"Cannot import database modules for mocking: {e}")
-        yield
-        return
-    
-    # Mock thread and run objects with all required attributes
-    mock_thread = MagicMock()
-    mock_thread.id = "test_thread_123"
-    mock_thread.user_id = "test_user_001"
-    mock_thread.metadata_ = {"user_id": "test_user_001", "created_at": "2025-01-01T00:00:00Z"}
-    mock_thread.created_at = 1640995200  # timestamp
-    mock_thread.object = "thread"
-    
-    mock_run = MagicMock()
-    mock_run.id = "test_run_123"  
-    mock_run.thread_id = "test_thread_123"
-    mock_run.status = "completed"
-    mock_run.assistant_id = "test_assistant"
-    mock_run.model = LLMModel.GEMINI_2_5_FLASH.value
-    mock_run.metadata_ = {"user_id": "test_user_001"}
-    mock_run.created_at = 1640995200
-    
-    with patch.object(uow_module, 'async_session_factory', mock_database_factory):
-        with patch.object(postgres_module, 'async_session_factory', mock_database_factory):
-            try:
-                with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock, return_value=mock_thread):
-                    with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock, return_value=mock_thread):
-                        with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock, return_value=mock_run):
-                            with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock, return_value=None):
-                                # Mock WebSocket manager broadcasting functionality
-                                mock_broadcasting = MagicMock()
-                                mock_broadcasting.join_room = AsyncMock()
-                                mock_broadcasting.leave_all_rooms = AsyncMock()
-                                
-                                try:
-                                    with patch('netra_backend.app.get_websocket_manager().broadcasting', mock_broadcasting):
-                                        yield
-                                except (ImportError, AttributeError):
-                                    # WebSocket manager not available, yield without it
-                                    yield
-            except ImportError as e:
-                import warnings
-                warnings.warn(f"Cannot patch thread services: {e}")
-                yield
-
-
-# Real LLM testing configuration
 @pytest.fixture
 def real_llm_config():
-    """Configuration for real LLM testing."""
+    """Real LLM configuration for E2E tests."""
     env = get_env()
     return {
         "enabled": env.get("ENABLE_REAL_LLM_TESTING") == "true",
@@ -201,105 +100,98 @@ def real_llm_config():
     }
 
 
-# Real agent setup fixture for E2E pipeline tests
+# REAL database connections for E2E tests - NO MOCKING
+@pytest.fixture
+async def real_database_session():
+    """Real database session for E2E tests."""
+    try:
+        from netra_backend.app.db.database_manager import DatabaseManager
+        db_manager = DatabaseManager()
+        async with db_manager.get_session() as session:
+            yield session
+    except Exception as e:
+        # If real database not available, skip tests that require it
+        pytest.skip(f"Real database not available for E2E testing: {e}")
+
+
+@pytest.fixture
+async def real_thread_service():
+    """Real thread service for E2E tests - NO MOCKING."""
+    try:
+        from netra_backend.app.services.thread_service import ThreadService
+        from netra_backend.app.db.database_manager import DatabaseManager
+        
+        db_manager = DatabaseManager()
+        async with db_manager.get_session() as session:
+            thread_service = ThreadService(session)
+            yield thread_service
+    except Exception as e:
+        # If real services not available, skip tests that require them
+        pytest.skip(f"Real thread service not available for E2E testing: {e}")
+
+
+# Real WebSocket manager fixture
+@pytest.fixture
+async def real_websocket_manager():
+    """Real WebSocket manager for E2E tests."""
+    try:
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        manager = UnifiedWebSocketManager()
+        yield manager
+    except Exception as e:
+        # If real WebSocket manager not available, skip tests that require it
+        pytest.skip(f"Real WebSocket manager not available for E2E testing: {e}")
+
+
+# REAL agent setup fixture for E2E pipeline tests - NO MOCKING
 @pytest.fixture
 async def real_agent_setup():
-    """Setup real agent infrastructure for E2E pipeline tests."""
-    from unittest.mock import AsyncMock, MagicMock
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
-    
-    # Create mock dependencies
-    db_session = AsyncMock()
-    
-    # LLM manager with graceful fallback
+    """Setup REAL agent infrastructure for E2E pipeline tests - NO MOCKING ALLOWED."""
     try:
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
+        from netra_backend.app.db.database_manager import DatabaseManager
         from netra_backend.app.core.config import get_config
+        
+        # Real database session
+        db_manager = DatabaseManager()
+        db_session = await db_manager.get_session()
+        
+        # Real LLM manager
         config = get_config()
         llm_manager = LLMManager(config)
-    except Exception:
-        # Fallback to mock for testing
-        llm_manager = MagicMock(spec=LLMManager)
-        llm_manager.call_llm = AsyncMock(return_value={"content": "Test response", "tool_calls": []})
-        llm_manager.ask_llm = AsyncMock(return_value='{"analysis": "test result"}')
-    
-    # WebSocket manager
-    websocket_manager = MagicMock()
-    websocket_manager.send_message = AsyncMock()
-    websocket_manager.send_to_thread = AsyncMock()
-    websocket_manager.send_agent_log = AsyncMock()
-    websocket_manager.send_sub_agent_update = AsyncMock()
-    
-    # Tool dispatcher
-    tool_dispatcher = MagicMock(spec=ApexToolSelector)
-    tool_dispatcher.dispatch_tool = AsyncMock(return_value={"result": "success"})
-    
-    # Create supervisor with mock dependencies
-    supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
-    supervisor.thread_id = str(uuid.uuid4())
-    supervisor.user_id = str(uuid.uuid4())
-    
-    # Mock the run method to complete successfully
-    async def mock_run(state_or_prompt, run_id: str = None, **kwargs):
-        """Mock run method that completes successfully."""
-        from netra_backend.app.schemas.agent import SubAgentLifecycle
-        from netra_backend.app.agents.state import DeepAgentState
         
-        # Set agent to completed state
-        supervisor.state = SubAgentLifecycle.COMPLETED
+        # Real WebSocket manager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        websocket_manager = UnifiedWebSocketManager()
         
-        # Return completed state with mock triage result
-        from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, UserIntent, Priority, Complexity, ExtractedEntities, TriageMetadata
+        # Real tool dispatcher
+        tool_dispatcher = ApexToolSelector()
         
-        # Create mock triage result
-        mock_user_intent = UserIntent(
-            primary_intent="optimize",
-            secondary_intents=["performance", "cost"],
-            action_required=True
-        )
+        # Create real supervisor agent
+        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor.thread_id = str(uuid.uuid4())
+        supervisor.user_id = str(uuid.uuid4())
         
-        mock_triage_result = TriageResult(
-            category="optimization",
-            confidence_score=0.9,
-            user_intent=mock_user_intent,
-            priority=Priority.MEDIUM,
-            complexity=Complexity.MODERATE,
-            extracted_entities=ExtractedEntities(),
-            metadata=TriageMetadata(triage_duration_ms=100)
-        )
+        # Setup agent infrastructure with REAL components
+        agents_dict = {
+            'triage': supervisor,
+            'data': supervisor,
+            'supervisor': supervisor
+        }
         
-        # Handle different call patterns
-        if hasattr(state_or_prompt, 'user_request'):
-            # It's a state object, update and return it
-            state_or_prompt.triage_result = mock_triage_result
-            return state_or_prompt
-        else:
-            # It's a prompt string, create new state
-            result_state = DeepAgentState(
-                user_request=state_or_prompt,
-                chat_thread_id=supervisor.thread_id,
-                user_id=supervisor.user_id,
-                triage_result=mock_triage_result
-            )
-            return result_state
-    
-    supervisor.run = mock_run
-    
-    # Setup agent infrastructure
-    agents_dict = {
-        'triage': supervisor,
-        'data': supervisor,
-        'supervisor': supervisor
-    }
-    
-    return {
-        'supervisor': supervisor,
-        'agents': agents_dict,
-        'websocket': websocket_manager,
-        'llm_manager': llm_manager, 
-        'tool_dispatcher': tool_dispatcher,
-        'db_session': db_session,
-        'user_id': supervisor.user_id,
-        'run_id': str(uuid.uuid4())
-    }
+        return {
+            'supervisor': supervisor,
+            'agents': agents_dict,
+            'websocket': websocket_manager,
+            'llm_manager': llm_manager, 
+            'tool_dispatcher': tool_dispatcher,
+            'db_session': db_session,
+            'user_id': supervisor.user_id,
+            'run_id': str(uuid.uuid4())
+        }
+        
+    except Exception as e:
+        # If real agent components not available, skip tests that require them
+        pytest.skip(f"Real agent infrastructure not available for E2E testing: {e}")

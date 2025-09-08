@@ -327,7 +327,7 @@ class ToolExecutorFactory:
         
         try:
             # Create test user context
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             test_context = UserExecutionContext(
                 user_id="health_check_user",
                 thread_id="health_check_thread",

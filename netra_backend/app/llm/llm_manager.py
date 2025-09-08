@@ -40,6 +40,9 @@ class LLMManager:
     factory function for proper isolation.
     """
     
+    # Class-level logger for test mocking compatibility - will be overridden per instance
+    _logger = logger
+    
     def __init__(self, user_context: Optional['UserExecutionContext'] = None):
         """
         Initialize LLM Manager with optional user context.
@@ -47,12 +50,16 @@ class LLMManager:
         Args:
             user_context: Optional UserExecutionContext for user-scoped operations
         """
-        from netra_backend.app.models.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
-        self._logger = logger
+        # Create isolated logger instance for this manager to prevent context mixing
+        # Each manager gets its own logger instance for proper factory pattern isolation
+        from netra_backend.app.core.unified_logging import UnifiedLogger
+        self._logger = UnifiedLogger()  # Create separate logger instance for true isolation
         self._config = None
         self._cache: Dict[str, Any] = {}  # User-scoped cache
         self._initialized = False
+        self._ever_initialized = False  # Track if manager has ever been successfully initialized
         self._user_context = user_context
         
         # Log the initialization with security context
@@ -73,10 +80,12 @@ class LLMManager:
             self._config = get_unified_config()
             self._logger.info("LLM Manager initialized successfully")
             self._initialized = True
+            self._ever_initialized = True  # Mark as having been successfully initialized
         except Exception as e:
             self._logger.error(f"Failed to initialize LLM Manager: {e}")
             # Continue with minimal functionality
             self._initialized = True
+            self._ever_initialized = True  # Even failed initialization counts as "attempted"
     
     async def _ensure_initialized(self) -> None:
         """Ensure the manager is initialized."""
@@ -272,14 +281,24 @@ class LLMManager:
         return await self.get_config(config_name)
     
     async def health_check(self) -> Dict[str, Any]:
-        """Perform health check on LLM services."""
-        await self._ensure_initialized()
+        """Perform health check on LLM services.
         
+        This method reports current state without side effects.
+        It does not trigger initialization - use initialize() or _ensure_initialized() explicitly.
+        """        
+        # Get available configs without triggering initialization
+        available_configs = []
+        if self._initialized:
+            available_configs = await self.get_available_models()
+        elif self._config and hasattr(self._config, 'llm_configs'):
+            # If we have config but aren't initialized, list the available configs
+            available_configs = list(self._config.llm_configs.keys())
+            
         return {
-            "status": "healthy" if self._initialized else "unhealthy",
+            "status": "healthy" if self._initialized else "unhealthy", 
             "initialized": self._initialized,
             "cache_size": len(self._cache),
-            "available_configs": await self.get_available_models()
+            "available_configs": available_configs
         }
     
     def clear_cache(self) -> None:
@@ -318,14 +337,14 @@ def create_llm_manager(user_context: 'UserExecutionContext' = None) -> LLMManage
         manager = create_llm_manager(user_context)
         response = await manager.ask_llm("Hello", use_cache=True)
     """
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.logging_config import central_logger
-    logger = central_logger.get_logger(__name__)
+    factory_logger = central_logger.get_logger(f"{__name__}.factory")
     
     if user_context:
-        logger.info(f"Creating LLM Manager for user {user_context.user_id[:8]}...")
+        factory_logger.info(f"Creating LLM Manager for user {user_context.user_id[:8]}...")
     else:
-        logger.warning("Creating LLM Manager without user context - cache isolation may be compromised")
+        factory_logger.warning("Creating LLM Manager without user context - cache isolation may be compromised")
     
     manager = LLMManager(user_context)
     return manager

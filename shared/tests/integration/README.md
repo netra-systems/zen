@@ -1,17 +1,10 @@
-# 🧪 IsolatedEnvironment Integration Test Suite
+# Configuration Management Integration Tests
 
 ## 🚨 MISSION CRITICAL IMPORTANCE
 
-**This test suite validates the MOST CRITICAL module in the entire Netra platform.**
+**This test suite prevents configuration cascade failures that have caused production outages.**
 
-The `IsolatedEnvironment` class is the **Single Source of Truth (SSOT)** for ALL environment variable management across EVERY service. It is used by:
-
-- ✅ **ALL Backend Services** (auth_service, netra_backend, analytics_service)
-- ✅ **ALL Test Infrastructure** (unit, integration, e2e tests)
-- ✅ **ALL Configuration Management** (development, staging, production)
-- ✅ **ALL Multi-User Isolation** (WebSocket connections, agent executions)
-
-**ANY failure in this module cascades to the ENTIRE platform.**
+These tests validate critical configuration management and environment isolation systems that are essential for deployment stability and configuration correctness. Configuration failures have caused complete system outages multiple times.
 
 ## 📋 Business Value Justification (BVJ)
 

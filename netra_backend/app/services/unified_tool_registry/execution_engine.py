@@ -75,7 +75,13 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
         return self._convert_execution_result_to_response(result, tool_name)
     
     def _create_mock_user_for_interface(self) -> User:
-        """Create mock user for interface method compatibility"""
+        """Create mock user for interface method compatibility with SSOT protection."""
+        from shared.test_only_guard import require_test_mode
+        
+        # SSOT Guard: This function should only run in test mode
+        require_test_mode("_create_mock_user_for_interface", 
+                         "Mock user creation should only happen in tests - production should pass proper user context")
+        
         # This is a temporary solution for interface compatibility
         # In production, proper user should be passed through context
         mock_user = User()

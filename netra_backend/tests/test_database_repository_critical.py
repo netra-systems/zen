@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import pytest
 
@@ -45,7 +46,7 @@ class TestDatabaseRepositoryCritical:
     async def test_user_repository_crud(self):
         """Test user repository CRUD operations"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_user_repo = AsyncNone  # TODO: Use real service instance
+        mock_user_repo = AsyncMock()  # TODO: Use real service instance
         
         # Create user
         new_user = MockUser(
@@ -83,7 +84,7 @@ class TestDatabaseRepositoryCritical:
     async def test_thread_repository_operations(self):
         """Test thread repository operations"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_thread_repo = AsyncNone  # TODO: Use real service instance
+        mock_thread_repo = AsyncMock()  # TODO: Use real service instance
         
         # Create thread
         thread_id = str(uuid.uuid4())
@@ -117,7 +118,7 @@ class TestDatabaseRepositoryCritical:
     async def test_message_repository_operations(self):
         """Test message repository operations"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_message_repo = AsyncNone  # TODO: Use real service instance
+        mock_message_repo = AsyncMock()  # TODO: Use real service instance
         
         # Create message
         message_id = str(uuid.uuid4())
@@ -155,15 +156,15 @@ class TestDatabaseRepositoryCritical:
     async def test_transaction_management(self):
         """Test database transaction management"""
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_db_session = AsyncNone  # TODO: Use real service instance
+        mock_db_session = AsyncMock()  # TODO: Use real service instance
         
         # Test successful transaction
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_db_session.add = AsyncNone  # TODO: Use real service instance
+        mock_db_session.add = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_db_session.commit = AsyncNone  # TODO: Use real service instance
+        mock_db_session.commit = AsyncMock()  # TODO: Use real service instance
         # Mock: Database session isolation for transaction testing without real database dependency
-        mock_db_session.rollback = AsyncNone  # TODO: Use real service instance
+        mock_db_session.rollback = AsyncMock()  # TODO: Use real service instance
         
         # Simulate successful transaction
         try:
@@ -197,7 +198,7 @@ class TestDatabaseRepositoryCritical:
     async def test_connection_pool_management(self):
         """Test database connection pool management"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_pool = AsyncNone  # TODO: Use real service instance
+        mock_pool = AsyncMock()  # TODO: Use real service instance
         
         # Configure pool settings
         pool_config = {
@@ -208,13 +209,13 @@ class TestDatabaseRepositoryCritical:
         }
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_pool.configure = AsyncNone  # TODO: Use real service instance
+        mock_pool.configure = AsyncMock()  # TODO: Use real service instance
         await mock_pool.configure(**pool_config)
         mock_pool.configure.assert_called_once_with(**pool_config)
         
         # Test connection acquisition
         # Mock: Generic component isolation for controlled unit testing
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_pool.acquire = AsyncMock(return_value=mock_connection)
         
@@ -240,7 +241,7 @@ class TestDatabaseRepositoryCritical:
     async def test_query_optimization(self):
         """Test query optimization strategies"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_query_optimizer = AsyncNone  # TODO: Use real service instance
+        mock_query_optimizer = AsyncMock()  # TODO: Use real service instance
         
         # Test query with index
         # Mock: Async component isolation for testing without real async operations
@@ -273,7 +274,7 @@ class TestDatabaseRepositoryCritical:
     async def test_migration_execution(self):
         """Test database migration execution"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_migrator = AsyncNone  # TODO: Use real service instance
+        mock_migrator = AsyncMock()  # TODO: Use real service instance
         
         # Test migration up
         # Mock: Async component isolation for testing without real async operations
@@ -301,7 +302,7 @@ class TestDatabaseRepositoryCritical:
     async def test_data_integrity_constraints(self):
         """Test data integrity constraints"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         
         # Test unique constraint
         # Mock: Async component isolation for testing without real async operations
@@ -322,9 +323,9 @@ class TestDatabaseRepositoryCritical:
     async def test_caching_layer(self):
         """Test database caching layer"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_cache = AsyncNone  # TODO: Use real service instance
+        mock_cache = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = AsyncNone  # TODO: Use real service instance
+        mock_db = AsyncMock()  # TODO: Use real service instance
         
         # Test cache hit
         cache_key = "user:1"
@@ -341,7 +342,7 @@ class TestDatabaseRepositoryCritical:
         # Mock: Async component isolation for testing without real async operations
         mock_db.fetch_one = AsyncMock(return_value={"id": 1, "email": "db@example.com"})
         # Mock: Generic component isolation for controlled unit testing
-        mock_cache.set = AsyncNone  # TODO: Use real service instance
+        mock_cache.set = AsyncMock()  # TODO: Use real service instance
         
         # Simulate cache miss
         cached = await mock_cache.get("user:2")
@@ -354,7 +355,7 @@ class TestDatabaseRepositoryCritical:
     async def test_bulk_operations(self):
         """Test bulk database operations"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_bulk_ops = AsyncNone  # TODO: Use real service instance
+        mock_bulk_ops = AsyncMock()  # TODO: Use real service instance
         
         # Test bulk insert
         data = [{"name": f"Item {i}", "value": i} for i in range(1000)]

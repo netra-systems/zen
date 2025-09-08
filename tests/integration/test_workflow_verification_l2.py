@@ -20,18 +20,20 @@ import pytest
 
 # Add scripts directory to path
 
-# REMOVED_SYNTAX_ERROR: from verify_workflow_status import ( )
+# Import workflow verification components
+from scripts.verify_workflow_status import (
+    CLIHandler,
+    GitHubAPIError,
+    OutputFormatter,
+    VerificationConfig,
+    WorkflowRun,
+    WorkflowStatusVerifier,
+    create_config_from_args
+)
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 import asyncio
-CLIHandler,
-GitHubAPIError,
-OutputFormatter,
-VerificationConfig,
-WorkflowRun,
-WorkflowStatusVerifier,
-create_config_from_args
 
 
 # REMOVED_SYNTAX_ERROR: class TestWorkflowRun:

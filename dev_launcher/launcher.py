@@ -1315,7 +1315,9 @@ class DevLauncher:
             self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
             return 0
         except Exception as e:
-            logger.error(f"Service startup failed: {e}")
+            error_type = type(e).__name__
+            startup_error_code = f"SERVICE_STARTUP_{error_type.upper()}"
+            logger.error(f"ERROR [{startup_error_code}] Service startup failed: {error_type} - {str(e)[:200]}")
             return 1
     
     async def _execute_spec_startup_sequence(self) -> bool:
@@ -2423,7 +2425,9 @@ class DevLauncher:
             else:
                 self._print("❌", "BACKEND", "Backend service failed to start")
         except Exception as e:
-            logger.error(f"Backend startup error: {e}")
+            error_type = type(e).__name__
+            startup_error_code = f"BACKEND_STARTUP_{error_type.upper()}"
+            logger.error(f"ERROR [{startup_error_code}] Backend service startup failure: {error_type} - {str(e)[:200]}")
         
         try:
             # Start auth service
@@ -2435,7 +2439,9 @@ class DevLauncher:
             else:
                 self._print("❌", "AUTH", "Auth service failed to start")
         except Exception as e:
-            logger.error(f"Auth startup error: {e}")
+            error_type = type(e).__name__
+            startup_error_code = f"AUTH_STARTUP_{error_type.upper()}"
+            logger.error(f"ERROR [{startup_error_code}] Auth service startup failure: {error_type} - {str(e)[:200]}")
         
         return backend_success, auth_success
     
@@ -2459,7 +2465,9 @@ class DevLauncher:
                 self._print("❌", "FRONTEND", "Frontend service failed to start")
                 return False
         except Exception as e:
-            logger.error(f"Frontend startup error: {e}")
+            error_type = type(e).__name__
+            startup_error_code = f"FRONTEND_STARTUP_{error_type.upper()}"
+            logger.error(f"ERROR [{startup_error_code}] Frontend service startup failure: {error_type} - {str(e)[:200]}")
             return False
     
     async def _wait_for_frontend_readiness_async(self) -> bool:

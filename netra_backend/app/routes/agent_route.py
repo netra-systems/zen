@@ -17,10 +17,9 @@ from netra_backend.app.dependencies import (
     RequestScopedContextDep,
     RequestScopedSupervisorDep,
     get_request_scoped_supervisor_dependency,
-    create_user_execution_context,
     get_request_scoped_user_context
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.routes.agent_route_processors import (
     execute_message_processing,
@@ -310,13 +309,11 @@ async def process_agent_message(
     try:
         logger.info(f"Processing message with UserExecutionContext for user {context.user_id}")
         
-        # Create UserExecutionContext for the message processing
-        user_context = create_user_execution_context(
+        # Get UserExecutionContext using session management for conversation continuity
+        user_context = get_user_execution_context(
             user_id=context.user_id,
             thread_id=request.thread_id or context.thread_id,
-            run_id=context.run_id,
-            db_session=db,
-            websocket_connection_id=context.websocket_connection_id
+            run_id=context.run_id
         )
         
         # Process message using supervisor with proper context
@@ -354,13 +351,11 @@ async def stream_response(
     """
     logger.info(f"Creating streaming response with UserExecutionContext for user {context.user_id}")
     
-    # Create UserExecutionContext for the streaming request
-    user_context = create_user_execution_context(
+    # Get UserExecutionContext using session management for conversation continuity
+    user_context = get_user_execution_context(
         user_id=context.user_id,
         thread_id=context.thread_id,
-        run_id=request_model.id or context.run_id,
-        db_session=db,
-        websocket_connection_id=context.websocket_connection_id
+        run_id=request_model.id or context.run_id
     )
     
     # Create a streaming response that uses the request-scoped supervisor

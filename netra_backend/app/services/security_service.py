@@ -103,7 +103,9 @@ class SecurityService:
         db_session.add(db_user)
         await db_session.commit()
         await db_session.refresh(db_user)
-        return schemas.User.model_validate(db_user)
+        # Use core_models.User explicitly to avoid ExtendedUser alias conflict
+        from netra_backend.app.schemas.core_models import User as CoreUser
+        return CoreUser.model_validate(db_user)
 
     async def authenticate_user(self, db_session: AsyncSession, email: str, password: str) -> Optional[models_postgres.User]:
         user = await self.get_user(db_session, email)
@@ -140,7 +142,9 @@ class SecurityService:
         user.picture = user_info.get("picture", user.picture)
         await db_session.commit()
         await db_session.refresh(user)
-        return schemas.User.model_validate(user)
+        # Use core_models.User explicitly to avoid ExtendedUser alias conflict
+        from netra_backend.app.schemas.core_models import User as CoreUser
+        return CoreUser.model_validate(user)
 
     async def _create_new_oauth_user(self, db_session: AsyncSession, user_info: dict) -> schemas.User:
         """Create new user from OAuth data."""

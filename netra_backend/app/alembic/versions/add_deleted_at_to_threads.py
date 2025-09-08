@@ -24,23 +24,23 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Add deleted_at column to threads table."""
-    # Check if column already exists before adding
-    conn = op.get_bind()
-    inspector = sa.inspect(conn)
-    
-    # Get columns for threads table
-    columns = []
+    # Use try/except for both online and offline mode compatibility
     try:
-        columns = [col['name'] for col in inspector.get_columns('threads')]
+        # This works for online mode - check if column exists
+        conn = op.get_bind()
+        if hasattr(conn, 'dialect') and not hasattr(conn, 'mock'):  # Not in offline mode
+            inspector = sa.inspect(conn)
+            columns = [col['name'] for col in inspector.get_columns('threads')]
+            if 'deleted_at' in columns:
+                return  # Column already exists
     except Exception:
-        # Table might not exist
+        # In offline mode or if table doesn't exist, just add the column
         pass
     
-    # Add deleted_at column if it doesn't exist
-    if 'deleted_at' not in columns:
-        op.add_column('threads', 
-            sa.Column('deleted_at', sa.DateTime(), nullable=True)
-        )
+    # Add deleted_at column (safe to run multiple times in production)
+    op.add_column('threads', 
+        sa.Column('deleted_at', sa.DateTime(), nullable=True)
+    )
 
 
 def downgrade() -> None:

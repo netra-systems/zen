@@ -15,8 +15,9 @@ from datetime import datetime, UTC
 from typing import Optional, Dict, Any, List
 
 from auth_service.auth_core.models.auth_models import User
-from auth_service.auth_core.database import AuthUserRepository, get_db_session
+from auth_service.auth_core.database import AuthUserRepository
 from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.database.connection import auth_db
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +42,12 @@ class UserService:
         self.database = database
         self._user_repository = None
         
-    @property
-    def user_repository(self) -> AuthUserRepository:
-        """Get or create user repository instance."""
-        if self._user_repository is None:
-            self._user_repository = AuthUserRepository(get_db_session())
-        return self._user_repository
+    async def _get_repository_session(self):
+        """Get a database session for repository operations."""
+        if self.database:
+            return self.database.get_session()
+        else:
+            return auth_db.get_session()
     
     async def create_user(self, email: str, password: str, name: str = None, **kwargs) -> User:
         """
@@ -76,30 +77,36 @@ class UserService:
                 bcrypt.gensalt(rounds=self.auth_config.get_bcrypt_rounds())
             ).decode('utf-8')
             
-            # Create user data
-            user_data = {
-                "id": str(uuid.uuid4()),
-                "email": email,
-                "name": name or email.split('@')[0],
-                "password_hash": password_hash,
-                "is_active": True,
-                "created_at": datetime.now(UTC),
-                "updated_at": datetime.now(UTC),
-                **kwargs
-            }
-            
-            # Create user in database
-            created_user = await self.user_repository.create(user_data)
-            
-            # Convert to User model
-            return User(
-                id=created_user.id,
-                email=created_user.email,
-                name=created_user.name,
-                is_active=created_user.is_active,
-                created_at=created_user.created_at,
-                updated_at=created_user.updated_at
-            )
+            # Create user in database using session context
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                
+                # Create user data
+                from auth_service.auth_core.database.models import AuthUser
+                
+                user_data = AuthUser(
+                    id=str(uuid.uuid4()),
+                    email=email,
+                    full_name=name or email.split('@')[0],
+                    hashed_password=password_hash,
+                    is_active=True,
+                    created_at=datetime.now(UTC),
+                    updated_at=datetime.now(UTC)
+                )
+                
+                session.add(user_data)
+                await session.commit()
+                await session.refresh(user_data)
+                
+                # Convert to User model
+                return User(
+                    id=user_data.id,
+                    email=user_data.email,
+                    name=user_data.full_name,
+                    is_active=user_data.is_active,
+                    created_at=user_data.created_at,
+                    updated_at=user_data.updated_at
+                )
             
         except Exception as e:
             logger.error(f"Failed to create user {email}: {e}")
@@ -116,18 +123,21 @@ class UserService:
             User instance or None if not found
         """
         try:
-            db_user = await self.user_repository.get_by_email(email)
-            if not db_user:
-                return None
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                db_user = await repository.get_by_email(email)
                 
-            return User(
-                id=db_user.id,
-                email=db_user.email,
-                name=db_user.name,
-                is_active=db_user.is_active,
-                created_at=db_user.created_at,
-                updated_at=db_user.updated_at
-            )
+                if not db_user:
+                    return None
+                    
+                return User(
+                    id=db_user.id,
+                    email=db_user.email,
+                    name=db_user.full_name,
+                    is_active=db_user.is_active,
+                    created_at=db_user.created_at,
+                    updated_at=db_user.updated_at
+                )
             
         except Exception as e:
             logger.error(f"Failed to get user by email {email}: {e}")
@@ -173,25 +183,40 @@ class UserService:
             Authentication result with user data or None if failed
         """
         try:
-            db_user = await self.user_repository.get_by_email(email)
-            if not db_user or not db_user.is_active:
-                return None
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                db_user = await repository.get_by_email(email)
                 
-            # Verify password
-            if not bcrypt.checkpw(password.encode('utf-8'), db_user.password_hash.encode('utf-8')):
-                return None
+                if not db_user or not db_user.is_active:
+                    raise Exception("User not found")
+                    
+                if not db_user.hashed_password:
+                    raise Exception("Invalid credentials")
                 
-            return {
-                "user": User(
-                    id=db_user.id,
+                # Verify password
+                if not bcrypt.checkpw(password.encode('utf-8'), db_user.hashed_password.encode('utf-8')):
+                    raise Exception("Invalid credentials")
+                
+                # Create JWT token (simplified for now)
+                from auth_service.services.jwt_service import JWTService
+                jwt_service = JWTService(self.auth_config)
+                access_token = await jwt_service.create_access_token(
+                    user_id=str(db_user.id),
                     email=db_user.email,
-                    name=db_user.name,
-                    is_active=db_user.is_active,
-                    created_at=db_user.created_at,
-                    updated_at=db_user.updated_at
-                ),
-                "success": True
-            }
+                    permissions=["read", "write"]
+                )
+                
+                return {
+                    "user": User(
+                        id=db_user.id,
+                        email=db_user.email,
+                        name=db_user.full_name,
+                        is_active=db_user.is_active,
+                        created_at=db_user.created_at,
+                        updated_at=db_user.updated_at
+                    ),
+                    "access_token": access_token
+                }
             
         except Exception as e:
             logger.error(f"Failed to authenticate user {email}: {e}")
@@ -209,11 +234,17 @@ class UserService:
             True if password is correct, False otherwise
         """
         try:
-            db_user = await self.user_repository.get_by_id(user_id)
-            if not db_user:
-                return False
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                db_user = await repository.get_by_id(user_id)
                 
-            return bcrypt.checkpw(password.encode('utf-8'), db_user.password_hash.encode('utf-8'))
+                if not db_user:
+                    return False
+                
+                if not db_user.hashed_password:
+                    return False
+                    
+                return bcrypt.checkpw(password.encode('utf-8'), db_user.hashed_password.encode('utf-8'))
             
         except Exception as e:
             logger.error(f"Failed to verify password for user {user_id}: {e}")
@@ -291,7 +322,16 @@ class UserService:
             True if successful, False otherwise
         """
         try:
-            return await self.user_repository.delete(user_id)
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                db_user = await repository.get_by_id(user_id)
+                
+                if not db_user:
+                    return False
+                
+                await session.delete(db_user)
+                await session.commit()
+                return True
             
         except Exception as e:
             logger.error(f"Failed to delete user {user_id}: {e}")

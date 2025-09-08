@@ -36,11 +36,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError
-try:
-    from websockets import InvalidStatusCode
-except ImportError:
-    # For newer versions of websockets where InvalidStatusCode is deprecated
-    InvalidStatusCode = Exception
+from websockets import InvalidStatus
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
@@ -275,7 +271,7 @@ class WebSocketRealConnectionTester:
                 "properly_rejected": True,
                 "rejection_reason": "Connection timeout - service not available"
             }
-        except (ConnectionClosedError, InvalidStatusCode) as e:
+        except (ConnectionClosedError, InvalidStatus) as e:
             return {
                 "properly_rejected": True,
                 "rejection_reason": str(e)

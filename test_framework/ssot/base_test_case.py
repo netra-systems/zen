@@ -39,7 +39,7 @@ import pytest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.unified import (
-    TestResult, TestExecutionState, TestCategory, TestConfiguration
+    TestResult, TestExecutionState, CategoryType, TestConfiguration
 )
 
 
@@ -83,7 +83,7 @@ class SsotTestContext:
     """SSOT test execution context."""
     test_id: str
     test_name: str
-    test_category: TestCategory = TestCategory.UNIT
+    test_category: CategoryType = CategoryType.UNIT
     user_id: Optional[str] = None
     trace_id: Optional[str] = None
     session_id: Optional[str] = None
@@ -494,14 +494,21 @@ class SSotAsyncTestCase(SSotBaseTestCase):
         yield loop
         loop.close()
     
-    async def setup_method(self, method=None):
-        """Async setup method."""
-        # Call the parent's sync setup method directly since async_setup_method just calls it
+    def setup_method(self, method=None):
+        """Setup method for async tests - calls parent sync setup."""
+        # Call the parent's sync setup method directly
         super().setup_method(method)
     
-    async def teardown_method(self, method=None):
-        """Async teardown method."""
-        # Call the parent's sync teardown method directly since async_teardown_method just calls it  
+    def teardown_method(self, method=None):
+        """Teardown method for async tests - calls parent sync teardown."""
+        # Call the parent's sync teardown method directly
+        # But ensure we have the required attributes first
+        if not hasattr(self, '_cleanup_callbacks'):
+            self._cleanup_callbacks = []
+        if not hasattr(self, '_test_context'):
+            self._test_context = None
+        if not hasattr(self, '_original_env_state'):
+            self._original_env_state = None
         super().teardown_method(method)
     
     async def wait_for_condition(
@@ -550,6 +557,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
 # Aliases migrated to SSOT patterns - use SSotBaseTestCase directly
 BaseTestCase = SSotBaseTestCase
 AsyncTestCase = SSotAsyncTestCase
+BaseIntegrationTest = SSotBaseTestCase  # Legacy alias for integration tests
 
 # Legacy compatibility classes removed - use SSotBaseTestCase directly
 
@@ -566,6 +574,7 @@ __all__ = [
     # SSOT Aliases
     "BaseTestCase",
     "AsyncTestCase",
+    "BaseIntegrationTest",  # Legacy alias for integration tests
     
     # Legacy compatibility classes removed
     

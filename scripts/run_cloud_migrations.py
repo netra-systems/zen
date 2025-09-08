@@ -27,6 +27,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from shared.isolated_environment import get_env
+# Import Windows encoding SSOT
+from shared.windows_encoding import setup_windows_encoding
+
+# Fix Unicode encoding issues on Windows - using SSOT
+setup_windows_encoding()
 
 
 class MigrationRunner:
@@ -60,7 +65,7 @@ class MigrationRunner:
         # Build the image
         build_cmd = [
             self.docker_cmd, "build",
-            "-f", "docker/migrations.alpine.Dockerfile",
+            "-f", "docker/migration.alpine.Dockerfile",
             "-t", self.image_name,
             "."
         ]
@@ -102,8 +107,8 @@ class MigrationRunner:
             "--memory", "512Mi",
             "--cpu", "1",
             "--max-retries", "1",
-            "--timeout", "600",
-            "--service-account", f"netra-backend@{self.project_id}.iam.gserviceaccount.com"
+            "--task-timeout", "600",
+            "--service-account", f"netra-staging-deploy@{self.project_id}.iam.gserviceaccount.com"
         ]
         
         # Add environment-specific secrets
@@ -120,6 +125,13 @@ class MigrationRunner:
         
         # Add environment variable
         job_cmd.extend(["--set-env-vars", f"ENVIRONMENT={self.environment.upper()}"])
+        
+        # CRITICAL: Add Cloud SQL connection for staging deployment compatibility
+        # This fixes the "No such file or directory" socket connection error
+        cloud_sql_instance = f"{self.project_id}:us-central1:{self.environment}-shared-postgres"
+        job_cmd.extend(["--set-cloudsql-instances", cloud_sql_instance])
+        
+        print(f"🔌 Configuring Cloud SQL connection: {cloud_sql_instance}")
         
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         

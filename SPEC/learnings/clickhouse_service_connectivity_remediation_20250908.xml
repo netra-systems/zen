@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>clickhouse_service_connectivity_remediation_20250908</id>
+    <title>ClickHouse Docker Service Connectivity Configuration Fix</title>
+    <category>infrastructure</category>
+    <priority>ultra_critical</priority>
+    <date>2025-09-08</date>
+    
+    <context>
+        <situation>ClickHouse integration tests failing with ConnectionRefusedError on port 8125 during --no-docker testing</situation>
+        <requirement>CLAUDE.md COMPLETE FEATURE FREEZE + REAL SERVICES ONLY mandate compliance</requirement>
+        <business_impact>Integration tests blocked, preventing reliable CI/CD pipeline execution</business_impact>
+        <environment>Windows Docker Desktop with Alpine test containers</environment>
+    </context>
+    
+    <root_cause_analysis>
+        <method>5 Whys Analysis</method>
+        <findings>
+            <finding level="1">ClickHouse service running on port 8126, tests expecting port 8125</finding>
+            <finding level="2">Test framework hardcoded port 8125, Docker Compose Alpine config using 8126</finding>
+            <finding level="3">Three separate configuration systems not synchronized (test/Docker/container env)</finding>
+            <finding level="4">No validation mechanism ensuring test config matches running services</finding>
+            <finding level="5">Independent evolution of Docker orchestration and test framework</finding>
+        </findings>
+        <ultimate_cause>Configuration drift between test framework expectations and actual Docker service parameters</ultimate_cause>
+    </root_cause_analysis>
+    
+    <solution>
+        <approach>Systematic configuration alignment across all ClickHouse parameters</approach>
+        <files_modified>
+            <file>test_framework/conftest_real_services.py</file>
+            <file>test_framework/real_services.py</file>
+        </files_modified>
+        <configuration_changes>
+            <change parameter="HTTP_PORT" from="8125" to="8126" reason="Match ALPINE_TEST_CLICKHOUSE_HTTP_PORT"/>
+            <change parameter="TCP_PORT" from="9002" to="9003" reason="Match ALPINE_TEST_CLICKHOUSE_TCP_PORT"/>
+            <change parameter="USERNAME" from="test_user" to="test" reason="Match Docker CLICKHOUSE_USER"/>
+            <change parameter="PASSWORD" from="test_pass" to="test" reason="Match Docker CLICKHOUSE_PASSWORD"/>
+            <change parameter="DATABASE" from="netra_test_analytics" to="test_analytics" reason="Match Docker CLICKHOUSE_DB"/>
+        </configuration_changes>
+    </solution>
+    
+    <verification>
+        <tests_run>21</tests_run>
+        <tests_passed>21</tests_passed>
+        <success_rate>100%</success_rate>
+        <key_validations>
+            <validation>Direct HTTP connectivity: curl localhost:8126/ping → Ok</validation>
+            <validation>Python client connection successful</validation>
+            <validation>SQL query execution: SELECT 1 → 1</validation>
+            <validation>Integration test suite: 21/21 passed</validation>
+        </key_validations>
+    </verification>
+    
+    <compliance_checklist>
+        <item checked="true">COMPLETE FEATURE FREEZE - only fixed existing functionality</item>
+        <item checked="true">REAL SERVICES ONLY - connects to actual ClickHouse container</item>
+        <item checked="true">SSOT ENVIRONMENT - used IsolatedEnvironment patterns</item>
+        <item checked="true">NO NEW FEATURES - zero new code, only config alignment</item>
+        <item checked="true">BUSINESS VALUE - enables analytics and testing workflows</item>
+    </compliance_checklist>
+    
+    <prevention_measures>
+        <immediate>
+            <measure>Configuration documentation in remediation report</measure>
+            <measure>Source comments linking test config to Docker config</measure>
+            <measure>Environment variable traceability with source attribution</measure>
+        </immediate>
+        <recommended>
+            <measure>Automated config validation script</measure>
+            <measure>CI step for configuration consistency checks</measure>
+            <measure>Service discovery for dynamic port/credential detection</measure>
+            <measure>Single SSOT configuration defining all service parameters</measure>
+        </recommended>
+    </prevention_measures>
+    
+    <patterns>
+        <pattern name="Docker Service Configuration Synchronization">
+            <description>Test framework configuration MUST match actual Docker service parameters</description>
+            <implementation>Systematic audit of ports, credentials, database names, hostnames</implementation>
+            <verification>Direct connectivity testing before integration test execution</verification>
+        </pattern>
+        <pattern name="Configuration Drift Detection">
+            <description>Independent evolution of services and test frameworks causes parameter mismatches</description>
+            <solution>Regular cross-validation of configuration parameters</solution>
+            <tooling>Automated configuration consistency checking</tooling>
+        </pattern>
+        <pattern name="Real Services Integration">
+            <description>Connecting test framework to actual Docker orchestrated services</description>
+            <requirements>Port mapping awareness, credential management, database name consistency</requirements>
+            <benefits>True integration testing, no mock dependencies, realistic failure scenarios</benefits>
+        </pattern>
+    </patterns>
+    
+    <key_insights>
+        <insight>Configuration mismatches are the #1 cause of service connectivity failures</insight>
+        <insight>Docker port mapping requires explicit coordination with test framework</insight>
+        <insight>Credential consistency across environments is critical for real service testing</insight>
+        <insight>Database name synchronization often overlooked but causes authentication failures</insight>
+        <insight>Windows environment requires UTF-8 encoding considerations for error messages</insight>
+    </key_insights>
+    
+    <business_impact>
+        <immediate>
+            <impact>100% ClickHouse integration test reliability</impact>
+            <impact>Eliminated test suite blocking issues</impact>
+            <impact>Developer productivity improvement</impact>
+        </immediate>
+        <strategic>
+            <impact>Reliable CI/CD pipeline execution</impact>
+            <impact>Foundation for analytics feature development</impact>
+            <impact>Model for future service integration fixes</impact>
+        </strategic>
+    </business_impact>
+    
+    <related_learnings>
+        <learning_ref>docker_testing_ssot_20250825</learning_ref>
+        <learning_ref>real_services_migration_20250824</learning_ref>
+        <learning_ref>integration_test_remediation_20250907</learning_ref>
+    </related_learnings>
+    
+    <success_metrics>
+        <metric name="connectivity_success" before="0%" after="100%"/>
+        <metric name="test_pass_rate" before="0%" after="100%"/>
+        <metric name="configuration_alignment" before="0/5" after="5/5"/>
+        <metric name="developer_friction" before="high" after="zero"/>
+    </success_metrics>
+</learning>

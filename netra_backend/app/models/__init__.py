@@ -10,7 +10,7 @@ All models are imported from their canonical sources to prevent duplication.
 
 from netra_backend.app.models.session import Session, SessionModel
 from netra_backend.app.models.user import User, UserBase, UserCreate, UserCreateOAuth
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.core_models import Message, Thread, ThreadMetadata
 from netra_backend.app.schemas.core_enums import MessageType
 

@@ -366,10 +366,17 @@ async def health_configuration(
             ]
         }
         
-        # Check which services are configured
+        # Check which services are configured using SSOT patterns
+        from shared.database_url_builder import DatabaseURLBuilder
+        
         env_dict = health_manager.env.as_dict()
+        builder = DatabaseURLBuilder(env_dict)
+        
+        # Use DatabaseURLBuilder for PostgreSQL validation
+        postgres_configured = bool(env_dict.get("POSTGRES_HOST")) or (builder.get_url_for_environment() is not None)
+        
         config_info["services_configured"] = {
-            "postgresql": bool(env_dict.get("POSTGRES_HOST") or env_dict.get("DATABASE_URL")),
+            "postgresql": postgres_configured,
             "redis": bool(env_dict.get("REDIS_HOST") or env_dict.get("REDIS_URL")),
             "clickhouse": bool(env_dict.get("CLICKHOUSE_HOST") or env_dict.get("CLICKHOUSE_URL"))
         }
@@ -396,8 +403,9 @@ async def health_configuration(
 
 # Legacy compatibility endpoints
 @router.get("/", response_model=HealthStatus)
+@router.get("", response_model=HealthStatus)  # Handle without trailing slash
 async def health_root(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:
-    """Root health endpoint - redirects to readiness probe."""
+    """Root health endpoint - redirects to readiness probe.""" 
     return await readiness_probe(user=user, force=False)

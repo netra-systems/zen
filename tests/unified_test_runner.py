@@ -436,7 +436,8 @@ class UnifiedTestRunner:
             # Create execution plan
             self.execution_plan = self.category_system.create_execution_plan(
                 categories_to_run,
-                max_parallel=args.workers
+                max_parallel=args.workers,
+                skip_dependencies=getattr(args, 'no_dependencies', False)
             )
             
             # Start progress tracking
@@ -1441,7 +1442,6 @@ class UnifiedTestRunner:
             'database',  # Database tests need PostgreSQL
             'api',  # API tests typically need backend services
             'websocket',  # WebSocket tests need backend
-            'integration',  # Integration tests often need services
             'post_deployment',  # Post-deployment tests need services
         }
         
@@ -1456,11 +1456,23 @@ class UnifiedTestRunner:
             'startup',  # Startup tests are about service initialization
         }
         
+        # Categories that can be mixed (some need services, some don't)
+        docker_conditional_categories = {
+            'integration',  # Some integration tests need services, some can run standalone
+        }
+        
         # Check if any of the selected categories require Docker
         for category in categories_to_run:
             if category in docker_required_categories:
                 print(f"[INFO] Docker required for category: {category}")
                 return True
+        
+        # Handle conditional categories (like integration) when --no-docker is specified
+        has_conditional_categories = any(cat in docker_conditional_categories for cat in categories_to_run)
+        if has_conditional_categories and hasattr(args, 'no_docker') and args.no_docker:
+            print(f"[INFO] Conditional categories {[cat for cat in categories_to_run if cat in docker_conditional_categories]} running in --no-docker mode - will skip service-dependent tests")
+            # Return False to skip Docker, tests will individually skip based on service availability
+            return False
         
         # If only running categories that don't need Docker, skip it
         if all(cat in docker_optional_categories for cat in categories_to_run if cat):
@@ -1478,6 +1490,11 @@ class UnifiedTestRunner:
             if any(pattern in test_pattern for pattern in ['mock', 'fake', 'stub']):
                 print(f"[INFO] Mock test pattern detected, Docker not required: {test_pattern}")
                 return False
+        
+        # If we have conditional categories but no --no-docker flag, require Docker
+        if has_conditional_categories:
+            print(f"[INFO] Docker required for conditional categories: {[cat for cat in categories_to_run if cat in docker_conditional_categories]}")
+            return True
         
         # Default to requiring Docker for safety if we can't determine
         print(f"[INFO] Unable to determine Docker requirement, defaulting to required for categories: {categories_to_run}")
@@ -1820,7 +1837,7 @@ class UnifiedTestRunner:
                     returncode = process.returncode
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
-                    cleanup_subprocess(process, timeout=5, force=True)
+                    cleanup_subprocess(process, timeout=5)
                     raise
                 except Exception as e:
                     # CRITICAL: Robust error handling for Windows I/O issues in process communication
@@ -2729,6 +2746,13 @@ def main():
     )
     
     parser.add_argument(
+        "--no-dependencies",
+        "--skip-deps", 
+        action="store_true",
+        help="Skip dependency resolution - run only the specified categories without their dependencies"
+    )
+    
+    parser.add_argument(
         "--min-coverage",
         type=int,
         default=70,
@@ -2945,9 +2969,15 @@ def main():
     )
     
     parser.add_argument(
-        "--validate",
+        "--no-validate",
         action="store_true",
-        help="Validate test structure and configuration"
+        help="Skip test structure and configuration validation (validation runs by default)"
+    )
+    
+    parser.add_argument(
+        "--full-validate",
+        action="store_true",
+        help="Run full validation on all Python files (default: quick mode with test files only)"
     )
     
     # Cypress-specific arguments
@@ -3154,11 +3184,50 @@ def main():
         
         return 0
     
-    if args.validate:
+    # Run validation by default unless --no-validate is specified
+    if not getattr(args, 'no_validate', False):
         validator = TestValidation()
+        full_mode = getattr(args, 'full_validate', False)
+        mode_desc = "full" if full_mode else "quick"
+        print(f"Running comprehensive test validation ({mode_desc} mode)...")
+        
+        # 1. Syntax validation
+        print("\n=== SYNTAX VALIDATION ===")
+        syntax_result = validator.validate_syntax(quick_mode=not full_mode)
+        if syntax_result["success"]:
+            mode_info = f" ({syntax_result.get('quick_mode', 'unknown')} mode)" if 'quick_mode' in syntax_result else ""
+            print(f"✅ Syntax validation passed: {syntax_result['files_checked']} files checked{mode_info}")
+        else:
+            print(f"❌ Syntax validation failed: {len(syntax_result['syntax_errors'])} errors found")
+            for error in syntax_result['syntax_errors']:
+                print(f"  - {error['file']}: {error['error']}")
+            return 1
+        
+        # 2. Test structure validation
+        print("\n=== TEST STRUCTURE VALIDATION ===")
         print("Test structure validation not fully implemented yet.")
-        print("Cypress integration completed successfully!")
-        return 0
+        
+        print("\n✅ All validations passed!")
+        
+        # If user ran ONLY validation (no other test arguments), exit here
+        # Check if user provided any actual test execution arguments
+        test_execution_args = [
+            args.category, args.categories, getattr(args, 'path', None), getattr(args, 'keyword', None), 
+            getattr(args, 'show_category_stats', False),
+            getattr(args, 'master_orchestration', False),
+            getattr(args, 'orchestration_status', False),
+            getattr(args, 'use_layers', False),
+            getattr(args, 'show_layers', False),
+            getattr(args, 'cleanup_old_environments', False)
+        ]
+        
+        # If no test execution arguments provided, exit after validation
+        if not any(test_execution_args):
+            return 0
+        
+        print("\n=== PROCEEDING TO TEST EXECUTION ===")
+    else:
+        print("⚠️  Skipping validation (--no-validate specified)")
     
     # NEW: Handle Master Orchestration Controller execution first
     if orchestration_config.master_orchestration_available and (

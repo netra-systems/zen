@@ -38,6 +38,7 @@ class TestAuthServiceCoreBusinessValue(BaseIntegrationTest):
         # Business Context: Configuration must support user authentication flows
         isolated_env.set("ENVIRONMENT", "production", "test")
         isolated_env.set("JWT_SECRET_KEY", "test-secret-key-for-testing-only-must-be-at-least-32-chars", "test")
+        isolated_env.set("JWT_ALGORITHM", "HS256", "test")  # Required in production environment
         isolated_env.set("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION", "test-client-id.apps.googleusercontent.com", "test")
         isolated_env.set("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION", "test-client-secret-must-be-long", "test")
         isolated_env.set("FRONTEND_URL", "https://app.netrasystems.ai", "test")
@@ -246,6 +247,7 @@ class TestAuthServiceCoreBusinessValue(BaseIntegrationTest):
         # Business Context: Logging configuration should not expose secrets that could compromise security
         isolated_env.set("ENVIRONMENT", "production", "test")
         isolated_env.set("JWT_SECRET_KEY", "super-secret-jwt-key-must-not-be-logged", "test")
+        isolated_env.set("JWT_ALGORITHM", "HS256", "test")  # Required in production environment
         isolated_env.set("SERVICE_SECRET", "super-secret-service-key-must-not-be-logged", "test")
         isolated_env.set("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION", "super-secret-oauth-secret", "test")
         

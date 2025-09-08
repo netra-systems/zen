@@ -78,6 +78,22 @@ class MockWebSocketManager:
         """Clear all events for next test."""
         self.emitted_events.clear()
         
+    async def send_to_thread(self, thread_id: str, message: dict) -> bool:
+        """Mock send_to_thread method required by AgentWebSocketBridge.
+        
+        This method is required by the AgentWebSocketBridge property setter
+        validation. It captures the message for test verification.
+        """
+        event = {
+            'type': 'thread_message',
+            'thread_id': thread_id,
+            'message': message,
+            'timestamp': time.time()
+        }
+        self.emitted_events.append(event)
+        logger.info(f"MockWebSocket: Sent to thread {thread_id}: {message}")
+        return True
+        
 
 class MockLLMManager:
     """Mock LLM manager for testing without external API calls."""
@@ -163,7 +179,7 @@ class BaseAgentExecutionTest(BaseIntegrationTest):
         if additional_metadata:
             metadata.update(additional_metadata)
             
-        context = UserExecutionContext.from_request(
+        context = UserExecutionContext.from_request_supervisor(
             user_id=self.test_user_id,
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,

@@ -40,13 +40,13 @@ class UnifiedTestHarness:
     def create_mock_service(self, service_name: str) -> MagicMock:
         """Create a mock service."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = MagicNone  # TODO: Use real service instance
+        mock = MagicMock()  # TODO: Use real service instance
         self.register_mock(service_name, mock)
         return mock
         
     def create_async_mock_service(self, service_name: str) -> AsyncMock:
         """Create an async mock service."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = AsyncNone  # TODO: Use real service instance
+        mock = AsyncMock()  # TODO: Use real service instance
         self.register_mock(service_name, mock)
         return mock

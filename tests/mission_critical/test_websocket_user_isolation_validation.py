@@ -32,7 +32,7 @@ from fastapi.websockets import WebSocketState
 
 from netra_backend.app.websocket.connection_handler import ConnectionHandler, ConnectionContext
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

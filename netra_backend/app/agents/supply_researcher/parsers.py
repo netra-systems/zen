@@ -96,8 +96,9 @@ class SupplyRequestParser:
     def _find_provider_match(self, request: str, request_lower: str) -> tuple:
         """Find first matching provider in request"""
         for provider, patterns in self.provider_patterns.items():
-            model_name = self._check_provider_patterns(request, request_lower, patterns)
-            if model_name is not None:
+            found_pattern = self._check_provider_patterns(request, request_lower, patterns)
+            if found_pattern is not None:
+                model_name = self._extract_model_name(request, found_pattern)
                 return provider, model_name
         return None, None
     
@@ -107,10 +108,10 @@ class SupplyRequestParser:
         request_lower: str, 
         patterns: List[str]
     ) -> str | None:
-        """Check if any pattern matches and extract model name"""
+        """Check if any pattern matches and return the pattern"""
         for pattern in patterns:
             if pattern in request_lower:
-                return self._extract_model_name(request, pattern)
+                return pattern
         return None
     
     def _extract_model_name(self, request: str, pattern: str) -> str:

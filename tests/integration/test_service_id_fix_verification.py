@@ -153,7 +153,7 @@ class TestWebSocketAuthFixIntegration:
         
         # Step 4: Simulate user context creation
         try:
-            from netra_backend.app.models.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             from fastapi import WebSocket
             
             # Mock WebSocket for context creation

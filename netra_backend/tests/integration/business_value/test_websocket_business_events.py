@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 from unittest.mock import patch, AsyncMock
 
-from .enhanced_base_integration_test import EnhancedBaseIntegrationTest
+from netra_backend.tests.integration.business_value.enhanced_base_integration_test import EnhancedBaseIntegrationTest
 from test_framework.ssot.websocket import WebSocketEventType, WebSocketTestClient
 
 
