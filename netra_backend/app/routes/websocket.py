@@ -44,7 +44,11 @@ from netra_backend.app.websocket_core import (
     MessageType,
     WebSocketConfig
 )
-from netra_backend.app.websocket_core.utils import is_websocket_connected
+from netra_backend.app.websocket_core.utils import (
+    is_websocket_connected, 
+    is_websocket_connected_and_ready, 
+    validate_websocket_handshake_completion
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -228,6 +232,33 @@ async def websocket_endpoint(websocket: WebSocket):
         else:
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
+        
+        # CRITICAL RACE CONDITION FIX: Progressive post-accept delays for Cloud Run environments
+        # This addresses the core race condition where message handling starts before handshake completion
+        if environment in ["staging", "production"]:
+            # Stage 1: Initial network propagation delay
+            await asyncio.sleep(0.05)  # 50ms for GCP Cloud Run network propagation
+            
+            # Stage 2: Validate that accept() has fully completed
+            if websocket.client_state != WebSocketState.CONNECTED:
+                logger.warning(f"WebSocket not immediately in CONNECTED state after accept() - applying progressive delay")
+                for delay_attempt in range(3):
+                    await asyncio.sleep(0.025 * (delay_attempt + 1))  # 25ms, 50ms, 75ms
+                    if websocket.client_state == WebSocketState.CONNECTED:
+                        logger.info(f"WebSocket reached CONNECTED state after {delay_attempt + 1} delay attempts")
+                        break
+                
+                if websocket.client_state != WebSocketState.CONNECTED:
+                    logger.error(f"WebSocket still not in CONNECTED state after progressive delays: {_safe_websocket_state_for_logging(websocket.client_state)}")
+            
+            # Stage 3: Final stabilization delay
+            await asyncio.sleep(0.025)  # Additional 25ms for Cloud Run stabilization
+            
+            logger.debug(f"Cloud Run post-accept stabilization complete for {environment}")
+        elif environment == "testing":
+            await asyncio.sleep(0.005)  # Minimal 5ms delay for tests
+        else:
+            await asyncio.sleep(0.01)   # 10ms for development environments
         
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:

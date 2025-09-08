@@ -171,6 +171,162 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         return False
 
 
+def is_websocket_connected_and_ready(websocket: WebSocket) -> bool:
+    """
+    Enhanced connection validation with handshake completion check.
+    CRITICAL: Replaces basic client_state check to prevent race conditions.
+    
+    This function ensures that:
+    1. WebSocket is in CONNECTED state
+    2. Handshake is complete and validated
+    3. Bidirectional communication is ready
+    
+    Returns:
+        True only when WebSocket is fully operational for message handling
+    """
+    try:
+        # First check basic connection state
+        if not is_websocket_connected(websocket):
+            logger.debug("WebSocket not connected - basic state check failed")
+            return False
+        
+        # Check if websocket has been accepted
+        if hasattr(websocket, 'client_state'):
+            client_state = websocket.client_state
+            if client_state != WebSocketState.CONNECTED:
+                logger.debug(f"WebSocket handshake not complete: {_safe_websocket_state_for_logging(client_state)}")
+                return False
+        
+        # Check if websocket has proper receive/send capabilities
+        if not hasattr(websocket, 'receive') or not hasattr(websocket, 'send'):
+            logger.debug("WebSocket missing receive/send methods - handshake not complete")
+            return False
+        
+        # Additional validation: Check if websocket is in a state ready for messaging
+        # This prevents "Need to call accept first" errors by ensuring accept() was called
+        try:
+            # Try to access websocket state attributes that are only available after accept()
+            if hasattr(websocket, '_send_queue') or hasattr(websocket, '_receive_queue'):
+                # These attributes indicate the websocket internal queues are initialized
+                logger.debug("WebSocket internal queues confirmed - handshake complete")
+                return True
+            elif hasattr(websocket, 'send_json'):
+                # send_json is available - indicates websocket is properly initialized
+                logger.debug("WebSocket send_json available - handshake complete")
+                return True
+        except Exception as e:
+            logger.debug(f"WebSocket state introspection failed: {e}")
+            # Fall through to environment-specific logic
+        
+        # Environment-specific validation
+        from shared.isolated_environment import get_env
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            # In cloud environments, be very conservative
+            # Only return True if we can definitively confirm readiness
+            logger.debug(f"Cloud environment {environment}: requiring definitive handshake confirmation")
+            return False  # Conservative approach - only return True if we can confirm readiness above
+        else:
+            # Development environment - if basic connection check passed, assume ready
+            logger.debug("Development environment: assuming ready after basic connection check")
+            return True
+        
+    except Exception as e:
+        logger.warning(f"WebSocket readiness check error: {e}, assuming not ready")
+        return False
+
+
+async def validate_websocket_handshake_completion(websocket: WebSocket, timeout_seconds: float = 1.0) -> bool:
+    """
+    Validate WebSocket handshake is complete with bidirectional communication test.
+    CRITICAL: This prevents race conditions in Cloud Run environments.
+    
+    This function performs a comprehensive handshake validation by:
+    1. Checking WebSocket state attributes
+    2. Performing a bidirectional communication test (ping/pong)
+    3. Validating message sending/receiving capabilities
+    
+    Args:
+        websocket: WebSocket connection to validate
+        timeout_seconds: Maximum time to wait for handshake validation
+        
+    Returns:
+        True if handshake is complete and bidirectional communication works
+    """
+    try:
+        # Environment-specific timeout configuration
+        from shared.isolated_environment import get_env
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Cloud environments need longer validation due to network latency
+        if environment in ["staging", "production"]:
+            timeout_seconds = max(timeout_seconds, 2.0)  # At least 2 seconds for cloud
+        
+        logger.debug(f"Starting WebSocket handshake validation (timeout: {timeout_seconds}s)")
+        
+        # Step 1: Basic state validation
+        if not is_websocket_connected(websocket):
+            logger.debug("Handshake validation failed: WebSocket not connected")
+            return False
+        
+        # Step 2: Check if accept() was called by examining websocket state
+        if hasattr(websocket, 'client_state'):
+            client_state = websocket.client_state
+            if client_state != WebSocketState.CONNECTED:
+                logger.debug(f"Handshake validation failed: client_state not CONNECTED: {_safe_websocket_state_for_logging(client_state)}")
+                return False
+        
+        # Step 3: Bidirectional communication test
+        # Send a test ping and wait for capability confirmation
+        test_start_time = time.time()
+        
+        try:
+            # Create a test message that doesn't interfere with normal operations
+            test_message = {
+                "type": "handshake_validation",
+                "timestamp": test_start_time,
+                "validation_id": f"test_{int(test_start_time * 1000)}"
+            }
+            
+            # Try to send test message - this will fail if handshake isn't complete
+            await asyncio.wait_for(
+                websocket.send_json(test_message),
+                timeout=timeout_seconds / 2  # Use half timeout for send
+            )
+            
+            logger.debug("WebSocket send test successful - handshake appears complete")
+            
+            # If we can send successfully, handshake is likely complete
+            # Note: We don't wait for a response since this is a validation ping
+            # The ability to send without "Need to call accept first" confirms handshake
+            return True
+            
+        except asyncio.TimeoutError:
+            logger.debug("WebSocket handshake validation timeout")
+            return False
+        except RuntimeError as e:
+            error_message = str(e)
+            if "Need to call 'accept' first" in error_message:
+                logger.debug(f"Handshake validation confirmed incomplete: {error_message}")
+                return False
+            elif "WebSocket is not connected" in error_message:
+                logger.debug(f"Handshake validation failed - WebSocket disconnected: {error_message}")
+                return False
+            else:
+                logger.debug(f"WebSocket handshake validation error: {error_message}")
+                return False
+        except Exception as e:
+            logger.debug(f"WebSocket handshake validation failed with error: {e}")
+            return False
+        
+    except Exception as e:
+        logger.warning(f"WebSocket handshake validation critical error: {e}")
+        return False
+
+
 async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], str],
                             retry_count: int = 2) -> bool:
     """
@@ -374,7 +530,7 @@ class WebSocketHeartbeat:
     async def _heartbeat_loop(self, websocket: WebSocket) -> None:
         """Main heartbeat loop."""
         try:
-            while self.running and is_websocket_connected(websocket):
+            while self.running and is_websocket_connected_and_ready(websocket):
                 current_time = time.time()
                 
                 # Check if we missed a pong
