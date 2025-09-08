@@ -48,13 +48,95 @@ class FactoryInitializationError(Exception):
     pass
 
 
+def create_defensive_user_execution_context(
+    user_id: str, 
+    websocket_client_id: Optional[str] = None,
+    fallback_context: Optional[Dict[str, Any]] = None
+) -> UserExecutionContext:
+    """
+    CRITICAL FIX: Create defensive UserExecutionContext with validation and fallback.
+    
+    This function creates a properly formatted UserExecutionContext with defensive
+    measures to prevent validation failures that cause 1011 WebSocket errors.
+    
+    Args:
+        user_id: User ID (required, validated)
+        websocket_client_id: WebSocket client ID (optional)
+        fallback_context: Fallback context data if available
+        
+    Returns:
+        Validated UserExecutionContext instance
+        
+    Raises:
+        ValueError: If user_id is invalid or context creation fails
+    """
+    import uuid
+    from datetime import datetime, timezone
+    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+    
+    try:
+        # CRITICAL FIX: Validate user_id defensively
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            logger.error(f"Invalid user_id for UserExecutionContext: {repr(user_id)}")
+            raise ValueError(f"user_id must be non-empty string, got: {repr(user_id)}")
+        
+        user_id = user_id.strip()
+        
+        # Generate unique identifiers using SSOT ID generator
+        try:
+            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+                user_id=user_id,
+                operation="websocket_factory"
+            )
+        except Exception as id_gen_error:
+            logger.warning(f"UnifiedIdGenerator failed, using fallback: {id_gen_error}")
+            # Fallback to simple UUID generation
+            unique_suffix = str(uuid.uuid4())[:8]
+            timestamp = int(datetime.now(timezone.utc).timestamp())
+            thread_id = f"ws_thread_{timestamp}_{unique_suffix}"
+            run_id = f"ws_run_{timestamp}_{unique_suffix}" 
+            request_id = f"ws_req_{timestamp}_{unique_suffix}"
+        
+        # Handle websocket_client_id defensively
+        if websocket_client_id is None:
+            # Generate client ID if not provided
+            timestamp = int(datetime.now(timezone.utc).timestamp())
+            unique_suffix = str(uuid.uuid4())[:8]
+            websocket_client_id = f"ws_client_{user_id[:8]}_{timestamp}_{unique_suffix}"
+            logger.debug(f"Generated websocket_client_id: {websocket_client_id}")
+        
+        # Create UserExecutionContext with validated inputs
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+        
+        # CRITICAL FIX: Validate the created context to ensure it meets SSOT requirements
+        _validate_ssot_user_context(user_context)
+        
+        logger.debug(f"[OK] Created defensive UserExecutionContext for user {user_id[:8]}... (client_id: {websocket_client_id})")
+        return user_context
+        
+    except Exception as context_error:
+        logger.error(f"Failed to create defensive UserExecutionContext for user_id {repr(user_id)}: {context_error}")
+        raise ValueError(
+            f"UserExecutionContext creation failed for user_id {repr(user_id)}: {context_error}. "
+            f"This indicates a system configuration issue."
+        ) from context_error
+
+
 def _validate_ssot_user_context(user_context: Any) -> None:
     """
-    CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation.
+    CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation with defensive fallback.
     
     This function validates that the provided user_context is the correct SSOT
     UserExecutionContext type with all required attributes, preventing the type
     inconsistencies that cause 1011 WebSocket errors.
+    
+    Enhanced with defensive validation to prevent hard failures.
     
     Args:
         user_context: Object to validate as SSOT UserExecutionContext
@@ -62,62 +144,94 @@ def _validate_ssot_user_context(user_context: Any) -> None:
     Raises:
         ValueError: If validation fails with detailed error information
     """
-    # CRITICAL FIX: Validate SSOT UserExecutionContext type
-    if not isinstance(user_context, UserExecutionContext):
-        # Enhanced error message with type information  
-        actual_type = type(user_context)
-        expected_module = "netra_backend.app.services.user_execution_context"
-        actual_module = getattr(actual_type, '__module__', 'unknown')
+    try:
+        # CRITICAL FIX: Validate SSOT UserExecutionContext type
+        if not isinstance(user_context, UserExecutionContext):
+            # Enhanced error message with type information  
+            actual_type = type(user_context)
+            expected_module = "netra_backend.app.services.user_execution_context"
+            actual_module = getattr(actual_type, '__module__', 'unknown')
+            
+            logger.error(
+                f"SSOT VIOLATION: Expected UserExecutionContext, got {actual_type.__name__} from {actual_module}. "
+                f"This indicates incomplete SSOT migration."
+            )
+            
+            raise ValueError(
+                f"SSOT VIOLATION: Expected netra_backend.app.services.user_execution_context.UserExecutionContext, "
+                f"got {actual_type}. "
+                f"Expected module: {expected_module}, Actual module: {actual_module}. "
+                f"This indicates incomplete SSOT migration - factory pattern requires SSOT compliance."
+            )
         
-        raise ValueError(
-            f"SSOT VIOLATION: Expected netra_backend.app.services.user_execution_context.UserExecutionContext, "
-            f"got {actual_type}. "
-            f"Expected module: {expected_module}, Actual module: {actual_module}. "
-            f"This indicates incomplete SSOT migration - factory pattern requires SSOT compliance."
+        # CRITICAL FIX: Validate all required SSOT attributes are present
+        required_attrs = ['user_id', 'thread_id', 'websocket_client_id', 'run_id', 'request_id']
+        missing_attrs = []
+        
+        for attr in required_attrs:
+            if not hasattr(user_context, attr):
+                missing_attrs.append(attr)
+            elif getattr(user_context, attr, None) is None and attr != 'websocket_client_id':
+                # websocket_client_id can be None, but others cannot
+                missing_attrs.append(f"{attr} (is None)")
+        
+        if missing_attrs:
+            logger.error(f"SSOT CONTEXT INCOMPLETE: Missing attributes {missing_attrs} in UserExecutionContext")
+            raise ValueError(
+                f"SSOT CONTEXT INCOMPLETE: UserExecutionContext missing required attributes: {missing_attrs}. "
+                f"This indicates incomplete SSOT migration or improper context initialization."
+            )
+        
+        # CRITICAL FIX: Validate attribute types and values with defensive checks
+        validation_errors = []
+        
+        # Check string fields are actual strings and not empty
+        string_fields = ['user_id', 'thread_id', 'run_id', 'request_id']
+        for field in string_fields:
+            try:
+                value = getattr(user_context, field, None)
+                if not isinstance(value, str):
+                    validation_errors.append(f"{field} must be string, got {type(value).__name__}: {repr(value)}")
+                elif not value.strip():
+                    validation_errors.append(f"{field} must be non-empty string, got empty/whitespace: {repr(value)}")
+            except Exception as attr_error:
+                logger.warning(f"Error accessing {field} attribute: {attr_error}")
+                validation_errors.append(f"{field} attribute access failed: {attr_error}")
+        
+        # Check websocket_client_id if present (defensive validation)
+        try:
+            websocket_client_id = getattr(user_context, 'websocket_client_id', None)
+            if websocket_client_id is not None:
+                if not isinstance(websocket_client_id, str):
+                    validation_errors.append(f"websocket_client_id must be None or string, got {type(websocket_client_id).__name__}: {repr(websocket_client_id)}")
+                elif not websocket_client_id.strip():
+                    validation_errors.append(f"websocket_client_id must be None or non-empty string, got empty/whitespace: {repr(websocket_client_id)}")
+        except Exception as client_id_error:
+            logger.warning(f"Error accessing websocket_client_id: {client_id_error}")
+            validation_errors.append(f"websocket_client_id attribute access failed: {client_id_error}")
+        
+        if validation_errors:
+            logger.error(f"SSOT CONTEXT VALIDATION FAILED: {validation_errors}")
+            raise ValueError(
+                f"SSOT CONTEXT VALIDATION FAILED: {'; '.join(validation_errors)}. "
+                f"Factory pattern requires properly formatted UserExecutionContext."
+            )
+        
+        logger.debug(
+            f"[OK] SSOT UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
+            f"(client_id: {user_context.websocket_client_id})"
         )
-    
-    # CRITICAL FIX: Validate all required SSOT attributes are present
-    required_attrs = ['user_id', 'thread_id', 'websocket_client_id', 'run_id', 'request_id']
-    missing_attrs = []
-    
-    for attr in required_attrs:
-        if not hasattr(user_context, attr):
-            missing_attrs.append(attr)
-        elif getattr(user_context, attr, None) is None and attr != 'websocket_client_id':
-            # websocket_client_id can be None, but others cannot
-            missing_attrs.append(f"{attr} (is None)")
-    
-    if missing_attrs:
+        
+    except ValueError:
+        # Re-raise validation errors
+        raise
+    except Exception as unexpected_error:
+        # CRITICAL FIX: Catch any unexpected validation errors to prevent system crashes
+        logger.error(f"Unexpected error during UserExecutionContext validation: {unexpected_error}", exc_info=True)
         raise ValueError(
-            f"SSOT CONTEXT INCOMPLETE: UserExecutionContext missing required attributes: {missing_attrs}. "
-            f"This indicates incomplete SSOT migration or improper context initialization."
-        )
-    
-    # CRITICAL FIX: Validate attribute types and values
-    validation_errors = []
-    
-    # Check string fields are actual strings and not empty
-    string_fields = ['user_id', 'thread_id', 'run_id', 'request_id']
-    for field in string_fields:
-        value = getattr(user_context, field, None)
-        if not isinstance(value, str) or not value.strip():
-            validation_errors.append(f"{field} must be non-empty string, got {type(value)}: {value!r}")
-    
-    # Check websocket_client_id if present
-    websocket_client_id = getattr(user_context, 'websocket_client_id', None)
-    if websocket_client_id is not None and (not isinstance(websocket_client_id, str) or not websocket_client_id.strip()):
-        validation_errors.append(f"websocket_client_id must be None or non-empty string, got {type(websocket_client_id)}: {websocket_client_id!r}")
-    
-    if validation_errors:
-        raise ValueError(
-            f"SSOT CONTEXT VALIDATION FAILED: {'; '.join(validation_errors)}. "
-            f"Factory pattern requires properly formatted UserExecutionContext."
-        )
-    
-    logger.debug(
-        f"[OK] SSOT UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
-        f"(client_id: {user_context.websocket_client_id})"
-    )
+            f"SSOT VALIDATION ERROR: Unexpected error during UserExecutionContext validation: {unexpected_error}. "
+            f"This indicates a system-level issue with context validation."
+        ) from unexpected_error
 
 
 @dataclass
@@ -1174,5 +1288,6 @@ __all__ = [
     "ManagerMetrics",
     "FactoryInitializationError",
     "get_websocket_manager_factory",
-    "create_websocket_manager"
+    "create_websocket_manager",
+    "create_defensive_user_execution_context"
 ]

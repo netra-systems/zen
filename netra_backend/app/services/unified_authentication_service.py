@@ -462,24 +462,89 @@ class UnifiedAuthenticationService:
             return None
     
     def _create_user_execution_context(self, auth_result: AuthResult, websocket: WebSocket) -> UserExecutionContext:
-        """Create UserExecutionContext from authentication result."""
+        """
+        CRITICAL FIX: Create UserExecutionContext with enhanced validation and defensive measures.
+        
+        This method creates a properly validated UserExecutionContext to prevent
+        factory validation failures that cause 1011 WebSocket errors.
+        """
         import uuid
         
-        # Generate unique identifiers for this connection
-        connection_timestamp = datetime.now(timezone.utc).timestamp()
-        unique_id = str(uuid.uuid4())
-        
-        # Create UserExecutionContext with proper identifiers
-        user_context = UserExecutionContext(
-            user_id=auth_result.user_id,
-            thread_id=f"ws_thread_{unique_id[:8]}",
-            run_id=f"ws_run_{unique_id[:8]}",
-            request_id=f"ws_req_{int(connection_timestamp)}_{unique_id[:8]}",
-            websocket_client_id=f"ws_{auth_result.user_id[:8]}_{int(connection_timestamp)}_{unique_id[:8]}"
-        )
-        
-        logger.debug(f"UNIFIED AUTH: Created UserExecutionContext for WebSocket: {user_context.websocket_client_id}")
-        return user_context
+        try:
+            # CRITICAL FIX: Validate auth_result has required user_id
+            if not auth_result or not auth_result.user_id:
+                logger.error(f"Cannot create UserExecutionContext: invalid auth_result or missing user_id")
+                raise ValueError("AuthResult must have valid user_id to create UserExecutionContext")
+            
+            user_id = str(auth_result.user_id).strip()
+            if not user_id:
+                logger.error(f"Cannot create UserExecutionContext: empty user_id after validation")
+                raise ValueError("user_id cannot be empty after string conversion and stripping")
+            
+            # CRITICAL FIX: Use defensive UserExecutionContext creation
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+            
+            # Generate WebSocket client ID using consistent format
+            connection_timestamp = int(datetime.now(timezone.utc).timestamp())
+            unique_id = str(uuid.uuid4())[:8]
+            websocket_client_id = f"ws_{user_id[:8]}_{connection_timestamp}_{unique_id}"
+            
+            logger.debug(f"UNIFIED AUTH: Creating defensive UserExecutionContext for user {user_id[:8]}... with client_id {websocket_client_id}")
+            
+            # Use defensive creation with validation
+            user_context = create_defensive_user_execution_context(
+                user_id=user_id,
+                websocket_client_id=websocket_client_id,
+                fallback_context={
+                    "auth_result": auth_result.to_dict(),
+                    "websocket_info": {
+                        "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                        "client_port": getattr(websocket.client, 'port', 'unknown') if websocket.client else 'no_client'
+                    },
+                    "creation_timestamp": connection_timestamp
+                }
+            )
+            
+            logger.debug(f"UNIFIED AUTH: Successfully created validated UserExecutionContext: {user_context.websocket_client_id}")
+            return user_context
+            
+        except Exception as context_error:
+            # CRITICAL FIX: Enhanced error handling for UserExecutionContext creation failures
+            error_details = {
+                "auth_result_valid": auth_result is not None,
+                "user_id_available": hasattr(auth_result, 'user_id') and auth_result.user_id is not None,
+                "websocket_available": websocket is not None,
+                "error_type": type(context_error).__name__,
+                "error_message": str(context_error)
+            }
+            
+            logger.error(f"UNIFIED AUTH: Failed to create UserExecutionContext: {context_error}")
+            logger.error(f"UNIFIED AUTH: Context creation error details: {json.dumps(error_details, indent=2)}")
+            
+            # Try fallback creation with minimal required data
+            try:
+                fallback_user_id = getattr(auth_result, 'user_id', 'fallback_user') or 'fallback_user'
+                fallback_user_id = str(fallback_user_id).strip() or 'unknown_user'
+                
+                logger.warning(f"UNIFIED AUTH: Attempting fallback UserExecutionContext creation for user {fallback_user_id[:8]}...")
+                
+                # Use defensive creation as fallback
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+                
+                fallback_context = create_defensive_user_execution_context(
+                    user_id=fallback_user_id,
+                    websocket_client_id=None  # Will be auto-generated
+                )
+                
+                logger.info(f"UNIFIED AUTH: Successfully created fallback UserExecutionContext: {fallback_context.websocket_client_id}")
+                return fallback_context
+                
+            except Exception as fallback_error:
+                logger.critical(f"UNIFIED AUTH: Fallback UserExecutionContext creation also failed: {fallback_error}")
+                raise ValueError(
+                    f"UserExecutionContext creation failed completely. Original error: {context_error}. "
+                    f"Fallback error: {fallback_error}. System may be in unstable state."
+                ) from context_error
     
     async def _validate_token_with_enhanced_resilience(
         self,

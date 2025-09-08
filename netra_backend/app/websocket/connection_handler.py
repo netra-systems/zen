@@ -337,7 +337,7 @@ class ConnectionHandler:
             "events_received": self.context.events_received,
             "events_sent": self.context.events_sent, 
             "events_filtered": self.context.events_filtered,
-            "connection_state": str(self.context.websocket.client_state)
+            "connection_state": self.context.websocket.client_state.name
         }
     
     async def cleanup(self):

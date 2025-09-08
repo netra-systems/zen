@@ -673,19 +673,21 @@ async def stream_agent_execution(
                     yield f"data: {json.dumps(data)}\n\n"
             
             # Always send end event
-            yield f"data: {json.dumps({
+            data = {
                 'event': 'stream_end',
                 'agent_id': agent_id,
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield f"data: {json.dumps(data)}\n\n"
             
         except Exception as e:
             logger.error(f"Error in agent streaming: {e}")
-            yield f"data: {json.dumps({
+            data = {
                 'event': 'stream_error',
                 'error': str(e),
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield f"data: {json.dumps(data)}\n\n"
     
     return StreamingResponse(
         generate_agent_stream(),
