@@ -26,7 +26,7 @@ if os.environ["PRODUCTION"]:                              # Runtime errors
 
 # ❌ Module-level configuration loading
 config = load_config()  # Executed before subprocess env ready
-DATABASE_URL = config.database_url  # Timing issues
+#removed-legacy= config.database_url  # Timing issues
 ```
 
 ## Post-Migration State (ENTERPRISE-GRADE)
@@ -105,7 +105,7 @@ password = config.database.password
 # BEFORE (Timing Issues)
 # At module level - executed before subprocess env ready
 settings = load_config()
-DATABASE_URL = settings.database_url
+#removed-legacy= settings.database_url
 
 # AFTER (Reliable)
 # Function-level access - executed when subprocess env is ready

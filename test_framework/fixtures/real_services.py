@@ -18,3 +18,16 @@ def with_test_database():
     # Placeholder implementation - yields None for basic compatibility  
     # In a real implementation, this would set up and tear down test database
     yield None
+
+
+@pytest.fixture(scope="function")
+def real_services_fixture():
+    """Fixture for real services testing - provides access to actual running services."""
+    # Returns a dict with real service connections - mocked for now until real services are needed
+    return {
+        "backend_url": "http://localhost:8000",
+        "auth_url": "http://localhost:8081",
+        "postgres": None,  # Will be set by real database fixtures when needed
+        "test_database": None,
+        "db": None  # Will be set by real database fixtures when needed
+    }

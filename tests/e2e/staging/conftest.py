@@ -115,104 +115,107 @@ def pytest_runtest_makereport(item, call):
             collector.skipped += 1
 
 def generate_test_report():
-    """Generate comprehensive test report"""
+    """Generate comprehensive test report with Windows I/O error handling"""
     
     report_path = Path("STAGING_TEST_REPORT_PYTEST.md")
     summary = collector.get_summary()
     
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("# Staging E2E Test Report - Pytest Results\n\n")
-        f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"**Environment:** Staging\n")
-        f.write(f"**Test Framework:** Pytest\n\n")
-        
-        # Executive Summary
-        f.write("## Executive Summary\n\n")
-        f.write(f"- **Total Tests:** {summary['total']}\n")
-        if summary['total'] > 0:
-            f.write(f"- **Passed:** {summary['passed']} ({summary['passed']/summary['total']*100:.1f}%)\n")
-            f.write(f"- **Failed:** {summary['failed']} ({summary['failed']/summary['total']*100:.1f}%)\n")
-        else:
-            f.write(f"- **Passed:** {summary['passed']} (0.0%)\n")
-            f.write(f"- **Failed:** {summary['failed']} (0.0%)\n")
-        f.write(f"- **Skipped:** {summary['skipped']}\n")
-        f.write(f"- **Duration:** {summary['duration']:.2f} seconds\n")
-        f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n\n")
-        
-        # Test Results by Priority
-        f.write("## Test Results by Priority\n\n")
-        
-        priorities = ["critical", "high", "medium", "low", "normal"]
-        for priority in priorities:
-            priority_results = [r for r in collector.results if r.get("priority") == priority]
-            if priority_results:
-                f.write(f"### {priority.upper()} Priority Tests\n\n")
-                f.write("| Test Name | Status | Duration | File |\n")
-                f.write("|-----------|--------|----------|------|\n")
-                
-                for result in priority_results:
-                    status_icon = "PASS" if result["outcome"] == "passed" else "FAIL" if result["outcome"] == "failed" else "SKIP"
-                    f.write(f"| {result['test_name']} | {status_icon} {result['outcome']} | {result['duration']:.3f}s | {Path(result['test_file']).name} |\n")
-                f.write("\n")
-        
-        # Failed Tests Details
-        if collector.failed > 0:
-            f.write("## Failed Tests Details\n\n")
-            failed_results = [r for r in collector.results if r["outcome"] == "failed"]
+    try:
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("# Staging E2E Test Report - Pytest Results\n\n")
+            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"**Environment:** Staging\n")
+            f.write(f"**Test Framework:** Pytest\n\n")
             
-            for result in failed_results:
-                f.write(f"### FAILED: {result['test_name']}\n")
-                f.write(f"- **File:** {result['test_file']}\n")
-                f.write(f"- **Duration:** {result['duration']:.3f}s\n")
-                if "error" in result:
-                    f.write(f"- **Error:** {result['error'][:500]}...\n")
-                f.write("\n")
-        
-        # Pytest Output Format
-        f.write("## Pytest Output Format\n\n")
-        f.write("```\n")
-        
-        # Generate pytest-style output
-        for result in collector.results:
-            if result["outcome"] == "passed":
-                f.write(f"{Path(result['test_file']).name}::{result['test_name']} PASSED\n")
-            elif result["outcome"] == "failed":
-                f.write(f"{Path(result['test_file']).name}::{result['test_name']} FAILED\n")
-            elif result["outcome"] == "skipped":
-                f.write(f"{Path(result['test_file']).name}::{result['test_name']} SKIPPED\n")
-        
-        f.write(f"\n{'='*50}\n")
-        f.write(f"{summary['passed']} passed, {summary['failed']} failed")
-        if summary['skipped'] > 0:
-            f.write(f", {summary['skipped']} skipped")
-        f.write(f" in {summary['duration']:.2f}s\n")
-        f.write("```\n\n")
-        
-        # Test Coverage Matrix
-        f.write("## Test Coverage Matrix\n\n")
-        f.write("| Category | Total | Passed | Failed | Coverage |\n")
-        f.write("|----------|-------|--------|--------|----------|\n")
-        
-        categories = {
-            "WebSocket": ["websocket", "ws"],
-            "Agent": ["agent"],
-            "Authentication": ["auth", "jwt", "oauth"],
-            "Performance": ["performance", "response_time", "throughput"],
-            "Security": ["security", "cors", "injection"],
-            "Data": ["storage", "database", "cache"]
-        }
-        
-        for category, keywords in categories.items():
-            cat_tests = [r for r in collector.results 
-                        if any(kw in r["test_name"].lower() for kw in keywords)]
-            if cat_tests:
-                cat_passed = sum(1 for t in cat_tests if t["outcome"] == "passed")
-                cat_failed = sum(1 for t in cat_tests if t["outcome"] == "failed")
-                coverage = (cat_passed / len(cat_tests) * 100) if cat_tests else 0
-                f.write(f"| {category} | {len(cat_tests)} | {cat_passed} | {cat_failed} | {coverage:.1f}% |\n")
-        
-        f.write("\n---\n")
-        f.write(f"*Report generated by pytest-staging framework v1.0*\n")
+            # Executive Summary
+            f.write("## Executive Summary\n\n")
+            f.write(f"- **Total Tests:** {summary['total']}\n")
+            if summary['total'] > 0:
+                f.write(f"- **Passed:** {summary['passed']} ({summary['passed']/summary['total']*100:.1f}%)\n")
+                f.write(f"- **Failed:** {summary['failed']} ({summary['failed']/summary['total']*100:.1f}%)\n")
+            else:
+                f.write(f"- **Passed:** {summary['passed']} (0.0%)\n")
+                f.write(f"- **Failed:** {summary['failed']} (0.0%)\n")
+            f.write(f"- **Skipped:** {summary['skipped']}\n")
+            f.write(f"- **Duration:** {summary['duration']:.2f} seconds\n")
+            f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n\n")
+            
+            # Test Results by Priority
+            f.write("## Test Results by Priority\n\n")
+            
+            priorities = ["critical", "high", "medium", "low", "normal"]
+            for priority in priorities:
+                priority_results = [r for r in collector.results if r.get("priority") == priority]
+                if priority_results:
+                    f.write(f"### {priority.upper()} Priority Tests\n\n")
+                    f.write("| Test Name | Status | Duration | File |\n")
+                    f.write("|-----------|--------|----------|------|\n")
+                    
+                    for result in priority_results:
+                        status_icon = "PASS" if result["outcome"] == "passed" else "FAIL" if result["outcome"] == "failed" else "SKIP"
+                        f.write(f"| {result['test_name']} | {status_icon} {result['outcome']} | {result['duration']:.3f}s | {Path(result['test_file']).name} |\n")
+                    f.write("\n")
+            
+            # Failed Tests Details
+            if collector.failed > 0:
+                f.write("## Failed Tests Details\n\n")
+                failed_results = [r for r in collector.results if r["outcome"] == "failed"]
+                
+                for result in failed_results:
+                    f.write(f"### FAILED: {result['test_name']}\n")
+                    f.write(f"- **File:** {result['test_file']}\n")
+                    f.write(f"- **Duration:** {result['duration']:.3f}s\n")
+                    if "error" in result:
+                        f.write(f"- **Error:** {result['error'][:500]}...\n")
+                    f.write("\n")
+            
+            # Pytest Output Format
+            f.write("## Pytest Output Format\n\n")
+            f.write("```\n")
+            
+            # Generate pytest-style output
+            for result in collector.results:
+                if result["outcome"] == "passed":
+                    f.write(f"{Path(result['test_file']).name}::{result['test_name']} PASSED\n")
+                elif result["outcome"] == "failed":
+                    f.write(f"{Path(result['test_file']).name}::{result['test_name']} FAILED\n")
+                elif result["outcome"] == "skipped":
+                    f.write(f"{Path(result['test_file']).name}::{result['test_name']} SKIPPED\n")
+            
+            f.write(f"\n{'='*50}\n")
+            f.write(f"{summary['passed']} passed, {summary['failed']} failed")
+            if summary['skipped'] > 0:
+                f.write(f", {summary['skipped']} skipped")
+            f.write(f" in {summary['duration']:.2f}s\n")
+            f.write("```\n\n")
+            
+            # Test Coverage Matrix
+            f.write("## Test Coverage Matrix\n\n")
+            f.write("| Category | Total | Passed | Failed | Coverage |\n")
+            f.write("|----------|-------|--------|--------|----------|\n")
+            
+            categories = {
+                "WebSocket": ["websocket", "ws"],
+                "Agent": ["agent"],
+                "Authentication": ["auth", "jwt", "oauth"],
+                "Performance": ["performance", "response_time", "throughput"],
+                "Security": ["security", "cors", "injection"],
+                "Data": ["storage", "database", "cache"]
+            }
+            
+            for category, keywords in categories.items():
+                cat_tests = [r for r in collector.results 
+                            if any(kw in r["test_name"].lower() for kw in keywords)]
+                if cat_tests:
+                    cat_passed = sum(1 for t in cat_tests if t["outcome"] == "passed")
+                    cat_failed = sum(1 for t in cat_tests if t["outcome"] == "failed")
+                    coverage = (cat_passed / len(cat_tests) * 100) if cat_tests else 0
+                    f.write(f"| {category} | {len(cat_tests)} | {cat_passed} | {cat_failed} | {coverage:.1f}% |\n")
+            
+            f.write("\n---\n")
+            f.write(f"*Report generated by pytest-staging framework v1.0*\n")
+    except (OSError, IOError) as e:
+        print(f"Warning: Could not generate test report due to I/O error: {e}")
     
     print(f"\nTest report saved to: {report_path.absolute()}")
 

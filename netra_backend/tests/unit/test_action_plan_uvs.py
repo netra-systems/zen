@@ -13,7 +13,7 @@ import pytest
 from typing import Dict, Any
 from unittest.mock import patch, Mock
 
-from test_framework.redis_test_utils import TestRedisManager
+from test_framework.redis_test_utils import RedisTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -25,7 +25,7 @@ from netra_backend.app.agents.actions_goals_plan_builder_uvs import (
     create_uvs_action_plan_builder
 )
 from netra_backend.app.agents.state import ActionPlanResult, PlanStep
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestActionPlanUVS:
@@ -415,7 +415,7 @@ class TestActionPlanUVS:
         # With context
         builder_with_context = create_uvs_action_plan_builder(
             user_context={'user_id': 'test'},
-            cache_manager=TestRedisManager().get_client()
+            cache_manager=RedisTestManager().get_client()
         )
         assert builder_with_context.user_context.get('user_id') == 'test'
         assert builder_with_context.cache_helpers is not None

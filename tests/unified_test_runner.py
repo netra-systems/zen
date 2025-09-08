@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+
+# CRITICAL WINDOWS I/O FIX: Apply Windows encoding setup IMMEDIATELY before ANY imports
+import sys
+import os
+from pathlib import Path
+
+# Setup path FIRST
+PROJECT_ROOT = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# CRITICAL: Delay Windows encoding setup to prevent I/O errors during Docker initialization
+# We'll call setup_windows_encoding() after Docker manager is initialized
+_windows_encoding_setup_pending = False
+try:
+    from shared.windows_encoding import setup_windows_encoding
+    _windows_encoding_setup_pending = True
+except ImportError:
+    pass  # Continue if Windows encoding not available
+
 """
 NETRA APEX UNIFIED TEST RUNNER
 ==============================
@@ -58,28 +77,17 @@ NEW ORCHESTRATION EXAMPLES:
     python unified_test_runner.py --orchestration-status
 """
 
+# Now safe to import everything else
 import argparse
 import json
 import logging
-import os
 import subprocess
-import sys
 import time
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
+# CRITICAL: Create logger AFTER Windows encoding setup to prevent I/O closed file errors
 logger = logging.getLogger(__name__)
-
-# Project root - script is now in scripts/ directory
-PROJECT_ROOT = Path(__file__).parent.parent.absolute()
-
-# Add project root to path for absolute imports
-sys.path.insert(0, str(PROJECT_ROOT))
-
-# Import Windows encoding SSOT and set up encoding
-from shared.windows_encoding import setup_windows_encoding
-setup_windows_encoding()
 
 # Load environment variables from .env file to ensure CONTAINER_RUNTIME is set
 try:
@@ -215,19 +223,19 @@ except ImportError:
     SafePortAllocator = None
     
 try:
-    from test_framework.unified_container_manager import (
-        UnifiedContainerManager, ContainerManagerMode
-    )
     from test_framework.unified_docker_manager import (
-        EnvironmentType, ServiceStatus
+        UnifiedDockerManager,
+        EnvironmentType, 
+        ServiceStatus,
+        ServiceMode
     )
     CENTRALIZED_DOCKER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_DOCKER_AVAILABLE = False
-    UnifiedContainerManager = None
-    ContainerManagerMode = None
+    UnifiedDockerManager = None
     EnvironmentType = None
     ServiceStatus = None
+    ServiceMode = None
 
 
 class UnifiedTestRunner:
@@ -559,15 +567,9 @@ class UnifiedTestRunner:
         except Exception as e:
             print(f"[WARNING] Memory check failed with error: {e}")
         
-        # Determine environment type - default to DEDICATED for unique names
-        # E2E tests should always use dedicated environments
-        if (args.categories and 'e2e' in args.categories) or (hasattr(args, 'docker_dedicated') and args.docker_dedicated):
-            env_type = EnvironmentType.DEDICATED
-        else:
-            # For unit/integration tests, still default to DEDICATED for isolation
-            # Can be overridden with TEST_USE_SHARED_DOCKER=true
-            use_shared = env.get('TEST_USE_SHARED_DOCKER', 'false').lower() == 'true'
-            env_type = EnvironmentType.SHARED if use_shared else EnvironmentType.DEDICATED
+        # Determine environment type - always default to DEDICATED for isolation
+        # DEDICATED is now the default for all test types
+        env_type = EnvironmentType.DEDICATED
         
         # Check if we should use production images
         use_production = env.get('TEST_USE_PRODUCTION_IMAGES', 'true').lower() == 'true'
@@ -592,7 +594,6 @@ class UnifiedTestRunner:
             print("[INFO] Using Podman runtime for container management")
         else:
             # Use Docker (existing UnifiedDockerManager)
-            from test_framework.unified_docker_manager import UnifiedDockerManager
             self.docker_manager = UnifiedDockerManager(
                 environment_type=env_type,
                 test_id=f"test_run_{int(time.time())}_{os.getpid()}",
@@ -604,6 +605,16 @@ class UnifiedTestRunner:
         
         print(f"[INFO] Using Docker environment: type={env_type.value}, alpine={use_alpine}, "
               f"rebuild={rebuild_images}, backend_only={rebuild_backend_only}, production={use_production}")
+        
+        # CRITICAL: Now that Docker manager is initialized, apply Windows encoding setup
+        global _windows_encoding_setup_pending
+        if _windows_encoding_setup_pending:
+            try:
+                setup_windows_encoding()
+                _windows_encoding_setup_pending = False
+                print("[INFO] Windows encoding setup completed after Docker initialization")
+            except Exception as e:
+                print(f"[WARNING] Windows encoding setup failed: {e}")
         
         # Acquire environment with locking
         try:
@@ -635,23 +646,171 @@ class UnifiedTestRunner:
                         raise RuntimeError("Docker services not healthy for testing")
                         
         except Exception as e:
-            print("\nSome services failed health checks. To fix:")
-            print("\nTo manually manage Docker services:")
-            print("  python scripts/docker.py start     # Start services")
-            print("  python scripts/docker.py status    # Check status")
-            print("  python scripts/docker.py help      # Get help\n")
+            # SSOT: Use UnifiedDockerManager's recovery mechanisms instead of manual scripts
+            print(f"\n⚠️ Docker initialization encountered an issue: {str(e)}")
+            print("\n🔄 Attempting graceful recovery with exponential backoff...")
+            
+            # Try recovery with exponential backoff
+            recovery_attempts = 3
+            backoff_seconds = [2, 5, 10]  # Exponential backoff
+            
+            for attempt in range(recovery_attempts):
+                print(f"\n  Attempt {attempt + 1}/{recovery_attempts}...")
+                time.sleep(backoff_seconds[attempt])
+                
+                try:
+                    # Check if containers exist but are unhealthy
+                    existing_containers = self.docker_manager._detect_existing_dev_containers()
+                    if existing_containers:
+                        print(f"  Found {len(existing_containers)} existing containers")
+                        
+                        # Try to restart unhealthy services
+                        print("  Attempting to restart unhealthy services...")
+                        for service in existing_containers.keys():
+                            try:
+                                self.docker_manager.restart_service(service)
+                            except Exception as restart_err:
+                                print(f"    Warning: Could not restart {service}: {restart_err}")
+                        
+                        # Wait for services with longer timeout
+                        print(f"  Waiting up to {30 + attempt * 10}s for services to become healthy...")
+                        if self.docker_manager.wait_for_services(timeout=30 + attempt * 10):
+                            print("\n✅ Docker services recovered successfully!")
+                            return  # Recovery successful
+                    
+                    # If no containers exist, try to start fresh
+                    else:
+                        print("  No existing containers found, attempting fresh start...")
+                        
+                        # Clean up any stale resources first
+                        try:
+                            self.docker_manager.cleanup_stale_resources()
+                        except Exception:
+                            pass  # Ignore cleanup errors
+                        
+                        # Try to start services again
+                        if env_type == "test":
+                            # First try normal environment
+                            success = self.docker_manager.start_test_environment(
+                                use_alpine=use_alpine,
+                                rebuild=rebuild_images
+                            )
+                            
+                            # If that fails, try minimal environment as fallback
+                            if not success:
+                                print("\n🔄 Attempting minimal test environment (infrastructure only)...")
+                                success = self.docker_manager.start_test_environment(
+                                    minimal_only=True
+                                )
+                        else:
+                            success = self.docker_manager.start_dev_environment(
+                                rebuild=rebuild_images
+                            )
+                        
+                        if success:
+                            print("\n✅ Docker services started successfully on retry!")
+                            return  # Recovery successful
+                            
+                except Exception as recovery_err:
+                    print(f"    Recovery attempt failed: {recovery_err}")
+                    if attempt < recovery_attempts - 1:
+                        print(f"    Will retry in {backoff_seconds[attempt + 1]} seconds...")
+            
+            # All recovery attempts failed
+            print("\n" + "="*60)
+            print("❌ DOCKER RECOVERY FAILED")
+            print("="*60)
+            
+            # Provide diagnostic information
+            print("\n📊 Diagnostic Information:")
+            try:
+                # Check Docker daemon status
+                daemon_check = subprocess.run(
+                    ["docker", "version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if daemon_check.returncode != 0:
+                    print("  ❌ Docker daemon is not running or not accessible")
+                    print("     Please ensure Docker Desktop is running")
+                else:
+                    print("  ✅ Docker daemon is running")
+                    
+                    # Check for port conflicts
+                    port_conflicts = self._check_port_conflicts()
+                    if port_conflicts:
+                        print(f"  ⚠️ Port conflicts detected: {port_conflicts}")
+                        print("     Another application may be using required ports")
+                    
+                    # Check Docker resources
+                    resource_check = subprocess.run(
+                        ["docker", "system", "df"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if "100%" in resource_check.stdout:
+                        print("  ⚠️ Docker disk space may be full")
+                        print("     Run: docker system prune -a")
+                        
+            except Exception:
+                pass  # Ignore diagnostic errors
+            
+            print("\n🔧 Manual Recovery Options:")
+            print("  1. Restart Docker Desktop")
+            print("  2. Clean Docker resources: docker system prune -a")
+            print("  3. Check for port conflicts on 5432, 6379, 8000, 8081")
+            print("  4. Review logs: docker-compose logs")
             
             if running_e2e or args.real_services:
-                raise  # Re-raise for E2E/real service testing
+                raise RuntimeError(f"Docker services required but could not be started after {recovery_attempts} attempts")  # Re-raise for E2E/real service testing
                 
-            # Fall back to port discovery
+            # Fall back to port discovery for non-critical tests
             self.docker_manager = None
             self.docker_environment = None
             self.docker_ports = None
-            print("[WARNING] Docker initialization failed, continuing without Docker management")
-            # Continue without Docker - tests will use existing services if available
+            print("\n[WARNING] Continuing without Docker management for non-critical tests")
+            print("[INFO] Tests will attempt to use any existing services if available")
     
 
+    def _check_port_conflicts(self) -> List[int]:
+        """Check for port conflicts on required ports."""
+        import socket
+        conflicted_ports = []
+        required_ports = {
+            "postgres": [5432, 5434],
+            "redis": [6379, 6381],
+            "backend": [8000],
+            "auth": [8081]
+        }
+        
+        for service, ports in required_ports.items():
+            for port in ports:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    result = sock.connect_ex(('localhost', port))
+                    if result == 0:
+                        # Port is in use, check if it's our container
+                        check_cmd = subprocess.run(
+                            ["docker", "ps", "--filter", f"publish={port}", "--format", "{{.Names}}"],
+                            capture_output=True,
+                            text=True,
+                            timeout=2
+                        )
+                        if check_cmd.returncode == 0 and check_cmd.stdout.strip():
+                            # It's a Docker container, likely ours
+                            continue
+                        else:
+                            # Port is used by something else
+                            conflicted_ports.append(port)
+                except Exception:
+                    pass
+                finally:
+                    sock.close()
+        
+        return conflicted_ports
+    
     def cleanup_test_environment(self):
         """Comprehensive cleanup of test environment to prevent Docker resource accumulation.
         
@@ -901,6 +1060,10 @@ class UnifiedTestRunner:
             # For staging, don't use Docker port discovery - use remote staging services
             # Configure test environment with discovered ports
             env = get_env()
+            # CRITICAL: Enable local config file loading for all staging tests
+            # This allows staging.env to be loaded for ClickHouse and other configurations
+            env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_config')
+            env.set('ENVIRONMENT', 'staging', 'staging_config')
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -934,6 +1097,12 @@ class UnifiedTestRunner:
         elif args.real_services or running_e2e:
             # Configure test environment with discovered ports
             env = get_env()
+            
+            # CRITICAL: Enable E2E tests execution when running e2e category
+            # Without this, all e2e tests are skipped per conftest_e2e.py
+            if running_e2e:
+                env.set('RUN_E2E_TESTS', 'true', 'test_runner')
+                logger.info("Enabled E2E tests execution (RUN_E2E_TESTS=true)")
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -970,7 +1139,7 @@ class UnifiedTestRunner:
             if 'postgres' in self.docker_ports:
                 postgres_port = self.docker_ports['postgres']
                 
-                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                # Construct #removed-legacywith discovered port and correct user/password for each environment
                 if args.env == "dev":
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
@@ -979,7 +1148,7 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'docker_manager')
-                print(f"[INFO] Updated DATABASE_URL with Docker port: {postgres_port}")
+                print(f"[INFO] Updated #removed-legacywith Docker port: {postgres_port}")
             
             # Update Redis URL
             if 'redis' in self.docker_ports:
@@ -1037,7 +1206,7 @@ class UnifiedTestRunner:
             if 'postgres' in port_mappings and port_mappings['postgres'].is_available:
                 postgres_port = port_mappings['postgres'].external_port
                 
-                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                # Construct #removed-legacywith discovered port and correct user/password for each environment
                 if args.env == "dev":
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
@@ -1046,7 +1215,7 @@ class UnifiedTestRunner:
                     discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
-                print(f"[INFO] Updated DATABASE_URL with discovered PostgreSQL port: {postgres_port}")
+                print(f"[INFO] Updated #removed-legacywith discovered PostgreSQL port: {postgres_port}")
             else:
                 print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
             
@@ -1155,7 +1324,9 @@ class UnifiedTestRunner:
                 env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
                 env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
-                print("[INFO] ✅ E2E bypass key configured successfully")
+                # CRITICAL: Enable local config file loading for staging tests
+                env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_e2e_auth')
+                print("[INFO] ✅ E2E bypass key and staging config loading configured successfully")
             else:
                 print(f"[WARNING] Could not fetch E2E bypass key from Google Secrets Manager: {result.stderr}")
                 print("[WARNING] E2E tests requiring authentication may fail")
@@ -1451,6 +1622,16 @@ class UnifiedTestRunner:
             result = self._execute_single_category(category_name, args)
             results[category_name] = result
             
+            # Validate E2E test timing BEFORE recording results
+            if 'e2e' in category_name.lower():
+                timing_valid = self._validate_e2e_test_timing(category_name, result)
+                if not timing_valid:
+                    # Force test failure for 0-second e2e tests
+                    result["success"] = False
+                    result["errors"] = (result.get("errors", "") + 
+                                      "\n\n🚨 E2E TESTS FAILED: 0-second execution detected. "
+                                      "All e2e tests returning in 0 seconds are automatic hard failures.").strip()
+            
             # Record test results in tracker
             if self.test_tracker and TestRunRecord:
                 self._record_test_results(category_name, result, args.env)
@@ -1569,42 +1750,116 @@ class UnifiedTestRunner:
         else:
             timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
-            # Fix stdout flush issue by using run with explicit flushing
+            # Fix stdout flush issue with Windows-safe flushing
             import sys
-            sys.stdout.flush()
-            sys.stderr.flush()
+            try:
+                if hasattr(sys.stdout, 'flush') and not getattr(sys.stdout, 'closed', False):
+                    sys.stdout.flush()
+            except (ValueError, OSError):
+                pass  # Skip flush if stdout is closed or has issues
             
-            # Prepare environment for subprocess with proper isolation
+            try:
+                if hasattr(sys.stderr, 'flush') and not getattr(sys.stderr, 'closed', False):
+                    sys.stderr.flush()
+            except (ValueError, OSError):
+                pass  # Skip flush if stderr is closed or has issues
+            
+            # Prepare environment for subprocess with proper isolation and Windows encoding
             env_manager = get_env()
             subprocess_env = env_manager.get_subprocess_env()
+            
+            # CRITICAL: Apply Windows encoding fixes to subprocess environment
+            if sys.platform == "win32":
+                from shared.windows_encoding import get_subprocess_env
+                subprocess_env = get_subprocess_env(subprocess_env)
+            
             subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
             
-            # Use subprocess.Popen for better process control on Windows with Node.js
-            if sys.platform == "win32" and service == "frontend":
-                # Special handling for Node.js processes on Windows
+            # Use subprocess.Popen for better process control on Windows 
+            # CRITICAL FIX: Apply Windows file handle management to all services, not just frontend
+            if sys.platform == "win32":
+                # Special handling for all processes on Windows to prevent I/O closed file errors
+                # Configure Windows-specific creation flags and file handle management
+                creationflags = 0
+                if sys.platform == "win32":
+                    creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+                
+                # CRITICAL: Windows-specific subprocess environment already set by get_subprocess_env above
+                # Add additional Windows-specific variables for testing stability
+                subprocess_env.update({
+                    'PYTHONLEGACYWINDOWSSTDIO': '0',  # Use new Windows stdio for better Unicode support
+                    'PYTHONDONTWRITEBYTECODE': '1',  # Prevent .pyc files during testing
+                })
+                
+                # CRITICAL: Use explicit encoding and error handling for Windows Unicode issues
                 process = subprocess.Popen(
                     cmd,
                     cwd=config["path"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
+                    stdin=subprocess.PIPE,  # Provide stdin to prevent handle issues
                     shell=True,
                     text=True,
                     encoding='utf-8',
-                    errors='replace',
+                    errors='replace',  # CRITICAL: Replace invalid characters instead of failing
                     env=subprocess_env,
-                    # Use CREATE_NEW_PROCESS_GROUP on Windows to isolate process tree
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+                    creationflags=creationflags,
+                    # CRITICAL: Close file descriptors on Windows to prevent leaks
+                    close_fds=False,  # Keep False on Windows as it's incompatible with shell=True
+                    # Additional Windows-specific options to prevent encoding issues
+                    bufsize=0  # Unbuffered to prevent issues with mixed text/binary
                 )
                 
                 # Track the process for automatic cleanup
                 track_subprocess(process)
                 
                 try:
+                    # CRITICAL: Close stdin immediately to prevent hanging
+                    process.stdin.close()
                     stdout, stderr = process.communicate(timeout=timeout_seconds)
                     returncode = process.returncode
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
                     cleanup_subprocess(process, timeout=5, force=True)
+                    raise
+                except Exception as e:
+                    # CRITICAL: Robust error handling for Windows I/O issues in process communication
+                    error_messages = [
+                        f"[WARNING] Process communication error: {e}",
+                        f"[DEBUG] Error type: {type(e)}",
+                        f"[DEBUG] Error args: {e.args}"
+                    ]
+                    
+                    # Try to get full traceback safely
+                    try:
+                        import traceback
+                        error_messages.append(f"[DEBUG] Full traceback: {traceback.format_exc()}")
+                    except Exception:
+                        error_messages.append("[DEBUG] Unable to get full traceback")
+                    
+                    # Print error messages with I/O error resilience
+                    for msg in error_messages:
+                        try:
+                            print(msg)
+                        except Exception:
+                            # If print fails, try direct stderr write
+                            try:
+                                if hasattr(sys.stderr, 'write') and not getattr(sys.stderr, 'closed', False):
+                                    sys.stderr.write(msg + '\n')
+                                    sys.stderr.flush()
+                            except Exception:
+                                # Complete failure - continue without logging
+                                pass
+                    
+                    # Try to clean up gracefully
+                    try:
+                        cleanup_subprocess(process, timeout=2)
+                    except Exception as cleanup_e:
+                        try:
+                            print(f"[DEBUG] Cleanup error: {cleanup_e}")
+                        except Exception:
+                            # Ignore if we can't print the cleanup error
+                            pass
                     raise
                 finally:
                     # Always ensure process is cleaned up
@@ -1613,11 +1868,11 @@ class UnifiedTestRunner:
                 result = subprocess.CompletedProcess(
                     args=cmd,
                     returncode=returncode,
-                    stdout=stdout,
-                    stderr=stderr
+                    stdout=stdout if 'stdout' in locals() else "",
+                    stderr=stderr if 'stderr' in locals() else ""
                 )
             else:
-                # Use standard subprocess.run for other cases
+                # Use standard subprocess.run for non-Windows platforms
                 result = subprocess.run(
                     cmd,
                     cwd=config["path"],
@@ -1654,6 +1909,11 @@ class UnifiedTestRunner:
             )
         except Exception as e:
             print(f"[ERROR] Failed to run {service} tests: {e}")
+            print(f"[DEBUG] Exception type: {type(e)}")
+            print(f"[DEBUG] Exception args: {e.args}")
+            import traceback
+            print(f"[DEBUG] Full exception traceback:")
+            print(traceback.format_exc())
             success = False
             result = None
         
@@ -2048,6 +2308,57 @@ class UnifiedTestRunner:
         test_counts["total"] = test_counts["passed"] + test_counts["failed"]
         
         return test_counts
+    
+    def _validate_e2e_test_timing(self, category_name: str, result: Dict) -> bool:
+        """Validate that e2e tests have non-zero execution time.
+        
+        CRITICAL: E2E tests returning in 0 seconds are automatic hard failures.
+        This indicates tests are not actually executing or are being skipped/mocked.
+        See STAGING_100_TESTS_REPORT.md for context.
+        """
+        if not category_name or 'e2e' not in category_name.lower():
+            return True  # Only validate e2e tests
+            
+        duration = result.get("duration", 0)
+        output = result.get("output", "")
+        
+        # Check for 0-second test patterns in output
+        import re
+        zero_time_pattern = r'\[(0\.00+s|0s)\]'  # Matches [0.00s], [0.000s], [0s]
+        zero_time_matches = re.findall(zero_time_pattern, output)
+        
+        # Count actual test executions with 0 time
+        test_pattern = r'(test_\w+).*?\[(\d+\.\d+s|\d+s)\]'
+        all_tests = re.findall(test_pattern, output)
+        zero_time_tests = [(test, time) for test, time in all_tests if time in ['0.00s', '0.000s', '0s']]
+        
+        if zero_time_tests:
+            print(f"\n{'='*60}")
+            print(f"🚨 CRITICAL E2E TEST FAILURE: 0-SECOND EXECUTION DETECTED")
+            print(f"{'='*60}")
+            print(f"Category: {category_name}")
+            print(f"Total tests with 0-second execution: {len(zero_time_tests)}")
+            print(f"\nTests that returned in 0 seconds (AUTOMATIC HARD FAIL):")
+            for test_name, exec_time in zero_time_tests[:10]:  # Show first 10
+                print(f"  ❌ {test_name}: {exec_time}")
+            if len(zero_time_tests) > 10:
+                print(f"  ... and {len(zero_time_tests) - 10} more")
+            print(f"\nThis indicates tests are:")
+            print(f"  - Not actually executing")
+            print(f"  - Being skipped/mocked inappropriately")
+            print(f"  - Missing proper async/await handling")
+            print(f"  - Not connecting to real services")
+            print(f"\nSee reports/staging/STAGING_100_TESTS_REPORT.md for details")
+            print(f"{'='*60}\n")
+            return False
+            
+        # Also check if the entire category ran in under 1 second (suspicious for e2e)
+        if duration < 1.0 and result.get("success", False):
+            print(f"\n⚠️  WARNING: E2E category '{category_name}' completed in {duration:.2f}s")
+            print(f"   This is suspiciously fast for e2e tests that should connect to real services.")
+            print(f"   Verify tests are actually executing and not being skipped.\n")
+            
+        return True
     
     def _record_test_results(self, category_name: str, result: Dict, environment: str):
         """Record test execution results in the tracker."""
@@ -2886,8 +3197,7 @@ def main():
     
     # Set Docker environment variables from args
     env = get_env()
-    if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
-        env.set('TEST_USE_SHARED_DOCKER', 'false', 'docker_args')
+    # DEDICATED is now the default, no need for TEST_USE_SHARED_DOCKER
     if hasattr(args, 'docker_production') and args.docker_production:
         env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
     
@@ -2895,6 +3205,35 @@ def main():
     # This ensures environment isolation respects real services flag from the start
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
                   (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
+    
+    # WINDOWS SAFETY: Detect Windows and use safe runner for e2e tests
+    import platform
+    if platform.system() == 'Windows' and running_e2e:
+        print("[WARNING] Windows detected with e2e tests - using safe runner to prevent Docker crash")
+        print("[INFO] See tests/e2e/WINDOWS_SAFE_TESTING_GUIDE.md for details")
+        
+        # Use the safe runner script for e2e tests on Windows
+        import subprocess
+        safe_runner = PROJECT_ROOT / 'tests' / 'e2e' / 'run_safe_windows.py'
+        if safe_runner.exists():
+            # Build command for safe runner
+            cmd = [sys.executable, str(safe_runner)]
+            if args.category == 'e2e':
+                # Run all e2e tests safely
+                pass  # Default behavior
+            elif args.categories and 'e2e' in args.categories:
+                # Run specific e2e tests
+                pass  # Will handle all e2e tests
+            
+            print(f"[INFO] Executing: {' '.join(cmd)}")
+            result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+            sys.exit(result.returncode)
+        else:
+            print("[WARNING] Safe runner not found, proceeding with caution...")
+            # Set safety environment variables
+            env.set('PYTEST_XDIST_WORKER_COUNT', '1', 'windows_safety')
+            env.set('PYTEST_TIMEOUT', '120', 'windows_safety')
+            env.set('PYTHONDONTWRITEBYTECODE', '1', 'windows_safety')
                   
     if args.env in ['staging', 'dev'] or args.real_services or running_e2e:
         env.set('USE_REAL_SERVICES', 'true', 'main_early_setup')

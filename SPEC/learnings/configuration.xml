@@ -22,7 +22,7 @@
                 configuration cascade.
             </problem>
             <root_cause>
-                - DATABASE_URL environment variable not properly loaded in staging
+                - #removed-legacyenvironment variable not properly loaded in staging
                 - Configuration system allows localhost fallback even in staging environment
                 - No validation that staging environment uses appropriate database configuration
                 - Environment detection (NETRA_ENVIRONMENT, K_SERVICE) not enforcing staging requirements
@@ -33,7 +33,7 @@
                 <symptom>No errors raised when staging uses development configuration</symptom>
             </symptoms>
             <prevention_measures>
-                <measure>Validate DATABASE_URL in staging startup to reject localhost patterns</measure>
+                <measure>Validate #removed-legacyin staging startup to reject localhost patterns</measure>
                 <measure>Enforce staging-specific database names and hosts</measure>
                 <measure>Add environment detection that prevents inappropriate fallbacks</measure>
                 <measure>Create failing tests that verify staging configuration requirements</measure>

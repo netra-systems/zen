@@ -148,6 +148,210 @@ class AuthConfig:
         from shared.isolated_environment import get_env
         return get_env().get("REDIS_DISABLED", "false").lower() == "true"
     
+    # CORS Configuration - delegate to SSOT
+    @staticmethod
+    def get_cors_origins() -> list[str]:
+        """Get CORS origins - delegates to SSOT."""
+        return get_auth_env().get_cors_origins()
+    
+    # API Configuration
+    @staticmethod
+    def get_api_base_url() -> str:
+        """Get API base URL (backend service URL)."""
+        return get_auth_env().get_backend_url()
+    
+    # Environment Checks - delegate to SSOT
+    @staticmethod
+    def is_development() -> bool:
+        """Check if running in development environment."""
+        return get_auth_env().is_development()
+    
+    @staticmethod
+    def is_production() -> bool:
+        """Check if running in production environment."""
+        return get_auth_env().is_production()
+    
+    @staticmethod
+    def is_test() -> bool:
+        """Check if running in test environment."""
+        return get_auth_env().is_testing()
+    
+    # OAuth Helper Methods - delegate to SSOT
+    @staticmethod
+    def is_google_oauth_enabled() -> bool:
+        """Check if Google OAuth is enabled (has both client ID and secret)."""
+        client_id = get_auth_env().get_oauth_google_client_id()
+        client_secret = get_auth_env().get_oauth_google_client_secret()
+        return bool(client_id and client_secret)
+    
+    @staticmethod
+    def get_google_oauth_redirect_uri() -> str:
+        """Get Google OAuth redirect URI."""
+        # DEPRECATED method preserved for backward compatibility
+        # This should eventually be replaced by using GoogleOAuthProvider directly
+        auth_url = get_auth_env().get_auth_service_url()
+        return f"{auth_url}/auth/callback/google"
+    
+    @staticmethod
+    def get_google_oauth_scopes() -> list[str]:
+        """Get Google OAuth scopes."""
+        # Standard Google OAuth scopes for user identification
+        return ["openid", "email", "profile"]
+    
+    # Database Detail Methods - delegate to SSOT
+    @staticmethod
+    def get_database_host() -> str:
+        """Get database host - delegates to SSOT."""
+        return get_auth_env().get_postgres_host()
+    
+    @staticmethod
+    def get_database_port() -> int:
+        """Get database port - delegates to SSOT."""
+        return get_auth_env().get_postgres_port()
+    
+    @staticmethod
+    def get_database_name() -> str:
+        """Get database name - delegates to SSOT."""
+        return get_auth_env().get_postgres_db()
+    
+    @staticmethod
+    def get_database_user() -> str:
+        """Get database user - delegates to SSOT."""
+        return get_auth_env().get_postgres_user()
+    
+    @staticmethod
+    def get_database_password() -> str:
+        """Get database password - delegates to SSOT."""
+        return get_auth_env().get_postgres_password()
+    
+    # Database Pool Methods - provide reasonable defaults
+    @staticmethod
+    def get_database_pool_size() -> int:
+        """Get database pool size with environment-specific defaults."""
+        env = get_auth_env().get_environment()
+        if env == "production":
+            return 20  # Higher pool for production
+        elif env == "staging":
+            return 10  # Moderate pool for staging
+        elif env == "development":
+            return 5   # Small pool for development
+        elif env == "test":
+            return 2   # Minimal pool for tests
+        else:
+            return 5   # Default
+    
+    @staticmethod
+    def get_database_max_overflow() -> int:
+        """Get database max overflow with environment-specific defaults."""
+        env = get_auth_env().get_environment()
+        if env == "production":
+            return 30  # Higher overflow for production
+        elif env == "staging":
+            return 15  # Moderate overflow for staging
+        elif env == "development":
+            return 5   # Small overflow for development
+        elif env == "test":
+            return 2   # Minimal overflow for tests
+        else:
+            return 10  # Default
+    
+    # Redis Detail Methods - delegate to SSOT
+    @staticmethod
+    def get_redis_host() -> str:
+        """Get Redis host - delegates to SSOT."""
+        return get_auth_env().get_redis_host()
+    
+    @staticmethod
+    def get_redis_port() -> int:
+        """Get Redis port - delegates to SSOT."""
+        return get_auth_env().get_redis_port()
+    
+    @staticmethod
+    def get_redis_db() -> int:
+        """Get Redis database number with environment-specific defaults."""
+        env = get_auth_env().get_environment()
+        if env == "production":
+            return 0   # Production DB
+        elif env == "staging":
+            return 1   # Staging DB
+        elif env == "development":
+            return 2   # Development DB
+        elif env == "test":
+            return 3   # Test DB
+        else:
+            return 0   # Default
+    
+    @staticmethod
+    def get_redis_password() -> str:
+        """Get Redis password - typically None for development/test."""
+        # AuthEnvironment doesn't expose this directly, return empty for local env
+        env = get_auth_env().get_environment()
+        if env in ["production", "staging"]:
+            # Production/staging would have passwords set via REDIS_URL
+            from shared.isolated_environment import get_env
+            return get_env().get("REDIS_PASSWORD", "")
+        else:
+            return ""  # No password for local development/test
+    
+    @staticmethod
+    def is_redis_enabled() -> bool:
+        """Check if Redis is enabled - opposite of is_redis_disabled."""
+        return not AuthConfig.is_redis_disabled()
+    
+    @staticmethod
+    def get_redis_default_ttl() -> int:
+        """Get Redis default TTL in seconds - delegates to SSOT session TTL."""
+        return get_auth_env().get_session_ttl()
+    
+    # Security Methods - delegate to SSOT where available
+    @staticmethod
+    def get_bcrypt_rounds() -> int:
+        """Get bcrypt rounds - delegates to SSOT."""
+        return get_auth_env().get_bcrypt_rounds()
+    
+    @staticmethod
+    def get_password_min_length() -> int:
+        """Get minimum password length - delegates to SSOT."""
+        return get_auth_env().get_min_password_length()
+    
+    @staticmethod
+    def get_max_login_attempts() -> int:
+        """Get max login attempts - delegates to SSOT."""
+        return get_auth_env().get_max_failed_login_attempts()
+    
+    @staticmethod
+    def get_account_lockout_duration_minutes() -> int:
+        """Get account lockout duration in minutes."""
+        # Convert seconds to minutes
+        return get_auth_env().get_account_lockout_duration() // 60
+    
+    @staticmethod
+    def get_session_timeout_minutes() -> int:
+        """Get session timeout in minutes."""
+        # Convert seconds to minutes  
+        return get_auth_env().get_session_ttl() // 60
+    
+    @staticmethod
+    def require_email_verification() -> bool:
+        """Check if email verification is required - delegates to SSOT."""
+        return get_auth_env().require_password_complexity()  # Use complexity as proxy
+    
+    @staticmethod
+    def get_token_blacklist_ttl_hours() -> int:
+        """Get token blacklist TTL in hours."""
+        # Use JWT refresh expiry as reasonable default
+        return get_auth_env().get_refresh_token_expiration_days() * 24
+    
+    @staticmethod
+    def get_rate_limit_requests_per_minute() -> int:
+        """Get rate limit requests per minute - delegates to SSOT."""
+        return get_auth_env().get_login_rate_limit()
+    
+    @staticmethod
+    def get_allowed_origins() -> list[str]:
+        """Get allowed origins (same as CORS origins) - delegates to SSOT."""
+        return get_auth_env().get_cors_origins()
+    
     # Logging and Status
     @staticmethod
     def log_configuration():

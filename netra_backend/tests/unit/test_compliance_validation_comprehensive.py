@@ -5,7 +5,6 @@ Validates GDPR, SOC2, and audit requirements for enterprise compliance.
 import pytest
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

@@ -804,9 +804,116 @@ async def cleanup_all_database_utilities():
     _global_db_utilities.clear()
 
 
+# ========== Legacy Compatibility Layer ==========
+
+class DatabaseTestManager:
+    """
+    SSOT Database Test Manager - provides backward compatibility for legacy tests.
+    
+    This class maintains compatibility with existing test imports while providing
+    modern database test utilities. It delegates to DatabaseTestUtility internally
+    but maintains the legacy interface that existing tests expect.
+    
+    Business Value: Platform/Internal - Maintains test compatibility while migrating to SSOT
+    Ensures existing tests continue working during SSOT migration without breaking changes.
+    
+    Usage (Legacy Pattern):
+        manager = DatabaseTestManager()
+        await manager.initialize()
+        session = await manager.create_session()
+    
+    Modern Pattern (Preferred):
+        async with DatabaseTestUtility() as db_util:
+            session = await db_util.get_test_session()
+    """
+    
+    def __init__(self, service: str = "netra_backend", env: Optional[Any] = None):
+        """Initialize DatabaseTestManager with backward compatibility."""
+        self._utility = DatabaseTestUtility(service=service, env=env)
+        self.engine = None
+        self.session = None
+        self.connection_pool = None
+        self.is_initialized = False
+        
+    async def initialize(self):
+        """Initialize the database manager (legacy interface)."""
+        await self._utility.initialize()
+        self.engine = self._utility.async_engine
+        self.is_initialized = True
+        logger.debug("DatabaseTestManager initialized (legacy compatibility)")
+        
+    async def create_session(self) -> AsyncSession:
+        """Create a database session (legacy interface)."""
+        if not self.is_initialized:
+            await self.initialize()
+        
+        session = await self._utility.get_test_session()
+        self.session = session  # Store for compatibility
+        return session
+        
+    async def close_session(self, session: Optional[AsyncSession] = None):
+        """Close a database session (legacy interface)."""
+        if session:
+            await session.close()
+            if session in self._utility.active_sessions:
+                self._utility.active_sessions.remove(session)
+        elif self.session:
+            await self.session.close()
+            if self.session in self._utility.active_sessions:
+                self._utility.active_sessions.remove(self.session)
+            
+    async def execute_query(self, query: str, params: Optional[Dict] = None):
+        """Execute a database query (legacy interface)."""
+        if not self.session:
+            self.session = await self.create_session()
+        
+        return await self._utility.execute_query(self.session, query, params)
+        
+    async def cleanup(self):
+        """Clean up database resources (legacy interface)."""
+        await self._utility.cleanup()
+        self.is_initialized = False
+        self.engine = None
+        self.session = None
+        logger.debug("DatabaseTestManager cleanup completed (legacy compatibility)")
+        
+    def get_connection_string(self) -> str:
+        """Get database connection string (legacy interface)."""
+        return self._utility._get_test_database_url()
+        
+    @property
+    def health_check(self):
+        """Health check method (legacy interface)."""
+        async def _health_check():
+            status = await self._utility.get_connection_status()
+            return {"status": "healthy" if status["can_connect"] else "unhealthy"}
+        
+        return _health_check
+        
+    # Delegate additional methods to utility
+    async def create_test_user(self, session: Optional[AsyncSession] = None, **kwargs):
+        """Create test user (enhanced legacy interface)."""
+        if not session:
+            session = self.session or await self.create_session()
+        return await self._utility.create_test_user(session, **kwargs)
+        
+    async def create_test_thread(self, user_id: str, session: Optional[AsyncSession] = None, **kwargs):
+        """Create test thread (enhanced legacy interface)."""
+        if not session:
+            session = self.session or await self.create_session()
+        return await self._utility.create_test_thread(session, user_id, **kwargs)
+        
+    async def create_test_message(self, thread_id: str, session: Optional[AsyncSession] = None, **kwargs):
+        """Create test message (enhanced legacy interface)."""
+        if not session:
+            session = self.session or await self.create_session()
+        return await self._utility.create_test_message(session, thread_id, **kwargs)
+
+
 # Export SSOT database utilities
 __all__ = [
     'DatabaseTestUtility',
+    'DatabaseTestManager',  # Added for legacy compatibility
     'PostgreSQLTestUtility', 
     'ClickHouseTestUtility',
     'DatabaseTestMetrics',

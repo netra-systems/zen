@@ -41,8 +41,8 @@
         # REMOVED_SYNTAX_ERROR: from datetime import datetime
         # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Any
         # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
-        # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
+        # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
@@ -327,7 +327,7 @@
     # Removed problematic line: async def test_user_state_isolation(self, mock_registry, mock_websocket_bridge):
         # REMOVED_SYNTAX_ERROR: """Test that user execution states are properly isolated."""
         # Create execution engine instance using the factory method
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
 
         # Create test user contexts
         # REMOVED_SYNTAX_ERROR: user1_context = UserExecutionContext( )

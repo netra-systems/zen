@@ -14,9 +14,9 @@
     </learning>
 
     <learning id="database-url-sslmode">
-        <title>DATABASE_URL requires sslmode parameter</title>
-        <description>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections</description>
-        <solution>Append ?sslmode=require to DATABASE_URL for Cloud SQL connections</solution>
+        <title>#removed-legacyrequires sslmode parameter</title>
+        <description>#removed-legacyin staging/production MUST include sslmode=require parameter for Cloud SQL connections</description>
+        <solution>Append ?sslmode=require to #removed-legacyfor Cloud SQL connections</solution>
     </learning>
 
     <learning id="frontend-api-url">
@@ -28,7 +28,7 @@
     <learning id="health-check-staging">
         <title>Health check endpoint configuration</title>
         <description>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured</description>
-        <solution>Check DATABASE_URL and SSL settings, ensure Cloud SQL instance is accessible</solution>
+        <solution>Check #removed-legacyand SSL settings, ensure Cloud SQL instance is accessible</solution>
     </learning>
 
     <learning id="oauth-flow-staging">

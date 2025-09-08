@@ -7,9 +7,6 @@ import uuid
 import pytest
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -261,10 +258,18 @@ class TestAuthConfigRedis:
     def test_redis_disabled_in_test(self):
         """Test Redis can be disabled in test"""
         env = get_env()
-        env.set("TEST_DISABLE_REDIS", "true", "test")
+        # Save current value to restore later
+        original_value = env.get("REDIS_DISABLED")
+        
+        env.set("REDIS_DISABLED", "true", "test")
         enabled = AuthConfig.is_redis_enabled()
         assert enabled is False
-        env.set("TEST_DISABLE_REDIS", "false", "test")  # Reset
+        
+        # Restore original value
+        if original_value is not None:
+            env.set("REDIS_DISABLED", original_value, "test")
+        else:
+            env.delete("REDIS_DISABLED", "test")
     
     def test_get_redis_ttl(self):
         """Test getting Redis TTL settings"""

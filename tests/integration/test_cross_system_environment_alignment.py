@@ -470,7 +470,7 @@ class TestCrossSystemEnvironmentAlignment:
         
         assert len(critical_misalignments) == 0, (
             f"Critical configuration misalignments detected: {critical_misalignments}. "
-            f"JWT_SECRET_KEY and DATABASE_URL must be identical across services."
+            f"JWT_SECRET_KEY and #removed-legacymust be identical across services."
         )
     
     @pytest.mark.asyncio

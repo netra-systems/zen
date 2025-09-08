@@ -16,7 +16,7 @@
         <examples>
             <example>
                 PostgreSQL falling back to "postgresql://postgres:postgres@localhost:5432/netra"
-                when DATABASE_URL was not set, causing connection failures in staging/production.
+                when #removed-legacywas not set, causing connection failures in staging/production.
             </example>
             <example>
                 JWT secret falling back to "dev-secret-key-DO-NOT-USE-IN-PRODUCTION" when
@@ -37,7 +37,7 @@
         
         <implementation>
             <step>
-                Remove all fallback to default/mock database URLs. If DATABASE_URL or POSTGRES_* 
+                Remove all fallback to default/mock database URLs. If #removed-legacyor POSTGRES_* 
                 environment variables are not set in staging/production, throw ConfigurationError immediately.
                 In test/development, warn but allow empty configuration for unit testing.
             </step>
@@ -65,7 +65,7 @@ url = self._env.get("DATABASE_URL")
 if not url:
     raise ConfigurationError(
         f"No PostgreSQL configuration found for {self._environment} environment. "
-        "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
+        "Set either POSTGRES_HOST/USER/DB or #removed-legacyenvironment variables."
     )
                 ]]></code>
             </pattern>

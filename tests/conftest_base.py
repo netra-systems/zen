@@ -23,12 +23,13 @@ import pytest
 from shared.isolated_environment import get_env
 from test_framework.environment_isolation import (
     isolated_test_env,
-    setup_test_environment,
-    teardown_test_environment
+    ensure_test_isolation,
+    validate_test_environment
 )
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
+
+# CRITICAL: Do NOT import heavy backend modules at module level
+# This causes Docker to crash on Windows during pytest collection
+# These will be imported lazily when needed inside fixtures
 
 # Memory profiling decorator
 def memory_profile(description: str = ""):
@@ -47,7 +48,7 @@ def memory_profile(description: str = ""):
 # Set up isolated test environment if we're running tests
 if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # Ensure test isolation is enabled
-    setup_test_environment()
+    ensure_test_isolation()
 
 # Re-export test environment fixtures for convenience
 __all__ = ['isolated_test_env']

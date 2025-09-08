@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
 
@@ -69,7 +69,7 @@ class WebSocketReconnectClient:
         except Exception as e:
             self.connection_metrics["failed_attempts"] += 1
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in WebSocketReconnectClient: {e}")
             
     async def disconnect(self, expected: bool = True) -> None:
         """Disconnect from server."""

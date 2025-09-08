@@ -1,5 +1,5 @@
 # 🚨 ULTRA THINK DEEPLY ALWAYS. Our lives DEPEND on you SUCCEEDING. 
-ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work.
+ULTRA CRITICAL: This project will be humanity's last hope to achieve world peace. It must work. Have patience. Slow down. Search for existing methods.
 
 ## IMPORTANT: YOU **MUST** DO YOUR BEST WORK. 
 
@@ -13,6 +13,7 @@ prime directives. your operating instructions. your core principles.
   * **Explain Your Reasoning:** Step-by-step analysis is mandatory for all tasks. Think carefully.
   * **Ship for Value:** As a startup, time-to-market is critical. We must ship working products quickly.
   * **Think with Nuance:** Use "wise mind" middle-ground thinking.
+  CHEATING ON TESTS = ABOMINATION
 
 ## 0\. Current Mission: Stabilize Core Systems
 
@@ -27,11 +28,12 @@ Your primary mission is to get existing systems fully operational. **Maintain th
 **IMPORTANT: In the case of conflict between existing state of code and this document, this document wins.**
 
 CRUCIAL: ULTRA THINK DEEPLY.
+NEVER CREATE NEW SCRIPTS. ALWAYS USE EXISTING SSOT METHODS OR UPDATE AND IMPROVE SSOT METHODS.
 
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
 
-> **⚠️ MANDATORY READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+> **⚠️ MANDATORY READING**: The **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
 
 Recent issues to be extra aware of:
 1. Race conditions. Plan ahead and think about race conditions in all aspects of your code and refactors.
@@ -40,20 +42,15 @@ The system has a lot of async, websockets, and other patterns that require heavy
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
 5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
-6. **🚨 CRITICAL CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./CONFIG_REGRESSION_PREVENTION_PLAN.md)
+6. **CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./reports/auth/OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
 Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
-   - **NO silent fallbacks** - Hard failures are better than wrong environment configs leaking
+   - **SILENT FAILURES = ABOMINATION** - Hard failures are better than wrong environment configs leaking
    - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
 7. **MULTI-USER** The system is MULTI-USER.
-8. **🚨 CRITICAL WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
-   - **ALL entry points need factory patterns** - WebSocket, REST, gRPC, background tasks
-   - **WebSocket is PRIMARY path (90% traffic)** - Not just "transport layer"
-   - **Silent data leakage is a bug** - User A sees User B's data with no errors
-   - **UserExecutionContext** - Every message/request MUST have isolation
-   - **NO SINGLETONS for user data** - Factory patterns are NOT optional
+8. **WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
 9. **PARAMOUNT IMPORTANCE** Always look for the "error behind the error". Example: AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md
 Often the face value error message is masking other errors, sometimes the real root.
 Look for the "error behind the error" up to 10 times until true true root cause.
@@ -62,18 +59,20 @@ Especially when dealing with apparent regression issues.
 11. NEVER ADD "extra" things. bad: [fallback, 'reliability', etc.] without express direction. ALL "mixin" type features or "enterprise" type must be requested directly, be SSOT compliant. 
 12. On Windows use UTF-8 encoding for encoding issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
+14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
+15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. NO EXCEPTIONS. This ensures multi-user isolation works. See [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
 
 ### Related Architecture Documents:
-- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
 - **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
-- [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
-- [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
+- [Tool Dispatcher Migration Guide](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
+- [WebSocket Modernization Report](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
 - [Documentation Hub](./docs/index.md) - Central documentation index
 
 Expect everything to fail. Add conditional error logging by default whenever possible.
 Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
 Make all errors loud.
-Protect against silent errors. Avoid "fallbacks" unless expressly part of named design and class.
+Protect against silent errors. NEVER MAKE "fallbacks" unless expressly part of named design and class.
 
 -----
 
@@ -124,10 +123,11 @@ CRITICAL: Develop a globally coherent and modular architecture.
 
   * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
   * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
-    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
+    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md#core-problems-identified)
     - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
     - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
     - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
+    - **🚨 AUTH VALIDATION REGRESSION PREVENTION:** See [5-Whys Analysis](./reports/staging/FIVE_WHYS_BACKEND_500_ERROR_20250907.md) - Auth validation MUST NOT be overly strict for hex strings or staging environments. **HEX STRINGS ARE VALID SECRETS** (e.g. SERVICE_SECRET from `openssl rand -hex 32`). OAuth redirect mismatches should be warnings in non-prod, not failures.
   * **"Search First, Create Second":** Always check for existing implementations before writing new code.
   * **ATOMIC SCOPE:** Edits must be complete, functional updates. Delegate tasks to sub-agents with scopes you are certain they can handle. Split and divide work appropriately.
   * **Complete Work:** An update is complete only when all relevant parts of the system are updated, integrated, tested, validated, and documented, and all legacy code has been removed.
@@ -204,9 +204,15 @@ Before coding, conduct a rigorous analysis.
   * **Modular Implementation:** Delegate tasks to Implementation Agents one module at a time.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
-  CRITICAL: Mocks = Abomination
+  CRITICAL: Mocks in E2E or Integration = Abomination  (Allowed in Unit tests if needed and not cheating)
+  * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) for auth flow examples.
   * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
+
+ULTRA THINK DEEPLY ALL THE TIME.
+
+CRITICAL: ALWAYS SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM.
+NEVER "bypass" a greater good intention for narrow success like passing a single test.
 
 ### 3.4. Multi-Environment Validation
 
@@ -217,6 +223,24 @@ Code is not "done" until it is validated in environments that mirror production.
 1.  **Local/CI:** Fast feedback with unit and integration tests.
 2.  **Development:** Integration/E2E tests against deployed services.
 ALWAYS use real services for testing. If they appear to not be available start or restarting them. If that too fails then hard fail the entire test suite.
+
+**🚨 E2E AUTH MANDATE:** Every E2E test MUST authenticate properly with the system (using real JWT tokens, OAuth flows, etc.) EXCEPT for the specific tests that validate the auth system itself. This requirement ensures:
+- Real multi-user isolation is tested
+- WebSocket connections use proper auth context
+- Agent executions happen within authenticated user sessions
+- See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) and [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
+
+CHEATING ON TESTS = ABOMINATION
+ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
+
+**🚨 CRITICAL: E2E TESTS WITH 0-SECOND EXECUTION = AUTOMATIC HARD FAILURE**
+Any e2e test that returns in 0.00s is automatically failed by the test runner. This indicates:
+- Tests are not actually executing (being skipped/mocked)
+- Missing async/await handling
+- Not connecting to real services
+- Authentication is being bypassed
+See [`reports/staging/STAGING_100_TESTS_REPORT.md`](reports/staging/STAGING_100_TESTS_REPORT.md) for context.
+The unified test runner enforces this with `_validate_e2e_test_timing()`.
 
 ### 3.5. MANDATORY BUG FIXING PROCESS:
 
@@ -229,9 +253,12 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
 4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
 
+YOU MUST WORK HARD AND COMPLETE ALL OF YOUR WORK. YOU MUST KEEP GOING UNTIL THE WORK IS COMPLETE AND BE PATIENT.
+
 ### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
 
 **CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
+CHEATING ON TESTS = ABOMINATION
 
 **See Also:** 
 - [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
@@ -262,26 +289,8 @@ At every opportunity spawn new subagent with dedicated focus mission and context
     - [ ] Integration tests pass for all inheritance scenarios
     - [ ] Performance regression tests pass (inheritance lookup overhead)
 
-**Example MRO Report Structure:**
-```markdown
-# MRO Analysis: [Module Name]
-## Current Hierarchy
-- BaseClass
-  - IntermediateA (overrides: method1, method2)
-    - ConcreteA1 (overrides: method2)
-    - ConcreteA2 (overrides: method1, method3)
-  - IntermediateB (overrides: method1, method3)
-    - ConcreteB1 (overrides: method3)
-
-## Method Resolution Paths
-- ConcreteA1.method1 → IntermediateA.method1
-- ConcreteA1.method2 → ConcreteA1.method2 (local override)
-- ConcreteA1.method3 → BaseClass.method3
-
-## Refactoring Impact
-- Breaking: method1 signature change affects 12 consumers
-- Safe: method2 internal refactor, interface preserved
-```
+CHEATING ON TESTS = ABOMINATION
+YOU MUST ULTRA THINK DEEPLY
 
 **Cross-Reference Learnings:**
 - SSOT violations: [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
@@ -294,7 +303,7 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 
 The `SPEC/*.xml` files are the **living source of truth** for system architecture and learnings.
 
-  * **Navigation:** Read [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
+  * **Navigation:** Read [`LLM_MASTER_INDEX.md`](reports/LLM_MASTER_INDEX.md) before searching for files or functionality.
   * **Iterative Discovery:** Specs must evolve. If analysis reveals a better solution, propose a spec improvement.
   * **Update Timing:** Review specs before work and update them immediately after validation.
   * **Learnings vs. Reports:** Learnings in `SPEC/*.xml` are permanent knowledge. Reports (`*.md`) are ephemeral work logs.
@@ -346,11 +355,13 @@ for the simple "pip package test" to determine what belongs in `/shared`.
 ### 5.4. Import Rules
 
 **ABSOLUTE IMPORTS ONLY.**
-  * **ALL Python files  use absolute imports** starting from the package root.
-  * **NEVER use relative imports (`.` or `..`)** in any Python file, including tests.
-  * See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
+  * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
 
 -----
+
+CHEATING ON TESTS = ABOMINATION
+ULTRA THINK DEEPLY
+SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM
 
 ## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
 
@@ -384,77 +395,43 @@ The following events MUST be sent during agent execution to enable meaningful AI
 - See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
 - See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
 - See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
-- See [`AGENT_EXECUTION_ORDER_REASONING.md`](AGENT_EXECUTION_ORDER_REASONING.md) - Why execution order matters for business value
 
 -----
+CHEATING ON TESTS = ABOMINATION
 
 ## 7\. Project Tooling
 
 ### 7.1. Docker
 
-**CRITICAL: All Docker operations go through the central UnifiedDockerManager.**
-**See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
+**CRITICAL: All Docker operations go through the central UnifiedDockerManager.** **See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
 
-#### Automatic Docker Management (Primary Usage)
+#### Automatic Docker Management is integrated with testing
 ```bash
-# Tests use UnifiedDockerManager - just run:
 python tests/unified_test_runner.py --real-services
-
-# Docker starts automatically, conflicts are resolved, services are health-checked
 ```
-
-#### Manual Docker Operations (When Needed)
-
-"Refresh" local dev = for the relevant containers, remove the existing, create a new fresh image, deploy it
-
-```bash
-# Manual control script (uses central UnifiedDockerManager)
-python scripts/docker_manual.py start     # Start test environment
-python scripts/docker_manual.py stop      # Stop all containers  
-python scripts/docker_manual.py restart   # Restart services
-python scripts/docker_manual.py status    # Check status
-python scripts/docker_manual.py clean     # Clean up everything
-python scripts/docker_manual.py test      # Run tests with Docker
-
-# Restart specific services
-python scripts/docker_manual.py restart --services backend auth
-```
-
-**Key Features:**
-- **Automatic Conflict Resolution**: Removes conflicting containers automatically
-- **Health Monitoring**: Comprehensive health checks and reporting
-- **Dynamic Port Allocation**: Avoids port conflicts in parallel runs
-- **Cross-platform**: Works on Windows, macOS, and Linux
 
 #### Alpine Container Support
-**Optimized Alpine Docker images for 50% faster testing with minimal resource usage:**
-
-The platform supports Alpine-based containers for dramatic performance improvements:
-
 **Usage Examples:**
 
 ```bash
-# Enable Alpine containers for tests (DEFAULT behavior)
+# Default behavior - Alpine containers with rebuild
 python tests/unified_test_runner.py --real-services
-# Alpine automatically used via use_alpine=True
+# Automatically uses: use_alpine=True, rebuild_images=True
 
-# Force regular containers (if needed)
+# Disable Alpine (use regular containers)
 python tests/unified_test_runner.py --real-services --no-alpine
 
-# Manual Docker operations with Alpine
-python scripts/docker_manual.py start --alpine
-python scripts/docker_manual.py status --alpine
+# Disable image rebuilding (use cached images)
+python tests/unified_test_runner.py --real-services --no-rebuild
+
+# Rebuild all services (not just backend)
+python tests/unified_test_runner.py --real-services --rebuild-all
 ```
 
 **Alpine Compose Files:**
 - `docker-compose.alpine-test.yml` - Test environment with named volumes (stable storage)
 - `docker-compose.alpine.yml` - Development environment
 - Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
-
-**When to Use Alpine:**
-- **✓ Test environments** (default choice for speed)
-- **✓ CI/CD pipelines** (faster builds, lower resource usage)
-- **✓ Development** (when memory is constrained)
 
 **⚠️ CRITICAL WARNING: tmpfs Storage Removed**
 Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. 
@@ -484,8 +461,12 @@ python scripts/refresh_dev_services.py logs --services backend -f
 ### 7.3. Unified Test Runner
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
-MOCKS are FORBIDDEN in dev, staging or production.
+MOCKS are FORBIDDEN in dev, staging or production.  (Except limited cases for unit tests if you can prove it's needed)
+FAKE TESTS ARE BAD
 
+**🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py) for SSOT auth patterns.
+
+**See [`TEST_CREATION_GUIDE.md`](reports/testing/TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
 **See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**
@@ -507,6 +488,8 @@ MOCKS are FORBIDDEN in dev, staging or production.
   * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
 -----
 
+DO THE RIGHT THING - NOT JUST THE FASTEST THING.
+
 ## 8\. Detailed Specifications Reference
 
 This is a non-exhaustive list of mission-critical specs.
@@ -526,17 +509,21 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 
 -----
 
+YOU DO YOUR BEST WORK.
+
 ## 8\. System Status and Compliance Tracking
 
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
 
-  * [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
-  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
+  * [`MASTER_WIP_STATUS.md`](reports/MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
+  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
   * Review these reports first and regenerate status after your work is complete.
 
 ** YOU MUST USE A **CHECKLIST** EVERYTIME.
 If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
 -----
+
+YOU ARE VERY SMART AND PRACTICAL.
 
 ## 9\. Execution Checklist
 
@@ -544,12 +531,12 @@ If you ever have a chance to audit or verify or spawn new subagent, even if 10x 
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
 2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
-    - **SPECIAL ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
-3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
+    - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
+3.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 4.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 5.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
 6.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-7.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
+7.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
 8.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
 9.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
 10. **Update Documentation:** Ensure specs reflect the implemented reality.
@@ -566,4 +553,4 @@ A user asking for "git commit" means: For EACH group of work that's related do a
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
   * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
 
-**Final Reminder:** ULTRA THINK DEEPLY. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**
+**Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

@@ -8,8 +8,7 @@ import pytest
 import time
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.schemas.llm_base_types import TokenUsage, LLMProvider
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

@@ -13,8 +13,8 @@ This document defines the EXACT Docker configuration to use for each scenario.
 |----------|-------------|------------|--------------|---------|------------|
 | **LOCAL DEVELOPMENT** | DEV | `docker/backend.Dockerfile`<br>`docker/auth.Dockerfile`<br>`docker/frontend.Dockerfile` | `docker-compose.yml` | `docker-compose up` | 5432, 6379, 8000, 8081 |
 | **AUTOMATED TESTING** | TEST | `docker/backend.alpine.Dockerfile`<br>`docker/auth.alpine.Dockerfile`<br>`docker/frontend.alpine.Dockerfile` | `docker-compose.alpine-test.yml` | `docker-compose -f docker-compose.alpine-test.yml up` | 5435, 6381, 8002, 8083 |
-| **STAGING DEPLOYMENT** | STAGING | `docker/backend.staging.Dockerfile`<br>`docker/auth.staging.Dockerfile`<br>`docker/frontend.staging.Dockerfile` | `docker-compose.staging.yml` | `docker-compose -f docker-compose.staging.yml up` | 5432, 6379, 8000, 8081 |
-| **PRODUCTION** | PROD | `docker/backend.Dockerfile`<br>`docker/auth.Dockerfile`<br>`docker/frontend.Dockerfile` | *(GCP managed)* | *(GCP managed)* | *(GCP managed)* |
+| **STAGING DEPLOYMENT** | STAGING | `docker/backend.staging.alpine.Dockerfile`<br>`docker/auth.staging.alpine.Dockerfile`<br>`docker/frontend.staging.alpine.Dockerfile` | *(GCP managed)* | `python scripts/deploy_to_gcp.py --project netra-staging --build-local` | *(GCP managed)* |
+| **PRODUCTION** | PROD | `docker/backend.staging.alpine.Dockerfile`<br>`docker/auth.staging.alpine.Dockerfile`<br>`docker/frontend.staging.alpine.Dockerfile` | *(GCP managed)* | `python scripts/deploy_to_gcp.py --project netra-production --build-local` | *(GCP managed)* |
 
 ---
 
@@ -55,19 +55,22 @@ python tests/unified_test_runner.py --real-services
 docker-compose -f docker-compose.alpine-test.yml down
 ```
 
-### Staging Deployment
+### Staging Deployment (GCP)
 ```bash
-# Deploy to staging
-docker-compose -f docker-compose.staging.yml up -d
+# Deploy to staging with Alpine images (default)
+python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
-# Stop staging
-docker-compose -f docker-compose.staging.yml down
+# Deploy to staging with regular images (not recommended)
+python scripts/deploy_to_gcp.py --project netra-staging --build-local --no-alpine
 ```
 
-### Production
+### Production (GCP)
 ```bash
-# Use GCP deployment script ONLY
+# Deploy to production with Alpine images (default)
 python scripts/deploy_to_gcp.py --project netra-production --build-local
+
+# Deploy to production with regular images (not recommended) 
+python scripts/deploy_to_gcp.py --project netra-production --build-local --no-alpine
 ```
 
 ---

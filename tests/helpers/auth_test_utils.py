@@ -52,9 +52,10 @@ class TestAuthHelper:
         """Initialize the test auth helper.
         
         Args:
-            environment: Optional environment override ('test', 'dev', etc.)
+            environment: Optional environment override ('test', 'dev', 'staging', etc.)
                         If None, will auto-detect from environment variables
         """
+        self.environment = environment
         self.jwt_helper = JWTTestHelper(environment)
     
     def create_test_token(self, user_id: str, email: Optional[str] = None) -> str:
@@ -77,8 +78,59 @@ class TestAuthHelper:
         if email is None:
             email = f"{user_id}@test.com"
         
+        # CRITICAL FIX: For staging environment, use special staging token creation
+        if self.environment == "staging":
+            return self.create_staging_token(user_id, email)
+        
         # Use default permissions for standard test scenarios
         return self.jwt_helper.create_access_token(user_id, email)
+    
+    def create_staging_token(self, user_id: str, email: Optional[str] = None) -> str:
+        """Create staging-specific token using unified JWT secret manager.
+        
+        CRITICAL FIX: This method ensures staging tokens are created with the EXACT
+        same secret resolution as the backend UserContextExtractor, fixing the
+        WebSocket 403 authentication failures.
+        
+        ASYNCIO FIX: Handle both sync and async contexts to prevent event loop conflicts.
+        
+        Args:
+            user_id: The user ID for the token
+            email: Optional email (defaults to {user_id}@netrasystems.ai)
+            
+        Returns:
+            A valid JWT token for staging testing
+            
+        Example:
+            auth_helper = TestAuthHelper(environment="staging")
+            token = auth_helper.create_staging_token("staging_user")
+        """
+        if email is None:
+            email = f"{user_id}@netrasystems.ai"
+        
+        # CRITICAL FIX: Handle both sync and async contexts
+        import asyncio
+        
+        try:
+            # Check if we're already in an event loop
+            loop = asyncio.get_running_loop()
+            # If we have a running loop, create a task and run it
+            task = loop.create_task(self.jwt_helper.get_staging_jwt_token(user_id, email))
+            # Use asyncio.wait_for to get the result synchronously from the async context
+            # This is a hack but necessary for the sync interface with async implementation
+            import concurrent.futures
+            import threading
+            
+            def run_async():
+                return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
+            
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(run_async)
+                return future.result(timeout=10)  # 10 second timeout
+                
+        except RuntimeError:
+            # No running event loop, safe to use asyncio.run()
+            return asyncio.run(self.jwt_helper.get_staging_jwt_token(user_id, email))
     
     def create_test_token_with_permissions(
         self, 

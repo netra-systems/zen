@@ -22,14 +22,14 @@ from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
 # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
-from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
+from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 logger = central_logger.get_logger(__name__)
@@ -113,15 +113,24 @@ class AgentWebSocketBridge(MonitorableComponent):
     # _instance: Optional['AgentWebSocketBridge'] = None
     # _lock = asyncio.Lock()
     
-    def __init__(self):
+    def __init__(self, user_context: Optional['UserExecutionContext'] = None):
         """Initialize bridge WITHOUT singleton pattern.
         
         MIGRATION NOTE: This bridge is now non-singleton. For per-user
         event emission, use create_user_emitter() factory method.
+        
+        Args:
+            user_context: Optional UserExecutionContext for per-user isolation
         """
         # Remove singleton initialization check
         # if hasattr(self, '_initialized'):
         #     return
+        
+        # Store user context for validation and isolation
+        self.user_context = user_context
+        
+        # Initialize connection status for test compatibility
+        self.is_connected = True  # Bridge is considered "connected" once initialized
         
         self._initialize_configuration()
         self._initialize_state()
@@ -130,7 +139,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._initialize_monitoring_observers()
         
         self._initialized = True
-        logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
+        if user_context:
+            logger.info(f"AgentWebSocketBridge initialized (non-singleton mode) for user {user_context.user_id}")
+        else:
+            logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
     
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
@@ -162,6 +174,16 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._thread_registry: Optional[ThreadRunRegistry] = None
         self._health_check_task = None
         logger.debug("Dependency references initialized")
+    
+    @property
+    def websocket_manager(self):
+        """Get the WebSocket manager for this bridge.
+        
+        CRITICAL: This property exposes the _websocket_manager for supervisor
+        and tool dispatcher integration. The manager is set per-request to
+        ensure proper user isolation.
+        """
+        return self._websocket_manager
     
     def _initialize_health_monitoring(self) -> None:
         """Initialize health monitoring and metrics."""
@@ -881,6 +903,21 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             logger.error(f"🚨 Error getting thread registry status: {e}")
             return None
+    
+    # ===================== UTILITY METHODS =====================
+    # Support methods for run ID processing (required by startup validator)
+    
+    def extract_thread_id(self, run_id: str) -> str:
+        """
+        Extract thread ID from run ID (delegated to UnifiedIDManager).
+        
+        Args:
+            run_id: Run ID to extract thread ID from
+            
+        Returns:
+            Extracted thread ID
+        """
+        return UnifiedIDManager.extract_thread_id(run_id)
     
     # ===================== NOTIFICATION INTERFACE =====================
     # SSOT for all WebSocket notifications - CRYSTAL CLEAR emission paths
@@ -2332,7 +2369,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             raise ValueError("user_id, thread_id, and run_id are all required")
         
         try:
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Create user execution context from IDs
             user_context = UserExecutionContext.from_request(
@@ -2369,7 +2406,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         # Import from the actual location - use the create_scoped_emitter function
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core import create_websocket_manager, get_websocket_manager
+        from netra_backend.app.websocket_core import create_websocket_manager
         
         # Create scoped emitter using the factory pattern for user isolation
         manager = create_websocket_manager(user_context)
@@ -2410,7 +2447,7 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     logger = central_logger.get_logger(__name__)
     
     logger.info("Creating isolated AgentWebSocketBridge instance")
-    bridge = AgentWebSocketBridge()
+    bridge = AgentWebSocketBridge(user_context=user_context)
     
     # Note: User emitters are created on-demand via await bridge.create_user_emitter(user_context)
     # when actually needed to avoid sync/async complexity in factory function

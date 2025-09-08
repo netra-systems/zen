@@ -7,6 +7,7 @@ import sys
 import re
 from io import StringIO
 import pytest
+from unittest.mock import patch
 
 # Must set environment before any imports
 os.environ['ENVIRONMENT'] = 'staging'

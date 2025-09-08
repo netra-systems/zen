@@ -14,9 +14,9 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.db.session import DatabaseSessionManager
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
 @pytest.mark.real_llm

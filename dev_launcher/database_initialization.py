@@ -102,7 +102,7 @@ class DatabaseInitializer:
                 # Parse database URL
                 parsed = urlparse(database_url)
                 if not parsed.hostname:
-                    self._print("⚠️", "POSTGRES", "Invalid DATABASE_URL format")
+                    self._print("⚠️", "POSTGRES", "Invalid #removed-legacyformat")
                     return False
                     
                 if attempt > 0:

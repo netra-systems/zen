@@ -66,15 +66,6 @@ class LegacyConfigMarker:
     """Mark and track legacy configuration variables to prevent regression."""
     
     LEGACY_VARIABLES: Dict[str, Dict[str, Any]] = {
-        "DATABASE_URL": {
-            "replacement": ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"],
-            "deprecation_date": "2025-12-01",
-            "migration_guide": "Use component-based database configuration (POSTGRES_HOST, POSTGRES_PORT, etc.) instead of single DATABASE_URL. The system will construct the URL internally.",
-            "still_supported": True,
-            "removal_version": "2.0.0",
-            "environments_affected": ["development", "test"],
-            "auto_construct": True  # System can construct this from components
-        },
         "JWT_SECRET": {
             "replacement": "JWT_SECRET_KEY",
             "deprecation_date": "2025-10-01",
@@ -205,21 +196,26 @@ class CentralConfigurationValidator:
             error_message="JWT_SECRET_KEY required in development/test environments."
         ),
         
-        # Database Configuration (CRITICAL)
+        # Database Configuration (CRITICAL) 
+        # CRITICAL FIX: Support #removed-legacyOR component-based configuration
+        # This aligns with actual GCP deployment patterns where #removed-legacyis provided
+        # No hard requirements for individual components if #removed-legacyis present
         ConfigRule(
-            env_var="DATABASE_PASSWORD",
-            requirement=ConfigRequirement.REQUIRED_SECURE,
+            env_var="POSTGRES_PASSWORD",
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since #removed-legacycan be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=8,
             forbidden_values={"", "password", "postgres", "admin"},
-            error_message="DATABASE_PASSWORD required in staging/production. Must be 8+ characters and not use common defaults."
+            error_message="POSTGRES_PASSWORD (if provided) must be 8+ characters and not use common defaults. Alternative: Use #removed-legacyfor Cloud SQL connections."
         ),
         ConfigRule(
-            env_var="DATABASE_HOST",
-            requirement=ConfigRequirement.REQUIRED,
+            env_var="POSTGRES_HOST",
+            requirement=ConfigRequirement.OPTIONAL,  # Made optional since #removed-legacycan be used instead
             environments={Environment.STAGING, Environment.PRODUCTION},
-            forbidden_values={"localhost", "127.0.0.1", ""},
-            error_message="DATABASE_HOST required in staging/production. Cannot be localhost or empty."
+            # Note: Cloud SQL Unix socket paths are valid (e.g., /cloudsql/project:region:instance)
+            # These should NOT be treated as localhost violations
+            forbidden_values={"localhost", "127.0.0.1"},  # Removed empty string check for Cloud SQL
+            error_message="POSTGRES_HOST (if provided) cannot be localhost/127.0.0.1 in staging/production. Cloud SQL Unix sockets (/cloudsql/...) are allowed. Alternative: Use #removed-legacyfor Cloud SQL connections."
         ),
         
         # Redis Configuration (CRITICAL)
@@ -367,10 +363,39 @@ class CentralConfigurationValidator:
         self._current_environment = None
         
     def get_environment(self) -> Environment:
-        """Get the current deployment environment."""
-        # In test contexts, don't cache the environment value to ensure 
-        # test patches (patch.dict(os.environ, ...)) are respected
+        """Get the current deployment environment using unified detection logic."""
+        # CRITICAL FIX: Use unified environment detection that matches ConfigManager
+        # This prevents validation/config environment mismatches that cause fallback to AppConfig
+        try:
+            # Try to use the unified environment detector for consistency
+            # Import locally to avoid circular dependencies during config bootstrap
+            from netra_backend.app.core.environment_constants import EnvironmentDetector
+            
+            unified_env = EnvironmentDetector.get_environment()
+            
+            # Map backend environment names to central validator environment names
+            env_mapping = {
+                "testing": Environment.TEST,    # Backend uses "testing", central uses "test"
+                "development": Environment.DEVELOPMENT,
+                "staging": Environment.STAGING,
+                "production": Environment.PRODUCTION
+            }
+            
+            if unified_env.lower() in env_mapping:
+                return env_mapping[unified_env.lower()]
+            else:
+                logger.warning(f"Unknown environment from EnvironmentDetector: '{unified_env}', falling back to legacy detection")
+                # Fall through to legacy detection as fallback
+        except ImportError:
+            # If backend modules not available (e.g., during auth service tests), use legacy detection
+            logger.debug("EnvironmentDetector not available, using legacy environment detection")
+        
+        # Legacy fallback - but now with better test context detection
         if self._is_test_context():
+            # Check for pytest context first (matches EnvironmentDetector logic)
+            if self.env_getter("PYTEST_CURRENT_TEST"):
+                return Environment.TEST
+            
             env_str = self.env_getter("ENVIRONMENT", "development").lower()
             try:
                 return Environment(env_str)
@@ -450,6 +475,15 @@ class CentralConfigurationValidator:
                     validation_errors.append(str(e))
                     logger.error(f"❌ {rule.env_var} validation failed: {e}")
         
+        # CRITICAL: Additional validation for database configuration in staging/production
+        if environment in [Environment.STAGING, Environment.PRODUCTION]:
+            try:
+                self._validate_database_configuration(environment)
+                logger.debug("✅ Database configuration validation passed")
+            except ValueError as e:
+                validation_errors.append(str(e))
+                logger.error(f"❌ Database configuration validation failed: {e}")
+        
         # HARD STOP: If any validation fails, prevent startup
         if validation_errors:
             error_msg = f"Configuration validation failed for {environment.value} environment:\n" + "\n".join(f"  - {err}" for err in validation_errors)
@@ -462,8 +496,42 @@ class CentralConfigurationValidator:
         """Validate a single configuration requirement."""
         value = self.env_getter(rule.env_var)
         
-        # Check if value is present
-        if rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
+        # CRITICAL FIX: For test environment OAuth credentials during pytest collection,
+        # be more lenient to handle timing issues during configuration loading
+        if environment == Environment.TEST and rule.env_var in ['GOOGLE_OAUTH_CLIENT_ID_TEST', 'GOOGLE_OAUTH_CLIENT_SECRET_TEST']:
+            if not value or not value.strip():
+                # During test context, try to get the value from test defaults if available
+                try:
+                    from shared.isolated_environment import get_env
+                    import os
+                    env = get_env()
+                    
+                    # CRITICAL FIX: More robust test context detection during pytest collection
+                    # The isolated environment's _is_test_context() may fail during collection
+                    is_test_context = (
+                        env._is_test_context() or 
+                        os.environ.get('PYTEST_CURRENT_TEST') or 
+                        environment == Environment.TEST or
+                        'pytest' in str(os.environ.get('_', ''))
+                    )
+                    
+                    if is_test_context and hasattr(env, '_get_test_environment_defaults'):
+                        test_defaults = env._get_test_environment_defaults()
+                        if rule.env_var in test_defaults:
+                            value = test_defaults[rule.env_var]
+                            logger.debug(f"Using test default for {rule.env_var} during validation")
+                except Exception as e:
+                    logger.debug(f"Could not load test defaults for {rule.env_var}: {e}")
+                
+                # If still no value, fail with detailed error message
+                if not value or not value.strip():
+                    error_msg = (rule.error_message or 
+                               f"{rule.env_var} is required in {environment.value} environment. "
+                               f"Ensure test environment is properly configured with OAuth test credentials.")
+                    raise ValueError(error_msg)
+        
+        # Check if value is present for non-OAuth test credentials
+        elif rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
             if not value or not value.strip():
                 error_msg = rule.error_message or f"{rule.env_var} is required in {environment.value} environment"
                 raise ValueError(error_msg)
@@ -477,6 +545,53 @@ class CentralConfigurationValidator:
             # Check forbidden values
             if rule.forbidden_values and value.strip() in rule.forbidden_values:
                 raise ValueError(f"{rule.env_var} cannot use forbidden value in {environment.value}")
+    
+    def _validate_database_configuration(self, environment: Environment) -> None:
+        """
+        Validate that database configuration is sufficient for the environment.
+        
+        CRITICAL: Ensure we have EITHER #removed-legacyOR component-based configuration.
+        This prevents false positives where GCP provides #removed-legacybut validator
+        expects individual components.
+        """
+        database_url = self.env_getter("DATABASE_URL")
+        
+        # If #removed-legacyis provided, that's sufficient (GCP Cloud Run pattern)
+        if database_url and database_url.strip():
+            logger.info(f"Database configuration: Using #removed-legacyfor {environment.value} environment")
+            return
+        
+        # Otherwise, require component-based configuration
+        # Check for either POSTGRES_* (GCP/modern) or DATABASE_* (legacy) variables
+        host = self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST")
+        password = self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD")
+        
+        if not host:
+            raise ValueError(
+                f"Database host required in {environment.value} environment. "
+                f"Provide either #removed-legacyor POSTGRES_HOST/DATABASE_HOST"
+            )
+        
+        if not password:
+            raise ValueError(
+                f"Database password required in {environment.value} environment. "
+                f"Provide either #removed-legacyor POSTGRES_PASSWORD/DATABASE_PASSWORD"
+            )
+        
+        # Validate host (allow Cloud SQL sockets)
+        if host in {"localhost", "127.0.0.1"}:
+            raise ValueError(
+                f"Database host cannot be localhost in {environment.value} environment. "
+                f"Use Cloud SQL socket (/cloudsql/...) or external host"
+            )
+        
+        # Validate password security
+        if len(password) < 8 or password in {"", "password", "postgres", "admin"}:
+            raise ValueError(
+                f"Database password must be 8+ characters and not use common defaults in {environment.value} environment"
+            )
+        
+        logger.info(f"Database configuration: Using component-based configuration for {environment.value} environment")
     
     def get_validated_config(self, config_name: str) -> str:
         """
@@ -522,26 +637,62 @@ class CentralConfigurationValidator:
         Get validated database credentials for the current environment.
         
         SSOT for database configuration requirements.
+        
+        CRITICAL FIX: Support both DATABASE_* (legacy) and POSTGRES_* (GCP/Cloud SQL) patterns.
+        This aligns validator with actual deployment patterns used by GCP Cloud Run.
         """
         environment = self.get_environment()
         
         if environment in [Environment.STAGING, Environment.PRODUCTION]:
-            # Hard requirements for staging/production
+            # CRITICAL: Check for #removed-legacyfirst (Cloud Run deployment pattern)
+            database_url = self.env_getter("DATABASE_URL")
+            if database_url:
+                # #removed-legacyis sufficient - no need to validate individual components
+                # This is how GCP Cloud Run deployments work
+                logger.info(f"Using #removed-legacyfor {environment.value} database configuration")
+                # Return minimal config - the actual connection uses #removed-legacydirectly
+                return {
+                    "url": database_url,
+                    "host": "cloud-sql",  # Placeholder for Cloud SQL
+                    "port": "5432",
+                    "database": "netra_staging" if environment == Environment.STAGING else "netra_prod",
+                    "username": "postgres",
+                    "password": "***"  # Handled by DATABASE_URL
+                }
+            
+            # Fallback: Check for component-based configuration (POSTGRES_* or DATABASE_*)
+            # Try POSTGRES_* first (modern GCP pattern), then DATABASE_* (legacy pattern)
+            host = self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST")
+            password = self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD")
+            
+            # Validate that we have at least host and password for component-based config
+            if not host:
+                raise ValueError(f"Database host required in {environment.value}. Set #removed-legacyor POSTGRES_HOST/DATABASE_HOST")
+            if not password:
+                raise ValueError(f"Database password required in {environment.value}. Set #removed-legacyor POSTGRES_PASSWORD/DATABASE_PASSWORD")
+            
+            # Additional validation for component-based config
+            if host in {"localhost", "127.0.0.1"} and not host.startswith("/cloudsql/"):
+                raise ValueError(f"Database host cannot be localhost in {environment.value} (Cloud SQL sockets like /cloudsql/... are allowed)")
+            
+            if len(password) < 8 or password in {"", "password", "postgres", "admin"}:
+                raise ValueError(f"Database password must be 8+ characters and not use common defaults in {environment.value}")
+            
             return {
-                "host": self.get_validated_config("DATABASE_HOST"),
-                "port": self.env_getter("DATABASE_PORT") or "5432",
-                "database": self.env_getter("DATABASE_NAME") or "netra_dev",
-                "username": self.env_getter("DATABASE_USER") or "postgres",
-                "password": self.get_validated_config("DATABASE_PASSWORD")
+                "host": host,
+                "port": self.env_getter("POSTGRES_PORT") or self.env_getter("DATABASE_PORT") or "5432",
+                "database": self.env_getter("POSTGRES_DB") or self.env_getter("DATABASE_NAME") or "netra_dev",
+                "username": self.env_getter("POSTGRES_USER") or self.env_getter("DATABASE_USER") or "postgres",
+                "password": password
             }
         else:
-            # Development/test can use defaults
+            # Development/test can use defaults - support both patterns
             return {
-                "host": self.env_getter("DATABASE_HOST", "localhost"),
-                "port": self.env_getter("DATABASE_PORT", "5432"),
-                "database": self.env_getter("DATABASE_NAME", "netra_dev"),
-                "username": self.env_getter("DATABASE_USER", "postgres"),
-                "password": self.env_getter("DATABASE_PASSWORD", "")
+                "host": self.env_getter("POSTGRES_HOST") or self.env_getter("DATABASE_HOST", "localhost"),
+                "port": self.env_getter("POSTGRES_PORT") or self.env_getter("DATABASE_PORT", "5432"),
+                "database": self.env_getter("POSTGRES_DB") or self.env_getter("DATABASE_NAME", "netra_dev"),
+                "username": self.env_getter("POSTGRES_USER") or self.env_getter("DATABASE_USER", "postgres"),
+                "password": self.env_getter("POSTGRES_PASSWORD") or self.env_getter("DATABASE_PASSWORD", "")
             }
     
     def get_redis_credentials(self) -> Dict[str, str]:

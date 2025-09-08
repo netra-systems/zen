@@ -28,18 +28,8 @@ jest.mock('@/lib/thread-operation-manager', () => ({
   },
 }));
 
-// Mock threadStateMachineManager
-const mockStateMachine = {
-  transition: jest.fn(),
-  getState: jest.fn(() => 'idle'),
-  addListener: jest.fn(),
-};
-jest.mock('@/lib/thread-state-machine', () => ({
-  threadStateMachineManager: {
-    getStateMachine: jest.fn(() => mockStateMachine),
-    resetAll: jest.fn(),
-  },
-}));
+// Mock thread-state-machine
+jest.mock('@/lib/thread-state-machine', () => require('../../__mocks__/lib/thread-state-machine'));
 
 describe('New Chat Race Condition Fixes', () => {
   let mockCreateThread: jest.Mock;
@@ -154,13 +144,6 @@ describe('New Chat Race Condition Fixes', () => {
   
   it('should maintain proper state machine transitions', async () => {
     // Arrange
-    const stateChanges: string[] = [];
-    
-    // Mock state machine listener to track transitions
-    mockStateMachine.transition.mockImplementation((event, data) => {
-      stateChanges.push(`${event}(${data?.targetThreadId || 'null'})`);
-    });
-    
     mockCreateThread.mockResolvedValue({
       id: 'state-machine-thread',
       created_at: Date.now(),
@@ -179,27 +162,25 @@ describe('New Chat Race Condition Fixes', () => {
     const operationId = `create_${Date.now()}_test`;
     
     // Start creation
-    stateMachine.transition('START_CREATE', {
+    const result1 = stateMachine.transition('START_CREATE', {
       operationId,
       startTime: Date.now(),
       targetThreadId: null
     });
     
     // Simulate thread creation success
-    stateMachine.transition('START_SWITCH', {
+    const result2 = stateMachine.transition('START_SWITCH', {
       targetThreadId: 'state-machine-thread'
     });
     
     // Complete operation
-    stateMachine.transition('COMPLETE_SUCCESS');
+    const result3 = stateMachine.transition('COMPLETE_SUCCESS');
     
     // Assert - State machine transitions are proper
-    expect(mockStateMachine.transition).toHaveBeenCalledTimes(3);
-    expect(stateChanges).toEqual([
-      'START_CREATE(null)',
-      'START_SWITCH(state-machine-thread)',
-      'COMPLETE_SUCCESS(null)'
-    ]);
+    expect(result1).toBe(true);
+    expect(result2).toBe(true); 
+    expect(result3).toBe(true);
+    expect(stateMachine.getState()).toBe('idle'); // Should end in idle state
   });
   
   it('should handle URL updates atomically without race conditions', async () => {

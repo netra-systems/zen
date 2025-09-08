@@ -68,7 +68,7 @@
         <name>Environment Validation</name>
         <description>Validate all required environment variables are set</description>
         <checks>
-          <check>DATABASE_URL exists and is valid</check>
+          <check>#removed-legacyexists and is valid</check>
           <check>SECRET_KEY exists and meets security requirements</check>
           <check>REDIS_URL exists and is valid</check>
           <check>CLICKHOUSE_URL exists and is valid (if configured)</check>

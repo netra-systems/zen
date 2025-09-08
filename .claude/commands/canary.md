@@ -1,5 +1,4 @@
 ---
-allowed-tools: ["Task", "Read", "Edit", "Bash", "TodoWrite", "Grep", "Glob"]
 description: "Standardized Load Factor Canary Prompt"
 ---
 

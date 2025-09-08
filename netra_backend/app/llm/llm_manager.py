@@ -163,10 +163,10 @@ class LLMManager:
         
         # Create full response object
         response = LLMResponse(
-            response=text_response,
+            content=text_response,
             model=self._get_model_name(llm_config_name),
             provider=self._get_provider(llm_config_name),
-            token_usage=TokenUsage(
+            usage=TokenUsage(
                 prompt_tokens=len(prompt.split()),  # Rough estimate
                 completion_tokens=len(text_response.split()),  # Rough estimate
                 total_tokens=len(prompt.split()) + len(text_response.split())

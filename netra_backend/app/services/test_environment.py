@@ -8,6 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import redis.asyncio as redis
 from loguru import logger
 from shared.isolated_environment import get_env
+from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
 env = get_env()
@@ -29,7 +30,8 @@ class TestEnvironment:
         
         # Initialize Redis connection if not already set
         if not self.redis_client:
-            redis_url = env.get("REDIS_URL", "redis://localhost:6380/0")
+            backend_env = BackendEnvironment()
+            redis_url = backend_env.get_redis_url()
             self.redis_client = await redis.from_url(redis_url)
         
         # Test Redis connection

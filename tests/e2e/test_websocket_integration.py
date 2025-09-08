@@ -24,10 +24,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-from tests.e2e.jwt_token_helpers import JWTTestHelper
+# SSOT Authentication imports per CLAUDE.md
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import proper dependencies
-from tests.e2e.config import TestTokenManager, TEST_SECRETS
 from test_framework.websocket_helpers import MockWebSocket
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
@@ -35,20 +36,22 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
+from unittest.mock import patch
 
 logger = central_logger.get_logger(__name__)
 
 
-# Helper function for creating test tokens
+# Use SSOT authentication helper per CLAUDE.md
+_auth_helper = E2EAuthHelper()
+
 def create_test_token(user_id: str, exp_offset: int = 900) -> str:
-    """Create test JWT token with configurable expiry offset."""
-    jwt_helper = JWTTestHelper()
-    token = jwt_helper.create_access_token(
+    """Create test JWT token using SSOT auth helper."""
+    return _auth_helper.create_test_jwt_token(
         user_id=user_id,
-        email=f"{user_id}@test.com", 
-        permissions=["read", "write"]
+        email=f"{user_id}@test.com",
+        permissions=["read", "write"],
+        exp_minutes=exp_offset // 60
     )
-    return token
 
 
 class WebSocketBuilder:
@@ -102,11 +105,9 @@ class MessageSimulator:
         failed = 0
         
         for client in clients:
-            try:
-                await client.send_json(message)
-                successful += 1
-            except Exception:
-                failed += 1
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await client.send_json(message)
+            successful += 1
         
         return {
             "successful": successful,
@@ -114,35 +115,8 @@ class MessageSimulator:
         }
 
 
-class WebSocketAuthTester:
-    """Real WebSocket connection tester with auth validation."""
-    
-    def __init__(self):
-        self.connection_manager = get_websocket_manager()
-        self.test_users: Dict[str, str] = {}
-        self.active_connections: List[MockWebSocket] = []
-        self.auth_results: List[Dict[str, Any]] = []
-    
-    def create_test_user_with_token(self, user_id: str) -> str:
-        """Create test user and return valid JWT token."""
-        token = create_test_token(user_id)
-        self.test_users[user_id] = token
-        return token
-    
-    def record_auth_result(self, user_id: str, success: bool, 
-                          error: Optional[str] = None) -> None:
-        """Record authentication test result."""
-        result = self._create_auth_result(user_id, success, error)
-        self.auth_results.append(result)
-    
-    def _create_auth_result(self, user_id: str, success: bool, error: Optional[str]) -> Dict[str, Any]:
-        """Create authentication result record."""
-        return {
-            "user_id": user_id,
-            "success": success,
-            "error": error,
-            "timestamp": datetime.now(timezone.utc)
-        }
+# WebSocketAuthTester class moved to test_framework.helpers.auth_helpers to maintain SSOT
+from test_framework.helpers.auth_helpers import WebSocketAuthTester
 
 
 @pytest.fixture
@@ -203,13 +177,11 @@ class TestWebSocketAuthHandshake:
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.side_effect = ValueError("Invalid token")
             
-            try:
-                await websocket.accept()
-                # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
-                return {"authenticated": True}
-            except ValueError as e:
-                return {"authenticated": False, "error": str(e)}
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await websocket.accept()
+            # Mock: Authentication service isolation for testing without real auth flows
+            await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
+            pytest.fail("Expected ValueError was not raised for invalid token")
 
 
 @pytest.mark.e2e
@@ -375,14 +347,10 @@ class TestWebSocketRateLimiting:
                 rate_limit_triggered = True
                 break
                 
-            try:
-                await client.send_json({"type": "test", "payload": {"count": i}})
-                messages_sent += 1
-                await asyncio.sleep(0.01)
-            except ConnectionError as e:
-                if "rate limit" in str(e).lower():
-                    rate_limit_triggered = True
-                break
+            # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+            await client.send_json({"type": "test", "payload": {"count": i}})
+            messages_sent += 1
+            await asyncio.sleep(0.01)
         
         return {
             "messages_sent": messages_sent,

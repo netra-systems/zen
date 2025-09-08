@@ -64,7 +64,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             'netra_backend.app.db.database_manager',
             'netra_backend.app.db.postgres_core',
             'netra_backend.app.db.clickhouse_init',
-            'netra_backend.app.db.clickhouse_reliable_manager',
+            'netra_backend.app.core.clickhouse_connection_manager',
         ]
         
         for module_path in db_modules:

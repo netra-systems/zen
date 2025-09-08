@@ -64,6 +64,23 @@ class OAuthConfigGenerator:
         """Get configuration for a specific OAuth provider."""
         env_config = self.generate(environment)
         return env_config.get(provider, {})
+    
+    def get_oauth_config(self, environment: str = 'development') -> 'OAuthConfig':
+        """Get OAuth configuration for startup validator compatibility."""
+        from dataclasses import dataclass
+        
+        @dataclass
+        class OAuthConfig:
+            redirect_uri: str
+            environment: str
+            
+        config = self.generate(environment)
+        google_config = config.get('google', {})
+        
+        return OAuthConfig(
+            redirect_uri=google_config.get('redirect_uri', ''),
+            environment=environment
+        )
 
 
 @dataclass

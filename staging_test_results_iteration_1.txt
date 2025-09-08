@@ -1,0 +1,416 @@
+======================================================================
+STAGING E2E TEST SUITE - TOP 10 AGENT TESTS
+======================================================================
+Running 10 test modules against staging environment
+
+[OK] Staging environment is available
+
+[1/10] Running test_1_websocket_events_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Loaded JWT_SECRET_STAGING from config/staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[PASS] Service discovery working
+[PASS] MCP config available
+[PASS] MCP servers endpoint working
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[PASS] Health checks successful
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Attempting WebSocket connection to: wss://api.staging.netrasystems.ai/ws
+[INFO] Auth headers present: True
+[DEBUG] WebSocket InvalidStatus error: server rejected WebSocket connection: HTTP 403
+[DEBUG] Extracted status code: 403
+[EXPECTED] WebSocket authentication rejected (HTTP 403): server rejected WebSocket connection: HTTP 403
+[INFO] This confirms that staging WebSocket authentication is properly enforced
+[PASS] WebSocket authentication properly enforced (expected in staging)
+[PASS] WebSocket connection test completed - staging behavior verified
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Testing WebSocket event flow with authentication
+[INFO] Target URL: wss://api.staging.netrasystems.ai/ws
+[ERROR] Unexpected WebSocket status code in event flow: 0
+  [FAIL] 3 passed, 2 failed: test_concurrent_websocket_real: server rejected WebSocket connection: HTTP 403; test_websocket_event_flow_real: server rejected WebSocket connection: HTTP 403
+
+[2/10] Running test_2_message_flow_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[PASS] Endpoint /api/health responding
+[PASS] Endpoint /api/discovery/services responding
+[INFO] Not Found Test: 404
+[INFO] Invalid ID Test: 403
+[INFO] Unauthorized Execution Test: 422
+[INFO] Security Test: 403
+[INFO] Missing Auth Test: 403
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] WebSocket auth error (expected): server rejected WebSocket connection: HTTP 403
+Error handling test results:
+  API error tests: 5
+  WebSocket error tests: 0
+  Test duration: 1.390s
+[PASS] Real error handling flow tested
+[INFO] /api/messages: 403
+[INFO] /api/threads: 403
+[INFO] /api/conversations: 404
+[INFO] /api/chat: 404
+[INFO] /api/chat/messages: 404
+Message API test duration: 0.762s
+[INFO] Accessible endpoints: 2/5
+[PASS] Real message API endpoints tested
+[INFO] List threads: 403 (auth required)
+[INFO] List conversations: 404 (auth required)
+[INFO] List messages: 403 (auth required)
+Thread management test results:
+  List threads: 403
+  List conversations: 404
+  List messages: 403
+Test duration: 0.717s
+[PASS] Real thread management tested
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Auth error (expected): server rejected WebSocket connection: HTTP 403
+Message flow test results:
+  Connection established: False
+  Messages sent: 0
+  Events received: 0
+  Auth error detected: True
+  Test duration: 0.587s
+[SUCCESS] Auth error confirms staging authentication is properly enforced
+[PASS] Real WebSocket message flow tested
+  [PASS] All 5 tests passed
+
+[3/10] Running test_3_agent_pipeline_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[STAGING TOKEN FIX] Using staging secret from config/staging.env
+[STAGING TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING TOKEN FIX] This MUST match what staging WebSocket service uses
+[SUCCESS] STAGING TOKEN CREATED: staging_... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/mcp/config: 200 - 649 bytes
+[INFO] /api/agents/config: 404
+[INFO] /api/configuration: 404
+[INFO] /api/settings: 422
+Agent configuration test results:
+  /api/mcp/config: 200 - Agent config: True
+  /api/agents/config: 404 - Agent config: False
+  /api/configuration: 404 - Agent config: False
+  /api/settings: 422 - Agent config: False
+Test duration: 0.743s
+[SUCCESS] Found 1 accessible configuration endpoints
+[PASS] Real agent configuration tested
+[INFO] /api/mcp/servers: 200 - 1
+[INFO] /api/agents: 404 (auth required)
+[INFO] /api/agents/list: 404 (auth required)
+[INFO] /api/mcp/config: 200 - config
+[INFO] /api/discovery/agents: 404 (auth required)
+Agent discovery test results:
+  Endpoints tested: 5
+  Successful responses: 2
+  Agents discovered: 1
+  Test duration: 0.832s
+[PASS] Real agent discovery tested
+[INFO] /api/agents/status: 404
+[INFO] /api/agents/active: 404
+[INFO] /api/execution/status: 404
+[INFO] /api/jobs: 404
+[INFO] /api/tasks: 404
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] Nonexistent Agent Error: 404
+[INFO] Invalid Execution Request: 422
+[INFO] Invalid Pipeline ID: 404
+[INFO] Wrong HTTP Method: 405
+[STAGING CONFIG TOKEN FIX] Using staging secret from config/staging.env
+[STAGING CONFIG TOKEN FIX] Secret hash 70610b56526d0480 (length: 86)
+[STAGING CONFIG TOKEN FIX] This MUST match staging WebSocket service secret
+[SUCCESS] STAGING CONFIG TOKEN CREATED: test-use... with staging secret (hash: 70610b56526d0480)
+[INFO] /api/metrics: 404
+[INFO] /api/metrics/agents: 404
+[INFO] /api/metrics/pipeline: 404
+[INFO] /api/stats: 404
+[INFO] /api/health/metrics: 404
+[INFO] /api/performance: 404
+Pipeline metrics test results:
+  Metrics endpoints tested: 6
+  Endpoints with metrics: 0
+  Performance test iterations: 5
+  Successful requests: 5/5
+  Response time - Avg: 0.325s, Min: 0.309s, Max: 0.343s
+  Total test duration: 3.402s
+[PASS] Real pipeline metrics tested
+  [FAIL] 3 passed, 3 failed: test_real_agent_lifecycle_monitoring: server rejected WebSocket connection: HTTP 403; test_real_agent_pipeline_execution: server rejected WebSocket connection: HTTP 403; test_real_pipeline_error_handling: server rejected WebSocket connection: HTTP 403
+
+[4/10] Running test_4_agent_orchestration_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[INFO] Pattern 'broadcast': Send message to all agents
+[INFO] Pattern 'round_robin': Distribute tasks evenly
+[INFO] Pattern 'priority': Send to highest priority agent
+[INFO] Pattern 'parallel': Execute on all agents simultaneously
+[INFO] Pattern 'sequential': Execute one after another
+[PASS] Validated 5 communication patterns
+[INFO] Found agent: netra-mcp (status: connected)
+[PASS] Agent discovery and listing test
+[PASS] Basic functionality test
+[INFO] Coordination efficiency: 70.0%
+[PASS] Multi-agent coordination metrics test
+[PASS] Tested 5 error scenarios
+[INFO] Testing workflow state transitions:
+  pending -> initializing
+  initializing -> running
+  running -> coordinating
+  coordinating -> waiting_for_agents
+  waiting_for_agents -> aggregating_results
+  aggregating_results -> completed
+[PASS] Orchestration workflow states test
+  [PASS] All 6 tests passed
+
+[5/10] Running test_5_response_streaming_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[INFO] Backpressure scenario: slow_consumer
+[INFO] Backpressure scenario: fast_producer
+[INFO] Backpressure scenario: network_congestion
+[INFO] Backpressure scenario: buffer_overflow
+[PASS] Tested 4 backpressure scenarios
+[PASS] Basic functionality test
+[PASS] Validated 5 chunk sizes
+[PASS] Validated 3 recovery checkpoints
+[INFO] Streaming success rate: 95.0%
+[PASS] Streaming performance metrics test
+[INFO] Protocol 'websocket' configuration validated
+[INFO] Protocol 'server-sent-events' configuration validated
+[INFO] Protocol 'chunked-transfer' configuration validated
+[PASS] Tested 3 streaming protocols
+  [PASS] All 6 tests passed
+
+[6/10] Running test_6_failure_recovery_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Circuit breaker state: closed
+[INFO] Circuit breaker state: open
+[INFO] Circuit breaker state: half_open
+[PASS] Circuit breaker pattern test
+[PASS] Tested 5 failure detection types
+[INFO] Level 0: Full functionality
+[INFO] Level 1: Non-critical features disabled
+[INFO] Level 2: Read-only mode
+[INFO] Level 3: Minimal functionality
+[INFO] Level 4: Maintenance mode
+[PASS] Tested 5 degradation levels
+[INFO] Recovery rate: 90.0%
+[INFO] Availability: 99.5%
+[PASS] Recovery metrics test
+[INFO] Strategy 'exponential_backoff': {'initial_delay': 1, 'max_delay': 32, 'multiplier': 2}
+[INFO] Strategy 'linear_backoff': {'delay': 5, 'max_attempts': 3}
+[INFO] Strategy 'immediate': {'delay': 0, 'max_attempts': 1}
+[INFO] Strategy 'jittered': {'base_delay': 2, 'jitter_range': 1}
+[PASS] Validated 4 retry strategies
+  [PASS] All 6 tests passed
+
+[7/10] Running test_7_startup_resilience_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[PASS] config_load_ms: 85ms (target: 100ms)
+[PASS] db_connect_ms: 420ms (target: 500ms)
+[PASS] service_init_ms: 890ms (target: 1000ms)
+[PASS] total_startup_ms: 2500ms (target: 3000ms)
+[PASS] Cold start performance test
+[INFO] Dependencies: 3/4 available
+[INFO] Required: 3 services
+[INFO] Checking required dependency: database
+[INFO] Checking required dependency: redis
+[INFO] Checking required dependency: llm_service
+[PASS] Dependency validation test
+[INFO] Service reported as healthy
+[INFO] Service: netra-ai-platform
+[INFO] Version: 1.0.0
+[PASS] Health check endpoints test
+[INFO] Scenario: config_missing -> Fallback to defaults
+[INFO] Scenario: db_unavailable -> Retry with exponential backoff
+[INFO] Scenario: port_conflict -> Try alternative ports
+[INFO] Scenario: memory_insufficient -> Reduce cache size
+[INFO] Scenario: service_conflict -> Wait for service availability
+[PASS] Tested 5 failure scenarios
+[INFO] Startup sequence:
+  -> config_loading
+  -> dependency_check
+  -> database_connection
+  -> service_initialization
+  -> health_check
+  -> ready
+[PASS] Validated 6 startup steps
+  [PASS] All 6 tests passed
+
+[8/10] Running test_8_lifecycle_events_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Filter: by_type
+[INFO] Filter: by_time_range
+[INFO] Filter: by_agent
+[INFO] Filter: by_status
+[PASS] Validated 4 filter types
+[INFO] Event metadata validated
+[INFO] Duration: 1500ms
+[INFO] Tokens: 250
+[PASS] Event metadata test
+[INFO] Retention: 30 days
+[INFO] Max events: 10000
+[PASS] Event persistence test
+[INFO] Valid sequence: agent_started -> agent_thinking -> agent_completed
+[INFO] Valid sequence: agent_started -> tool_executing -> tool_completed -> agent_completed
+[INFO] Valid sequence: agent_started -> agent_failed
+[INFO] Valid sequence: system_startup -> agent_initialized -> agent_started
+[PASS] Validated 4 event sequences
+[PASS] Validated 9 event types
+  [PASS] All 6 tests passed
+
+[9/10] Running test_9_coordination_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Consensus: voting
+[INFO] Consensus: quorum
+[INFO] Consensus: leader_election
+[INFO] Consensus: two_phase_commit
+[PASS] Tested 4 consensus mechanisms
+[INFO] Coordination efficiency: 95.0%
+[INFO] Throughput: 20.5 tasks/sec
+[PASS] Coordination metrics test
+[INFO] Pattern: master_slave
+[INFO] Pattern: peer_to_peer
+[INFO] Pattern: publish_subscribe
+[INFO] Pattern: request_reply
+[INFO] Pattern: pipeline
+[PASS] Tested 5 coordination patterns
+[INFO] Primitive: mutex
+[INFO] Primitive: semaphore
+[INFO] Primitive: barrier
+[INFO] Primitive: event
+[INFO] Primitive: condition
+[PASS] Tested 5 synchronization primitives
+[INFO] Strategy 'round_robin': {'index': 0, 'agents': 3}
+[INFO] Strategy 'least_loaded': {'load_threshold': 0.8}
+[INFO] Strategy 'random': {'seed': 42}
+[INFO] Strategy 'weighted': {'weights': [0.5, 0.3, 0.2]}
+[INFO] Strategy 'sticky': {'session_affinity': True}
+[PASS] Validated 5 distribution strategies
+  [PASS] All 6 tests passed
+
+[10/10] Running test_10_critical_path_staging...
+Loading staging environment from: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\config\staging.env
+Set ENVIRONMENT=staging for staging tests
+[PASS] Basic functionality test
+[INFO] Critical features: 5/5 enabled
+[PASS] chat_functionality: enabled
+[PASS] agent_execution: enabled
+[PASS] real_time_updates: enabled
+[PASS] error_recovery: enabled
+[PASS] performance_monitoring: enabled
+[PASS] All business critical features enabled
+[PASS] /health returned 200
+[PASS] /api/health returned 200
+[PASS] /api/discovery/services returned 200
+[PASS] /api/mcp/config returned 200
+[PASS] /api/mcp/servers returned 200
+[PASS] All 5 critical endpoints working
+[INFO] Error AUTH_FAILED: redirect_to_login
+[INFO] Error RATE_LIMITED: exponential_backoff
+[INFO] Error SERVICE_UNAVAILABLE: failover
+[INFO] Error INVALID_REQUEST: return_error
+[INFO] Error INTERNAL_ERROR: log_and_retry
+[PASS] Validated 5 critical error handlers
+[PASS] api_response_time_ms: 85ms (target: 100ms)
+[PASS] websocket_latency_ms: 42ms (target: 50ms)
+[PASS] agent_startup_time_ms: 380ms (target: 500ms)
+[PASS] message_processing_time_ms: 165ms (target: 200ms)
+[PASS] total_request_time_ms: 872ms (target: 1000ms)
+[PASS] All performance targets met
+[INFO] Critical path flow:
+  1. user_input_received
+  2. message_validated
+  3. agent_selected
+  4. agent_executed
+  5. response_generated
+  6. response_delivered
+[PASS] End-to-end message flow validated
+  [PASS] All 6 tests passed
+
+======================================================================
+TEST SUMMARY
+======================================================================
+Total: 10 modules
+Passed: 8
+Failed: 2
+Skipped: 0
+Time: 46.53 seconds
+
+Failed tests:
+  - test_1_websocket_events_staging: 3 passed, 2 failed: test_concurrent_websocket_real: server rejected WebSocket connection: HTTP 403; test_websocket_event_flow_real: server rejected WebSocket connection: HTTP 403
+  - test_3_agent_pipeline_staging: 3 passed, 3 failed: test_real_agent_lifecycle_monitoring: server rejected WebSocket connection: HTTP 403; test_real_agent_pipeline_execution: server rejected WebSocket connection: HTTP 403; test_real_pipeline_error_handling: server rejected WebSocket connection: HTTP 403
+
+[FAILURE] Some tests failed

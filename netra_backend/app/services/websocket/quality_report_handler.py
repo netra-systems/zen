@@ -12,8 +12,8 @@ from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -98,7 +98,9 @@ class QualityReportHandler(BaseMessageHandler):
         """Send formatted report response to user."""
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
-        await manager.send_message(user_id, message)
+        user_context = UserExecutionContext.get_context(user_id)
+        manager = create_websocket_manager(user_context)
+        await manager.send_to_user(message)
 
     def _build_report_payload(self, markdown_report: str, report_data: Dict[str, Any]) -> Dict[str, Any]:
         """Build report response payload."""
@@ -112,7 +114,12 @@ class QualityReportHandler(BaseMessageHandler):
         """Handle report generation error."""
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
-        await manager.send_error(user_id, error_message)
+        try:
+            user_context = UserExecutionContext.get_context(user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user({"type": "error", "message": error_message})
+        except Exception as e:
+            logger.error(f"Failed to send report error to user {user_id}: {e}")
     
     def _format_quality_report(self, data: Dict[str, Any], report_type: str) -> str:
         """Format quality data as markdown report."""

@@ -58,7 +58,7 @@ from shared.isolated_environment import get_env
 
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
 # REMOVED_SYNTAX_ERROR: def test_staging_database_url_should_not_contain_netra_dev(self):
-    # REMOVED_SYNTAX_ERROR: """Staging DATABASE_URL should not reference netra_dev database"""
+    # REMOVED_SYNTAX_ERROR: """Staging #removed-legacyshould not reference netra_dev database"""
     # Simulate CORRECT staging environment - Fixed from previous misconfiguration
     # REMOVED_SYNTAX_ERROR: staging_env = { )
     # REMOVED_SYNTAX_ERROR: 'ENVIRONMENT': 'staging',

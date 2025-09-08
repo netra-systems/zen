@@ -68,8 +68,7 @@ WORKDIR /app
 # Copy Python packages from builder (expensive layer, changes rarely)
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
-# Copy SPEC files for reference (changes less frequently)
-COPY --chown=netra:netra SPEC /app/SPEC
+# SPEC files removed - not present in repository
 
 # Copy shared libraries (changes moderately)
 COPY --chown=netra:netra shared /app/shared
@@ -83,12 +82,12 @@ COPY --chown=netra:netra netra_backend /app/netra_backend
 
 # Set optimized environment variables
 ENV PATH=/home/netra/.local/bin:$PATH \
-    PYTHONPATH=/app:$PYTHONPATH \
+    PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     RUNNING_IN_DOCKER=true \
     ENVIRONMENT=${ENVIRONMENT} \
-    BUILD_ENV=${BUILD_ENV} \
+    BUILD_ENV=staging \
     PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
     # Staging-specific optimizations

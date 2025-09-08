@@ -2,7 +2,7 @@
 
 Migrated to UserExecutionContext pattern for proper request isolation:
 - Uses UserExecutionContext for per-request data isolation
-- Database session management via DatabaseSessionManager
+- Database session management via SSOT database module get_db()
 - Action plan generation isolated per user/thread
 - Zero global state references for security compliance
 
@@ -15,14 +15,13 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.actions_goals_plan_builder_uvs import ActionPlanBuilderUVS
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.prompts import actions_to_meet_goals_prompt_template
 from netra_backend.app.agents.state import ActionPlanResult, OptimizationsResult
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
@@ -38,13 +37,13 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
     """UserExecutionContext Pattern Action Plan Generation Agent.
     
     Request Isolation: Contains ONLY action plan business logic with proper isolation
-    - Uses UserExecutionContext for per-request data isolation
-    - Database sessions managed via DatabaseSessionManager
+    - Uses UserExecutionContext for per-request data isolation  
+    - Database sessions accessed via SSOT database module get_db()
     - Action plans isolated per user/thread for security compliance
     - Zero global state references
     """
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[UnifiedToolDispatcher] = None):
         """Initialize with BaseAgent infrastructure.
         
         CRITICAL: LLM manager is required for this agent to function.

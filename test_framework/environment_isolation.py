@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # TEST ENVIRONMENT MANAGER
 # =============================================================================
 
-class TestEnvironmentManager:
+class EnvironmentTestManager:
     """
     Manages isolated environment variables for testing.
     
@@ -142,18 +142,18 @@ class EnvironmentWrapper:
 # GLOBAL INSTANCE
 # =============================================================================
 
-_test_env_manager: Optional[TestEnvironmentManager] = None
+_test_env_manager: Optional[EnvironmentTestManager] = None
 _manager_lock = threading.Lock()
 
 
-def get_test_env_manager() -> TestEnvironmentManager:
+def get_test_env_manager() -> EnvironmentTestManager:
     """Get or create the global test environment manager."""
     global _test_env_manager
     
     if _test_env_manager is None:
         with _manager_lock:
             if _test_env_manager is None:
-                _test_env_manager = TestEnvironmentManager()
+                _test_env_manager = EnvironmentTestManager()
     
     return _test_env_manager
 
@@ -242,7 +242,7 @@ def isolated_test_session(session_id: str = None) -> Generator[IsolatedSession, 
 
 
 @contextmanager
-def isolated_test_env(**env_vars) -> Generator[TestEnvironmentManager, None, None]:
+def isolated_test_env(**env_vars) -> Generator[EnvironmentTestManager, None, None]:
     """
     Create an isolated environment for a single test.
     
@@ -250,7 +250,7 @@ def isolated_test_env(**env_vars) -> Generator[TestEnvironmentManager, None, Non
         **env_vars: Environment variables to set for the test
         
     Yields:
-        TestEnvironmentManager: The environment manager
+        EnvironmentTestManager: The environment manager
     """
     manager = get_test_env_manager()
     manager.enable_isolation()
@@ -385,6 +385,9 @@ def setup_test_security_environment():
         "ENCRYPTION_KEY": "test-encryption-key-32-chars-long",
         "GOOGLE_CLIENT_ID": "test-google-client-id",
         "GOOGLE_CLIENT_SECRET": "test-google-client-secret",
+        # OAuth Test Environment Credentials (required by CentralConfigurationValidator)
+        "GOOGLE_OAUTH_CLIENT_ID_TEST": "test-oauth-client-id-for-automated-testing",
+        "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test-oauth-client-secret-for-automated-testing",
         "GEMINI_API_KEY": "test-gemini-api-key",
         "GOOGLE_API_KEY": "test-google-api-key",
         "ANTHROPIC_API_KEY": "test-anthropic-api-key",
@@ -425,22 +428,9 @@ def validate_test_environment():
 
 
 # =============================================================================
-# LEGACY COMPATIBILITY FUNCTIONS
+# LEGACY COMPATIBILITY FUNCTIONS REMOVED
+# Use ensure_test_isolation() and setup_test_security_environment() directly
 # =============================================================================
-
-def setup_test_environment():
-    """Legacy function for setting up test environment."""
-    ensure_test_isolation()
-    setup_test_security_environment()
-    logger.debug("Legacy test environment setup completed")
-
-
-def teardown_test_environment():
-    """Legacy function for tearing down test environment."""
-    manager = get_test_env_manager()
-    manager.restore_env_vars()
-    manager.disable_isolation()
-    logger.debug("Legacy test environment teardown completed")
 
 
 # =============================================================================
@@ -449,7 +439,7 @@ def teardown_test_environment():
 
 __all__ = [
     # Main classes
-    'TestEnvironmentManager',
+    'EnvironmentTestManager',
     'EnvironmentWrapper',
     'IsolatedSession',
     
@@ -468,8 +458,8 @@ __all__ = [
     'setup_test_security_environment',
     
     # Legacy compatibility
-    'setup_test_environment',
-    'teardown_test_environment',
+    # 'setup_test_environment', # Legacy compatibility removed
+    # 'teardown_test_environment', # Legacy compatibility removed
     
     # Validation
     'validate_test_environment',

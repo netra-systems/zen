@@ -15,6 +15,14 @@ except ImportError:
     # Fallback if dev_launcher is not available
     from shared.isolated_environment import get_env
 
+# CRITICAL: Set OAuth test credentials immediately to prevent validation errors
+# This must happen before any validator is called during conftest execution
+_env = get_env()
+if not _env.get("GOOGLE_OAUTH_CLIENT_ID_TEST"):
+    _env.set("GOOGLE_OAUTH_CLIENT_ID_TEST", "test-oauth-client-id-for-automated-testing", source="early_conftest_setup")
+if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
+    _env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "test-oauth-client-secret-for-automated-testing", source="early_conftest_setup")
+
 # REAL SERVICES INTEGRATION
 # Import all real service fixtures to replace backend mocks
 # Skip real services for smoke tests to ensure they work without external dependencies
@@ -135,6 +143,8 @@ from test_framework.conftest_base import *
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *
 from test_framework.fixtures.service_fixtures import *
+# CRITICAL: Import ExecutionEngineFactory fixtures for integration tests
+from test_framework.fixtures.execution_engine_factory_fixtures import *
 from test_framework.mocks.service_mocks import MockClickHouseService, MockLLMService
 
 # Setup Python path for imports
@@ -265,6 +275,10 @@ if ("pytest" in sys.modules and hasattr(sys.modules.get('pytest'), 'main') and
         # Set test values for all required secrets from SecretManager
         env.set("GOOGLE_CLIENT_ID", "test-google-client-id-for-integration-testing", source="netra_backend_conftest")
         env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret-for-integration-testing", source="netra_backend_conftest")
+        
+        # Set environment-specific OAuth credentials required by CentralConfigurationValidator
+        env.set("GOOGLE_OAUTH_CLIENT_ID_TEST", "test-oauth-client-id-for-automated-testing", source="netra_backend_conftest")
+        env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "test-oauth-client-secret-for-automated-testing", source="netra_backend_conftest")
         env.set("CLICKHOUSE_PASSWORD", "test-clickhouse-password-for-integration-testing", source="netra_backend_conftest")
         env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
         env.set("LOG_LEVEL", "INFO", source="netra_backend_conftest")

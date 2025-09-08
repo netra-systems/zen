@@ -5,7 +5,7 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio

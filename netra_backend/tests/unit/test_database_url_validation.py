@@ -20,7 +20,7 @@ Updated to test the SSOT method using DatabaseURLBuilder and IsolatedEnvironment
 import pytest
 from typing import Optional
 import os
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.schemas.config import (
@@ -175,7 +175,7 @@ class TestHealthCheckDatabaseValidation:
                 # Test in staging environment - should raise
                 mock_env.return_value.get.return_value = 'staging'
                 
-                with pytest.raises(ValueError, match="DATABASE_URL is not configured"):
+                with pytest.raises(ValueError, match="#removed-legacyis not configured"):
                     await _check_postgres_connection(mock_db)
     
     @pytest.mark.asyncio

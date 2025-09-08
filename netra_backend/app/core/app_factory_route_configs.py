@@ -33,6 +33,7 @@ def _get_auth_route_configs(modules: dict) -> dict:
 def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
     return {"threads": (modules["threads_router"], "", ["threads"]),
+        "messages": (modules["messages_router"], "/api/chat", ["messages"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
         "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])}
 
@@ -67,7 +68,7 @@ def _get_supply_business_configs(modules: dict) -> dict:
 
 def _get_admin_business_configs(modules: dict) -> dict:
     """Get admin and references business route configurations."""
-    return {"admin": (modules["admin"].router, "/api", ["admin"]),
+    return {"admin": (modules["admin"].router, "/api/admin", ["admin"]),
             "references": (modules["references"].router, "/api", ["references"])}
 
 
@@ -81,7 +82,6 @@ def _get_extended_business_configs(modules: dict) -> dict:
 def _get_health_business_configs(modules: dict) -> dict:
     """Get health-related business route configurations."""
     return {"health": (modules["health"].router, "/health", ["health"]),
-            "health_api": (modules["health"].router, "/api/health", ["health"]),
             "health_extended": (modules["health_extended_router"], "", ["monitoring"])}
 
 
@@ -89,6 +89,7 @@ def _get_monitoring_business_configs(modules: dict) -> dict:
     """Get monitoring and corpus business route configurations."""
     return {"monitoring": (modules["monitoring_router"], "/api", ["database-monitoring"]),
             "gcp_monitoring": (modules["gcp_monitoring_router"], "/api", ["gcp-error-monitoring"]),
+            "circuit_breaker": (modules["circuit_breaker_router"], "", ["circuit-breaker-monitoring"]),
             "corpus": (modules["corpus"].router, "/api/corpus", ["corpus"])}
 
 

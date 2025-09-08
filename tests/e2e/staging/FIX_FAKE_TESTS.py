@@ -274,8 +274,8 @@ if __name__ == "__main__":
     # Make executable on Unix
     try:
         os.chmod(script_path, 0o755)
-    except:
-        pass
+    except Exception as e:
+        print(f"Could not set executable permissions: {e}")
 
 
 if __name__ == "__main__":

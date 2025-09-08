@@ -9,8 +9,8 @@
 
     # REMOVED_SYNTAX_ERROR: EXPECTED TO FAIL: These tests replicate critical backend service issues found in staging:
 
-        # REMOVED_SYNTAX_ERROR: 1. **CRITICAL: Auth Service DATABASE_URL Not Configured**
-        # REMOVED_SYNTAX_ERROR: - Auth service attempts to use undefined DATABASE_URL causing complete service failure
+        # REMOVED_SYNTAX_ERROR: 1. **CRITICAL: Auth Service #removed-legacyNot Configured**
+        # REMOVED_SYNTAX_ERROR: - Auth service attempts to use undefined #removed-legacycausing complete service failure
         # REMOVED_SYNTAX_ERROR: - All authentication requests fail due to database connectivity breakdown
         # REMOVED_SYNTAX_ERROR: - Microservice architecture becomes non-functional
 
@@ -102,7 +102,7 @@
         # REMOVED_SYNTAX_ERROR: self.env.reset_to_original()
 
         # ===================================================================
-        # CRITICAL: Auth Service DATABASE_URL Configuration Failure Tests
+        # CRITICAL: Auth Service #removed-legacyConfiguration Failure Tests
         # ===================================================================
 
         # REMOVED_SYNTAX_ERROR: @pytest.fixture
@@ -112,26 +112,26 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: EXPECTED TO FAIL - CRITICAL DATABASE CONFIG ISSUE
 
-    # REMOVED_SYNTAX_ERROR: Issue: Auth service DATABASE_URL not configured causing complete auth service failure
-    # REMOVED_SYNTAX_ERROR: Expected: Auth service should have valid DATABASE_URL for staging database
-    # REMOVED_SYNTAX_ERROR: Actual: DATABASE_URL undefined or pointing to non-existent database
+    # REMOVED_SYNTAX_ERROR: Issue: Auth service #removed-legacynot configured causing complete auth service failure
+    # REMOVED_SYNTAX_ERROR: Expected: Auth service should have valid #removed-legacyfor staging database
+    # REMOVED_SYNTAX_ERROR: Actual: #removed-legacyundefined or pointing to non-existent database
 
     # REMOVED_SYNTAX_ERROR: Business Impact: 100% authentication failure = 100% revenue loss
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
-    # Test that DATABASE_URL is configured for auth service
+    # Test that #removed-legacyis configured for auth service
     # REMOVED_SYNTAX_ERROR: database_url = self.env.get("DATABASE_URL")
 
-    # Should have a DATABASE_URL configured
+    # Should have a #removed-legacyconfigured
     # REMOVED_SYNTAX_ERROR: assert database_url is not None, ( )
-    # REMOVED_SYNTAX_ERROR: "CRITICAL: AUTH SERVICE DATABASE_URL NOT CONFIGURED - "
-    # REMOVED_SYNTAX_ERROR: "Auth service requires DATABASE_URL environment variable to connect to staging database"
+    # REMOVED_SYNTAX_ERROR: "CRITICAL: AUTH SERVICE #removed-legacyNOT CONFIGURED - "
+    # REMOVED_SYNTAX_ERROR: "Auth service requires #removed-legacyenvironment variable to connect to staging database"
     
 
     # Should not be empty or placeholder
-    # REMOVED_SYNTAX_ERROR: assert database_url != "", "DATABASE_URL should not be empty string"
-    # REMOVED_SYNTAX_ERROR: assert "placeholder" not in database_url.lower(), "DATABASE_URL should not contain placeholder values"
-    # REMOVED_SYNTAX_ERROR: assert "undefined" not in database_url.lower(), "DATABASE_URL should not contain undefined values"
+    # REMOVED_SYNTAX_ERROR: assert database_url != "", "#removed-legacyshould not be empty string"
+    # REMOVED_SYNTAX_ERROR: assert "placeholder" not in database_url.lower(), "#removed-legacyshould not contain placeholder values"
+    # REMOVED_SYNTAX_ERROR: assert "undefined" not in database_url.lower(), "#removed-legacyshould not contain undefined values"
 
     # Should be a valid PostgreSQL URL format
     # REMOVED_SYNTAX_ERROR: assert database_url.startswith(("postgresql://", "postgres://")), ( )
@@ -177,14 +177,14 @@
     # REMOVED_SYNTAX_ERROR: database_url = self.env.get("DATABASE_URL")
 
     # REMOVED_SYNTAX_ERROR: if not database_url:
-        # REMOVED_SYNTAX_ERROR: pytest.fail("DATABASE_URL not configured - cannot test connection failure")
+        # REMOVED_SYNTAX_ERROR: pytest.fail("#removed-legacynot configured - cannot test connection failure")
 
         # Test database connectivity using raw connection
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: import psycopg2
             # REMOVED_SYNTAX_ERROR: from urllib.parse import urlparse
 
-            # Parse DATABASE_URL to extract connection parameters
+            # Parse #removed-legacyto extract connection parameters
             # REMOVED_SYNTAX_ERROR: parsed = urlparse(database_url)
 
             # Connection parameters
@@ -1072,7 +1072,7 @@ validation_error: Optional[str] = None
         # REMOVED_SYNTAX_ERROR: '''
         # REMOVED_SYNTAX_ERROR: STANDALONE CRITICAL TEST - Auth Service Database Configuration
 
-        # REMOVED_SYNTAX_ERROR: EXPECTED TO FAIL: Auth service DATABASE_URL not configured
+        # REMOVED_SYNTAX_ERROR: EXPECTED TO FAIL: Auth service #removed-legacynot configured
         # REMOVED_SYNTAX_ERROR: Root Cause: Environment variable not loaded or missing from staging configuration
         # REMOVED_SYNTAX_ERROR: '''
         # REMOVED_SYNTAX_ERROR: pass
@@ -1084,7 +1084,7 @@ validation_error: Optional[str] = None
 
             # Critical failure check
             # REMOVED_SYNTAX_ERROR: assert database_url is not None, ( )
-            # REMOVED_SYNTAX_ERROR: "CRITICAL FAILURE: AUTH SERVICE DATABASE_URL NOT CONFIGURED. "
+            # REMOVED_SYNTAX_ERROR: "CRITICAL FAILURE: AUTH SERVICE #removed-legacyNOT CONFIGURED. "
             # REMOVED_SYNTAX_ERROR: "This causes complete auth service failure and 100% authentication breakdown."
             
 

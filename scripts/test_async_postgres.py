@@ -145,7 +145,7 @@ async def main():
                 )
                 await conn.close()
                 print(f"[OK] PostgreSQL is running on localhost:{port}")
-                # Update DATABASE_URL with working configuration
+                # Update #removed-legacywith working configuration
                 db_name = 'netra_dev' if port == 5433 else 'netra'
                 os.environ["DATABASE_URL"] = f"postgresql+asyncpg://postgres:{password}@localhost:{port}/{db_name}"
                 connected = True

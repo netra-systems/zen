@@ -237,7 +237,7 @@ AUTH_SERVICE_URL=http://localhost:8001
 2. **Permission Errors**
    ```bash
    # Verify database permissions
-   psql $DATABASE_URL -c "\l"
+   psql $#removed-legacy-c "\l"
    
    # Verify Redis access
    redis-cli -u $REDIS_URL info replication

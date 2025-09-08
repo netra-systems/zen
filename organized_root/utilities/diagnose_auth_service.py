@@ -293,7 +293,7 @@ class AuthServiceDiagnostic:
             ],
             "Database permission": [
                 "1. Check Cloud SQL IAM permissions",
-                "2. Verify DATABASE_URL secret is correct",
+                "2. Verify #removed-legacysecret is correct",
                 "3. Run: ./fix-cloud-sql-permissions.ps1"
             ],
             "JWT secret": [

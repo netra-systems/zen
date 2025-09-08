@@ -239,8 +239,9 @@ class TestFrontendPerformanceReliability:
             try:
                 await client.get(f"{self.tester.api_url}/api/health", headers=headers)
                 await asyncio.sleep(0.1)  # Brief pause to let cache settle
-            except:
-                pass  # Ignore warmup errors
+            except Exception as e:
+                # Warmup errors are acceptable - service may be starting up
+                print(f"Warmup request failed: {e}")
             
             # Now run the actual performance test
             for endpoint in endpoints:
@@ -384,8 +385,9 @@ class TestFrontendPerformanceReliability:
                                         headers=headers,
                                         timeout=5.0
                                     )
-                            except Exception:
-                                pass  # Ignore deletion errors
+                            except Exception as e:
+                                # Deletion errors during memory test are acceptable
+                                print(f"Memory test cleanup error: {e}")
                                 
                     except Exception as e:
                         print(f"Memory leak test operation failed: {e}")
@@ -499,8 +501,9 @@ class TestFrontendPerformanceReliability:
                             )
                             if response.status_code < 500:
                                 successful_requests += 1
-                        except:
-                            pass
+                        except Exception as e:
+                            # Request failures during load test are expected behavior
+                            print(f"Load test request failed (expected): {e}")
                         await asyncio.sleep(0.1)  # Small delay between requests
                         
                     return "completed" if successful_requests > 0 else "failed"
@@ -543,8 +546,9 @@ class TestFrontendPerformanceReliability:
                         headers=headers,
                         timeout=2.0
                     )
-                except Exception:
-                    pass  # Expected to fail
+                except Exception as e:
+                    # Expected to fail during stress test
+                    print(f"Stress test failure (expected): {e}")
                     
             # Measure recovery
             recovery_times = []
@@ -561,8 +565,10 @@ class TestFrontendPerformanceReliability:
                     if response.status_code < 500:
                         break
                         
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Recovery attempt failed - continue testing
+                    print(f"Recovery attempt failed: {e}")
+                    continue
                     
                 await asyncio.sleep(0.5)  # Shorter sleep
                 

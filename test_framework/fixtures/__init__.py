@@ -13,8 +13,15 @@ from test_framework.fixtures.real_services import *
 from test_framework.fixtures.websocket_manager_mock import *
 from test_framework.fixtures.websocket_test_helpers import *
 
-# Import additional classes and functions
-from test_framework.fixtures.service_fixtures import _ConfigManagerHelper as ConfigManagerHelper, create_test_app
+# CRITICAL: Import ExecutionEngineFactory fixtures for integration tests
+try:
+    from test_framework.fixtures.execution_engine_factory_fixtures import *
+except ImportError:
+    # Skip if execution engine factory fixtures not available
+    pass
+
+# Legacy compatibility classes removed - use unified configuration management
+# create_test_app is now available via wildcard import from service_fixtures
 
 # Import create_test_client from backend route helpers
 try:
@@ -148,9 +155,8 @@ def get_test_db_session():
 
 __all__ = [
     # Re-export all fixtures from submodules
-    "ConfigManagerHelper",
     "create_test_app",
-    "create_test_client",
+    "create_test_client", 
     "create_test_deep_state",
     "create_test_thread_message",
     "create_test_user",

@@ -72,9 +72,10 @@ class AuthService:
         try:
             from auth_service.auth_core.database.connection import auth_db
             self._db_connection = auth_db
-            logger.info("Auth service database connection initialized")
+            logger.debug("AuthService: Database connection object acquired")
         except Exception as e:
-            logger.error(f"Failed to initialize database connection: {e}")
+            logger.warning(f"AuthService: Running without database - {e}")
+            logger.info("AuthService: Operating in STATELESS mode - JWT validation only, no user persistence")
             self._db_connection = None
     
     async def _get_db_session(self):
@@ -260,6 +261,24 @@ class AuthService:
                 self._blacklisted_tokens.add(token)
         except Exception as e:
             logger.error(f"Token blacklist error: {e}")
+    
+    async def is_token_blacklisted(self, token: str) -> bool:
+        """Check if a token is blacklisted."""
+        try:
+            # Check JWT handler blacklist first
+            if hasattr(self.jwt_handler, 'is_token_blacklisted'):
+                return await self.jwt_handler.is_token_blacklisted(token)
+            elif hasattr(self.jwt_handler, 'blacklisted_tokens'):
+                return token in self.jwt_handler.blacklisted_tokens
+            
+            # Fallback to in-memory blacklist
+            if hasattr(self, '_blacklisted_tokens'):
+                return token in self._blacklisted_tokens
+            
+            return False
+        except Exception as e:
+            logger.error(f"Token blacklist check error: {e}")
+            return False
     
     async def verify_password(self, password: str, hash_value: str) -> bool:
         """Verify a password against a hash."""
@@ -574,20 +593,20 @@ class AuthService:
                         email = user.email
                         # For now, use default permissions (in future this could come from user roles)
                         permissions = ["read", "write"]
-                        logger.info(f"Refresh token: Retrieved user data from database for {email}")
+                        logger.debug(f"Refresh token: Successfully retrieved user data from database for {email}")
                     else:
                         logger.warning(f"Refresh token: User {user_id} not found in database, using token payload")
                 except Exception as db_error:
                     logger.warning(f"Refresh token: Database lookup failed for user {user_id}: {db_error}, using token payload")
                     # Fallback to token payload or defaults
             else:
-                logger.info(f"Refresh token: No database session, using token payload for user {user_id}")
+                logger.debug(f"Refresh token: Operating in stateless mode (no DB session) - using token payload for user {user_id}")
             
             # Generate new tokens with proper user data and unique timestamps
             new_access = self.jwt_handler.create_access_token(user_id, email, permissions)
             new_refresh = self.jwt_handler.create_refresh_token(user_id, email, permissions)
             
-            logger.info(f"Refresh token: Generated new tokens for user {user_id} with email {email}")
+            logger.debug(f"Refresh token: Successfully generated new tokens for user {user_id} ({email})")
             return new_access, new_refresh
             
         except Exception as e:

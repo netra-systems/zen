@@ -216,7 +216,7 @@ services:
         - NEXT_PUBLIC_WS_URL=ws://backend:8000
         - NEXT_PUBLIC_WEBSOCKET_URL=ws://backend:8000
       cache_from:
-        - node:20-alpine3.19
+        - node:20-alpine
     image: netra-frontend-staging:alpine
     environment:
       NODE_ENV: production

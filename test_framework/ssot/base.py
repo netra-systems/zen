@@ -41,7 +41,7 @@ if str(PROJECT_ROOT) not in sys.path:
 logger = logging.getLogger(__name__)
 
 
-class TestExecutionMetrics:
+class ExecutionMetrics:
     """Collect and track test execution metrics for analysis."""
     
     def __init__(self):
@@ -135,7 +135,7 @@ class BaseTestCase(TestCase):
         self._test_id = f"test_{uuid.uuid4().hex[:8]}"
         
         # Metrics collection
-        self.metrics = TestExecutionMetrics()
+        self.metrics = ExecutionMetrics()
         
         # Resource tracking
         self._resources_to_cleanup: List[Any] = []
@@ -626,7 +626,7 @@ __all__ = [
     'DatabaseTestCase',
     'WebSocketTestCase',
     'IntegrationTestCase',
-    'TestExecutionMetrics',
+    'ExecutionMetrics',
     'validate_test_class',
     'get_test_base_for_category'
 ]

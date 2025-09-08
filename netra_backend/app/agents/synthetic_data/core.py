@@ -15,7 +15,7 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+# DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     ApprovalFlowOrchestrator,
     ApprovalMessageBuilder,
@@ -35,7 +35,7 @@ from netra_backend.app.agents.synthetic_data_metrics_handler import (
 )
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.synthetic_data_llm_handler import SyntheticDataLLMHandler
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -59,7 +59,7 @@ class SyntheticDataAgentCore(ABC):
     while maintaining all synthetic data generation capabilities.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher):
         # Using single inheritance with standardized execution patterns
         self.agent_name = "SyntheticDataSubAgent"
         self.llm_manager = llm_manager
@@ -110,13 +110,13 @@ class SyntheticDataAgentCore(ABC):
             return {"status": "skipped", "message": "Synthetic data generation not required"}
         
         # Create database session manager for this request
-        db_manager = DatabaseSessionManager(context)
+        # Database session available via context.db_session if needed
         
         try:
             logger.info(f"Starting synthetic data generation for user {context.user_id}, run {context.run_id}")
             
             # Execute generation workflow
-            result = await self._execute_generation_workflow_with_context(context, stream_updates, db_manager)
+            result = await self._execute_generation_workflow_with_context(context, stream_updates)
             
             logger.info(f"Synthetic data generation completed for run {context.run_id}")
             return result
@@ -127,7 +127,7 @@ class SyntheticDataAgentCore(ABC):
             raise
         finally:
             # Clean up database session
-            await db_manager.close()
+            # Session cleanup handled by context manager
     
     def _should_execute_synthetic_data(self, user_request: str, context: UserExecutionContext) -> bool:
         """Determine if synthetic data generation should be executed.
@@ -159,7 +159,7 @@ class SyntheticDataAgentCore(ABC):
         return False
     
     async def _execute_generation_workflow_with_context(self, context: UserExecutionContext, 
-                                                       stream_updates: bool, db_manager: DatabaseSessionManager) -> Dict[str, Any]:
+                                                       stream_updates: bool) -> Dict[str, Any]:
         """Execute generation workflow using UserExecutionContext.
         
         Args:

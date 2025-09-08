@@ -63,10 +63,17 @@ const config = {
     createProject('utils', ['<rootDir>/__tests__/utils/**/*.test.[jt]s?(x)']),
     createProject('auth', ['<rootDir>/__tests__/auth/**/*.test.[jt]s?(x)']),
     createProject('chat', ['<rootDir>/__tests__/chat/**/*.test.[jt]s?(x)']),
+    createProject('agents', ['<rootDir>/__tests__/agents/**/*.test.[jt]s?(x)']),
     
     // Integration and specialized tests
     createProject('integration', ['<rootDir>/__tests__/integration/**/*.test.[jt]s?(x)']),
     createProject('critical', ['<rootDir>/__tests__/critical/**/*.test.[jt]s?(x)']),
+    createProject('regression', ['<rootDir>/__tests__/regression/**/*.test.[jt]s?(x)']),
+    createProject('bugs', ['<rootDir>/__tests__/bugs/**/*.test.[jt]s?(x)']),
+    createProject('providers', ['<rootDir>/__tests__/providers/**/*.test.[jt]s?(x)']),
+    createProject('websocket', ['<rootDir>/__tests__/websocket/**/*.test.[jt]s?(x)']),
+    createProject('bug_reproduction', ['<rootDir>/__tests__/bug_reproduction/**/*.test.[jt]s?(x)']),
+    createProject('unit', ['<rootDir>/__tests__/unit/**/*.test.[jt]s?(x)']),
     createProject('a11y', ['<rootDir>/__tests__/a11y/**/*.test.[jt]s?(x)']),
     
     // Platform-specific tests

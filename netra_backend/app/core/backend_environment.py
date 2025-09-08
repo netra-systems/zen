@@ -29,7 +29,7 @@ class BackendEnvironment:
     def _validate_backend_config(self) -> None:
         """Validate backend-specific configuration on initialization."""
         # Core backend requirements
-        # DATABASE_URL is built from POSTGRES_* variables via DatabaseURLBuilder
+        # Database URL can come from #removed-legacydirectly or built from POSTGRES_* variables
         required_vars = [
             "JWT_SECRET_KEY",
             "SECRET_KEY"
@@ -43,15 +43,26 @@ class BackendEnvironment:
         if missing:
             logger.warning(f"Missing required backend environment variables: {missing}")
         
-        # Check if we can build a database URL (not required, just informational)
+        # Check if we can build a database URL from POSTGRES_* variables
         db_url = self.get_database_url()
-        if not db_url:
-            logger.info("Database URL will be built from POSTGRES_* environment variables")
+        logger.info("Built database URL from POSTGRES_* environment variables")
     
     # Authentication & Security
     def get_jwt_secret_key(self) -> str:
-        """Get JWT secret key for authentication."""
-        return self.env.get("JWT_SECRET_KEY", "")
+        """
+        Get JWT secret key for authentication.
+        
+        Uses unified secrets manager to properly handle environment-specific JWT secrets.
+        This ensures consistency with auth service which uses environment-specific secrets.
+        
+        Priority order:
+        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
+        2. Generic JWT_SECRET_KEY
+        3. Legacy JWT_SECRET
+        4. Development fallback
+        """
+        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
+        return get_jwt_secret()
     
     def get_secret_key(self) -> str:
         """Get general secret key for session/encryption."""
@@ -69,11 +80,6 @@ class BackendEnvironment:
             sync: If True, return synchronous URL (for Alembic, etc.)
         """
         from shared.database_url_builder import DatabaseURLBuilder
-        
-        # First check if DATABASE_URL is explicitly set
-        database_url = self.env.get("DATABASE_URL", "")
-        if database_url:
-            return database_url
         
         # Use DatabaseURLBuilder to construct URL from components
         builder = DatabaseURLBuilder(self.env.as_dict())
@@ -276,7 +282,7 @@ class BackendEnvironment:
         issues = []
         warnings = []
         
-        # Required variables (DATABASE_URL is built dynamically, not required as env var)
+        # Required variables (#removed-legacyis built dynamically, not required as env var)
         required = {
             "JWT_SECRET_KEY": self.get_jwt_secret_key(),
             "SECRET_KEY": self.get_secret_key()

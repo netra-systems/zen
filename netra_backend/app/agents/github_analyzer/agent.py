@@ -29,7 +29,7 @@ from netra_backend.app.agents.github_analyzer.scanner_core import RepositoryScan
 from netra_backend.app.agents.github_analyzer.tool_analyzer import ToolUsageAnalyzer
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.reliability import get_reliability_wrapper
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -43,7 +43,7 @@ class GitHubAnalyzerService(BaseAgent):
     def __init__(
         self, 
         llm_manager: LLMManager, 
-        tool_dispatcher: ToolDispatcher
+        tool_dispatcher: UnifiedToolDispatcher
     ) -> None:
         """Initialize with LLM manager and tool dispatcher."""
         self._init_base_agent(llm_manager)

@@ -16,14 +16,17 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage.unified_triage_agent import TriageResult, TriageMetadata, Priority, Complexity
+from netra_backend.app.agents.triage.models import TriageResult, TriageMetadata, Priority, Complexity
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,
 )
 from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
+    AnomalyDetail,
+    AnomalySeverity,
     DataAnalysisResponse,
+    PerformanceMetrics,
 )
 
 
@@ -58,30 +61,37 @@ class GoldenDatasets:
                 category="data_analysis",
                 confidence_score=0.95,
                 priority=Priority.MEDIUM,
-                complexity=Complexity.SIMPLE,
+                complexity=Complexity.LOW,
                 metadata=TriageMetadata(
                     triage_duration_ms=150,
-                    llm_tokens_used=450,
                     cache_hit=False
                 )
             ),
             "data_result": DataAnalysisResponse(
-                query="SELECT avg(response_time), p95(response_time), p99(response_time) FROM api_metrics",
-                results=[
-                    {"metric": "avg_response_time", "value": 250},
-                    {"metric": "p95_response_time", "value": 450},
-                    {"metric": "p99_response_time", "value": 800}
-                ],
-                insights={
-                    "performance_summary": "API response times analyzed", 
-                    "average_response": "250ms",
-                    "p95_response": "450ms", 
-                    "p99_response": "800ms"
+                analysis_id=f"analysis_{uuid.uuid4().hex[:8]}",
+                status="completed",
+                results={
+                    "query": "SELECT avg(response_time), p95(response_time), p99(response_time) FROM api_metrics",
+                    "data": [
+                        {"metric": "avg_response_time", "value": 250},
+                        {"metric": "p95_response_time", "value": 450},
+                        {"metric": "p99_response_time", "value": 800}
+                    ],
+                    "insights": {
+                        "performance_summary": "API response times analyzed", 
+                        "average_response": "250ms",
+                        "p95_response": "450ms", 
+                        "p99_response": "800ms"
+                    },
+                    "recommendations": ["Consider caching for slow endpoints"],
+                    "affected_rows": 10000
                 },
-                recommendations=["Consider caching for slow endpoints"],
-                execution_time_ms=2500.0,
-                affected_rows=10000,
-                metadata={"analysis_duration": 2.5}
+                metrics=PerformanceMetrics(
+                    duration_ms=2500.0,
+                    latency_p95=450.0,
+                    latency_p99=800.0
+                ),
+                created_at=datetime.now(timezone.utc).timestamp()
             ),
             "expected_metrics": {
                 "total_steps": 3,
@@ -121,36 +131,62 @@ class GoldenDatasets:
                     "agent_type": "data_analyst",
                     "run_id": f"{run_id}_data",
                     "result": DataAnalysisResponse(
-                        query="SELECT stage, resource_usage, data_skew FROM pipeline_metrics WHERE pipeline_id = ?",
-                        results=[
-                            {"stage": "etl_stage_3", "resource_usage": 0.60, "data_skew": True},
-                            {"stage": "etl_stage_1", "resource_usage": 0.25, "data_skew": False}
-                        ],
-                        insights={
-                            "summary": "Pipeline bottlenecks identified",
-                            "main_issue": "ETL stage 3 using 60% resources",
-                            "secondary_issue": "Data skew detected"
+                        analysis_id=f"analysis_{uuid.uuid4().hex[:8]}",
+                        status="completed",
+                        results={
+                            "query": "SELECT stage, resource_usage, data_skew FROM pipeline_metrics WHERE pipeline_id = ?",
+                            "data": [
+                                {"stage": "etl_stage_3", "resource_usage": 0.60, "data_skew": True},
+                                {"stage": "etl_stage_1", "resource_usage": 0.25, "data_skew": False}
+                            ],
+                            "insights": {
+                                "summary": "Pipeline bottlenecks identified",
+                                "main_issue": "ETL stage 3 using 60% resources",
+                                "secondary_issue": "Data skew detected"
+                            },
+                            "recommendations": ["Partition rebalancing", "Add parallel processing"],
+                            "affected_rows": 50000
                         },
-                        recommendations=["Partition rebalancing", "Add parallel processing"],
-                        execution_time_ms=15300.0,
-                        affected_rows=50000,
-                        metadata={"processing_time": 15.3}
+                        metrics=PerformanceMetrics(
+                            duration_ms=15300.0
+                        ),
+                        created_at=datetime.now(timezone.utc).timestamp()
                     )
                 },
                 {
                     "agent_type": "anomaly_detector",
                     "run_id": f"{run_id}_anomaly",
                     "result": AnomalyDetectionResponse(
-                        anomalies_detected=True,
-                        anomaly_count=3,
-                        anomalies=[
-                            {"type": "cost_spike", "severity": "high", "timestamp": datetime.now(timezone.utc).isoformat()},
-                            {"type": "performance_degradation", "severity": "medium", "timestamp": datetime.now(timezone.utc).isoformat()},
-                            {"type": "data_quality", "severity": "low", "timestamp": datetime.now(timezone.utc).isoformat()}
+                        anomalies_detected=[
+                            AnomalyDetail(
+                                metric_name="cost_spike",
+                                value=150.0,
+                                expected_value=100.0,
+                                deviation=50.0,
+                                severity=AnomalySeverity.HIGH,
+                                timestamp=datetime.now(timezone.utc).timestamp()
+                            ),
+                            AnomalyDetail(
+                                metric_name="performance_degradation",
+                                value=0.75,
+                                expected_value=0.95,
+                                deviation=-0.20,
+                                severity=AnomalySeverity.MEDIUM,
+                                timestamp=datetime.now(timezone.utc).timestamp()
+                            ),
+                            AnomalyDetail(
+                                metric_name="data_quality",
+                                value=0.88,
+                                expected_value=0.95,
+                                deviation=-0.07,
+                                severity=AnomalySeverity.LOW,
+                                timestamp=datetime.now(timezone.utc).timestamp()
+                            )
                         ],
-                        confidence_score=0.87,
-                        analysis_window_hours=24,
-                        metadata={"alerts_triggered": 2}
+                        total_anomalies=3,
+                        detection_time_ms=450.0,
+                        model_version="anomaly_v2.1",
+                        confidence_threshold=0.85
                     )
                 },
                 {

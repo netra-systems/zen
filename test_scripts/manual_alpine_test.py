@@ -54,7 +54,7 @@ class AlpineContainerTester:
         try:
             # Test parameter acceptance
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 use_alpine=True
             )
             
@@ -64,7 +64,7 @@ class AlpineContainerTester:
                 self.test_results["parameter_tests"]["acceptance"] = True
                 
                 # Test default value
-                manager_default = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+                manager_default = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
                 if hasattr(manager_default, 'use_alpine'):
                     self.log(f"[PASS] use_alpine defaults to: {manager_default.use_alpine}")
                     self.test_results["parameter_tests"]["default_value"] = manager_default.use_alpine is False
@@ -94,7 +94,7 @@ class AlpineContainerTester:
         try:
             # Test Alpine compose file selection
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 use_alpine=True
             )
             
@@ -113,7 +113,7 @@ class AlpineContainerTester:
                 
                 # Test regular compose file selection
                 manager_regular = UnifiedDockerManager(
-                    environment_type=EnvironmentType.SHARED,
+                    environment_type=EnvironmentType.TEST,
                     use_alpine=False
                 )
                 regular_compose_file = manager_regular._get_compose_file()
@@ -149,7 +149,7 @@ class AlpineContainerTester:
                 return False
             
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 test_id="alpine_manual_test",
                 use_alpine=True
             )
@@ -220,7 +220,7 @@ class AlpineContainerTester:
             # Test regular containers first
             self.log("Testing regular container memory usage...")
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 test_id="memory_test_regular",
                 use_alpine=False
             )
@@ -236,7 +236,7 @@ class AlpineContainerTester:
             # Test Alpine containers
             self.log("Testing Alpine container memory usage...")
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 test_id="memory_test_alpine",
                 use_alpine=True
             )
@@ -290,13 +290,13 @@ class AlpineContainerTester:
             
             # Create managers for both types
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 test_id="parallel_regular",
                 use_alpine=False
             )
             
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.SHARED,
+                environment_type=EnvironmentType.TEST,
                 test_id="parallel_alpine", 
                 use_alpine=True
             )

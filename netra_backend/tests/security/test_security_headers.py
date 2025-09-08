@@ -6,7 +6,7 @@ Tests security headers middleware
 
 import sys
 from pathlib import Path
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

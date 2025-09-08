@@ -27,13 +27,8 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 
-@dataclass
-class AuthTestConfig:
-    """Configuration for authentication tests."""
-    auth_service_url: str = "http://localhost:8001"
-    backend_url: str = "http://localhost:8000"
-    timeout: float = 10.0
-    test_user_prefix: str = "test_auth"
+# AuthTestConfig class moved to test_framework.helpers.auth_helpers to maintain SSOT
+from test_framework.helpers.auth_helpers import AuthTestConfig
 
 
 class SimplifiedAuthTester:
@@ -191,12 +186,14 @@ class SimplifiedAuthTester:
                 "email": token_data.get('email')
             }
             
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return {
                 "valid": False,
                 "service": "simplified_test",
                 "error": f"Token validation failed: {str(e)}"
             }
+        except Exception as e:
+            pytest.fail(f"Unexpected error during token validation: {e}")
     
     async def test_token_refresh(self, refresh_token: str) -> Dict[str, Any]:
         """Test token refresh flow - simplified for testing core logic."""

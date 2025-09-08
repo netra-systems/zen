@@ -10,7 +10,7 @@ TEST_CONFIG,
 TEST_ENDPOINTS,
 TEST_SECRETS,
 TEST_USERS,
-TestDatabaseManager,
+DatabaseTestManager,
 TestDataFactory,
 CustomerTier,
 TestTokenManager,
@@ -78,13 +78,13 @@ get_test_user,
 # REMOVED_SYNTAX_ERROR: def demo_database_config():
     # REMOVED_SYNTAX_ERROR: """Demonstrate database configuration"""
     # REMOVED_SYNTAX_ERROR: print("=== Database Configuration ===")
-    # REMOVED_SYNTAX_ERROR: db_url = TestDatabaseManager.get_memory_db_url()
+    # REMOVED_SYNTAX_ERROR: db_url = DatabaseTestManager.get_memory_db_url()
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-    # REMOVED_SYNTAX_ERROR: db_config = TestDatabaseManager.get_test_db_config()
+    # REMOVED_SYNTAX_ERROR: db_config = DatabaseTestManager.get_test_db_config()
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-    # REMOVED_SYNTAX_ERROR: session_config = TestDatabaseManager.create_test_session_config()
+    # REMOVED_SYNTAX_ERROR: session_config = DatabaseTestManager.create_test_session_config()
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
     # REMOVED_SYNTAX_ERROR: print()
 

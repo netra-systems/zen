@@ -36,7 +36,7 @@ from datetime import datetime, timezone
 from dataclasses import FrozenInstanceError
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 from netra_backend.app.services.token_optimization.session_factory import TokenOptimizationSessionFactory
 from netra_backend.app.services.token_optimization.config_manager import TokenOptimizationConfigManager

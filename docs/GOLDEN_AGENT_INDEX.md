@@ -5,6 +5,9 @@
 
 This index serves as the **Single Source of Truth (SSOT)** for all agent-related documentation, patterns, and specifications in the Netra Apex platform. All agent implementations MUST follow these guidelines to ensure consistency, reliability, and maintainability.
 
+> **⚠️ CRITICAL: Factory-Based User Isolation**  
+> **MANDATORY READING**: The **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **ALL AGENT IMPLEMENTATIONS** must understand and implement these isolation patterns.
+
 ---
 
 ## 🎯 Quick Navigation

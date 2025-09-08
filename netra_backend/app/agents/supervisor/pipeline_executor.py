@@ -25,7 +25,7 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
-    from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -394,7 +394,7 @@ class PipelineExecutor:
                 
             # Create UserExecutionContext from parameters if available
             if run_id and thread_id:
-                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
                 
                 user_context = UserExecutionContext(
                     user_id=user_id or "unknown_user",

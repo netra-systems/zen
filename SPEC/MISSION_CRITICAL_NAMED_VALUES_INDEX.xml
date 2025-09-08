@@ -90,6 +90,35 @@
     </category>
     
     <category name="Backend Critical Variables">
+      <variable name="SERVICE_ID" type="hardcoded_value">
+        <description>Stable service identifier for backend-to-auth communication</description>
+        <cascade_impact>CRITICAL: Service ID mismatch causes authentication failures, must be stable value "netra-backend"</cascade_impact>
+        <severity>ULTRA_CRITICAL</severity>
+        <stable_value>netra-backend</stable_value>
+        <critical_learning date="2025-09-07">
+          <discovery>SERVICE_ID with timestamp suffixes causes authentication failures every minute</discovery>
+          <cross_reference>SPEC/learnings/service_id_stability_fix_20250907.xml</cross_reference>
+          <note>Auth service must use hardcoded "netra-backend" not environment variable with timestamps</note>
+        </critical_learning>
+        <required_by>
+          <service>auth_service/auth_core/routes/auth_routes.py:760</service>
+          <service>auth_service/auth_core/routes/auth_routes.py:935</service>
+          <location>netra_backend/app/clients/auth_client_core.py</location>
+        </required_by>
+        <incident_history>
+          <incident date="2025-09-07" severity="CRITICAL" duration="recurring">
+            <description>SERVICE_ID with timestamp suffix caused auth failures every 60 seconds</description>
+            <impact>Service authentication mismatch, blacklist validation failures</impact>
+            <logs_pattern>Service ID mismatch: received netra-auth-staging-[timestamp] but expected netra-backend</logs_pattern>
+          </incident>
+        </incident_history>
+        <used_in>
+          <location>auth_service/auth_core/routes/auth_routes.py - HARDCODED</location>
+          <location>netra_backend X-Service-ID header</location>
+          <location>Must NOT use environment variable</location>
+        </used_in>
+      </variable>
+      
       <variable name="SERVICE_SECRET" type="env_var">
         <description>Inter-service authentication secret for backend-to-auth communication</description>
         <cascade_impact>CRITICAL: Complete authentication failure, circuit breaker permanently open, 100% user lockout, system unusable</cascade_impact>

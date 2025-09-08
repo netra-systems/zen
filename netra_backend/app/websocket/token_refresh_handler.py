@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Set
 
-import jwt
+# JWT import removed - SSOT compliance: all JWT operations delegated to auth service
 from fastapi import WebSocket, WebSocketDisconnect
 
 from netra_backend.app.auth_integration.auth import auth_client

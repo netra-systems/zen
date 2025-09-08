@@ -1,5 +1,5 @@
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import asyncio

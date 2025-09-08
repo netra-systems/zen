@@ -117,7 +117,7 @@ class TestConfigurationRegression:
         config = get_unified_config()
         
         # Critical configs that MUST exist
-        assert config.database_url, "DATABASE_URL is missing"
+        assert config.database_url, "#removed-legacyis missing"
         assert config.jwt_secret_key, "JWT_SECRET_KEY is missing"
         assert config.environment in ["development", "testing", "staging", "production"], \
             f"Invalid environment: {config.environment}"

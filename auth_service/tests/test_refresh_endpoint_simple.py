@@ -21,11 +21,11 @@ def test_refresh_endpoint_accepts_multiple_formats():
     
     # Test with real HTTP client instead of mocks
     import asyncio
-    from httpx import AsyncClient
+    from httpx import AsyncClient, ASGITransport
     from auth_service.main import app
     
     async def test_real_refresh():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Test 1: snake_case format (refresh_token)
             response1 = await client.post("/auth/refresh", json={"refresh_token": test_token})
             # Will return 401 for invalid token, but should parse the field correctly
@@ -49,11 +49,11 @@ def test_refresh_endpoint_error_handling():
     
     # Test with real HTTP client
     import asyncio
-    from httpx import AsyncClient
+    from httpx import AsyncClient, ASGITransport
     from auth_service.main import app
     
     async def test_real_empty_body():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/auth/refresh", json={})
             assert response.status_code == 422
             assert "refresh_token" in response.text.lower()
@@ -68,11 +68,11 @@ def test_refresh_endpoint_invalid_json():
     
     # Test with real HTTP client and invalid JSON
     import asyncio
-    from httpx import AsyncClient
+    from httpx import AsyncClient, ASGITransport
     from auth_service.main import app
     
     async def test_real_invalid_json():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/auth/refresh", 
                 content=b"not valid json",
@@ -91,11 +91,11 @@ def test_refresh_endpoint_invalid_token():
     
     # Test with real HTTP client and invalid token
     import asyncio
-    from httpx import AsyncClient
+    from httpx import AsyncClient, ASGITransport
     from auth_service.main import app
     
     async def test_real_invalid_token():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/auth/refresh", json={"refresh_token": "invalid"})
             assert response.status_code == 401
             assert "invalid" in response.text.lower() or "token" in response.text.lower()

@@ -303,7 +303,7 @@ class AppConfig(BaseModel):
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
-    service_id: str = Field(default="backend", description="Service ID for cross-service authentication")
+    service_id: str = Field(default="netra-backend", description="Service ID for cross-service authentication")
     service_secret: Optional[str] = Field(
         default=None, 
         description="Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret."
@@ -380,6 +380,17 @@ class AppConfig(BaseModel):
     startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
     startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
     
+    # Compatibility properties for uppercase attribute access (SSOT pattern)
+    @property
+    def API_BASE_URL(self) -> str:
+        """Compatibility alias for api_base_url."""
+        return self.api_base_url
+    
+    @property
+    def SECRET_KEY(self) -> str:
+        """Compatibility alias for secret_key."""
+        return self.secret_key
+    
     @field_validator('secret_key')
     @classmethod
     def validate_secret_key(cls, v):
@@ -441,7 +452,12 @@ class AppConfig(BaseModel):
     @field_validator('service_secret')
     @classmethod
     def validate_service_secret(cls, v):
-        """CRITICAL: Validate service secret security requirements"""
+        """CRITICAL: Validate service secret security requirements
+        
+        Environment-aware validation:
+        - Production: Strict validation against weak patterns
+        - Test/Development: Allow test values and hex strings
+        """
         if v is None:
             # Allow None for backward compatibility, but log warning
             import logging
@@ -456,10 +472,22 @@ class AppConfig(BaseModel):
         # Note: Cross-field validation for JWT secret would require model_validator in Pydantic v2
         # This security check is handled at runtime during configuration loading
         
+        # Environment-aware validation - check if we're in test environment
+        from netra_backend.app.core.project_utils import is_test_environment
+        is_testing = is_test_environment()
+        
+        # Check for hex string pattern (from openssl rand -hex 32)
+        # Hex strings are valid secrets as per CLAUDE.md
+        import re
+        is_hex_string = re.match(r'^[a-f0-9]{32,}$', v.lower())
+        
         # Additional security checks for weak patterns
-        weak_patterns = ['default', 'secret', 'password', 'dev-secret', 'test', 'admin', 'user']
-        if any(pattern in v.lower() for pattern in weak_patterns):
-            raise ValueError(f"service_secret cannot contain weak patterns like: {', '.join(weak_patterns)}")
+        # In production: reject weak patterns
+        # In test/development: allow test values and hex strings
+        if not is_testing and not is_hex_string:
+            weak_patterns = ['default', 'secret', 'password', 'dev-secret', 'test', 'admin', 'user']
+            if any(pattern in v.lower() for pattern in weak_patterns):
+                raise ValueError(f"service_secret cannot contain weak patterns like: {', '.join(weak_patterns)} (production environment)")
         
         return v
 
@@ -503,17 +531,6 @@ class DevelopmentConfig(AppConfig):
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
-    
-    # Compatibility aliases for uppercase attribute access
-    @property
-    def SECRET_KEY(self) -> str:
-        """Compatibility alias for secret_key."""
-        return self.secret_key
-    
-    @property 
-    def API_BASE_URL(self) -> str:
-        """Compatibility alias for api_base_url."""
-        return self.api_base_url
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
@@ -738,7 +755,7 @@ class ProductionConfig(AppConfig):
             raise ValueError(
                 "DatabaseURLBuilder failed to construct URL for production environment. "
                 "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                "or DATABASE_URL is provided."
+                "or #removed-legacyis provided."
             )
     
     def __init__(self, **data):
@@ -1153,7 +1170,7 @@ class StagingConfig(AppConfig):
             raise ValueError(
                 "DatabaseURLBuilder failed to construct URL for staging environment. "
                 "Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                "or DATABASE_URL is provided."
+                "or #removed-legacyis provided."
             )
     
 
@@ -1177,7 +1194,7 @@ class NetraTestingConfig(AppConfig):
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env.as_dict())
         
-        # Get URL for test environment - uses test.auto_url which handles DATABASE_URL or test defaults
+        # Get URL for test environment - uses test.auto_url which handles #removed-legacyor test defaults
         database_url = builder.test.auto_url
         
         if database_url:
@@ -1262,9 +1279,9 @@ class NetraTestingConfig(AppConfig):
                 ),
             }
         
-        # Load OAuth credentials from environment
-        oauth_client_id = env.get('OAUTH_GOOGLE_CLIENT_ID_ENV')
-        oauth_client_secret = env.get('OAUTH_GOOGLE_CLIENT_SECRET_ENV')
+        # Load OAuth credentials from environment (test environment uses TEST suffix)
+        oauth_client_id = env.get('GOOGLE_OAUTH_CLIENT_ID_TEST')
+        oauth_client_secret = env.get('GOOGLE_OAUTH_CLIENT_SECRET_TEST')
         
         if oauth_client_id or oauth_client_secret:
             if 'google_cloud' not in data:

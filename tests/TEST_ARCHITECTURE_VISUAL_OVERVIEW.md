@@ -2,6 +2,8 @@
 
 ## Related Documentation
 
+- **[Test Creation Guide](../TEST_CREATION_GUIDE.md)** - AUTHORITATIVE guide for creating tests with SSOT patterns
+- **[Staging E2E Test Index](./e2e/STAGING_E2E_TEST_INDEX.md)** - Comprehensive index of all staging-ready E2E tests
 - **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation
 - **[Agent Architecture Disambiguation Guide](../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Agent component relationships
 - **[Docker Orchestration](../docs/docker_orchestration.md)** - Docker management and Alpine containers

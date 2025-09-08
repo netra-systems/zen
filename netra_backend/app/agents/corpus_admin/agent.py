@@ -18,7 +18,7 @@ from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.logging_config import central_logger
@@ -48,7 +48,7 @@ class CorpusValidator:
 class CorpusOperations:
     """Corpus operations handler."""
     
-    def __init__(self, tool_dispatcher: ToolDispatcher):
+    def __init__(self, tool_dispatcher: UnifiedToolDispatcher):
         self.tool_dispatcher = tool_dispatcher
     
     def execute_operation(self, request: Any, run_id: str, stream_updates: bool) -> CorpusOperationResult:
@@ -68,7 +68,7 @@ class CorpusOperations:
 class CorpusAdminSubAgent(BaseAgent):
     """Corpus administration sub-agent."""
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher, 
                  websocket_manager: Optional[Any] = None):
         super().__init__(
             llm_manager=llm_manager,

@@ -8,7 +8,7 @@ from typing import Optional, Any, Dict, Union
 from unittest.mock import AsyncMock, MagicMock
 
 
-class TestRedisManager:
+class RedisTestManager:
     """Mock Redis manager for testing purposes."""
     
     def __init__(self):

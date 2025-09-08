@@ -39,6 +39,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     UserWebSocketEmitter
 )
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -66,8 +67,33 @@ class ExecutionEngineFactory:
     is completely isolated per user request.
     """
     
-    def __init__(self):
-        """Initialize the execution engine factory."""
+    def __init__(self, 
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 database_session_manager=None,
+                 redis_manager=None):
+        """Initialize the execution engine factory.
+        
+        Args:
+            websocket_bridge: WebSocket bridge for agent notifications.
+                             Required for proper agent execution with WebSocket events.
+            database_session_manager: Database session manager for infrastructure access.
+            redis_manager: Redis manager for caching and session management.
+        """
+        # CRITICAL: Validate dependencies early (fail fast)
+        if not websocket_bridge:
+            raise ExecutionEngineFactoryError(
+                "ExecutionEngineFactory requires websocket_bridge during initialization. "
+                "Ensure AgentWebSocketBridge is created and passed during startup. "
+                "This is required for WebSocket events that enable chat business value."
+            )
+        
+        # Store validated websocket bridge
+        self._websocket_bridge = websocket_bridge
+        
+        # Store infrastructure managers (optional - for tests and infrastructure validation)
+        self._database_session_manager = database_session_manager
+        self._redis_manager = redis_manager
+        
         # Active engines registry for lifecycle management
         self._active_engines: Dict[str, UserExecutionEngine] = {}
         self._engine_lock = asyncio.Lock()
@@ -76,6 +102,9 @@ class ExecutionEngineFactory:
         self._max_engines_per_user = 2  # Prevent resource exhaustion
         self._engine_timeout_seconds = 300  # 5 minutes max engine lifetime
         self._cleanup_interval = 60  # Cleanup check every minute
+        
+        # Tool dispatcher factory for integration
+        self._tool_dispatcher_factory = None
         
         # Factory metrics
         self._factory_metrics = {
@@ -93,6 +122,15 @@ class ExecutionEngineFactory:
         self._shutdown_event = asyncio.Event()
         
         logger.info("ExecutionEngineFactory initialized")
+    
+    def set_tool_dispatcher_factory(self, tool_dispatcher_factory):
+        """Set the tool dispatcher factory for integration.
+        
+        Args:
+            tool_dispatcher_factory: Factory for creating tool dispatchers
+        """
+        self._tool_dispatcher_factory = tool_dispatcher_factory
+        logger.info(f"Tool dispatcher factory set for ExecutionEngineFactory: {type(tool_dispatcher_factory).__name__}")
     
     async def create_for_user(self, context: UserExecutionContext) -> UserExecutionEngine:
         """Create UserExecutionEngine for specific user.
@@ -145,6 +183,13 @@ class ExecutionEngineFactory:
                     websocket_emitter=websocket_emitter
                 )
                 
+                # Attach infrastructure managers for tests and validation
+                # These are optional dependencies that enable infrastructure validation
+                if self._database_session_manager:
+                    engine.database_session_manager = self._database_session_manager
+                if self._redis_manager:
+                    engine.redis_manager = self._redis_manager
+                
                 # Register engine for lifecycle management
                 self._active_engines[engine_key] = engine
                 
@@ -194,11 +239,11 @@ class ExecutionEngineFactory:
     async def _create_user_websocket_emitter(self, 
                                             context: UserExecutionContext,
                                             agent_factory) -> UserWebSocketEmitter:
-        """Create user WebSocket emitter via agent factory.
+        """Create user WebSocket emitter using validated websocket bridge.
         
         Args:
             context: User execution context
-            agent_factory: Agent instance factory
+            agent_factory: Agent instance factory (unused now, kept for compatibility)
             
         Returns:
             UserWebSocketEmitter: User-specific WebSocket emitter
@@ -207,11 +252,9 @@ class ExecutionEngineFactory:
             ExecutionEngineFactoryError: If emitter creation fails
         """
         try:
-            # Get WebSocket bridge from factory
-            if not hasattr(agent_factory, '_websocket_bridge') or not agent_factory._websocket_bridge:
-                raise ExecutionEngineFactoryError("WebSocket bridge not available in agent factory")
-            
-            websocket_bridge = agent_factory._websocket_bridge
+            # Use the validated websocket_bridge from initialization
+            # This eliminates the late validation that was causing the bug
+            websocket_bridge = self._websocket_bridge
             
             # Create user WebSocket emitter
             emitter = UserWebSocketEmitter(
@@ -221,7 +264,7 @@ class ExecutionEngineFactory:
                 websocket_bridge=websocket_bridge
             )
             
-            logger.debug(f"Created UserWebSocketEmitter for user {context.user_id}")
+            logger.debug(f"Created UserWebSocketEmitter for user {context.user_id} with validated bridge")
             return emitter
             
         except Exception as e:
@@ -441,6 +484,69 @@ class ExecutionEngineFactory:
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
     
+    async def create_execution_engine(self, user_context: UserExecutionContext) -> 'UserExecutionEngine':
+        """Create execution engine for user - alias for create_for_user for compatibility.
+        
+        Args:
+            user_context: User execution context
+            
+        Returns:
+            UserExecutionEngine: Isolated execution engine
+        """
+        return await self.create_for_user(user_context)
+    
+    def get_active_contexts(self) -> Dict[str, str]:
+        """Get active user contexts for monitoring.
+        
+        Returns:
+            Dictionary mapping user IDs to their active context count
+        """
+        user_contexts = {}
+        try:
+            for engine in self._active_engines.values():
+                user_id = engine.get_user_context().user_id
+                if user_id in user_contexts:
+                    user_contexts[user_id] += 1
+                else:
+                    user_contexts[user_id] = 1
+        except Exception as e:
+            logger.error(f"Error getting active contexts: {e}")
+        
+        return user_contexts
+    
+    async def cleanup_user_context(self, user_id: str) -> bool:
+        """Cleanup all engines for a specific user.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            True if cleanup successful
+        """
+        try:
+            engines_to_cleanup = []
+            
+            # Find engines for this user
+            async with self._engine_lock:
+                for engine in self._active_engines.values():
+                    if engine.get_user_context().user_id == user_id:
+                        engines_to_cleanup.append(engine)
+            
+            # Cleanup engines for this user
+            for engine in engines_to_cleanup:
+                await self.cleanup_engine(engine)
+            
+            logger.info(f"Cleaned up {len(engines_to_cleanup)} engines for user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error cleaning up user context {user_id}: {e}")
+            return False
+    
+    async def cleanup_all_contexts(self) -> None:
+        """Cleanup all active contexts - alias for shutdown for compatibility."""
+        await self.shutdown()
+    
     async def shutdown(self) -> None:
         """Shutdown factory and clean up all resources."""
         logger.info("Shutting down ExecutionEngineFactory")
@@ -488,17 +594,79 @@ _factory_lock = asyncio.Lock()
 
 
 async def get_execution_engine_factory() -> ExecutionEngineFactory:
-    """Get singleton ExecutionEngineFactory instance.
+    """Get configured ExecutionEngineFactory instance.
     
     Returns:
         ExecutionEngineFactory: Configured factory instance
+        
+    Raises:
+        ExecutionEngineFactoryError: If factory not configured during startup
     """
+    # Try to get configured factory from FastAPI app state first
+    try:
+        from fastapi import Request
+        from starlette.middleware.base import BaseHTTPMiddleware
+        import contextvars
+        
+        # Try to get from current app context if available
+        try:
+            from netra_backend.app.main import app
+            if hasattr(app.state, 'execution_engine_factory'):
+                return app.state.execution_engine_factory
+        except (ImportError, AttributeError):
+            pass
+    except ImportError:
+        pass
+    
+    # Fallback to singleton pattern with clear error messaging
     global _factory_instance
     
     async with _factory_lock:
         if _factory_instance is None:
-            _factory_instance = ExecutionEngineFactory()
-            logger.info("Created singleton ExecutionEngineFactory instance")
+            raise ExecutionEngineFactoryError(
+                "ExecutionEngineFactory not configured during startup. "
+                "The factory requires a WebSocket bridge for proper agent execution. "
+                "Check system initialization in smd.py - ensure ExecutionEngineFactory "
+                "is created with websocket_bridge parameter during startup."
+            )
+        
+        return _factory_instance
+
+
+async def configure_execution_engine_factory(
+    websocket_bridge: AgentWebSocketBridge,
+    database_session_manager=None,
+    redis_manager=None
+) -> ExecutionEngineFactory:
+    """Configure the singleton ExecutionEngineFactory with dependencies.
+    
+    This function should be called during system startup to properly initialize
+    the ExecutionEngineFactory with required dependencies.
+    
+    Args:
+        websocket_bridge: WebSocket bridge for agent notifications
+        database_session_manager: Optional database session manager for infrastructure validation
+        redis_manager: Optional Redis manager for infrastructure validation
+        
+    Returns:
+        ExecutionEngineFactory: Configured factory instance
+        
+    Raises:
+        ExecutionEngineFactoryError: If configuration fails
+    """
+    global _factory_instance
+    
+    async with _factory_lock:
+        if _factory_instance is not None:
+            logger.warning("ExecutionEngineFactory already configured - replacing with new instance")
+        
+        # Create new factory with validated dependencies
+        _factory_instance = ExecutionEngineFactory(
+            websocket_bridge=websocket_bridge,
+            database_session_manager=database_session_manager,
+            redis_manager=redis_manager
+        )
+        logger.info("✅ ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers")
         
         return _factory_instance
 

@@ -36,7 +36,7 @@ import weakref
 from threading import RLock
 import logging
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.logging_config import central_logger
 
@@ -526,9 +526,30 @@ class IsolatedWebSocketManager:
                 connection = self._connections.get(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # Check if WebSocket is still connected before sending
+                        from fastapi.websockets import WebSocketState
+                        if hasattr(connection.websocket, 'client_state'):
+                            if connection.websocket.client_state != WebSocketState.CONNECTED:
+                                logger.warning(f"WebSocket {conn_id} not in CONNECTED state")
+                                failed_connections.append(conn_id)
+                                continue
+                        
+                        # Send with timeout to prevent hanging
+                        await asyncio.wait_for(
+                            connection.websocket.send_json(message),
+                            timeout=5.0
+                        )
                         successful_sends += 1
                         logger.debug(f"Sent message to connection {conn_id}")
+                        
+                    except asyncio.TimeoutError:
+                        logger.error(
+                            f"Timeout sending message to connection {conn_id} "
+                            f"for user {self.user_context.user_id[:8]}..."
+                        )
+                        failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
                         
                     except Exception as e:
                         logger.error(
@@ -536,6 +557,8 @@ class IsolatedWebSocketManager:
                             f"for user {self.user_context.user_id[:8]}...: {e}"
                         )
                         failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
                 else:
                     logger.warning(f"Invalid connection {conn_id} - removing from manager")
                     failed_connections.append(conn_id)
@@ -715,8 +738,10 @@ class WebSocketManagerFactory:
             Unique isolation key
         """
         # Use connection-specific isolation (stronger than per-user)
-        if user_context.websocket_connection_id:
-            return f"{user_context.user_id}:{user_context.websocket_connection_id}"
+        # Handle both websocket_connection_id (agents context) and websocket_client_id (services context)
+        connection_id = getattr(user_context, 'websocket_connection_id', None) or getattr(user_context, 'websocket_client_id', None)
+        if connection_id:
+            return f"{user_context.user_id}:{connection_id}"
         else:
             # Fallback to request-based isolation
             return f"{user_context.user_id}:{user_context.request_id}"

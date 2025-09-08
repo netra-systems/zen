@@ -206,7 +206,6 @@ components:
       - auth_configuration
       - websocket_configuration
     required_env_vars:
-      - DATABASE_URL
       - JWT_SECRET_KEY
       - ENVIRONMENT
       - WEBSOCKET_ENABLED

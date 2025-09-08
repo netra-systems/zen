@@ -12,8 +12,8 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -82,7 +82,9 @@ class QualityValidationHandler(BaseMessageHandler):
     async def _send_validation_result(self, user_id: str, result) -> None:
         """Send validation result to user."""
         message = self._build_validation_message(result)
-        await manager.send_message(user_id, message)
+        user_context = UserExecutionContext.get_context(user_id)
+        manager = create_websocket_manager(user_context)
+        await manager.send_to_user(message)
 
     def _build_validation_message(self, result) -> Dict[str, Any]:
         """Build validation result message."""
@@ -95,4 +97,9 @@ class QualityValidationHandler(BaseMessageHandler):
         """Handle content validation error."""
         logger.error(f"Error validating content: {str(error)}")
         error_message = f"Failed to validate content: {str(error)}"
-        await manager.send_error(user_id, error_message)
+        try:
+            user_context = UserExecutionContext.get_context(user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user({"type": "error", "message": error_message})
+        except Exception as e:
+            logger.error(f"Failed to send validation error to user {user_id}: {e}")

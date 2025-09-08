@@ -18,7 +18,7 @@ import pytest
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.dependencies import (

@@ -33,7 +33,7 @@ The Netra platform implements a sophisticated multi-layered configuration manage
 - Because os.environ is a global mutable state that any code can modify at any time, and Python's import system caches modules, keeping stale configuration values.
 
 **Why #4: Why is global mutable state problematic for configuration?**
-- Because we can't track who changed what, when, or why. Without isolation, a test that sets DATABASE_URL affects all subsequent tests, and debugging becomes impossible.
+- Because we can't track who changed what, when, or why. Without isolation, a test that sets #removed-legacyaffects all subsequent tests, and debugging becomes impossible.
 
 **Why #5: Why do we need to track configuration changes?**
 - Because configuration errors cause 60% of production outages (per Google SRE data), and without traceability, we lose $12K MRR from configuration-related incidents.
@@ -405,7 +405,7 @@ graph TD
 **Purpose**: Orchestrates configuration loading from multiple sources.
 
 **Key Components**:
-- `DatabaseConfigManager` - Database connection strings
+- `DatabaseConfigManager` - Database connection strings (uses [DatabaseURLBuilder SSOT](#database-url-ssot-architecture))
 - `ServiceConfigManager` - Service-specific settings
 - `SecretManager` - Secret keys and credentials
 - `ConfigurationValidator` - Validation logic
@@ -438,19 +438,120 @@ graph TD
 - [`ConfigService`](../netra_backend/app/services/config_service.py) - Configuration backup/restore
 - [`config.py` routes](../netra_backend/app/routes/config.py) - Configuration API endpoints
 
+## Database URL SSOT Architecture
+
+**CRITICAL: DatabaseURLBuilder is the absolute SSOT for ALL database URL construction.**
+
+### The SSOT Principle for Database URLs
+
+The platform enforces strict SSOT compliance for database URLs to prevent configuration drift, silent failures, and environment-specific bugs.
+
+**GOLDEN RULE: Never Read DATABASE_URL Directly**
+```python
+# ❌ FORBIDDEN - Direct DATABASE_URL access
+database_url = os.environ.get("DATABASE_URL")
+database_url = env.get("DATABASE_URL")
+
+# ✅ CORRECT - Always use DatabaseURLBuilder
+from shared.database_url_builder import DatabaseURLBuilder
+builder = DatabaseURLBuilder(env_vars)
+database_url = builder.get_url_for_environment(sync=False)
+```
+
+### Why SSOT for Database URLs?
+
+1. **Environment Consistency**: Each environment (dev/test/staging/prod) has different URL construction logic
+2. **Driver Compatibility**: Different drivers (asyncpg, psycopg2, psycopg) require different URL formats  
+3. **Docker Resolution**: Docker environments need hostname resolution (localhost → postgres)
+4. **Cloud SQL Support**: Unix socket URLs have completely different formats
+5. **Security Validation**: Centralized credential validation and sanitization
+6. **Debug Traceability**: Single point for URL masking and debug information
+
+### DatabaseURLBuilder Integration Flow
+
+```mermaid
+graph TD
+    subgraph "All Services"
+        NS[netra_backend<br/>Service Config]
+        AS[auth_service<br/>Service Config]  
+        TS[test_framework<br/>Test Setup]
+    end
+    
+    subgraph "SSOT Layer"
+        DB[DatabaseURLBuilder<br/>shared/database_url_builder.py]
+        ENV[Component Variables<br/>POSTGRES_HOST, USER, etc.]
+    end
+    
+    subgraph "Environment Detection"
+        DEV[Development Builder]
+        TEST[Test Builder]
+        STAGE[Staging Builder]
+        PROD[Production Builder]
+        DOCKER[Docker Builder]
+        CLOUD[Cloud SQL Builder]
+    end
+    
+    NS --> DB
+    AS --> DB
+    TS --> DB
+    
+    DB --> ENV
+    
+    DB --> DEV
+    DB --> TEST
+    DB --> STAGE
+    DB --> PROD
+    DB --> DOCKER
+    DB --> CLOUD
+    
+    style DB fill:#ff9999
+    style ENV fill:#ffcccc
+```
+
+### SSOT Compliance Checklist
+
+**For ALL services using database connections:**
+
+- [ ] **Import DatabaseURLBuilder from shared module**
+- [ ] **Pass environment variables to builder constructor**
+- [ ] **Use builder.get_url_for_environment() for URL generation**
+- [ ] **NEVER read DATABASE_URL environment variable directly**
+- [ ] **Use component variables (POSTGRES_HOST, POSTGRES_USER, etc.)**
+- [ ] **Test URL generation in all target environments**
+
+**Cross-Reference Documentation:**
+- [`shared/database_url_builder.py`](../shared/database_url_builder.py) - Complete implementation
+- [`SPEC/database_connectivity_architecture.xml`](../SPEC/database_connectivity_architecture.xml) - Architecture specification
+- [Environment-Specific Behavior](#environment-specific-behavior) - Per-environment URL logic
+
 ## Shared Configuration Components
 
 **Location**: [`shared/`](../shared/) directory for cross-service components
 
-### DatabaseURLBuilder
+### DatabaseURLBuilder - SSOT for Database URLs
 
-Constructs database URLs from components or environment variables.
+**CRITICAL: This is the ONLY SSOT for database_url construction across ALL services.**
+
+Constructs database URLs from components or environment variables. ALL database URLs MUST be built through DatabaseURLBuilder subcomponents to ensure consistency and prevent configuration drift.
+
+**Key SSOT Principle:**
+- **NEVER directly read DATABASE_URL from environment**
+- **ALWAYS use DatabaseURLBuilder with component variables (POSTGRES_HOST, POSTGRES_USER, etc.)**
+- **ALL services must go through this builder to maintain SSOT compliance**
 
 ```python
-# Usage pattern
+# CORRECT Usage - SSOT Compliant
 builder = DatabaseURLBuilder(env_vars)
 url = builder.get_url_for_environment(sync=False)
+
+# INCORRECT - Direct DATABASE_URL access violates SSOT
+url = os.environ.get("DATABASE_URL")  # FORBIDDEN
 ```
+
+**Cross-References:**
+- **Implementation**: [`shared/database_url_builder.py`](../shared/database_url_builder.py) - Complete builder implementation with all environments
+- **SSOT Spec**: [`SPEC/database_connectivity_architecture.xml`](../SPEC/database_connectivity_architecture.xml) - Database configuration patterns
+- **Configuration Flow**: See [Cross-Service Configuration Flow](#4-cross-service-configuration-flow) for integration patterns
 
 ### SharedJWTSecretManager
 
@@ -473,7 +574,15 @@ url = PortDiscovery.get_service_url("auth", environment=env)
 ## Configuration Validation
 
 ### Required Variables
-- `DATABASE_URL` - PostgreSQL connection
+
+**Database Configuration (via [DatabaseURLBuilder SSOT](#database-url-ssot-architecture)):**
+- `POSTGRES_HOST` - PostgreSQL host (component-based via DatabaseURLBuilder)
+- `POSTGRES_USER` - PostgreSQL user (component-based via DatabaseURLBuilder)
+- `POSTGRES_PASSWORD` - PostgreSQL password (component-based via DatabaseURLBuilder)
+- `POSTGRES_DB` - PostgreSQL database name (component-based via DatabaseURLBuilder)
+- ~~`DATABASE_URL`~~ - **DEPRECATED: Use DatabaseURLBuilder instead**
+
+**Other Required Variables:**
 - `JWT_SECRET_KEY` - JWT signing key
 - `SECRET_KEY` - Application secret
 - `ENVIRONMENT` - Runtime environment
@@ -481,16 +590,112 @@ url = PortDiscovery.get_service_url("auth", environment=env)
 ### Optional Variables (Categorized)
 - **OAuth Configuration**: Google/GitHub OAuth credentials
 - **LLM API Keys**: Anthropic, OpenAI, Gemini
-- **Database Connections**: Redis, ClickHouse
+- **Database Connections**: Redis, ClickHouse (PostgreSQL via [DatabaseURLBuilder SSOT](#database-url-ssot-architecture))
 - **Monitoring**: Grafana, Prometheus, Langfuse
 - **Feature Flags**: Various enable/disable flags
 
 ### Validation Rules
-1. URL format validation (database, Redis, ClickHouse)
+1. URL format validation (database via [DatabaseURLBuilder](#database-url-ssot-architecture), Redis, ClickHouse)
 2. Secret key length requirements (>= 32 chars for production)
 3. API key format validation
 4. Port conflict detection
 5. Environment consistency checks
+6. **Database URL SSOT compliance** - Ensures all services use DatabaseURLBuilder
+
+## OAuth Dual Naming Convention Rationale
+
+### Background
+The platform implements a dual naming convention for OAuth credentials that was identified as a MEDIUM risk in the CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT. This section documents the rationale and proper usage.
+
+### The Dual Naming Pattern
+
+```python
+# Backend Service Pattern (Simplified Names)
+GOOGLE_CLIENT_ID = "your-client-id"
+GOOGLE_CLIENT_SECRET = "your-client-secret"
+
+# Auth Service Pattern (Environment-Specific Names)
+GOOGLE_OAUTH_CLIENT_ID_STAGING = "your-staging-client-id"
+GOOGLE_OAUTH_CLIENT_SECRET_STAGING = "your-staging-client-secret"
+GOOGLE_OAUTH_CLIENT_ID_PRODUCTION = "your-production-client-id"
+GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION = "your-production-client-secret"
+```
+
+### Why Two Naming Conventions?
+
+#### 1. Service Architecture Differences
+- **Backend Service**: Uses a single OAuth configuration per deployment
+- **Auth Service**: Manages multiple environment configurations simultaneously
+- **Deployment Scripts**: Need to map both patterns to the same GCP secrets
+
+#### 2. Historical Evolution
+- Initially, backend service was primary OAuth handler (simplified names)
+- Auth service added later with multi-environment support requirement
+- Maintaining backward compatibility prevented immediate unification
+
+#### 3. Security Isolation
+- **Backend**: Simplified names reduce configuration complexity for single-env deployments
+- **Auth Service**: Environment-specific names prevent accidental cross-environment credential usage
+- **Risk Mitigation**: Explicit environment naming prevents staging credentials in production
+
+### Implementation in deployment/secrets_config.py
+
+```python
+# The dual mapping ensures both services get correct credentials
+SECRET_MAPPINGS = {
+    # Backend service uses simplified names
+    "GOOGLE_CLIENT_ID": "google-oauth-client-id-{environment}",
+    "GOOGLE_CLIENT_SECRET": "google-oauth-client-secret-{environment}",
+    
+    # Auth service uses explicit environment names
+    "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
+    "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
+    "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION": "google-oauth-client-id-production",
+    "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": "google-oauth-client-secret-production",
+}
+```
+
+### Risk Assessment and Mitigation
+
+**Current Risks:**
+- Configuration complexity increases maintenance burden
+- Potential for misconfiguration during deployment
+- Different naming patterns can confuse developers
+
+**Mitigation Strategies:**
+1. **Documentation**: This section serves as the canonical reference
+2. **Validation**: Deployment scripts validate both patterns exist
+3. **Testing**: Integration tests verify OAuth works in both services
+4. **Future Consolidation**: Plan to unify in next major version (2.0)
+
+### Best Practices
+
+1. **For Backend Service Development:**
+   - Always use simplified names (GOOGLE_CLIENT_ID)
+   - Let deployment system handle environment mapping
+
+2. **For Auth Service Development:**
+   - Always use environment-specific names
+   - Never hardcode environment in variable values
+
+3. **For Deployment:**
+   - Ensure both patterns map to same GCP secrets
+   - Validate credentials exist for target environment
+   - Test OAuth flow end-to-end after deployment
+
+### Future Consolidation Plan (v2.0)
+
+**Target State:**
+- Single naming convention: `OAUTH_{PROVIDER}_{FIELD}_{ENVIRONMENT}`
+- Example: `OAUTH_GOOGLE_CLIENT_ID_STAGING`
+- Migration script to update all references
+- Backward compatibility layer for 6 months
+
+**Benefits:**
+- Reduced configuration complexity
+- Single source of truth for OAuth config
+- Easier debugging and maintenance
+- Lower risk of misconfiguration
 
 ## Environment-Specific Behavior
 
@@ -605,6 +810,7 @@ This separation allows:
 8. **Document requirements** - Keep variable documentation up-to-date
 9. **Monitor WebSocket health** - Use event monitoring to detect silent failures
 10. **Verify critical services** - WebSocket events are critical infrastructure for chat functionality
+11. **🚨 CRITICAL: Database URL SSOT Compliance** - ALWAYS use [DatabaseURLBuilder](#database-url-ssot-architecture), NEVER read DATABASE_URL directly
 
 ## Common Patterns
 
@@ -618,9 +824,18 @@ config = ServiceConfig()
 
 ### Configuration Access
 ```python
+# SSOT-compliant database URL access
+from shared.database_url_builder import DatabaseURLBuilder
+from service.isolated_environment import get_env
+
+env = get_env()
+builder = DatabaseURLBuilder(env._dict)  # or env variables
+database_url = builder.get_url_for_environment(sync=False)
+
+# Other configuration access
 from app.core.configuration.base import get_unified_config
 config = get_unified_config()
-database_url = config.database_url
+# Access other config values (but NOT database_url directly)
 ```
 
 ### Test Setup
@@ -687,15 +902,17 @@ class AppConfig:
 2. **Validation failures**: Run validation manually, check required variables
 3. **Port conflicts**: Review service port assignments
 4. **Secret key errors**: Ensure proper length and uniqueness
-5. **Database connection issues**: Verify URL format and credentials
-6. **Test isolation problems**: Ensure isolation mode is enabled
+5. **Database connection issues**: Verify URL format and credentials via [DatabaseURLBuilder](#database-url-ssot-architecture)
+6. **Database URL SSOT violations**: Check that code uses DatabaseURLBuilder instead of direct DATABASE_URL access
+7. **Test isolation problems**: Ensure isolation mode is enabled
 
 ### Debug Tools
 
 - `env.get_debug_info()` - Get environment manager state
 - `config_manager.get_config_summary()` - Configuration overview
 - `validator.print_validation_summary()` - Detailed validation report
-- `builder.debug_info()` - Database URL builder diagnostics
+- `builder.debug_info()` - Database URL builder diagnostics (see [DatabaseURLBuilder](#database-url-ssot-architecture))
+- `builder.get_safe_log_message()` - Safe database URL logging with credential masking
 
 ## Understanding Environment Types
 
@@ -760,10 +977,25 @@ When migrating to the unified configuration system:
 1. Replace direct `os.environ` access with `get_env().get()`
 2. Add source tracking to all `set()` calls
 3. Update imports to use service-specific IsolatedEnvironment
-4. Remove legacy configuration code
-5. Add validation to service startup
-6. Update tests to use isolation mode
-7. Document new environment variables
+4. **CRITICAL: Replace direct DATABASE_URL usage with [DatabaseURLBuilder](#database-url-ssot-architecture)**
+5. Remove legacy configuration code
+6. Add validation to service startup
+7. Update tests to use isolation mode
+8. Document new environment variables
+
+### Database URL Migration Priority
+
+**High Priority - MUST be done immediately:**
+```python
+# OLD - Direct DATABASE_URL access (DELETE THIS)
+database_url = os.environ.get("DATABASE_URL")
+database_url = config.database_url  # If directly from env
+
+# NEW - DatabaseURLBuilder SSOT compliance
+from shared.database_url_builder import DatabaseURLBuilder
+builder = DatabaseURLBuilder(env_vars)
+database_url = builder.get_url_for_environment(sync=False)
+```
 
 ## The Configuration Contract
 

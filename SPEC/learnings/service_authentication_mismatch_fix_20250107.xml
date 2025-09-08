@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <id>service_authentication_mismatch_fix_20250107</id>
+  <timestamp>2025-01-07T02:45:00Z</timestamp>
+  <category>authentication</category>
+  <subcategory>service-to-service</subcategory>
+  <importance>CRITICAL</importance>
+  
+  <title>Service Authentication Mismatch Between Backend and Auth Service</title>
+  
+  <problem>
+    <description>
+      Backend service was failing to authenticate with auth service, resulting in 
+      "Invalid service credentials from backend" warnings and authentication failures.
+    </description>
+    <error_message>
+      2025-09-07 02:33:59,841 - WARNING - Invalid service credentials from backend for blacklist check
+      2025-09-07 02:33:59,843 - WARNING - Invalid service credentials from backend
+    </error_message>
+    <root_cause>
+      Service ID mismatch: Backend was using "backend" as default service_id while 
+      auth service expected "netra-backend". This caused all service-to-service 
+      authentication attempts to fail.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <changes>
+      <change>
+        <file>netra_backend/app/schemas/config.py</file>
+        <description>Changed default service_id from "backend" to "netra-backend"</description>
+        <code><![CDATA[
+# Before:
+service_id: str = Field(default="backend", description="Service ID for cross-service authentication")
+
+# After:
+service_id: str = Field(default="netra-backend", description="Service ID for cross-service authentication")
+        ]]></code>
+      </change>
+      <change>
+        <file>.env</file>
+        <description>Added SERVICE_ID environment variable</description>
+        <code><![CDATA[
+SERVICE_ID=netra-backend
+SERVICE_SECRET=mock-service-auth-key-for-cross-service-auth-32-chars-minimum-length
+        ]]></code>
+      </change>
+    </changes>
+  </solution>
+  
+  <prevention>
+    <regression_test>tests/regression/test_service_authentication_regression.py</regression_test>
+    <checklist>
+      <item>Always use "netra-backend" as SERVICE_ID for backend service</item>
+      <item>Ensure SERVICE_SECRET is set in environment (minimum 32 characters)</item>
+      <item>Verify X-Service-ID and X-Service-Secret headers are sent in service calls</item>
+      <item>Test service-to-service authentication in all environments</item>
+    </checklist>
+  </prevention>
+  
+  <configuration_requirements>
+    <environment_variables>
+      <variable>
+        <name>SERVICE_ID</name>
+        <value>netra-backend</value>
+        <description>Service identifier for backend service authentication</description>
+        <required>true</required>
+      </variable>
+      <variable>
+        <name>SERVICE_SECRET</name>
+        <value>minimum 32 character secret</value>
+        <description>Shared secret for service-to-service authentication</description>
+        <required>true</required>
+      </variable>
+    </environment_variables>
+  </configuration_requirements>
+  
+  <related_issues>
+    <issue>
+      <description>
+        Auth service currently uses a single SERVICE_ID/SERVICE_SECRET pair,
+        which doesn't support multiple services authenticating to it. Future
+        enhancement should support per-service credentials.
+      </description>
+      <severity>medium</severity>
+    </issue>
+  </related_issues>
+  
+  <verification>
+    <steps>
+      <step>Run: python tests/regression/test_service_authentication_regression.py</step>
+      <step>Check backend logs for successful auth service calls</step>
+      <step>Verify no "Invalid service credentials" warnings in auth service logs</step>
+    </steps>
+  </verification>
+  
+  <keywords>
+    <keyword>SERVICE_ID</keyword>
+    <keyword>SERVICE_SECRET</keyword>
+    <keyword>X-Service-ID</keyword>
+    <keyword>X-Service-Secret</keyword>
+    <keyword>service authentication</keyword>
+    <keyword>netra-backend</keyword>
+    <keyword>auth service</keyword>
+  </keywords>
+</learning>

@@ -9,7 +9,7 @@ from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

@@ -51,8 +51,8 @@ import sys
 from typing import Dict, Any, List, Set, Optional
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.agent_registry import AgentRegistry
 from netra_backend.app.core.user_execution_engine import UserExecutionEngine
@@ -64,7 +64,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import real production components - NO MOCKS
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent

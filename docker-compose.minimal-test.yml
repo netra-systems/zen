@@ -1,0 +1,80 @@
+# Minimal Test Environment - Infrastructure Only
+# Only includes services needed for integration tests
+# Avoids Docker Hub rate limits and build complexity
+
+services:
+  # ============================================
+  # MINIMAL INFRASTRUCTURE FOR INTEGRATION TESTS
+  # ============================================
+  
+  minimal-test-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: netra_test
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    ports:
+      - "${MINIMAL_TEST_POSTGRES_PORT:-5436}:5432"
+    volumes:
+      - minimal-test-postgres-data:/var/lib/postgresql/data
+    command: |
+      postgres
+        -c shared_buffers=64MB
+        -c max_connections=50
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=8MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - minimal-test
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+
+  minimal-test-redis:
+    image: redis:7-alpine
+    command: |
+      redis-server
+        --appendonly no
+        --save ""
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --tcp-keepalive 30
+    ports:
+      - "${MINIMAL_TEST_REDIS_PORT:-6383}:6379"
+    volumes:
+      - minimal-test-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - minimal-test
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+
+networks:
+  minimal-test:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+
+# Named volumes for persistent storage
+volumes:
+  minimal-test-postgres-data:
+  minimal-test-redis-data:

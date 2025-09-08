@@ -6,6 +6,9 @@
 
 > **📣 NEW: UVS Architecture Update**  
 > See **[UVS Triage Architecture Transition Guide](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** for the latest 2-agent model with intelligent data sufficiency validation and Data Intelligence Agent (formerly Data Helper) as PRIMARY agent.
+>
+> **⚠️ CRITICAL: Factory-Based User Isolation**  
+> **MANDATORY READING**: The **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
 
 ---
 

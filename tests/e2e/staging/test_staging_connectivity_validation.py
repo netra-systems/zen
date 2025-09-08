@@ -88,8 +88,14 @@ class StagingConnectivityValidator:
         start_time = time.time()
         
         try:
+            # Get authentication headers for WebSocket connection
+            ws_headers = self.config.get_websocket_headers()
+            
             websocket = await asyncio.wait_for(
-                websockets.connect(self.config.websocket_url),
+                websockets.connect(
+                    self.config.websocket_url,
+                    additional_headers=ws_headers
+                ),
                 timeout=10
             )
             
@@ -134,12 +140,18 @@ class StagingConnectivityValidator:
         start_time = time.time()
         
         try:
+            # Get authentication headers for WebSocket connection
+            ws_headers = self.config.get_websocket_headers()
+            
             websocket = await asyncio.wait_for(
-                websockets.connect(self.config.websocket_url),
+                websockets.connect(
+                    self.config.websocket_url,
+                    additional_headers=ws_headers
+                ),
                 timeout=10
             )
             
-            # Send agent request (should get auth error)
+            # Send agent request (should either succeed or get auth error)
             agent_request = {
                 "id": f"test_{uuid.uuid4().hex[:8]}",
                 "type": "agent_execute",
@@ -149,7 +161,7 @@ class StagingConnectivityValidator:
             
             await websocket.send(json.dumps(agent_request))
             
-            # Listen for response (expecting auth error)
+            # Listen for response (could be success or auth error)
             response = None
             try:
                 response_data = await asyncio.wait_for(websocket.recv(), timeout=5)
@@ -161,6 +173,11 @@ class StagingConnectivityValidator:
             
             duration = time.time() - start_time
             
+            # Determine if we got a valid response (success or expected error)
+            got_auth_error = response and response.get("error_code") == "AUTH_ERROR"
+            got_agent_response = response and response.get("type") in ["agent_started", "agent_completed", "error"]
+            pipeline_working = got_auth_error or got_agent_response or (response and not response.get("timeout"))
+            
             result = {
                 "test": "agent_request_pipeline",
                 "success": True,
@@ -168,8 +185,9 @@ class StagingConnectivityValidator:
                 "request_sent": True,
                 "response_received": response is not None,
                 "response_data": response,
-                "auth_error_expected": True,
-                "auth_error_received": response and response.get("error_code") == "AUTH_ERROR"
+                "pipeline_working": pipeline_working,
+                "auth_error_received": got_auth_error,
+                "agent_response_received": got_agent_response
             }
             
             self.test_results.append(result)
@@ -229,11 +247,20 @@ class StagingConnectivityValidator:
                     report_lines.append(f"- **Ping Time**: {result.get('ping_time', 0):.3f}s")
                 
                 elif test_name == "agent_request_pipeline":
+                    pipeline_working = result.get('pipeline_working', False)
                     auth_error = result.get('auth_error_received', False)
-                    report_lines.append(f"- **Auth Error Received**: {auth_error} (Expected)")
+                    agent_response = result.get('agent_response_received', False)
+                    
+                    report_lines.append(f"- **Pipeline Working**: {pipeline_working}")
+                    if auth_error:
+                        report_lines.append(f"- **Auth Error Received**: {auth_error} (Authentication enforced)")
+                    elif agent_response:
+                        report_lines.append(f"- **Agent Response Received**: {agent_response} (Authenticated successfully)")
+                    
                     response = result.get('response_data', {})
-                    if response:
-                        report_lines.append(f"- **Error Code**: {response.get('error_code', 'N/A')}")
+                    if response and not response.get('timeout'):
+                        response_type = response.get('type', response.get('error_code', 'N/A'))
+                        report_lines.append(f"- **Response Type**: {response_type}")
             
             else:
                 report_lines.append(f"- **Error**: {result.get('error', 'Unknown error')}")
@@ -316,12 +343,21 @@ class TestStagingConnectivityValidation:
         assert result["request_sent"], "Agent request should be sent successfully"
         assert result["response_received"], "Should receive response from staging"
         
-        # Validate auth error is received (this proves the pipeline is working)
+        # Validate pipeline is working (either auth error or agent response)
+        pipeline_working = result.get("pipeline_working", False)
         auth_error_received = result.get("auth_error_received", False)
+        agent_response_received = result.get("agent_response_received", False)
+        
         if auth_error_received:
-            logger.info("✅ Auth error received as expected - pipeline is working correctly")
+            logger.info("✅ Auth error received - pipeline is enforcing authentication correctly")
+        elif agent_response_received:
+            logger.info("✅ Agent response received - pipeline is working with authentication")
+        elif pipeline_working:
+            logger.info("✅ Pipeline responded - connectivity confirmed")
         else:
-            logger.warning("⚠️ No auth error received - this may indicate pipeline issues")
+            logger.warning("⚠️ No clear pipeline response received")
+        
+        assert pipeline_working, "Pipeline should either authenticate successfully or return proper auth errors"
         
         logger.info(f"✅ Agent request pipeline test passed in {result['duration']:.3f}s")
     

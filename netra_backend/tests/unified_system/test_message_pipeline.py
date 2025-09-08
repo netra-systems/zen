@@ -13,9 +13,10 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
@@ -32,8 +33,18 @@ from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
-manager = get_unified_manager()
+from netra_backend.app.websocket_core import create_websocket_manager
+
+@pytest.fixture
+async def websocket_manager():
+    """Create WebSocket manager with proper UserExecutionContext for testing."""
+    user_context = UserExecutionContext(
+        user_id="test-user-123",
+        thread_id="test-thread-456",
+        run_id="test-run-789",
+        request_id="test-request-789"
+    )
+    return create_websocket_manager(user_context)
 
 logger = central_logger.get_logger(__name__)
 

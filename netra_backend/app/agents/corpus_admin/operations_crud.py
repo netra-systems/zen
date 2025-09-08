@@ -6,7 +6,7 @@ This module has been removed but tests still reference it.
 """
 
 from typing import Any, Dict, Optional
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 
 class CorpusCRUDOperations:
@@ -16,7 +16,7 @@ class CorpusCRUDOperations:
     Handles create, read, update, delete operations for corpus management.
     """
     
-    def __init__(self, tool_dispatcher: ToolDispatcher):
+    def __init__(self, tool_dispatcher: UnifiedToolDispatcher):
         self.tool_dispatcher = tool_dispatcher
     
     def create_corpus(self, corpus_data: Dict[str, Any]) -> Dict[str, Any]:

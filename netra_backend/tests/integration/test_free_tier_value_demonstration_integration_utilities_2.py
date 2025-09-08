@@ -2,8 +2,7 @@
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead

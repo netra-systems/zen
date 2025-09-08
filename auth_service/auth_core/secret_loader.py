@@ -148,7 +148,7 @@ class AuthSecretLoader:
         """Get database URL from secrets with proper normalization.
         
         Constructs URL from individual POSTGRES_* environment variables.
-        Falls back to DATABASE_URL if individual variables not set.
+        Builds from individual POSTGRES_* variables if not in secrets.
         
         Returns:
             Database URL normalized for auth service compatibility
@@ -204,15 +204,8 @@ class AuthSecretLoader:
                 from shared.database_url_builder import DatabaseURLBuilder
                 return DatabaseURLBuilder.format_url_for_driver(secret_url, 'asyncpg')
         
-        # Fall back to DATABASE_URL environment variable
-        database_url = env_manager.get("DATABASE_URL", "")
-        if not database_url:
-            logger.warning("No database configuration found in secrets or environment")
-            return ""
-        
-        # Ensure async format for auth service
-        from shared.database_url_builder import DatabaseURLBuilder
-        return DatabaseURLBuilder.format_url_for_driver(database_url, 'asyncpg')
+        logger.warning("No database configuration found in secrets or environment")
+        return ""
     
     @staticmethod
     def get_E2E_OAUTH_SIMULATION_KEY() -> Optional[str]:

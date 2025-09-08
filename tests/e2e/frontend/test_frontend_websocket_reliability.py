@@ -147,8 +147,9 @@ class WebSocketReliabilityTester:
         for conn in self.connections:
             try:
                 await conn.close()
-            except:
-                pass
+            except Exception as e:
+                # Connection already closed or error during cleanup - acceptable
+                print(f"Warning: Error closing connection: {e}")
 
 
 @pytest.mark.e2e
@@ -196,7 +197,8 @@ class TestFrontendWebSocketReliability:
             response = await asyncio.wait_for(connection.recv(), timeout=5.0)
             assert response is not None
         except asyncio.TimeoutError:
-            pass  # Some servers might not echo pings
+            # Some servers might not echo pings - this is acceptable behavior
+            print("No response to ping message (acceptable for some WebSocket implementations)")
             
     @pytest.mark.asyncio
     async def test_47_websocket_auto_reconnect(self):
@@ -469,7 +471,8 @@ class TestFrontendWebSocketReliability:
                     response = await asyncio.wait_for(conn2.recv(), timeout=2.0)
                     assert response is not None
                 except asyncio.TimeoutError:
-                    pass
+                    # No state response - state persistence may not be implemented
+                    print("No state response from server (state persistence may not be implemented)")
                     
     @pytest.mark.asyncio
     async def test_57_websocket_graceful_shutdown(self):
@@ -522,9 +525,10 @@ class TestFrontendWebSocketReliability:
                     # Connection should survive
                     assert connection.state.name == "OPEN"
                     
-                except Exception:
-                    # Should handle gracefully
-                    pass
+                except Exception as e:
+                    # Some error scenarios are expected in error recovery testing
+                    print(f"Expected error during error recovery test: {e}")
+                    # Continue to next scenario
                     
     @pytest.mark.asyncio
     async def test_59_websocket_rate_limiting(self):
@@ -551,7 +555,8 @@ class TestFrontendWebSocketReliability:
                                 blocked_count += 1
                                 
                 except asyncio.TimeoutError:
-                    pass
+                    # No response to rapid message - acceptable during rate limiting test
+                    continue
                     
             # Should implement some rate limiting
             assert blocked_count >= 0  # May or may not have rate limiting

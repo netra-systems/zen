@@ -571,7 +571,7 @@ class GoalsTriageSubAgent(BaseAgent):
         self.logger.info(f"GoalsTriageSubAgent executing for user {context.user_id}, run {context.run_id}")
         
         # Create database session manager from context
-        session_manager = DatabaseSessionManager(context)
+        session_manager = DatabaseSessionManager()
         
         try:
             # Validate preconditions

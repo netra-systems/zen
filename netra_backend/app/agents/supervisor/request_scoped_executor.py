@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.agent_execution_tracker import (
     get_execution_tracker,
     ExecutionState

@@ -37,7 +37,6 @@ import re
 from typing import Dict, Optional, Tuple
 from urllib.parse import urlparse
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest

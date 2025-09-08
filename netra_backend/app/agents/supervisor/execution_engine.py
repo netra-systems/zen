@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 from netra_backend.app.agents.state import DeepAgentState

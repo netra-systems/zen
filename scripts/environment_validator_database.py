@@ -79,7 +79,7 @@ class DatabaseValidator:
                 "password": env_vars.get("POSTGRES_PASSWORD", "")
             }
         elif env_vars.get("DATABASE_URL"):
-            # Parse from DATABASE_URL using builder's parsing logic
+            # Parse from #removed-legacyusing builder's parsing logic
             try:
                 from urllib.parse import urlparse
                 parsed = urlparse(env_vars["DATABASE_URL"])
@@ -121,7 +121,7 @@ class DatabaseValidator:
         database_url = get_env().get("DATABASE_URL", "")
         if not database_url:
             db_result["status"] = "error"
-            db_result["error"] = "DATABASE_URL not configured"
+            db_result["error"] = "#removed-legacynot configured"
             results["databases"]["postgresql"] = db_result
             return
         

@@ -1,11 +1,18 @@
-images:
-- gcr.io/netra-staging/netra-frontend-staging:latest
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
 steps:
 - args:
-  - build
-  - -t
-  - gcr.io/netra-staging/netra-frontend-staging:latest
-  - -f
-  - deployment/docker/frontend.gcp.Dockerfile
-  - .
-  name: gcr.io/cloud-builders/docker
+  - --dockerfile=docker/frontend.staging.alpine.Dockerfile
+  - --destination=gcr.io/netra-staging/netra-frontend-staging:latest
+  - --cache=true
+  - --cache-ttl=24h
+  - --cache-repo=gcr.io/netra-staging/cache
+  - --compressed-caching=false
+  - --use-new-run
+  - --snapshot-mode=redo
+  - --build-arg
+  - BUILD_ENV=staging
+  - --build-arg
+  - ENVIRONMENT=staging
+  name: gcr.io/kaniko-project/executor:latest

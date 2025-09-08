@@ -184,7 +184,7 @@ class ServiceStartupCoordinator:
             critical_handler.handle_critical_error(
                 CriticalErrorType.DATABASE_CONNECTION,
                 "Backend failed to start - database connection or configuration error",
-                {"suggestion": "Check DATABASE_URL and ensure PostgreSQL is running"}
+                {"suggestion": "Check #removed-legacyand ensure PostgreSQL is running"}
             )
         else:
             # Store allocated port for reference

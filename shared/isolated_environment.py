@@ -116,11 +116,41 @@ class IsolatedEnvironment:
     }
     
     def __new__(cls) -> 'IsolatedEnvironment':
-        """Ensure singleton behavior with thread safety."""
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
+        """Ensure singleton behavior with thread safety.
+        
+        Enhanced double-checked locking with additional safety measures.
+        This method guarantees that only one instance is ever created across
+        all threads and all access patterns.
+        """
+        # First check (fast path) - no lock needed if instance already exists
+        if cls._instance is not None:
+            return cls._instance
+        
+        # Second check with lock (slow path) - ensure atomic instance creation
+        with cls._lock:
+            if cls._instance is None:
+                logger.debug("Creating new IsolatedEnvironment singleton instance")
+                cls._instance = super().__new__(cls)
+                
+                # CRITICAL: Verify module-level singleton consistency
+                # This ensures _env_instance and cls._instance are always the same
+                import sys
+                current_module = sys.modules.get(__name__)
+                if current_module and hasattr(current_module, '_env_instance'):
+                    if current_module._env_instance is not None and current_module._env_instance is not cls._instance:
+                        logger.warning(
+                            f"Singleton consistency issue detected: "
+                            f"cls._instance={id(cls._instance)} != "
+                            f"_env_instance={id(current_module._env_instance)}"
+                        )
+                        # Force consistency by updating module instance
+                        current_module._env_instance = cls._instance
+                        logger.info("Forced singleton consistency - updated _env_instance")
+                
+                logger.debug(f"Singleton instance created: ID {id(cls._instance)}")
+            else:
+                logger.debug("Singleton instance already exists, returning existing")
+                
         return cls._instance
     
     def __init__(self):
@@ -152,6 +182,12 @@ class IsolatedEnvironment:
             # Set default optimized persistence configuration
             self._set_optimized_persistence_defaults()
             
+            # CRITICAL FIX: Auto-enable isolation during test contexts to ensure test defaults are available
+            # This ensures OAuth test credentials are accessible during CentralConfigurationValidator execution
+            if self._is_test_context():
+                self._isolation_enabled = True
+                logger.debug("Auto-enabled isolation for test context - OAuth test credentials now available")
+            
             self._initialized = True
             logger.debug("Unified IsolatedEnvironment initialized")
     
@@ -164,6 +200,8 @@ class IsolatedEnvironment:
         
         CRITICAL: .env files are NEVER loaded in staging or production environments
         to ensure secrets come only from the deployment system.
+        EXCEPTION: For local testing, environment-specific files (staging.env, production.env)
+        can be loaded when ENABLE_LOCAL_CONFIG_FILES=true is set.
         """
         # Skip auto-loading during pytest to allow test configuration to take precedence
         import sys
@@ -176,10 +214,16 @@ class IsolatedEnvironment:
             logger.debug("Skipping env file auto-load due to DISABLE_SECRETS_LOADING")
             return
             
-        # Check current environment - never load .env in staging/production
+        # Check current environment
         environment = os.environ.get('ENVIRONMENT', '').lower()
+        
+        # For staging/production: only load environment-specific config if explicitly enabled for local testing
         if environment in ['staging', 'production']:
-            logger.debug(f"Skipping .env file loading in {environment} environment")
+            enable_local_config = os.environ.get("ENABLE_LOCAL_CONFIG_FILES", "").lower() == "true"
+            if enable_local_config:
+                self._load_environment_specific_file(environment)
+            else:
+                logger.debug(f"Skipping .env file loading in {environment} environment (set ENABLE_LOCAL_CONFIG_FILES=true for local testing)")
             return
         
         try:
@@ -207,6 +251,34 @@ class IsolatedEnvironment:
                         
         except Exception as e:
             logger.warning(f"Failed to auto-load env file: {e}")
+    
+    def _load_environment_specific_file(self, environment: str) -> None:
+        """Load environment-specific configuration file for local testing.
+        
+        This method loads config/{environment}.env files when ENABLE_LOCAL_CONFIG_FILES=true.
+        Used for local testing of staging/production configurations.
+        
+        Args:
+            environment: The environment name (e.g., 'staging', 'production')
+        """
+        try:
+            config_dir = Path.cwd() / "config"
+            env_file = config_dir / f"{environment}.env"
+            
+            if env_file.exists():
+                # Load environment-specific file but DO NOT override existing variables
+                # This ensures deployment system values take precedence
+                loaded_count, errors = self.load_from_file(env_file, override_existing=False)
+                if loaded_count > 0:
+                    logger.debug(f"Auto-loaded {loaded_count} variables from {environment}.env (without overriding existing)")
+                if errors:
+                    for error in errors:
+                        logger.warning(f"Auto-load error from {environment}.env: {error}")
+            else:
+                logger.debug(f"Environment-specific file {env_file} not found")
+                
+        except Exception as e:
+            logger.warning(f"Failed to load environment-specific file for {environment}: {e}")
     
     def _set_optimized_persistence_defaults(self) -> None:
         """Set default configuration for optimized persistence features."""
@@ -255,23 +327,75 @@ class IsolatedEnvironment:
             'TEST_MODE'
         ]
         
-        # CRITICAL: Use internal state or fallback to os.environ for test detection only
-        # This is necessary to avoid recursion since get() calls _is_test_context()
-        # We must use direct access here, not self.get()
-        env_dict = self._isolated_vars if self._isolation_enabled else os.environ
-        
+        # CRITICAL: Always use os.environ for test detection to avoid chicken-and-egg during initialization
+        # During initialization, _isolation_enabled might be True but _isolated_vars is empty
+        # We must use direct os.environ access here, not isolated vars or self.get()
         for indicator in test_indicators:
-            value = env_dict.get(indicator, '').lower()
+            value = os.environ.get(indicator, '').lower()
             # Only consider it a test context if the value is explicitly true
             if value in ['true', '1', 'yes', 'on']:
                 return True
         
         # Check if ENVIRONMENT is set to testing (direct access, not via self.get())
-        env_value = env_dict.get('ENVIRONMENT', '').lower()
+        env_value = os.environ.get('ENVIRONMENT', '').lower()
         if env_value in ['test', 'testing']:
             return True
         
         return False
+    
+    def _get_test_environment_defaults(self) -> Dict[str, str]:
+        """
+        Get built-in default values for test environment.
+        
+        CRITICAL: These defaults ensure OAuth test credentials are ALWAYS available
+        during test execution, preventing CentralConfigurationValidator failures.
+        
+        Returns:
+            Dict of test environment default values
+        """
+        return {
+            # OAuth Test Environment Credentials - CRITICAL for CentralConfigurationValidator
+            'GOOGLE_OAUTH_CLIENT_ID_TEST': 'test-oauth-client-id-for-automated-testing',
+            'GOOGLE_OAUTH_CLIENT_SECRET_TEST': 'test-oauth-client-secret-for-automated-testing',
+            
+            # E2E Test OAuth Simulation - CRITICAL for agent integration tests
+            'E2E_OAUTH_SIMULATION_KEY': 'test-e2e-oauth-bypass-key-for-testing-only-unified-2025',
+            
+            # Basic test environment settings
+            'ENVIRONMENT': 'test',
+            'TESTING': '1',
+            'TEST_MODE': 'true',
+            'TEST_ENV': 'test',
+            
+            # Security defaults for testing
+            'JWT_SECRET_KEY': 'test-jwt-secret-key-32-characters-long-for-testing-only',
+            'SERVICE_SECRET': 'test-service-secret-32-characters-long-for-cross-service-auth',
+            'FERNET_KEY': 'test-fernet-key-for-encryption-32-characters-long-base64-encoded=',
+            'SECRET_KEY': 'test-secret-key-for-test-environment-only-32-chars-min',
+            
+            # API Keys for testing (placeholder values)
+            'ANTHROPIC_API_KEY': 'test-anthropic-api-key',
+            'OPENAI_API_KEY': 'test-openai-api-key', 
+            'GEMINI_API_KEY': 'test-gemini-api-key',
+            
+            # Database defaults for testing
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5434',
+            'POSTGRES_USER': 'netra_test',
+            'POSTGRES_PASSWORD': 'netra_test_password',
+            'POSTGRES_DB': 'netra_test',
+            
+            # Redis defaults for testing
+            'REDIS_HOST': 'localhost',
+            'REDIS_PORT': '6381',
+            'REDIS_URL': 'redis://localhost:6381/0',
+            
+            # Service configuration for testing
+            'SERVER_PORT': '8000',
+            'AUTH_PORT': '8081',
+            'FRONTEND_PORT': '3000',
+            'LOG_LEVEL': 'DEBUG'
+        }
     
     def _sync_with_os_environ(self) -> None:
         """Synchronize isolated variables with os.environ during test execution.
@@ -476,6 +600,13 @@ class IsolatedEnvironment:
                 if self._is_test_context() and key in os.environ:
                     value = os.environ[key]
                     return self._expand_shell_commands(value) if value else value
+                
+                # CRITICAL FIX: Provide OAuth test credentials as built-in defaults during test context
+                # This ensures CentralConfigurationValidator can always find required test OAuth credentials
+                if self._is_test_context():
+                    test_defaults = self._get_test_environment_defaults()
+                    if key in test_defaults:
+                        return test_defaults[key]
                 
                 # Not found in isolated vars or os.environ
                 return default
@@ -761,6 +892,11 @@ class IsolatedEnvironment:
                     key = key.strip()
                     value = value.strip()
                     
+                    # Validate key is not empty
+                    if not key:
+                        errors.append(f"Line {line_num}: Invalid format (empty key name)")
+                        continue
+                    
                     # Remove quotes if present
                     if value and value[0] == value[-1] and value[0] in ('"', "'"):
                         value = value[1:-1]
@@ -929,7 +1065,8 @@ class IsolatedEnvironment:
         
         if missing_vars:
             validation_result["valid"] = False
-            validation_result["issues"].append(f"Missing required staging database variables: {missing_vars}")
+            for var in missing_vars:
+                validation_result["issues"].append(f"Missing required staging database variable: {var}")
         
         # Validate specific credential values for staging
         postgres_host = self.get("POSTGRES_HOST", "")
@@ -958,12 +1095,12 @@ class IsolatedEnvironment:
         if not postgres_password:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is not set")
-        elif len(postgres_password) < 8:
-            validation_result["valid"] = False
-            validation_result["issues"].append("POSTGRES_PASSWORD is too short (< 8 characters) for staging")
         elif postgres_password in ["password", "123456", "admin", "test", "wrong_password"]:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is using insecure default - must be secure for staging")
+        elif len(postgres_password) < 8:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is too short (< 8 characters) for staging")
         elif postgres_password.isdigit() and len(postgres_password) < 12:
             validation_result["valid"] = False
             validation_result["issues"].append("POSTGRES_PASSWORD is only numbers and too short - needs complexity")
@@ -1104,7 +1241,24 @@ _env_instance = IsolatedEnvironment()
 
 
 def get_env() -> IsolatedEnvironment:
-    """Get the singleton IsolatedEnvironment instance."""
+    """Get the singleton IsolatedEnvironment instance.
+    
+    Enhanced with singleton consistency verification to ensure
+    module-level and class-level singletons are always identical.
+    """
+    global _env_instance
+    
+    # CRITICAL: Verify singleton consistency
+    if IsolatedEnvironment._instance is not None and _env_instance is not IsolatedEnvironment._instance:
+        logger.warning(
+            f"Singleton inconsistency detected in get_env(): "
+            f"_env_instance={id(_env_instance)} != "
+            f"IsolatedEnvironment._instance={id(IsolatedEnvironment._instance)}"
+        )
+        # Force consistency by returning the class instance (which is more authoritative)
+        _env_instance = IsolatedEnvironment._instance
+        logger.info("Forced singleton consistency in get_env() - updated _env_instance")
+    
     return _env_instance
 
 

@@ -11,7 +11,7 @@ import pytest
 import re
 from urllib.parse import urlparse
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from shared.isolated_environment import IsolatedEnvironment

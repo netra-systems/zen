@@ -41,6 +41,8 @@ from netra_backend.app.websocket_core.types import (
     normalize_message_type
 )
 from netra_backend.app.websocket_core.utils import is_websocket_connected
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -388,9 +390,14 @@ class TestAgentHandler(BaseMessageHandler):
             
             logger.info(f"Broadcasting message from {user_id} to all clients: {broadcast_message}")
             
-            # Get WebSocket manager for broadcasting
-            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-            ws_manager = get_websocket_manager()
+            # SECURITY FIX: Use secure factory pattern with proper user context
+            # Create secure WebSocket manager with user isolation
+            context = UserExecutionContext.from_request(
+                user_id=user_id,
+                thread_id=f"broadcast_{broadcast_id}",
+                run_id=f"broadcast_run_{user_id}_{broadcast_id}"
+            )
+            ws_manager = create_websocket_manager(context=context)
             
             # Create broadcast message
             broadcast_data = {

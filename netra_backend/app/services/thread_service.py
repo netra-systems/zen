@@ -21,7 +21,7 @@ from netra_backend.app.services.database.unit_of_work import (
 )
 from netra_backend.app.services.service_interfaces import IThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 

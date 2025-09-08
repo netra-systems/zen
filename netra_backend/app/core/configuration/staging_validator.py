@@ -31,7 +31,7 @@ class StagingConfigurationValidator:
     # Critical variables that MUST be present for staging
     CRITICAL_VARIABLES = [
         'ENVIRONMENT',
-        # DATABASE_URL removed - now built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # #removed-legacyremoved - now built from individual POSTGRES_* variables via DatabaseURLBuilder
         'POSTGRES_HOST',
         'POSTGRES_USER',
         'POSTGRES_PASSWORD',
@@ -169,7 +169,7 @@ class StagingConfigurationValidator:
         localhost_patterns = ['localhost', '127.0.0.1', '0.0.0.0']
         
         vars_to_check = [
-            # DATABASE_URL no longer checked directly - built from POSTGRES_* variables
+            # #removed-legacyno longer checked directly - built from POSTGRES_* variables
             'POSTGRES_HOST',
             'REDIS_URL',
             'REDIS_HOST',
@@ -190,7 +190,7 @@ class StagingConfigurationValidator:
     
     def _validate_database_config(self) -> None:
         """Validate database configuration is complete."""
-        # DATABASE_URL is now built from individual POSTGRES_* variables via DatabaseURLBuilder
+        # #removed-legacyis now built from individual POSTGRES_* variables via DatabaseURLBuilder
         # Check individual postgres vars instead
         postgres_host = self._env.get('POSTGRES_HOST', '')
         postgres_user = self._env.get('POSTGRES_USER', '')

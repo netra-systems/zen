@@ -276,7 +276,8 @@ class ImportTester:
             # Skip __pycache__ and test directories
             dirs[:] = [d for d in dirs if d not in ['__pycache__', '.git', '.pytest_cache']]
             
-            rel_path = Path(root).relative_to(package_dir.parent)
+            # FIXED: Calculate relative path from project root, not package_dir.parent
+            rel_path = Path(root).relative_to(self.root_path)
             module_base = str(rel_path).replace(os.sep, '.')
             
             for file in files:

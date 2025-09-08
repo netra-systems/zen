@@ -145,12 +145,17 @@ class UnifiedWebSocketManager:
                 
                 # CRITICAL FIX: Process any queued messages for this user after connection established
                 # This prevents race condition where messages are sent before connection is ready
-                if connection.user_id in self._message_recovery_queue:
-                    queued_messages = self._message_recovery_queue.get(connection.user_id, [])
-                    if queued_messages:
-                        logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
-                        # Process outside the lock to prevent deadlock
-                        asyncio.create_task(self._process_queued_messages(connection.user_id))
+                # Store the user_id for processing outside the lock to prevent deadlock
+                process_recovery = connection.user_id in self._message_recovery_queue
+                
+        # DEADLOCK FIX: Process recovery queue OUTSIDE the lock to prevent circular dependency
+        # add_connection -> _process_queued_messages -> send_to_user -> user_lock (deadlock)
+        if process_recovery:
+            queued_messages = self._message_recovery_queue.get(connection.user_id, [])
+            if queued_messages:
+                logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
+                # Create task AFTER releasing the lock to prevent deadlock
+                asyncio.create_task(self._process_queued_messages(connection.user_id))
     
     async def remove_connection(self, connection_id: str) -> None:
         """Remove a WebSocket connection with thread safety."""
@@ -401,28 +406,6 @@ class UnifiedWebSocketManager:
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
         # Don't return silently - emit to user notification system
         await self._emit_connection_error_notification(user_id, event_type)
-        
-        message = {
-            "type": event_type,
-            "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
-            "critical": True
-        }
-        
-        try:
-            await self.send_to_user(user_id, message)
-            logger.debug(f"Successfully emitted critical event {event_type} to user {user_id}")
-        except Exception as e:
-            # CRITICAL: Failure to emit critical events must be highly visible
-            logger.critical(
-                f"CRITICAL EVENT EMISSION FAILURE: Failed to emit {event_type} "
-                f"to user {user_id}: {e}. This breaks the user experience."
-            )
-            # Store for recovery
-            await self._store_failed_message(user_id, message, f"emission_error: {e}")
-            # Notify user of the error
-            await self._emit_system_error_notification(user_id, event_type, str(e))
-            raise
     
     async def send_to_user_with_wait(self, user_id: str, message: Dict[str, Any], 
                                       wait_timeout: float = 3.0) -> bool:
@@ -616,13 +599,15 @@ class UnifiedWebSocketManager:
         # Check for invalid job_id patterns (object representations)
         if "<" in job_id or "object at" in job_id or "WebSocket" in job_id:
             logger.warning(f"Invalid job_id detected: {job_id}, generating new one")
-            job_id = f"job_{uuid.uuid4().hex[:8]}"
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            job_id = UnifiedIdGenerator.generate_base_id("job", random_length=8)
         
         # Create a user_id based on job_id and websocket
         user_id = f"job_{job_id}_{id(websocket)}"
         
-        # Create connection
-        connection_id = str(uuid.uuid4())
+        # Create connection using SSOT
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         connection = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
@@ -789,8 +774,17 @@ class UnifiedWebSocketManager:
                 "critical": True
             }
             
-            # Attempt to send error notification
-            await self.send_to_user(user_id, error_message)
+            # DEADLOCK FIX: Send directly to avoid circular dependency with send_to_user
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        await connection.websocket.send_json(error_message)
+                        logger.info(f"Sent system error notification to user {user_id}")
+                        return
+                    except Exception:
+                        continue  # Try next connection
             
         except Exception as e:
             logger.critical(
@@ -1682,26 +1676,32 @@ class UnifiedWebSocketManager:
 
 
 # SECURITY FIX: Replace singleton with factory pattern
-# Global instance removed to prevent multi-user data leakage
-# Use create_websocket_manager(user_context) instead
-
-# TEMPORARY: Global singleton for staging deployment only
-_temporary_singleton_manager = None
+# 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
+# Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
-    🚨 SECURITY DEPRECATED: This function is DEPRECATED and UNSAFE.
+    🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
     
-    This function has been DISABLED because it creates critical security vulnerabilities
-    in multi-user environments, causing user data leakage and authentication bypass.
+    This function created critical security vulnerabilities in multi-user environments,
+    causing user data leakage and authentication bypass.
     
-    REQUIRED MIGRATION:
-    - For authenticated WebSocket connections: Use create_websocket_manager(user_context)
-    - For factory patterns: Use WebSocketManagerFactory
-    - For testing: Create dedicated test instances with proper user context
+    REQUIRED MIGRATION (choose one):
+    1. For per-user WebSocket events: Use WebSocketBridgeFactory.create_user_emitter()
+    2. For authenticated connections: Use create_websocket_manager(user_context)
+    3. For testing: Create dedicated test instances with proper user context
     
-    SECURITY ISSUE: This function was creating shared state between users,
-    allowing User A to see User B's messages and data.
+    Example migration:
+    ```python
+    # OLD (UNSAFE):
+    manager = get_websocket_manager()
+    
+    # NEW (SAFE):
+    factory = WebSocketBridgeFactory()
+    emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
+    ```
+    
+    This function was causing User A to see User B's messages.
     """
     from netra_backend.app.logging_config import central_logger
     import inspect
@@ -1714,31 +1714,12 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     if frame and frame.f_back:
         caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
     
-    # Log warning about deprecated usage
-    warning_message = (
-        f"⚠️ SECURITY WARNING: get_websocket_manager() is DEPRECATED and UNSAFE. "
+    error_message = (
+        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been REMOVED for security. "
         f"Called from: {caller_info}. "
-        f"This creates multi-user security vulnerabilities. "
-        f"Migrate to create_websocket_manager(user_context) ASAP."
+        f"This function caused USER DATA LEAKAGE between different users. "
+        f"Migrate to WebSocketBridgeFactory or create_websocket_manager(user_context)."
     )
     
-    logger.warning(warning_message)
-    
-    # TEMPORARY: Allow in staging/dev/test environments only
-    import os
-    env = os.environ.get('ENV', 'dev')
-    if env not in ['staging', 'dev', 'test']:
-        error_message = (
-            f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() is DISABLED in {env}. "
-            f"This function causes USER DATA LEAKAGE between different users."
-        )
-        logger.critical(error_message)
-        raise RuntimeError(error_message)
-    
-    # Return a singleton instance (UNSAFE - TEMPORARY FOR STAGING)
-    global _temporary_singleton_manager
-    if _temporary_singleton_manager is None:
-        logger.warning("Creating TEMPORARY singleton WebSocket manager - THIS IS UNSAFE FOR PRODUCTION")
-        _temporary_singleton_manager = UnifiedWebSocketManager()
-    
-    return _temporary_singleton_manager
+    logger.critical(error_message)
+    raise RuntimeError(error_message)

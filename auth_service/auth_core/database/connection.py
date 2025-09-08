@@ -77,10 +77,9 @@ class AuthDatabaseConnection:
                 # Enhanced error message for authentication failures
                 error_msg = str(e).lower()
                 if "authentication" in error_msg or "password" in error_msg:
-                    database_url_for_error = get_env().get("DATABASE_URL", "")
-                    user_match = self._extract_user_from_url(database_url_for_error)
+                    user = get_env().get("POSTGRES_USER", "")
                     raise RuntimeError(
-                        f"Database authentication failed for user '{user_match}'. "
+                        f"Database authentication failed for user '{user}'. "
                         f"Check POSTGRES_USER and POSTGRES_PASSWORD environment variables. "
                         f"Original error: {e}"
                     ) from e

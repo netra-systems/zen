@@ -53,7 +53,7 @@ except Exception as e:
     traceback.print_exc()
 
 try:
-    from netra_backend.app.db.session import DatabaseSessionManager
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
     print("[OK] Database Session Manager import successful")
     db_manager = DatabaseSessionManager()
     print("[OK] Database Session Manager created successfully")

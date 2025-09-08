@@ -37,7 +37,7 @@ from netra_backend.app.core.reliability.unified_reliability_manager import (
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 logger = central_logger.get_logger(__name__)

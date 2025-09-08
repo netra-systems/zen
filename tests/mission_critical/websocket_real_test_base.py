@@ -48,68 +48,27 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
-# Docker availability detection
-def is_docker_available() -> bool:
-    """Check if Docker is available for testing."""
+# CRITICAL: Always require real services - NO MOCKS per CLAUDE.md
+def require_docker_services() -> None:
+    """Require Docker services for all tests - fail fast if not available.
+    
+    CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
+    """
     try:
-        manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
-        return manager.is_docker_available()
-    except Exception:
-        return False
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+        if not manager.is_docker_available():
+            pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")
+    except Exception as e:
+        pytest.fail(f"Docker services check failed: {e}. Ensure Docker is running.")
 
-# Skip decorator for Docker-dependent tests
-requires_docker = pytest.mark.skipif(
-    not is_docker_available(), 
-    reason="Docker not available - skipping real service tests"
-)
+# Always require Docker for real tests
+requires_docker = pytest.mark.usefixtures("ensure_docker_services")
 
 
-class MockWebSocketConnection:
-    """Mock WebSocket connection for testing without Docker services."""
-    
-    def __init__(self):
-        self.closed = False
-        self.state_name = "OPEN"
-        self._sent_messages = []
-        self._receive_queue = asyncio.Queue()
-        
-        # Don't auto-populate with mock responses - let the test control what it receives
-    
-    async def _add_mock_responses(self):
-        """Add mock responses to simulate WebSocket events."""
-        mock_events = [
-            {"type": "connection_ack", "timestamp": time.time()},
-            {"type": "agent_started", "agent_name": "test_agent", "timestamp": time.time()},
-            {"type": "agent_thinking", "reasoning": "Mock reasoning", "timestamp": time.time()},
-            {"type": "tool_executing", "tool_name": "mock_tool", "timestamp": time.time()},
-            {"type": "tool_completed", "tool_name": "mock_tool", "results": {}, "timestamp": time.time()},
-            {"type": "agent_completed", "response": "Mock response", "timestamp": time.time()}
-        ]
-        
-        for event in mock_events:
-            await self._receive_queue.put(json.dumps(event))
-    
-    async def send(self, message: str):
-        """Mock send method - echoes message back to receive queue."""
-        self._sent_messages.append(message)
-        # Echo the message back to the receive queue so tests can receive what they sent
-        await self._receive_queue.put(message)
-    
-    async def recv(self):
-        """Mock receive method."""
-        try:
-            return await asyncio.wait_for(self._receive_queue.get(), timeout=5.0)
-        except asyncio.TimeoutError:
-            raise asyncio.TimeoutError("Mock WebSocket receive timeout")
-    
-    async def close(self):
-        """Mock close method."""
-        self.closed = True
-        self.state_name = "CLOSED"
-    
-    async def ping(self):
-        """Mock ping method."""
-        pass
+# REMOVED: MockWebSocketConnection class
+# Per CLAUDE.md: "MOCKS = Abomination" - Always use real services
+# Tests must fail if Docker services are not available
+# This ensures we test real WebSocket behavior, not mock approximations
 
 
 
@@ -223,7 +182,7 @@ class RealWebSocketTestBase:
         self.env = get_env()
         
         # Docker and service management
-        self.docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+        self.docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         self.services_started = False
         
         # Connection management
@@ -617,244 +576,27 @@ class RealWebSocketTestBase:
         }
 
 
-class MockWebSocketTestBase:
-    """
-    Mock WebSocket test base for environments without Docker services.
-    
-    Provides the same interface as RealWebSocketTestBase but uses mock connections
-    instead of real Docker services. This enables testing factory patterns and
-    WebSocket event flows without requiring Docker infrastructure.
-    """
-    
-    def __init__(self, config: Optional[RealWebSocketTestConfig] = None):
-        """Initialize the mock WebSocket test base."""
-        self.config = config or RealWebSocketTestConfig()
-        self.env = get_env()
-        
-        # Mock service management
-        self.services_started = True  # Always "started" in mock mode
-        
-        # Connection management
-        self.connection_pool = WebSocketConnectionPool()
-        self.test_contexts: List[TestContext] = []
-        
-        # Event and performance tracking
-        self.performance_monitor = WebSocketPerformanceMonitor()
-        self.test_id = f"mock_websocket_test_{uuid.uuid4().hex[:8]}"
-        self.test_start_time: Optional[float] = None
-        self.test_end_time: Optional[float] = None
-        
-        # Mock health and metrics
-        self.service_health: Dict[str, ServiceHealth] = {
-            "backend": ServiceHealth(service_name="backend", is_healthy=True, port=8000, response_time_ms=50.0),
-            "auth": ServiceHealth(service_name="auth", is_healthy=True, port=8081, response_time_ms=25.0)
-        }
-        self.connection_metrics: Dict[str, Any] = {}
-        
-        logger.info(f"Initialized MockWebSocketTestBase with test_id: {self.test_id}")
-    
-    async def setup_docker_services(self) -> bool:
-        """Mock setup - always returns True."""
-        logger.info("Mock services started (no Docker required)")
-        self.services_started = True
-        return True
-    
-    async def create_real_websocket_connection(
-        self,
-        endpoint: str = "/ws/test",
-        headers: Optional[Dict[str, str]] = None,
-        user_context: Optional[TestUserContext] = None
-    ) -> MockWebSocketConnection:
-        """Create a mock WebSocket connection."""
-        connection = MockWebSocketConnection()
-        await self.connection_pool.add_connection(connection)
-        logger.info(f"Created mock WebSocket connection to {endpoint}")
-        return connection
-    
-    async def create_test_context(
-        self,
-        user_id: Optional[str] = None,
-        jwt_token: Optional[str] = None
-    ) -> TestContext:
-        """Create a TestContext with mock WebSocket connection capabilities."""
-        if not user_id:
-            user_id = f"mock_test_user_{uuid.uuid4().hex[:8]}"
-        
-        # Create user context
-        user_context = TestUserContext(user_id=user_id)
-        if jwt_token:
-            user_context.jwt_token = jwt_token
-        
-        # Create TestContext (it will automatically configure WebSocket URL from environment)
-        test_context = TestContext(
-            user_context=user_context,
-            websocket_timeout=self.config.connection_timeout,
-            event_timeout=self.config.event_timeout
-        )
-        
-        self.test_contexts.append(test_context)
-        return test_context
-    
-    async def validate_agent_events(
-        self,
-        test_context: TestContext,
-        required_events: Optional[Set[str]] = None,
-        timeout: float = 30.0
-    ) -> EventValidationResult:
-        """Mock agent event validation - always succeeds with mock events."""
-        if required_events is None:
-            required_events = self.config.required_agent_events.copy()
-        
-        start_time = time.time()
-        
-        # Create mock events that match required events
-        mock_events = []
-        for event_type in required_events:
-            mock_event = {
-                "type": event_type,
-                "timestamp": time.time(),
-                "mock": True,
-                "agent_name": "mock_agent"
-            }
-            if event_type == "tool_executing":
-                mock_event["tool_name"] = "mock_tool"
-                mock_event["parameters"] = {}
-            elif event_type == "tool_completed":
-                mock_event["tool_name"] = "mock_tool"
-                mock_event["results"] = {"status": "success"}
-                mock_event["duration"] = 1.0
-            mock_events.append(mock_event)
-        
-        validation_duration = time.time() - start_time
-        
-        return EventValidationResult(
-            success=True,
-            events_captured=mock_events,
-            required_events_found=required_events,
-            missing_events=set(),
-            extra_events=set(),
-            total_events=len(mock_events),
-            validation_duration=validation_duration
-        )
-    
-    async def test_concurrent_connections(self, connection_count: int = 25) -> Dict[str, Any]:
-        """Mock concurrent connection test - always succeeds."""
-        logger.info(f"Mock testing {connection_count} concurrent WebSocket connections")
-        
-        start_time = time.time()
-        
-        # Mock successful connections
-        connection_results = []
-        for i in range(connection_count):
-            connection_results.append({
-                "success": True,
-                "index": i,
-                "user_id": f"mock_user_{i}",
-                "connection_duration": 0.1,
-                "message_received": True,
-                "response": {"type": "mock_response", "index": i}
-            })
-        
-        total_duration = time.time() - start_time
-        successful_connections = connection_count  # All mock connections succeed
-        
-        return {
-            "total_connections": connection_count,
-            "successful_connections": successful_connections,
-            "failed_connections": 0,
-            "success_rate": 1.0,
-            "total_duration": total_duration,
-            "average_connection_time": total_duration / connection_count if connection_count > 0 else 0,
-            "connection_results": connection_results
-        }
-    
-    async def cleanup_connections(self):
-        """Mock cleanup - always succeeds."""
-        logger.info("Mock cleaning up WebSocket connections...")
-        
-        # Clean up test contexts
-        cleanup_tasks = []
-        for context in self.test_contexts:
-            cleanup_tasks.append(context.cleanup())
-        
-        if cleanup_tasks:
-            await asyncio.gather(*cleanup_tasks, return_exceptions=True)
-        
-        # Clean up connection pool
-        await self.connection_pool.cleanup_all()
-        
-        # Clear references
-        self.test_contexts.clear()
-    
-    async def stop_docker_services(self):
-        """Mock stop services - no-op."""
-        logger.info("Mock services stopped (no Docker to stop)")
-        self.services_started = False
-    
-    @asynccontextmanager
-    async def real_websocket_test_session(self):
-        """Mock context manager for WebSocket test session."""
-        self.test_start_time = time.time()
-        logger.info(f"Starting mock WebSocket test session: {self.test_id}")
-        
-        try:
-            # Mock setup
-            if not await self.setup_docker_services():
-                raise RuntimeError("Failed to start mock services")
-            
-            # Start performance monitoring
-            self.performance_monitor.start_monitoring(self.test_id)
-            
-            yield self
-            
-        finally:
-            # Record end time
-            self.test_end_time = time.time()
-            
-            # Stop performance monitoring
-            metrics = self.performance_monitor.stop_monitoring(self.test_id)
-            if metrics:
-                self.connection_metrics = metrics
-            
-            # Clean up connections
-            await self.cleanup_connections()
-            
-            # Stop mock services
-            await self.stop_docker_services()
-            
-            logger.info(f"Completed mock WebSocket test session: {self.test_id}")
-    
-    def get_test_metrics(self) -> Dict[str, Any]:
-        """Get mock test metrics."""
-        duration = None
-        if self.test_start_time and self.test_end_time:
-            duration = self.test_end_time - self.test_start_time
-        
-        return {
-            "test_id": self.test_id,
-            "duration_seconds": duration,
-            "services_started": self.services_started,
-            "total_connections_created": self.connection_pool.active_count,
-            "total_test_contexts": len(self.test_contexts),
-            "connection_metrics": self.connection_metrics,
-            "mock_mode": True,
-            "config": {
-                "backend_url": "http://mock:8000",
-                "websocket_url": "ws://mock:8000",
-                "connection_timeout": self.config.connection_timeout,
-                "concurrent_connections": self.config.concurrent_connections
-            }
-        }
+# REMOVED: MockWebSocketTestBase class (lines 576-803)
+# Per CLAUDE.md: "MOCKS = Abomination" - all tests must use real services
+# Tests will fail if Docker services are not available (expected behavior)
+# 
+# The MockWebSocketTestBase class and MockWebSocketConnection have been completely removed.
+# All tests must use RealWebSocketTestBase with actual Docker services.
+# This ensures we validate real WebSocket behavior, not mock approximations.
+
+# Note: If you see import errors for MockWebSocketTestBase, update your imports to use
+# RealWebSocketTestBase directly, or call require_docker_services() to fail fast.
 
 
-def get_websocket_test_base() -> Union[RealWebSocketTestBase, MockWebSocketTestBase]:
-    """Factory function to get appropriate test base based on Docker availability."""
-    if is_docker_available():
-        logger.info("Docker available - using RealWebSocketTestBase")
-        return RealWebSocketTestBase()
-    else:
-        logger.info("Docker not available - using MockWebSocketTestBase")
-        return MockWebSocketTestBase()
+def get_websocket_test_base() -> RealWebSocketTestBase:
+    """Get real WebSocket test base - no fallback to mocks.
+    
+    CRITICAL: Always returns RealWebSocketTestBase. Tests fail if Docker unavailable.
+    Per CLAUDE.md: Real services > mocks for authentic testing.
+    """
+    require_docker_services()  # Fail fast if Docker not available
+    logger.info("Using RealWebSocketTestBase with real Docker services")
+    return RealWebSocketTestBase()
 
 
 # Pytest fixtures for real WebSocket testing

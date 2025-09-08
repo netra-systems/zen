@@ -155,22 +155,25 @@ class TestFrontendLoginJourneys:
                 email_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='email'], input[name='email']")
                 email_input.clear()
                 email_input.send_keys(f"invalid{i}@example.com")
-            except:
-                pass
+            except Exception as e:
+                # Email input field not found - may not be a standard login form
+                print(f"Email input not found: {e}")
                 
             try:
                 password_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='password'], input[name='password']")
                 password_input.clear()
                 password_input.send_keys("wrongpassword")
-            except:
-                pass
+            except Exception as e:
+                # Password input field not found - may not be a standard login form
+                print(f"Password input not found: {e}")
                 
             try:
                 submit_button = self.tester.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
                 submit_button.click()
                 time.sleep(1)
-            except:
-                pass
+            except Exception as e:
+                # Submit button not found - may not be a standard login form
+                print(f"Submit button not found: {e}")
                 
         # Check for rate limiting, error messages, or that login form is still present (graceful handling)
         page_content = self.tester.driver.page_source
@@ -195,8 +198,9 @@ class TestFrontendLoginJourneys:
         try:
             remember_checkbox = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='checkbox'][name*='remember']")
             remember_checkbox.click()
-        except:
-            pass
+        except Exception as e:
+            # Remember me checkbox not found - feature may not be implemented
+            print(f"Remember me checkbox not found: {e}")
             
         # Set authentication with extended expiry
         long_lived_token_obj = create_test_user_token("remember-user", use_real_jwt=True)
@@ -249,9 +253,10 @@ class TestFrontendLoginJourneys:
             has_oauth_redirect = "google" in current_url.lower() or "oauth" in current_url.lower()
             
             assert has_error or has_oauth_redirect
-        except:
+        except Exception as e:
             # Social login buttons may not be present in test environment
-            pass
+            print(f"Google login button not found: {e}")
+            pytest.skip(f"Social login not available in test environment: {e}")
             
     async def test_14_login_redirect_preservation(self):
         """Test 14: Original destination is preserved after login"""
@@ -348,13 +353,17 @@ class TestFrontendLoginJourneys:
         # Check for form labels and ARIA attributes
         try:
             email_label = self.tester.driver.find_element(By.CSS_SELECTOR, "label[for*='email']")
-        except:
+        except Exception as e:
+            # Email label not found - may not follow accessibility standards
             email_label = None
+            print(f"Email label not found: {e}")
             
         try:
             password_label = self.tester.driver.find_element(By.CSS_SELECTOR, "label[for*='password']")
-        except:
+        except Exception as e:
+            # Password label not found - may not follow accessibility standards
             password_label = None
+            print(f"Password label not found: {e}")
         
         # Test keyboard navigation using ActionChains
         from selenium.webdriver.common.action_chains import ActionChains
@@ -375,16 +384,18 @@ class TestFrontendLoginJourneys:
             email_input.clear()
             email_input.send_keys("test@example.com")
             email_input.send_keys(Keys.TAB)
-        except:
-            pass
+        except Exception as e:
+            # Email input not found for keyboard navigation test
+            print(f"Email input not found for keyboard test: {e}")
             
         try:
             password_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='password']")
             password_input.clear()
             password_input.send_keys("password123")
             password_input.send_keys(Keys.ENTER)
-        except:
-            pass
+        except Exception as e:
+            # Password input not found for keyboard navigation test
+            print(f"Password input not found for keyboard test: {e}")
             
         time.sleep(1)
         
@@ -428,12 +439,13 @@ class TestFrontendLoginJourneys:
                 # Check if type changed
                 input_type_after = password_input.get_attribute("type")
                 assert input_type_after == "text"
-            except:
+            except Exception as e:
                 # No toggle button found, this is acceptable for basic login forms
-                pass
-        except:
+                print(f"Password visibility toggle not found: {e}")
+        except Exception as e:
             # No password input found, skip test
-            pass
+            print(f"Password input not found for visibility toggle test: {e}")
+            pytest.skip(f"Password input not available: {e}")
                 
     async def test_18_login_with_email_case_insensitivity(self):
         """Test 18: Email login is case-insensitive"""
@@ -472,13 +484,17 @@ class TestFrontendLoginJourneys:
         # Check for CSRF token in form or meta tags
         try:
             csrf_meta = self.tester.driver.find_element(By.CSS_SELECTOR, "meta[name='csrf-token']")
-        except:
+        except Exception as e:
+            # CSRF meta tag not found
             csrf_meta = None
+            print(f"CSRF meta tag not found: {e}")
             
         try:
             csrf_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[name='csrf'], input[name='_csrf']")
-        except:
+        except Exception as e:
+            # CSRF input field not found
             csrf_input = None
+            print(f"CSRF input field not found: {e}")
         
         # Check page content for security indicators
         page_content = self.tester.driver.page_source
@@ -504,22 +520,25 @@ class TestFrontendLoginJourneys:
             email_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='email']")
             email_input.clear()
             email_input.send_keys("test@example.com")
-        except:
-            pass
+        except Exception as e:
+            # Email input not found for network failure test
+            print(f"Email input not found for network test: {e}")
             
         try:
             password_input = self.tester.driver.find_element(By.CSS_SELECTOR, "input[type='password']")
             password_input.clear()
             password_input.send_keys("password123")
-        except:
-            pass
+        except Exception as e:
+            # Password input not found for network failure test
+            print(f"Password input not found for network test: {e}")
             
         try:
             submit_button = self.tester.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
             submit_button.click()
             time.sleep(2)
-        except:
-            pass
+        except Exception as e:
+            # Submit button not found for network failure test
+            print(f"Submit button not found for network test: {e}")
             
         # Check for error message or login form still present (graceful handling)
         page_content = self.tester.driver.page_source

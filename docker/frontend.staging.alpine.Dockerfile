@@ -2,7 +2,7 @@
 # 78% smaller, 3x faster startup, production-optimized Next.js build
 # CRITICAL: Uses standalone output for minimal runtime
 
-FROM node:23-alpine as builder
+FROM node:20-alpine AS builder
 
 # Build arguments for staging environment
 ARG BUILD_ENV=staging
@@ -42,15 +42,24 @@ COPY frontend/eslint.config.mjs ./
 COPY frontend/tailwind.config.ts ./
 COPY frontend/postcss.config.mjs ./
 COPY frontend/components.json ./
+COPY frontend/middleware.ts ./
+COPY frontend/config.ts ./
+COPY frontend/global.d.ts ./
+COPY frontend/next-env.d.ts ./
 
 # Copy public assets (changes less frequently)
 COPY frontend/public ./public
 
 # Copy source code LAST (changes most frequently)
+COPY frontend/@types ./@types
 COPY frontend/app ./app
+COPY frontend/auth ./auth
 COPY frontend/components ./components
+COPY frontend/config ./config
 COPY frontend/lib ./lib
+COPY frontend/providers ./providers
 COPY frontend/services ./services
+COPY frontend/store ./store
 COPY frontend/hooks ./hooks
 COPY frontend/styles ./styles
 COPY frontend/types ./types
@@ -73,7 +82,7 @@ RUN npx next build
 # ============================================
 # Production Stage - Minimal Alpine Runtime
 # ============================================
-FROM node:23-alpine
+FROM node:20-alpine
 
 # Build and environment arguments
 ARG BUILD_ENV=staging
@@ -106,7 +115,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME="0.0.0.0" \
-    BUILD_ENV=${BUILD_ENV} \
+    BUILD_ENV=staging \
     ENVIRONMENT=${ENVIRONMENT} \
     RUNNING_IN_DOCKER=true \
     # Node.js memory optimization for 512MB limit

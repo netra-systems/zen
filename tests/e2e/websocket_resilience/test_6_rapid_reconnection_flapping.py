@@ -20,7 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import psutil
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
 
@@ -169,7 +169,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in RapidReconnectionClient: {e}")
             
     async def _attempt_disconnection(self) -> bool:
         """Attempt to disconnect WebSocket."""
@@ -190,7 +190,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Disconnection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected disconnection failure in RapidReconnectionClient: {e}")
             
     async def establish_stable_connection(self) -> bool:
         """Establish a stable connection after flapping."""
@@ -199,7 +199,7 @@ class RapidReconnectionClient:
             return await self._attempt_connection()
         except Exception as e:
             logger.error(f"Stable connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected stable connection failure in RapidReconnectionClient: {e}")
             
     @pytest.mark.e2e
     async def test_send_test_message(self) -> bool:
@@ -221,7 +221,7 @@ class RapidReconnectionClient:
             
         except Exception as e:
             logger.error(f"Failed to send test message: {e}")
-            return False
+            pytest.fail(f"Unexpected error sending test message in RapidReconnectionClient: {e}")
 
 
 @pytest.mark.asyncio

@@ -13,14 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from netra_backend.app.logging_config import central_logger
 
-# Import DatabaseManager at module level to ensure it's loaded
-try:
-    from netra_backend.app.db.database_manager import DatabaseManager
-except ImportError:
-    # Fallback import if the primary path fails
-    DatabaseManager = None
-    logger = central_logger.get_logger(__name__)
-    logger.warning("Could not import DatabaseManager from primary path")
+# DatabaseManager import removed - using SSOT database module instead
 
 logger = central_logger.get_logger(__name__)
 
@@ -207,26 +200,10 @@ class ConnectionHealthChecker:
         ]
     
     async def _get_or_create_engine(self) -> AsyncEngine:
-        """Get or create database engine for health checks"""
-        # If database manager was injected, use it
-        if self._database_manager:
-            # Check if it's the class or an instance
-            if hasattr(self._database_manager, 'create_application_engine'):
-                return self._database_manager.create_application_engine()
-            elif hasattr(self._database_manager, 'get_engine'):
-                return self._database_manager.get_engine()
-        
-        # Use module-level imported DatabaseManager
-        if DatabaseManager:
-            return DatabaseManager.create_application_engine()
-        
-        # Last resort: try runtime import
-        try:
-            from netra_backend.app.db.database_manager import DatabaseManager as DM
-            return DM.create_application_engine()
-        except ImportError as e:
-            logger.error(f"Failed to import DatabaseManager: {e}")
-            raise RuntimeError("DatabaseManager not available for health checks")
+        """Get or create database engine for health checks using SSOT database module"""
+        # Use SSOT database module for engine access
+        from netra_backend.app.database import get_engine
+        return get_engine()
     
     async def _time_query(self, query) -> float:
         """Time a single query execution"""

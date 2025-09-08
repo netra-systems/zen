@@ -33,7 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.factory_performance_config import (
     FactoryPerformanceConfig, 
     get_factory_performance_config
@@ -472,6 +472,32 @@ class AgentInstanceFactory:
         logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
         logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
     
+    def _agent_name_matches_class(self, agent_name: str, class_name: str) -> bool:
+        """
+        Check if an agent name matches a class name using flexible matching.
+        
+        Handles cases like:
+        - "optimization_core" matches "OptimizationsCoreSubAgent"
+        - "data" matches "DataSubAgent" 
+        """
+        # Normalize both names: lowercase, remove underscores, remove common suffixes
+        def normalize(name: str) -> str:
+            return name.lower().replace('_', '').replace('subagent', '').replace('agent', '')
+        
+        normalized_agent = normalize(agent_name)
+        normalized_class = normalize(class_name)
+        
+        # Try different matching strategies
+        return (
+            normalized_agent == normalized_class or
+            normalized_agent in normalized_class or  
+            normalized_class in normalized_agent or
+            # Handle "optimizations" vs "optimization" case
+            normalized_agent.replace('s', '') == normalized_class.replace('s', '') or
+            # Handle common word variations
+            any(word in normalized_class for word in normalized_agent.split() if len(word) > 2)
+        )
+    
     def _validate_agent_dependencies(self, agent_name: str) -> None:
         """
         Validate that all required dependencies for an agent are available.
@@ -485,15 +511,16 @@ class AgentInstanceFactory:
         # Check both agent name and class name
         dependencies = []
         
-        # Check by agent name
+        # Check by agent name (exact match first)
         if agent_name in self.AGENT_DEPENDENCIES:
             dependencies = self.AGENT_DEPENDENCIES[agent_name]
         
-        # Also check by class name (e.g., OptimizationsCoreSubAgent)
-        for class_name, deps in self.AGENT_DEPENDENCIES.items():
-            if agent_name.lower() in class_name.lower() or class_name.lower() in agent_name.lower():
-                dependencies = deps
-                break
+        # Also check by class name with flexible matching
+        if not dependencies:
+            for class_name, deps in self.AGENT_DEPENDENCIES.items():
+                if self._agent_name_matches_class(agent_name, class_name):
+                    dependencies = deps
+                    break
         
         # Validate each required dependency
         for dep in dependencies:
@@ -548,8 +575,8 @@ class AgentInstanceFactory:
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
-            # Create user execution context using the proper immutable class
-            context = UserExecutionContext.from_request(
+            # Create user execution context using the supervisor-compatible method
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
@@ -659,8 +686,22 @@ class AgentInstanceFactory:
                 if self._performance_config.enable_class_caching:
                     AgentClass = self._get_cached_agent_class(agent_name)
                 
+                # Set dependencies for cached agent class
+                if AgentClass:
+                    # Agent class found in cache - set dependencies
+                    if self._llm_manager:
+                        llm_manager = self._llm_manager
+                        tool_dispatcher = self._tool_dispatcher  # Can be None for per-request creation
+                    elif self._agent_registry:
+                        llm_manager = self._agent_registry.llm_manager
+                        tool_dispatcher = self._agent_registry.tool_dispatcher
+                    else:
+                        # No LLM manager available - this is OK for agents that don't need one
+                        llm_manager = None
+                        tool_dispatcher = None
+                
                 # Fallback to registry lookup if not cached
-                if not AgentClass and self._agent_class_registry:
+                elif not AgentClass and self._agent_class_registry:
                     AgentClass = self._agent_class_registry.get_agent_class(agent_name)
                     if not AgentClass:
                         # Provide detailed debugging information
@@ -724,6 +765,14 @@ class AgentInstanceFactory:
                 if hasattr(AgentClass, 'create_agent_with_context'):
                     logger.info(f"✅ Using create_agent_with_context factory for {agent_name} ({agent_class_name})")
                     agent = AgentClass.create_agent_with_context(user_context)
+                    
+                    # CRITICAL: Inject dependencies after creation when using factory method
+                    if hasattr(agent, 'llm_manager') and llm_manager is not None:
+                        agent.llm_manager = llm_manager
+                        logger.debug(f"Injected llm_manager into {agent_name}")
+                    if hasattr(agent, 'tool_dispatcher') and tool_dispatcher is not None:
+                        agent.tool_dispatcher = tool_dispatcher
+                        logger.debug(f"Injected tool_dispatcher into {agent_name}")
                 else:
                     # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
                     logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")
@@ -1009,13 +1058,12 @@ class AgentInstanceFactory:
         if self._performance_config.enable_emitter_pooling:
             # Initialize emitter pool if needed
             if self._emitter_pool is None:
-                # Create a new WebSocketEmitterPool instance
-                from netra_backend.app.websocket_core import get_websocket_manager
-                ws_manager = get_websocket_manager()
-                self._emitter_pool = WebSocketEmitterPool(
-                    manager=ws_manager,
-                    max_size=self._performance_config.pool_max_size if self._performance_config else 100
-                )
+                # MIGRATION NOTE: WebSocket pooling requires user context but pool is shared
+                # For now, disable pooling until architecture supports shared pools
+                logger.debug("WebSocket emitter pooling temporarily disabled - requires user context migration")
+                # Future implementation should use a different pooling strategy or
+                # create user-agnostic pool managers
+                pass
             
             # Get from pool (this will return an OptimizedUserWebSocketEmitter)
             # Note: For now we maintain backward compatibility by creating regular emitters
@@ -1158,6 +1206,56 @@ class AgentInstanceFactory:
             logger.info(f"Cleaned up {cleanup_count} inactive contexts (max age: {max_age_seconds}s)")
         
         return cleanup_count
+    
+    def reset_for_testing(self) -> None:
+        """
+        Reset factory state for testing purposes.
+        
+        This method clears all internal state to ensure clean test isolation.
+        It should only be called during test setup/teardown.
+        
+        CRITICAL: This method is for testing only and should never be called
+        in production code as it will cause resource leaks and context loss.
+        """
+        logger.debug("Resetting AgentInstanceFactory state for testing")
+        
+        # Clear active contexts tracking
+        self._active_contexts.clear()
+        
+        # Clear user semaphores
+        self._user_semaphores.clear()
+        
+        # Clear WebSocket emitters if they exist
+        if hasattr(self, '_websocket_emitters'):
+            self._websocket_emitters.clear()
+        
+        # Clear agent instances if they exist
+        if hasattr(self, '_agent_instances'):
+            self._agent_instances.clear()
+        
+        # Reset factory metrics to initial state
+        self._factory_metrics = {
+            'total_instances_created': 0,
+            'active_contexts': 0,
+            'total_contexts_cleaned': 0,
+            'creation_errors': 0,
+            'cleanup_errors': 0,
+            'average_context_lifetime_seconds': 0.0
+        }
+        
+        # Clear performance statistics if enabled
+        if self._performance_config.enable_metrics and hasattr(self, '_perf_stats'):
+            for metric_name in self._perf_stats:
+                self._perf_stats[metric_name].clear()
+        
+        # Clear agent class cache if enabled
+        if self._performance_config.enable_class_caching and hasattr(self, '_agent_class_cache'):
+            self._agent_class_cache.clear()
+            # Reset the LRU cache
+            if hasattr(self, '_get_cached_agent_class'):
+                self._get_cached_agent_class.cache_clear()
+        
+        logger.debug("AgentInstanceFactory state reset completed")
 
 
 # Singleton factory instance for application use

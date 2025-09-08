@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager

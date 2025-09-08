@@ -7,7 +7,10 @@ BVJ: Growth & Enterprise | Increase Value Creation | +15% customer savings
 import time
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List, Optional, Protocol, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
@@ -49,7 +52,7 @@ from netra_backend.app.agents.synthetic_data_sub_agent_workflow import (
     SyntheticDataContext,
     SyntheticDataWorkflowOrchestrator,
 )
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.serialization.unified_json_handler import safe_json_dumps
@@ -71,7 +74,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
     Uses ExecutionContext/ExecutionResult types for consistency.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher,
                  reliability_manager: Optional[ReliabilityManager] = None):
         # Initialize BaseAgent with proper parameters
         super().__init__(
@@ -156,8 +159,8 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         if not isinstance(context, UserExecutionContext):
             raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
         
-        # Create database session manager
-        db_manager = DatabaseSessionManager(context)
+        # Create database session manager (stub implementation)
+        db_manager = DatabaseSessionManager()
         
         try:
             # Use BaseAgent's WebSocket event emission capabilities
@@ -207,7 +210,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         return any(keyword in request_lower for keyword in synthetic_keywords)
 
     async def _execute_with_context(self, context: UserExecutionContext, 
-                                   stream_updates: bool, db_manager: DatabaseSessionManager) -> Dict[str, Any]:
+                                   stream_updates: bool, db_manager: 'DatabaseSessionManager') -> Dict[str, Any]:
         """Execute generation workflow using UserExecutionContext.
         
         Args:

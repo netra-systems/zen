@@ -5,8 +5,11 @@ BVJ: ALL segments | Platform Stability | Complete user isolation for production 
 """
 
 import asyncio
-from typing import Any, Dict, Optional, List, Set
+from typing import Any, Dict, Optional, List, Set, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
@@ -17,7 +20,6 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.database.session_manager import (
-    DatabaseSessionManager,
     managed_session,
     validate_agent_session_isolation
 )
@@ -47,16 +49,23 @@ class SupervisorAgent(BaseAgent):
     
     def __init__(self, 
                  llm_manager: LLMManager,
-                 websocket_bridge: AgentWebSocketBridge):
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 db_session_factory=None,
+                 user_context: Optional[UserExecutionContext] = None):
         """Initialize SupervisorAgent with UserExecutionContext pattern.
         
         CRITICAL: No user context, session storage, or tool_dispatcher in constructor.
         All user-specific data and tools come through execute() method via context.
         Tool dispatcher is created per-request for complete isolation.
         
+        ARCHITECTURE: WebSocket bridge is now optional and will be created per-request
+        when UserExecutionContext is available, following factory pattern.
+        
         Args:
             llm_manager: LLM manager for agent operations
-            websocket_bridge: WebSocket bridge for notifications
+            websocket_bridge: Optional WebSocket bridge (lazy initialized if None)
+            db_session_factory: Optional database session factory  
+            user_context: Optional user context (set per-request)
         """
         # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
@@ -70,36 +79,42 @@ class SupervisorAgent(BaseAgent):
         )
         
         # Core infrastructure (NO user-specific data)
-        if not websocket_bridge:
-            raise ValueError("SupervisorAgent requires websocket_bridge to be provided")
-        
+        # ARCHITECTURE: WebSocket bridge is now optional for lazy initialization
         self.websocket_bridge = websocket_bridge
-        logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+        self.db_session_factory = db_session_factory
+        self.user_context = user_context
+        
+        if websocket_bridge:
+            logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+        else:
+            logger.info("✅ SupervisorAgent initialized with lazy WebSocket bridge initialization")
         
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
         self.flow_logger = get_supervisor_flow_logger()
         
-        # CRITICAL FIX: Pre-configure the factory with WebSocket bridge IMMEDIATELY
-        # This ensures sub-agents created later will have WebSocket events working
-        # We'll configure again with registries in execute(), but at least bridge is set now
-        logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
-        try:
-            # Pre-configure with just the websocket bridge (registries will be added in execute())
-            # This is critical to prevent None bridge errors when creating sub-agents
-            # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
-            self.agent_instance_factory.configure(
-                websocket_bridge=websocket_bridge,
-                websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
-                agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
-                llm_manager=llm_manager,
-                tool_dispatcher=None  # Will be set per-request in execute()
-            )
-            logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
-        except Exception as e:
-            # CRITICAL: Changed from warning to error - configuration failure should fail fast
-            logger.error(f"❌ Failed to pre-configure factory in init: {e}")
-            raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
+        # ARCHITECTURE: Conditional factory pre-configuration
+        # Only pre-configure if WebSocket bridge is available, otherwise defer to execute()
+        if websocket_bridge:
+            logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
+            try:
+                # Pre-configure with just the websocket bridge (registries will be added in execute())
+                # This is critical to prevent None bridge errors when creating sub-agents
+                # NOTE: tool_dispatcher is created per-request, NOT passed in constructor
+                self.agent_instance_factory.configure(
+                    websocket_bridge=websocket_bridge,
+                    websocket_manager=getattr(websocket_bridge, 'websocket_manager', None),
+                    agent_class_registry=self.agent_class_registry,  # Use the class registry we just got
+                    llm_manager=llm_manager,
+                    tool_dispatcher=None  # Will be set per-request in execute()
+                )
+                logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
+            except Exception as e:
+                # CRITICAL: Changed from warning to error - configuration failure should fail fast
+                logger.error(f"❌ Failed to pre-configure factory in init: {e}")
+                raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
+        else:
+            logger.info("⏳ WebSocket bridge is None - factory configuration deferred to execute() method")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
@@ -153,11 +168,15 @@ class SupervisorAgent(BaseAgent):
                 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
                 
                 # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
-                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                # Get the actual WebSocketManager from the bridge
+                websocket_manager = self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                if not websocket_manager:
+                    raise RuntimeError("WebSocket manager not available from bridge")
+                
+                websocket_emitter = IsolatedWebSocketEventEmitter(
+                    manager=websocket_manager,
                     user_id=context.user_id,
-                    thread_id=context.thread_id,
-                    run_id=context.run_id,
-                    websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                    context=context
                 )
                 
                 # Get the actual WebSocketManager to pass to ToolDispatcher
@@ -185,7 +204,7 @@ class SupervisorAgent(BaseAgent):
                 )
                 
                 logger.info(f"✅ UserContext-based tool system created for {context.user_id}")
-                logger.info(f"   - Registry: {tool_system['registry'].registry_id}")
+                logger.info(f"   - Registry: {tool_system['registry'].name}")
                 logger.info(f"   - Tools: {len(tool_system['tools'])}")
                 logger.info(f"   - Dispatcher: {tool_system['dispatcher'].dispatcher_id}")
                 
@@ -234,7 +253,7 @@ class SupervisorAgent(BaseAgent):
                 # No registry cleanup needed - using factory pattern
     
     async def _orchestrate_agents(self, context: UserExecutionContext, 
-                                 session_manager: DatabaseSessionManager, 
+                                 session_manager: 'DatabaseSessionManager', 
                                  stream_updates: bool) -> Dict[str, Any]:
         """Orchestrate agent execution with proper isolation.
         
@@ -535,7 +554,7 @@ class SupervisorAgent(BaseAgent):
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
                                                    context: UserExecutionContext,
-                                                   session_manager: DatabaseSessionManager,
+                                                   session_manager: 'DatabaseSessionManager',
                                                    flow_id: str) -> Dict[str, Any]:
         """Execute workflow using isolated agent instances with UserExecutionContext.
         
@@ -1256,3 +1275,150 @@ class SupervisorAgent(BaseAgent):
     def agents(self) -> Dict[str, BaseAgent]:
         """Get all registered agents (legacy compatibility)."""
         return self.registry.agents if self.registry else {}
+    
+    # === LEGACY COMPATIBILITY ===
+    
+    async def run(self, user_request: str, thread_id: str, user_id: str, run_id: str) -> Any:
+        """
+        Legacy run method wrapper for AgentService compatibility.
+        
+        CRITICAL: Converts legacy parameters to UserExecutionContext pattern
+        and emits WebSocket events required for user chat business value.
+        
+        Args:
+            user_request: The user's request message
+            thread_id: Thread identifier 
+            user_id: User identifier
+            run_id: Execution run identifier
+            
+        Returns:
+            Agent execution result
+        """
+        logger.info(f"🔄 Legacy run() method called for user {user_id}")
+        
+        try:
+            # Import necessary modules for context creation
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from shared.id_generation import UnifiedIdGenerator
+            
+            # Create UserExecutionContext from legacy parameters
+            # This ensures the new execute() method gets proper context
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=UnifiedIdGenerator.generate_request_id(),
+                user_request=user_request,
+                websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+            )
+            
+            # CRITICAL BUSINESS VALUE: Send agent_started event
+            # This is required for user chat experience - users must see agent began processing
+            await self._emit_agent_started(user_context, user_request)
+            
+            # Execute using modern UserExecutionContext pattern
+            logger.info(f"🚀 Converting legacy run() to execute() with UserExecutionContext for user {user_id}")
+            result = await self.execute(user_context, stream_updates=True)
+            
+            # CRITICAL BUSINESS VALUE: Send agent_completed event  
+            # This tells users the agent has finished and results are ready
+            await self._emit_agent_completed(user_context, result)
+            
+            # Extract the actual result content for backward compatibility
+            if isinstance(result, dict):
+                # Return the actual agent results for legacy compatibility
+                if "results" in result:
+                    return result["results"]
+                elif "supervisor_result" in result:
+                    return result.get("results", result.get("supervisor_result", result))
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Legacy run() method failed for user {user_id}: {e}")
+            
+            # Send completion event even on error (best effort for user experience)
+            try:
+                if 'user_context' in locals():
+                    await self._emit_agent_completed(user_context, {"error": str(e), "status": "failed"})
+            except Exception:
+                pass  # Best effort - don't fail on WebSocket emission errors
+            
+            raise
+    
+    async def _emit_agent_started(self, context: UserExecutionContext, user_request: str) -> None:
+        """
+        Emit agent_started WebSocket event for user chat business value.
+        
+        BUSINESS CRITICAL: Users must see that agent began processing their request.
+        This provides immediate feedback and builds trust in the AI system.
+        """
+        try:
+            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
+                websocket_manager = self.websocket_bridge._websocket_manager
+                if websocket_manager:
+                    event_data = {
+                        "type": "agent_started", 
+                        "agent_id": "supervisor",
+                        "user_id": context.user_id,
+                        "timestamp": context.created_at.isoformat(),
+                        "details": {
+                            "agent_name": "Supervisor Agent",
+                            "request_preview": user_request[:100] + "..." if len(user_request) > 100 else user_request,
+                            "run_id": context.run_id,
+                            "thread_id": context.thread_id
+                        }
+                    }
+                    
+                    await websocket_manager.send_to_user(context.user_id, event_data)
+                    logger.info(f"📤 Sent agent_started event for user {context.user_id}")
+                else:
+                    logger.warning(f"⚠️ WebSocket manager not available for agent_started event (user {context.user_id})")
+            else:
+                logger.warning(f"⚠️ WebSocket bridge not available for agent_started event (user {context.user_id})")
+        except Exception as e:
+            logger.error(f"❌ Failed to emit agent_started event for user {context.user_id}: {e}")
+            # Don't fail the entire operation due to WebSocket event failure
+    
+    async def _emit_agent_completed(self, context: UserExecutionContext, result: Any) -> None:
+        """
+        Emit agent_completed WebSocket event for user chat business value.
+        
+        BUSINESS CRITICAL: Users must know when the agent has finished and results are ready.
+        This completes the user experience loop and signals results availability.
+        """
+        try:
+            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
+                websocket_manager = self.websocket_bridge._websocket_manager
+                if websocket_manager:
+                    # Determine completion status
+                    status = "completed"
+                    if isinstance(result, dict):
+                        if result.get("error") or result.get("status") == "failed":
+                            status = "failed"
+                        elif result.get("orchestration_successful") is False:
+                            status = "failed"
+                    
+                    event_data = {
+                        "type": "agent_completed",
+                        "agent_id": "supervisor", 
+                        "user_id": context.user_id,
+                        "timestamp": context.created_at.isoformat(),
+                        "details": {
+                            "agent_name": "Supervisor Agent",
+                            "status": status,
+                            "run_id": context.run_id,
+                            "thread_id": context.thread_id,
+                            "has_results": bool(result)
+                        }
+                    }
+                    
+                    await websocket_manager.send_to_user(context.user_id, event_data)
+                    logger.info(f"📤 Sent agent_completed event for user {context.user_id} (status: {status})")
+                else:
+                    logger.warning(f"⚠️ WebSocket manager not available for agent_completed event (user {context.user_id})")
+            else:
+                logger.warning(f"⚠️ WebSocket bridge not available for agent_completed event (user {context.user_id})")
+        except Exception as e:
+            logger.error(f"❌ Failed to emit agent_completed event for user {context.user_id}: {e}")
+            # Don't fail the entire operation due to WebSocket event failure

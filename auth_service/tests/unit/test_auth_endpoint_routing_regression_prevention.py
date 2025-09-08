@@ -15,7 +15,7 @@
     # REMOVED_SYNTAX_ERROR: from fastapi.testclient import TestClient
     # REMOVED_SYNTAX_ERROR: from fastapi import FastAPI
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.routes.auth_routes import router as auth_router
-    # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
+    # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
 

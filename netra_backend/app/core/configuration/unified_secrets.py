@@ -74,13 +74,10 @@ class UnifiedSecretsManager:
     
     def get_jwt_secret(self) -> str:
         """
-        Get JWT secret following proper fallback chain - instance method.
+        Get JWT secret using the unified JWT secret manager for consistency.
         
-        Priority order:
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} 
-        2. Generic JWT_SECRET_KEY  
-        3. Legacy JWT_SECRET
-        4. Development fallback (only for development environment)
+        This delegates to shared.jwt_secret_manager to ensure consistency 
+        with auth service, preventing JWT secret mismatches between services.
         
         Raises:
             ValueError: If no JWT secret is configured for production environment
@@ -88,34 +85,9 @@ class UnifiedSecretsManager:
         Returns:
             JWT secret string, properly stripped of whitespace
         """
-        environment = self.get_secret('ENVIRONMENT', 'development').lower()
-        
-        # 1. Try environment-specific secret first
-        env_specific_key = f"JWT_SECRET_{environment.upper()}"
-        secret = self.get_secret(env_specific_key)
-        if secret:
-            return secret.strip()
-        
-        # 2. Try generic JWT_SECRET_KEY
-        secret = self.get_secret('JWT_SECRET_KEY')
-        if secret:
-            return secret.strip()
-        
-        # 3. Try legacy JWT_SECRET
-        secret = self.get_secret('JWT_SECRET')
-        if secret:
-            return secret.strip()
-        
-        # 4. Development fallback
-        if environment == 'development':
-            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
-        
-        # 5. Production validation - must have explicit secret
-        if environment == 'production':
-            raise ValueError("JWT secret not configured for production environment")
-        
-        # 6. Default fallback for other environments
-        return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+        # Always use the unified JWT secret manager - no fallbacks
+        from shared.jwt_secret_manager import get_unified_jwt_secret
+        return get_unified_jwt_secret()
 
 
 # Global instance

@@ -349,7 +349,7 @@ def run_database_migrations(logger: logging.Logger) -> None:
     fast_startup = config.fast_startup_mode.lower() == "true"
     skip_migrations = config.skip_migrations.lower() == "true"
     
-    # Check if database is in mock mode by examining DATABASE_URL or service config
+    # Check if database is in mock mode by examining #removed-legacyor service config
     database_url = config.database_url or ""
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     
@@ -374,7 +374,8 @@ def _is_mock_database_url(database_url: str) -> bool:
         "postgresql+asyncpg://mock:mock@",
         "/mock?",  # database name is "mock"
         "/mock$",  # database name is "mock" at end
-        "@localhost:5432/mock"  # specific mock pattern used by dev launcher
+        "@localhost:5432/mock",  # specific mock pattern used by dev launcher
+        "?mock"  # query parameter indicating mock mode
     ]
     
     return any(pattern in database_url for pattern in mock_patterns)
@@ -497,7 +498,7 @@ async def setup_database_connections(app: FastAPI) -> None:
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
-    # Check if database is in mock mode by examining DATABASE_URL or service config
+    # Check if database is in mock mode by examining #removed-legacyor service config
     database_url = config.database_url or ""
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     
@@ -509,16 +510,28 @@ async def setup_database_connections(app: FastAPI) -> None:
         return
     
     # CRITICAL FIX: Wrap database initialization in timeout to prevent server startup hanging
+    # Get environment-aware timeout configuration
+    from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+    from shared.isolated_environment import get_env
+    
+    environment = get_env().get("ENVIRONMENT", "development")
+    timeout_config = get_database_timeout_config(environment)
+    
+    initialization_timeout = timeout_config["initialization_timeout"]
+    table_setup_timeout = timeout_config["table_setup_timeout"]
+    
+    logger.info(f"Database setup for {environment} environment - init timeout: {initialization_timeout}s, table timeout: {table_setup_timeout}s")
+    
     try:
-        logger.debug("Calling initialize_postgres() with 15s timeout...")
+        logger.debug(f"Calling initialize_postgres() with {initialization_timeout}s timeout...")
         async_session_factory = await asyncio.wait_for(
             asyncio.create_task(_async_initialize_postgres(logger)),
-            timeout=15.0
+            timeout=initialization_timeout
         )
         logger.debug(f"initialize_postgres() returned: {async_session_factory}")
         
         if async_session_factory is None:
-            error_msg = "initialize_postgres() returned None - database initialization failed"
+            error_msg = f"initialize_postgres() returned None - database initialization failed in {environment} environment"
             if graceful_startup:
                 logger.error(f"{error_msg} - using mock database for graceful degradation")
                 app.state.db_session_factory = None  # Signal to use mock/fallback
@@ -529,10 +542,10 @@ async def setup_database_connections(app: FastAPI) -> None:
                 raise RuntimeError(error_msg)
         
         # Ensure database tables exist with timeout protection
-        logger.debug("Ensuring database tables exist with 10s timeout...")
+        logger.debug(f"Ensuring database tables exist with {table_setup_timeout}s timeout...")
         await asyncio.wait_for(
             _ensure_database_tables_exist(logger, graceful_startup),
-            timeout=10.0
+            timeout=table_setup_timeout
         )
             
         app.state.db_session_factory = async_session_factory
@@ -882,12 +895,19 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
             raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
         
-        # Validate WebSocket manager is available for per-request enhancement
-        from netra_backend.app.websocket_core import get_websocket_manager
-        ws_manager = get_websocket_manager()
-        if not ws_manager:
-            logger.error("🚨 CRITICAL: WebSocket manager not available - per-request tool dispatcher enhancement will fail!")
-            raise RuntimeError("WebSocket manager must be available for tool dispatcher enhancement")
+        # Validate WebSocket manager factory is available for per-request enhancement  
+        # SSOT COMPLIANCE: Using factory pattern - no singleton WebSocket managers during startup
+        from netra_backend.app.websocket_core import get_websocket_manager_factory
+        try:
+            factory = get_websocket_manager_factory()
+            if not factory:
+                logger.error("🚨 CRITICAL: WebSocket manager factory not available - per-request tool dispatcher enhancement will fail!")
+                raise RuntimeError("WebSocket manager factory must be available for tool dispatcher enhancement")
+            logger.info("✅ SSOT COMPLIANCE: WebSocket factory pattern verified - no singleton manager calls during startup")
+            logger.debug("✅ WebSocket manager factory available for per-request enhancement")
+        except Exception as e:
+            logger.error(f"🚨 CRITICAL: Failed to get WebSocket manager factory: {e}")
+            raise RuntimeError(f"WebSocket manager factory initialization failed: {e}")
         
         _setup_agent_state(app, supervisor)
         
@@ -923,7 +943,6 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.websocket_core import get_websocket_manager
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
@@ -981,15 +1000,17 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     
     try:
         from netra_backend.app.websocket_core import (
-            get_websocket_manager,
-            WebSocketManager,
+            get_websocket_manager_factory,
+            WebSocketManagerFactory,
         )
-        # Get the consolidated WebSocket manager instance
-        manager = get_websocket_manager()
+        # Initialize the WebSocket manager factory for per-request use
+        # SSOT COMPLIANCE: Factory pattern ensures UserExecutionContext isolation
+        factory = get_websocket_manager_factory()
         
-        # Initialize if the manager has an initialize method
-        if hasattr(manager, 'initialize'):
-            await manager.initialize()
+        # Factory is initialized on creation - no additional initialization needed
+        # Individual managers are created per-request with UserExecutionContext
+        logger.info("✅ SSOT COMPLIANCE: WebSocket components use factory pattern - no singleton violations")
+        logger.debug("WebSocket factory initialized for per-request manager creation")
         
         logger.debug("WebSocket components initialized")
     except Exception as e:

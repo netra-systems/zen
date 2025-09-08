@@ -28,7 +28,7 @@ import threading
 import websocket
 import random
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode, InvalidHandshake
+from websockets import ConnectionClosedError, InvalidStatusCode, InvalidHandshake
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -41,7 +41,7 @@ from loguru import logger
 # Import production components - REAL SERVICES ONLY
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
@@ -351,15 +351,16 @@ class TestFirstMessageExperience:
                         "X-Test-Environment": "staging"
                     }
                     
-                    ws = await websockets.connect(
-                        self.ws_url,
-                        ssl=ssl_context,
-                        extra_headers=extra_headers,
-                        ping_interval=30,
-                        ping_timeout=10,
-                        close_timeout=10,
-                        open_timeout=15
-                    )
+                    # Use asyncio.timeout for Python 3.12 compatibility
+                    async with asyncio.timeout(15):  # 15 second timeout for connection
+                        ws = await websockets.connect(
+                            self.ws_url,
+                            ssl=ssl_context,
+                            extra_headers=extra_headers,
+                            ping_interval=30,
+                            ping_timeout=10,
+                            close_timeout=10
+                        )
                     logger.info(f"Connected to staging WebSocket: {self.ws_url}")
                     
                     # Send authentication message with JWT token
@@ -452,7 +453,7 @@ class TestFirstMessageExperience:
                                 logger.info(f"Received event: {event.get('type', 'unknown')}")
                             except json.JSONDecodeError as e:
                                 logger.warning(f"Failed to parse WebSocket message: {message[:100]}... Error: {e}")
-                except (ConnectionClosedError, websockets.exceptions.ConnectionClosed):
+                except (ConnectionClosedError, websockets.ConnectionClosed):
                     logger.info("WebSocket connection closed by server")
                 except asyncio.TimeoutError:
                     logger.info("WebSocket receive timeout")

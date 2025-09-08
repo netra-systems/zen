@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.request_scoped_executor import (
     RequestScopedExecutorFactory,
     create_full_request_execution_stack
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter

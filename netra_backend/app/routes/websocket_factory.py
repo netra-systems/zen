@@ -85,7 +85,7 @@ async def websocket_factory_endpoint(
     
     # CRITICAL SECURITY: Authenticate WebSocket connection using JWT
     try:
-        user_context, auth_info = extract_websocket_user_context(
+        user_context, auth_info = await extract_websocket_user_context(
             websocket, 
             additional_metadata={
                 "thread_id": thread_id,

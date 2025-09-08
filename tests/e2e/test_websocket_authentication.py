@@ -34,7 +34,7 @@ class TestWebSocketAuther:
     """Test utilities for WebSocket authentication scenarios."""
     
     def __init__(self):
-        self.harness = TestHarness()
+        self.harness = UnifiedTestHarnessComplete()
         self.jwt_helper = JWTTestHelper()
         self.active_connections: Dict[str, websockets.ClientConnection] = {}
         self.test_users: Dict[str, Dict] = {}
@@ -52,8 +52,20 @@ class TestWebSocketAuther:
     
     async def _create_test_users(self):
         """Create test users for authentication scenarios."""
+        role_to_tier = {
+            "admin": "enterprise", 
+            "user": "early",
+            "guest": "free"
+        }
+        
         for role in ["admin", "user", "guest"]:
-            user_data = await create_test_user_data(role=role)
+            tier = role_to_tier[role]
+            user_data = create_test_user_data(
+                email=f"test-{role}@websocket-auth.test",
+                tier=tier
+            )
+            # Add role information to the user data
+            user_data["role"] = role
             self.test_users[role] = user_data
     
     async def _close_all_connections(self):
@@ -69,7 +81,8 @@ class TestWebSocketAuther:
             connection_id = f"{user_role}_{datetime.now().timestamp()}"
         
         user_data = self.test_users[user_role]
-        token = await self.jwt_helper.create_token_for_user(user_data["user_id"])
+        # Use the async method for token creation
+        token = await self.jwt_helper.create_token_for_user(user_data["id"])
         
         ws = await websockets.connect(
             "ws://localhost:8000/websocket",
@@ -94,7 +107,7 @@ class TestWebSocketAuther:
 @pytest.fixture
 async def auth_tester():
     """Fixture providing WebSocket authentication test utilities."""
-    tester = WebSocketAuthTester()
+    tester = TestWebSocketAuther()
     await tester.setup()
     yield tester
     await tester.cleanup()

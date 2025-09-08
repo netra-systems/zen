@@ -247,25 +247,28 @@ class AsyncDatabase:
             "pool_reset_on_return": "rollback",  # Safe connection resets
         }
         
-        # Add pool sizing for non-NullPool connections
+        # Add pool sizing for non-NullPool connections with environment-aware optimization
         if pool_class != NullPool:
             config = get_unified_config()
+            
+            # Get environment-aware database configuration
+            from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
+            environment = get_env().get("ENVIRONMENT", "development")
+            cloud_sql_config = get_cloud_sql_optimized_config(environment)
+            
+            # Use Cloud SQL optimized configuration if available
+            pool_config = cloud_sql_config["pool_config"]
             engine_args.update({
-                "pool_size": max(config.db_pool_size, 10),  # Minimum enforced for resilience
-                "max_overflow": max(config.db_max_overflow, 20),  # Minimum enforced for resilience
-                "pool_timeout": max(config.db_pool_timeout, 45),  # Shorter timeout for faster feedback
-                "pool_recycle": config.db_pool_recycle,
+                "pool_size": pool_config["pool_size"],
+                "max_overflow": pool_config["max_overflow"],
+                "pool_timeout": pool_config["pool_timeout"],
+                "pool_recycle": pool_config["pool_recycle"],
+                "pool_pre_ping": pool_config["pool_pre_ping"],
+                "pool_reset_on_return": pool_config["pool_reset_on_return"],
             })
             
-            # Add connection arguments for PostgreSQL
-            engine_args["connect_args"] = {
-                "server_settings": {
-                    "application_name": "netra_async_db",
-                    "tcp_keepalives_idle": "600",
-                    "tcp_keepalives_interval": "30",
-                    "tcp_keepalives_count": "3",
-                }
-            }
+            # Use Cloud SQL optimized connection arguments
+            engine_args["connect_args"] = cloud_sql_config["connect_args"]
         
         self._engine = create_async_engine(self.db_url, **engine_args)
         self._session_factory = async_sessionmaker(
@@ -414,21 +417,29 @@ def _get_base_engine_args(pool_class):
     }
 
 def _get_pool_sizing_args():
-    """Get pool sizing arguments with resilient defaults."""
-    config = get_unified_config()
+    """Get pool sizing arguments with environment-aware Cloud SQL optimization."""
+    from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
+    environment = get_env().get("ENVIRONMENT", "development")
+    cloud_sql_config = get_cloud_sql_optimized_config(environment)
+    
+    pool_config = cloud_sql_config["pool_config"]
     return {
-        "pool_size": max(config.db_pool_size, 10),  # Minimum 10 for resilience
-        "max_overflow": max(config.db_max_overflow, 20),  # Minimum 20 for resilience
+        "pool_size": pool_config["pool_size"],
+        "max_overflow": pool_config["max_overflow"],
     }
 
 def _get_pool_timing_args():
-    """Get pool timing arguments with resilient defaults."""
-    config = get_unified_config()
+    """Get pool timing arguments with environment-aware Cloud SQL optimization."""
+    from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
+    environment = get_env().get("ENVIRONMENT", "development")
+    cloud_sql_config = get_cloud_sql_optimized_config(environment)
+    
+    pool_config = cloud_sql_config["pool_config"]
     return {
-        "pool_timeout": max(config.db_pool_timeout, 60),  # Minimum 60s for resilience
-        "pool_recycle": config.db_pool_recycle,
-        "pool_pre_ping": True,  # Always enable for resilience
-        "pool_reset_on_return": "rollback",  # Safe connection reset
+        "pool_timeout": pool_config["pool_timeout"],
+        "pool_recycle": pool_config["pool_recycle"],
+        "pool_pre_ping": pool_config["pool_pre_ping"],
+        "pool_reset_on_return": pool_config["pool_reset_on_return"],
     }
 
 def _get_pool_specific_args():
@@ -500,18 +511,13 @@ def _create_and_setup_engine(async_db_url: str, engine_args: dict):
         raise RuntimeError(f"CRITICAL: Database URL validation failed. "
                           f"URL may contain incompatible parameters for asyncpg. URL: {async_db_url}")
     
-    # Add resilient connection arguments
-    if "connect_args" not in engine_args:
-        engine_args["connect_args"] = {}
+    # Use environment-aware connection arguments for Cloud SQL optimization
+    from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
+    environment = get_env().get("ENVIRONMENT", "development")
+    cloud_sql_config = get_cloud_sql_optimized_config(environment)
     
-    engine_args["connect_args"].update({
-        "server_settings": {
-            "application_name": "netra_core",
-            "tcp_keepalives_idle": "600",  # 10 minutes
-            "tcp_keepalives_interval": "30",  # 30 seconds
-            "tcp_keepalives_count": "3",  # 3 probes
-        }
-    })
+    # Override with Cloud SQL optimized connection arguments
+    engine_args["connect_args"] = cloud_sql_config["connect_args"]
     
     engine = create_async_engine(async_db_url, **engine_args)
     _setup_global_engine_objects(engine)

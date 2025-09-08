@@ -14,7 +14,7 @@ Business Value:
 from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
-    get_websocket_manager,
+    # SECURITY FIX: get_websocket_manager removed - caused multi-user data leakage
 )
 
 from netra_backend.app.websocket_core.unified_emitter import (
@@ -30,6 +30,38 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     get_websocket_manager_factory,
     create_websocket_manager
 )
+
+# Backward compatibility function using factory pattern
+def get_websocket_manager(user_context=None):
+    """
+    SECURITY MIGRATION: Compatibility wrapper for get_websocket_manager.
+    
+    IMPORTANT: This function now uses the secure factory pattern instead
+    of a singleton to prevent multi-user data leakage.
+    
+    ARCHITECTURE COMPLIANCE: Import-time initialization is prohibited.
+    WebSocket managers must be created per-request with valid UserExecutionContext.
+    
+    Args:
+        user_context: Required UserExecutionContext for proper isolation
+    
+    Returns:
+        IsolatedWebSocketManager instance
+        
+    Raises:
+        ValueError: If user_context is None (import-time initialization not allowed)
+    
+    Note: For new code, use create_websocket_manager(user_context) directly.
+    """
+    if user_context is None:
+        # CRITICAL: Import-time initialization violates User Context Architecture
+        raise ValueError(
+            "WebSocket manager creation requires valid UserExecutionContext. "
+            "Import-time initialization is prohibited. Use request-scoped factory pattern instead. "
+            "See User Context Architecture documentation for proper implementation."
+        )
+    
+    return create_websocket_manager(user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     WebSocketManagerAdapter,
@@ -144,6 +176,7 @@ __all__ = [
     "IsolatedWebSocketManager",
     "get_websocket_manager_factory",
     "create_websocket_manager",
+    "get_websocket_manager",  # Backward compatibility
     
     # Migration support
     "WebSocketManagerAdapter", 

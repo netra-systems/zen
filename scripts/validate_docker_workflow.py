@@ -336,7 +336,7 @@ class DockerWorkflowValidator:
             try:
                 from test_framework.unified_docker_manager import UnifiedDockerManager
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.SHARED,
+                    environment_type=EnvironmentType.DEDICATED,
                     use_alpine=True
                 )
                 logger.info("   ✅ UnifiedDockerManager import successful")

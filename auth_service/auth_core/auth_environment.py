@@ -31,7 +31,7 @@ class AuthEnvironment:
         # Core auth requirements
         required_vars = [
             "JWT_SECRET_KEY"
-            # DATABASE_URL is now built from components, not required directly
+            # Database URL is now built from components, not required directly
         ]
         
         missing = []
@@ -46,61 +46,68 @@ class AuthEnvironment:
     def get_jwt_secret_key(self) -> str:
         """Get JWT secret key for token generation/validation.
         
-        UPDATED: Now supports environment-specific JWT secrets to align with backend service.
-        Fallback chain matches netra_backend/app/core/configuration/unified_secrets.py:94
+        CRITICAL FIX: Now uses unified JWT secret manager to ensure consistency
+        with backend service. This fixes the WebSocket 403 authentication failures
+        caused by JWT secret mismatches between auth service and backend service.
         
-        Priority order:
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
-        2. Generic JWT_SECRET_KEY  
-        3. Legacy JWT_SECRET
-        4. Development/test fallbacks
-        
-        This fixes the 401 authentication regression in staging where JWT_SECRET_STAGING
-        was configured but auth service only looked for JWT_SECRET_KEY.
+        The unified manager ensures IDENTICAL secret resolution logic across
+        all services, preventing the $50K MRR WebSocket authentication issues.
         """
-        env = self.get_environment()
-        
-        # 1. Try environment-specific secret first (matches backend service logic)
-        env_specific_key = f"JWT_SECRET_{env.upper()}"
-        secret = self.env.get(env_specific_key, "")
-        if secret:
-            logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
-            return secret.strip()
-        
-        # 2. Try generic JWT_SECRET_KEY (original logic)
-        secret = self.env.get("JWT_SECRET_KEY", "")
-        if secret:
-            logger.debug("Using generic JWT_SECRET_KEY")
-            return secret.strip()
+        try:
+            # Use the unified JWT secret manager for consistency
+            from shared.jwt_secret_manager import get_unified_jwt_secret
+            secret = get_unified_jwt_secret()
+            logger.debug("Using unified JWT secret manager for consistent secret resolution")
+            return secret
+        except Exception as e:
+            logger.error(f"Failed to use unified JWT secret manager: {e}")
+            logger.warning("Falling back to local JWT secret resolution (less secure)")
             
-        # 3. Try legacy JWT_SECRET
-        secret = self.env.get("JWT_SECRET", "")
-        if secret:
-            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY or environment-specific)")
-            return secret.strip()
-        
-        # 4. Environment-specific fallbacks
-        if env == "development":
-            # Development: Generate consistent dev secret
-            import hashlib
-            dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
-            self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
-            logger.debug("Generated development JWT secret")
-            return dev_secret
-        elif env == "test":
-            # Test: Generate consistent test secret
-            import hashlib
-            test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
-            self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
-            logger.debug("Generated test JWT secret")
-            return test_secret
-        elif env in ["staging", "production"]:
-            # Hard failure for staging/production - no fallbacks
-            expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
-            raise ValueError(f"JWT secret not configured for {env} environment. Expected one of: {expected_vars}")
-        
-        # Fallback for unknown environments
-        raise ValueError(f"JWT secret not configured for {env} environment")
+            # Fallback to local resolution if unified manager fails
+            env = self.get_environment()
+            
+            # 1. Try environment-specific secret first
+            env_specific_key = f"JWT_SECRET_{env.upper()}"
+            secret = self.env.get(env_specific_key, "")
+            if secret:
+                logger.debug(f"Fallback: Using environment-specific JWT secret: {env_specific_key}")
+                return secret.strip()
+            
+            # 2. Try generic JWT_SECRET_KEY
+            secret = self.env.get("JWT_SECRET_KEY", "")
+            if secret:
+                logger.debug("Fallback: Using generic JWT_SECRET_KEY")
+                return secret.strip()
+                
+            # 3. Try legacy JWT_SECRET
+            secret = self.env.get("JWT_SECRET", "")
+            if secret:
+                logger.warning("Fallback: Using JWT_SECRET from environment (DEPRECATED)")
+                return secret.strip()
+            
+            # 4. Environment-specific fallbacks
+            if env == "development":
+                # Development: Generate consistent dev secret
+                import hashlib
+                dev_secret = hashlib.sha256("netra_dev_jwt_key".encode()).hexdigest()[:32]
+                self.env.set("JWT_SECRET_KEY", dev_secret, "auth_env_development")
+                logger.debug("Fallback: Generated development JWT secret")
+                return dev_secret
+            elif env == "test":
+                # Test: Generate consistent test secret
+                import hashlib
+                test_secret = hashlib.sha256("netra_test_jwt_key".encode()).hexdigest()[:32]
+                self.env.set("JWT_SECRET_KEY", test_secret, "auth_env_test")
+                logger.debug("Fallback: Generated test JWT secret")
+                return test_secret
+            elif env in ["staging", "production"]:
+                # Hard failure for staging/production - no fallbacks
+                expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                logger.critical(f"JWT secret not configured for {env} environment - WebSocket auth will fail")
+                raise ValueError(f"JWT secret not configured for {env} environment. Expected one of: {expected_vars}")
+            
+            # Fallback for unknown environments
+            raise ValueError(f"JWT secret not configured for {env} environment")
     
     def get_jwt_algorithm(self) -> str:
         """Get JWT algorithm with environment-specific defaults."""
@@ -249,7 +256,7 @@ class AuthEnvironment:
         env = self.get_environment()
         
         # CRITICAL: Test environment gets SQLite in-memory for isolation and speed (per CLAUDE.md)
-        # This takes priority over any explicit DATABASE_URL to ensure "permissive" test behavior
+        # This takes priority over any explicit #removed-legacyto ensure "permissive" test behavior
         if env == "test":
             # Test: Always use in-memory SQLite for isolation (permissive test behavior)
             url = "sqlite+aiosqlite:///:memory:"
@@ -266,8 +273,7 @@ class AuthEnvironment:
             "POSTGRES_PORT": self.env.get("POSTGRES_PORT"),
             "POSTGRES_DB": self.env.get("POSTGRES_DB"),
             "POSTGRES_USER": self.env.get("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD"),
-            "DATABASE_URL": self.env.get("DATABASE_URL")  # For backward compatibility
+            "POSTGRES_PASSWORD": self.env.get("POSTGRES_PASSWORD")
         }
         
         # Create URL builder
@@ -286,14 +292,14 @@ class AuthEnvironment:
             if env == "production" or env == "staging":
                 raise ValueError(
                     f"DatabaseURLBuilder failed to construct URL for {env} environment. "
-                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set, "
-                    f"or DATABASE_URL is provided. Debug info: {debug_info}"
+                    f"Ensure POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set. "
+                    f"Debug info: {debug_info}"
                 )
             else:
                 # For development/test, still fail but with more helpful message
                 raise ValueError(
                     f"DatabaseURLBuilder failed to construct URL for {env} environment. "
-                    f"For development, ensure DATABASE_URL is set or use default localhost configuration. "
+                    f"For development, ensure POSTGRES_* variables are set or use default localhost configuration. "
                     f"Debug info: {debug_info}"
                 )
         
@@ -1071,7 +1077,6 @@ class AuthEnvironment:
         # Required variables
         required = {
             "JWT_SECRET_KEY": self.get_jwt_secret_key()
-            # DATABASE_URL is validated through DatabaseURLBuilder
         }
         
         for name, value in required.items():

@@ -7,7 +7,6 @@ Business Value: Long-term maintainability
 import pytest
 from netra_backend.app.models.message import Message
 from netra_backend.app.schemas.core_enums import MessageType
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestMessage:

@@ -24,7 +24,7 @@
             <cause type="bypass_conversion">Some components created engines directly without URL conversion logic</cause>
             <cause type="missing_validation">No validation to catch sslmode URLs before engine creation</cause>
             <cause type="logic_bug">DatabaseManager.get_application_url_async() had incorrect elif logic that prevented sslmode conversion for non-Cloud SQL URLs</cause>
-            <cause type="source_of_sslmode">GCP Secret Manager stores DATABASE_URL with sslmode=require (standard psycopg2 format) which gets mounted to Cloud Run containers</cause>
+            <cause type="source_of_sslmode">GCP Secret Manager stores #removed-legacywith sslmode=require (standard psycopg2 format) which gets mounted to Cloud Run containers</cause>
         </root_causes>
     </context>
     
@@ -78,7 +78,7 @@
     
     <url_flow>
         <source>GCP Secret Manager stores "database-url-staging" with postgresql://...?sslmode=require</source>
-        <mount>Cloud Run mounts secret as DATABASE_URL environment variable</mount>
+        <mount>Cloud Run mounts secret as #removed-legacyenvironment variable</mount>
         <step1>DatabaseConfigManager._get_postgres_url() reads DATABASE_URL</step1>
         <step2>DatabaseManager.get_base_database_url() strips driver prefixes, keeps sslmode</step2>
         <step3>DatabaseManager.get_migration_url_sync_format() keeps sslmode for Alembic (sync)</step3>

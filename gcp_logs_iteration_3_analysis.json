@@ -1,0 +1,680 @@
+[
+  {
+    "httpRequest": {
+      "latency": "0.008254829s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "337",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/performance",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca000d93873002a3e0",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:03.015132294Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "ef498b6b15d13f37",
+    "timestamp": "2025-09-07T15:42:02.878579Z",
+    "trace": "projects/netra-staging/traces/22c3c90f0c39be5b14b70e8a5e062e9d"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006520300s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "340",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/health/metrics",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca000bff361ed807aa",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:03.015132294Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "6b1f4ec185609b46",
+    "timestamp": "2025-09-07T15:42:02.777245Z",
+    "trace": "projects/netra-staging/traces/80344eb6b5278a1814b70e8a5e06291e"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.008351263s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "330",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/stats",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca000a817b1af01773",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:03.015132294Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "744fdfe0b3a698dd",
+    "timestamp": "2025-09-07T15:42:02.675227Z",
+    "trace": "projects/netra-staging/traces/358208e33acdd28114b70e8a5e062905",
+    "traceSampled": true
+  },
+  {
+    "httpRequest": {
+      "latency": "0.009003749s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "342",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/metrics/pipeline",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca0008dbec46d769c2",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:02.680803936Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "5ed32455ddfc50f6",
+    "timestamp": "2025-09-07T15:42:02.560042Z",
+    "trace": "projects/netra-staging/traces/7d39e6b3b29e08b814b70e8a5e0621b1"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.009166270s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "339",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/metrics/agents",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca000711e63d0ee39c",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:02.680803936Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "ba9e1e9016e69cb5",
+    "timestamp": "2025-09-07T15:42:02.449476Z",
+    "trace": "projects/netra-staging/traces/ea57021592619f8b14b70e8a5e062faa"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.010911987s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "333",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/metrics",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7ca0005668f2aa8b590",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:02.680803936Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "169fc0f8f901cbbe",
+    "timestamp": "2025-09-07T15:42:02.340552Z",
+    "trace": "projects/netra-staging/traces/c7bc51608600794114b70e8a5e062f78"
+  },
+  {
+    "insertId": "68bda7ca000060b5c52605c7",
+    "jsonPayload": {
+      "context": {
+        "exc_info": true,
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "557",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket error: 'coroutine' object has no attribute 'get'",
+      "timestamp": "2025-09-07T15:42:02.022079+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T15:42:02.351174623Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T15:42:02.024757Z"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006270s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "1039",
+      "requestUrl": "https://api.staging.netrasystems.ai/ws",
+      "responseSize": "99",
+      "serverIp": "34.54.41.44",
+      "status": 500,
+      "userAgent": "Netra-E2E-Tests/1.0"
+    },
+    "insertId": "68bda7ca00006fb45e00badb",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:02.347926983Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "spanId": "81c2f9a0855a3633",
+    "timestamp": "2025-09-07T15:42:02.012715Z",
+    "trace": "projects/netra-staging/traces/fe1b829b34ac4270ab712d1ea4ff3239"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006082011s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "PUT",
+      "requestSize": "427",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/agents/execute",
+      "responseSize": "2454",
+      "serverIp": "34.54.41.44",
+      "status": 405,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c9000a00e4a7fb59df",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:01.679236839Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "e5edb6c1e47f1a72",
+    "timestamp": "2025-09-07T15:42:01.647197Z",
+    "trace": "projects/netra-staging/traces/dbd4c8be142926bae653fe2a384be28a"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006902197s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "344",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/pipeline/invalid-id",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c9000872bdd73e7751",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:01.679236839Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "41dcc42d5e36a390",
+    "timestamp": "2025-09-07T15:42:01.543995Z",
+    "trace": "projects/netra-staging/traces/6f12090718a7197ee653fe2a384be872"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.007246557s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "POST",
+      "requestSize": "430",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/agents/execute",
+      "responseSize": "2650",
+      "serverIp": "34.54.41.44",
+      "status": 422,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c90006d9205a3726b6",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:01.679236839Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "5b78b1a8727b5cb3",
+    "timestamp": "2025-09-07T15:42:01.439314Z",
+    "trace": "projects/netra-staging/traces/f0698417dc1420c5e653fe2a384bee5a"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.008043201s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "POST",
+      "requestSize": "442",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/agents/nonexistent/execute",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c9000548af1757843b",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:01.679236839Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "c994b6c5216a7a38",
+    "timestamp": "2025-09-07T15:42:01.335716Z",
+    "trace": "projects/netra-staging/traces/d6fd97ce296656fae653fe2a384be6c8"
+  },
+  {
+    "insertId": "68bda7c900002b7a2696a3e8",
+    "jsonPayload": {
+      "context": {
+        "exc_info": true,
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "557",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket error: 'coroutine' object has no attribute 'get'",
+      "timestamp": "2025-09-07T15:42:01.008557+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T15:42:01.013925693Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T15:42:01.011130Z"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.004643s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "1039",
+      "requestUrl": "https://api.staging.netrasystems.ai/ws",
+      "responseSize": "99",
+      "serverIp": "34.54.41.44",
+      "status": 500,
+      "userAgent": "Netra-E2E-Tests/1.0"
+    },
+    "insertId": "68bda7c900002d00cf168141",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:01.013329822Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "spanId": "5f1b2f276f6000f6",
+    "timestamp": "2025-09-07T15:42:00.999453Z",
+    "trace": "projects/netra-staging/traces/2499a522bace67888b7ae25d1893dd18"
+  },
+  {
+    "insertId": "68bda7c80009b3e8740b423f",
+    "jsonPayload": {
+      "context": {
+        "exc_info": true,
+        "name": "netra_backend.app.routes.websocket"
+      },
+      "labels": {
+        "function": "websocket_endpoint",
+        "line": "557",
+        "module": "netra_backend.app.routes.websocket"
+      },
+      "message": "WebSocket error: 'coroutine' object has no attribute 'get'",
+      "timestamp": "2025-09-07T15:42:00.633251+00:00"
+    },
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2025-09-07T15:42:00.681981109Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2025-09-07T15:42:00.635880Z"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.007542s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "1039",
+      "requestUrl": "https://api.staging.netrasystems.ai/ws",
+      "responseSize": "99",
+      "serverIp": "34.54.41.44",
+      "status": 500,
+      "userAgent": "Netra-E2E-Tests/1.0"
+    },
+    "insertId": "68bda7c80009b49cdf4d8303",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:00.685530775Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "spanId": "9f94dfd45a5ce4f4",
+    "timestamp": "2025-09-07T15:42:00.621971Z",
+    "trace": "projects/netra-staging/traces/1bc5d0e7d0253116fcc7ce908d316fcf"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006742719s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "331",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/tasks",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c80003d76aab645ea2",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:00.350463704Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "25528c9e4100ad54",
+    "timestamp": "2025-09-07T15:42:00.242675Z",
+    "trace": "projects/netra-staging/traces/09ab0a77f800ffa029e7d576cae0eaf9"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.006205875s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "330",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/jobs",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c800028c2658a3f31a",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:00.350463704Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "dd307af0f0fcd216",
+    "timestamp": "2025-09-07T15:42:00.158827Z",
+    "trace": "projects/netra-staging/traces/470d4379108befd029e7d576cae0e104"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.008458001s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "341",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/execution/status",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c8000133a908e307d6",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:00.350463704Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "5ddce54e6a7bcdd3",
+    "timestamp": "2025-09-07T15:42:00.068214Z",
+    "trace": "projects/netra-staging/traces/b5e930913b8d22d329e7d576cae0e70f"
+  },
+  {
+    "httpRequest": {
+      "latency": "0.008446486s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "68.5.230.82",
+      "requestMethod": "GET",
+      "requestSize": "339",
+      "requestUrl": "https://api.staging.netrasystems.ai/api/agents/active",
+      "responseSize": "2436",
+      "serverIp": "34.54.41.44",
+      "status": 404,
+      "userAgent": "python-httpx/0.28.1"
+    },
+    "insertId": "68bda7c7000f25f2731de768",
+    "labels": {
+      "instanceId": "0069c7a9887b7eccb40c9b8b86fa5f2fe707d6f2a3ae3cef54b074268eca9fbf54539bdc03cdd492d65c214784b498fe420984d718d599b53f25f00c37352cc265d78d21bc505988ed70bf59"
+    },
+    "logName": "projects/netra-staging/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2025-09-07T15:42:00.015550584Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "netra-backend-staging",
+        "location": "us-central1",
+        "project_id": "netra-staging",
+        "revision_name": "netra-backend-staging-00093-x55",
+        "service_name": "netra-backend-staging"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "spanId": "01b7f05da0b5097d",
+    "timestamp": "2025-09-07T15:41:59.982109Z",
+    "trace": "projects/netra-staging/traces/e0b103d4aa7523b429e7d576cae0ebcc"
+  }
+]

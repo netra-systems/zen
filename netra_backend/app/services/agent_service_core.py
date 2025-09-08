@@ -18,7 +18,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
 from netra_backend.app.services.streaming_service import (
@@ -26,7 +26,8 @@ from netra_backend.app.services.streaming_service import (
     get_streaming_service,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core import create_websocket_manager
+from shared.id_generation import UnifiedIdGenerator, create_user_execution_context_factory
 
 logger = central_logger.get_logger(__name__)
 
@@ -187,12 +188,28 @@ class AgentService(IAgentService):
             if await self._ensure_bridge_ready():
                 status = await self._bridge.get_status()
                 if status["dependencies"]["websocket_manager_available"]:
-                    websocket_manager = get_websocket_manager()
+                    # Create user context for WebSocket operations using SSOT
+                    context_data = create_user_execution_context_factory(user_id, "stop_agent")
+                    user_context = UserExecutionContext(
+                        user_id=context_data['user_id'],
+                        thread_id=context_data['thread_id'],
+                        run_id=context_data['run_id'],
+                        request_id=context_data['request_id']
+                    )
+                    websocket_manager = create_websocket_manager(user_context)
                     await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
             # Fallback to direct manager access (preserve existing behavior)
-            websocket_manager = get_websocket_manager()
+            # Use SSOT for fallback context creation
+            context_data = create_user_execution_context_factory(user_id, "fallback_stop")
+            fallback_context = UserExecutionContext(
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
+            )
+            websocket_manager = create_websocket_manager(fallback_context)
             await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
             return True
         except Exception as e:
@@ -340,7 +357,15 @@ class AgentService(IAgentService):
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         # Send error to user for unknown message type (through bridge-managed WebSocket)
         try:
-            websocket_manager = get_websocket_manager()
+            # Use SSOT for error context creation
+            context_data = create_user_execution_context_factory(user_id, "error_handling")
+            error_context = UserExecutionContext(
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
+            )
+            websocket_manager = create_websocket_manager(error_context)
             await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
         except Exception as e:
             logger.error(f"Failed to send unknown message type error to {user_id}: {e}")
@@ -367,7 +392,15 @@ class AgentService(IAgentService):
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
             # Use bridge-managed WebSocket communication (preserve boundary)
-            websocket_manager = get_websocket_manager()
+            # Use SSOT for JSON error context creation
+            context_data = create_user_execution_context_factory(user_id, "json_error")
+            json_error_context = UserExecutionContext(
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
+            )
+            websocket_manager = create_websocket_manager(json_error_context)
             await websocket_manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
@@ -391,7 +424,15 @@ class AgentService(IAgentService):
             
         # WebSocket concern: Send error through WebSocket channel
         try:
-            websocket_manager = get_websocket_manager()
+            # Use SSOT for exception context creation
+            context_data = create_user_execution_context_factory(user_id, "exception_handling")
+            exception_context = UserExecutionContext(
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
+            )
+            websocket_manager = create_websocket_manager(exception_context)
             await websocket_manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")

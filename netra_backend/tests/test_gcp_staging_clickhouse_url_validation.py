@@ -15,7 +15,7 @@ Issues replicated:
 import pytest
 import re
 from urllib.parse import urlparse, ParseResult
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from shared.isolated_environment import IsolatedEnvironment

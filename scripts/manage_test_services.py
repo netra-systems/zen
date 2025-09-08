@@ -38,7 +38,7 @@ class TestServiceCLI:
     def __init__(self):
         # Use SSOT DockerTestUtility for all Docker operations
         self.docker_utility = create_docker_test_utility(
-            environment_type=DockerTestEnvironmentType.SHARED
+            environment_type=DockerTestEnvironmentType.DEDICATED
         )
         
     async def start_services(self, e2e: bool = False, clickhouse: bool = False):

@@ -12,6 +12,7 @@ import os
 import sys
 from pathlib import Path
 import pytest
+from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports

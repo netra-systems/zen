@@ -191,30 +191,26 @@ async def _send_sensitive_data(agent, sensitive_data: str, duration: float) -> D
     
     end_time = start_time + duration
     
-    try:
-        while time.time() < end_time:
-            message = {
-                "type": "sensitive_data_test",
-                "tenant_id": agent.tenant_id,
-                "sensitive_payload": sensitive_data,
-                "message_id": f"{agent.tenant_id}-sensitive-{messages_sent}",
-                "timestamp": time.time()
-            }
-            
-            await agent.connection.send(json.dumps(message))
-            messages_sent += 1
-            
-            # Try to collect response
-            try:
-                response = await asyncio.wait_for(agent.connection.recv(), timeout=1.0)
-                responses.append(response)
-            except asyncio.TimeoutError:
-                pass
-            
-            await asyncio.sleep(1.0)
-    
-    except Exception as e:
-        logger.error(f"Sensitive data test error for {agent.tenant_id}: {e}")
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    while time.time() < end_time:
+        message = {
+            "type": "sensitive_data_test",
+            "tenant_id": agent.tenant_id,
+            "sensitive_payload": sensitive_data,
+            "message_id": f"{agent.tenant_id}-sensitive-{messages_sent}",
+            "timestamp": time.time()
+        }
+        
+        await agent.connection.send(json.dumps(message))
+        messages_sent += 1
+        
+        # Try to collect response
+        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+        # Note: Using timeout is acceptable for non-critical response collection
+        response = await asyncio.wait_for(agent.connection.recv(), timeout=1.0)
+        responses.append(response)
+        
+        await asyncio.sleep(1.0)
     
     return {
         "tenant_id": agent.tenant_id,
@@ -279,10 +275,7 @@ async def test_scalable_tenant_isolation(resource_isolation_suite):
         # Cleanup for next iteration
         for agent in test_agents:
             if agent.connection:
-                try:
-                    await agent.connection.close()
-                except Exception:
-                    pass
+                await agent.connection.close()
     
     # Analyze scalability
     if len(scalability_results) >= 2:
@@ -349,28 +342,22 @@ async def _simulate_tenant_failure(agent, delay: float):
     """Simulate failure in a tenant after delay."""
     await asyncio.sleep(delay)
     
-    try:
-        # Send malformed messages to cause errors
-        malformed_messages = [
-            "invalid json",
-            json.dumps({"type": "crash_simulation"}),
-            "",
-            None
-        ]
-        
-        for msg in malformed_messages:
-            try:
-                if msg is not None:
-                    await agent.connection.send(str(msg))
-                await asyncio.sleep(0.1)
-            except Exception:
-                pass  # Expected failures
-        
-        # Force close connection
-        await agent.connection.close()
-        
-    except Exception:
-        pass  # Failure simulation, exceptions expected
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    # Send malformed messages to cause errors
+    malformed_messages = [
+        "invalid json",
+        json.dumps({"type": "crash_simulation"}),
+        "",
+        None
+    ]
+    
+    for msg in malformed_messages:
+        if msg is not None:
+            await agent.connection.send(str(msg))
+        await asyncio.sleep(0.1)
+    
+    # Force close connection
+    await agent.connection.close()
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

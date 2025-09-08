@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 #     upgrade_admin_dispatcher_creation
 # )
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -88,7 +88,7 @@ async def _create_admin_tool_dispatcher(
 def _create_standard_tool_dispatcher(
     tools: List[BaseTool],
     user_context: Optional[UserExecutionContext] = None
-) -> ToolDispatcher:
+) -> UnifiedToolDispatcher:
     """Create standard tool dispatcher with optional request-scoped context.
     
     Args:
@@ -96,18 +96,18 @@ def _create_standard_tool_dispatcher(
         user_context: Optional UserExecutionContext for request-scoped isolation
         
     Returns:
-        ToolDispatcher: Tool dispatcher (request-scoped if context provided)
+        UnifiedToolDispatcher: Tool dispatcher (request-scoped if context provided)
     """
     logger.info("Creating supervisor with standard tools only")
     
     if user_context:
         logger.info("✅ Creating request-scoped standard tool dispatcher")
         # Modern request-scoped pattern
-        return ToolDispatcher(user_context=user_context, tools=tools)
+        return UnifiedToolDispatcher(user_context=user_context, tools=tools)
     else:
         logger.warning("⚠️ Creating global tool dispatcher - consider providing UserExecutionContext")
         # Legacy global pattern with warning
-        return ToolDispatcher(user_context=None, tools=tools)
+        return UnifiedToolDispatcher(user_context=None, tools=tools)
 
 
 def _determine_supervisor_mode(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorMode:

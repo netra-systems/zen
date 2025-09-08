@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>SERVICE_ID Stability Fix for Cross-Service Authentication</title>
+  <date>2025-09-07</date>
+  <severity>HIGH</severity>
+  <category>authentication,deployment,configuration</category>
+  
+  <problem>
+    <description>
+      Auth service was expecting a dynamically changing SERVICE_ID with timestamp suffix
+      (e.g., netra-auth-staging-1757252100) while backend was sending a fixed SERVICE_ID
+      (netra-auth-staging-1757251019), causing authentication failures every minute.
+    </description>
+    <symptoms>
+      <symptom>Persistent "Service ID mismatch" warnings in auth service logs</symptom>
+      <symptom>Expected SERVICE_ID changing every 60 seconds (Unix timestamp increment)</symptom>
+      <symptom>Blacklist endpoint validation failures</symptom>
+    </symptoms>
+    <root_cause>
+      The auth service was reading SERVICE_ID from environment variables that contained
+      a timestamp suffix, likely set during deployment with $(date +%s) or similar.
+      This caused the expected SERVICE_ID to change every minute.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <description>
+      Fixed auth service to use a stable, hardcoded SERVICE_ID for cross-service
+      authentication instead of reading from environment variables.
+    </description>
+    <changes>
+      <change file="auth_service/auth_core/routes/auth_routes.py">
+        <before>expected_service_id = env.get("SERVICE_ID", "netra-backend")</before>
+        <after>expected_service_id = "netra-backend"  # Stable ID for backend service</after>
+        <lines>760, 935</lines>
+      </change>
+    </changes>
+    <rationale>
+      Cross-service authentication should use stable, predictable SERVICE_IDs
+      that don't change over time. Environment-based SERVICE_IDs with timestamps
+      break this contract.
+    </rationale>
+  </solution>
+  
+  <prevention>
+    <measure>Use hardcoded stable SERVICE_IDs for cross-service authentication</measure>
+    <measure>Never use timestamps in SERVICE_ID values</measure>
+    <measure>Validate deployment configs to reject SERVICE_IDs with timestamp patterns</measure>
+    <measure>Add monitoring for SERVICE_ID mismatch errors</measure>
+  </prevention>
+  
+  <testing>
+    <test>test_service_id_fix_verification.py - Verifies stable SERVICE_ID usage</test>
+    <test>test_service_id_no_timestamp.py - Prevents timestamp suffixes</test>
+    <test>test_service_id_stability_regression.py - Regression prevention</test>
+  </testing>
+  
+  <related>
+    <issue>This is a recurring issue that has been fixed before but regressed</issue>
+    <file>SPEC/learnings/service_id_timestamp_issue_20250907.xml</file>
+    <file>reports/SERVICE_ID_MISMATCH_BUG_REPORT_20250907.md</file>
+  </related>
+  
+  <key_insights>
+    <insight>
+      SERVICE_ID should be a stable identifier for service-to-service authentication.
+      Using dynamic values (timestamps, random numbers) breaks authentication contracts.
+    </insight>
+    <insight>
+      Environment variables are not always the right source for authentication constants.
+      Critical security values should be hardcoded or derived from stable configuration.
+    </insight>
+    <insight>
+      This regression occurred despite existing tests, suggesting the issue is being
+      reintroduced at the deployment/infrastructure level rather than code level.
+    </insight>
+  </key_insights>
+</learning>

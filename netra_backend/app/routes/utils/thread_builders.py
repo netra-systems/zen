@@ -7,21 +7,33 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 
 
 def extract_thread_title(thread, title: Optional[str]) -> Optional[str]:
-    """Extract thread title from parameters or metadata."""
-    return title or (thread.metadata_.get("title") if thread.metadata_ else None)
+    """Extract thread title from parameters or metadata with NULL safety."""
+    if title:
+        return title
+    if hasattr(thread, 'metadata_') and thread.metadata_:
+        return thread.metadata_.get("title")
+    return None
 
 
 def extract_thread_updated_at(thread) -> Optional[int]:
-    """Extract thread updated_at timestamp."""
-    return thread.metadata_.get("updated_at") if thread.metadata_ else None
+    """Extract thread updated_at timestamp with NULL safety."""
+    if hasattr(thread, 'metadata_') and thread.metadata_:
+        return thread.metadata_.get("updated_at")
+    return None
 
 
 def _create_thread_response_fields(thread, message_count: int, title: Optional[str]) -> Dict:
-    """Create thread response field dictionary."""
+    """Create thread response field dictionary with NULL safety."""
+    # Ensure metadata is never None in response
+    metadata = thread.metadata_ if hasattr(thread, 'metadata_') and thread.metadata_ else {}
+    
     return {
-        "id": thread.id, "object": thread.object,
-        "title": extract_thread_title(thread, title), "created_at": thread.created_at,
-        "updated_at": extract_thread_updated_at(thread), "metadata": thread.metadata_,
+        "id": thread.id, 
+        "object": thread.object,
+        "title": extract_thread_title(thread, title), 
+        "created_at": thread.created_at,
+        "updated_at": extract_thread_updated_at(thread), 
+        "metadata": metadata,
         "message_count": message_count
     }
 
@@ -48,10 +60,16 @@ async def convert_threads_to_responses(db: AsyncSession, threads: List, offset: 
 
 
 def format_single_message(msg) -> Dict[str, Any]:
-    """Format single message for response."""
+    """Format single message for response with NULL safety."""
+    # Ensure metadata is never None in response
+    metadata = msg.metadata_ if hasattr(msg, 'metadata_') and msg.metadata_ else {}
+    
     return {
-        "id": msg.id, "role": msg.role, "content": msg.content,
-        "created_at": msg.created_at, "metadata": msg.metadata_
+        "id": msg.id, 
+        "role": msg.role, 
+        "content": msg.content,
+        "created_at": msg.created_at, 
+        "metadata": metadata
     }
 
 

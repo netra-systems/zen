@@ -33,7 +33,7 @@
             </cause>
             <cause id="database-credentials">
                 <symptom>password authentication failed for user 'postgres'</symptom>
-                <root_cause>DATABASE_URL secret contains incorrect/outdated credentials</root_cause>
+                <root_cause>#removed-legacysecret contains incorrect/outdated credentials</root_cause>
                 <impact>Complete database connectivity failure</impact>
             </cause>
         </root_causes_identified>
@@ -216,8 +216,8 @@
         
         <failure_pattern name="Authentication Failures">
             <symptom>password authentication failed for user</symptom>
-            <cause>DATABASE_URL contains incorrect or outdated credentials</cause>
-            <solution>Update DATABASE_URL secret with current Cloud SQL credentials</solution>
+            <cause>#removed-legacycontains incorrect or outdated credentials</cause>
+            <solution>Update #removed-legacysecret with current Cloud SQL credentials</solution>
         </failure_pattern>
         
         <failure_pattern name="Cloud SQL SSL Conflicts">

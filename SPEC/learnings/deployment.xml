@@ -53,7 +53,7 @@
       <category>deployment</category>
       <date>2025-08-22</date>
       <severity>critical</severity>
-      <title>DATABASE_URL Must Include sslmode=require for Cloud SQL</title>
+      <title>#removed-legacyMust Include sslmode=require for Cloud SQL</title>
       <problem>
         <description>Database connections fail without proper SSL configuration</description>
         <symptoms>
@@ -64,7 +64,7 @@
         <root_cause>Cloud SQL requires SSL connections but URL doesn't specify sslmode</root_cause>
       </problem>
       <solution>
-        <description>Include sslmode=require parameter in DATABASE_URL for staging/production</description>
+        <description>Include sslmode=require parameter in #removed-legacyfor staging/production</description>
         <implementation>
           <example>postgresql://user:pass@host:5432/db?sslmode=require</example>
           <note>Use sslmode=require in secrets - DatabaseManager will convert for asyncpg</note>
@@ -100,7 +100,7 @@
           <symptom>Health checks fail in GCP staging but work locally</symptom>
         </symptoms>
         <root_cause>
-          <source>GCP Secret Manager stores DATABASE_URL with sslmode=require</source>
+          <source>GCP Secret Manager stores #removed-legacywith sslmode=require</source>
           <bug>DatabaseManager.get_application_url_async() had logic bug preventing conversion</bug>
         </root_cause>
       </problem>
@@ -108,7 +108,7 @@
         <description>Fixed DatabaseManager conversion logic for async connections</description>
         <url_flow>
           <step1>deploy_to_gcp.py creates secret with sslmode=require (standard format)</step1>
-          <step2>Cloud Run mounts secret as DATABASE_URL environment variable</step2>
+          <step2>Cloud Run mounts secret as #removed-legacyenvironment variable</step2>
           <step3>DatabaseManager.get_base_database_url() reads and normalizes</step3>
           <step4>DatabaseManager.get_application_url_async() converts for asyncpg</step4>
         </url_flow>
@@ -175,7 +175,7 @@
       <solution>
         <description>Fix database connectivity and SSL settings for health checks</description>
         <implementation>
-          <check>Verify DATABASE_URL includes SSL settings</check>
+          <check>Verify #removed-legacyincludes SSL settings</check>
           <check>Ensure database credentials are correct</check>
           <check>Test database connection from health check code</check>
         </implementation>
@@ -399,7 +399,7 @@
   <troubleshooting>
     <issue symptom="503 health check errors">
       <cause>Database connectivity issues</cause>
-      <solution>Check DATABASE_URL includes sslmode=require</solution>
+      <solution>Check #removed-legacyincludes sslmode=require</solution>
     </issue>
     
     <issue symptom="OAuth flow failures">

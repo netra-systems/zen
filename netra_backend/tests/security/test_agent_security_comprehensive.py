@@ -11,7 +11,7 @@ from typing import Dict, Any, List
 import hashlib
 import json
 import time
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -387,7 +387,7 @@ class TestAgentDataProtection:
     async def test_agent_sql_injection_protection(self):
         """Test agent protects against SQL injection attacks."""
         # Mock database manager with injection detection
-        mock_db_manager = TestDatabaseManager().get_session()
+        mock_db_manager = DatabaseTestManager().get_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         
         injection_attempts = []

@@ -17,7 +17,7 @@ from netra_backend.app.core.startup_manager import StartupManager
 async def test_database_url_consistency_across_environments():
     """Test database URLs are properly configured for each environment.
     
-    NOTE: Currently the system uses a single DATABASE_URL for all environments.
+    NOTE: Currently the system uses a single #removed-legacyfor all environments.
     This test validates that the URL is accessible and properly formatted.
     Environment-specific URLs are not yet implemented.
     """
@@ -28,8 +28,8 @@ async def test_database_url_consistency_across_environments():
             db_url = get_config_value("DATABASE_URL")
             
             # Basic validation that applies to all environments
-            assert db_url is not None, f"DATABASE_URL must be configured for {env}"
-            assert db_url.startswith("postgresql"), f"DATABASE_URL must be postgresql URL, got: {db_url}"
+            assert db_url is not None, f"#removed-legacymust be configured for {env}"
+            assert db_url.startswith("postgresql"), f"#removed-legacymust be postgresql URL, got: {db_url}"
             
             # Currently all environments use the same database URL (development database)
             # This validates the current system behavior
@@ -80,7 +80,7 @@ async def test_redis_configuration_environment_parity():
 async def test_environment_isolation_validation():
     """Test environment configurations don't leak between environments.
     
-    NOTE: Currently the system uses a single DATABASE_URL for all environments.
+    NOTE: Currently the system uses a single #removed-legacyfor all environments.
     This test validates that the URL is safe (not pointing to production).
     Environment-specific isolation is not yet implemented.
     """

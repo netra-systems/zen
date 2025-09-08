@@ -1,6 +1,4 @@
-from shared.isolated_environment import get_env
 """
-env = get_env()
 Base E2E Test Framework
 
 Business Value Justification (BVJ):
@@ -28,6 +26,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
+
+from shared.isolated_environment import get_env
 
 
 class BaseE2ETest:
@@ -264,7 +264,8 @@ class DevLauncherE2ETestMixin:
     
     def get_test_environment(self) -> Dict[str, str]:
         """Get standard test environment variables."""
-        env = env.get_all()
+        env_manager = get_env()
+        env = env_manager.get_all()
         env.update({
             "NETRA_TEST_MODE": "true",
             "NETRA_STARTUP_MODE": "minimal",

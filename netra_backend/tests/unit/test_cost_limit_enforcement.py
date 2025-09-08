@@ -2,7 +2,6 @@
 
 import pytest
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Skip test if any imports fail due to missing dependencies

@@ -34,7 +34,7 @@ from netra_backend.app.services.websocket_connection_pool import WebSocketConnec
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 

@@ -67,10 +67,10 @@ def check_github_secrets() -> Dict[str, bool]:
     return secrets
 
 def _get_database_url() -> Optional[str]:
-    """Get and validate DATABASE_URL environment variable."""
+    """Get and validate #removed-legacyenvironment variable."""
     db_url = get_env().get("DATABASE_URL")
     if not db_url:
-        print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
+        print(f"{Fore.RED}✗ #removed-legacynot set{Style.RESET_ALL}")
         return None
     return db_url
 
@@ -89,7 +89,7 @@ def _parse_cloud_sql_url(db_url: str) -> Optional[Tuple[str, str, str, str]]:
         creds, db = creds_and_db.split("@")[0], creds_and_db.split("/")[-1]
         user, password = creds.split(":")
         return user, password, db, socket_path
-    print(f"{Fore.RED}✗ Invalid DATABASE_URL format{Style.RESET_ALL}")
+    print(f"{Fore.RED}✗ Invalid #removed-legacyformat{Style.RESET_ALL}")
     return None
 
 def _connect_cloud_sql(user: str, password: str, db: str, socket_path: str):

@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 from netra_backend.app.agents.base_agent import BaseAgent
 # WebSocketContextMixin removed - BaseAgent now handles WebSocket via bridge
 # Using single inheritance with standardized execution patterns
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -82,7 +82,7 @@ class ValidationSubAgent(BaseAgent):
     - Completion status with results
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: UnifiedToolDispatcher,
                  websocket_manager: Optional[Any] = None):
         """Initialize ValidationSubAgent with WebSocket capabilities."""
         # Initialize base class only - single inheritance pattern
@@ -115,8 +115,8 @@ class ValidationSubAgent(BaseAgent):
         context = validate_user_context(context)
         
         try:
-            # Create database session manager
-            session_mgr = DatabaseSessionManager(context)
+            # Create database session manager (stub implementation)
+            session_mgr = DatabaseSessionManager()
             
             # Emit thinking event (agent_started is handled by orchestrator)
             await self.emit_thinking("Starting comprehensive validation process")

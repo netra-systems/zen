@@ -36,17 +36,28 @@ class SecretConfig:
                 "POSTGRES_DB",
                 "POSTGRES_USER",
                 "POSTGRES_PASSWORD"
+                # DATABASE_HOST removed - conflicts with Cloud Run environment variable
+                # DATABASE_PASSWORD removed - redundant with POSTGRES_PASSWORD
             ],
             "authentication": [
-                "JWT_SECRET_STAGING",
-                "JWT_SECRET_KEY",
-                "SECRET_KEY",  # CRITICAL: Backend requires SECRET_KEY
+                "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
+                "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
+                "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
+                "SECRET_KEY",          # CRITICAL: Backend requires SECRET_KEY
                 "SERVICE_SECRET",
-                "SERVICE_ID",  # CRITICAL: Required for inter-service auth with auth service
+                "SERVICE_ID",          # CRITICAL: Required for inter-service auth with auth service
                 "FERNET_KEY"
             ],
-            # OAuth removed - backend doesn't handle OAuth, only the auth service does
-            # Backend communicates with auth service for authentication needs
+            "oauth": [
+                # Backend uses simplified OAuth naming (matches config.py fallback chain)
+                # Backend config.py tries: OAUTH_GOOGLE_CLIENT_ID_ENV or GOOGLE_CLIENT_ID or GOOGLE_OAUTH_CLIENT_ID
+                # Tests expect GOOGLE_CLIENT_ID which is the second fallback option
+                "GOOGLE_CLIENT_ID", 
+                "GOOGLE_CLIENT_SECRET",
+                # CRITICAL: Also include staging-specific OAuth variables that config validation expects
+                "GOOGLE_OAUTH_CLIENT_ID_STAGING",
+                "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"
+            ],
             "redis": [
                 "REDIS_HOST",
                 "REDIS_PORT",
@@ -71,16 +82,18 @@ class SecretConfig:
                 "POSTGRES_PASSWORD"
             ],
             "authentication": [
-                "JWT_SECRET_STAGING",
-                "JWT_SECRET_KEY",
-                "SECRET_KEY",  # CRITICAL: Auth service requires SECRET_KEY
+                "JWT_SECRET",          # CRITICAL: Base JWT secret for auth validator
+                "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
+                "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
+                "SECRET_KEY",          # CRITICAL: Auth service requires SECRET_KEY
                 "SERVICE_SECRET",
                 "SERVICE_ID"
             ],
             "oauth": [
                 "GOOGLE_OAUTH_CLIENT_ID_STAGING",  # Auth uses environment-specific names
                 "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
-                "OAUTH_HMAC_SECRET"
+                "OAUTH_HMAC_SECRET",
+                "E2E_OAUTH_SIMULATION_KEY"  # CRITICAL: Required for E2E testing in staging
             ],
             "redis": [
                 "REDIS_HOST",
@@ -104,19 +117,28 @@ class SecretConfig:
         "POSTGRES_DB": "postgres-db-staging",
         "POSTGRES_USER": "postgres-user-staging",
         "POSTGRES_PASSWORD": "postgres-password-staging",
+        # DATABASE_HOST and DATABASE_PASSWORD mappings removed - avoid conflicts with Cloud Run env vars
         
         # Authentication & JWT
-        "JWT_SECRET_STAGING": "jwt-secret-staging",
-        "JWT_SECRET_KEY": "jwt-secret-key-staging",
-        "SECRET_KEY": "secret-key-staging",  # CRITICAL: Maps to secret-key-staging
+        # CRITICAL FIX: All JWT secret names must map to the same secret for consistency
+        # This ensures WebSocket authentication works correctly in staging
+        "JWT_SECRET": "jwt-secret-staging",         # CRITICAL: Base JWT secret
+        "JWT_SECRET_KEY": "jwt-secret-staging",     # CRITICAL: Same as JWT_SECRET for consistency
+        "JWT_SECRET_STAGING": "jwt-secret-staging", # CRITICAL: Environment-specific name
+        "SECRET_KEY": "secret-key-staging",         # CRITICAL: Maps to secret-key-staging
         "SERVICE_SECRET": "service-secret-staging",
         "SERVICE_ID": "service-id-staging",
         "FERNET_KEY": "fernet-key-staging",
         
-        # OAuth - Auth service uses environment-specific names
+        # OAuth - Dual naming convention for backend and auth services
+        # Backend service uses simplified names (matches config.py fallback)
+        "GOOGLE_CLIENT_ID": "google-oauth-client-id-staging",
+        "GOOGLE_CLIENT_SECRET": "google-oauth-client-secret-staging",
+        # Auth service uses environment-specific names
         "GOOGLE_OAUTH_CLIENT_ID_STAGING": "google-oauth-client-id-staging",
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "google-oauth-client-secret-staging",
         "OAUTH_HMAC_SECRET": "oauth-hmac-secret-staging",
+        "E2E_OAUTH_SIMULATION_KEY": "e2e-oauth-simulation-key-staging",
         
         # Redis
         "REDIS_HOST": "redis-host-staging",
@@ -137,15 +159,17 @@ class SecretConfig:
     # If any of these are missing, deployment should fail
     CRITICAL_SECRETS: Dict[str, List[str]] = {
         "backend": [
-            "SECRET_KEY",  # CRITICAL: Required for encryption
-            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens
+            "SECRET_KEY",      # CRITICAL: Required for encryption
+            "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
+            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
-            "SERVICE_ID",  # CRITICAL: Required for inter-service auth
+            "SERVICE_ID",      # CRITICAL: Required for inter-service auth
             "POSTGRES_PASSWORD",  # CRITICAL: Required for database
         ],
         "auth": [
-            "SECRET_KEY",  # CRITICAL: Required for auth service
-            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens
+            "SECRET_KEY",      # CRITICAL: Required for auth service
+            "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
+            "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
             "POSTGRES_PASSWORD",  # CRITICAL: Required for database
         ]
@@ -281,8 +305,10 @@ class SecretConfig:
             "POSTGRES_PASSWORD": "PostgreSQL database password (CRITICAL - required for database access)",
             "REDIS_URL": "Redis connection URL for caching and sessions",
             "FERNET_KEY": "Symmetric encryption key for data encryption",
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging environment",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging environment",
+            "GOOGLE_CLIENT_ID": "Google OAuth client ID (simplified naming for backend)",
+            "GOOGLE_CLIENT_SECRET": "Google OAuth client secret (simplified naming for backend)",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging environment (auth service)",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging environment (auth service)",
         }
         
         return explanations.get(

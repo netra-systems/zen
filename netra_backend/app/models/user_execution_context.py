@@ -43,7 +43,7 @@ class UserExecutionContext:
                      Must not be None, empty, or the placeholder "registry".
         request_id (str): Unique identifier for the specific request.
                          Must not be None or empty.
-        websocket_connection_id (Optional[str]): Unique identifier for the specific WebSocket connection.
+        websocket_client_id (Optional[str]): Unique identifier for the specific WebSocket client.
                                                Optional, used for targeted event emission.
     
     Raises:
@@ -55,7 +55,7 @@ class UserExecutionContext:
         ...     thread_id="thread_456", 
         ...     run_id="run_789",
         ...     request_id="req_012",
-        ...     websocket_connection_id="conn_345"
+        ...     websocket_client_id="conn_345"
         ... )
         
         >>> # This will raise ValueError
@@ -70,7 +70,7 @@ class UserExecutionContext:
     thread_id: str
     run_id: str
     request_id: str
-    websocket_connection_id: Optional[str] = None
+    websocket_client_id: Optional[str] = None
     
     def __post_init__(self) -> None:
         """
@@ -129,7 +129,7 @@ class UserExecutionContext:
             "thread_id": self.thread_id, 
             "run_id": self.run_id,
             "request_id": self.request_id,
-            "websocket_connection_id": self.websocket_connection_id
+            "websocket_client_id": self.websocket_client_id
         }
     
     def __str__(self) -> str:

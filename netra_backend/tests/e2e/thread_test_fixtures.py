@@ -22,8 +22,19 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import get_websocket_manager as get_unified_manager
-manager = get_unified_manager()
+from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+
+@pytest.fixture
+async def websocket_manager():
+    """Create WebSocket manager with proper UserExecutionContext for testing."""
+    user_context = UserExecutionContext(
+        user_id="test-user-123",
+        thread_id="test-thread-456",
+        run_id="test-run-789",
+        request_id="test-request-789"
+    )
+    return create_websocket_manager(user_context)
 
 class ThreadTestDataFactory:
     """Factory for creating thread test data."""

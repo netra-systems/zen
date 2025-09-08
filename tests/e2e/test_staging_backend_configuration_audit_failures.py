@@ -12,7 +12,7 @@
         ## CRITICAL INFRASTRUCTURE FAILURES MATRIX
 
         ### 1. Auth Service Configuration Cascade (100% Authentication Breakdown)
-        # REMOVED_SYNTAX_ERROR: - DATABASE_URL undefined/misconfigured → Auth service startup failure
+        # REMOVED_SYNTAX_ERROR: - #removed-legacyundefined/misconfigured → Auth service startup failure
         # REMOVED_SYNTAX_ERROR: - JWT_SECRET_KEY mismatch → Cross-service authentication broken
         # REMOVED_SYNTAX_ERROR: - Service account credentials invalid → OAuth completely non-functional
         # REMOVED_SYNTAX_ERROR: - REDIS_URL fallback masking → Session persistence broken
@@ -824,7 +824,7 @@ requirements: Dict[str, Any]
         # REMOVED_SYNTAX_ERROR: configuration_status="missing",
         # REMOVED_SYNTAX_ERROR: fallback_status="unknown",
         # REMOVED_SYNTAX_ERROR: business_impact=requirements['business_impact'],
-        # REMOVED_SYNTAX_ERROR: staging_requirement="DATABASE_URL must be configured"
+        # REMOVED_SYNTAX_ERROR: staging_requirement="#removed-legacymust be configured"
         
 
         # REMOVED_SYNTAX_ERROR: if "localhost" in database_url:

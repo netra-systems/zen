@@ -65,15 +65,28 @@ jest.mock('@/lib/logger', () => ({
 
 describe('Thread Switching Basic Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Don't use jest.clearAllMocks() as it clears mock implementations
+    // Instead, reset specific mocks we need to reset
     
     // Reset the mock store to initial state
     if (typeof resetMockState === 'function') {
       resetMockState();
     }
+    
+    // Reset only the calls, not the implementation
+    const { threadLoadingService } = require('@/services/threadLoadingService');
+    threadLoadingService.loadThread.mockClear();
+    
+    // Re-set up retry manager mock implementation
+    const { executeWithRetry } = require('@/lib/retry-manager');
+    executeWithRetry.mockClear();
+    executeWithRetry.mockImplementation(async (fn, options) => {
+      const result = await fn();
+      return result;
+    });
   });
 
-  it.skip('should switch to a thread successfully', async () => {
+  it('should switch to a thread successfully', async () => {
     const mockMessages = [
       { id: 'msg-1', content: 'Test message', role: 'user', timestamp: Date.now() }
     ];
@@ -112,7 +125,7 @@ describe('Thread Switching Basic Tests', () => {
     expect(threadLoadingService.loadThread).toHaveBeenCalledWith('thread-1');
   });
 
-  it.skip('should handle loading errors', async () => {
+  it('should handle loading errors', async () => {
     (threadLoadingService.loadThread as jest.Mock).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useThreadSwitching());
@@ -123,14 +136,21 @@ describe('Thread Switching Basic Tests', () => {
     });
 
     expect(switchResult).toBe(false);
-    expect(result.current.state.error).toBeTruthy();
-    expect(result.current.state.error?.message).toContain('Network error');
+    
+    // Wait for error state to be set
+    await waitFor(() => {
+      expect(result.current.state.error).toBeTruthy();
+    });
+    
+    // Check that error message contains expected text (may be wrapped in thread error)
+    const errorMessage = result.current.state.error?.message || '';
+    expect(errorMessage).toMatch(/Thread loading failed|Network error/);
     
     const storeState = useUnifiedChatStore.getState();
     expect(storeState.activeThreadId).toBeNull(); // Should not change on error
   });
 
-  it.skip('should prevent concurrent switches', async () => {
+  it('should prevent concurrent switches', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     
     const resolvers: { [key: string]: any } = {};
@@ -143,21 +163,30 @@ describe('Thread Switching Basic Tests', () => {
 
     const { result } = renderHook(() => useThreadSwitching());
 
-    // Start first switch
-    act(() => {
+    // Start first switch and wait for loading state
+    await act(async () => {
       result.current.switchToThread('thread-1');
+      // Give operation a chance to start
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    expect(result.current.state.isLoading).toBe(true);
-    expect(result.current.state.loadingThreadId).toBe('thread-1');
+    // Wait for loading state to be set
+    await waitFor(() => {
+      expect(result.current.state.isLoading).toBe(true);
+      expect(result.current.state.loadingThreadId).toBe('thread-1');
+    });
 
     // Try second switch while first is loading - this should cancel the first
     await act(async () => {
       result.current.switchToThread('thread-2');
+      // Give operation a chance to start
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    // The loading thread should now be thread-2 
-    expect(result.current.state.loadingThreadId).toBe('thread-2');
+    // Wait for the loading thread to change to thread-2 
+    await waitFor(() => {
+      expect(result.current.state.loadingThreadId).toBe('thread-2');
+    });
 
     // Resolve the second switch
     await act(async () => {
@@ -172,8 +201,10 @@ describe('Thread Switching Basic Tests', () => {
     });
 
     // Should end up on thread-2
-    expect(result.current.state.lastLoadedThreadId).toBe('thread-2');
-    expect(useUnifiedChatStore.getState().activeThreadId).toBe('thread-2');
+    await waitFor(() => {
+      expect(result.current.state.lastLoadedThreadId).toBe('thread-2');
+      expect(useUnifiedChatStore.getState().activeThreadId).toBe('thread-2');
+    });
   });
 
   it('should clear messages when requested', async () => {
@@ -200,15 +231,20 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { clearMessages: true });
     });
 
-    const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
-    expect(clearMessages).toHaveBeenCalled();
+    // Wait for state to stabilize
+    await waitFor(() => {
+      const clearMessages = useUnifiedChatStore.getState().clearMessages as jest.Mock;
+      expect(clearMessages).toHaveBeenCalled();
+    });
   });
 
-  it.skip('should update URL when enabled', async () => {
+  it('should update URL when enabled', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     const updateUrl = jest.fn();
     
-    jest.spyOn(require('@/services/urlSyncService'), 'useURLSync').mockReturnValue({ updateUrl });
+    // Mock the urlSyncService at the module level
+    const urlSyncModule = require('@/services/urlSyncService');
+    jest.spyOn(urlSyncModule, 'useURLSync').mockReturnValue({ updateUrl });
     
     threadLoadingService.loadThread.mockResolvedValue({
       success: true,
@@ -222,10 +258,13 @@ describe('Thread Switching Basic Tests', () => {
       await result.current.switchToThread('thread-1', { updateUrl: true });
     });
 
-    expect(updateUrl).toHaveBeenCalledWith('thread-1');
+    // Wait for the URL update to be called
+    await waitFor(() => {
+      expect(updateUrl).toHaveBeenCalledWith('thread-1');
+    });
   });
 
-  it.skip('should handle retry after failure', async () => {
+  it('should handle retry after failure', async () => {
     const { threadLoadingService } = require('@/services/threadLoadingService');
     
     // First attempt fails
@@ -239,8 +278,9 @@ describe('Thread Switching Basic Tests', () => {
 
     expect(result.current.state.error).toBeTruthy();
 
-    // Setup success for retry
-    threadLoadingService.loadThread.mockResolvedValueOnce({
+    // Clear any existing mock behavior and setup success for retry
+    threadLoadingService.loadThread.mockReset();
+    threadLoadingService.loadThread.mockResolvedValue({
       success: true,
       threadId: 'thread-1',
       messages: []
@@ -251,8 +291,12 @@ describe('Thread Switching Basic Tests', () => {
       retryResult = await result.current.retryLastFailed();
     });
 
+    // Wait for state to stabilize
+    await waitFor(() => {
+      expect(result.current.state.error).toBeNull();
+    });
+
     expect(retryResult).toBe(true);
-    expect(result.current.state.error).toBeNull();
     expect(result.current.state.lastLoadedThreadId).toBe('thread-1');
   });
 });

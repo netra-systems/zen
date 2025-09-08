@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.db.session import DatabaseSessionManager
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,
@@ -13,7 +13,7 @@ from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
 # In-memory SQLite database for testing
-DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+#removed-legacy= "sqlite+aiosqlite:///:memory:"
 
 
 @pytest.fixture(scope="module")

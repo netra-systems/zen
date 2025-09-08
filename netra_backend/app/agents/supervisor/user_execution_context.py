@@ -43,7 +43,7 @@ class UserExecutionContext:
         run_id: Unique identifier for this specific execution run
         request_id: Unique identifier for this specific request
         db_session: Optional database session for this request
-        websocket_connection_id: Optional WebSocket connection identifier for event routing
+        websocket_client_id: Optional WebSocket client identifier for event routing
         created_at: Timestamp when context was created
         metadata: Extensible dictionary for additional context data
     """
@@ -53,7 +53,8 @@ class UserExecutionContext:
     run_id: str
     db_session: Optional[AsyncSession] = field(default=None, repr=False)
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    websocket_connection_id: Optional[str] = field(default=None)
+    session_id: Optional[str] = field(default=None)
+    websocket_client_id: Optional[str] = field(default=None)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = field(default_factory=dict)
     
@@ -71,6 +72,26 @@ class UserExecutionContext:
         logger.debug(f"Created UserExecutionContext: user_id={self.user_id}, "
                     f"thread_id={self.thread_id}, run_id={self.run_id}, "
                     f"request_id={self.request_id}")
+    
+    def create_child_context(self, child_suffix: str) -> 'UserExecutionContext':
+        """Create a child context for agent-specific execution.
+        
+        Args:
+            child_suffix: Suffix to append to the run_id to create child context
+            
+        Returns:
+            New UserExecutionContext with child-specific run_id
+        """
+        return UserExecutionContext(
+            user_id=self.user_id,
+            thread_id=self.thread_id,
+            run_id=f"{self.run_id}_{child_suffix}",
+            request_id=f"{self.request_id}_{child_suffix}",
+            session_id=self.session_id,
+            websocket_client_id=self.websocket_client_id,
+            created_at=datetime.now(timezone.utc),
+            metadata=self.metadata.copy() if self.metadata else {}
+        )
     
     def _validate_required_ids(self) -> None:
         """Validate that all required IDs are present and non-empty."""
@@ -146,7 +167,7 @@ class UserExecutionContext:
         run_id: str,
         request_id: Optional[str] = None,
         db_session: Optional[AsyncSession] = None,
-        websocket_connection_id: Optional[str] = None,
+        websocket_client_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> 'UserExecutionContext':
         """Factory method to create context from request parameters.
@@ -157,7 +178,7 @@ class UserExecutionContext:
             run_id: Run identifier from request
             request_id: Optional request identifier (auto-generated if None)
             db_session: Optional database session
-            websocket_connection_id: Optional WebSocket connection ID
+            websocket_client_id: Optional WebSocket client ID
             metadata: Optional metadata dictionary
             
         Returns:
@@ -172,7 +193,7 @@ class UserExecutionContext:
             run_id=run_id,
             request_id=request_id or str(uuid.uuid4()),
             db_session=db_session,
-            websocket_connection_id=websocket_connection_id,
+            websocket_client_id=websocket_client_id,
             metadata=metadata or {}
         )
     
@@ -216,7 +237,7 @@ class UserExecutionContext:
             run_id=self.run_id,
             request_id=str(uuid.uuid4()),
             db_session=self.db_session,
-            websocket_connection_id=self.websocket_connection_id,
+            websocket_client_id=self.websocket_client_id,
             metadata=child_metadata
         )
     
@@ -238,7 +259,7 @@ class UserExecutionContext:
             run_id=self.run_id,
             request_id=self.request_id,
             db_session=db_session,
-            websocket_connection_id=self.websocket_connection_id,
+            websocket_client_id=self.websocket_client_id,
             created_at=self.created_at,
             metadata=self.metadata.copy()
         )
@@ -258,7 +279,7 @@ class UserExecutionContext:
             run_id=self.run_id,
             request_id=self.request_id,
             db_session=self.db_session,
-            websocket_connection_id=connection_id,
+            websocket_client_id=connection_id,
             created_at=self.created_at,
             metadata=self.metadata.copy()
         )
@@ -300,7 +321,7 @@ class UserExecutionContext:
             'thread_id': self.thread_id,
             'run_id': self.run_id,
             'request_id': self.request_id,
-            'websocket_connection_id': self.websocket_connection_id,
+            'websocket_client_id': self.websocket_client_id,
             'created_at': self.created_at.isoformat(),
             'metadata': self.metadata.copy(),
             'has_db_session': self.db_session is not None

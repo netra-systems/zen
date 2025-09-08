@@ -43,7 +43,7 @@ from netra_backend.app.services.billing.usage_tracker import (
     UsageType,
     UsageEvent
 )
-from shared.database.core_database_manager import CoreDatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 import redis.asyncio as redis
 
 

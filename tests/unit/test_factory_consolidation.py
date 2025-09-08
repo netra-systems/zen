@@ -18,9 +18,8 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -32,7 +31,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     configure_agent_instance_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.factory_performance_config import (
     FactoryPerformanceConfig,
     set_factory_performance_config

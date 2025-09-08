@@ -26,8 +26,8 @@ from netra_backend.app.services.websocket.quality_report_handler import (
 from netra_backend.app.services.websocket.quality_validation_handler import (
     QualityValidationHandler,
 )
-from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -102,7 +102,12 @@ class QualityMessageRouter:
         """Handle unknown message type."""
         logger.warning(f"Unknown message type: {message_type}")
         error_message = f"Unknown message type: {message_type}"
-        await manager.send_error(user_id, error_message)
+        try:
+            user_context = UserExecutionContext.get_context(user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user({"type": "error", "message": error_message})
+        except Exception as e:
+            logger.error(f"Failed to send error message to user {user_id}: {e}")
     
     async def broadcast_quality_update(self, update: Dict[str, Any]) -> None:
         """Broadcast quality update to all subscribers."""
@@ -115,7 +120,9 @@ class QualityMessageRouter:
         """Send quality update to a single subscriber."""
         try:
             message = self._build_update_message(update)
-            await manager.send_message(user_id, message)
+            user_context = UserExecutionContext.get_context(user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user(message)
         except Exception as e:
             logger.error(f"Error broadcasting to {user_id}: {str(e)}")
 
@@ -137,7 +144,9 @@ class QualityMessageRouter:
         """Send quality alert to a single subscriber."""
         try:
             alert_message = self._build_alert_message(alert)
-            await manager.send_message(user_id, alert_message)
+            user_context = UserExecutionContext.get_context(user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user(alert_message)
         except Exception as e:
             logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")
 

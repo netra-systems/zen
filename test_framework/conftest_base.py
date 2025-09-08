@@ -54,8 +54,10 @@ except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:
         def get(self, key, default=None):
-            return get_env().get(key, default)  # @marked: Fallback environment wrapper
+            import os
+            return os.environ.get(key, default)  # @marked: Fallback environment wrapper
         def set(self, key, value, source="test_framework"):
+            import os
             os.environ[key] = value  # @marked: Fallback environment wrapper
         def enable_isolation(self):
             pass
@@ -89,7 +91,6 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     
     # FastMCP home directory workaround for Windows compatibility
     # Ensures Path.home() works correctly in FastMCP settings initialization
-    import os
     from pathlib import Path
     if os.name == 'nt':  # Windows
         # Ensure HOME is set for FastMCP compatibility
@@ -122,10 +123,11 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("CLICKHOUSE_ENABLED", "false", "test_framework_base")
     env.set("TEST_DISABLE_REDIS", "true", "test_framework_base")
     
-    # CRITICAL: Also set TEST_DISABLE_REDIS in real os.environ so auth_service can see it
-    # This ensures cross-service test configuration consistency
-    import os
-    os.environ["TEST_DISABLE_REDIS"] = "true"  # @marked: Cross-service test config
+    # CRITICAL: Set TEST_DISABLE_REDIS for cross-service test configuration consistency
+    # Note: This is a legacy compatibility requirement for auth_service
+    # TODO: Migrate auth_service to use IsolatedEnvironment
+    import os as os_legacy
+    os_legacy.environ["TEST_DISABLE_REDIS"] = "true"  # @marked: Cross-service test config - legacy compatibility
 
 # =============================================================================
 # COMMON FIXTURES

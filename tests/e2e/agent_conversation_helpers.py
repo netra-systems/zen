@@ -130,7 +130,7 @@ class AgentConversationTestCore:
         """Establish authenticated conversation session with real WebSocket client."""
         from netra_backend.app.schemas.user_plan import PlanTier
         from tests.e2e.config import TEST_USERS
-        from test_framework.auth_helpers import WebSocketAuthTester, AuthTestConfig
+        from test_framework.helpers.auth_helpers import WebSocketAuthTester, AuthTestConfig
         
         # Map plan tier to test user
         tier_user_map = {

@@ -39,7 +39,7 @@ from loguru import logger
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Import configuration components
-from netra_backend.app.startup_module import validate_critical_environment_variables
+from scripts.environment_validator_core import EnvironmentValidatorCore
 from test_framework.docker_test_base import DockerTestBase
 
 
@@ -543,8 +543,8 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
         # Test database URL regression prevention
         with IsolatedEnvironment() as env:
             database_url = env.get('DATABASE_URL')
-            assert database_url, "DATABASE_URL must be present"
-            assert database_url.startswith(('postgresql://', 'postgres://')), "DATABASE_URL must be PostgreSQL"
+            assert database_url, "#removed-legacymust be present"
+            assert database_url.startswith(('postgresql://', 'postgres://')), "#removed-legacymust be PostgreSQL"
             
         # Test JWT secret regression prevention
         with IsolatedEnvironment() as env:

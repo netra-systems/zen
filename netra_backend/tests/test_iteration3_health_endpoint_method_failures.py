@@ -10,7 +10,7 @@ Critical Issue: AttributeError: 'DatabaseEnvironmentValidator' object has no att
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator

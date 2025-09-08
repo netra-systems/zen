@@ -58,12 +58,12 @@ class TestStagingDeploymentErrors:
         Test that reproduces the PostgreSQL authentication failure in staging.
         Error: "password authentication failed for user 'postgres'"
         
-        Root Cause: Database credentials mismatch between DATABASE_URL secret 
+        Root Cause: Database credentials mismatch between #removed-legacysecret 
         and actual Cloud SQL instance user configuration.
         """
         from netra_backend.app.services.database.database_manager import DatabaseManager
         
-        # Simulate staging DATABASE_URL with incorrect credentials
+        # Simulate staging #removed-legacywith incorrect credentials
         staging_url = "postgresql://postgres:wrong_password@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres&sslmode=require"
         
         with patch.dict(os.environ, {"DATABASE_URL": staging_url, "ENVIRONMENT": "staging"}):
@@ -177,7 +177,7 @@ class TestStagingDeploymentErrors:
     @pytest.mark.e2e
     async def test_database_url_consistency_staging(self):
         """
-        Test that both backend and auth services handle DATABASE_URL consistently.
+        Test that both backend and auth services handle #removed-legacyconsistently.
         Both services must properly convert URLs for their respective drivers.
         """
         test_url = "postgresql://netra:password@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres&sslmode=require"

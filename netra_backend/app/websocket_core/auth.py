@@ -8,6 +8,7 @@ import base64
 from typing import Optional, Dict, Any, Tuple
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from uuid import uuid4
 
 from fastapi import WebSocket, HTTPException
 
@@ -31,8 +32,9 @@ class WebSocketAuthenticator:
     def __init__(self):
         """Initialize WebSocket authenticator with auth client."""
         # Import here to avoid circular imports
-        from netra_backend.app.clients.auth_client_core import auth_client
-        self.auth_client = auth_client
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        # Create a new instance instead of using singleton to ensure circuit breaker is initialized
+        self.auth_client = AuthServiceClient()
         self._auth_attempts = 0
         self._successful_auths = 0
         self._failed_auths = 0
@@ -51,18 +53,39 @@ class WebSocketAuthenticator:
         logger.info(f"WebSocket authentication attempt for token: {clean_token[:20]}...")
         
         try:
-            # Use the existing auth client for JWT validation
+            # Use the existing auth client for JWT validation with circuit breaker protection
+            # The auth client has built-in circuit breaker that handles failures gracefully
+            # SSOT ENFORCEMENT: WebSocket MUST use auth service for ALL token validation
             validation_result = await self.auth_client.validate_token_jwt(clean_token)
             
             if not validation_result:
-                logger.warning("WebSocket authentication: Token validation returned None")
+                # SSOT ENFORCEMENT: No local validation fallback - auth service is required
+                # Check if auth service is unavailable (circuit breaker open)
+                from netra_backend.app.clients.circuit_breaker import CircuitState
+                if hasattr(self.auth_client, 'circuit_breaker') and self.auth_client.circuit_breaker.state == CircuitState.OPEN:
+                    logger.error("WebSocket authentication: Auth service unavailable (circuit breaker open) - authentication failed")
+                    logger.error("SSOT ENFORCEMENT: WebSocket authentication requires auth service - no local fallback allowed")
+                else:
+                    logger.warning("WebSocket authentication: Token validation returned None from auth service")
+                
                 self._failed_auths += 1
                 return None
             
             # Check if validation was successful
             if not validation_result.get("valid", False):
                 error_msg = validation_result.get("error", "Token validation failed")
-                logger.warning(f"WebSocket authentication: Token validation failed - {error_msg}")
+                error_details = validation_result.get("details", "")
+                
+                # Enhanced error logging for auth service failures
+                if "auth_service_required" in error_msg or "unavailable" in error_msg:
+                    logger.error(f"WebSocket authentication: Auth service required but unavailable - {error_msg}")
+                    logger.error("SSOT ENFORCEMENT: WebSocket authentication requires functional auth service")
+                else:
+                    logger.warning(f"WebSocket authentication: Token validation failed - {error_msg}")
+                
+                if error_details:
+                    logger.debug(f"WebSocket authentication error details: {error_details}")
+                
                 self._failed_auths += 1
                 return None
             
@@ -144,11 +167,22 @@ class WebSocketAuthenticator:
         
         if not auth_result or not auth_result.get("authenticated", False):
             error_detail = "Invalid or expired authentication token"
+            
             if auth_result:
                 # Include more specific error information if available
                 error_info = auth_result.get("error", "")
-                if error_info:
+                error_details = auth_result.get("details", "")
+                
+                # Provide specific error messages for auth service issues
+                if "auth_service_required" in error_info or "unavailable" in error_info:
+                    error_detail = "Authentication service temporarily unavailable. Please try again later."
+                    logger.error(f"WebSocket authentication failed: Auth service unavailable - {error_info}")
+                    raise HTTPException(status_code=503, detail=error_detail)
+                elif error_info:
                     error_detail = f"Authentication failed: {error_info}"
+                
+                if error_details:
+                    logger.debug(f"WebSocket authentication error details: {error_details}")
             
             logger.warning(f"WebSocket authentication failed: {error_detail}")
             raise HTTPException(status_code=401, detail=error_detail)
@@ -307,6 +341,57 @@ def get_connection_security_manager() -> ConnectionSecurityManager:
     if _security_manager is None:
         _security_manager = ConnectionSecurityManager()
     return _security_manager
+
+
+class WebSocketAuthMiddleware:
+    """Middleware for WebSocket authentication and security."""
+    
+    def __init__(self):
+        """Initialize WebSocket authentication middleware."""
+        self.authenticator = get_websocket_authenticator()
+        self.security_manager = get_connection_security_manager()
+        self.rate_limiter = RateLimiter()
+        
+    async def authenticate_connection(self, websocket: WebSocket) -> Tuple[AuthInfo, str]:
+        """Authenticate WebSocket connection and return auth info and connection ID."""
+        
+        # Generate connection ID
+        connection_id = str(uuid4())
+        
+        # Authenticate the WebSocket
+        auth_info = await self.authenticator.authenticate_websocket(websocket)
+        
+        # Register with security manager
+        self.security_manager.register_connection(connection_id, auth_info, websocket)
+        
+        # Check rate limits
+        if not await self.rate_limiter.check_rate_limit(auth_info.user_id):
+            logger.warning(f"Rate limit exceeded for user: {auth_info.user_id}")
+            self.security_manager.report_security_violation(
+                connection_id, 
+                "rate_limit_exceeded", 
+                {"user_id": auth_info.user_id}
+            )
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+        
+        logger.info(f"WebSocket connection authenticated: {connection_id} for user: {auth_info.user_id}")
+        return auth_info, connection_id
+    
+    async def validate_message_auth(self, connection_id: str, message: Dict[str, Any]) -> bool:
+        """Validate authentication for incoming WebSocket messages."""
+        
+        # Check connection security
+        if not self.security_manager.validate_connection_security(connection_id):
+            logger.warning(f"Message authentication failed for connection: {connection_id}")
+            return False
+        
+        # Additional message-level authentication checks can be added here
+        return True
+    
+    def cleanup_connection(self, connection_id: str):
+        """Clean up connection authentication resources."""
+        self.security_manager.unregister_connection(connection_id)
+        logger.debug(f"Cleaned up authentication for connection: {connection_id}")
 
 
 @asynccontextmanager

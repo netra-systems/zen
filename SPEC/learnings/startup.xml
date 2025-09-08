@@ -851,14 +851,14 @@
       <severity>critical</severity>
       <title>Database URL Migration to Multi-Part Configuration</title>
       <problem>
-        <description>Monolithic DATABASE_URL causes configuration issues across environments</description>
+        <description>Monolithic #removed-legacycauses configuration issues across environments</description>
         <symptoms>
           <symptom>SSL configuration conflicts between psycopg2 and asyncpg drivers</symptom>
           <symptom>Cloud SQL Unix socket connections require special URL formatting</symptom>
           <symptom>URL parsing errors with special characters in passwords</symptom>
           <symptom>Different connection types require different URL formats</symptom>
         </symptoms>
-        <root_cause>Single DATABASE_URL string cannot handle all connection scenarios</root_cause>
+        <root_cause>Single #removed-legacystring cannot handle all connection scenarios</root_cause>
       </problem>
       <solution>
         <description>Migrate to individual PostgreSQL configuration variables</description>

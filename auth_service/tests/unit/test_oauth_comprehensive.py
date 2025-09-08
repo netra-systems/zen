@@ -11,7 +11,6 @@ from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

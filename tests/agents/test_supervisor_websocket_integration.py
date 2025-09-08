@@ -50,7 +50,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.agent_registry import AgentRegistry
 from netra_backend.app.core.user_execution_engine import UserExecutionEngine

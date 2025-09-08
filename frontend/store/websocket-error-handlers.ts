@@ -5,6 +5,7 @@ import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 import type { UnifiedChatState } from '@/types/store-types';
 import type { ChatMessage } from '@/types/unified';
 import { MessageFormatterService } from '@/services/messageFormatter';
+import { generateUniqueId } from '../utils/unique-id-generator';
 
 /**
  * Handles error events - sets processing to false and adds error message
@@ -25,7 +26,7 @@ export const handleError = (
  * Creates a chat message for error display
  */
 const createErrorChatMessage = (errorMessage: string): ChatMessage => ({
-  id: `error-${Date.now()}`,
+  id: generateUniqueId('error'),
   role: 'system',
   content: errorMessage,
   timestamp: Date.now(),

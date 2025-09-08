@@ -38,7 +38,7 @@ All Docker Compose services are running and healthy:
 
 ### Test Environment Integration
 While the test framework now accepts --real-llm flag and attempts to use real services, the tests are still using some isolation mechanisms:
-- DATABASE_URL is still set to SQLite in-memory despite configuration
+- #removed-legacyis still set to SQLite in-memory despite configuration
 - TEST_DISABLE_REDIS=true is still being set
 - The test isolation layer needs deeper refactoring to fully use Docker services
 

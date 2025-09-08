@@ -211,15 +211,15 @@ print(env2.get("DATABASE_URL"))  # "db1" - Consistent!
 
 ```python
 # Without Source Tracking
-DATABASE_URL = "postgresql://prod"
+#removed-legacy= "postgresql://prod"
 # ... 1000 lines later ...
-DATABASE_URL = "postgresql://test"  # WHO DID THIS?!
+#removed-legacy= "postgresql://test"  # WHO DID THIS?!
 
 # With Source Tracking
 env.set("DATABASE_URL", "postgresql://prod", source="app_init")
 # ... 1000 lines later ...
 env.set("DATABASE_URL", "postgresql://test", source="test_fixture")
-# Debug: DATABASE_URL last set by "test_fixture" - Found the bug!
+# Debug: #removed-legacylast set by "test_fixture" - Found the bug!
 ```
 
 ### Why Separate Validation from Loading?
@@ -252,7 +252,7 @@ if not env.get("DATABASE_URL"):
 
 # Production: Fail fast and loud
 if not env.get("DATABASE_URL"):
-    raise CriticalError("DATABASE_URL not configured!")
+    raise CriticalError("#removed-legacynot configured!")
     # Alert on-call engineer
     # Block deployment
 ```

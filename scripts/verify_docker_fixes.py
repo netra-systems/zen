@@ -23,8 +23,8 @@ def verify_credentials():
     
     test_cases = [
         (EnvironmentType.DEVELOPMENT, False, "netra", "netra123", "netra_dev"),
-        (EnvironmentType.SHARED, False, "test_user", "test_pass", "netra_test"),
-        (EnvironmentType.SHARED, True, "test", "test", "netra_test"),
+        (EnvironmentType.TEST, False, "test_user", "test_pass", "netra_test"),
+        (EnvironmentType.TEST, True, "test", "test", "netra_test"),
     ]
     
     all_passed = True
@@ -68,7 +68,7 @@ def verify_service_urls():
         all_passed = False
     
     # Test test environment
-    test_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+    test_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
     test_url = test_manager._build_service_url_from_port("postgres", 5434)
     
     if "test_user:test_pass" in test_url and "netra_test" in test_url:
@@ -78,7 +78,7 @@ def verify_service_urls():
         all_passed = False
     
     # Test Alpine environment
-    alpine_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED, use_alpine=True)
+    alpine_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST, use_alpine=True)
     alpine_url = alpine_manager._build_service_url_from_port("postgres", 5435)
     
     if "test:test" in alpine_url and "netra_test" in alpine_url:

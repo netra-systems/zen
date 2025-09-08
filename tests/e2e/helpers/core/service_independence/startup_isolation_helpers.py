@@ -180,8 +180,8 @@ except Exception as e:
     def cleanup(self):
         """Cleanup temporary files."""
         for temp_path in self.temp_dirs:
-            try: Path(temp_path).unlink() if Path(temp_path).exists() else None
-            except: pass
+            if Path(temp_path).exists():
+                Path(temp_path).unlink()
 
 
 class ConfigurationIsolationTester:

@@ -18,7 +18,7 @@ Business Value Justification (BVJ):
 CRITICAL: This test validates the security fix that prevents mock session factories
 from being returned in any environment, which would cause silent data corruption.
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """
 
@@ -33,6 +33,7 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from unittest.mock import patch
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
@@ -1146,41 +1147,17 @@ class TestRealSessionValidation:
                 continue
 
 
-# Run comprehensive validation
-@pytest.mark.asyncio
-async def test_comprehensive_mock_removal_validation():
-    """Comprehensive validation that mock session factory removal is complete."""
-    
-    # 1. Verify initialize_postgres behavior
-    print("Testing initialize_postgres behavior...")
-    test_init = TestInitializePostgresFailFast()
-    await test_init.test_initialize_postgres_fails_on_invalid_url()
-    await test_init.test_initialize_postgres_no_silent_failures()
-    
-    # 2. Verify real session creation
-    print("Testing real session creation...")
-    test_real = TestRealDatabaseSessions()
-    await test_real.test_real_session_creation_with_database_test_utility()
-    await test_real.test_database_operations_with_real_persistence()
-    
-    # 3. Verify concurrent behavior
-    print("Testing concurrent session behavior...")
-    test_concurrent = TestConcurrentSessionIsolation()
-    await test_concurrent.test_concurrent_session_creation_all_real()
-    
-    # 4. Verify edge cases
-    print("Testing edge cases...")
-    test_edge = TestDifficultEdgeCases()
-    await test_edge.test_rapid_session_creation_destruction_no_mocks()
-    
-    # 5. Verify validation
-    print("Testing session validation...")
-    test_validation = TestRealSessionValidation()
-    await test_validation.test_all_database_entry_points_use_real_sessions()
-    
-    print("✅ Comprehensive mock session factory removal validation PASSED")
-    print("✅ CRITICAL SECURITY FIX validated: No mock session factories can be returned")
-    print("✅ Data integrity protection confirmed: All database operations use real sessions")
+# NOTE: The comprehensive validation test was removed because it incorrectly called
+# other test methods directly, which bypasses pytest's proper test management and
+# causes timeouts. The individual test classes already provide comprehensive coverage:
+# - TestInitializePostgresFailFast: Tests initialization behavior
+# - TestRealDatabaseSessions: Tests real session creation  
+# - TestConcurrentSessionIsolation: Tests concurrent behavior
+# - TestDifficultEdgeCases: Tests edge cases
+# - TestRealSessionValidation: Tests validation
+# 
+# These test classes are executed properly by pytest and provide the same validation
+# without the architectural issues of calling test methods from within tests.
 
 
 if __name__ == "__main__":

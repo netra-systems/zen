@@ -64,7 +64,7 @@ gcp-*.json
 .service_discovery/
 
 # Test artifacts
-reports/
+# reports/ - Now tracked for organized documentation
 coverage/
 test-results/
 *.log
@@ -134,3 +134,4 @@ nul
 /google-cloud-sdk
 google-cloud-cli-darwin-arm.tar.gz
 /frontend/cypress/screenshots
+/redis-local

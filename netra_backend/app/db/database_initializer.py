@@ -868,7 +868,7 @@ class DatabaseInitializer:
             # NO MANUAL FALLBACKS - DatabaseURLBuilder is SSOT
             raise ValueError(
                 "DatabaseURLBuilder failed to construct database URL. "
-                "Ensure DATABASE_URL is set or provide POSTGRES_* environment variables."
+                "Ensure POSTGRES_* environment variables are provided."
             )
         
         # Parse the URL to get components for DatabaseConfig

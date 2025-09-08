@@ -5,7 +5,7 @@ Tests to prevent IndexError when logging SQLAlchemy errors.
 
 import sys
 from pathlib import Path
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest

@@ -60,7 +60,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("SERVICE_SECRET", "test-service-secret-for-auth-service-32-chars-minimum-required-length-secure", "auth_conftest_real")
     env.set("SERVICE_ID", "auth-service-test", "auth_conftest_real")
     
-    # FAST TEST MODE: Skip DATABASE_URL to let fast test mode use SQLite
+    # FAST TEST MODE: Skip #removed-legacyto let fast test mode use SQLite
     # REAL SERVICES: Configure real database connection (unused in fast test mode)
     if not env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true":
         env.set("DATABASE_URL", "postgresql://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")

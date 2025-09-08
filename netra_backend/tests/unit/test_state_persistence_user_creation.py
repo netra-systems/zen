@@ -6,11 +6,7 @@ user creation when saving agent state to prevent foreign key violations.
 
 import uuid
 from datetime import datetime, timezone
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.exc import IntegrityError
@@ -31,7 +27,7 @@ async def test_state_persistence_fails_without_user():
     when trying to save agent state for a non-existent user.
     """
     # Create a mock database session
-    mock_session = AsyncNone  # TODO: Use real service instance
+    mock_session = AsyncMock()
     
     # Create a persistence request with a user that doesn't exist
     non_existent_user_id = "dev-temp-" + str(uuid.uuid4())[:8]
@@ -78,13 +74,13 @@ async def test_state_persistence_auto_creates_dev_user():
     are automatically created when saving agent state.
     """
     # Create a mock database session with proper async context manager setup
-    mock_session = AsyncNone  # TODO: Use real service instance
-    mock_begin_context = AsyncNone  # TODO: Use real service instance
+    mock_session = AsyncMock()
+    mock_begin_context = AsyncMock()
     mock_begin_context.__aenter__ = AsyncMock(return_value=None)
     mock_begin_context.__aexit__ = AsyncMock(return_value=None)
     mock_session.begin = Mock(return_value=mock_begin_context)
-    mock_session.flush = AsyncNone  # TODO: Use real service instance
-    mock_session.add = add_instance  # Initialize appropriate service
+    mock_session.flush = AsyncMock()
+    mock_session.add = MagicMock()
     
     # Create a persistence request with a dev user that doesn't exist
     dev_user_id = "dev-temp-" + str(uuid.uuid4())[:8]
@@ -116,7 +112,7 @@ async def test_state_persistence_auto_creates_dev_user():
             mock_cache.cache_legacy_state = AsyncMock(return_value=True)  # Mock legacy cache
             
             # Mock successful database operations
-            mock_session.execute = AsyncNone  # TODO: Use real service instance
+            mock_session.execute = AsyncMock()
             
             # Call the save method with the enhanced implementation
             success, snapshot_id = await state_persistence_service.save_agent_state(
@@ -147,9 +143,9 @@ async def test_state_persistence_skips_creation_for_existing_user():
     This ensures we don't try to recreate users unnecessarily.
     """
     # Create a mock database session
-    mock_session = AsyncNone  # TODO: Use real service instance
-    mock_session.begin = AsyncNone  # TODO: Use real service instance
-    mock_session.flush = AsyncNone  # TODO: Use real service instance
+    mock_session = AsyncMock()
+    mock_session.begin = AsyncMock()
+    mock_session.flush = AsyncMock()
     
     # Create a persistence request with an existing user
     existing_user_id = "existing-user-123"
@@ -171,11 +167,11 @@ async def test_state_persistence_skips_creation_for_existing_user():
     with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         mock_existing_user = Mock(id=existing_user_id)
         mock_user_service.get = AsyncMock(return_value=mock_existing_user)
-        mock_user_service.create = AsyncNone  # TODO: Use real service instance  # Should not be called
+        mock_user_service.create = AsyncMock()  # Should not be called
         
         # Mock successful database operations
-        mock_session.add = add_instance  # Initialize appropriate service
-        mock_session.execute = AsyncNone  # TODO: Use real service instance
+        mock_session.add = MagicMock()
+        mock_session.execute = AsyncMock()
         
         # Call the save method
         success, snapshot_id = await state_persistence_service.save_agent_state(
@@ -197,13 +193,13 @@ async def test_state_persistence_handles_test_users():
     This verifies that test users are handled the same as dev users.
     """
     # Create a mock database session with proper async context manager setup
-    mock_session = AsyncNone  # TODO: Use real service instance
-    mock_begin_context = AsyncNone  # TODO: Use real service instance
+    mock_session = AsyncMock()
+    mock_begin_context = AsyncMock()
     mock_begin_context.__aenter__ = AsyncMock(return_value=None)
     mock_begin_context.__aexit__ = AsyncMock(return_value=None)
     mock_session.begin = Mock(return_value=mock_begin_context)
-    mock_session.flush = AsyncNone  # TODO: Use real service instance
-    mock_session.add = add_instance  # Initialize appropriate service
+    mock_session.flush = AsyncMock()
+    mock_session.add = MagicMock()
     
     # Create a persistence request with a test user that doesn't exist
     test_user_id = "test-user-" + str(uuid.uuid4())[:8]
@@ -234,7 +230,7 @@ async def test_state_persistence_handles_test_users():
             mock_cache.cache_legacy_state = AsyncMock(return_value=True)  # Mock legacy cache
             
             # Mock successful database operations
-            mock_session.execute = AsyncNone  # TODO: Use real service instance
+            mock_session.execute = AsyncMock()
             
             # Call the save method
             success, snapshot_id = await state_persistence_service.save_agent_state(

@@ -7,7 +7,7 @@ Business Value: Long-term maintainability
 import pytest
 from sqlalchemy import Column, Integer
 from netra_backend.app.db.base import Base
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 class TestBase:

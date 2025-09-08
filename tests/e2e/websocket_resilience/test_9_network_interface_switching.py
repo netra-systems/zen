@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
 
@@ -99,7 +99,7 @@ class TestNetworkSwitchingClient:
             
         except Exception as e:
             logger.error(f"Connection failed: {e}")
-            return False
+            pytest.fail(f"Unexpected connection failure in NetworkSwitchingTestClient: {e}")
             
     async def disconnect(self):
         """Disconnect from WebSocket server."""
@@ -134,7 +134,7 @@ class TestNetworkSwitchingClient:
             
         except Exception as e:
             logger.error(f"Failed to send message: {e}")
-            return {'success': False, 'error': str(e)}
+            pytest.fail(f"Unexpected error sending message in NetworkSwitchingTestClient: {e}")
             
     async def simulate_network_switch(self) -> Dict[str, Any]:
         """Simulate switching network interfaces while maintaining connection."""
@@ -166,7 +166,7 @@ class TestNetworkSwitchingClient:
                 
         except Exception as e:
             logger.error(f"Network switch failed: {e}")
-            return {'success': False, 'error': str(e)}
+            pytest.fail(f"Unexpected error during network switch: {e}")
             
     async def verify_session_continuity(self) -> Dict[str, Any]:
         """Verify session state is preserved after network switch."""
@@ -186,7 +186,7 @@ class TestNetworkSwitchingClient:
                 
         except Exception as e:
             logger.error(f"Session continuity check failed: {e}")
-            return {'session_preserved': False, 'error': str(e)}
+            pytest.fail(f"Unexpected error during session continuity check: {e}")
 
 
 @pytest.mark.asyncio

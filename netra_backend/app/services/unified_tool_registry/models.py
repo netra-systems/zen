@@ -48,3 +48,12 @@ class ToolExecutionResult(BaseModel):
     execution_time_ms: int = 0
     permission_check: Optional[PermissionCheckResult] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    
+    @property
+    def user_context(self):
+        """Get user context object for compatibility."""
+        # Create a simple object with user_id for test compatibility
+        class UserContext:
+            def __init__(self, user_id):
+                self.user_id = user_id
+        return UserContext(self.user_id) if self.user_id else None

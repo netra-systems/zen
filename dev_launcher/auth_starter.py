@@ -165,7 +165,7 @@ class AuthStarter:
             if postgres_config.get('host') and postgres_config.get('database'):
                 database_url = f"postgresql://{postgres_config.get('user', 'postgres')}:{postgres_config.get('password', 'postgres')}@{postgres_config['host']}:{postgres_config.get('port', '5432')}/{postgres_config['database']}"
         
-        # Set DATABASE_URL if we have one
+        # Set #removed-legacyif we have one
         if database_url:
             env["DATABASE_URL"] = database_url
         else:

@@ -28,7 +28,6 @@ import pytest
 from loguru import logger
 import websockets
 from websockets.exceptions import WebSocketException
-from netra_backend.app.core.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
@@ -574,11 +573,13 @@ async def test_websocket_chat_events_complete_flow():
     test = WebSocketChatIntegrationTest()
     await test.setup()
     
-    # Get test token
-    from netra_backend.app.auth_integration.auth import AuthService, AuthUser
-    auth_service = AuthService()
-    user = AuthUser(id="test_user", email="test@netra.ai", name="Test User")
-    token = await auth_service.create_access_token(user)
+    # Get test token using SSOT E2E auth helper
+    from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+    auth_helper = E2EAuthHelper()
+    token = auth_helper.create_test_jwt_token(
+        user_id="test_user",
+        email="test@netra.ai"
+    )
     
     result = await test.test_single_message_flow(token)
     
@@ -598,11 +599,13 @@ async def test_websocket_concurrent_messages():
     test = WebSocketChatIntegrationTest()
     await test.setup()
     
-    # Get test token
-    from netra_backend.app.auth_integration.auth import AuthService, AuthUser
-    auth_service = AuthService()
-    user = AuthUser(id="test_user", email="test@netra.ai", name="Test User")
-    token = await auth_service.create_access_token(user)
+    # Get test token using SSOT E2E auth helper
+    from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+    auth_helper = E2EAuthHelper()
+    token = auth_helper.create_test_jwt_token(
+        user_id="test_user",
+        email="test@netra.ai"
+    )
     
     result = await test.test_concurrent_messages(token, num_messages=5)
     
@@ -616,11 +619,13 @@ async def test_websocket_deduplication():
     test = WebSocketChatIntegrationTest()
     await test.setup()
     
-    # Get test token
-    from netra_backend.app.auth_integration.auth import AuthService, AuthUser
-    auth_service = AuthService()
-    user = AuthUser(id="test_user", email="test@netra.ai", name="Test User")
-    token = await auth_service.create_access_token(user)
+    # Get test token using SSOT E2E auth helper
+    from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+    auth_helper = E2EAuthHelper()
+    token = auth_helper.create_test_jwt_token(
+        user_id="test_user",
+        email="test@netra.ai"
+    )
     
     result = await test.test_message_deduplication(token)
     
@@ -633,11 +638,13 @@ async def test_websocket_event_storm():
     """Stress test with high volume of events."""
     stress_test = WebSocketEventStressTest()
     
-    # Get test token
-    from netra_backend.app.auth_integration.auth import AuthService, AuthUser
-    auth_service = AuthService()
-    user = AuthUser(id="test_user", email="test@netra.ai", name="Test User")
-    token = await auth_service.create_access_token(user)
+    # Get test token using SSOT E2E auth helper
+    from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+    auth_helper = E2EAuthHelper()
+    token = auth_helper.create_test_jwt_token(
+        user_id="test_user",
+        email="test@netra.ai"
+    )
     
     result = await stress_test.test_event_storm(
         token,

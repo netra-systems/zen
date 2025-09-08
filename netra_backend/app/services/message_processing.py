@@ -8,7 +8,7 @@ from starlette.websockets import WebSocketDisconnect
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -88,16 +88,30 @@ async def execute_and_persist(
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         bridge = AgentWebSocketBridge()
         
-        # MIGRATION NOTE: register_run_thread_mapping is deprecated in factory pattern
-        # Event routing is now handled automatically through UserExecutionContext  
-        logger.info(f"ℹ️ Bridge created for user isolation - run_id={run_id} → thread_id={thread_id}")
+        # CRITICAL FIX: Create proper UserExecutionContext first
+        temp_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session
+        )
+        
+        # Create WebSocket manager for this user context
+        websocket_manager = create_websocket_manager(temp_context)
+        
+        # CRITICAL FIX: Set the WebSocket manager on the bridge
+        # This fixes the issue where all bridge events fail due to missing _websocket_manager
+        bridge._websocket_manager = websocket_manager
+        
+        logger.info(f"✅ Bridge created with WebSocket manager for user isolation - run_id={run_id} → thread_id={thread_id}")
         
         # Store bridge for later use with UserExecutionContext
         bridge_for_emitter = bridge
             
     except Exception as e:
-        logger.error(f"🚨 Error registering run-thread mapping: {e}")
+        logger.error(f"🚨 Error creating WebSocket bridge with manager: {e}")
         # Continue execution even if registration fails
+        bridge_for_emitter = None
     
     # UserExecutionContext already imported at top of file
     
@@ -116,20 +130,29 @@ async def execute_and_persist(
         logger.info(f"✅ Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
         
         # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
-        if 'bridge_for_emitter' in locals():
+        if bridge_for_emitter is not None:
             try:
-                user_emitter = await bridge_for_emitter.create_user_emitter(context)
-                
-                # Set user-specific emitter on supervisor for real-time events
-                if hasattr(supervisor, 'set_websocket_emitter'):
-                    supervisor.set_websocket_emitter(user_emitter)
-                    logger.info(f"✅ Set user-specific WebSocket emitter on supervisor for run_id={run_id}")
+                # CRITICAL FIX: Set the bridge on the supervisor directly 
+                # This ensures the supervisor can emit all 5 required WebSocket events
+                if hasattr(supervisor, 'websocket_bridge'):
+                    supervisor.websocket_bridge = bridge_for_emitter
+                    logger.info(f"✅ Set WebSocket bridge on supervisor for real-time events - run_id={run_id}")
+                    
+                    # Also try to create user emitter for advanced usage
+                    try:
+                        user_emitter = await bridge_for_emitter.create_user_emitter(context)
+                        if hasattr(supervisor, 'set_websocket_emitter'):
+                            supervisor.set_websocket_emitter(user_emitter)
+                            logger.info(f"✅ Also set user-specific WebSocket emitter on supervisor for run_id={run_id}")
+                    except Exception as emitter_error:
+                        logger.warning(f"⚠️ Could not create user emitter (will use bridge directly): {emitter_error}")
+                        
                 elif hasattr(supervisor, 'set_websocket_bridge'):
                     # Backward compatibility: use bridge if emitter method not available
                     supervisor.set_websocket_bridge(bridge_for_emitter, run_id)
-                    logger.warning(f"⚠️ Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
+                    logger.info(f"✅ Set WebSocket bridge on supervisor using legacy method - run_id={run_id}")
                 else:
-                    logger.warning(f"⚠️ Supervisor doesn't have WebSocket emitter or bridge methods")
+                    logger.warning(f"⚠️ Supervisor doesn't have WebSocket bridge property or methods")
                     
             except Exception as emitter_error:
                 logger.error(f"🚨 Failed to create user emitter: {emitter_error}")

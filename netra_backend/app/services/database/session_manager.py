@@ -39,6 +39,24 @@ class SessionManager:
         """Close database session - stub implementation."""
         logger.debug("Closing database session via services SessionManager")
         pass
+    
+    def validate_session(self, db_session: Optional[Any], stored_session: Optional[Any]) -> Any:
+        """Validate and return appropriate session - stub implementation."""
+        if db_session is not None:
+            return db_session
+        if stored_session is not None:
+            return stored_session
+        logger.warning("No valid session available - returning None")
+        return None
+    
+    def validate_session_with_id(self, db_session: Optional[Any], entity_id: Any, stored_session: Optional[Any]) -> Any:
+        """Validate session for entity operations - stub implementation."""
+        if db_session is not None:
+            return db_session
+        if stored_session is not None:
+            return stored_session
+        logger.warning(f"No valid session available for entity {entity_id} - returning None")
+        return None
 
 
 # Global instance for backward compatibility

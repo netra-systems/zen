@@ -63,9 +63,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+# Removed non-existent AuthManager import
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -125,7 +125,7 @@ class TestDockerCredentialConfiguration:
     def test_postgres_credentials_match_docker_compose_test(self):
         """Test that test environment uses correct PostgreSQL credentials."""
         manager = UnifiedDockerManager(
-            environment_type=EnvironmentType.SHARED,
+            environment_type=EnvironmentType.TEST,
             use_alpine=False
         )
         
@@ -144,7 +144,7 @@ class TestDockerCredentialConfiguration:
     def test_postgres_credentials_match_docker_compose_alpine(self):
         """Test that Alpine test environment uses correct PostgreSQL credentials."""
         manager = UnifiedDockerManager(
-            environment_type=EnvironmentType.SHARED,
+            environment_type=EnvironmentType.TEST,
             use_alpine=True
         )
         
@@ -171,7 +171,7 @@ class TestDockerCredentialConfiguration:
         
         # Test detection logic
         env_type = manager.detect_environment()
-        assert env_type in [EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED, EnvironmentType.DEDICATED], (
+        assert env_type in [EnvironmentType.DEVELOPMENT, EnvironmentType.TEST, EnvironmentType.DEDICATED], (
             f"Environment detection should return valid EnvironmentType, got {env_type}"
         )
     
@@ -237,7 +237,7 @@ class TestPortDiscovery:
     def test_port_conflict_resolution(self):
         """Test that port conflicts are properly resolved."""
         manager = UnifiedDockerManager(
-            environment_type=EnvironmentType.SHARED
+            environment_type=EnvironmentType.TEST
         )
         
         # Simulate port conflict
@@ -259,7 +259,7 @@ class TestServiceURLConstruction:
         # Test for each environment
         environments = [
             (EnvironmentType.DEVELOPMENT, "netra", "netra123", "netra_dev"),
-            (EnvironmentType.SHARED, "test_user", "test_pass", "netra_test"),
+            (EnvironmentType.TEST, "test_user", "test_pass", "netra_test"),
         ]
         
         for env_type, expected_user, expected_pass, expected_db in environments:
@@ -275,7 +275,7 @@ class TestServiceURLConstruction:
             assert expected_db in url, f"URL should contain database '{expected_db}' for {env_type}"
     
     def test_database_url_environment_variable_setting(self):
-        """Test that DATABASE_URL is set with correct credentials."""
+        """Test that #removed-legacyis set with correct credentials."""
         env = IsolatedEnvironment()
         
         with patch.object(env, 'set') as mock_set:
@@ -286,7 +286,7 @@ class TestServiceURLConstruction:
             # Simulate setting up environment
             manager._setup_environment_for_e2e({'postgres': 5433})
             
-            # Check DATABASE_URL was set with correct credentials
+            # Check #removed-legacywas set with correct credentials
             calls = mock_set.call_args_list
             db_url_call = None
             for call in calls:
@@ -294,9 +294,9 @@ class TestServiceURLConstruction:
                     db_url_call = call
                     break
             
-            assert db_url_call is not None, "DATABASE_URL should be set"
+            assert db_url_call is not None, "#removed-legacyshould be set"
             db_url = db_url_call[0][1]
-            assert 'netra:netra123' in db_url, f"Development DATABASE_URL should use netra:netra123"
+            assert 'netra:netra123' in db_url, f"Development #removed-legacyshould use netra:netra123"
 
 
 class TestEnvironmentIsolation:
@@ -306,7 +306,7 @@ class TestEnvironmentIsolation:
         """Test that container names follow environment-specific patterns."""
         patterns = {
             EnvironmentType.DEVELOPMENT: "netra-core-generation-1-dev-",
-            EnvironmentType.SHARED: "netra-core-generation-1-test-",
+            EnvironmentType.TEST: "netra-core-generation-1-test-",
         }
         
         for env_type, expected_prefix in patterns.items():
@@ -323,7 +323,7 @@ class TestEnvironmentIsolation:
     def test_network_isolation_between_environments(self):
         """Test that different environments use isolated networks."""
         dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
-        test_manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+        test_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         
         dev_network = dev_manager._get_network_name()
         test_network = test_manager._get_network_name()
@@ -403,8 +403,8 @@ class TestDockerCredentialSecurityInfrastructure:
         environments_to_test = [
             (EnvironmentType.DEVELOPMENT, False, "Development Standard"),
             (EnvironmentType.DEVELOPMENT, True, "Development Alpine"),
-            (EnvironmentType.SHARED, False, "Shared Standard"),
-            (EnvironmentType.SHARED, True, "Shared Alpine"),
+            (EnvironmentType.TEST, False, "Test Standard"),
+            (EnvironmentType.TEST, True, "Test Alpine"),
         ]
         
         for env_type, use_alpine, env_description in environments_to_test:
@@ -524,7 +524,7 @@ class TestDockerCredentialSecurityInfrastructure:
             start_time = time.time()
             
             try:
-                manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+                manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
                 url = manager._build_service_url_from_port("postgres", 5432 + i)
                 
                 construction_time = (time.time() - start_time) * 1000
@@ -608,8 +608,8 @@ class TestDockerCredentialSecurityInfrastructure:
         
         # Test environment pairs for isolation
         environment_pairs = [
-            (EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED),
-            (EnvironmentType.SHARED, EnvironmentType.DEVELOPMENT),
+            (EnvironmentType.DEVELOPMENT, EnvironmentType.TEST),
+            (EnvironmentType.TEST, EnvironmentType.DEVELOPMENT),
         ]
         
         for env1, env2 in environment_pairs:
@@ -646,7 +646,7 @@ class TestDockerCredentialSecurityInfrastructure:
                         f"Development environment using non-dev database: {creds1['database']}"
                     )
                 
-                if env2 == EnvironmentType.SHARED and 'test' not in creds2['database']:
+                if env2 == EnvironmentType.TEST and 'test' not in creds2['database']:
                     isolation_results['environment_confusion'].append(
                         f"Shared environment using non-test database: {creds2['database']}"
                     )
@@ -800,7 +800,7 @@ class TestDockerCredentialSecurityInfrastructure:
         # Test 3: Connection pooling impact
         try:
             # Estimate impact of credential rotation on active connections
-            manager = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
+            manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
             
             # Check if there are connection management features
             has_connection_management = any(hasattr(manager, method) for method in [
@@ -968,7 +968,7 @@ class TestDockerCredentialSecurityInfrastructure:
         results['total_checks'] += 1
         
         # Test all environment credentials
-        environments = [EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED]
+        environments = [EnvironmentType.DEVELOPMENT, EnvironmentType.TEST]
         
         for env_type in environments:
             try:
@@ -1157,7 +1157,7 @@ class TestDockerCredentialSecurityInfrastructure:
         compliance_score = 70.0  # Base score
         
         # Check credential strength across environments
-        environments = [EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED]
+        environments = [EnvironmentType.DEVELOPMENT, EnvironmentType.TEST]
         
         for env_type in environments:
             try:

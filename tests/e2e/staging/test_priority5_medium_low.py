@@ -19,8 +19,8 @@ from datetime import datetime, timedelta
 
 from tests.e2e.staging_test_config import get_staging_config
 
-# Mark all tests in this file as medium-low priority and real
-pytestmark = [pytest.mark.staging, pytest.mark.medium_low, pytest.mark.real]
+# Mark all tests in this file as staging and real
+pytestmark = [pytest.mark.staging, pytest.mark.real]
 
 class TestMediumLowStorage:
     """Tests 71-75: Core Storage Operations - REAL TESTS"""

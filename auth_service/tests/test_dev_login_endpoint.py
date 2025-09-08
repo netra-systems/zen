@@ -5,7 +5,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime, UTC
-from auth_service.core.auth_manager import AuthManager
+# Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.fixture

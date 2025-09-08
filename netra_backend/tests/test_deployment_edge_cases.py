@@ -1,8 +1,8 @@
 """
 from test_framework.performance_helpers import fast_test, timeout_override
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 Deployment Edge Cases and Failure Scenarios Tests

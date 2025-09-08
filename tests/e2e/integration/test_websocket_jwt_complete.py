@@ -33,7 +33,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 from tests.clients import TestClientFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper

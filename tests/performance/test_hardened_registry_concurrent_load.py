@@ -50,14 +50,14 @@
             # REMOVED_SYNTAX_ERROR: from typing import List, Dict
             # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-            # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+            # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
             # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient

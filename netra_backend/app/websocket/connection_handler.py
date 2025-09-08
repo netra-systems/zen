@@ -64,9 +64,44 @@ class ConnectionContext:
     last_activity: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     _is_cleaned: bool = False
     
+    # SECURITY FIX: Event buffering to prevent race conditions
+    _event_buffer: List[Dict[str, Any]] = field(default_factory=list)
+    _buffer_enabled: bool = True
+    _max_buffer_size: int = 50
+    
     async def update_activity(self):
         """Update last activity timestamp."""
         self.last_activity = datetime.now(timezone.utc)
+    
+    def add_to_buffer(self, event: Dict[str, Any]) -> bool:
+        """Add event to buffer if buffering is enabled.
+        
+        Returns:
+            bool: True if event was buffered, False if buffer is full or disabled
+        """
+        if not self._buffer_enabled:
+            return False
+            
+        if len(self._event_buffer) >= self._max_buffer_size:
+            logger.warning(f"Event buffer full for connection {self.connection_id}, dropping oldest events")
+            # Drop oldest events to make room
+            self._event_buffer = self._event_buffer[-(self._max_buffer_size//2):]
+        
+        self._event_buffer.append(event)
+        logger.debug(f"Buffered event for connection {self.connection_id}, buffer size: {len(self._event_buffer)}")
+        return True
+    
+    def get_buffered_events(self) -> List[Dict[str, Any]]:
+        """Get and clear all buffered events."""
+        events = self._event_buffer.copy()
+        self._event_buffer.clear()
+        self._buffer_enabled = False  # Disable buffering after first flush
+        logger.debug(f"Flushed {len(events)} buffered events for connection {self.connection_id}")
+        return events
+    
+    def is_thread_associated(self) -> bool:
+        """Check if thread_id has been properly associated."""
+        return self.thread_id is not None and self.is_authenticated
     
     async def cleanup(self):
         """Clean up connection resources."""
@@ -74,6 +109,10 @@ class ConnectionContext:
             return
         
         logger.info(f"🧹 Cleaning up ConnectionContext for user {self.user_id} connection {self.connection_id}")
+        # Clear any remaining buffered events
+        if self._event_buffer:
+            logger.warning(f"Discarding {len(self._event_buffer)} unbuffered events for {self.connection_id}")
+            self._event_buffer.clear()
         self._is_cleaned = True
 
 
@@ -159,6 +198,17 @@ class ConnectionHandler:
             logger.info(f"✅ ConnectionHandler authenticated for user {self.context.user_id[:8]}... "
                        f"thread_id: {thread_id}")
             
+            # SECURITY FIX: Flush any buffered events that arrived before thread association
+            buffered_events = self.context.get_buffered_events()
+            if buffered_events:
+                logger.info(f"🔄 Flushing {len(buffered_events)} buffered events for connection {self.connection_id}")
+                for event in buffered_events:
+                    try:
+                        await self.emitter.send_event(event)
+                        self.context.events_sent += 1
+                    except Exception as e:
+                        logger.error(f"Failed to send buffered event: {e}")
+            
             return True
             
         except Exception as e:
@@ -216,8 +266,22 @@ class ConnectionHandler:
         Returns:
             bool: True if event sent successfully
         """
-        if not self.context.is_authenticated or not self.emitter:
-            logger.warning(f"🚫 Cannot send event to unauthenticated connection {self.connection_id}")
+        # SECURITY FIX: Handle events before thread association is complete
+        if not self.context.is_authenticated:
+            # If user is not authenticated but we have a valid user connection, buffer the event
+            if (self.context.user_id and 
+                event.get("user_id") == self.context.user_id and 
+                self.context.add_to_buffer(event)):
+                logger.debug(f"📦 Buffered event for connection {self.connection_id} "
+                           f"waiting for authentication")
+                return True
+            else:
+                logger.warning(f"🚫 Cannot buffer event for unauthenticated connection {self.connection_id}")
+                return False
+        
+        # Check if emitter is available
+        if not self.emitter:
+            logger.warning(f"🚫 No emitter available for connection {self.connection_id}")
             return False
         
         # CRITICAL: Validate event is for this user

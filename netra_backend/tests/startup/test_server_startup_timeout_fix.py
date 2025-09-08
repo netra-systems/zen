@@ -13,7 +13,7 @@ and startup checks from hanging the server startup indefinitely.
 from test_framework.performance_helpers import fast_test, timeout_override
 import asyncio
 import time
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest

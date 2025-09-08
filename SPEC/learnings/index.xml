@@ -38,6 +38,104 @@
         </prevention>
     </learning>
     
+    <learning id="auth-startup-validation-critical-2025-09-07">
+        <title>CRITICAL: Auth Startup Validation Must Never Be Removed</title>
+        <category>Authentication/Startup/Security/Critical</category>
+        <keywords>auth-startup-validation, startup-sequence, auth-configuration, JWT_SECRET, SERVICE_SECRET, OAuth, CORS, production-security</keywords>
+        <path>auth_startup_validation_critical.xml</path>
+        <critical-takeaway>
+            Auth startup validation MUST run in Phase 2, Step 4 of startup sequence. 
+            System MUST NOT start if auth validation fails. This was previously regressed 
+            causing production outages. Validates JWT_SECRET, SERVICE_ID/SECRET, AUTH_SERVICE_URL,
+            OAuth credentials, CORS config, token expiry, and production HTTPS requirements.
+            Hard failures prevent insecure deployments.
+        </critical-takeaway>
+        <severity>EXTREME</severity>
+        <business-impact>Complete platform outage - users cannot authenticate, WebSocket 403 errors, OAuth 503 errors</business-impact>
+        <prevention>
+            Never remove _validate_auth_configuration() from Phase 2. 
+            Never add try/except that swallows auth errors.
+            Always test startup fails with missing JWT_SECRET.
+            Monitor for HTTP 403 and OAuth 503 errors.
+        </prevention>
+    </learning>
+    
+    <learning id="service-authentication-mismatch-fix-2025-01-07">
+        <title>Service Authentication Mismatch Between Backend and Auth Service</title>
+        <category>Authentication/Service-to-Service/Configuration</category>
+        <keywords>service-authentication, SERVICE_ID, SERVICE_SECRET, X-Service-ID, X-Service-Secret, netra-backend, auth-service</keywords>
+        <path>service_authentication_mismatch_fix_20250107.xml</path>
+        <critical-takeaway>
+            Backend service was using "backend" as service_id while auth service expected "netra-backend",
+            causing all service-to-service authentication to fail. Fixed by updating default service_id
+            and ensuring SERVICE_ID and SERVICE_SECRET are properly configured in environment.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete authentication failure blocking all user operations</business-impact>
+        <prevention>
+            Always use "netra-backend" as SERVICE_ID. Ensure SERVICE_SECRET is set (min 32 chars).
+            Run regression test: tests/regression/test_service_authentication_regression.py
+        </prevention>
+    </learning>
+    
+    <learning id="auth-ssot-implementation-2025-01-07">
+        <title>Auth SSOT Implementation - JWT Decoding Removal</title>
+        <category>Security/Architecture/SSOT/Authentication</category>
+        <keywords>jwt-decoding, auth-ssot, single-source-of-truth, jwt-validation, websocket-auth, auth-service</keywords>
+        <path>auth_ssot_implementation_20250107.xml</path>
+        <critical-takeaway>
+            Backend contained JWT decoding violations that should only exist in auth service.
+            Removed _decode_test_jwt() and _decode_token() from backend, eliminated WebSocket 
+            local validation fallback, created automated compliance check. Auth service is now
+            exclusive JWT authority. SSOT score improved from 40/100 to 85/100.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$50K MRR protection from JWT mismatch causing WebSocket 403 failures</business-impact>
+        <prevention>
+            Run scripts/check_auth_ssot_compliance.py in CI/CD. Backend must never decode JWT.
+            WebSocket must fail when auth service unavailable. All JWT ops through auth service only.
+        </prevention>
+    </learning>
+    
+    <learning id="service-id-stability-fix-2025-09-07">
+        <title>SERVICE_ID Stability Fix for Cross-Service Authentication</title>
+        <category>Authentication/Configuration/Deployment/CriticalFix</category>
+        <keywords>SERVICE_ID, timestamp-suffix, authentication-failure, cross-service, stable-identifier, hardcoded-value</keywords>
+        <path>service_id_stability_fix_20250907.xml</path>
+        <critical-takeaway>
+            Auth service was expecting dynamically changing SERVICE_ID with timestamp suffix
+            (e.g., netra-auth-staging-1757252100) while backend sent fixed ID. Fixed by hardcoding
+            expected_service_id = "netra-backend" in auth_routes.py instead of reading from env.
+            SERVICE_ID must be stable for cross-service auth - never use timestamps or dynamic values.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Service authentication failures every 60 seconds, blacklist validation broken</business-impact>
+        <prevention>
+            Always use hardcoded stable SERVICE_ID="netra-backend" for cross-service auth.
+            Never use timestamps in SERVICE_ID. Added to MISSION_CRITICAL_NAMED_VALUES_INDEX.xml.
+            Test with test_service_id_fix_verification.py.
+        </prevention>
+    </learning>
+    
+    <learning id="docker-crash-pytest-collection-windows-2025-01-07">
+        <title>Docker Desktop Crash During Pytest Collection on Windows WSL2</title>
+        <category>Testing/Docker/Windows/ResourceExhaustion/CriticalFailure</category>
+        <keywords>docker-crash, pytest-collection, windows-wsl2, resource-exhaustion, file-descriptors, e2e-tests</keywords>
+        <path>docker_crash_pytest_collection_windows_20250107.xml</path>
+        <critical-takeaway>
+            Pytest collection phase causes Docker Desktop crash on Windows due to resource exhaustion.
+            Root cause: Heavy module imports with side effects + Windows/WSL2 file descriptor doubling
+            + pytest parallel collection = connection storm that crashes Docker (exit code 1077).
+            NEVER initialize connections at import time. Use lazy loading and fixture-scoped init.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete development environment failure - blocks all testing</business-impact>
+        <prevention>
+            Use lazy initialization. Remove import-time side effects. Add Docker health checks.
+            Windows: Use run_safe_windows.py script. Set PYTEST_XDIST_WORKER_COUNT=1.
+        </prevention>
+    </learning>
+    
     <learning id="fake-staging-tests-critical-failure-2025-09-05">
         <title>🚨 CRITICAL: Fake Staging Tests Creating False Confidence</title>
         <category>Testing/Staging/FakeTests/CriticalFailure/Abomination</category>
@@ -98,6 +196,26 @@
         <prevention>
             Never delete configs without dependency check. Provide test credentials. 
             Run scripts/check_config_before_deploy.py. Monitor config health continuously.
+        </prevention>
+    </learning>
+    
+    <learning id="database-config-validation-architecture-fix-2025-09-07">
+        <title>Database Configuration Validation Architecture Fix - Smart Pattern Detection</title>
+        <category>Configuration/Database/ValidationArchitecture</category>
+        <keywords>database-validation, config-architecture, gcp-deployment, postgres-components, database-url, cloud-sql, false-positive</keywords>
+        <path>database_config_validation_architecture_fix_20250907.xml</path>
+        <critical-takeaway>
+            GCP staging validation failed for DATABASE_* variables while database worked perfectly using #removed-legacy+ POSTGRES_* variables.
+            Root cause: architectural fragmentation between deployment patterns and validation logic. Fixed with smart pattern detection:
+            #removed-legacypriority → POSTGRES_* components → DATABASE_* legacy. Prevents false positives where system works but validation fails.
+            Critical insight: "error behind the error" - apparent config issues were actually architectural coordination failures.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>False positive configuration failures blocking deployments and wasting engineering time</business-impact>
+        <prevention>
+            Validation must understand equivalent configuration patterns. Check #removed-legacyfirst for Cloud Run.
+            Support both POSTGRES_* (GCP) and DATABASE_* (legacy) patterns. Architecture drift detection between systems.
+            Integration tests validating deployment config against validator requirements.
         </prevention>
     </learning>
     
@@ -1465,7 +1583,7 @@
         </category>
         
         <category name="Configuration Issues 2025" path="SPEC/learnings/configuration_issues_2025.xml" keywords="DATABASE_URL, ClickHouse, Redis, Environment Detection, Import Paths, WebSocket">
-            <critical-takeaway>DATABASE_URL must use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
+            <critical-takeaway>#removed-legacymust use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
             <critical-takeaway>Redis fallback to localhost must be disabled in staging/production via REDIS_FALLBACK_ENABLED=false environment variable.</critical-takeaway>
             <critical-takeaway>Import paths: ClickHouseClient moved to data_sub_agent module, RedisClient is RedisManager, WebSocket imports use fastapi not starlette.</critical-takeaway>
         </category>
@@ -1796,9 +1914,9 @@
 
         <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy, Gunicorn, Workers">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
-            <critical-takeaway>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
+            <critical-takeaway>#removed-legacyin staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
             <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL (e.g., https://api.staging.netrasystems.ai) for proxy rewrites to work.</critical-takeaway>
-            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check DATABASE_URL and SSL settings.</critical-takeaway>
+            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check #removed-legacyand SSL settings.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain (e.g., auth.staging.netrasystems.ai) with proper CORS and callback URL configuration.</critical-takeaway>
             <critical-takeaway>Gunicorn workers require proper lifecycle hooks and tini for signal handling to prevent ProcessLookupError in containers.</critical-takeaway>
             <critical-takeaway>CRITICAL: USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service, even if OAUTH_PROXY_URL is correctly set.</critical-takeaway>
@@ -1842,7 +1960,7 @@
         </category>
         
         <category name="Configuration Issues Resolution [RESOLVED]" path="SPEC/learnings/configuration_fixes_20250825.xml" keywords="Configuration, Database URL, PostgreSQL, AsyncPG, Auth Service, Startup Import, WebSocket Deprecation">
-            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service DATABASE_URL configuration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service #removed-legacyconfiguration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
             <critical-takeaway>Auth service requires postgresql+asyncpg:// driver format for async operations, not plain postgresql://</critical-takeaway>
             <critical-takeaway>Database connectivity errors often manifest as "connection refused" when service configuration is correct but infrastructure (Docker PostgreSQL) is not running</critical-takeaway>
             <critical-takeaway>Fixed startup module import error: ErrorAggregator import from netra_backend.app.error_aggregator should be netra_backend.app.startup.error_aggregator</critical-takeaway>
@@ -2005,7 +2123,7 @@
         </category>
         
         <category name="Database/URLConsistency" path="SPEC/learnings/database_url_consistency.xml" keywords="Database URL, Secret Management, Cloud SQL Proxy, Service Consistency">
-            <critical-takeaway>All services MUST use the same DATABASE_URL secret for consistency</critical-takeaway>
+            <critical-takeaway>All services MUST use the same #removed-legacysecret for consistency</critical-takeaway>
             <critical-takeaway>When using Cloud SQL proxy, use Unix socket format not direct IP</critical-takeaway>
             <critical-takeaway>Verify IP addresses in secrets match actual Cloud SQL instances</critical-takeaway>
         </category>
@@ -2074,12 +2192,12 @@
             <critical-takeaway>WebSocket route registration mandatory for real-time functionality.</critical-takeaway>
             <critical-takeaway>CORS configuration must support dynamic development ports with service discovery.</critical-takeaway>
             <critical-takeaway>Frontend environment configuration must align with backend service discovery.</critical-takeaway>
-            <critical-takeaway>Staging deployment requires sslmode=require for DATABASE_URL and gunicorn with uvicorn workers.</critical-takeaway>
+            <critical-takeaway>Staging deployment requires sslmode=require for #removed-legacyand gunicorn with uvicorn workers.</critical-takeaway>
         </category>
         
         <category name="Deployment Staging" path="SPEC/learnings/deployment.xml" keywords="Staging, GCP, Cloud Run, SSL, OAuth, Health Checks">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run deployments for optimal performance.</critical-takeaway>
-            <critical-takeaway>DATABASE_URL MUST include sslmode=require parameter for Cloud SQL connections in staging/production.</critical-takeaway>
+            <critical-takeaway>#removed-legacyMUST include sslmode=require parameter for Cloud SQL connections in staging/production.</critical-takeaway>
             <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL for proxy rewrites to work.</critical-takeaway>
             <critical-takeaway>Health check /health/ready endpoint failures in staging usually indicate database connectivity issues.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain with proper CORS and callback URL configuration.</critical-takeaway>
@@ -2256,7 +2374,7 @@
         
         <category name="Staging Backend Service Failure Tests 2025" path="SPEC/learnings/staging_backend_service_failure_tests_2025.xml" keywords="Staging, Backend Service Failures, TDC, Test-Driven Correction, Infrastructure Validation, Configuration Audit, External Services">
             <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical-takeaway>
-            <critical-takeaway>Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
+            <critical-takeaway>Auth service #removed-legacyundefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
             <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical-takeaway>
             <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
             <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
@@ -2788,6 +2906,23 @@
         <prevention>Always use UnifiedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
     </learning>
     
+    <learning id="docker-scripts-prohibition-critical-2025-01-06">
+        <title>CRITICAL: Never Copy Scripts Folder into Docker Containers</title>
+        <category>Infrastructure/Docker/Security</category>
+        <keywords>docker, dockerfile, scripts, security, container-size, COPY, runtime, production, deployment</keywords>
+        <path>docker_scripts_prohibition_critical.xml</path>
+        <critical-takeaway>
+            NEVER copy entire scripts/ folder into Docker containers. This causes security vulnerabilities,
+            100MB+ container bloat, and deployment credential exposure. Only copy SPECIFIC runtime-required
+            scripts (e.g., wait_for_db.py). Scripts folder contains dev-only tools, test runners, and
+            deployment scripts that MUST NOT be in production containers. Use multi-stage builds or inline
+            scripts instead.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Security vulnerability exposure, 3x slower deployments, potential credential leakage, increased attack surface</business-impact>
+        <prevention>Never use "COPY scripts/ ./scripts/". Only copy specific needed files. Audit all Dockerfiles for script copying patterns. Verify containers don't have /app/scripts/ directory.</prevention>
+    </learning>
+    
     <learning id="playwright-testing-advantages-2025-09-01">
         <title>Playwright Testing Advantages and Adoption Strategy</title>
         <category>Testing Infrastructure</category>
@@ -3003,6 +3138,97 @@
             <learning-ref>agent_execution_order_fix_20250904.xml</learning-ref>
             <learning-ref>../USER_CONTEXT_ARCHITECTURE.md</learning-ref>
             <learning-ref>../../docs/GOLDEN_AGENT_INDEX.md</learning-ref>
+        </related-learnings>
+    </learning>
+
+    <learning id="docker-alpine-optimization-2025-09-07">
+        <title>Docker Alpine Container Size Optimization and SSOT Architecture</title>
+        <category>Docker/Infrastructure/Optimization</category>
+        <keywords>docker, alpine, container-size, optimization, ssot, migrations, python-packages, ai-ml-containers</keywords>
+        <path>docker_alpine_optimization_20250907.xml</path>
+        <critical-takeaway>
+            Alpine containers with AI/ML libraries are NORMALLY 500-900MB. Not a sign of poor optimization.
+            Python packages (pandas, numpy, langchain) account for 520MB+ in backend containers.
+            Solution: Separate migration service, remove SPEC/docs from runtime, clean test dirs.
+            CRITICAL: Always use --no-cache when testing Dockerfile changes, Docker aggressively caches layers.
+            Achieved SSOT: One Dockerfile per service (backend, auth, frontend, migration).
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Container size affects deployment speed, cold starts, and infrastructure costs</business-impact>
+        <prevention>
+            Accept that AI/ML containers are large. Focus on removing unnecessary files not core dependencies.
+            Always rebuild with --no-cache when optimizing. Create separate services for migrations/jobs.
+            Use docker history and du -sh to analyze before assuming bloat.
+        </prevention>
+        <documentation>docs/docker_architecture_diagrams.md</documentation>
+    </learning>
+    
+    <learning id="frontend-dockerfile-missing-directories-2025-01-07">
+        <title>Frontend Dockerfile Missing Directories and Cloud Run CPU Fix</title>
+        <category>Docker/Deployment/Frontend/CloudRun</category>
+        <keywords>dockerfile, frontend, next.js, alpine, cloud-run, cpu-limit, missing-directories, deployment-failure</keywords>
+        <path>frontend_dockerfile_missing_directories_fix_20250107.xml</path>
+        <critical-takeaway>
+            Frontend Alpine Dockerfile was missing critical directories (auth, store, config, providers)
+            and TypeScript declaration files causing build failures. Also, Cloud Run requires CPU >= 1
+            when concurrency > 1, but Alpine config had CPU=0.5. Fixed by adding all required directories
+            and files to Dockerfile, setting CPU=1. Achieved 78% smaller images with 3x faster startup.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Frontend deployment failures block all user access to the application</business-impact>
+        <prevention>
+            Always verify tsconfig.json paths are included in Dockerfile. Check Cloud Run CPU requirements.
+            Test Docker builds locally before deployment. Include all TypeScript declaration files.
+            Maintain comprehensive list of required vs excluded directories for production builds.
+        </prevention>
+        <related-learnings>
+            <learning-ref>docker_alpine_optimization_20250907.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
+    <learning id="service-id-timestamp-issue-2025-09-07">
+        <title>SERVICE_ID Timestamp Suffix Issue</title>
+        <category>Deployment/Authentication/Configuration</category>
+        <keywords>service-id, authentication, inter-service-auth, staging, google-secret-manager, timestamp</keywords>
+        <path>service_id_timestamp_issue_20250907.xml</path>
+        <critical-takeaway>
+            Deployment script was appending timestamp to SERVICE_ID in Google Secret Manager
+            (e.g., 'netra-auth-staging-1757224059'), causing service ID mismatch between backend
+            and auth service. Fixed by using stable SERVICE_ID without timestamp: 'netra-auth-staging'.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Inter-service authentication failures preventing backend from communicating with auth service</business-impact>
+        <prevention>
+            Never append dynamic values (timestamps, random numbers) to SERVICE_ID or other
+            authentication identifiers. SERVICE_ID should be stable and environment-specific:
+            'netra-{service}-{environment}'. Add validation to ensure proper format.
+        </prevention>
+        <related-learnings>
+            <learning-ref>service_authentication_mismatch_fix_20250107.xml</learning-ref>
+        </related-learnings>
+    </learning>
+
+    <learning id="stub-file-anti-pattern-2025-09-07">
+        <title>Stub File Anti-Pattern: The AgentExecutionRegistry Abomination</title>
+        <category>AntiPatterns/SSOT/TechnicalDebt/TestCheating</category>
+        <keywords>stub-files, anti-pattern, ssot-violation, test-cheating, agent-execution-registry, minimal-implementation, duplication</keywords>
+        <path>stub_file_anti_pattern_20250907.xml</path>
+        <critical-takeaway>
+            NEVER create "minimal stub" files to pass tests. agent_execution_registry.py was created
+            as stub to satisfy startup_validator imports instead of fixing the real issue (wrong imports).
+            This violates SSOT, creates confusion, and is CHEATING ON TESTS = ABOMINATION.
+            Fix: Updated imports to use UniversalRegistry SSOT, deleted stub file completely.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Technical debt, maintenance nightmare, confusion about which registry to use</business-impact>
+        <prevention>
+            Never create stub files to pass tests. Always search for existing SSOT implementations.
+            If import fails, fix the import path, don't create new file. Tests validate real system, not stubs.
+            When seeing "minimal implementation" comment, it's a red flag indicating anti-pattern.
+        </prevention>
+        <related-learnings>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>type_safety.xml</learning-ref>
         </related-learnings>
     </learning>
 </specification>

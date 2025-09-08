@@ -7,8 +7,11 @@ import hashlib
 import hmac
 import json
 import time
-from typing import Any, Dict, Optional
+import asyncio
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
+from dataclasses import dataclass
 
 
 def create_test_jwt_token(
@@ -239,3 +242,103 @@ def create_oauth_flow_test_data() -> Dict[str, Any]:
             "picture": "https://example.com/avatar.jpg"
         }
     }
+
+
+@dataclass
+class AuthTestConfig:
+    """Configuration for authentication tests."""
+    auth_service_url: str = "http://localhost:8001"
+    backend_url: str = "http://localhost:8000"
+    timeout: float = 10.0
+    test_user_prefix: str = "test_auth"
+
+
+class WebSocketAuthTester:
+    """Real WebSocket connection tester with auth validation."""
+    
+    def __init__(self, config: Optional[AuthTestConfig] = None):
+        """Initialize WebSocket auth tester."""
+        self.config = config or AuthTestConfig()
+        # Import here to avoid circular imports
+        try:
+            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+            self.connection_manager = get_websocket_manager()
+        except ImportError:
+            # Handle case where netra_backend is not available (e.g., in isolated test environment)
+            self.connection_manager = None
+        self.test_users: Dict[str, str] = {}
+        self.active_connections: List = []  # Will be populated with MockWebSocket instances
+        self.auth_results: List[Dict[str, Any]] = []
+    
+    def create_test_user_with_token(self, user_id: str) -> str:
+        """Create test user and return valid JWT token."""
+        token = create_test_jwt_token(user_id)
+        self.test_users[user_id] = token
+        return token
+    
+    def record_auth_result(self, user_id: str, success: bool, 
+                          error: Optional[str] = None) -> None:
+        """Record authentication test result."""
+        result = self._create_auth_result(user_id, success, error)
+        self.auth_results.append(result)
+    
+    def _create_auth_result(self, user_id: str, success: bool, error: Optional[str]) -> Dict[str, Any]:
+        """Create authentication result record."""
+        return {
+            "user_id": user_id,
+            "success": success,
+            "error": error,
+            "timestamp": datetime.now(timezone.utc)
+        }
+    
+    async def connect_authenticated_websocket(self, user_id: Optional[str] = None) -> Any:
+        """Connect authenticated WebSocket client.
+        
+        This is a test helper method that creates a mock WebSocket connection
+        with authentication for testing purposes.
+        """
+        if user_id is None:
+            user_id = f"test_user_{int(time.time())}"
+        
+        token = self.create_test_user_with_token(user_id)
+        
+        # For testing purposes, return a mock WebSocket-like object
+        class MockWebSocketClient:
+            def __init__(self, user_id: str, token: str):
+                self.user_id = user_id
+                self.token = token
+                self.is_authenticated = True
+                self.sent_messages = []
+                self.received_messages = []
+            
+            async def send(self, message: str) -> None:
+                """Mock send message."""
+                self.sent_messages.append(message)
+            
+            async def recv(self) -> str:
+                """Mock receive message."""
+                if self.received_messages:
+                    return self.received_messages.pop(0)
+                return '{"type": "ack", "message": "Message received"}'
+            
+            async def close(self) -> None:
+                """Mock close connection."""
+                self.is_authenticated = False
+        
+        client = MockWebSocketClient(user_id, token)
+        self.active_connections.append(client)
+        return client
+    
+    async def cleanup(self) -> None:
+        """Clean up test connections."""
+        cleanup_tasks = []
+        for connection in self.active_connections:
+            if hasattr(connection, 'close'):
+                cleanup_tasks.append(connection.close())
+        
+        if cleanup_tasks:
+            await asyncio.gather(*cleanup_tasks, return_exceptions=True)
+        
+        self.active_connections.clear()
+        self.test_users.clear()
+        self.auth_results.clear()

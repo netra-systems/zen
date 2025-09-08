@@ -10,7 +10,7 @@
     </metadata>
 
     <issue-category name="Database Configuration">
-        <critical-takeaway>DATABASE_URL environment variable must use Cloud SQL format in staging, not localhost fallback.</critical-takeaway>
+        <critical-takeaway>#removed-legacyenvironment variable must use Cloud SQL format in staging, not localhost fallback.</critical-takeaway>
         <critical-takeaway>Staging environment detection via K_SERVICE and NETRA_ENVIRONMENT variables must prevent localhost database connections.</critical-takeaway>
         <critical-takeaway>IsolatedEnvironment caching requires singleton instance reset when testing different environment configurations.</critical-takeaway>
         
@@ -20,7 +20,7 @@
             <details>DatabaseURLBuilder validates environment-specific database URLs and prevents localhost in staging/production</details>
         </fix-applied>
         
-        <testing-requirement>Always test DATABASE_URL configuration with actual staging environment variables set (K_SERVICE, NETRA_ENVIRONMENT)</testing-requirement>
+        <testing-requirement>Always test #removed-legacyconfiguration with actual staging environment variables set (K_SERVICE, NETRA_ENVIRONMENT)</testing-requirement>
     </issue-category>
 
     <issue-category name="Import Path Management">
@@ -93,7 +93,7 @@
         <test-requirement>Configuration tests should verify fallback behavior is environment-appropriate</test-requirement>
         
         <regression-prevention>
-            <check>Verify DATABASE_URL format matches expected staging patterns (Cloud SQL, no localhost)</check>
+            <check>Verify #removed-legacyformat matches expected staging patterns (Cloud SQL, no localhost)</check>
             <check>Verify Redis fallback disabled when REDIS_FALLBACK_ENABLED=false or in staging environment</check>
             <check>Verify WebSocket imports use fastapi.websockets, not starlette.websockets</check>
             <check>Verify ClickHouse and Redis client imports resolve to correct modules and use async methods</check>

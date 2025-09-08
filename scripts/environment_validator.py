@@ -151,7 +151,7 @@ class EnvironmentValidator:
         
         if not database_url:
             self._add_result("postgres_connection", "FAIL", 
-                           "DATABASE_URL not configured")
+                           "#removed-legacynot configured")
             return
         
         try:

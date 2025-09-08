@@ -24,7 +24,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # REAL SERVICES: No mock imports
 from fastapi import Request
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Real auth service components
 from auth_service.main import app
@@ -58,7 +58,7 @@ class TestAuthRefreshEndpointBugsReal:
         tokens = await real_jwt_manager.generate_tokens(user.email, {"user_id": user.id})
         
         # Test with REAL HTTP client
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Test the refresh endpoint with real token
             response = await client.post(
                 "/auth/refresh",
@@ -94,7 +94,7 @@ class TestAuthRefreshEndpointBugsReal:
         tokens = await real_jwt_manager.generate_tokens(user.email, {"user_id": user.id})
         
         # Test with various JSON formats using REAL HTTP client
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Test normal JSON
             response = await client.post(
                 "/auth/refresh",

@@ -147,8 +147,8 @@ class TestEnvironmentValidator:
                 self.issues.append(ConfigurationIssue(
                     severity="error",
                     category="database",
-                    message="DATABASE_URL not set",
-                    fix_suggestion="Set DATABASE_URL in .env.mock"
+                    message="#removed-legacynot set",
+                    fix_suggestion="Set #removed-legacyin .env.mock"
                 ))
                 return
             

@@ -239,7 +239,7 @@ class MessageHandlerService(IMessageHandlerService):
             # Continue execution even if registration fails
         
         # Create UserExecutionContext for the new pattern
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # CRITICAL DEBUG: Log the db_session status
         logger.info(f"🔍 DEBUG: db_session type: {type(db_session)}, is None: {db_session is None}")

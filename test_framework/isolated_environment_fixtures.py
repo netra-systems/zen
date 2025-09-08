@@ -87,11 +87,22 @@ def isolated_env() -> Generator[IsolatedEnvironment, None, None]:
     try:
         yield env
     finally:
-        # Restore original state
-        if not original_isolated:
-            env.disable_isolation()
-        elif original_state is not None:
-            env.reset_to_original()
+        # Restore original state with error handling
+        try:
+            if not original_isolated:
+                env.disable_isolation()
+            elif original_state is not None:
+                env.reset_to_original()
+        except ValueError as e:
+            # Handle illegal environment variable names that can't be synced to os.environ
+            # This can happen when tests create variables with invalid names
+            import logging
+            logging.getLogger(__name__).warning(f"Failed to restore environment state: {e}")
+            # Force reset to clean state
+            try:
+                env.reset()
+            except Exception:
+                pass  # Best effort cleanup
 
 @pytest.fixture(scope="function")
 def test_env() -> Generator[IsolatedEnvironment, None, None]:

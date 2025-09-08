@@ -59,7 +59,7 @@ from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_c
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine

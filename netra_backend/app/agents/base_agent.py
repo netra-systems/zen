@@ -40,7 +40,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.services.billing.token_counter import TokenCounter
@@ -123,7 +123,7 @@ class BaseAgent(ABC):
                  enable_reliability: bool = True,  # ENABLED: Required for test infrastructure compatibility
                  enable_execution_engine: bool = True,
                  enable_caching: bool = False,
-                 tool_dispatcher: Optional[ToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
+                 tool_dispatcher: Optional[UnifiedToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
                  redis_manager: Optional[RedisManager] = None,
                  user_context: Optional['UserExecutionContext'] = None):
         
@@ -528,7 +528,8 @@ class BaseAgent(ABC):
         if not isinstance(context, UserExecutionContext):
             raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
         
-        return DatabaseSessionManager(context)
+        # DatabaseSessionManager is now a stub that doesn't take context parameter
+        return DatabaseSessionManager()
     
     # === Abstract Methods ===
     
@@ -1528,7 +1529,7 @@ class BaseAgent(ABC):
     def create_legacy_with_warnings(
         cls,
         llm_manager: Optional[LLMManager] = None,
-        tool_dispatcher: Optional['ToolDispatcher'] = None,
+        tool_dispatcher: Optional['UnifiedToolDispatcher'] = None,
         redis_manager: Optional['RedisManager'] = None,
         **kwargs
     ) -> 'BaseAgent':

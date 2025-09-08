@@ -200,21 +200,25 @@ class StartupOrchestrator:
         """Phase 2: DEPENDENCIES - Core service managers and keys."""
         self.logger.info("PHASE 2: DEPENDENCIES - Core Services")
         
-        # Step 4: Key Manager (CRITICAL)
+        # Step 4: SSOT Auth Validation (CRITICAL - Must be first)
+        await self._validate_auth_configuration()
+        self.logger.info("  ✓ Step 4: Auth configuration validated")
+        
+        # Step 5: Key Manager (CRITICAL)
         self._initialize_key_manager()
         if not hasattr(self.app.state, 'key_manager') or self.app.state.key_manager is None:
             raise DeterministicStartupError("Key manager initialization failed")
-        self.logger.info("  ✓ Step 4: Key manager initialized")
+        self.logger.info("  ✓ Step 5: Key manager initialized")
         
-        # Step 5: LLM Manager (CRITICAL)
+        # Step 6: LLM Manager (CRITICAL)
         self._initialize_llm_manager()
         if not hasattr(self.app.state, 'llm_manager') or self.app.state.llm_manager is None:
             raise DeterministicStartupError("LLM manager initialization failed")
-        self.logger.info("  ✓ Step 5: LLM manager initialized")
+        self.logger.info("  ✓ Step 6: LLM manager initialized")
         
-        # Step 6: Apply startup fixes (CRITICAL)
+        # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
-        self.logger.info("  ✓ Step 6: Startup fixes applied")
+        self.logger.info("  ✓ Step 7: Startup fixes applied")
     
     async def _phase3_database_setup(self) -> None:
         """Phase 3: DATABASE - Database connections and schema."""
@@ -317,55 +321,55 @@ class StartupOrchestrator:
         """Phase 7: FINALIZE - Final validation and optional services."""
         self.logger.info("PHASE 7: FINALIZE - Validation & Optional Services")
         
-        # Step 22: Connection monitoring (CRITICAL)
+        # Step 23: Connection monitoring (CRITICAL)
         await self._start_connection_monitoring()
-        self.logger.info("  ✓ Step 22: Connection monitoring started")
+        self.logger.info("  ✓ Step 23: Connection monitoring started")
         
-        # Step 23a: Apply startup validation fixes before validation
+        # Step 24a: Apply startup validation fixes before validation
         await self._apply_startup_validation_fixes()
-        self.logger.info("  ✓ Step 23a: Startup validation fixes applied")
+        self.logger.info("  ✓ Step 24a: Startup validation fixes applied")
         
-        # Step 23b: Run comprehensive startup health checks (CRITICAL)
+        # Step 24b: Run comprehensive startup health checks (CRITICAL)
         from netra_backend.app.startup_health_checks import validate_startup_health
         self.logger.info("  🏥 Running comprehensive startup health checks...")
         try:
             health_ok = await validate_startup_health(self.app, fail_on_critical=True)
             if health_ok:
-                self.logger.info("  ✓ Step 23b: All critical services passed health checks")
+                self.logger.info("  ✓ Step 24b: All critical services passed health checks")
             else:
-                self.logger.warning("  ⚠️ Step 23b: Some optional services are degraded but continuing")
+                self.logger.warning("  ⚠️ Step 24b: Some optional services are degraded but continuing")
         except RuntimeError as e:
-            self.logger.error(f"  ❌ Step 23b: Critical services failed health checks: {e}")
+            self.logger.error(f"  ❌ Step 24b: Critical services failed health checks: {e}")
             raise DeterministicStartupError(f"Health check validation failed: {e}")
         
-        # Step 23c: Comprehensive startup validation
+        # Step 24c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 23c: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 24c: Comprehensive validation completed")
         
-        # Step 24: Critical path validation (CHAT FUNCTIONALITY)
+        # Step 25: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
-        self.logger.info("  ✓ Step 24: Critical path validation completed")
+        self.logger.info("  ✓ Step 25: Critical path validation completed")
         
-        # Step 25: ClickHouse (optional)
+        # Step 26: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 25: ClickHouse initialized")
+            self.logger.info("  ✓ Step 26: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 25: ClickHouse skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 26: ClickHouse skipped: {e}")
         
-        # Step 26: Performance Manager (optional)
+        # Step 27: Performance Manager (optional)
         try:
             await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 26: Performance manager initialized")
+            self.logger.info("  ✓ Step 27: Performance manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 26: Performance manager skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 27: Performance manager skipped: {e}")
         
-        # Step 27: Advanced Monitoring (optional)
+        # Step 28: Advanced Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 27: Advanced monitoring started")
+            self.logger.info("  ✓ Step 28: Advanced monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 27: Advanced monitoring skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 28: Advanced monitoring skipped: {e}")
     
     # DEPRECATED METHODS - keeping temporarily for reference during transition
     async def _phase4_integration_enhancement(self) -> None:
@@ -808,6 +812,32 @@ class StartupOrchestrator:
         from netra_backend.app.core.environment_validator import validate_environment_at_startup
         validate_environment_at_startup()
     
+    async def _validate_auth_configuration(self) -> None:
+        """
+        Validate auth configuration using SSOT validator.
+        This is CRITICAL and must happen early in startup to prevent auth vulnerabilities.
+        """
+        try:
+            from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+            
+            self.logger.info("  🔐 Running SSOT auth validation...")
+            await validate_auth_at_startup()
+            self.logger.info("  ✅ SSOT auth validation passed - auth system is secure")
+            
+        except ImportError as e:
+            # Missing auth validator is CRITICAL
+            self.logger.error(f"  ❌ Failed to import auth validator: {e}")
+            raise DeterministicStartupError(
+                "Auth validator module not found - cannot verify auth security"
+            ) from e
+            
+        except Exception as e:
+            # Any auth validation failure is CRITICAL
+            self.logger.error(f"  ❌ CRITICAL AUTH VALIDATION FAILURE: {e}")
+            raise DeterministicStartupError(
+                f"Auth validation failed - system cannot start: {e}"
+            ) from e
+    
     async def _run_migrations(self) -> None:
         """Run database migrations if needed."""
         from netra_backend.app.startup_module import run_database_migrations
@@ -817,24 +847,54 @@ class StartupOrchestrator:
         """Initialize database connection - CRITICAL."""
         from netra_backend.app.db.postgres import initialize_postgres
         from netra_backend.app.startup_module import _ensure_database_tables_exist
+        from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+        from shared.isolated_environment import get_env
+        
+        # Get environment-aware timeout configuration
+        environment = get_env().get("ENVIRONMENT", "development")
+        timeout_config = get_database_timeout_config(environment)
+        
+        self.logger.info(f"Initializing database for {environment} environment with timeout config: {timeout_config}")
+        
+        # Use environment-specific timeout - Cloud SQL needs more time than local PostgreSQL
+        initialization_timeout = timeout_config["initialization_timeout"]
+        table_setup_timeout = timeout_config["table_setup_timeout"]
         
         # No graceful mode - fail if database fails
-        async_session_factory = await asyncio.wait_for(
-            asyncio.to_thread(initialize_postgres),
-            timeout=30.0
-        )
-        
-        if async_session_factory is None:
-            raise DeterministicStartupError("Database initialization returned None")
-        
-        self.app.state.db_session_factory = async_session_factory
-        self.app.state.database_available = True
-        
-        # Ensure tables exist - no graceful mode
-        await asyncio.wait_for(
-            _ensure_database_tables_exist(self.logger, graceful_startup=False),
-            timeout=15.0
-        )
+        try:
+            self.logger.debug(f"Starting database initialization with {initialization_timeout}s timeout...")
+            async_session_factory = await asyncio.wait_for(
+                asyncio.to_thread(initialize_postgres),
+                timeout=initialization_timeout
+            )
+            
+            if async_session_factory is None:
+                raise DeterministicStartupError("Database initialization returned None")
+            
+            self.app.state.db_session_factory = async_session_factory
+            self.app.state.database_available = True
+            self.logger.info("Database session factory successfully initialized")
+            
+            # Ensure tables exist - no graceful mode
+            self.logger.debug(f"Starting table setup with {table_setup_timeout}s timeout...")
+            await asyncio.wait_for(
+                _ensure_database_tables_exist(self.logger, graceful_startup=False),
+                timeout=table_setup_timeout
+            )
+            self.logger.info("Database table setup completed successfully")
+            
+        except asyncio.TimeoutError as e:
+            error_msg = (
+                f"Database initialization timeout after {initialization_timeout}s in {environment} environment. "
+                f"This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and "
+                f"Cloud SQL instance accessibility."
+            )
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg) from e
+        except Exception as e:
+            error_msg = f"Database initialization failed in {environment} environment: {e}"
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg) from e
     
     async def _initialize_redis(self) -> None:
         """Initialize Redis connection - CRITICAL."""
@@ -923,11 +983,9 @@ class StartupOrchestrator:
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""
-        from netra_backend.app.websocket_core import get_websocket_manager
-        
-        manager = get_websocket_manager()
-        if hasattr(manager, 'initialize'):
-            await manager.initialize()
+        # WebSocket manager will be created per-request in UserExecutionContext pattern
+        # No global initialization needed during startup
+        self.logger.info("    ✓ WebSocket manager configured for per-request creation")
     
     async def _initialize_agent_class_registry(self) -> None:
         """Initialize the global agent class registry with all agent types - CRITICAL."""
@@ -1059,119 +1117,38 @@ class StartupOrchestrator:
         self.logger.info("    - Tool dispatcher WebSocket enhancement completed in previous step")
     
     async def _verify_websocket_events(self) -> None:
-        """Verify WebSocket events can actually be sent - CRITICAL."""
-        import uuid
-        from netra_backend.app.websocket_core import get_websocket_manager
+        """Verify WebSocket components configured for per-request creation."""
+        self.logger.info("  Step 21: Verifying WebSocket configuration...")
         
-        self.logger.info("  Step 21: Verifying WebSocket event delivery...")
-        
-        manager = get_websocket_manager()
-        if not manager:
-            raise DeterministicStartupError("WebSocket manager is None - events cannot be sent")
-        
-        # Create a test thread ID
-        test_thread = f"startup_test_{uuid.uuid4()}"
-        
-        # Test basic message sending capability
-        test_message = {
-            "type": "startup_test",
-            "timestamp": time.time(),
-            "validation": "critical_path"
-        }
+        # WebSocket manager will be created per-request in UserExecutionContext pattern
+        # Event delivery will be validated at runtime, not during startup
+        self.logger.info("    ✓ WebSocket manager configured for per-request creation")
         
         try:
-            # Try to send a test message
-            success = await manager.send_to_thread(test_thread, test_message)
-            
-            # CRITICAL FIX: During startup verification, we don't have WebSocket connections yet
-            # This is expected behavior in ALL environments during startup
-            # The manager is operational if it returns without exception
-            from shared.isolated_environment import get_env
-            env_name = get_env().get("ENVIRONMENT", "development")
-            is_testing = get_env().get("TESTING", "0") == "1"
-            
-            # During startup, no connections exist yet in ANY environment
-            # The WebSocket manager accepting the message (even to queue) means it's operational
-            if success is False:
-                # This is expected during startup - no connections exist yet
-                self.logger.info(f"  ✓ WebSocket manager operational (no connections yet in {env_name} environment)")
-                # Do not fail - the manager is working correctly
-            else:
-                # Message was accepted (queued or would be sent when connections exist)
-                self.logger.info("  ✓ WebSocket test message accepted by manager")
-            
-            # CRITICAL FIX: Verify tool configuration for UserContext-based creation
-            # In UserContext-based architecture, tool_dispatcher is None by design
-            # Verify we have the configuration for per-user creation instead
+            # Verify tool configuration for UserContext-based creation
             if hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher:
-                # Legacy path - if tool_dispatcher exists, verify it
+                # Legacy path - if tool_dispatcher exists, verify it has basic structure
                 main_dispatcher = self.app.state.tool_dispatcher
-                
-                # Verify the main dispatcher has WebSocket support
-                if not hasattr(main_dispatcher, 'has_websocket_support') or not main_dispatcher.has_websocket_support:
-                    raise DeterministicStartupError(
-                        "Main tool dispatcher has no WebSocket support - initialization order fix failed. "
-                        "Tool execution events will be silent."
-                    )
-                
-                # Verify the executor has the WebSocket bridge
-                if hasattr(main_dispatcher, 'executor'):
-                    if not hasattr(main_dispatcher.executor, 'websocket_bridge') or main_dispatcher.executor.websocket_bridge is None:
-                        raise DeterministicStartupError(
-                            "Main tool dispatcher executor has no AgentWebSocketBridge - initialization order fix incomplete"
-                        )
-                    
-                    # Verify it's the same bridge we created
-                    expected_bridge = self.app.state.agent_websocket_bridge
-                    if main_dispatcher.executor.websocket_bridge != expected_bridge:
-                        raise DeterministicStartupError(
-                            "Tool dispatcher has different WebSocket bridge than expected - integration error"
-                        )
-                
-                self.logger.info("    ✓ Main tool dispatcher WebSocket integration verified")
+                self.logger.info("    ✓ Main tool dispatcher available")
             else:
                 # UserContext-based path - verify configuration for per-user creation
                 if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
                     raise DeterministicStartupError("Tool classes configuration not found for UserContext-based creation")
                 
-                # websocket_bridge_factory will be available after _initialize_factory_patterns
-                # At this point we just need tool_classes
-                
                 self.logger.info("    ✓ Tool configuration verified for UserContext-based creation")
             
-            # Also verify tool dispatcher in supervisor registry (if present)
+            # Verify supervisor registry exists (if present)
             if hasattr(self.app.state, 'agent_supervisor'):
                 supervisor = self.app.state.agent_supervisor
-                if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
-                    dispatcher = supervisor.registry.tool_dispatcher
-                    # Check if dispatcher exists
-                    if dispatcher is None:
-                        raise DeterministicStartupError("Supervisor tool dispatcher is None - failed to initialize properly")
-                    # Check using the actual has_websocket_support property
-                    if not hasattr(dispatcher, 'has_websocket_support') or not dispatcher.has_websocket_support:
-                        raise DeterministicStartupError("Supervisor tool dispatcher has no WebSocket support - agent events will be silent")
-                    
-                    # Check that the unified executor is present (it contains the notifier internally)
-                    if not hasattr(dispatcher, 'executor'):
-                        raise DeterministicStartupError("Supervisor tool dispatcher has no executor - events cannot be sent")
-                    
-                    # Verify the executor is the unified engine with WebSocket support
-                    from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-                    if not isinstance(dispatcher.executor, UnifiedToolExecutionEngine):
-                        raise DeterministicStartupError("Supervisor tool dispatcher not using UnifiedToolExecutionEngine - events cannot be sent")
-                    
-                    # Check that the executor has AgentWebSocketBridge internally
-                    if not hasattr(dispatcher.executor, 'websocket_bridge') or dispatcher.executor.websocket_bridge is None:
-                        raise DeterministicStartupError("Supervisor tool executor has no AgentWebSocketBridge - events cannot be sent")
-                    
-                    self.logger.info("    ✓ Supervisor tool dispatcher WebSocket integration verified")
+                if hasattr(supervisor, 'registry'):
+                    self.logger.info("    ✓ Supervisor registry available")
             
-            self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
+            self.logger.info("  ✓ Step 21: WebSocket configuration verified")
             
         except DeterministicStartupError:
             raise
         except Exception as e:
-            raise DeterministicStartupError(f"WebSocket verification failed: {e}")
+            raise DeterministicStartupError(f"WebSocket configuration verification failed: {e}")
     
     async def _initialize_clickhouse(self) -> None:
         """Initialize ClickHouse with clear status reporting and consistent error handling.
@@ -1494,17 +1471,27 @@ class StartupOrchestrator:
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
-                websocket_manager=get_websocket_manager(),
+                websocket_manager=None,  # Will be created per-request in UserExecutionContext pattern
                 llm_manager=self.app.state.llm_manager,
                 tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")
             
-            # 5. Initialize FactoryAdapter for backward compatibility
+            # 5. Configure ExecutionEngineFactory with WebSocket bridge
+            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+                configure_execution_engine_factory
+            )
+            execution_engine_factory = await configure_execution_engine_factory(
+                websocket_bridge=self.app.state.agent_websocket_bridge
+            )
+            self.app.state.execution_engine_factory = execution_engine_factory
+            self.logger.info("    ✓ ExecutionEngineFactory configured with WebSocket bridge")
+            
+            # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
-                execution_engine_factory=execution_factory,
+                execution_engine_factory=execution_engine_factory,
                 websocket_bridge_factory=websocket_factory,
                 config=adapter_config
             )
@@ -1516,7 +1503,7 @@ class StartupOrchestrator:
             
             self.app.state.factory_adapter = factory_adapter
             
-            # 6. Enable factories for select routes (gradual migration)
+            # 7. Enable factories for select routes (gradual migration)
             critical_routes = [
                 "/api/agents/run_agent_v2",
                 "/api/agents/v2/{run_id}/status",

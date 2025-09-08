@@ -100,12 +100,16 @@ class CorpusClickHouseOperations:
         async with get_clickhouse_client() as client:
             await client.execute(query)
 
-    def _update_corpus_status_success(self, corpus_id: str, db: AsyncSession):
+    async def _update_corpus_status_success(self, corpus_id: str, db: AsyncSession):
         """Update corpus status to AVAILABLE in PostgreSQL"""
-        db.query(models.Corpus).filter(
+        from sqlalchemy import update
+        
+        query = update(models.Corpus).where(
             models.Corpus.id == corpus_id
-        ).update({"status": CorpusStatus.AVAILABLE.value})
-        db.commit()
+        ).values(status=CorpusStatus.AVAILABLE.value)
+        
+        await db.execute(query)
+        await db.commit()
 
     def _build_success_payload(self, corpus_id: str, table_name: str) -> Dict:
         """Build success notification payload"""
@@ -138,12 +142,16 @@ class CorpusClickHouseOperations:
             f"Created ClickHouse table {table_name} for corpus {corpus_id}"
         )
 
-    def _update_corpus_status_failed(self, corpus_id: str, db: AsyncSession):
+    async def _update_corpus_status_failed(self, corpus_id: str, db: AsyncSession):
         """Update corpus status to FAILED in PostgreSQL"""
-        db.query(models.Corpus).filter(
+        from sqlalchemy import update
+        
+        query = update(models.Corpus).where(
             models.Corpus.id == corpus_id
-        ).update({"status": CorpusStatus.FAILED.value})
-        db.commit()
+        ).values(status=CorpusStatus.FAILED.value)
+        
+        await db.execute(query)
+        await db.commit()
 
     def _build_error_payload(self, corpus_id: str, error: Exception) -> Dict:
         """Build error notification payload"""
@@ -178,7 +186,7 @@ class CorpusClickHouseOperations:
     ):
         """Handle corpus table creation error"""
         self._log_creation_error(corpus_id, error)
-        self._update_corpus_status_failed(corpus_id, db)
+        await self._update_corpus_status_failed(corpus_id, db)
         await self._send_error_notification(corpus_id, error)
         raise ClickHouseOperationError(f"Failed to create table: {str(error)}")
 
@@ -186,7 +194,7 @@ class CorpusClickHouseOperations:
         self, corpus_id: str, table_name: str, db: AsyncSession
     ):
         """Execute successful table creation flow"""
-        self._update_corpus_status_success(corpus_id, db)
+        await self._update_corpus_status_success(corpus_id, db)
         await self._send_success_notification(corpus_id, table_name)
         self._log_creation_success(corpus_id, table_name)
 

@@ -27,7 +27,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from shared.isolated_environment import IsolatedEnvironment
 
 # =============================================================================
@@ -374,7 +374,7 @@ class TestEventIngestionEndpoint:
     
     async def test_successful_event_ingestion(self, analytics_api, sample_event_batch):
         """Test successful event batch ingestion"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             payload = {
                 "events": sample_event_batch,
                 "context": {"user_id": "test-user-123"}
@@ -393,7 +393,7 @@ class TestEventIngestionEndpoint:
     
     async def test_event_ingestion_validation_errors(self, analytics_api):
         """Test event ingestion with validation errors"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Mix of valid and invalid events
             payload = {
                 "events": [
@@ -435,7 +435,7 @@ class TestEventIngestionEndpoint:
     
     async def test_empty_event_batch(self, analytics_api):
         """Test ingestion of empty event batch"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             payload = {
                 "events": [],
                 "context": {"user_id": "test-user"}
@@ -452,7 +452,7 @@ class TestEventIngestionEndpoint:
     
     async def test_malformed_request_body(self, analytics_api):
         """Test ingestion with malformed request body"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Invalid JSON structure
             response = await client.post("/api/analytics/events", json={"invalid": "structure"})
             
@@ -460,7 +460,7 @@ class TestEventIngestionEndpoint:
     
     async def test_large_event_batch_ingestion(self, analytics_api, high_volume_event_generator):
         """Test ingestion of large event batch"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             large_batch = high_volume_event_generator(count=1000)
             payload = {
                 "events": large_batch,
@@ -495,7 +495,7 @@ class TestRateLimiting:
     
     async def test_event_ingestion_rate_limiting(self, analytics_api, sample_chat_interaction_event):
         """Test rate limiting for event ingestion"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             user_id = "rate-limit-test-user"
             
             # Send events up to the limit
@@ -525,7 +525,7 @@ class TestRateLimiting:
     
     async def test_report_generation_rate_limiting(self, analytics_api):
         """Test rate limiting for report generation"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Artificially trigger rate limit
             rate_key = "report_test-user_testserver"
             rate_limiter.requests[rate_key] = [time.time()] * 61  # Exceed hourly limit
@@ -540,7 +540,7 @@ class TestRateLimiting:
     
     async def test_health_check_rate_limiting(self, analytics_api):
         """Test rate limiting for health checks"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Artificially trigger rate limit
             rate_key = "health_testserver"
             rate_limiter.requests[rate_key] = [time.time()] * 3601  # Exceed limit
@@ -563,7 +563,7 @@ class TestReportEndpoints:
     
     async def test_user_activity_report_generation(self, analytics_api):
         """Test user activity report generation"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get(
                 "/api/analytics/reports/user-activity",
                 params={
@@ -591,7 +591,7 @@ class TestReportEndpoints:
     
     async def test_user_activity_report_with_optional_params(self, analytics_api):
         """Test user activity report with minimal parameters"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get("/api/analytics/reports/user-activity")
             
             assert response.status_code == 200
@@ -602,7 +602,7 @@ class TestReportEndpoints:
     
     async def test_prompt_analysis_report_generation(self, analytics_api):
         """Test prompt analysis report generation"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get(
                 "/api/analytics/reports/prompts",
                 params={
@@ -628,7 +628,7 @@ class TestReportEndpoints:
     
     async def test_prompt_analysis_report_invalid_time_range(self, analytics_api):
         """Test prompt analysis with invalid time range parameter"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get(
                 "/api/analytics/reports/prompts",
                 params={"time_range": "invalid_range"}
@@ -638,7 +638,7 @@ class TestReportEndpoints:
     
     async def test_prompt_analysis_report_invalid_min_frequency(self, analytics_api):
         """Test prompt analysis with invalid min_frequency parameter"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get(
                 "/api/analytics/reports/prompts",
                 params={"min_frequency": -1}
@@ -660,7 +660,7 @@ class TestHealthCheckEndpoint:
     
     async def test_health_check_success(self, analytics_api):
         """Test successful health check"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get("/health")
             
             assert response.status_code == 200
@@ -680,7 +680,7 @@ class TestHealthCheckEndpoint:
     
     async def test_health_check_response_format(self, analytics_api):
         """Test health check response format"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get("/health")
             
             assert response.status_code == 200
@@ -706,7 +706,7 @@ class TestAPIPerformance:
     
     async def test_event_ingestion_response_time(self, analytics_api, sample_event_batch, analytics_performance_monitor):
         """Test event ingestion response time"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             payload = {
                 "events": sample_event_batch,
                 "context": {"user_id": "perf-test-user"}
@@ -727,7 +727,7 @@ class TestAPIPerformance:
     
     async def test_report_generation_response_time(self, analytics_api, analytics_performance_monitor):
         """Test report generation response time"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             analytics_performance_monitor.start_measurement("query_response")
             response = await client.get(
                 "/api/analytics/reports/user-activity",
@@ -746,7 +746,7 @@ class TestAPIPerformance:
     
     async def test_concurrent_api_requests(self, analytics_api, sample_chat_interaction_event):
         """Test concurrent API requests handling"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Prepare concurrent requests
             tasks = []
             for i in range(10):
@@ -783,7 +783,7 @@ class TestAPIErrorHandling:
     
     async def test_invalid_content_type(self, analytics_api):
         """Test API with invalid content type"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.post(
                 "/api/analytics/events",
                 content="plain text data",
@@ -795,14 +795,14 @@ class TestAPIErrorHandling:
     
     async def test_missing_request_body(self, analytics_api):
         """Test API with missing request body"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.post("/api/analytics/events")
             
             assert response.status_code == 422  # Validation error
     
     async def test_invalid_query_parameters(self, analytics_api):
         """Test report endpoint with invalid query parameters"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get(
                 "/api/analytics/reports/user-activity",
                 params={"granularity": "invalid_granularity"}
@@ -812,7 +812,7 @@ class TestAPIErrorHandling:
     
     async def test_nonexistent_endpoint(self, analytics_api):
         """Test request to nonexistent endpoint"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             response = await client.get("/api/analytics/nonexistent")
             
             assert response.status_code == 404
@@ -832,7 +832,7 @@ class TestAPIWithFixtures:
     async def test_api_with_all_sample_events(self, analytics_api, sample_chat_interaction_event, 
                                             sample_survey_response_event, sample_performance_event):
         """Test API with all sample event types from fixtures"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             events = [
                 sample_chat_interaction_event,
                 sample_survey_response_event,
@@ -854,7 +854,7 @@ class TestAPIWithFixtures:
     
     async def test_api_performance_with_high_volume_generator(self, analytics_api, high_volume_event_generator, analytics_performance_monitor):
         """Test API performance with high volume event generator"""
-        async with AsyncClient(app=analytics_api, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=analytics_api), base_url="http://test") as client:
             # Generate smaller batch for API testing (API has more overhead than direct processing)
             events = high_volume_event_generator(count=100)
             

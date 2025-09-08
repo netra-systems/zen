@@ -119,65 +119,32 @@ async def real_sub_agents():
     # Create REAL agent instances using actual available agents
     agents = {}
     
-    try:
-        agents["data"] = DataSubAgent(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-            websocket_manager=websocket_manager
-        )
-    except Exception as e:
-        # Create stub that explains the issue but allows test to continue
-        agents["data"] = type('StubDataAgent', (), {
-            'execute': lambda self, *args, **kwargs: {
-                "error": f"DataSubAgent initialization failed: {e}", 
-                "status": "error",
-                "agent": "data_sub_agent"
-            }
-        })()
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    agents["data"] = DataSubAgent(
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher,
+        websocket_manager=websocket_manager
+    )
     
-    try:
-        agents["optimizations"] = OptimizationsCoreSubAgent(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-            websocket_manager=websocket_manager
-        )
-    except Exception as e:
-        agents["optimizations"] = type('StubOptimizationAgent', (), {
-            'execute': lambda self, *args, **kwargs: {
-                "error": f"OptimizationsCoreSubAgent initialization failed: {e}", 
-                "status": "error",
-                "agent": "optimizations_core_sub_agent"
-            }
-        })()
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    agents["optimizations"] = OptimizationsCoreSubAgent(
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher,
+        websocket_manager=websocket_manager
+    )
     
-    try:
-        agents["actions"] = ActionsToMeetGoalsSubAgent(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher
-        )
-    except Exception as e:
-        agents["actions"] = type('StubActionAgent', (), {
-            'execute': lambda self, *args, **kwargs: {
-                "error": f"ActionsToMeetGoalsSubAgent initialization failed: {e}", 
-                "status": "error",
-                "agent": "actions_to_meet_goals_sub_agent"
-            }
-        })()
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    agents["actions"] = ActionsToMeetGoalsSubAgent(
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher
+    )
         
-    try:
-        agents["reporting"] = ReportingSubAgent(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-            websocket_manager=websocket_manager
-        )
-    except Exception as e:
-        agents["reporting"] = type('StubReportingAgent', (), {
-            'execute': lambda self, *args, **kwargs: {
-                "error": f"ReportingSubAgent initialization failed: {e}", 
-                "status": "error",
-                "agent": "reporting_sub_agent"
-            }
-        })()
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    agents["reporting"] = ReportingSubAgent(
+        llm_manager=llm_manager,
+        tool_dispatcher=tool_dispatcher,
+        websocket_manager=websocket_manager
+    )
     
     return agents
 
@@ -226,22 +193,13 @@ async def real_websocket():
     session = aiohttp.ClientSession()
     ws_url = TEST_ENDPOINTS.ws_url
     
-    try:
-        # Create REAL WebSocket connection to actual service
-        ws = await session.ws_connect(ws_url)
-        yield ws
-    except Exception as e:
-        # If real service unavailable, fail the test (per CLAUDE.md - real services required)
-        raise RuntimeError(
-            f"Failed to connect to REAL WebSocket service at {ws_url}. "
-            f"E2E tests require REAL services per CLAUDE.md: {e}"
-        )
-    finally:
-        try:
-            await ws.close()
-        except:
-            pass
-        await session.close()
+    # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
+    # Create REAL WebSocket connection to actual service
+    ws = await session.ws_connect(ws_url)
+    yield ws
+    # Cleanup - but must raise errors if cleanup fails
+    await ws.close()
+    await session.close()
 
 
 @pytest.fixture

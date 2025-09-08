@@ -435,40 +435,38 @@ async def service_lifecycle_manager():
 
 
 # =============================================================================
-# LEGACY COMPATIBILITY HELPERS
+# LEGACY COMPATIBILITY HELPERS REMOVED
+# Use unified configuration management and app factory patterns instead
 # =============================================================================
 
-class _ConfigManagerHelper:
-    """Helper class for configuration management in tests."""
-    
-    def __init__(self):
-        self.config = {}
-    
-    def get_config(self, key: str, default: Any = None) -> Any:
-        """Get configuration value."""
-        return self.config.get(key, default)
-    
-    def set_config(self, key: str, value: Any):
-        """Set configuration value."""
-        self.config[key] = value
-    
-    def reset_config(self):
-        """Reset configuration."""
-        self.config.clear()
 
+# =============================================================================
+# TEST APP FACTORY
+# =============================================================================
 
 def create_test_app():
-    """Create test application instance."""
+    """
+    Create a minimal FastAPI test application.
+    
+    This is a SSOT test app factory that provides a clean FastAPI instance
+    for testing without any service dependencies or complex setup.
+    
+    Returns:
+        FastAPI: A minimal FastAPI application instance for testing
+    """
     try:
         from fastapi import FastAPI
-        app = FastAPI(title="Test App", version="1.0.0")
+        app = FastAPI(
+            title="Test Application",
+            description="Minimal test app for unit testing",
+            version="test"
+        )
         return app
     except ImportError:
-        # Return mock app if FastAPI not available
+        # Fallback mock if FastAPI not available
         from unittest.mock import MagicMock
         mock_app = MagicMock()
-        mock_app.title = "Test App"
-        mock_app.version = "1.0.0"
+        mock_app.include_router = MagicMock()
         return mock_app
 
 
@@ -503,7 +501,6 @@ __all__ = [
     'service_health_check',
     'service_lifecycle_manager',
     
-    # Legacy helpers
-    '_ConfigManagerHelper',
-    'create_test_app'
+    # Test app factory
+    'create_test_app',
 ]

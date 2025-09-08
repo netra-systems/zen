@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """
 Test that exposes the LLM health check issue in the health route.

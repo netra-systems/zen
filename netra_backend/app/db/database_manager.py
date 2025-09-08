@@ -183,7 +183,7 @@ class DatabaseManager:
             if not database_url:
                 raise ValueError(
                     "DatabaseURLBuilder failed to construct URL and no config fallback available. "
-                    "Ensure DATABASE_URL or proper POSTGRES_* environment variables are set."
+                    "Ensure proper POSTGRES_* environment variables are set."
                 )
         
         # CRITICAL: Use DatabaseURLBuilder to format URL for asyncpg driver

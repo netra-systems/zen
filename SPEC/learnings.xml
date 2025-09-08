@@ -866,7 +866,7 @@
                     <cause>No mechanism to load non-secret environment variables during config initialization</cause>
                 </root-causes>
                 <solution>
-                    <step>Added __init__ method to StagingConfig to load DATABASE_URL from environment</step>
+                    <step>Added __init__ method to StagingConfig to load #removed-legacyfrom environment</step>
                     <step>Created _load_critical_env_vars() method in ConfigManager to load critical env vars</step>
                     <step>Added redis_url and clickhouse_url fields to base AppConfig</step>
                     <step>Ensured JWT_SECRET_KEY, FERNET_KEY, and GEMINI_API_KEY are loaded from environment</step>
@@ -990,7 +990,7 @@
                     <cause>Terraform creates PostgreSQL container but doesn't create application tables</cause>
                     <cause>No automatic table creation on first startup</cause>
                     <cause>Startup checks verify table existence as critical requirement</cause>
-                    <cause>DATABASE_URL environment variable not always loaded correctly in scripts</cause>
+                    <cause>#removed-legacyenvironment variable not always loaded correctly in scripts</cause>
                 </root-causes>
                 <solution>
                     <step>Create init_database.py script to initialize all tables</step>
@@ -1024,7 +1024,7 @@
                     <action>Always verify database tables exist before running application</action>
                     <action>Include table creation in development setup documentation</action>
                     <action>Consider adding automatic table creation to startup process with flag</action>
-                    <action>Ensure DATABASE_URL is properly loaded in all database scripts</action>
+                    <action>Ensure #removed-legacyis properly loaded in all database scripts</action>
                 </prevention>
                 <key-insight>
                     Development database setup requires explicit table creation after container initialization.
@@ -1139,8 +1139,8 @@
                     </code>
                 </implementation>
                 <files-changed>
-                    <file>.env - Updated DATABASE_URL with port 5433</file>
-                    <file>.env.development.local - Updated DATABASE_URL and POSTGRES_PORT</file>
+                    <file>.env - Updated #removed-legacywith port 5433</file>
+                    <file>.env.development.local - Updated #removed-legacyand POSTGRES_PORT</file>
                     <file>dev_launcher/service_config.py - Changed PostgreSQL port to 5433</file>
                 </files-changed>
                 <debugging-steps>
@@ -1367,13 +1367,13 @@
                 </symptoms>
                 <root-causes>
                     <cause>.dev_services.json configured with postgres mode set to "mock"</cause>
-                    <cause>dev_launcher/service_config.py sets mock DATABASE_URL when mode is MOCK</cause>
+                    <cause>dev_launcher/service_config.py sets mock #removed-legacywhen mode is MOCK</cause>
                     <cause>Mock database only suitable for specific testing scenarios</cause>
                 </root-causes>
                 <solution>
                     <step>Changed .dev_services.json postgres mode from "mock" to "local"</step>
                     <step>Ensures real Postgres database used in development environment</step>
-                    <step>DATABASE_URL properly configured as postgresql://postgres:postgres@localhost:5432/netra_dev</step>
+                    <step>#removed-legacyproperly configured as postgresql://postgres:postgres@localhost:5432/netra_dev</step>
                 </solution>
                 <files-changed>
                     <file>.dev_services.json - Changed postgres mode from "mock" to "local"</file>

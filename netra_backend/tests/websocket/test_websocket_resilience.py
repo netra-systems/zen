@@ -4,7 +4,7 @@ Tests focused on connection resilience, error recovery, and network instability 
 """
 import pytest
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Skip this entire module due to missing dependencies

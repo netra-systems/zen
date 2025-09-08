@@ -74,7 +74,7 @@ resource "google_compute_backend_service" "api_backend" {
   name                  = "${var.environment}-api-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
+  timeout_sec           = var.backend_timeout_sec  # CRITICAL FIX: Use variable for flexible timeout (24 hours)
   project               = var.project_id
   
   backend {
@@ -83,16 +83,15 @@ resource "google_compute_backend_service" "api_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
-  # REQUIREMENT 2: Session affinity for WebSocket connections
+  # CRITICAL FIX: Session affinity for WebSocket connections
   session_affinity = "GENERATED_COOKIE"
-  
   affinity_cookie_ttl_sec = var.session_affinity_ttl_sec
   
-  # Health checks not supported for serverless NEGs
-  
-  # REQUIREMENT 4: Preserve X-Forwarded-Proto header
+  # CRITICAL FIX: Preserve headers for WebSocket upgrade
   custom_request_headers = [
-    "X-Forwarded-Proto: https"
+    "X-Forwarded-Proto: https",
+    "Connection: upgrade",
+    "Upgrade: websocket"
   ]
   
   log_config {
@@ -218,14 +217,14 @@ resource "google_compute_url_map" "https_lb" {
     name            = "api-paths"
     default_service = google_compute_backend_service.api_backend.id
     
-    # REQUIREMENT 5: WebSocket-specific path matchers
+    # CRITICAL FIX: WebSocket-specific path matchers with proper headers
     path_rule {
       paths   = ["/ws", "/ws/*", "/websocket", "/websocket/*"]
       service = google_compute_backend_service.api_backend.id
       
       route_action {
         timeout {
-          seconds = var.backend_timeout_sec
+          seconds = var.websocket_timeout_sec  # NEW: Dedicated WebSocket timeout
         }
       }
     }
@@ -253,12 +252,18 @@ resource "google_compute_url_map" "https_lb" {
     }
   }
   
-  # Add headers to support WebSocket upgrade
+  # CRITICAL FIX: Add header transformations for WebSocket support
   header_action {
     request_headers_to_add {
       header_name  = "X-Forwarded-Proto"
       header_value = "https"
       replace      = false
+    }
+    
+    request_headers_to_add {
+      header_name  = "X-WebSocket-Upgrade"
+      header_value = "true"
+      replace      = true
     }
   }
 }

@@ -72,7 +72,7 @@ from .base import (
     DatabaseTestCase,
     WebSocketTestCase,
     IntegrationTestCase,
-    TestExecutionMetrics,
+    ExecutionMetrics,
     validate_test_class,
     get_test_base_for_category
 )
@@ -421,7 +421,7 @@ __all__ = [
     "DatabaseTestCase", 
     "WebSocketTestCase",
     "IntegrationTestCase",
-    "TestExecutionMetrics",
+    "ExecutionMetrics",
     
     # Mock utilities
     "MockFactory",

@@ -8,7 +8,6 @@ import pytest
 from unittest.mock import patch, AsyncMock
 from datetime import datetime, timezone
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-# from auth_service.core.auth_manager import AuthManager  # Commented out - not available
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -22,7 +21,7 @@ from netra_backend.app.agents.data.unified_data_agent import (
     UsagePatternStrategy,
     CostOptimizationStrategy
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestUnifiedDataAgentFactory:
@@ -425,7 +424,7 @@ class TestUnifiedDataAgentExecution:
             request_id="test_req_ws",
             thread_id="test_thread",
             run_id="test_run_ws",
-            websocket_connection_id="test_ws_connection"
+            websocket_client_id="test_ws_connection"
         )
         
         # Mock WebSocket manager (this should be patched at the agent level)

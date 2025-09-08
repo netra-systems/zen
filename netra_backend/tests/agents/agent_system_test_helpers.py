@@ -60,9 +60,9 @@ class MockSupervisorAgent:
         try:
             await asyncio.sleep(0.1)  # Simulate processing
             return TypedAgentResult(
-                status=ExecutionStatus.SUCCESS,
+                success=True,
                 result="Analysis completed successfully",
-                execution_time=0.1
+                metadata={"execution_time": 0.1}
             )
         finally:
             self.active_executions.discard(run_id)
@@ -71,26 +71,25 @@ class MockSupervisorAgent:
         """Aggregate responses from multiple agents"""
         if not responses:
             return TypedAgentResult(
-                status=ExecutionStatus.FAILED,
+                success=False,
                 result="No responses to aggregate",
-                execution_time=0.0
+                error="No responses to aggregate",
+                metadata={"execution_time": 0.0}
             )
             
-        successful_responses = {k: v for k, v in responses.items() if v.status == ExecutionStatus.SUCCESS}
-        failed_responses = {k: v for k, v in responses.items() if v.status == ExecutionStatus.FAILED}
+        successful_responses = {k: v for k, v in responses.items() if v.success}
+        failed_responses = {k: v for k, v in responses.items() if not v.success}
         
         if not successful_responses:
             return TypedAgentResult(
-                status=ExecutionStatus.FAILED,
+                success=False,
                 result="All agents failed",
-                execution_time=sum(r.execution_time for r in responses.values())
+                error="All agents failed",
+                metadata={"execution_time": sum(r.metadata.get("execution_time", 0) for r in responses.values())}
             )
             
         # Determine overall status
-        if failed_responses:
-            overall_status = ExecutionStatus.PARTIAL_SUCCESS
-        else:
-            overall_status = ExecutionStatus.SUCCESS
+        overall_success = not failed_responses
             
         # Combine results
         result_parts = []
@@ -102,9 +101,12 @@ class MockSupervisorAgent:
                 result_parts.append(f"{agent}: {response.result}")
                 
         return TypedAgentResult(
-            status=overall_status,
+            success=overall_success,
             result="; ".join(result_parts),
-            execution_time=max(r.execution_time for r in responses.values())
+            metadata={
+                "execution_time": max(r.metadata.get("execution_time", 0) for r in responses.values()),
+                "partial_success": bool(failed_responses)
+            }
         )
         
     async def _generate_cost_optimization_recommendations(self, cost_data: Dict[str, Dict[str, Any]]) -> List[str]:
@@ -129,13 +131,14 @@ class MockSupervisorAgent:
         
         if self.current_daily_spend + estimated_cost > self.daily_budget:
             return TypedAgentResult(
-                status=ExecutionStatus.FAILED,
+                success=False,
                 result="Daily budget exceeded",
-                execution_time=0.0
+                error="Daily budget exceeded",
+                metadata={"execution_time": 0.0}
             )
             
         result = await self.execute(state, run_id)
-        if result.status == ExecutionStatus.SUCCESS:
+        if result.success:
             self.current_daily_spend += estimated_cost
             
         return result
@@ -169,15 +172,17 @@ class MockSupervisorAgent:
             if len(response.result) < 20:
                 enhanced_result = f"Enhanced response: {response.result} - providing additional context and details"
                 return TypedAgentResult(
-                    status=response.status,
+                    success=response.success,
                     result=enhanced_result,
-                    execution_time=response.execution_time
+                    error=response.error,
+                    metadata=response.metadata
                 )
             else:
                 return TypedAgentResult(
-                    status=ExecutionStatus.NEEDS_IMPROVEMENT,
+                    success=False,
                     result=response.result,
-                    execution_time=response.execution_time
+                    error="Quality score below threshold",
+                    metadata=response.metadata
                 )
                 
         return response
@@ -205,9 +210,10 @@ class MockSupervisorAgent:
                 continue
                 
         return TypedAgentResult(
-            status=ExecutionStatus.FAILED,
+            success=False,
             result="All fallback options exhausted",
-            execution_time=0.0
+            error="All fallback options exhausted",
+            metadata={"execution_time": 0.0}
         )
         
     async def _execute_with_access_control(self, state: DeepAgentState, run_id: str) -> TypedAgentResult:
@@ -217,16 +223,18 @@ class MockSupervisorAgent:
         # Check if user has required permissions
         if not user_permissions:
             return TypedAgentResult(
-                status=ExecutionStatus.FORBIDDEN,
+                success=False,
                 result="Access denied - no permissions",
-                execution_time=0.0
+                error="Access denied - no permissions",
+                metadata={"execution_time": 0.0}
             )
             
         if "sensitive_operation" in state.request_type and "admin" not in user_permissions:
             return TypedAgentResult(
-                status=ExecutionStatus.FORBIDDEN,
+                success=False,
                 result="Access denied - insufficient permissions",
-                execution_time=0.0
+                error="Access denied - insufficient permissions",
+                metadata={"execution_time": 0.0}
             )
             
         return await self.execute(state, run_id)
@@ -250,9 +258,9 @@ class MockAgentRegistry:
         agent = Mock()
         # Mock: Agent service isolation for testing without LLM agent execution
         agent.execute = AsyncMock(return_value=TypedAgentResult(
-            status=ExecutionStatus.SUCCESS,
+            success=True,
             result=f"Mock result from {name}",
-            execution_time=0.5
+            metadata={"execution_time": 0.5}
         ))
         return agent
 

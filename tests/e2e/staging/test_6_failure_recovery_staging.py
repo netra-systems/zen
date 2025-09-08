@@ -54,7 +54,13 @@ class TestFailureRecoveryStaging(StagingTestBase):
         }
         
         for name, config in strategies.items():
-            assert "delay" in config or "initial_delay" in config
+            # Check for any delay-related configuration
+            has_delay_config = (
+                "delay" in config or 
+                "initial_delay" in config or 
+                "base_delay" in config
+            )
+            assert has_delay_config, f"Strategy '{name}' missing delay configuration: {config}"
             print(f"[INFO] Strategy '{name}': {config}")
             
         print(f"[PASS] Validated {len(strategies)} retry strategies")

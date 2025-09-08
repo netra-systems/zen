@@ -165,17 +165,28 @@ async def health(request: Request, response: Response) -> Dict[str, Any]:
         pass  # Continue to normal health check
     
     # Startup is complete, proceed with normal health check
-    health_status = await health_interface.get_health_status(HealthLevel.BASIC)
-    
-    # Add version-specific fields based on requested API version
-    if requested_version in ["1.0", "2024-08-01"]:
-        health_status["version_info"] = {
-            "api_version": requested_version,
-            "service_version": "1.0.0",
-            "supported_versions": ["current", "1.0", "2024-08-01"]
-        }
-    
-    return health_status
+    try:
+        health_status = await health_interface.get_health_status(HealthLevel.BASIC)
+        
+        # Add version-specific fields based on requested API version
+        if requested_version in ["1.0", "2024-08-01"]:
+            health_status["version_info"] = {
+                "api_version": requested_version,
+                "service_version": "1.0.0",
+                "supported_versions": ["current", "1.0", "2024-08-01"]
+            }
+        
+        return health_status
+    except Exception as e:
+        # CRITICAL FIX: Prevent health interface exceptions from causing 500 errors
+        # This should never happen with BASIC level, but provides safety for staging
+        logger.error(f"Health interface failed unexpectedly: {e}")
+        return _create_error_response(503, {
+            "status": "unhealthy",
+            "message": f"Health check system error: {str(e)}",
+            "fallback": True,
+            "timestamp": time.time()
+        })
 
 
 # Add separate endpoint for /health (without trailing slash) to handle direct requests
@@ -214,7 +225,7 @@ async def _check_postgres_connection(db: AsyncSession) -> None:
         from shared.isolated_environment import get_env
         env_name = get_env().get("ENVIRONMENT", "development")
         if env_name not in ["testing", "development"]:
-            raise ValueError("DATABASE_URL is not configured")
+            raise ValueError("#removed-legacyis not configured")
 
 async def _check_clickhouse_connection() -> None:
     """Check ClickHouse database connection (non-blocking for readiness)."""
@@ -507,23 +518,14 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
-        # Initialize postgres through service pattern
-        from netra_backend.app.db.postgres import initialize_postgres
-        from netra_backend.app.db.postgres_core import async_engine
+        # Use SSOT database module for engine access
+        from netra_backend.app.database import get_engine
         from netra_backend.app.services.database_operations_service import (
             database_operations_service,
         )
         
-        # Always get fresh reference to engine after ensuring initialization
-        if async_engine is None:
-            initialize_postgres()
-            # Get fresh reference after initialization
-            from netra_backend.app.db.postgres_core import async_engine as engine_ref
-            if engine_ref is None:
-                raise RuntimeError("Database engine not initialized after initialization")
-            engine = engine_ref
-        else:
-            engine = async_engine
+        # Get engine via SSOT pattern
+        engine = get_engine()
             
         return await SchemaValidationService.validate_schema(engine)
     except Exception as e:

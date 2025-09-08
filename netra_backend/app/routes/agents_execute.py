@@ -22,6 +22,21 @@ from netra_backend.app.dependencies import get_agent_service
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service import AgentService
 
+def get_agent_service_optional(request: Request) -> Optional["AgentService"]:
+    """Get agent service from app state - returns None if not available.
+    
+    This is used for endpoints that can function in degraded mode without AgentService.
+    Unlike get_agent_service(), this does not raise exceptions for missing services.
+    """
+    try:
+        return get_agent_service(request)
+    except RuntimeError as e:
+        logger.warning(f"AgentService not available: {e}")
+        return None
+    except Exception as e:
+        logger.warning(f"Failed to get AgentService: {e}")
+        return None
+
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
 
@@ -69,7 +84,7 @@ class CircuitBreakerStatus(BaseModel):
 async def execute_agent(
     request: AgentExecuteRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),  # Allow optional auth for E2E tests
-    agent_service: AgentService = Depends(get_agent_service)
+    agent_service: Optional[AgentService] = Depends(get_agent_service_optional)
 ) -> AgentExecuteResponse:
     """Execute an agent task."""
     start_time = asyncio.get_event_loop().time()
@@ -91,14 +106,25 @@ async def execute_agent(
             logger.warning(f"Simulating timeout for test message: {request.message}")
             await asyncio.sleep(20)  # Simulate long processing that will timeout
         
+        # Check if agent service is available
+        if not agent_service:
+            # Service not available - provide degraded mode response
+            logger.warning(f"AgentService not available, providing degraded mode response for {request.type}")
+            response_text = f"Degraded mode {request.type} response: Service unavailable, request acknowledged: {request.message}"
+            
+            return AgentExecuteResponse(
+                status="service_unavailable",
+                agent=request.type,
+                response=response_text,
+                execution_time=asyncio.get_event_loop().time() - start_time,
+                circuit_breaker_state="UNKNOWN"
+            )
+        
         # For E2E testing, provide quick mock responses to test circuit breaker logic
         if request.message.startswith("Test") or request.message.startswith("WebSocket") or "test" in request.message.lower():
             response_text = f"Mock {request.type} agent response for: {request.message}"
         else:
             # Use actual agent service for real scenarios
-            if not agent_service:
-                raise HTTPException(status_code=503, detail="Agent service not available")
-            
             try:
                 result = await asyncio.wait_for(
                     agent_service.execute_agent(
@@ -174,7 +200,7 @@ async def execute_agent(
 async def execute_triage_agent(
     request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
-    agent_service: AgentService = Depends(get_agent_service)
+    agent_service: Optional[AgentService] = Depends(get_agent_service_optional)
 ) -> AgentExecuteResponse:
     """Execute triage agent - specific endpoint for testing."""
     return await execute_agent_with_type(request, "triage", user, agent_service)
@@ -184,7 +210,7 @@ async def execute_triage_agent(
 async def execute_data_agent(
     request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
-    agent_service: AgentService = Depends(get_agent_service)
+    agent_service: Optional[AgentService] = Depends(get_agent_service_optional)
 ) -> AgentExecuteResponse:
     """Execute data agent - specific endpoint for testing."""
     return await execute_agent_with_type(request, "data", user, agent_service)
@@ -194,7 +220,7 @@ async def execute_data_agent(
 async def execute_optimization_agent(
     request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
-    agent_service: AgentService = Depends(get_agent_service)
+    agent_service: Optional[AgentService] = Depends(get_agent_service_optional)
 ) -> AgentExecuteResponse:
     """Execute optimization agent - specific endpoint for testing."""
     return await execute_agent_with_type(request, "optimization", user, agent_service)
@@ -203,7 +229,7 @@ async def execute_agent_with_type(
     request: AgentSpecificRequest, 
     agent_type: str, 
     user: Optional[Dict], 
-    agent_service: AgentService
+    agent_service: Optional[AgentService]
 ) -> AgentExecuteResponse:
     """Common agent execution logic with type-specific handling."""
     # Create a new request with the correct agent type

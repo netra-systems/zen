@@ -14,7 +14,7 @@
     # REMOVED_SYNTAX_ERROR: import uuid
     # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import pytest
@@ -57,7 +57,7 @@
 
 
     # Create required dependencies
-    # REMOVED_SYNTAX_ERROR: db_session = TestDatabaseManager().get_session() instead of Mock
+    # REMOVED_SYNTAX_ERROR: db_session = DatabaseTestManager().get_session() instead of Mock
     # REMOVED_SYNTAX_ERROR: tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service instead of Mock
 
     # REMOVED_SYNTAX_ERROR: supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)

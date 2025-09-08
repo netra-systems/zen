@@ -10,7 +10,10 @@
 # ================================
 
 import time
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -38,7 +41,7 @@ from netra_backend.app.agents.synthetic_data_metrics_handler import (
 )
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import log_agent_communication
 from netra_backend.app.logging_config import central_logger
@@ -50,7 +53,7 @@ logger = central_logger.get_logger(__name__)
 class SyntheticDataSubAgent(BaseAgent):
     """Sub-agent dedicated to synthetic data generation"""
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[ToolDispatcher] = None):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, tool_dispatcher: Optional[UnifiedToolDispatcher] = None):
         super().__init__(
             llm_manager, 
             name="SyntheticDataSubAgent", 
@@ -86,8 +89,8 @@ class SyntheticDataSubAgent(BaseAgent):
         if not isinstance(context, UserExecutionContext):
             raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
         
-        # Create database session manager
-        db_manager = DatabaseSessionManager(context)
+        # Create database session manager (stub implementation)
+        db_manager = DatabaseSessionManager()
         
         try:
             log_agent_communication("Supervisor", "SyntheticDataSubAgent", context.run_id, "execute_request")
@@ -130,7 +133,7 @@ class SyntheticDataSubAgent(BaseAgent):
     
     async def _execute_main_flow_with_context(self, context: UserExecutionContext, 
                                          stream_updates: bool, start_time: float, 
-                                         db_manager: DatabaseSessionManager) -> None:
+                                         db_manager: 'DatabaseSessionManager') -> None:
         """Execute the main generation flow using UserExecutionContext."""
         user_request = context.metadata.get("user_request", "")
         workload_profile = await self._determine_workload_profile_from_request(user_request)

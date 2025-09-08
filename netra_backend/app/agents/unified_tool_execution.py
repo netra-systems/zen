@@ -336,13 +336,14 @@ class UnifiedToolExecutionEngine:
         from langchain_core.tools import BaseTool
         if isinstance(tool, BaseTool):
             # BaseTool.arun expects the input as a single argument or dict
-            # Convert kwargs to the format expected by the tool
+            # For our custom tools, we need to pass context via kwargs
+            context = kwargs.get('context')
             if tool_kwargs:
-                # If there are parameters, pass them as tool input
-                return await tool.arun(tool_kwargs)
+                # If there are parameters, pass them as tool input, context via kwargs
+                return await tool.arun(tool_kwargs, context=context)
             else:
-                # If no parameters, pass empty dict
-                return await tool.arun({})
+                # If no parameters, pass empty dict, context via kwargs
+                return await tool.arun({}, context=context)
         elif hasattr(tool, 'arun'):
             return await tool.arun(**tool_kwargs)
         elif asyncio.iscoroutinefunction(tool):
@@ -578,11 +579,8 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception instead of silent return
-            raise ConnectionError(
-                operation=f"tool_executing({tool_name})",
-                user_id=context.user_id,
-                thread_id=context.thread_id
-            )
+            error_details = f"operation=tool_executing({tool_name}), user_id={context.user_id}, thread_id={context.thread_id}"
+            raise ConnectionError(f"WebSocket notification failed: {error_details}")
         
         # MONITORING: Track notification attempt
         correlation_id = self.notification_monitor.track_notification_attempted(
@@ -679,11 +677,8 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception
-            raise ConnectionError(
-                operation=f"tool_completed({tool_name})",
-                user_id=context.user_id,
-                thread_id=context.thread_id
-            )
+            error_details = f"operation=tool_completed({tool_name}), user_id={context.user_id}, thread_id={context.thread_id}"
+            raise ConnectionError(f"WebSocket notification failed: {error_details}")
         
         # MONITORING: Track notification attempt  
         correlation_id = self.notification_monitor.track_notification_attempted(
@@ -1122,4 +1117,13 @@ class UnifiedToolExecutionEngine:
             "timestamp": datetime.now(UTC).isoformat(),
             "reason": "emergency_shutdown"
         }
+
+
+# BACKWARD COMPATIBILITY: EnhancedToolExecutionEngine alias
+# This maintains backward compatibility per SSOT consolidation report
+# EnhancedToolExecutionEngine is a thin wrapper (alias) for UnifiedToolExecutionEngine
+# See: reports/TOOL_EXECUTION_CONSOLIDATION_REPORT.md - "backward compatibility wrapper"
+EnhancedToolExecutionEngine = UnifiedToolExecutionEngine
+
+logger.debug("✅ EnhancedToolExecutionEngine registered as backward compatibility alias for UnifiedToolExecutionEngine")
 

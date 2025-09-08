@@ -46,7 +46,7 @@ class TestStagingConfiguration:
         }
     
     def test_database_url_construction_from_postgres_vars(self, staging_env):
-        """Test that DATABASE_URL is correctly constructed from POSTGRES_* variables."""
+        """Test that #removed-legacyis correctly constructed from POSTGRES_* variables."""
         with patch.dict(os.environ, staging_env, clear=True):
             db_config = DatabaseConfig()
             
@@ -64,14 +64,14 @@ class TestStagingConfiguration:
     
     def test_environment_validator_checks_postgres_vars_not_database_url(self, staging_env):
         """Test that environment validator checks POSTGRES_* vars instead of DATABASE_URL."""
-        # Remove DATABASE_URL but keep POSTGRES_* vars
+        # Remove #removed-legacybut keep POSTGRES_* vars
         env_without_db_url = staging_env.copy()
         env_without_db_url.pop("DATABASE_URL", None)
         
         with patch.dict(os.environ, env_without_db_url, clear=True):
             validator = EnvironmentValidator()
             
-            # Should not fail when DATABASE_URL is missing but POSTGRES_* are present
+            # Should not fail when #removed-legacyis missing but POSTGRES_* are present
             try:
                 validator.validate_environment_at_startup()
                 # Should pass without errors

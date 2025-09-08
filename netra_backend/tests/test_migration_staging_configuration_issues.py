@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """Migration Configuration Staging Issues - Failing Tests
 

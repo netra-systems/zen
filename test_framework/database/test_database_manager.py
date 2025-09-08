@@ -8,7 +8,7 @@ from typing import Optional, Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
 
-class TestDatabaseManager:
+class DatabaseTestManager:
     """Mock database manager for testing purposes."""
     
     def __init__(self):

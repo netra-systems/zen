@@ -27,7 +27,7 @@ from enum import Enum
 import pytest
 import websocket
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode, WebSocketException
+from websockets import ConnectionClosed, InvalidStatusCode, WebSocketException
 
 # Import SSOT environment management
 from shared.isolated_environment import get_env
@@ -236,17 +236,15 @@ class WebSocketTestClient:
                 "X-Test-Timestamp": str(int(time.time()))
             })
             
-            # Connect with timeout
-            self.websocket = await asyncio.wait_for(
-                websockets.connect(
+            # Connect with timeout (Python 3.12 compatible)
+            async with asyncio.timeout(timeout):
+                self.websocket = await websockets.connect(
                     self.url,
                     extra_headers=test_headers,
                     ping_interval=20,
                     ping_timeout=10,
                     close_timeout=10
-                ),
-                timeout=timeout
-            )
+                )
             
             self.is_connected = True
             
@@ -601,9 +599,10 @@ class WebSocketTestUtility:
     async def _verify_server_availability(self):
         """Verify WebSocket server is available."""
         try:
-            # Simple connection test
-            test_ws = await websockets.connect(self.base_url, ping_timeout=5)
-            await test_ws.close()
+            # Simple connection test with Python 3.12 compatible timeout
+            async with asyncio.timeout(5):
+                test_ws = await websockets.connect(self.base_url, ping_timeout=5)
+                await test_ws.close()
             logger.debug("WebSocket server availability verified")
         except Exception as e:
             raise RuntimeError(f"WebSocket server not available at {self.base_url}: {e}")

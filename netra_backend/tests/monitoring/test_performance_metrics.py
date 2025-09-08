@@ -16,8 +16,8 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+# Removed non-existent AuthManager import
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -41,6 +41,7 @@ from netra_backend.app.agents.supervisor.comprehensive_observability import (
     SupervisorObservability
 )
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
 class TestPhaseTimer:
@@ -494,7 +495,7 @@ class TestSupervisorObservabilityIntegration:
         observability.stop_phase(context.run_id, "llm_processing")
         
         # Complete workflow
-        result = ExecutionResult(success=True, data={"test": "data"})
+        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id=context.request_id, data={"test": "data"})
         observability.complete_workflow_trace(context, result)
         
         # Check metrics

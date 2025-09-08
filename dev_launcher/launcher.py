@@ -899,7 +899,7 @@ class DevLauncher:
     
     def _validate_critical_env_vars(self):
         """Validate required environment variables."""
-        required_vars = ["DATABASE_URL", "JWT_SECRET_KEY"]
+        required_vars = ["JWT_SECRET_KEY"]
         
         for var in required_vars:
             value = self.env.get(var)

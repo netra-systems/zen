@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { useAnalytics } from '@/services/analyticsService';
+import { useAnalytics } from '../../services/analyticsService';
 import { useStatsigClient } from '@statsig/react-bindings';
 import { useGTM } from '@/hooks/useGTM';
 
@@ -32,7 +32,7 @@ describe('Analytics Service', () => {
       trackConversion: jest.fn()
     };
     (useGTM as jest.Mock).mockReturnValue({
-      events: () => mockGTMEvents
+      events: mockGTMEvents
     });
   });
 

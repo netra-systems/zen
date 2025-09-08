@@ -105,6 +105,4 @@ class MockClickHouseDatabase:
         }
 
 
-# Backward compatibility aliases
-DisabledClickHouseDatabase = MockClickHouseDatabase
-MockClickHouseClient = MockClickHouseDatabase
+# Backward compatibility aliases removed - use MockClickHouseDatabase directly

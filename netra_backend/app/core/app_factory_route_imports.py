@@ -105,7 +105,8 @@ def _import_core_routers() -> dict:
     from netra_backend.app.routes.llm_cache import router as llm_cache_router
     from netra_backend.app.routes.mcp import router as mcp_router
     from netra_backend.app.routes.threads_route import router as threads_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
+    from netra_backend.app.routes.messages import router as messages_router
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router, "messages_router": messages_router}
 
 
 def _import_extended_routers() -> dict:
@@ -128,15 +129,19 @@ def _import_extended_router_modules() -> tuple:
     from netra_backend.app.routes.websocket_isolated import (
         router as websocket_isolated_router,
     )
-    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router
+    from netra_backend.app.routes.circuit_breaker_status import (
+        router as circuit_breaker_router,
+    )
+    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router, circuit_breaker_router
 
 
 def _create_extended_router_dict(router_imports: tuple) -> dict:
     """Create extended router dictionary from imports."""
-    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router = router_imports
+    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_isolated_router, circuit_breaker_router = router_imports
     return {"health_extended_router": health_extended_router,
         "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router,
-        "websocket_router": websocket_router, "websocket_isolated_router": websocket_isolated_router}
+        "websocket_router": websocket_router, "websocket_isolated_router": websocket_isolated_router,
+        "circuit_breaker_router": circuit_breaker_router}
 
 
 def _import_test_routers() -> dict:

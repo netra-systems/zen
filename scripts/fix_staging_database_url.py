@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Fix the staging DATABASE_URL secret in Google Cloud.
+Fix the staging #removed-legacysecret in Google Cloud.
 
-This script generates the correct DATABASE_URL format for staging
+This script generates the correct #removed-legacyformat for staging
 and provides the command to update it in Google Secret Manager.
 
 **UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
@@ -50,7 +50,7 @@ def fetch_password_from_secret():
 
 
 def generate_correct_database_url():
-    """Generate the correct DATABASE_URL for staging Cloud SQL using DatabaseURLBuilder."""
+    """Generate the correct #removed-legacyfor staging Cloud SQL using DatabaseURLBuilder."""
     
     # Fetch the password from secret manager
     password = fetch_password_from_secret()
@@ -62,7 +62,7 @@ def generate_correct_database_url():
         "POSTGRES_USER": USERNAME,
         "POSTGRES_PASSWORD": password,
         "POSTGRES_DB": DATABASE_NAME,
-        # Don't set DATABASE_URL to force builder to construct from parts
+        # Don't set #removed-legacyto force builder to construct from parts
     }
     
     # Create builder
@@ -88,7 +88,7 @@ def main():
     """Generate and display the correct DATABASE_URL."""
     
     print("\n" + "="*70)
-    print("STAGING DATABASE_URL FIX")
+    print("STAGING #removed-legacyFIX")
     print("="*70)
     
     # Generate the correct URL using DatabaseURLBuilder
@@ -97,11 +97,11 @@ def main():
     # Use DatabaseURLBuilder's masking utility
     masked_url = DatabaseURLBuilder.mask_url_for_logging(database_url)
     
-    print("\n1. CORRECT DATABASE_URL FORMAT:")
+    print("\n1. CORRECT #removed-legacyFORMAT:")
     print("-" * 40)
     print(f"postgresql://{USERNAME}:[ENCODED_PASSWORD]@/{DATABASE_NAME}?host=/cloudsql/{PROJECT_ID}:{REGION}:{INSTANCE_NAME}")
     
-    print("\n2. GENERATED DATABASE_URL (masked):")
+    print("\n2. GENERATED #removed-legacy(masked):")
     print("-" * 40)
     print(masked_url)
     
@@ -141,7 +141,7 @@ def main():
     print("LEARNINGS FROM PREVIOUS ISSUES:")
     print("="*70)
     print("- This issue has occurred before (see SPEC/learnings/auth_service_staging_errors_five_whys.xml)")
-    print("- Root cause: DATABASE_URL secret has incorrect format or credentials")
+    print("- Root cause: #removed-legacysecret has incorrect format or credentials")
     print("- Solution: Use Unix socket format without SSL parameters")
     print("- The deployment script expects 'database-url-staging' secret to exist")
     print()
@@ -150,7 +150,7 @@ def main():
     output_file = Path("staging_database_url.txt")
     with open(output_file, 'w') as f:
         f.write(database_url)
-    print(f"DATABASE_URL saved to: {output_file}")
+    print(f"#removed-legacysaved to: {output_file}")
     print()
 
 

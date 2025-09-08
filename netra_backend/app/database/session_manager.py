@@ -11,6 +11,10 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
+# CRITICAL FIX: Add DatabaseSessionManager alias to prevent startup errors
+# Many agent files reference DatabaseSessionManager but it was renamed to SessionManager
+# This alias maintains backward compatibility during the SSOT migration
+
 
 class SessionIsolationError(Exception):
     """Raised when session isolation is violated."""

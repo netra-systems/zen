@@ -70,8 +70,9 @@ from netra_backend.app.db.models_supply import (
 # User models
 from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
+# TODO this should be from env
 # Database configuration
-DATABASE_URL = "postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev"
+#removed-legacy= "postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev"
 
 
 async def create_all_tables():

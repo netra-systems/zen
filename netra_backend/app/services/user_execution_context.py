@@ -60,6 +60,22 @@ class UserExecutionContext:
     designed to prevent any form of data leakage between concurrent requests
     while providing complete audit trail support.
     
+    **BACKWARD COMPATIBILITY LAYER:**
+    This implementation includes full backward compatibility with the supervisor
+    implementation patterns, supporting both interface styles:
+    
+    Services Style (Enhanced):
+    - separate `agent_context` and `audit_metadata` dictionaries
+    - `websocket_client_id` for WebSocket routing
+    - comprehensive security validation (20 forbidden patterns)
+    - enhanced operation depth tracking and hierarchical contexts
+    
+    Supervisor Style (Compatibility):
+    - unified `metadata` property (merges agent_context + audit_metadata)
+    - `websocket_connection_id` property alias for `websocket_client_id`
+    - `from_request_supervisor` factory method with single metadata parameter
+    - default operation_depth=0 and parent_request_id=None for compatibility
+    
     Key Design Principles:
     - Immutable after creation (frozen=True) - prevents accidental modification
     - No global state references - everything passed explicitly
@@ -481,6 +497,23 @@ class UserExecutionContext:
             parent_request_id=self.parent_request_id
         )
     
+    def with_websocket_connection_supervisor(self, connection_id: str) -> 'UserExecutionContext':
+        """Supervisor-compatible method for WebSocket connection attachment.
+        
+        This is an alias for `with_websocket_connection` to maintain compatibility
+        with supervisor implementation naming patterns.
+        
+        Args:
+            connection_id: WebSocket connection identifier
+            
+        Returns:
+            New UserExecutionContext with the WebSocket connection ID
+            
+        Raises:
+            InvalidContextError: If connection_id is invalid
+        """
+        return self.with_websocket_connection(connection_id)
+    
     def verify_isolation(self) -> bool:
         """Verify that this context has proper isolation from other requests.
         
@@ -530,24 +563,38 @@ class UserExecutionContext:
     def to_dict(self) -> Dict[str, Any]:
         """Convert context to dictionary for serialization and logging.
         
-        Note: Excludes db_session as it's not serializable and may contain
+        Note: Excludes db_session as it's not serializable and may contains
         sensitive connection information.
+        
+        **Backward Compatibility:** Includes both services and supervisor field names
+        for maximum compatibility.
         
         Returns:
             Dictionary representation of the context (safe for serialization)
         """
         return {
+            # Core fields (both implementations)
             'user_id': self.user_id,
             'thread_id': self.thread_id,
             'run_id': self.run_id,
             'request_id': self.request_id,
-            'websocket_client_id': self.websocket_client_id,
             'created_at': self.created_at.isoformat(),
-            'agent_context': copy.deepcopy(self.agent_context),
-            'audit_metadata': copy.deepcopy(self.audit_metadata),
             'operation_depth': self.operation_depth,
             'parent_request_id': self.parent_request_id,
-            'has_db_session': self.db_session is not None
+            'has_db_session': self.db_session is not None,
+            
+            # Services implementation fields
+            'websocket_client_id': self.websocket_client_id,
+            'agent_context': copy.deepcopy(self.agent_context),
+            'audit_metadata': copy.deepcopy(self.audit_metadata),
+            
+            # Supervisor compatibility fields
+            'websocket_connection_id': self.websocket_connection_id,  # Alias
+            'metadata': self.metadata,  # Unified metadata
+            
+            # Additional compatibility info
+            'implementation': 'services_with_supervisor_compatibility',
+            'compatibility_layer_active': True
         }
     
     def get_correlation_id(self) -> str:
@@ -578,6 +625,191 @@ class UserExecutionContext:
             'audit_metadata': copy.deepcopy(self.audit_metadata),
             'context_age_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
         }
+    
+    # ============================================================================
+    # BACKWARD COMPATIBILITY LAYER FOR SUPERVISOR IMPLEMENTATION PATTERNS
+    # ============================================================================
+    
+    @property
+    def websocket_connection_id(self) -> Optional[str]:
+        """Backward compatibility property mapping to websocket_client_id.
+        
+        The supervisor implementation used `websocket_connection_id`, while
+        the services implementation uses `websocket_client_id`. This property
+        provides seamless compatibility.
+        
+        Returns:
+            WebSocket connection ID (same as websocket_client_id)
+        """
+        return self.websocket_client_id
+    
+    @property 
+    def metadata(self) -> Dict[str, Any]:
+        """Backward compatibility property merging agent_context and audit_metadata.
+        
+        The supervisor implementation used a single `metadata` dictionary, while
+        the services implementation uses separate `agent_context` and `audit_metadata`.
+        This property merges both for backward compatibility.
+        
+        **Merge Priority:** audit_metadata values override agent_context values
+        for any conflicting keys (audit data takes precedence).
+        
+        Returns:
+            Merged dictionary containing all context and audit metadata
+        """
+        merged = copy.deepcopy(self.agent_context)
+        merged.update(self.audit_metadata)  # Audit metadata takes precedence
+        return merged
+    
+    @classmethod
+    def from_request_supervisor(
+        cls,
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        request_id: Optional[str] = None,
+        db_session: Optional['AsyncSession'] = None,
+        websocket_connection_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> 'UserExecutionContext':
+        """Supervisor-compatible factory method with single metadata parameter.
+        
+        This factory method provides full backward compatibility with the supervisor
+        implementation's interface, accepting a single metadata dictionary that gets
+        intelligently split into agent_context and audit_metadata.
+        
+        **Metadata Split Logic:**
+        - Keys containing 'audit', 'compliance', 'trace', 'log' → audit_metadata
+        - Keys containing 'agent', 'operation', 'workflow' → agent_context  
+        - Special supervisor fields (operation_depth, parent_request_id) → audit_metadata
+        - All other keys → agent_context (default)
+        
+        Args:
+            user_id: User identifier from authentication
+            thread_id: Thread identifier from request
+            run_id: Run identifier from request
+            request_id: Optional request identifier (auto-generated if None)
+            db_session: Optional database session for the request
+            websocket_connection_id: Optional WebSocket connection ID (supervisor field name)
+            metadata: Optional unified metadata dictionary (supervisor style)
+            
+        Returns:
+            New UserExecutionContext instance with metadata properly split
+            
+        Raises:
+            InvalidContextError: If any required parameters are invalid
+        """
+        # Handle metadata splitting for backward compatibility
+        agent_context = {}
+        audit_metadata = {}
+        
+        if metadata:
+            # Define audit-related keys that should go to audit_metadata
+            audit_keywords = {
+                'audit', 'compliance', 'trace', 'log', 'parent_request_id',
+                'operation_depth', 'created_at', 'context_', 'client_ip',
+                'user_agent', 'method', 'url', 'content_type'
+            }
+            
+            # Define agent-related keys that should go to agent_context
+            agent_keywords = {
+                'agent', 'operation_name', 'workflow', 'execution', 'state',
+                'parent_operation'
+            }
+            
+            for key, value in metadata.items():
+                key_lower = key.lower()
+                
+                # Check if key should go to audit_metadata
+                if any(keyword in key_lower for keyword in audit_keywords):
+                    audit_metadata[key] = value
+                # Check if key should go to agent_context
+                elif any(keyword in key_lower for keyword in agent_keywords):
+                    agent_context[key] = value
+                else:
+                    # Default to agent_context for unknown keys
+                    agent_context[key] = value
+        
+        # Set default values for supervisor compatibility
+        if 'operation_depth' not in audit_metadata:
+            audit_metadata['operation_depth'] = 0
+        if 'parent_request_id' not in audit_metadata:
+            audit_metadata['parent_request_id'] = None
+            
+        # Extract operation_depth and parent_request_id for constructor
+        operation_depth = audit_metadata.get('operation_depth', 0)
+        parent_request_id = audit_metadata.get('parent_request_id')
+        
+        # Remove from audit_metadata to avoid duplication (they're constructor params)
+        audit_metadata_cleaned = {k: v for k, v in audit_metadata.items() 
+                                  if k not in ('operation_depth', 'parent_request_id')}
+        
+        return cls(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id or str(uuid.uuid4()),
+            db_session=db_session,
+            websocket_client_id=websocket_connection_id,  # Map supervisor field name
+            agent_context=agent_context,
+            audit_metadata=audit_metadata_cleaned,
+            operation_depth=operation_depth,
+            parent_request_id=parent_request_id
+        )
+    
+    def create_child_context_supervisor(
+        self,
+        operation_name: str,
+        additional_metadata: Optional[Dict[str, Any]] = None
+    ) -> 'UserExecutionContext':
+        """Supervisor-compatible child context creation method.
+        
+        This method provides backward compatibility with the supervisor implementation's
+        child context creation interface, accepting a single additional_metadata parameter
+        that gets merged with the parent's unified metadata.
+        
+        Args:
+            operation_name: Name of the sub-operation (e.g., 'data_analysis', 'report_generation')
+            additional_metadata: Additional unified metadata for the child context (supervisor style)
+            
+        Returns:
+            New UserExecutionContext for the child operation
+            
+        Raises:
+            InvalidContextError: If operation_name is invalid or depth limit exceeded
+        """
+        if not operation_name or not isinstance(operation_name, str) or not operation_name.strip():
+            raise InvalidContextError("operation_name must be a non-empty string")
+        
+        # Prevent excessive nesting depth
+        max_depth = 10
+        if self.operation_depth >= max_depth:
+            raise InvalidContextError(
+                f"Maximum operation depth ({max_depth}) exceeded. "
+                f"Current depth: {self.operation_depth}"
+            )
+        
+        # Start with parent's unified metadata (supervisor style)
+        child_metadata = self.metadata.copy()
+        child_metadata.update({
+            'parent_request_id': self.request_id,
+            'operation_name': operation_name,
+            'operation_depth': self.operation_depth + 1
+        })
+        
+        if additional_metadata:
+            child_metadata.update(additional_metadata)
+        
+        # Use the supervisor factory method to handle metadata splitting
+        return self.from_request_supervisor(
+            user_id=self.user_id,
+            thread_id=self.thread_id,
+            run_id=self.run_id,
+            request_id=str(uuid.uuid4()),
+            db_session=self.db_session,
+            websocket_connection_id=self.websocket_client_id,
+            metadata=child_metadata
+        )
     
     def to_execution_context(self) -> 'ExecutionContext':
         """Convert to legacy ExecutionContext for backwards compatibility.

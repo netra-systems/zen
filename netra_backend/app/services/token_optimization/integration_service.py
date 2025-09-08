@@ -9,7 +9,7 @@ CRITICAL: This is the primary interface for token optimization functionality.
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 from netra_backend.app.services.token_optimization.session_factory import TokenOptimizationSessionFactory

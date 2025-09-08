@@ -48,8 +48,8 @@
             # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass
             # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-            # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
-            # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+            # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
+            # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
             # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
@@ -408,7 +408,7 @@
 
             # Register database with degradation manager
             # Mock: Generic component isolation for controlled unit testing
-            # REMOVED_SYNTAX_ERROR: mock_db_manager = TestDatabaseManager().get_session() instead of Mock
+            # REMOVED_SYNTAX_ERROR: mock_db_manager = DatabaseTestManager().get_session() instead of Mock
             # REMOVED_SYNTAX_ERROR: mock_db_manager.is_available.return_value = False
             # REMOVED_SYNTAX_ERROR: degradation_manager.register_database_manager("postgres", mock_db_manager)
 

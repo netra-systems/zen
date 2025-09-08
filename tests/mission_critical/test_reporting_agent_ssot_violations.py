@@ -44,8 +44,8 @@
     # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, Optional
     # REMOVED_SYNTAX_ERROR: import pytest
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
-    # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import TestRedisManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
+    # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
     # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
@@ -55,7 +55,7 @@
     # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.agent_error_types import AgentValidationError
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.serialization.unified_json_handler import LLMResponseParser
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.cache.cache_helpers import CacheHelpers

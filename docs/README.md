@@ -1,8 +1,8 @@
-# Netra Platform Documentation
+# Netra Apex Platform Documentation
 
 ## 📚 Documentation Index
 
-### Getting Started
+### Core Architecture & Guidelines
 - **[CUSTOMER_GETTING_STARTED.md](development/CUSTOMER_GETTING_STARTED.md)** ⭐ - **PRIMARY GUIDE** - Complete getting started for development and usage
 - **[CONFIGURATION_GUIDE.md](configuration/CONFIGURATION_GUIDE.md)** ⭐ - **NEW** - Complete environment configuration guide
 - **[STAGING_SECRETS_GUIDE.md](deployment/STAGING_SECRETS_GUIDE.md)** ⭐ - **CRITICAL** - Secrets management for all environments

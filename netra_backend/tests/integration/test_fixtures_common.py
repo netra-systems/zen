@@ -10,9 +10,8 @@ from netra_backend.app.websocket_core import WebSocketManager
 from pathlib import Path
 import sys
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.database.test_database_manager import TestDatabaseManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import TestRedisManager
-from auth_service.core.auth_manager import AuthManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
@@ -80,7 +79,7 @@ async def test_database():
         ws_manager = WebSocketManager()
 
     # Mock: Generic component isolation for controlled unit testing
-        cache_service = TestRedisManager().get_client()
+        cache_service = RedisTestManager().get_client()
 
     # Mock: Async component isolation for testing without real async operations
         cache_service.get = AsyncMock(return_value=None)
@@ -91,50 +90,28 @@ async def test_database():
         # FIXED: return in generator
     pass
 
-    async def create_test_user_with_oauth(db_setup):
-        pass
-
-        """Create test user with OAuth credentials"""
-
-        user = User(
-
+async def create_test_user_with_oauth(db_setup):
+    """Create test user with OAuth credentials"""
+    user = User(
         id=str(uuid.uuid4()),
-
         email="test@example.com",
-
         oauth_provider="google",
-
         is_active=True
-
-        )
-
-        db_setup["session"].add(user)
-
-        await db_setup["session"].commit()
-
-        await asyncio.sleep(0)
-        return user
-
-    async def setup_circuit_breakers_for_chain(service_chain):
-        pass
-
-        """Setup circuit breakers for each service"""
-
-        breakers = {}
-
-    for service_name in service_chain:
-        pass
-
-        breakers[service_name] = CircuitBreaker(
-
-    failure_threshold=3,
-
-    recovery_timeout=30,
-
-    expected_exception=Exception
-
     )
+    db_setup["session"].add(user)
+    await db_setup["session"].commit()
+    await asyncio.sleep(0)
+    return user
 
+async def setup_circuit_breakers_for_chain(service_chain):
+    """Setup circuit breakers for each service"""
+    breakers = {}
+    for service_name in service_chain:
+        breakers[service_name] = CircuitBreaker(
+            failure_threshold=3,
+            recovery_timeout=30,
+            expected_exception=Exception
+        )
     await asyncio.sleep(0)
     return breakers
 

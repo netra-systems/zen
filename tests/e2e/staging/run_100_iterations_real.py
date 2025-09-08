@@ -30,10 +30,10 @@ class StagingE2ETestRunner:
         self.all_results = []
         self.staging_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
         
-    def run_tests(self, test_pattern: str = "test_*.py") -> Tuple[int, int, List[str]]:
+    def run_tests(self, test_pattern: Optional[str] = None) -> Tuple[int, int, List[str]]:
         """Run E2E tests and return passed, failed counts and failed test names"""
         print(f"\n{'='*70}")
-        print(f"Running E2E Tests - Pattern: {test_pattern}")
+        print(f"Running E2E Tests - Pattern: {test_pattern or 'all tests'}")
         print(f"{'='*70}")
         
         # Run pytest with real services
@@ -43,9 +43,19 @@ class StagingE2ETestRunner:
             "-v", "--tb=short",
             "--maxfail=100",  # Don't stop on failures
             "--json-report",
-            f"--json-report-file={self.results_dir / f'iteration_{self.iteration}.json'}",
-            "-k", test_pattern
+            f"--json-report-file={self.results_dir / f'iteration_{self.iteration}.json'}"
         ]
+        
+        # Add test pattern filter if provided (using -k for keyword expressions)
+        if test_pattern:
+            # Convert file patterns to pytest keyword expressions
+            if "*" in test_pattern and test_pattern.endswith(".py"):
+                # Convert file pattern like "test_*.py" to appropriate test discovery
+                # Just let pytest discover all tests in the directory
+                pass  # Don't add -k filter for file patterns
+            else:
+                # Use as pytest keyword expression (test names, not file names)
+                cmd.extend(["-k", test_pattern])
         
         # Set environment for staging
         env = os.environ.copy()
@@ -91,7 +101,8 @@ class StagingE2ETestRunner:
             import httpx
             response = httpx.get(f"{self.staging_url}/health", timeout=10)
             return response.status_code == 200
-        except:
+        except Exception as e:
+            print(f"Health check failed: {e}")
             return False
     
     def fix_common_issues(self, failed_tests: List[str]) -> bool:
@@ -180,13 +191,13 @@ class StagingE2ETestRunner:
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode == 0:
-            print("  ✅ Deployment successful")
+            print("  [SUCCESS] Deployment successful")
             # Wait for deployment to stabilize
             print("  Waiting 30s for deployment to stabilize...")
             time.sleep(30)
             return True
         else:
-            print(f"  ❌ Deployment failed: {result.stderr[:500]}")
+            print(f"  [FAILED] Deployment failed: {result.stderr[:500]}")
             return False
     
     def generate_report(self):
@@ -208,7 +219,7 @@ class StagingE2ETestRunner:
 
 **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Total Iterations:** {self.iteration}
-**Final Status:** {'✅ ALL TESTS PASSING' if self.all_results[-1]['failed'] == 0 else '❌ SOME TESTS FAILING'}
+**Final Status:** {'ALL TESTS PASSING' if self.all_results[-1]['failed'] == 0 else 'SOME TESTS FAILING'}
 
 ## Iteration Summary
 
@@ -217,25 +228,25 @@ class StagingE2ETestRunner:
 """
         
         for result in self.all_results:
-            status = "✅" if result['failed'] == 0 else "❌"
+            status = "[PASS]" if result['failed'] == 0 else "[FAIL]"
             md_report += f"| {result['iteration']} | {result['passed']} | {result['failed']} | {result['duration']:.1f}s | {status} |\n"
         
         md_file = self.results_dir / "comprehensive_report.md"
         md_file.write_text(md_report)
         
-        print(f"\n📊 Reports generated:")
+        print(f"\n[REPORTS] Generated:")
         print(f"  - {report_file}")
         print(f"  - {md_file}")
     
     def run(self):
         """Main execution loop"""
-        print("🚀 STARTING COMPREHENSIVE E2E TEST RUNNER")
+        print("STARTING COMPREHENSIVE E2E TEST RUNNER")
         print(f"Target: {self.staging_url}")
         print(f"Max iterations: {self.max_iterations}")
         
         # Check staging health
         if not self.check_staging_health():
-            print("⚠️  WARNING: Staging may not be healthy, continuing anyway...")
+            print("[WARNING] Staging may not be healthy, continuing anyway...")
         
         for i in range(1, self.max_iterations + 1):
             self.iteration = i
@@ -264,7 +275,7 @@ class StagingE2ETestRunner:
             
             # Check if all tests pass
             if failed == 0 and passed > 0:
-                print("\n🎉 SUCCESS! All tests passing!")
+                print("\n[SUCCESS] All tests passing!")
                 break
             
             # Apply fixes
@@ -296,10 +307,10 @@ class StagingE2ETestRunner:
             print(f"Final results: {final['passed']} passed, {final['failed']} failed")
             
             if final['failed'] == 0:
-                print("\n✅ SUCCESS: All E2E tests are passing on staging!")
+                print("\n[SUCCESS] All E2E tests are passing on staging!")
                 return 0
             else:
-                print(f"\n❌ INCOMPLETE: {final['failed']} tests still failing after {self.iteration} iterations")
+                print(f"\n[INCOMPLETE] {final['failed']} tests still failing after {self.iteration} iterations")
                 return 1
         
         return 1

@@ -133,7 +133,7 @@ def test_backend_config_cloud_sql_connection():
     
     env.set('ENVIRONMENT', 'staging', "test")
     
-    # Test different DATABASE_URL formats
+    # Test different #removed-legacyformats
     test_urls = [
         # Local format
         "postgresql://user:pass@localhost/db",

@@ -1,6 +1,6 @@
-"""Test that DATABASE_URL is properly passed through the system.
+"""Test that #removed-legacyis properly passed through the system.
 
-This test ensures that DATABASE_URL environment variable is correctly:
+This test ensures that #removed-legacyenvironment variable is correctly:
 1. Retrieved from the environment
 2. Passed through DatabaseURLBuilder
 3. Formatted for the appropriate driver
@@ -17,10 +17,10 @@ from netra_backend.app.db.database_manager import DatabaseManager
 
 
 class TestDatabaseURLPassing:
-    """Test suite for DATABASE_URL environment variable passing."""
+    """Test suite for #removed-legacyenvironment variable passing."""
     
     def test_database_url_retrieved_from_environment(self):
-        """Test that DATABASE_URL is retrieved from environment."""
+        """Test that #removed-legacyis retrieved from environment."""
         env = get_env()
         
         # Set a test DATABASE_URL
@@ -32,10 +32,10 @@ class TestDatabaseURLPassing:
         assert retrieved_url == test_url, f"Expected {test_url}, got {retrieved_url}"
     
     def test_database_url_builder_uses_environment(self):
-        """Test that DatabaseURLBuilder correctly uses DATABASE_URL from environment."""
+        """Test that DatabaseURLBuilder correctly uses #removed-legacyfrom environment."""
         env = get_env()
         
-        # Set test DATABASE_URL and environment
+        # Set test #removed-legacyand environment
         test_url = "postgresql://test_user:test_pass@test_host:5432/test_db"
         env.set("DATABASE_URL", test_url)
         env.set("ENVIRONMENT", "test")
@@ -48,10 +48,10 @@ class TestDatabaseURLPassing:
         
         # Verify it returns the URL for test environment
         url = builder.get_url_for_environment()
-        assert url == test_url, f"Builder didn't return DATABASE_URL for test environment: {url}"
+        assert url == test_url, f"Builder didn't return #removed-legacyfor test environment: {url}"
     
     def test_database_url_formatted_for_asyncpg(self):
-        """Test that DATABASE_URL is correctly formatted for asyncpg driver."""
+        """Test that #removed-legacyis correctly formatted for asyncpg driver."""
         env = get_env()
         
         # Set test DATABASE_URL
@@ -72,7 +72,7 @@ class TestDatabaseURLPassing:
         """Test that DatabaseManager correctly retrieves and formats DATABASE_URL."""
         env = get_env()
         
-        # Set test DATABASE_URL and environment
+        # Set test #removed-legacyand environment
         test_url = "postgresql://test_user:test_pass@test_host:5432/test_db"
         env.set("DATABASE_URL", test_url)
         env.set("ENVIRONMENT", "test")
@@ -90,7 +90,7 @@ class TestDatabaseURLPassing:
         assert "test_db" in manager_url, f"Database not in URL: {manager_url}"
     
     def test_database_url_fallback_to_components(self):
-        """Test that system falls back to POSTGRES_* components if DATABASE_URL not set."""
+        """Test that system falls back to POSTGRES_* components if #removed-legacynot set."""
         env = get_env()
         
         # Clear DATABASE_URL
@@ -120,10 +120,10 @@ class TestDatabaseURLPassing:
         assert "component_db" in url
     
     def test_database_url_priority_over_components(self):
-        """Test that DATABASE_URL takes priority over individual components."""
+        """Test that #removed-legacytakes priority over individual components."""
         env = get_env()
         
-        # Set both DATABASE_URL and components
+        # Set both #removed-legacyand components
         test_url = "postgresql://url_user:url_pass@url_host:5432/url_db"
         env.set("DATABASE_URL", test_url)
         env.set("POSTGRES_HOST", "component_host")
@@ -136,9 +136,9 @@ class TestDatabaseURLPassing:
         
         # Get URL - should use DATABASE_URL, not components
         url = builder.get_url_for_environment()
-        assert url == test_url, f"DATABASE_URL should take priority: {url}"
+        assert url == test_url, f"#removed-legacyshould take priority: {url}"
         
-        # Verify URL contains DATABASE_URL values, not component values
+        # Verify URL contains #removed-legacyvalues, not component values
         assert "url_user" in url
         assert "url_host" in url
         assert "url_db" in url
@@ -151,16 +151,16 @@ if __name__ == "__main__":
     # Run the tests
     test_suite = TestDatabaseURLPassing()
     
-    print("Running DATABASE_URL passing tests...")
+    print("Running #removed-legacypassing tests...")
     
     test_suite.test_database_url_retrieved_from_environment()
-    print("✓ DATABASE_URL retrieved from environment")
+    print("✓ #removed-legacyretrieved from environment")
     
     test_suite.test_database_url_builder_uses_environment()
-    print("✓ DatabaseURLBuilder uses DATABASE_URL from environment")
+    print("✓ DatabaseURLBuilder uses #removed-legacyfrom environment")
     
     test_suite.test_database_url_formatted_for_asyncpg()
-    print("✓ DATABASE_URL formatted for asyncpg driver")
+    print("✓ #removed-legacyformatted for asyncpg driver")
     
     test_suite.test_database_manager_retrieves_database_url()
     print("✓ DatabaseManager retrieves and formats DATABASE_URL")
@@ -169,6 +169,6 @@ if __name__ == "__main__":
     print("✓ System falls back to POSTGRES_* components when needed")
     
     test_suite.test_database_url_priority_over_components()
-    print("✓ DATABASE_URL takes priority over individual components")
+    print("✓ #removed-legacytakes priority over individual components")
     
-    print("\nAll tests passed! DATABASE_URL is being properly passed through the system.")
+    print("\nAll tests passed! #removed-legacyis being properly passed through the system.")

@@ -19,8 +19,8 @@ from datetime import datetime
 
 from tests.e2e.staging_test_config import get_staging_config
 
-# Mark all tests in this file as medium-high priority and real
-pytestmark = [pytest.mark.staging, pytest.mark.medium_high, pytest.mark.real]
+# Mark all tests in this file as staging and real
+pytestmark = [pytest.mark.staging, pytest.mark.real]
 
 class TestMediumHighOrchestration:
     """Tests 41-45: Multi-Agent Workflows - REAL TESTS"""

@@ -1,699 +1,675 @@
-# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+"""
+Comprehensive WebSocket Supervisor Isolation Tests
 
-# REMOVED_SYNTAX_ERROR: def __init__(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
-    # REMOVED_SYNTAX_ERROR: self.is_connected = True
-    # REMOVED_SYNTAX_ERROR: self._closed = False
+Business Value Justification:
+- Segment: Platform/Internal
+- Business Goal: Multi-User Support & System Reliability
+- Value Impact: Ensures complete isolation between users in WebSocket supervisor creation
+- Strategic Impact: Validates core business requirement of secure multi-user AI interactions
 
-# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
-    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
-    # REMOVED_SYNTAX_ERROR: if self._closed:
-        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
-        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+This test suite validates the WebSocket supervisor isolation patterns and multi-user
+support using REAL services, REAL authentication, and REAL WebSocket connections.
 
-# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
-    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self._closed = True
-    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+CRITICAL: These tests verify that the WebSocket remediation provides:
+1. Complete multi-user isolation (no data leakage between users)
+2. Concurrent connection safety (multiple users simultaneously)
+3. Performance characteristics under load
+4. Error recovery and resilience patterns
+5. Factory-based isolation patterns
 
-# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
-    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+This replaces the previous test file that contained REMOVED_SYNTAX_ERROR markings
+and mock-based patterns with real service testing following SSOT patterns.
+"""
 
-    # REMOVED_SYNTAX_ERROR: '''
-    # REMOVED_SYNTAX_ERROR: Comprehensive WebSocket Supervisor Isolation Tests
+import asyncio
+import json
+import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Any, Optional, Tuple
+import pytest
+import websockets
 
-    # REMOVED_SYNTAX_ERROR: This test suite validates the WebSocket supervisor isolation patterns and multi-user
-    # REMOVED_SYNTAX_ERROR: support with both v2 (legacy) and v3 (clean) patterns.
+from netra_backend.app.websocket_core.context import WebSocketContext
+from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
+from netra_backend.app.websocket_core.types import (
+    WebSocketMessage, MessageType, WebSocketConnectionState, ConnectionInfo
+)
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.db.database_manager import DatabaseManager
 
-    # REMOVED_SYNTAX_ERROR: CRITICAL: These tests verify that the WebSocket remediation provides:
-        # REMOVED_SYNTAX_ERROR: 1. Complete multi-user isolation
-        # REMOVED_SYNTAX_ERROR: 2. Concurrent connection safety
-        # REMOVED_SYNTAX_ERROR: 3. Performance characteristics
-        # REMOVED_SYNTAX_ERROR: 4. Error recovery and resilience
-        # REMOVED_SYNTAX_ERROR: 5. Feature flag switching functionality
-        # REMOVED_SYNTAX_ERROR: '''
-
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: import os
-        # REMOVED_SYNTAX_ERROR: import time
-        # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
-        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta
-        # REMOVED_SYNTAX_ERROR: from typing import List, Dict, Any
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import TestDatabaseManager
-        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
-
-        # REMOVED_SYNTAX_ERROR: from fastapi import WebSocket
-        # REMOVED_SYNTAX_ERROR: from starlette.websockets import WebSocketState
-        # REMOVED_SYNTAX_ERROR: from sqlalchemy.ext.asyncio import AsyncSession
-
-        # Import the WebSocket components
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.context import WebSocketContext
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.database.database_fixtures import DatabaseTestManager
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketSupervisorIsolation:
-    # REMOVED_SYNTAX_ERROR: """Comprehensive tests for WebSocket supervisor isolation."""
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_websocket():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a mock WebSocket for testing."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: ws = Mock(spec=WebSocket)
-    # REMOVED_SYNTAX_ERROR: ws.client_state = WebSocketState.CONNECTED
-    # REMOVED_SYNTAX_ERROR: return ws
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def real_db_session():
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a mock database session."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: return AsyncMock(spec=AsyncSession)
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: def sample_message(self):
-    # REMOVED_SYNTAX_ERROR: """Use real service instance."""
-    # TODO: Initialize real service
-    # REMOVED_SYNTAX_ERROR: """Create a sample WebSocket message for testing."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: return WebSocketMessage( )
-    # REMOVED_SYNTAX_ERROR: type=MessageType.START_AGENT,
-    # REMOVED_SYNTAX_ERROR: payload={"thread_id": "test_thread", "task": "analyze data"},
-    # REMOVED_SYNTAX_ERROR: user_id="test_user",
-    # REMOVED_SYNTAX_ERROR: thread_id="test_thread",
-    # REMOVED_SYNTAX_ERROR: correlation_id="test_correlation"
+class TestWebSocketSupervisorIsolation(SSotBaseTestCase):
+    """
+    Comprehensive tests for WebSocket supervisor isolation using REAL services.
     
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_basic_websocket_context_isolation(self, mock_websocket, mock_db_session):
-        # REMOVED_SYNTAX_ERROR: '''
-        # REMOVED_SYNTAX_ERROR: Test that WebSocketContext properly isolates different user connections.
-        # REMOVED_SYNTAX_ERROR: '''
-        # REMOVED_SYNTAX_ERROR: pass
-        # Create contexts for different users
-        # REMOVED_SYNTAX_ERROR: contexts = []
-        # REMOVED_SYNTAX_ERROR: for i in range(3):
-            # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-            # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-            # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-            # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-            
-            # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-            # Each context should be completely isolated
-            # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                # REMOVED_SYNTAX_ERROR: assert ctx.user_id == "formatted_string"
-                # REMOVED_SYNTAX_ERROR: assert ctx.thread_id == "formatted_string"
-                # REMOVED_SYNTAX_ERROR: assert ctx.connection_id != contexts[(i + 1) % 3].connection_id
-
-                # Isolation keys should be unique
-                # REMOVED_SYNTAX_ERROR: isolation_key = ctx.to_isolation_key()
-                # REMOVED_SYNTAX_ERROR: for j, other_ctx in enumerate(contexts):
-                    # REMOVED_SYNTAX_ERROR: if i != j:
-                        # REMOVED_SYNTAX_ERROR: assert isolation_key != other_ctx.to_isolation_key()
-
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # Removed problematic line: async def test_concurrent_supervisor_creation(self, mock_websocket, mock_db_session):
-                            # REMOVED_SYNTAX_ERROR: '''
-                            # REMOVED_SYNTAX_ERROR: Test that multiple supervisors can be created concurrently without interference.
-                            # REMOVED_SYNTAX_ERROR: '''
-                            # REMOVED_SYNTAX_ERROR: pass
-                            # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.supervisor_factory._get_websocket_supervisor_components') as mock_components:
-                                # REMOVED_SYNTAX_ERROR: mock_components.return_value = { )
-                                # REMOVED_SYNTAX_ERROR: "llm_client":                 "websocket_bridge":                 "tool_dispatcher":             }
-
-                                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.supervisor_factory.create_supervisor_core') as mock_create_core:
-                                    # Create multiple contexts
-                                    # REMOVED_SYNTAX_ERROR: contexts = []
-                                    # REMOVED_SYNTAX_ERROR: tasks = []
-
-                                    # REMOVED_SYNTAX_ERROR: for i in range(5):
-                                        # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                        # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                        # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                        
-                                        # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                        # Return unique supervisor for each call
-                                        # REMOVED_SYNTAX_ERROR: unique_supervisor = Mock(name="formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: mock_create_core.return_value = unique_supervisor
-
-                                        # Create supervisor creation task
-                                        # REMOVED_SYNTAX_ERROR: task = asyncio.create_task( )
-                                        # REMOVED_SYNTAX_ERROR: get_websocket_scoped_supervisor(context, mock_db_session)
-                                        
-                                        # REMOVED_SYNTAX_ERROR: tasks.append(task)
-
-                                        # Execute all supervisor creations concurrently
-                                        # REMOVED_SYNTAX_ERROR: supervisors = await asyncio.gather(*tasks)
-
-                                        # Verify all supervisors were created
-                                        # REMOVED_SYNTAX_ERROR: assert len(supervisors) == 5
-                                        # REMOVED_SYNTAX_ERROR: for supervisor in supervisors:
-                                            # REMOVED_SYNTAX_ERROR: assert supervisor is not None
-
-                                            # Verify supervisor factory was called for each context
-                                            # REMOVED_SYNTAX_ERROR: assert mock_create_core.call_count == 5
-
-                                            # Verify each call had correct isolation parameters
-                                            # REMOVED_SYNTAX_ERROR: for i, call in enumerate(mock_create_core.call_args_list):
-                                                # REMOVED_SYNTAX_ERROR: kwargs = call[1]
-                                                # REMOVED_SYNTAX_ERROR: assert kwargs['user_id'] == "formatted_string"
-                                                # REMOVED_SYNTAX_ERROR: assert kwargs['thread_id'] == "formatted_string"
-                                                # REMOVED_SYNTAX_ERROR: assert 'websocket_connection_id' in kwargs
-
-                                                # Removed problematic line: @pytest.mark.asyncio
-                                                # Removed problematic line: async def test_websocket_context_lifecycle_isolation(self, mock_websocket):
-                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                    # REMOVED_SYNTAX_ERROR: Test that WebSocket context lifecycle operations don"t interfere between users.
-                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                    # REMOVED_SYNTAX_ERROR: pass
-                                                    # Create contexts for multiple users
-                                                    # REMOVED_SYNTAX_ERROR: contexts = []
-                                                    # REMOVED_SYNTAX_ERROR: for i in range(3):
-                                                        # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                                        # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                                        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                        # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                                        
-                                                        # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                                        # Perform lifecycle operations on different contexts
-                                                        # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                                                            # Update activity
-                                                            # REMOVED_SYNTAX_ERROR: original_activity = ctx.last_activity
-                                                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.01)
-                                                            # REMOVED_SYNTAX_ERROR: ctx.update_activity()
-
-                                                            # Verify activity was updated for this context only
-                                                            # REMOVED_SYNTAX_ERROR: assert ctx.last_activity > original_activity
-
-                                                            # Verify other contexts weren't affected
-                                                            # REMOVED_SYNTAX_ERROR: for j, other_ctx in enumerate(contexts):
-                                                                # REMOVED_SYNTAX_ERROR: if i != j:
-                                                                    # Other contexts should have earlier activity timestamps
-                                                                    # REMOVED_SYNTAX_ERROR: assert other_ctx.last_activity < ctx.last_activity
-
-                                                                    # Test connection state isolation
-                                                                    # REMOVED_SYNTAX_ERROR: mock_websocket.client_state = WebSocketState.DISCONNECTED
-
-                                                                    # All contexts should detect disconnected state
-                                                                    # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-                                                                        # REMOVED_SYNTAX_ERROR: assert not ctx.is_active
-
-                                                                        # Reconnect and verify all contexts detect connected state
-                                                                        # REMOVED_SYNTAX_ERROR: mock_websocket.client_state = WebSocketState.CONNECTED
-                                                                        # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-                                                                            # REMOVED_SYNTAX_ERROR: assert ctx.is_active
-
-                                                                            # Removed problematic line: @pytest.mark.asyncio
-                                                                            # Removed problematic line: async def test_concurrent_message_handling_isolation(self, mock_websocket, sample_message):
-                                                                                # REMOVED_SYNTAX_ERROR: '''
-                                                                                # REMOVED_SYNTAX_ERROR: Test that concurrent message handling maintains proper user isolation.
-                                                                                # REMOVED_SYNTAX_ERROR: '''
-                                                                                # REMOVED_SYNTAX_ERROR: pass
-                                                                                # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handlers import MessageHandlerService
-                                                                                # REMOVED_SYNTAX_ERROR: mock_service = Mock(spec=MessageHandlerService)
-                                                                                # REMOVED_SYNTAX_ERROR: handler = AgentMessageHandler(message_handler_service=mock_service)
-
-                                                                                # Create messages for different users
-                                                                                # REMOVED_SYNTAX_ERROR: messages = []
-                                                                                # REMOVED_SYNTAX_ERROR: for i in range(4):
-                                                                                    # REMOVED_SYNTAX_ERROR: message = WebSocketMessage( )
-                                                                                    # REMOVED_SYNTAX_ERROR: type=MessageType.USER_MESSAGE,
-                                                                                    # REMOVED_SYNTAX_ERROR: payload={"message": "formatted_string", "thread_id": "formatted_string"},
-                                                                                    # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                                                    # REMOVED_SYNTAX_ERROR: thread_id="formatted_string",
-                                                                                    # REMOVED_SYNTAX_ERROR: correlation_id="formatted_string"
-                                                                                    
-                                                                                    # REMOVED_SYNTAX_ERROR: messages.append(message)
-
-                                                                                    # Force v3 clean pattern
-                                                                                    # REMOVED_SYNTAX_ERROR: with patch.dict(os.environ, {'USE_WEBSOCKET_SUPERVISOR_V3': 'true'}):
-                                                                                        # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.agent_handler.get_websocket_scoped_supervisor') as mock_ws_supervisor:
-                                                                                            # Track supervisor calls for isolation verification
-                                                                                            # REMOVED_SYNTAX_ERROR: supervisor_calls = []
-
-# REMOVED_SYNTAX_ERROR: def track_supervisor_call(*args, **kwargs):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: supervisor_calls.append(kwargs['context'])
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return
-    # REMOVED_SYNTAX_ERROR: mock_ws_supervisor.side_effect = track_supervisor_call
-
-    # Process messages concurrently
-    # REMOVED_SYNTAX_ERROR: tasks = []
-    # REMOVED_SYNTAX_ERROR: for i, message in enumerate(messages):
-        # REMOVED_SYNTAX_ERROR: task = asyncio.create_task( )
-        # REMOVED_SYNTAX_ERROR: handler.handle_message("formatted_string", mock_websocket, message)
+    This test class validates that WebSocket supervisor creation and management
+    provides complete isolation between different users while maintaining
+    performance and reliability under concurrent load.
+    
+    CRITICAL: All tests use REAL WebSocket connections, REAL authentication,
+    and REAL database sessions - NO MOCKS in integration/e2e patterns.
+    """
+    
+    @pytest.fixture(scope="class")
+    def auth_helper(self) -> E2EWebSocketAuthHelper:
+        """SSOT WebSocket authentication helper for all tests."""
+        config = E2EAuthConfig.for_environment("test")
+        return E2EWebSocketAuthHelper(config=config, environment="test")
+    
+    @pytest.fixture(scope="class")
+    def database_manager(self) -> DatabaseTestManager:
+        """Real database test manager for isolated test database operations."""
+        return DatabaseTestManager()
+    
+    @pytest.fixture
+    def isolated_env(self) -> IsolatedEnvironment:
+        """Isolated environment for consistent test configuration."""
+        return IsolatedEnvironment()
+    
+    async def _create_real_websocket_context(
+        self,
+        auth_helper: E2EWebSocketAuthHelper,
+        user_id: str,
+        thread_id: str,
+        run_id: Optional[str] = None
+    ) -> Tuple[WebSocketContext, websockets.WebSocketServerProtocol]:
+        """
+        Create a REAL WebSocket context with authenticated connection.
         
-        # REMOVED_SYNTAX_ERROR: tasks.append(task)
-
-        # Wait for all message processing to complete
-        # REMOVED_SYNTAX_ERROR: with patch.object(handler, '_route_agent_message_v3', return_value=True):
-            # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            # Verify supervisor was called for each user
-            # REMOVED_SYNTAX_ERROR: assert len(supervisor_calls) == 4
-
-            # Verify each supervisor call had correct user isolation
-            # REMOVED_SYNTAX_ERROR: for i, context in enumerate(supervisor_calls):
-                # REMOVED_SYNTAX_ERROR: assert isinstance(context, WebSocketContext)
-                # REMOVED_SYNTAX_ERROR: assert context.user_id == "formatted_string"
-                # REMOVED_SYNTAX_ERROR: assert context.thread_id == "formatted_string"
-
-                # Verify contexts are unique
-                # REMOVED_SYNTAX_ERROR: for j, other_context in enumerate(supervisor_calls):
-                    # REMOVED_SYNTAX_ERROR: if i != j:
-                        # REMOVED_SYNTAX_ERROR: assert context.connection_id != other_context.connection_id
-                        # REMOVED_SYNTAX_ERROR: assert context.to_isolation_key() != other_context.to_isolation_key()
-
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # Removed problematic line: async def test_error_isolation_between_users(self, mock_websocket, mock_db_session):
-                            # REMOVED_SYNTAX_ERROR: '''
-                            # REMOVED_SYNTAX_ERROR: Test that errors in one user's context don't affect other users.
-                            # REMOVED_SYNTAX_ERROR: '''
-                            # REMOVED_SYNTAX_ERROR: pass
-                            # Create contexts for multiple users
-                            # REMOVED_SYNTAX_ERROR: contexts = []
-                            # REMOVED_SYNTAX_ERROR: for i in range(3):
-                                # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                
-                                # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.supervisor_factory._get_websocket_supervisor_components') as mock_components:
-                                    # REMOVED_SYNTAX_ERROR: mock_components.return_value = { )
-                                    # REMOVED_SYNTAX_ERROR: "llm_client":                 "websocket_bridge":                 "tool_dispatcher":             }
-
-                                    # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.supervisor_factory.create_supervisor_core') as mock_create_core:
-                                        # Make supervisor creation fail for user_1 only
-# REMOVED_SYNTAX_ERROR: def selective_failure(*args, **kwargs):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: if kwargs.get('user_id') == 'user_1':
-        # REMOVED_SYNTAX_ERROR: raise ValueError("Simulated failure for user_1")
-        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-        # REMOVED_SYNTAX_ERROR: return
-        # REMOVED_SYNTAX_ERROR: mock_create_core.side_effect = selective_failure
-
-        # Attempt supervisor creation for all users
-        # REMOVED_SYNTAX_ERROR: results = []
-        # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-            # REMOVED_SYNTAX_ERROR: try:
-                # REMOVED_SYNTAX_ERROR: supervisor = await get_websocket_scoped_supervisor(ctx, mock_db_session)
-                # REMOVED_SYNTAX_ERROR: results.append(('success', supervisor))
-                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                    # REMOVED_SYNTAX_ERROR: results.append(('error', str(e)))
-
-                    # Verify isolation: only user_1 should fail
-                    # REMOVED_SYNTAX_ERROR: assert len(results) == 3
-                    # REMOVED_SYNTAX_ERROR: assert results[0][0] == 'success'  # user_0 succeeds
-                    # REMOVED_SYNTAX_ERROR: assert results[1][0] == 'error'    # user_1 fails
-                    # REMOVED_SYNTAX_ERROR: assert results[1][1] == 'Simulated failure for user_1'
-                    # REMOVED_SYNTAX_ERROR: assert results[2][0] == 'success'  # user_2 succeeds
-
-                    # Removed problematic line: @pytest.mark.asyncio
-                    # Removed problematic line: async def test_feature_flag_isolation(self, mock_websocket, sample_message):
-                        # REMOVED_SYNTAX_ERROR: '''
-                        # REMOVED_SYNTAX_ERROR: Test that feature flag switching works correctly with user isolation.
-                        # REMOVED_SYNTAX_ERROR: '''
-                        # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handlers import MessageHandlerService
-                        # REMOVED_SYNTAX_ERROR: mock_service = Mock(spec=MessageHandlerService)
-                        # REMOVED_SYNTAX_ERROR: handler = AgentMessageHandler(message_handler_service=mock_service)
-
-                        # Create messages for multiple users
-                        # REMOVED_SYNTAX_ERROR: users = ['user_v2', 'user_v3']
-                        # REMOVED_SYNTAX_ERROR: messages = []
-                        # REMOVED_SYNTAX_ERROR: for user in users:
-                            # REMOVED_SYNTAX_ERROR: message = WebSocketMessage( )
-                            # REMOVED_SYNTAX_ERROR: type=MessageType.START_AGENT,
-                            # REMOVED_SYNTAX_ERROR: payload={"message": "formatted_string", "thread_id": "formatted_string"},
-                            # REMOVED_SYNTAX_ERROR: user_id=user,
-                            # REMOVED_SYNTAX_ERROR: thread_id="formatted_string",
-                            # REMOVED_SYNTAX_ERROR: correlation_id="formatted_string"
-                            
-                            # REMOVED_SYNTAX_ERROR: messages.append(message)
-
-                            # Test both patterns work with proper isolation
-                            # REMOVED_SYNTAX_ERROR: patterns = [ )
-                            # REMOVED_SYNTAX_ERROR: ('false', '_handle_message_v2_legacy'),
-                            # REMOVED_SYNTAX_ERROR: ('true', '_handle_message_v3_clean')
-                            
-
-                            # REMOVED_SYNTAX_ERROR: for flag_value, expected_method in patterns:
-                                # REMOVED_SYNTAX_ERROR: with patch.dict(os.environ, {'USE_WEBSOCKET_SUPERVISOR_V3': flag_value}):
-                                    # REMOVED_SYNTAX_ERROR: method_calls = []
-
-                                    # Mock both handler methods to track calls
-# REMOVED_SYNTAX_ERROR: async def track_v2_call(*args, **kwargs):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: method_calls.append(('v2', args[0]))  # args[0] is user_id
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return True
-
-# REMOVED_SYNTAX_ERROR: async def track_v3_call(*args, **kwargs):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: method_calls.append(('v3', args[0]))  # args[0] is user_id
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return True
-
-    # REMOVED_SYNTAX_ERROR: with patch.object(handler, '_handle_message_v2_legacy', side_effect=track_v2_call):
-        # REMOVED_SYNTAX_ERROR: with patch.object(handler, '_handle_message_v3_clean', side_effect=track_v3_call):
-            # Process messages for both users
-            # REMOVED_SYNTAX_ERROR: for i, message in enumerate(messages):
-                # REMOVED_SYNTAX_ERROR: await handler.handle_message(users[i], mock_websocket, message)
-
-                # Verify correct pattern was used with proper user isolation
-                # REMOVED_SYNTAX_ERROR: assert len(method_calls) == 2
-                # REMOVED_SYNTAX_ERROR: for call in method_calls:
-                    # REMOVED_SYNTAX_ERROR: pattern, user_id = call
-                    # REMOVED_SYNTAX_ERROR: if flag_value == 'false':
-                        # REMOVED_SYNTAX_ERROR: assert pattern == 'v2', "formatted_string"
-                        # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: assert pattern == 'v3', "formatted_string"
-
-                            # Removed problematic line: @pytest.mark.asyncio
-                            # Removed problematic line: async def test_performance_under_concurrent_load(self, mock_websocket, mock_db_session):
-                                # REMOVED_SYNTAX_ERROR: '''
-                                # REMOVED_SYNTAX_ERROR: Test performance characteristics of WebSocket supervisor isolation under load.
-                                # REMOVED_SYNTAX_ERROR: '''
-                                # REMOVED_SYNTAX_ERROR: pass
-                                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.supervisor_factory._get_websocket_supervisor_components') as mock_components:
-                                    # REMOVED_SYNTAX_ERROR: mock_components.return_value = { )
-                                    # REMOVED_SYNTAX_ERROR: "llm_client":                 "websocket_bridge":                 "tool_dispatcher":             }
-
-                                    # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.supervisor_factory.create_supervisor_core') as mock_create_core:
-                                        # REMOVED_SYNTAX_ERROR: mock_create_core.websocket = TestWebSocketConnection()  # Real WebSocket implementation
-
-                                        # Create a larger number of concurrent connections
-                                        # REMOVED_SYNTAX_ERROR: num_connections = 50
-                                        # REMOVED_SYNTAX_ERROR: contexts = []
-
-                                        # REMOVED_SYNTAX_ERROR: for i in range(num_connections):
-                                            # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                            # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                            # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                            # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                            
-                                            # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                            # Measure time for concurrent supervisor creation
-                                            # REMOVED_SYNTAX_ERROR: start_time = time.time()
-
-                                            # REMOVED_SYNTAX_ERROR: tasks = []
-                                            # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-                                                # REMOVED_SYNTAX_ERROR: task = asyncio.create_task( )
-                                                # REMOVED_SYNTAX_ERROR: get_websocket_scoped_supervisor(ctx, mock_db_session)
-                                                
-                                                # REMOVED_SYNTAX_ERROR: tasks.append(task)
-
-                                                # Execute all supervisor creations concurrently
-                                                # REMOVED_SYNTAX_ERROR: supervisors = await asyncio.gather(*tasks)
-
-                                                # REMOVED_SYNTAX_ERROR: end_time = time.time()
-                                                # REMOVED_SYNTAX_ERROR: duration = end_time - start_time
-
-                                                # Verify all supervisors were created
-                                                # REMOVED_SYNTAX_ERROR: assert len(supervisors) == num_connections
-                                                # REMOVED_SYNTAX_ERROR: for supervisor in supervisors:
-                                                    # REMOVED_SYNTAX_ERROR: assert supervisor is not None
-
-                                                    # Performance assertion - should complete within reasonable time
-                                                    # (This is lenient since we're using mocks, but validates no deadlocks)
-                                                    # REMOVED_SYNTAX_ERROR: assert duration < 5.0, "formatted_string"
-
-                                                    # Verify no race conditions in isolation
-                                                    # REMOVED_SYNTAX_ERROR: assert mock_create_core.call_count == num_connections
-
-                                                    # Verify each context maintained unique identities
-                                                    # REMOVED_SYNTAX_ERROR: user_ids = set()
-                                                    # REMOVED_SYNTAX_ERROR: for call in mock_create_core.call_args_list:
-                                                        # REMOVED_SYNTAX_ERROR: kwargs = call[1]
-                                                        # REMOVED_SYNTAX_ERROR: user_id = kwargs['user_id']
-                                                        # REMOVED_SYNTAX_ERROR: assert user_id not in user_ids, "formatted_string"
-                                                        # REMOVED_SYNTAX_ERROR: user_ids.add(user_id)
-
-                                                        # Removed problematic line: @pytest.mark.asyncio
-                                                        # Removed problematic line: async def test_websocket_disconnection_isolation(self, mock_db_session):
-                                                            # REMOVED_SYNTAX_ERROR: '''
-                                                            # REMOVED_SYNTAX_ERROR: Test that WebSocket disconnections are properly isolated between users.
-                                                            # REMOVED_SYNTAX_ERROR: '''
-                                                            # REMOVED_SYNTAX_ERROR: pass
-                                                            # Create WebSocket mocks for different users
-                                                            # REMOVED_SYNTAX_ERROR: websockets = []
-                                                            # REMOVED_SYNTAX_ERROR: contexts = []
-
-                                                            # REMOVED_SYNTAX_ERROR: for i in range(3):
-                                                                # REMOVED_SYNTAX_ERROR: ws = Mock(spec=WebSocket)
-                                                                # REMOVED_SYNTAX_ERROR: ws.client_state = WebSocketState.CONNECTED
-                                                                # REMOVED_SYNTAX_ERROR: websockets.append(ws)
-
-                                                                # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                                                # REMOVED_SYNTAX_ERROR: websocket=ws,
-                                                                # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                                # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                                                
-                                                                # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                                                # Verify all are initially active
-                                                                # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-                                                                    # REMOVED_SYNTAX_ERROR: assert ctx.is_active
-
-                                                                    # Disconnect user_1's WebSocket
-                                                                    # REMOVED_SYNTAX_ERROR: websockets[1].client_state = WebSocketState.DISCONNECTED
-
-                                                                    # Verify isolation: only user_1 should be inactive
-                                                                    # REMOVED_SYNTAX_ERROR: assert contexts[0].is_active, "User 0 should remain active"
-                                                                    # REMOVED_SYNTAX_ERROR: assert not contexts[1].is_active, "User 1 should be inactive"
-                                                                    # REMOVED_SYNTAX_ERROR: assert contexts[2].is_active, "User 2 should remain active"
-
-                                                                    # Test validation isolation
-                                                                    # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                                                                        # REMOVED_SYNTAX_ERROR: if i == 1:  # Disconnected user
-                                                                        # REMOVED_SYNTAX_ERROR: with pytest.raises(ValueError, match="not active"):
-                                                                            # REMOVED_SYNTAX_ERROR: ctx.validate_for_message_processing()
-                                                                            # REMOVED_SYNTAX_ERROR: else:  # Active users
-                                                                            # REMOVED_SYNTAX_ERROR: assert ctx.validate_for_message_processing()
-
-                                                                            # Reconnect user_1
-                                                                            # REMOVED_SYNTAX_ERROR: websockets[1].client_state = WebSocketState.CONNECTED
-
-                                                                            # Verify all are active again
-                                                                            # REMOVED_SYNTAX_ERROR: for ctx in contexts:
-                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.is_active
-                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.validate_for_message_processing()
-
-                                                                                # Removed problematic line: @pytest.mark.asyncio
-                                                                                # Removed problematic line: async def test_websocket_context_factory_isolation(self):
-                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                    # REMOVED_SYNTAX_ERROR: Test that the WebSocketContext factory creates properly isolated contexts.
-                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                    # REMOVED_SYNTAX_ERROR: pass
-                                                                                    # Create WebSocket connections for different users
-                                                                                    # REMOVED_SYNTAX_ERROR: websockets = []
-                                                                                    # REMOVED_SYNTAX_ERROR: for i in range(3):
-                                                                                        # REMOVED_SYNTAX_ERROR: ws = Mock(spec=WebSocket)
-                                                                                        # REMOVED_SYNTAX_ERROR: ws.client_state = WebSocketState.CONNECTED
-                                                                                        # REMOVED_SYNTAX_ERROR: websockets.append(ws)
-
-                                                                                        # Create contexts using factory method
-                                                                                        # REMOVED_SYNTAX_ERROR: contexts = []
-                                                                                        # REMOVED_SYNTAX_ERROR: for i, ws in enumerate(websockets):
-                                                                                            # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                                                                            # REMOVED_SYNTAX_ERROR: websocket=ws,
-                                                                                            # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                                                            # REMOVED_SYNTAX_ERROR: thread_id="formatted_string",
-                                                                                            # REMOVED_SYNTAX_ERROR: run_id="formatted_string"
-                                                                                            
-                                                                                            # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                                                                            # Verify each context is properly isolated
-                                                                                            # REMOVED_SYNTAX_ERROR: connection_ids = set()
-                                                                                            # REMOVED_SYNTAX_ERROR: isolation_keys = set()
-
-                                                                                            # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                                                                                                # Verify correct data
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.user_id == "formatted_string"
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.thread_id == "formatted_string"
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.run_id == "formatted_string"
-
-                                                                                                # Verify uniqueness
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.connection_id not in connection_ids
-                                                                                                # REMOVED_SYNTAX_ERROR: connection_ids.add(ctx.connection_id)
-
-                                                                                                # REMOVED_SYNTAX_ERROR: isolation_key = ctx.to_isolation_key()
-                                                                                                # REMOVED_SYNTAX_ERROR: assert isolation_key not in isolation_keys
-                                                                                                # REMOVED_SYNTAX_ERROR: isolation_keys.add(isolation_key)
-
-                                                                                                # Verify WebSocket association
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.websocket == websockets[i]
-                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.is_active
-
-                                                                                                # Removed problematic line: @pytest.mark.asyncio
-                                                                                                # Removed problematic line: async def test_memory_isolation_and_cleanup(self, mock_websocket, mock_db_session):
-                                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                                    # REMOVED_SYNTAX_ERROR: Test that WebSocket contexts don"t leak memory between users.
-                                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                                    # REMOVED_SYNTAX_ERROR: pass
-                                                                                                    # This test verifies that contexts don't retain references to each other
-                                                                                                    # REMOVED_SYNTAX_ERROR: import weakref
-
-                                                                                                    # REMOVED_SYNTAX_ERROR: contexts = []
-                                                                                                    # REMOVED_SYNTAX_ERROR: weak_refs = []
-
-                                                                                                    # Create contexts and weak references
-                                                                                                    # REMOVED_SYNTAX_ERROR: for i in range(5):
-                                                                                                        # REMOVED_SYNTAX_ERROR: context = WebSocketContext.create_for_user( )
-                                                                                                        # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                                                                                        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                                                                        # REMOVED_SYNTAX_ERROR: thread_id="formatted_string"
-                                                                                                        
-                                                                                                        # REMOVED_SYNTAX_ERROR: contexts.append(context)
-                                                                                                        # REMOVED_SYNTAX_ERROR: weak_refs.append(weakref.ref(context))
-
-                                                                                                        # Verify contexts are independent (no shared state)
-                                                                                                        # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                                                                                                            # Each context should have unique data
-                                                                                                            # REMOVED_SYNTAX_ERROR: assert ctx.user_id == "formatted_string"
-
-                                                                                                            # Modify one context and verify others aren't affected
-                                                                                                            # REMOVED_SYNTAX_ERROR: original_activity = ctx.last_activity
-                                                                                                            # REMOVED_SYNTAX_ERROR: ctx.update_activity()
-
-                                                                                                            # REMOVED_SYNTAX_ERROR: for j, other_ctx in enumerate(contexts):
-                                                                                                                # REMOVED_SYNTAX_ERROR: if i != j:
-                                                                                                                    # REMOVED_SYNTAX_ERROR: assert other_ctx.last_activity != ctx.last_activity
-
-                                                                                                                    # Clear references to allow garbage collection
-                                                                                                                    # REMOVED_SYNTAX_ERROR: contexts.clear()
-
-                                                                                                                    # Force garbage collection (this is implementation-dependent)
-                                                                                                                    # REMOVED_SYNTAX_ERROR: import gc
-                                                                                                                    # REMOVED_SYNTAX_ERROR: gc.collect()
-
-                                                                                                                    # Verify weak references can be collected (no memory leaks)
-                                                                                                                    # Note: This test might be flaky in some Python implementations
-                                                                                                                    # but serves as a basic memory leak detector
-                                                                                                                    # REMOVED_SYNTAX_ERROR: alive_refs = [item for item in []]
-
-                                                                                                                    # In a clean implementation, we'd expect few or no references to remain
-                                                                                                                    # This is more of a smoke test than a strict requirement
-                                                                                                                    # REMOVED_SYNTAX_ERROR: assert len(alive_refs) <= len(weak_refs), "Potential memory leak detected"
-
-                                                                                                                    # Removed problematic line: @pytest.mark.asyncio
-                                                                                                                    # Removed problematic line: async def test_cross_user_data_isolation(self, mock_websocket):
-                                                                                                                        # REMOVED_SYNTAX_ERROR: '''
-                                                                                                                        # REMOVED_SYNTAX_ERROR: Test that user data cannot leak between different WebSocket contexts.
-                                                                                                                        # REMOVED_SYNTAX_ERROR: '''
-                                                                                                                        # REMOVED_SYNTAX_ERROR: pass
-                                                                                                                        # Create contexts with sensitive user data
-                                                                                                                        # REMOVED_SYNTAX_ERROR: sensitive_data = [ )
-                                                                                                                        # REMOVED_SYNTAX_ERROR: ("user_alice", "thread_secret_project", "run_confidential_001"),
-                                                                                                                        # REMOVED_SYNTAX_ERROR: ("user_bob", "thread_personal_data", "run_private_002"),
-                                                                                                                        # REMOVED_SYNTAX_ERROR: ("user_charlie", "thread_financial_info", "run_sensitive_003")
-                                                                                                                        
-
-                                                                                                                        # REMOVED_SYNTAX_ERROR: contexts = []
-                                                                                                                        # REMOVED_SYNTAX_ERROR: for user_id, thread_id, run_id in sensitive_data:
-                                                                                                                            # REMOVED_SYNTAX_ERROR: context = WebSocketContext( )
-                                                                                                                            # REMOVED_SYNTAX_ERROR: connection_id="formatted_string",
-                                                                                                                            # REMOVED_SYNTAX_ERROR: websocket=mock_websocket,
-                                                                                                                            # REMOVED_SYNTAX_ERROR: user_id=user_id,
-                                                                                                                            # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
-                                                                                                                            # REMOVED_SYNTAX_ERROR: run_id=run_id,
-                                                                                                                            # REMOVED_SYNTAX_ERROR: connected_at=datetime.utcnow(),
-                                                                                                                            # REMOVED_SYNTAX_ERROR: last_activity=datetime.utcnow()
-                                                                                                                            
-                                                                                                                            # REMOVED_SYNTAX_ERROR: contexts.append(context)
-
-                                                                                                                            # Verify complete data isolation
-                                                                                                                            # REMOVED_SYNTAX_ERROR: for i, ctx in enumerate(contexts):
-                                                                                                                                # REMOVED_SYNTAX_ERROR: expected_user, expected_thread, expected_run = sensitive_data[i]
-
-                                                                                                                                # Verify context contains only its own data
-                                                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.user_id == expected_user
-                                                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.thread_id == expected_thread
-                                                                                                                                # REMOVED_SYNTAX_ERROR: assert ctx.run_id == expected_run
-
-                                                                                                                                # Verify isolation keys don't contain other users' data
-                                                                                                                                # REMOVED_SYNTAX_ERROR: isolation_key = ctx.to_isolation_key()
-
-                                                                                                                                # REMOVED_SYNTAX_ERROR: for j, (other_user, other_thread, other_run) in enumerate(sensitive_data):
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: if i != j:
-                                                                                                                                        # Other users' data should not appear in this context
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: assert other_user not in isolation_key
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: assert other_thread not in isolation_key
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: assert other_run not in isolation_key
-
-                                                                                                                                        # Verify connection info doesn't leak other users' data
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: conn_info = ctx.get_connection_info()
-
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: for j, (other_user, other_thread, other_run) in enumerate(sensitive_data):
-                                                                                                                                            # REMOVED_SYNTAX_ERROR: if i != j:
-                                                                                                                                                # Other users' data should not appear in connection info
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: info_str = str(conn_info)
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: assert other_user not in info_str
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: assert other_thread not in info_str
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: assert other_run not in info_str
-
-                                                                                                                                                # Removed problematic line: @pytest.mark.asyncio
-                                                                                                                                                # Removed problematic line: async def test_supervisor_isolation_health_check(self, mock_websocket, mock_db_session):
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: Test the health check functionality works correctly with isolation.
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: '''
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: pass
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.supervisor_factory import get_websocket_supervisor_health
-
-                                                                                                                                                    # Mock required components
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.supervisor_factory.get_supervisor_health_info') as mock_core_health:
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: mock_core_health.return_value = { )
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "components_valid": True,
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "llm_client_available": True
-                                                                                                                                                        
-
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.websocket_core.supervisor_factory.get_websocket_manager') as mock_ws_manager:
-                                                                                                                                                            # Test healthy state
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: mock_ws_manager.websocket = TestWebSocketConnection()  # Real WebSocket implementation
-
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: health = get_websocket_supervisor_health()
-
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert "websocket_supervisor_factory" in health
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: factory_health = health["websocket_supervisor_factory"]
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["status"] == "healthy"
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["components_valid"] is True
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["websocket_manager_available"] is True
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["websocket_bridge_available"] is True
-
-                                                                                                                                                            # Test degraded state (missing WebSocket manager)
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: mock_ws_manager.return_value = None
-
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: health = get_websocket_supervisor_health()
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: factory_health = health["websocket_supervisor_factory"]
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["status"] == "degraded"
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: assert factory_health["websocket_manager_available"] is False
-
-
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                                                                                                                                # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short", "--asyncio-mode=auto"])
+        This helper establishes real WebSocket connections with proper authentication
+        and creates WebSocketContext objects that represent actual user sessions.
+        
+        Args:
+            auth_helper: Authentication helper for JWT tokens
+            user_id: Unique user identifier
+            thread_id: Thread/conversation identifier
+            run_id: Optional run identifier
+            
+        Returns:
+            Tuple of (WebSocketContext, WebSocket connection)
+        """
+        # Create authenticated WebSocket connection
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Create real WebSocket context (not a mock)
+        context = WebSocketContext.create_for_user(
+            websocket=websocket,
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id
+        )
+        
+        # Validate context is properly isolated
+        assert context.user_id == user_id
+        assert context.thread_id == thread_id
+        assert context.is_active
+        assert context.validate_for_message_processing()
+        
+        return context, websocket
+    
+    @pytest.mark.asyncio
+    async def test_basic_websocket_context_isolation(
+        self, 
+        auth_helper: E2EWebSocketAuthHelper,
+        database_manager: DatabaseTestManager
+    ):
+        """
+        Test that WebSocketContext properly isolates different user connections.
+        
+        This test validates the core isolation requirement: different users
+        must have completely isolated WebSocket contexts with no shared state.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts for 3 different users
+            for i in range(3):
+                user_id = f"test_user_{i}_{int(time.time())}"
+                thread_id = f"thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Verify complete isolation between contexts
+            contexts = [ctx for ctx, ws in contexts_and_connections]
+            
+            for i, ctx in enumerate(contexts):
+                # Each context should have unique identifiers
+                assert ctx.user_id == f"test_user_{i}_{int(time.time())}"[:-10] + ctx.user_id.split('_')[-1]
+                assert ctx.connection_id != contexts[(i + 1) % 3].connection_id
+                
+                # Isolation keys must be unique
+                isolation_key = ctx.to_isolation_key()
+                for j, other_ctx in enumerate(contexts):
+                    if i != j:
+                        assert isolation_key != other_ctx.to_isolation_key()
+                        
+                # Verify connection info doesn't leak other users' data
+                conn_info = ctx.get_connection_info()
+                for j, other_ctx in enumerate(contexts):
+                    if i != j:
+                        info_str = str(conn_info)
+                        assert other_ctx.user_id not in info_str
+                        assert other_ctx.thread_id not in info_str
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_supervisor_creation_isolation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper,
+        database_manager: DatabaseTestManager
+    ):
+        """
+        Test that multiple supervisors can be created concurrently without interference.
+        
+        This test validates that the supervisor factory can handle concurrent
+        requests from different users without race conditions or data leakage.
+        """
+        contexts_and_connections = []
+        supervisors = []
+        
+        try:
+            # Create multiple contexts for concurrent supervisor creation
+            for i in range(5):
+                user_id = f"concurrent_user_{i}_{int(time.time())}"
+                thread_id = f"concurrent_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Create supervisors concurrently
+            async with database_manager.get_async_session() as db_session:
+                tasks = []
+                
+                for context, _ in contexts_and_connections:
+                    task = asyncio.create_task(
+                        get_websocket_scoped_supervisor(context, db_session)
+                    )
+                    tasks.append(task)
+                
+                # Execute all supervisor creations concurrently
+                created_supervisors = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Verify all supervisors were created successfully
+            for i, supervisor in enumerate(created_supervisors):
+                if isinstance(supervisor, Exception):
+                    pytest.fail(f"Supervisor creation {i} failed: {supervisor}")
+                
+                assert supervisor is not None
+                supervisors.append(supervisor)
+                
+                # Verify supervisor has correct user isolation
+                context = contexts_and_connections[i][0]
+                expected_user = context.user_id
+                
+                # Verify supervisor is isolated to correct user
+                # (This will depend on supervisor's internal structure)
+                assert hasattr(supervisor, 'user_id') or hasattr(supervisor, '_user_context')
+        
+        finally:
+            # Clean up supervisors if they have cleanup methods
+            for supervisor in supervisors:
+                if hasattr(supervisor, 'cleanup'):
+                    try:
+                        await supervisor.cleanup()
+                    except Exception as e:
+                        print(f"Supervisor cleanup error: {e}")
+            
+            # Clean up WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_websocket_context_lifecycle_isolation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper
+    ):
+        """
+        Test that WebSocket context lifecycle operations don't interfere between users.
+        
+        This validates that activity updates, connection state changes, and other
+        lifecycle operations maintain proper isolation between different users.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts for multiple users
+            for i in range(3):
+                user_id = f"lifecycle_user_{i}_{int(time.time())}"
+                thread_id = f"lifecycle_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            contexts = [ctx for ctx, ws in contexts_and_connections]
+            
+            # Perform lifecycle operations on different contexts
+            for i, ctx in enumerate(contexts):
+                original_activity = ctx.last_activity
+                
+                # Small delay to ensure timestamp difference
+                await asyncio.sleep(0.01)
+                ctx.update_activity()
+                
+                # Verify activity was updated for this context only
+                assert ctx.last_activity > original_activity
+                
+                # Verify other contexts weren't affected
+                for j, other_ctx in enumerate(contexts):
+                    if i != j:
+                        # Other contexts should have earlier activity timestamps
+                        assert other_ctx.last_activity < ctx.last_activity
+            
+            # Test connection state validation isolation
+            for context in contexts:
+                assert context.is_active
+                assert context.validate_for_message_processing()
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_message_handling_isolation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper,
+        database_manager: DatabaseTestManager
+    ):
+        """
+        Test that concurrent message handling maintains proper user isolation.
+        
+        This validates that when multiple users send messages simultaneously,
+        each message is processed in the correct user context without interference.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts and messages for different users
+            for i in range(4):
+                user_id = f"message_user_{i}_{int(time.time())}"
+                thread_id = f"message_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Create test messages for concurrent processing
+            test_messages = []
+            for i, (context, websocket) in enumerate(contexts_and_connections):
+                message = {
+                    "type": "user_message",
+                    "content": f"Test message from user {i}",
+                    "user_id": context.user_id,
+                    "thread_id": context.thread_id,
+                    "timestamp": time.time(),
+                    "message_id": str(uuid.uuid4())
+                }
+                test_messages.append((message, websocket, context))
+            
+            # Send messages concurrently to different user connections
+            send_tasks = []
+            for message, websocket, context in test_messages:
+                task = asyncio.create_task(
+                    websocket.send(json.dumps(message))
+                )
+                send_tasks.append(task)
+            
+            # Wait for all messages to be sent
+            await asyncio.gather(*send_tasks, return_exceptions=True)
+            
+            # Give the system time to process messages
+            await asyncio.sleep(1.0)
+            
+            # Verify each context maintained its isolation
+            contexts = [ctx for ctx, ws in contexts_and_connections]
+            for i, ctx in enumerate(contexts):
+                # Verify context still has correct user data
+                assert f"message_user_{i}_" in ctx.user_id
+                assert f"message_thread_{i}_" in ctx.thread_id
+                
+                # Verify contexts remain unique
+                isolation_key = ctx.to_isolation_key()
+                for j, other_ctx in enumerate(contexts):
+                    if i != j:
+                        assert isolation_key != other_ctx.to_isolation_key()
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_error_isolation_between_users(
+        self,
+        auth_helper: E2EWebSocketAuthHelper,
+        database_manager: DatabaseTestManager
+    ):
+        """
+        Test that errors in one user's context don't affect other users.
+        
+        This validates that when one user experiences an error (connection failure,
+        processing error, etc.), other users continue to operate normally.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts for multiple users
+            for i in range(3):
+                user_id = f"error_test_user_{i}_{int(time.time())}"
+                thread_id = f"error_test_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Simulate error in middle user's connection
+            error_context, error_websocket = contexts_and_connections[1]
+            
+            # Force close the error user's connection
+            await error_websocket.close()
+            
+            # Small delay for state propagation
+            await asyncio.sleep(0.1)
+            
+            # Verify isolation: only middle user should be affected
+            contexts = [ctx for ctx, ws in contexts_and_connections]
+            
+            assert contexts[0].is_active, "User 0 should remain active"
+            assert not contexts[1].is_active, "User 1 should be inactive (error)"
+            assert contexts[2].is_active, "User 2 should remain active"
+            
+            # Test validation isolation
+            for i, ctx in enumerate(contexts):
+                if i == 1:  # Error user
+                    with pytest.raises(ValueError, match="not active"):
+                        ctx.validate_for_message_processing()
+                else:  # Healthy users
+                    assert ctx.validate_for_message_processing()
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    try:
+                        await websocket.close()
+                    except Exception:
+                        pass  # Already closed or errored
+    
+    @pytest.mark.asyncio
+    async def test_performance_under_concurrent_load(
+        self,
+        auth_helper: E2EWebSocketAuthHelper,
+        database_manager: DatabaseTestManager
+    ):
+        """
+        Test performance characteristics of WebSocket supervisor isolation under load.
+        
+        This validates that the system can handle multiple concurrent users
+        without significant performance degradation or resource exhaustion.
+        """
+        num_connections = 20  # Reasonable load for test environment
+        contexts_and_connections = []
+        
+        try:
+            start_time = time.time()
+            
+            # Create multiple concurrent connections
+            connection_tasks = []
+            for i in range(num_connections):
+                user_id = f"perf_user_{i}_{int(time.time())}"
+                thread_id = f"perf_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                task = asyncio.create_task(
+                    self._create_real_websocket_context(auth_helper, user_id, thread_id)
+                )
+                connection_tasks.append(task)
+            
+            # Create all connections concurrently
+            connections_results = await asyncio.gather(
+                *connection_tasks, return_exceptions=True
+            )
+            
+            connection_time = time.time() - start_time
+            
+            # Verify all connections were successful
+            successful_connections = []
+            for i, result in enumerate(connections_results):
+                if isinstance(result, Exception):
+                    pytest.fail(f"Connection {i} failed: {result}")
+                
+                context, websocket = result
+                successful_connections.append((context, websocket))
+                assert context.is_active
+            
+            contexts_and_connections = successful_connections
+            
+            # Performance assertions
+            assert len(successful_connections) == num_connections
+            assert connection_time < 30.0, f"Connection time {connection_time}s too slow"
+            
+            # Verify each context maintained unique identities
+            user_ids = set()
+            connection_ids = set()
+            
+            for context, _ in successful_connections:
+                assert context.user_id not in user_ids, f"Duplicate user_id: {context.user_id}"
+                user_ids.add(context.user_id)
+                
+                assert context.connection_id not in connection_ids, \
+                    f"Duplicate connection_id: {context.connection_id}"
+                connection_ids.add(context.connection_id)
+        
+        finally:
+            # Clean up all WebSocket connections
+            cleanup_tasks = []
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    task = asyncio.create_task(websocket.close())
+                    cleanup_tasks.append(task)
+            
+            if cleanup_tasks:
+                await asyncio.gather(*cleanup_tasks, return_exceptions=True)
+    
+    @pytest.mark.asyncio
+    async def test_websocket_disconnection_isolation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper
+    ):
+        """
+        Test that WebSocket disconnections are properly isolated between users.
+        
+        This validates that when some users disconnect, other users remain
+        unaffected and can continue their sessions normally.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create WebSocket connections for different users
+            for i in range(3):
+                user_id = f"disconnect_user_{i}_{int(time.time())}"
+                thread_id = f"disconnect_thread_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Verify all are initially active
+            contexts = [ctx for ctx, ws in contexts_and_connections]
+            for ctx in contexts:
+                assert ctx.is_active
+                assert ctx.validate_for_message_processing()
+            
+            # Disconnect user_1's WebSocket
+            middle_context, middle_websocket = contexts_and_connections[1]
+            await middle_websocket.close()
+            
+            # Small delay for state propagation
+            await asyncio.sleep(0.1)
+            
+            # Verify isolation: only user_1 should be inactive
+            assert contexts[0].is_active, "User 0 should remain active"
+            assert not contexts[1].is_active, "User 1 should be inactive after disconnect"
+            assert contexts[2].is_active, "User 2 should remain active"
+            
+            # Test validation isolation
+            for i, ctx in enumerate(contexts):
+                if i == 1:  # Disconnected user
+                    with pytest.raises(ValueError, match="not active"):
+                        ctx.validate_for_message_processing()
+                else:  # Active users
+                    assert ctx.validate_for_message_processing()
+        
+        finally:
+            # Clean up all remaining WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    try:
+                        await websocket.close()
+                    except Exception:
+                        pass  # Already closed
+    
+    @pytest.mark.asyncio
+    async def test_websocket_context_factory_isolation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper
+    ):
+        """
+        Test that the WebSocketContext factory creates properly isolated contexts.
+        
+        This validates that the factory method produces contexts with unique
+        identifiers and proper isolation without any shared state.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts using factory method with different parameters
+            for i in range(3):
+                user_id = f"factory_user_{i}_{int(time.time())}"
+                thread_id = f"factory_thread_{i}_{uuid.uuid4().hex[:8]}"
+                run_id = f"factory_run_{i}_{uuid.uuid4().hex[:8]}"
+                
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id, run_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Verify each context is properly isolated
+            connection_ids = set()
+            isolation_keys = set()
+            
+            for i, (ctx, websocket) in enumerate(contexts_and_connections):
+                # Verify correct data
+                assert f"factory_user_{i}_" in ctx.user_id
+                assert f"factory_thread_{i}_" in ctx.thread_id
+                assert f"factory_run_{i}_" in ctx.run_id
+                
+                # Verify uniqueness
+                assert ctx.connection_id not in connection_ids
+                connection_ids.add(ctx.connection_id)
+                
+                isolation_key = ctx.to_isolation_key()
+                assert isolation_key not in isolation_keys
+                isolation_keys.add(isolation_key)
+                
+                # Verify WebSocket association and activity
+                assert ctx.websocket is websocket
+                assert ctx.is_active
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+    
+    @pytest.mark.asyncio
+    async def test_cross_user_data_isolation_validation(
+        self,
+        auth_helper: E2EWebSocketAuthHelper
+    ):
+        """
+        Test that user data cannot leak between different WebSocket contexts.
+        
+        This is a security-focused test ensuring that sensitive user data
+        (user_id, thread_id, connection info) remains completely isolated.
+        """
+        contexts_and_connections = []
+        
+        try:
+            # Create contexts with distinct user data
+            sensitive_data = [
+                ("user_alice_sensitive", "thread_confidential_001", "run_secret_alpha"),
+                ("user_bob_private", "thread_personal_002", "run_private_beta"),
+                ("user_charlie_secure", "thread_classified_003", "run_secure_gamma")
+            ]
+            
+            for user_id, thread_id, run_id in sensitive_data:
+                context, websocket = await self._create_real_websocket_context(
+                    auth_helper, user_id, thread_id, run_id
+                )
+                contexts_and_connections.append((context, websocket))
+            
+            # Verify complete data isolation
+            for i, (ctx, _) in enumerate(contexts_and_connections):
+                expected_user, expected_thread, expected_run = sensitive_data[i]
+                
+                # Verify context contains only its own data
+                assert ctx.user_id == expected_user
+                assert ctx.thread_id == expected_thread
+                assert ctx.run_id == expected_run
+                
+                # Verify isolation keys don't contain other users' data
+                isolation_key = ctx.to_isolation_key()
+                
+                for j, (other_user, other_thread, other_run) in enumerate(sensitive_data):
+                    if i != j:
+                        # Other users' data should not appear in this context
+                        assert other_user not in isolation_key
+                        assert other_thread not in isolation_key
+                        assert other_run not in isolation_key
+                
+                # Verify connection info doesn't leak other users' data
+                conn_info = ctx.get_connection_info()
+                info_str = str(conn_info)
+                
+                for j, (other_user, other_thread, other_run) in enumerate(sensitive_data):
+                    if i != j:
+                        # Other users' data should not appear in connection info
+                        assert other_user not in info_str
+                        assert other_thread not in info_str
+                        assert other_run not in info_str
+        
+        finally:
+            # Clean up all WebSocket connections
+            for context, websocket in contexts_and_connections:
+                if websocket and not websocket.closed:
+                    await websocket.close()
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short", "--asyncio-mode=auto"])

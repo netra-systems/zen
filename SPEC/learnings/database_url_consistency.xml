@@ -7,16 +7,16 @@
   <date>2025-08-20</date>
   <severity>CRITICAL</severity>
   <summary>
-    Both backend and auth services must use the same DATABASE_URL secret.
+    Both backend and auth services must use the same #removed-legacysecret.
     When using Cloud SQL proxy, the URL must use Unix socket format, not direct IP.
     Invalid IP addresses in secrets cause connection timeouts.
   </summary>
   <issue_discovery>
     <symptom>Auth service fails with database connection timeout</symptom>
-    <initial_assumption>Auth service was getting different DATABASE_URL than backend</initial_assumption>
+    <initial_assumption>Auth service was getting different #removed-legacythan backend</initial_assumption>
     <actual_problem>Both services use same secret but IP address is invalid</actual_problem>
     <discovery_method>
-      <step>Checked how both services load DATABASE_URL - both use os.getenv("DATABASE_URL")</step>
+      <step>Checked how both services load #removed-legacy- both use os.getenv("DATABASE_URL")</step>
       <step>Checked Cloud Build configs - both use database-url-staging secret</step>
       <step>Checked secret value - contains IP 34.68.229.240</step>
       <step>Listed Cloud SQL instances - IP doesn't match any instance</step>
@@ -81,7 +81,7 @@
     </async_driver>
     <conversion_flow>
       <step1>GCP Secret Manager: stores with sslmode=require (standard format)</step1>
-      <step2>Cloud Run: mounts as DATABASE_URL env var</step2>
+      <step2>Cloud Run: mounts as #removed-legacyenv var</step2>
       <step3>DatabaseManager.get_base_database_url(): strips driver prefixes</step3>
       <step4a>DatabaseManager.get_migration_url_sync_format(): keeps sslmode for sync</step4a>
       <step4b>DatabaseManager.get_application_url_async(): converts sslmode→ssl for async</step4b>
@@ -104,7 +104,7 @@
       <title>Use Cloud SQL proxy for all services</title>
       <description>
         Configure all Cloud Run services with --set-cloudsql-instances.
-        Use Unix socket format in DATABASE_URL for consistency.
+        Use Unix socket format in #removed-legacyfor consistency.
       </description>
     </practice>
     <practice priority="2">

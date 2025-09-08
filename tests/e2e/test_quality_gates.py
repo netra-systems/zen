@@ -1,7 +1,7 @@
 from shared.isolated_environment import get_env
 # REMOVED_SYNTAX_ERROR: '''Quality Gate Tester - Phase 4 of Unified System Testing
 from shared.isolated_environment import get_env
-from test_framework.database.test_database_manager import TestDatabaseManager
+from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
@@ -206,7 +206,7 @@ env = get_env()
     # REMOVED_SYNTAX_ERROR: """Create quality service with feedback capabilities"""
     # REMOVED_SYNTAX_ERROR: service = create_quality_service()
     # Mock: Generic component isolation for controlled unit testing
-    # REMOVED_SYNTAX_ERROR: service.feedback_processor = TestDatabaseManager().get_session() instead of Mock
+    # REMOVED_SYNTAX_ERROR: service.feedback_processor = DatabaseTestManager().get_session() instead of Mock
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return service
 

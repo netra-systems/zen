@@ -1,6 +1,6 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-05 17:42:36
-Environment: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
+Generated: 2025-09-07 18:12:25
+Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
 - **Total Tests**: 3
@@ -10,7 +10,7 @@ Environment: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
 ## Test Results
 ### http_connectivity
 - **Status**: ✅ PASS
-- **Duration**: 0.465s
+- **Duration**: 0.928s
 - **Health Status**: 200
 - **Service Status**: healthy
 - **Version**: 1.0.0
@@ -18,14 +18,14 @@ Environment: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
 ### websocket_connectivity
 - **Status**: ✅ PASS
 - **Duration**: 0.000s
-- **Connection Time**: 0.385s
+- **Connection Time**: 1.235s
 - **Ping Time**: 0.000s
 
 ### agent_request_pipeline
 - **Status**: ✅ PASS
-- **Duration**: 0.440s
-- **Auth Error Received**: True (Expected)
-- **Error Code**: AUTH_ERROR
+- **Duration**: 0.961s
+- **Pipeline Working**: True
+- **Response Type**: error_message
 
 ## Recommendations
 ✅ **All connectivity tests passed!**

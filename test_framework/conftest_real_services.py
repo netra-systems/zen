@@ -267,15 +267,7 @@ async def real_services(real_services_function: RealServicesManager) -> AsyncIte
     # await real_services_function.reset_all_data()
 
 
-# BACKWARD COMPATIBILITY: Alias for old session fixture name
-@pytest.fixture(scope="function")
-async def real_services_session(real_services_function: RealServicesManager) -> AsyncIterator[RealServicesManager]:
-    """DEPRECATED: Use real_services_function instead.
-    
-    Backward compatibility alias for real_services_session fixture.
-    Now function-scoped to fix pytest-asyncio ScopeMismatch issues.
-    """
-    yield real_services_function
+# Backward compatibility removed - use real_services_function instead
 
 
 @pytest.fixture(scope="function")
@@ -609,7 +601,7 @@ def performance_monitor():
 __all__ = [
     # Core real service managers
     'real_services_function',  # New primary fixture (function-scoped)
-    'real_services_session',   # Backward compatibility alias
+    # 'real_services_session', # Backward compatibility removed
     'real_services', 
     'real_postgres',
     'real_redis',
