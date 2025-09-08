@@ -1,1 +1,97 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="1" tests="1" time="7.252" timestamp="2025-09-07T19:54:26.284345-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 51, 'Skipped: Test framework functions have been removed')</skipped></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="6" time="22.717" timestamp="2025-09-07T20:53:08.446480-07:00" hostname="Anthony"><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_startup_sequence_integration" time="2.576"><failure message="Failed: Failed to connect to auth service health endpoints: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_service_startup.py:241: in test_auth_service_startup_sequence_integration
+    async with session.get(self.health_endpoint, timeout=aiohttp.ClientTimeout(total=10)) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\integration\test_auth_service_startup.py:257: in test_auth_service_startup_sequence_integration
+    pytest.fail(f"Failed to connect to auth service health endpoints: {e}")
+E   Failed: Failed to connect to auth service health endpoints: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_database_initialization" time="0.026" /><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_health_endpoints_available" time="2.283"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_service_startup.py:382: in test_auth_service_health_endpoints_available
+    async with session.get(self.health_endpoint, timeout=aiohttp.ClientTimeout(total=10)) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_oauth_validation" time="0.008" /><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_graceful_shutdown" time="0.012"><failure message="AssertionError: Database should be healthy before shutdown test&#10;assert 'error' in ['healthy', 'timeout']">auth_service\tests\integration\test_auth_service_startup.py:540: in test_auth_service_graceful_shutdown
+    assert db_health_before["status"] in ["healthy", "timeout"], "Database should be healthy before shutdown test"
+E   AssertionError: Database should be healthy before shutdown test
+E   assert 'error' in ['healthy', 'timeout']</failure></testcase><testcase classname="tests.integration.test_auth_service_startup.TestAuthServiceStartup" name="test_auth_service_startup_performance_metrics" time="2.347"><failure message="AssertionError: At least 80% of health checks should succeed, got 0/10&#10;assert 0 &gt;= 8&#10; +  where 0 = len([])">auth_service\tests\integration\test_auth_service_startup.py:689: in test_auth_service_startup_performance_metrics
+    assert len(successful_responses) &gt;= 8, f"At least 80% of health checks should succeed, got {len(successful_responses)}/10"
+E   AssertionError: At least 80% of health checks should succeed, got 0/10
+E   assert 0 &gt;= 8
+E    +  where 0 = len([])</failure></testcase></testsuite></testsuites>
