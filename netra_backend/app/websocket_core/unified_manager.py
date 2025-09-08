@@ -463,17 +463,23 @@ class UnifiedWebSocketManager:
                     f"Failed: {[f'{conn_id}: {error}' for conn_id, error in failed_connections]}"
                 )
             
-            # Remove failed connections outside the send loop to avoid race conditions
-            for failed_conn_id, error in failed_connections:
-                try:
-                    await self.remove_connection(failed_conn_id)
-                    logger.info(f"Removed failed connection {failed_conn_id} due to: {error}")
-                except Exception as e:
-                    # LOUD ERROR: Failed to clean up failed connection
-                    logger.critical(
-                        f"CLEANUP FAILURE: Failed to remove failed connection {failed_conn_id} "
-                        f"for user {user_id}: {e}. This may cause connection leaks."
-                    )
+            # DEADLOCK FIX: Schedule failed connection removal as background task to avoid nested locks
+            # This prevents deadlock when send_to_user is called from within add_connection's user lock
+            if failed_connections:
+                async def cleanup_failed_connections():
+                    for failed_conn_id, error in failed_connections:
+                        try:
+                            await self.remove_connection(failed_conn_id)
+                            logger.info(f"Removed failed connection {failed_conn_id} due to: {error}")
+                        except Exception as e:
+                            # LOUD ERROR: Failed to clean up failed connection
+                            logger.critical(
+                                f"CLEANUP FAILURE: Failed to remove failed connection {failed_conn_id} "
+                                f"for user {user_id}: {e}. This may cause connection leaks."
+                            )
+                
+                # Create background task for cleanup to avoid deadlock
+                asyncio.create_task(cleanup_failed_connections())
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
         """
