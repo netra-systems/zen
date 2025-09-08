@@ -178,7 +178,7 @@ class AgentTimeoutError(AgentError):
         details = self._build_timeout_details(agent_name, timeout_seconds)
         message = self._build_timeout_message(agent_name, timeout_seconds)
         init_params = self._build_timeout_init_params(message, details, kwargs)
-        NetraException.__init__(self, **init_params)
+        super().__init__(agent_name=agent_name, **init_params)
     
     def _build_timeout_details(self, agent_name: str, timeout_seconds: Optional[Union[int, float]]) -> dict:
         """Build timeout error details dictionary."""

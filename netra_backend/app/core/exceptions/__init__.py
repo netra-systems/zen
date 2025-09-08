@@ -60,6 +60,27 @@ from netra_backend.app.core.exceptions_database import (
     DatabaseConstraintError
 )
 
+# Import service exceptions
+from netra_backend.app.core.exceptions_service import (
+    ServiceError,
+    ServiceUnavailableError,
+    ServiceTimeoutError,
+    ExternalServiceError,
+    LLMRequestError,
+    LLMRateLimitError,
+    ProcessingError
+)
+
+# Import agent exceptions from canonical location  
+from netra_backend.app.core.exceptions_agent import (
+    AgentError,
+    AgentExecutionError,
+    AgentTimeoutError,  # SSOT canonical location
+    LLMError,
+    AgentCoordinationError,
+    AgentConfigurationError
+)
+
 # Import aliases for backward compatibility
 from netra_backend.app.core.exceptions_database import (
     DatabaseConstraintError as ConstraintViolationError
@@ -72,7 +93,15 @@ __all__ = [
     "WebSocketAgentEventError",
     "WebSocketEventValidationError",
     
-    # Agent exceptions
+    # Agent exceptions (from canonical location)
+    "AgentError",
+    "AgentExecutionError", 
+    "AgentTimeoutError",
+    "LLMError",
+    "AgentCoordinationError",
+    "AgentConfigurationError",
+    
+    # Specialized agent exceptions
     "AgentLifecycleError",
     "AgentStateTransitionError",
     "AgentContextError",
@@ -106,6 +135,15 @@ __all__ = [
     "DatabaseConnectionError",
     "RecordAlreadyExistsError",
     "DatabaseConstraintError",
+    
+    # Service exceptions
+    "ServiceError",
+    "ServiceUnavailableError",
+    "ServiceTimeoutError", 
+    "ExternalServiceError",
+    "LLMRequestError",
+    "LLMRateLimitError",
+    "ProcessingError",
     
     # Aliases for backward compatibility
     "ConstraintViolationError"
