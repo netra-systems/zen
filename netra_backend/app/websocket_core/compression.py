@@ -85,6 +85,11 @@ class CompressionStats(BaseModel):
             self.bandwidth_savings_percent = (self.total_bytes_saved / self.total_original_bytes) * 100
 
 
+class CostSavings(BaseModel):
+    """Cost savings estimation."""
+    monthly_savings_usd: float = 0.0
+
+
 class PerformanceReport(BaseModel):
     """Performance report for compression operations."""
     total_messages_processed: int
@@ -92,7 +97,7 @@ class PerformanceReport(BaseModel):
     total_bandwidth_saved_bytes: int
     average_compression_ratio: float
     compression_efficiency_rating: str
-    estimated_cost_savings: Dict[str, float]
+    estimated_cost_savings: CostSavings
     
     def model_post_init(self, __context: Any) -> None:
         """Calculate efficiency rating and cost savings."""
@@ -110,9 +115,9 @@ class PerformanceReport(BaseModel):
         # Assume $0.10 per GB of data transfer
         gb_saved = self.total_bandwidth_saved_bytes / (1024 * 1024 * 1024)
         monthly_savings = gb_saved * 0.10 * 30  # 30 days
-        self.estimated_cost_savings = {
-            'monthly_savings_usd': round(monthly_savings, 2)
-        }
+        self.estimated_cost_savings = CostSavings(
+            monthly_savings_usd=round(monthly_savings, 2)
+        )
 
 
 class WebSocketCompressionHandler:
@@ -298,7 +303,7 @@ class WebSocketCompressionHandler:
                 total_bandwidth_saved_bytes=self.stats.total_bytes_saved,
                 average_compression_ratio=self.stats.average_compression_ratio,
                 compression_efficiency_rating='good',  # Will be calculated in model_post_init
-                estimated_cost_savings={'monthly_savings_usd': 0.0}  # Will be calculated in model_post_init
+                estimated_cost_savings=CostSavings()  # Will be calculated in model_post_init
             )
 
 

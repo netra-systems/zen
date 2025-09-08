@@ -74,6 +74,7 @@ class MessageType(str, Enum):
     AGENT_STATUS_REQUEST = "agent_status_request"
     AGENT_STATUS_UPDATE = "agent_status_update"
     AGENT_PROGRESS = "agent_progress"
+    AGENT_THINKING = "agent_thinking"  # Alias for AGENT_PROGRESS
     AGENT_ERROR = "agent_error"
     
     # Thread/conversation

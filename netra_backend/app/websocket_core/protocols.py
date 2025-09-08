@@ -498,8 +498,36 @@ formal interface contracts exist and are enforced for all WebSocket managers.
 """
 
 
+class WebSocketProtocol:
+    """Simple WebSocket protocol class for integration test compatibility."""
+    
+    def __init__(self, websocket=None, connection_id: str = None, user_id: str = None):
+        self.websocket = websocket
+        self.connection_id = connection_id
+        self.user_id = user_id
+        self.is_active = True
+    
+    async def send_message(self, message: Dict[str, Any]) -> bool:
+        """Send message through websocket."""
+        try:
+            if self.websocket and hasattr(self.websocket, 'send_json'):
+                await self.websocket.send_json(message)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to send message: {e}")
+            return False
+    
+    async def close(self) -> None:
+        """Close websocket connection."""
+        self.is_active = False
+        if self.websocket and hasattr(self.websocket, 'close'):
+            await self.websocket.close()
+
+
 __all__ = [
     'WebSocketManagerProtocol',
     'WebSocketManagerProtocolValidator',
+    'WebSocketProtocol',
     'get_protocol_documentation'
 ]
