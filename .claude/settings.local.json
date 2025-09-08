@@ -27,7 +27,9 @@
       "Bash(TEST_ENV=staging PYTHONPATH=/Users/rindhujajohnson/Netra/GitHub/netra-apex python -m pytest tests/e2e/staging/test_auth_routes.py -v --tb=short)",
       "Bash(TEST_ENV=staging PYTHONPATH=/Users/rindhujajohnson/Netra/GitHub/netra-apex python -m pytest tests/e2e/staging/test_staging_connectivity_validation.py -v --tb=short)",
       "Bash(gcloud run services describe:*)",
-      "Bash(gcloud run services list:*)"
+      "Bash(gcloud run services list:*)",
+      "Bash(cat:*)",
+      "Bash(docker:*)"
     ],
     "deny": [],
     "ask": []
