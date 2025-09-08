@@ -621,30 +621,33 @@ async def stream_agent_execution(
             if not agent_service:
                 # Mock streaming response for testing
                 await asyncio.sleep(0.1)
-                yield f"data: {json.dumps({
+                data = {
                     'event': 'agent_thinking',
                     'agent_id': agent_id,
                     'status': 'processing',
                     'message': f'Mock processing {request.agent_type} request...',
                     'timestamp': datetime.now(timezone.utc).isoformat()
-                })}\n\n"
+                }
+                yield f"data: {json.dumps(data)}\n\n"
                 
                 await asyncio.sleep(0.1)
-                yield f"data: {json.dumps({
+                data = {
                     'event': 'agent_progress',
                     'agent_id': agent_id,
                     'progress': 50,
                     'message': 'Halfway through processing',
                     'timestamp': datetime.now(timezone.utc).isoformat()
-                })}\n\n"
+                }
+                yield f"data: {json.dumps(data)}\n\n"
                 
                 await asyncio.sleep(0.1)
-                yield f"data: {json.dumps({
+                data = {
                     'event': 'agent_completed',
                     'agent_id': agent_id,
                     'result': f'Mock {request.agent_type} response: {request.message}',
                     'timestamp': datetime.now(timezone.utc).isoformat()
-                })}\n\n"
+                }
+                yield f"data: {json.dumps(data)}\n\n"
                 
             else:
                 # Use actual agent service with streaming
@@ -660,13 +663,14 @@ async def stream_agent_execution(
                 except Exception as e:
                     # Fallback to mock streaming on service error
                     logger.warning(f"Agent service streaming failed, using fallback: {e}")
-                    yield f"data: {json.dumps({
+                    data = {
                         'event': 'agent_error',
                         'agent_id': agent_id,
                         'error': 'Service unavailable, using fallback',
                         'result': f'Fallback {request.agent_type} response: {request.message}',
                         'timestamp': datetime.now(timezone.utc).isoformat()
-                    })}\n\n"
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
             
             # Always send end event
             yield f"data: {json.dumps({
