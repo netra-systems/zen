@@ -37,6 +37,39 @@ from netra_backend.app.websocket_core.types import (
 logger = central_logger.get_logger(__name__)
 
 
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
+    
+    CRITICAL FIX: GCP Cloud Run structured logging cannot serialize Starlette WebSocketState
+    enum objects directly. This causes "Object of type WebSocketState is not JSON serializable"
+    errors that manifest as 1011 internal server errors.
+    
+    Args:
+        state: WebSocketState enum or any object that needs safe logging
+        
+    Returns:
+        String representation safe for JSON serialization in structured logs
+    """
+    try:
+        # Handle Starlette/FastAPI WebSocketState enums
+        if hasattr(state, 'name') and hasattr(state, 'value'):
+            return str(state.name).lower()  # CONNECTED -> "connected"
+        
+        # Handle other enum-like objects
+        if hasattr(state, '__class__') and hasattr(state.__class__, '__name__'):
+            if 'State' in state.__class__.__name__:
+                return str(state)
+        
+        # Fallback to string representation
+        return str(state)
+        
+    except Exception as e:
+        # Ultimate fallback - prevent logging failures
+        logger.debug(f"Error serializing state for logging: {e}")
+        return "<serialization_error>"
+
+
 def generate_connection_id(user_id: str, prefix: str = "conn") -> str:
     """Generate unique connection ID."""
     timestamp = int(time.time() * 1000)
@@ -75,11 +108,11 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
             
             # CRITICAL FIX: If client state indicates disconnected or not yet connected, return False
             if client_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
-                logger.debug(f"WebSocket client_state not connected: {client_state}")
+                logger.debug(f"WebSocket client_state not connected: {_safe_websocket_state_for_logging(client_state)}")
                 return False
             
             if is_connected:
-                logger.debug(f"WebSocket connected via client_state: {client_state}")
+                logger.debug(f"WebSocket connected via client_state: {_safe_websocket_state_for_logging(client_state)}")
             return is_connected
         
         # 2. Fallback to application_state if available
@@ -89,11 +122,11 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
             
             # CRITICAL FIX: If application state indicates disconnected or not yet connected, return False
             if app_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
-                logger.debug(f"WebSocket application_state not connected: {app_state}")
+                logger.debug(f"WebSocket application_state not connected: {_safe_websocket_state_for_logging(app_state)}")
                 return False
                 
             if is_connected:
-                logger.debug(f"WebSocket connected via application_state: {app_state}")
+                logger.debug(f"WebSocket connected via application_state: {_safe_websocket_state_for_logging(app_state)}")
             return is_connected
         
         # 3. Check if the websocket has been properly initialized
