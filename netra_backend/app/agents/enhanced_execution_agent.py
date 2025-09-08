@@ -5,7 +5,10 @@ Business Value: Ensures real-time agent status updates for improved UX.
 
 import asyncio
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
@@ -76,7 +79,7 @@ class EnhancedExecutionAgent(BaseAgent):
     
     async def _process_with_thinking(self, context: UserExecutionContext, 
                                     stream_updates: bool, 
-                                    session_manager: Optional[DatabaseSessionManager]) -> str:
+                                    session_manager: Optional['DatabaseSessionManager']) -> str:
         """Process request with thinking updates using context pattern."""
         thinking_steps = [
             "Analyzing the user's request...",
@@ -141,7 +144,7 @@ class EnhancedExecutionAgent(BaseAgent):
     
     async def _execute_tools(self, context: UserExecutionContext, 
                            stream_updates: bool, 
-                           session_manager: Optional[DatabaseSessionManager]) -> None:
+                           session_manager: Optional['DatabaseSessionManager']) -> None:
         """Execute tools with notifications using context pattern."""
         tools = ["data_analyzer", "calculator", "search_engine"]
         

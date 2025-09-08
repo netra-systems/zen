@@ -73,8 +73,8 @@ class SummaryExtractorSubAgent(BaseAgent):
         context = validate_user_context(context)
         
         try:
-            # Create database session manager
-            session_mgr = DatabaseSessionManager(context)
+            # Create database session manager (stub implementation)
+            session_mgr = DatabaseSessionManager()
             
             # Validate preconditions
             if not await self._validate_preconditions(context):

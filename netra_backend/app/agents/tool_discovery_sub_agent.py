@@ -67,8 +67,8 @@ class ToolDiscoverySubAgent(BaseAgent):
         start_time = time.time()
         
         try:
-            # Create database session manager
-            session_mgr = DatabaseSessionManager(context)
+            # Create database session manager (stub implementation)
+            session_mgr = DatabaseSessionManager()
             
             # Validate preconditions
             if not await self._validate_preconditions(context):
