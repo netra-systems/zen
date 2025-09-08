@@ -1007,6 +1007,6 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
 
 
 # Mark these as critical WebSocket mis-routing tests
-pytest.mark.critical_websocket_misrouting = pytest.mark.mark
-pytest.mark.websocket_event_violations = pytest.mark.mark
-pytest.mark.integration_websocket_failures = pytest.mark.mark
+pytest.mark.critical_websocket_misrouting = pytest.mark.critical
+pytest.mark.websocket_event_violations = pytest.mark.websocket
+pytest.mark.integration_websocket_failures = pytest.mark.integration
