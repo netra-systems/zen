@@ -23,6 +23,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
@@ -40,7 +41,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_test_endpoint_connection(self):
         """Test that WebSocket connection logic handles successful connections properly."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         mock_websocket.open = True
         
         # Mock welcome message
@@ -53,7 +54,7 @@ class TestWebSocketBasicConnection:
         mock_websocket.recv = AsyncMock(return_value=welcome_message)
         
         # Mock the websocket connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -82,7 +83,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_ping_pong(self):
         """Test basic ping/pong functionality using mocked WebSocket."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({
@@ -99,10 +100,10 @@ class TestWebSocketBasicConnection:
         
         # Set up mock to return welcome first, then pong
         mock_websocket.recv = AsyncMock(side_effect=[welcome_message, pong_message])
-        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send = AsyncMock()  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -140,7 +141,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_echo_message(self):
         """Test echo functionality using mocked WebSocket."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({"type": "connection_established"})
@@ -163,10 +164,10 @@ class TestWebSocketBasicConnection:
         
         # Set up mock to return welcome first, then echo response
         mock_websocket.recv = AsyncMock(side_effect=[welcome_message, echo_response])
-        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send = AsyncMock()  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -198,7 +199,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_invalid_json_handling(self):
         """Test how the WebSocket handles invalid JSON messages using mocked connection."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({"type": "connection_established"})
@@ -212,10 +213,10 @@ class TestWebSocketBasicConnection:
         
         # Set up mock to return welcome first, then error response
         mock_websocket.recv = AsyncMock(side_effect=[welcome_message, error_response])
-        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send = AsyncMock()  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -248,7 +249,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_unknown_message_type(self):
         """Test handling of unknown message types using mocked connection."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({"type": "connection_established"})
@@ -262,10 +263,10 @@ class TestWebSocketBasicConnection:
         
         # Set up mock to return welcome first, then ack response
         mock_websocket.recv = AsyncMock(side_effect=[welcome_message, ack_response])
-        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send = AsyncMock()  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -301,7 +302,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_connection_timeout_handling(self):
         """Test that WebSocket handles connection timeouts gracefully using mocked connection."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({"type": "connection_established"})
@@ -317,7 +318,7 @@ class TestWebSocketBasicConnection:
         mock_websocket.recv = AsyncMock(side_effect=[welcome_message, heartbeat_message])
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         
@@ -346,7 +347,7 @@ class TestWebSocketBasicConnection:
     async def test_websocket_multiple_messages_sequence(self):
         """Test sending multiple messages in sequence using mocked connection."""
         # Mock websocket connection
-        mock_websocket = AsyncNone  # TODO: Use real service instance
+        mock_websocket = AsyncMock()  # TODO: Use real service instance
         
         # Mock welcome message
         welcome_message = json.dumps({"type": "connection_established"})
@@ -365,10 +366,10 @@ class TestWebSocketBasicConnection:
             pong_response_2,
             ack_response
         ])
-        mock_websocket.send = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send = AsyncMock()  # TODO: Use real service instance
         
         # Mock connection context manager
-        mock_connection = AsyncNone  # TODO: Use real service instance
+        mock_connection = AsyncMock()  # TODO: Use real service instance
         mock_connection.__aenter__ = AsyncMock(return_value=mock_websocket)
         mock_connection.__aexit__ = AsyncMock(return_value=None)
         

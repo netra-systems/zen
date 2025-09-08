@@ -5,6 +5,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import asyncio
 import json
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -22,9 +23,9 @@ class TestWebSocketAdvanced:
         """Test parsing valid JSON message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Test valid JSON
         result = await parse_json_message('{"type": "test", "content": "hello"}', "user-123", mock_manager)
@@ -37,9 +38,9 @@ class TestWebSocketAdvanced:
         """Test parsing invalid JSON message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Test invalid JSON
         result = await parse_json_message('invalid json', "user-123", mock_manager)
@@ -57,9 +58,9 @@ class TestWebSocketAdvanced:
         """Test parsing None message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Test None input
         result = await parse_json_message(None, "user-123", mock_manager)
@@ -72,9 +73,9 @@ class TestWebSocketAdvanced:
         """Test handling raw pong message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.handle_pong = AsyncNone  # TODO: Use real service instance
+        mock_manager.handle_pong = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
@@ -89,11 +90,11 @@ class TestWebSocketAdvanced:
         """Test handling JSON ping message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         # Test JSON ping
         ping_message = '{"type": "ping", "timestamp": 123456}'
@@ -110,7 +111,7 @@ class TestWebSocketAdvanced:
         """Test handling non-pong message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
@@ -124,11 +125,11 @@ class TestWebSocketAdvanced:
         """Test validate and handle ping message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket.send_json = AsyncNone  # TODO: Use real service instance
+        mock_websocket.send_json = AsyncMock()  # TODO: Use real service instance
         
         ping_message = {"type": "ping", "timestamp": 123456}
         
@@ -143,9 +144,9 @@ class TestWebSocketAdvanced:
         """Test validate and handle message with invalid structure"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
@@ -166,8 +167,8 @@ class TestWebSocketAdvanced:
         """Test validate and handle message missing type field"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Test message without type
@@ -188,7 +189,7 @@ class TestWebSocketAdvanced:
         """Test validate and handle valid message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Async component isolation for testing without real async operations
         mock_manager.handle_message = AsyncMock(return_value=True)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
@@ -239,9 +240,9 @@ class TestWebSocketAdvanced:
         """Test parsing empty string message"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Test empty string
         result = await parse_json_message("", "user-123", mock_manager)
@@ -258,9 +259,9 @@ class TestWebSocketAdvanced:
         """Test parsing JSON that's not an object"""
         
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicNone  # TODO: Use real service instance
+        mock_manager = MagicMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.send_message = AsyncNone  # TODO: Use real service instance
+        mock_manager.send_message = AsyncMock()  # TODO: Use real service instance
         
         # Test JSON array instead of object
         result = await parse_json_message('["not", "an", "object"]', "user-123", mock_manager)
