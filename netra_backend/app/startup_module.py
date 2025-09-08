@@ -912,25 +912,132 @@ def _create_tool_dispatcher(tool_registry):
     return ToolDispatcher(tool_registry.get_tools([]))
 
 
+async def _validate_supervisor_dependencies(app: FastAPI, logger) -> bool:
+    """Validate all supervisor dependencies are properly initialized."""
+    required_deps = {
+        'db_session_factory': 'Database session factory',
+        'llm_manager': 'LLM manager for agent operations', 
+        'tool_dispatcher': 'Tool dispatcher for agent tools'
+    }
+    
+    missing_deps = []
+    for dep_name, description in required_deps.items():
+        if not hasattr(app.state, dep_name):
+            missing_deps.append(f"{dep_name} ({description})")
+        elif getattr(app.state, dep_name) is None:
+            missing_deps.append(f"{dep_name} is None ({description})")
+    
+    if missing_deps:
+        logger.error(f"SUPERVISOR DEPENDENCY FAILURE: {missing_deps}")
+        return False
+    return True
+
+
+async def _initialize_supervisor_with_retry(app: FastAPI, logger) -> bool:
+    """Initialize supervisor with retry logic and detailed error reporting."""
+    max_retries = 3
+    
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Supervisor initialization attempt {attempt + 1}/{max_retries}")
+            
+            # Validate dependencies first
+            if not await _validate_supervisor_dependencies(app, logger):
+                if attempt < max_retries - 1:
+                    import asyncio
+                    await asyncio.sleep(1)  # Wait before retry
+                    continue
+                else:
+                    raise RuntimeError("Supervisor dependencies failed validation after all retries")
+            
+            # Attempt supervisor creation
+            supervisor = _build_supervisor_agent(app)
+            if supervisor is None:
+                raise RuntimeError("Supervisor creation returned None")
+            
+            _setup_agent_state(app, supervisor)
+            logger.info("✅ Supervisor initialized successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Supervisor initialization attempt {attempt + 1} failed: {e}")
+            if attempt == max_retries - 1:
+                raise  # Re-raise on final attempt
+            import asyncio
+            await asyncio.sleep(2)  # Wait before retry
+    
+    return False
+
+
+async def _validate_staging_readiness(app: FastAPI, logger) -> None:
+    """Validate staging environment readiness for agent execution."""
+    from shared.isolated_environment import get_env
+    env = get_env()
+    
+    if env.get("ENVIRONMENT", "").lower() != "staging":
+        return  # Only run in staging
+    
+    logger.info("🔍 STAGING VALIDATION: Checking agent execution readiness")
+    
+    # Check required environment variables for staging
+    required_env_vars = [
+        'DATABASE_URL',
+        'WEBSOCKET_HEARTBEAT_INTERVAL', 
+        'LLM_API_KEY',  # Or whatever LLM config is needed
+        'AUTH_SERVICE_URL'
+    ]
+    
+    missing_vars = [var for var in required_env_vars if not env.get(var)]
+    if missing_vars:
+        logger.error(f"🚨 STAGING MISSING ENV VARS: {missing_vars}")
+        raise RuntimeError(f"Staging missing required environment variables: {missing_vars}")
+    
+    logger.info("✅ STAGING VALIDATION: Environment variables verified")
+
+
 def _create_agent_supervisor(app: FastAPI) -> None:
-    """Create agent supervisor - CRITICAL for chat functionality."""
+    """Create agent supervisor - CRITICAL for chat functionality with enhanced error handling."""
     from netra_backend.app.logging_config import central_logger
     from shared.isolated_environment import get_env
+    import asyncio
     logger = central_logger.get_logger(__name__)
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
     try:
-        logger.debug(f"Creating agent supervisor for {environment} environment...")
-        supervisor = _build_supervisor_agent(app)
+        # Log detailed environment information for staging diagnosis
+        logger.info(f"🔍 SUPERVISOR INIT DEBUG - Environment: {environment}")
+        logger.info(f"🔍 App state attributes: {[attr for attr in dir(app.state) if not attr.startswith('_')]}")
         
-        # Verify supervisor was created properly
-        if supervisor is None:
-            raise RuntimeError("Supervisor creation returned None")
+        # Check each dependency individually with detailed logging
+        deps_status = {}
+        deps_status['db_session_factory'] = {
+            'exists': hasattr(app.state, 'db_session_factory'),
+            'not_none': getattr(app.state, 'db_session_factory', None) is not None,
+            'type': type(getattr(app.state, 'db_session_factory', None)).__name__
+        }
+        deps_status['llm_manager'] = {
+            'exists': hasattr(app.state, 'llm_manager'),
+            'not_none': getattr(app.state, 'llm_manager', None) is not None,
+            'type': type(getattr(app.state, 'llm_manager', None)).__name__
+        }
+        deps_status['tool_dispatcher'] = {
+            'exists': hasattr(app.state, 'tool_dispatcher'),
+            'not_none': getattr(app.state, 'tool_dispatcher', None) is not None,
+            'type': type(getattr(app.state, 'tool_dispatcher', None)).__name__
+        }
+        logger.info(f"🔍 DEPENDENCY STATUS: {deps_status}")
+        
+        # Validate staging environment readiness
+        asyncio.create_task(_validate_staging_readiness(app, logger))
+        
+        # Use retry logic for supervisor initialization
+        success = asyncio.run(_initialize_supervisor_with_retry(app, logger))
+        if not success:
+            raise RuntimeError("Supervisor initialization failed after all retries")
         
         # CRITICAL: Validate WebSocket infrastructure for agent events
-        # Note: SupervisorAgent using UserExecutionContext pattern creates per-request tool dispatchers
-        # so we validate that the WebSocket infrastructure is properly initialized instead
+        supervisor = app.state.agent_supervisor
         if hasattr(supervisor, 'websocket_bridge') and supervisor.websocket_bridge:
             logger.info("✅ SupervisorAgent has WebSocket bridge - agent events will be enabled")
             
@@ -958,8 +1065,6 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             logger.error(f"🚨 CRITICAL: Failed to get WebSocket manager factory: {e}")
             raise RuntimeError(f"WebSocket manager factory initialization failed: {e}")
         
-        _setup_agent_state(app, supervisor)
-        
         # Final verification
         if not hasattr(app.state, 'agent_supervisor') or app.state.agent_supervisor is None:
             raise RuntimeError("Agent supervisor not set on app.state after setup")
@@ -971,22 +1076,27 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         logger.debug(f"WebSocket enhancement status: {getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False) if hasattr(supervisor, 'registry') else 'N/A'}")
         
     except Exception as e:
-        error_msg = f"Failed to create agent supervisor in {environment}: {e}"
-        logger.error(error_msg, exc_info=True)
+        # Log comprehensive error context for staging diagnosis
+        error_context = {
+            'environment': environment,
+            'error_type': type(e).__name__,
+            'error_message': str(e),
+            'app_state_attrs': [attr for attr in dir(app.state) if not attr.startswith('_')],
+            'dependency_status': deps_status if 'deps_status' in locals() else 'not_checked'
+        }
+        logger.error(f"🚨 SUPERVISOR FAILURE CONTEXT: {error_context}")
         
-        # CRITICAL FIX: Agent supervisor is REQUIRED for chat functionality
-        # Chat is king - we MUST fail fast if agent services cannot be initialized
+        # CRITICAL FIX: Always fail fast in staging/production
+        # Don't set supervisor to None - this causes silent failures
         if environment in ["staging", "production"]:
-            logger.critical(f"CRITICAL: Agent supervisor failed in {environment} - chat functionality broken!")
-            logger.critical("Chat delivers 90% of value - failing startup to prevent broken user experience")
-            # Re-raise to fail startup - chat MUST work
-            raise RuntimeError(f"Agent supervisor initialization failed in {environment} - chat is broken") from e
+            logger.critical(f"CRITICAL: Agent supervisor failed in {environment} - failing startup immediately")
+            logger.critical("🚨 BUSINESS IMPACT: Chat functionality completely broken - users cannot get AI responses")
+            raise RuntimeError(f"Agent supervisor initialization failed in {environment} - startup aborted") from e
         else:
-            # In development/testing, still try to continue for debugging
+            # In development, log extensively but continue for debugging
+            logger.warning(f"🚨 Setting supervisor to None in {environment} for debugging")
             app.state.agent_supervisor = None
             app.state.thread_service = None
-            logger.warning(f"Agent supervisor set to None for {environment} after failure - chat will not work!")
-            # Don't raise in dev to allow debugging
 
 
 def _build_supervisor_agent(app: FastAPI):

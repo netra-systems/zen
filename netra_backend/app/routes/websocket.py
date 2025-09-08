@@ -437,11 +437,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info("🤖 Will use fallback handlers if services aren't ready")
                 startup_complete = True  # Force completion for E2E tests
             else:
-                max_wait_time = 30  # Maximum 30 seconds to wait for startup
-                wait_interval = 0.5  # Check every 500ms
+                # CRITICAL FIX: Drastically reduced wait time to prevent 179s WebSocket latencies
+                # Previous: 30s max wait was contributing to cumulative startup delays
+                # New: 5s max wait with fast-fail to restore WebSocket performance
+                max_wait_time = 5  # CRITICAL: Maximum 5 seconds to prevent WebSocket blocking
+                wait_interval = 0.2  # Check every 200ms for faster response
                 total_waited = 0
                 
-                logger.info(f"WebSocket connection waiting for startup to complete in {environment} (in_progress={startup_in_progress})")
+                logger.info(f"WebSocket connection waiting for startup to complete in {environment} (in_progress={startup_in_progress}) - max wait: {max_wait_time}s")
                 
                 while not startup_complete and total_waited < max_wait_time:
                     await asyncio.sleep(wait_interval)
@@ -449,21 +452,35 @@ async def websocket_endpoint(websocket: WebSocket):
                     startup_complete = getattr(websocket.app.state, 'startup_complete', False)
                     startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
                     
-                    if total_waited % 5 == 0:  # Log every 5 seconds
-                        logger.info(f"Still waiting for startup... (waited {total_waited}s, in_progress={startup_in_progress})")
+                    if total_waited % 1 == 0:  # Log every 1 second for faster debugging
+                        logger.debug(f"WebSocket startup wait... (waited {total_waited}s, in_progress={startup_in_progress})")
                 
                 if not startup_complete:
-                    logger.error(f"Startup did not complete after {max_wait_time}s in {environment}")
-                    error_msg = create_error_message(
-                        "STARTUP_INCOMPLETE",
-                        f"Service startup not complete after {max_wait_time}s. Please try again.",
-                        {"environment": environment, "startup_in_progress": startup_in_progress}
-                    )
-                    await safe_websocket_send(websocket, error_msg.model_dump())
-                    await safe_websocket_close(websocket, code=1011, reason="Service startup incomplete")
-                    return
+                    # CRITICAL FIX: Don't fail WebSocket connections - use graceful degradation
+                    logger.warning(f"Startup not complete after {max_wait_time}s in {environment} - using graceful degradation")
+                    logger.warning("🤖 WebSocket will use fallback handlers for immediate connectivity")
+                    
+                    # Set startup_complete to True to proceed with fallback functionality
+                    startup_complete = True  # Force completion to prevent WebSocket blocking
+                    
+                    # Send informational message about degraded mode (non-blocking)
+                    try:
+                        degraded_msg = create_server_message(
+                            MessageType.SYSTEM_MESSAGE,
+                            {
+                                "event": "degraded_mode",
+                                "message": f"Connected with basic functionality - startup still in progress",
+                                "environment": environment,
+                                "startup_wait_time": total_waited,
+                                "fallback_active": True
+                            }
+                        )
+                        # Don't await this - it's informational only
+                        asyncio.create_task(safe_websocket_send(websocket, degraded_msg.model_dump()))
+                    except Exception:
+                        pass  # Best effort notification
                 
-                logger.info(f"Startup complete after {total_waited}s wait - proceeding with WebSocket connection")
+                logger.info(f"WebSocket proceeding after {total_waited}s wait (startup_complete={startup_complete})")
         
         # CRITICAL FIX: After waiting for startup, services should be initialized
         # If they're still missing, use graceful degradation instead of 1011 failure
@@ -472,18 +489,18 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # CRITICAL FIX: Don't fail immediately - use fallback pattern for staging
             if environment in ["staging", "production"]:
-                # Wait briefly for supervisor initialization (might be race condition)
-                supervisor_wait_attempts = 3
+                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
+                supervisor_wait_attempts = 2  # Reduced from 3 to 2 attempts
                 for attempt in range(supervisor_wait_attempts):
-                    await asyncio.sleep(0.5)  # Wait 500ms
+                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
                     supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
                     if supervisor is not None:
-                        logger.info(f"supervisor initialized after {(attempt + 1) * 0.5}s wait")
+                        logger.info(f"supervisor initialized after {(attempt + 1) * 0.1}s wait")
                         break
                 
                 # If supervisor still None, use fallback but don't fail connection
                 if supervisor is None:
-                    logger.warning(f"Supervisor still None after {supervisor_wait_attempts * 0.5}s - using fallback")
+                    logger.info(f"Supervisor still None after {supervisor_wait_attempts * 0.1}s - using fallback (prevents WebSocket delay)")
             
             # No 1011 error - proceed with graceful degradation
         
@@ -492,18 +509,18 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # CRITICAL FIX: Use same graceful approach for thread_service
             if environment in ["staging", "production"]:
-                # Wait briefly for thread_service initialization (might be race condition)
-                thread_wait_attempts = 3
+                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
+                thread_wait_attempts = 2  # Reduced from 3 to 2 attempts
                 for attempt in range(thread_wait_attempts):
-                    await asyncio.sleep(0.5)  # Wait 500ms
+                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
                     thread_service = getattr(websocket.app.state, 'thread_service', None)
                     if thread_service is not None:
-                        logger.info(f"thread_service initialized after {(attempt + 1) * 0.5}s wait")
+                        logger.info(f"thread_service initialized after {(attempt + 1) * 0.1}s wait")
                         break
                 
                 # If thread_service still None, use fallback but don't fail connection
                 if thread_service is None:
-                    logger.warning(f"ThreadService still None after {thread_wait_attempts * 0.5}s - using fallback")
+                    logger.info(f"ThreadService still None after {thread_wait_attempts * 0.1}s - using fallback (prevents WebSocket delay)")
             
             # No 1011 error - proceed with graceful degradation
         
