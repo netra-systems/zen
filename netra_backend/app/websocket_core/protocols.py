@@ -21,12 +21,16 @@ preventing future AttributeError and method missing errors.
 """
 
 import asyncio
-from typing import Dict, Optional, Set, Any, List, Protocol, runtime_checkable
+from typing import Dict, Optional, Set, Any, List, Protocol, runtime_checkable, Union
 from datetime import datetime
 from abc import abstractmethod
 
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.logging_config import central_logger
+from shared.types.core_types import (
+    UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
+    ensure_user_id, ensure_thread_id, ensure_websocket_id
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -65,22 +69,22 @@ class WebSocketManagerProtocol(Protocol):
         ...
     
     @abstractmethod
-    async def remove_connection(self, connection_id: str) -> None:
+    async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:
         """
         Remove a WebSocket connection from the manager.
         
         Args:
-            connection_id: ID of connection to remove
+            connection_id: ID of connection to remove (accepts both str and ConnectionID)
         """
         ...
     
     @abstractmethod
-    def get_connection(self, connection_id: str) -> Optional[WebSocketConnection]:
+    def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
         """
         Retrieve a specific connection by ID.
         
         Args:
-            connection_id: ID of connection to retrieve
+            connection_id: ID of connection to retrieve (accepts both str and ConnectionID)
             
         Returns:
             WebSocketConnection instance if found, None otherwise
@@ -88,12 +92,12 @@ class WebSocketManagerProtocol(Protocol):
         ...
     
     @abstractmethod
-    def get_user_connections(self, user_id: str) -> Set[str]:
+    def get_user_connections(self, user_id: Union[str, UserID]) -> Set[str]:
         """
         Get all connection IDs for a specific user.
         
         Args:
-            user_id: User ID to get connections for
+            user_id: User ID to get connections for (accepts both str and UserID)
             
         Returns:
             Set of connection IDs belonging to the user
@@ -101,13 +105,13 @@ class WebSocketManagerProtocol(Protocol):
         ...
     
     @abstractmethod
-    def is_connection_active(self, user_id: str) -> bool:
+    def is_connection_active(self, user_id: Union[str, UserID]) -> bool:
         """
         Check if a user has any active WebSocket connections.
         CRITICAL for authentication event validation.
         
         Args:
-            user_id: User ID to check
+            user_id: User ID to check (accepts both str and UserID)
             
         Returns:
             True if user has at least one active connection, False otherwise
@@ -119,7 +123,7 @@ class WebSocketManagerProtocol(Protocol):
     # ===========================================================================
     
     @abstractmethod
-    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
+    def get_connection_id_by_websocket(self, websocket) -> Optional[ConnectionID]:
         """
         FIVE WHYS CRITICAL METHOD: Get connection ID for a given WebSocket instance.
         
@@ -131,7 +135,7 @@ class WebSocketManagerProtocol(Protocol):
             websocket: WebSocket instance to search for
             
         Returns:
-            Connection ID if found, None otherwise
+            Strongly typed ConnectionID if found, None otherwise
             
         Root Cause Prevention:
             This method prevents "AttributeError: 'IsolatedWebSocketManager' object 
@@ -141,7 +145,7 @@ class WebSocketManagerProtocol(Protocol):
         ...
     
     @abstractmethod
-    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+    def update_connection_thread(self, connection_id: Union[str, ConnectionID], thread_id: Union[str, ThreadID]) -> bool:
         """
         FIVE WHYS CRITICAL METHOD: Update thread association for a connection.
         
@@ -149,8 +153,8 @@ class WebSocketManagerProtocol(Protocol):
         handler patterns. Both must exist for proper thread management.
         
         Args:
-            connection_id: Connection ID to update
-            thread_id: New thread ID to associate
+            connection_id: Connection ID to update (accepts both str and ConnectionID)
+            thread_id: New thread ID to associate (accepts both str and ThreadID)
             
         Returns:
             True if update successful, False if connection not found
@@ -162,12 +166,12 @@ class WebSocketManagerProtocol(Protocol):
     # ===========================================================================
     
     @abstractmethod
-    async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> None:
+    async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """
         Send a message to all connections for a specific user.
         
         Args:
-            user_id: Target user ID
+            user_id: Target user ID (accepts both str and UserID)
             message: Message payload to send
             
         Raises:
@@ -176,7 +180,7 @@ class WebSocketManagerProtocol(Protocol):
         ...
     
     @abstractmethod
-    async def emit_critical_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> None:
+    async def emit_critical_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
         """
         Emit a critical event to a specific user with delivery tracking.
         
@@ -184,7 +188,7 @@ class WebSocketManagerProtocol(Protocol):
         that power the user chat experience.
         
         Args:
-            user_id: Target user ID
+            user_id: Target user ID (accepts both str and UserID)
             event_type: Event type (e.g., 'agent_started', 'tool_executing')
             data: Event payload
             
@@ -198,12 +202,12 @@ class WebSocketManagerProtocol(Protocol):
     # ===========================================================================
     
     @abstractmethod
-    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
+    def get_connection_health(self, user_id: Union[str, UserID]) -> Dict[str, Any]:
         """
         Get detailed connection health information for a user.
         
         Args:
-            user_id: User ID to check health for
+            user_id: User ID to check health for (accepts both str and UserID)
             
         Returns:
             Dictionary containing health metrics and connection status
@@ -215,12 +219,12 @@ class WebSocketManagerProtocol(Protocol):
     # ===========================================================================
     
     @abstractmethod
-    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+    async def send_to_thread(self, thread_id: Union[str, ThreadID], message: Dict[str, Any]) -> bool:
         """
         Send message to a thread (compatibility method).
         
         Args:
-            thread_id: Thread ID to send to
+            thread_id: Thread ID to send to (accepts both str and ThreadID)
             message: Message to send
             
         Returns:
@@ -280,7 +284,7 @@ class WebSocketManagerProtocolValidator:
             'is_connection_active': {'async': False, 'params': ['user_id'], 'returns': bool},
             
             # Five Whys Critical Methods
-            'get_connection_id_by_websocket': {'async': False, 'params': ['websocket'], 'returns': 'Optional[str]'},
+            'get_connection_id_by_websocket': {'async': False, 'params': ['websocket'], 'returns': 'Optional[ConnectionID]'},
             'update_connection_thread': {'async': False, 'params': ['connection_id', 'thread_id'], 'returns': bool},
             
             # Message Sending
@@ -501,10 +505,10 @@ formal interface contracts exist and are enforced for all WebSocket managers.
 class WebSocketProtocol:
     """Simple WebSocket protocol class for integration test compatibility."""
     
-    def __init__(self, websocket=None, connection_id: str = None, user_id: str = None):
+    def __init__(self, websocket=None, connection_id: Union[str, ConnectionID] = None, user_id: Union[str, UserID] = None):
         self.websocket = websocket
-        self.connection_id = connection_id
-        self.user_id = user_id
+        self.connection_id = str(connection_id) if connection_id else None
+        self.user_id = str(user_id) if user_id else None
         self.is_active = True
     
     async def send_message(self, message: Dict[str, Any]) -> bool:
@@ -525,9 +529,234 @@ class WebSocketProtocol:
             await self.websocket.close()
 
 
+# =============================================================================
+# BACKWARD COMPATIBILITY WRAPPERS FOR GRADUAL MIGRATION
+# =============================================================================
+
+def ensure_connection_id_type(connection_id: Union[str, ConnectionID]) -> ConnectionID:
+    """
+    Convert string connection_id to ConnectionID for backward compatibility.
+    
+    Args:
+        connection_id: Connection ID as str or ConnectionID
+        
+    Returns:
+        Validated ConnectionID
+    """
+    if isinstance(connection_id, str):
+        return ConnectionID(connection_id)
+    return connection_id
+
+
+def ensure_user_id_type(user_id: Union[str, UserID]) -> UserID:
+    """
+    Convert string user_id to UserID for backward compatibility.
+    
+    Args:
+        user_id: User ID as str or UserID
+        
+    Returns:
+        Validated UserID
+    """
+    return ensure_user_id(user_id)
+
+
+def ensure_thread_id_type(thread_id: Union[str, ThreadID]) -> ThreadID:
+    """
+    Convert string thread_id to ThreadID for backward compatibility.
+    
+    Args:
+        thread_id: Thread ID as str or ThreadID
+        
+    Returns:
+        Validated ThreadID
+    """
+    return ensure_thread_id(thread_id)
+
+
+def ensure_websocket_id_type(websocket_id: Union[str, WebSocketID, None]) -> Optional[WebSocketID]:
+    """
+    Convert string websocket_id to WebSocketID for backward compatibility.
+    
+    Args:
+        websocket_id: WebSocket ID as str, WebSocketID, or None
+        
+    Returns:
+        Validated WebSocketID or None
+    """
+    return ensure_websocket_id(websocket_id)
+
+
+def adapt_manager_for_legacy_code(manager: WebSocketManagerProtocol) -> 'LegacyWebSocketManagerAdapter':
+    """
+    Create a legacy adapter wrapper around a typed WebSocket manager.
+    
+    This adapter allows legacy code that expects string-based APIs to work
+    with the new strongly-typed WebSocket manager implementations.
+    
+    Args:
+        manager: Typed WebSocket manager instance
+        
+    Returns:
+        Legacy adapter wrapper
+    """
+    return LegacyWebSocketManagerAdapter(manager)
+
+
+class LegacyWebSocketManagerAdapter:
+    """
+    Adapter that provides string-based APIs for legacy compatibility.
+    
+    This wrapper converts between legacy string-based method calls and
+    the new strongly-typed WebSocket manager interface.
+    """
+    
+    def __init__(self, typed_manager: WebSocketManagerProtocol):
+        """
+        Initialize legacy adapter.
+        
+        Args:
+            typed_manager: Strongly-typed WebSocket manager to wrap
+        """
+        self._typed_manager = typed_manager
+        self._logger = central_logger.get_logger(__name__)
+    
+    async def add_connection(self, connection) -> None:
+        """Legacy add_connection with automatic type conversion."""
+        return await self._typed_manager.add_connection(connection)
+    
+    async def remove_connection(self, connection_id: str) -> None:
+        """Legacy remove_connection with automatic type conversion."""
+        return await self._typed_manager.remove_connection(connection_id)
+    
+    def get_connection(self, connection_id: str):
+        """Legacy get_connection with automatic type conversion."""
+        return self._typed_manager.get_connection(connection_id)
+    
+    def get_user_connections(self, user_id: str) -> Set[str]:
+        """Legacy get_user_connections with automatic type conversion."""
+        return self._typed_manager.get_user_connections(user_id)
+    
+    def is_connection_active(self, user_id: str) -> bool:
+        """Legacy is_connection_active with automatic type conversion."""
+        return self._typed_manager.is_connection_active(user_id)
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
+        """Legacy get_connection_id_by_websocket returning string."""
+        result = self._typed_manager.get_connection_id_by_websocket(websocket)
+        return str(result) if result else None
+    
+    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+        """Legacy update_connection_thread with automatic type conversion."""
+        return self._typed_manager.update_connection_thread(connection_id, thread_id)
+    
+    async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> None:
+        """Legacy send_to_user with automatic type conversion."""
+        return await self._typed_manager.send_to_user(user_id, message)
+    
+    async def emit_critical_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> None:
+        """Legacy emit_critical_event with automatic type conversion."""
+        return await self._typed_manager.emit_critical_event(user_id, event_type, data)
+    
+    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
+        """Legacy get_connection_health with automatic type conversion."""
+        return self._typed_manager.get_connection_health(user_id)
+    
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """Legacy send_to_thread with automatic type conversion."""
+        return await self._typed_manager.send_to_thread(thread_id, message)
+
+
+# =============================================================================
+# TYPE MIGRATION VALIDATION HELPERS
+# =============================================================================
+
+def validate_migration_compatibility(manager: Any) -> Dict[str, Any]:
+    """
+    Validate that a WebSocket manager is compatible with both legacy and typed interfaces.
+    
+    This helps during the gradual migration process to ensure managers work correctly
+    with both old and new calling patterns.
+    
+    Args:
+        manager: WebSocket manager instance to validate
+        
+    Returns:
+        Validation report with compatibility details
+    """
+    validation_report = {
+        'legacy_compatible': False,
+        'typed_compatible': False,
+        'migration_safe': False,
+        'issues': [],
+        'recommendations': []
+    }
+    
+    try:
+        # Check protocol compliance
+        protocol_validation = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
+        validation_report['typed_compatible'] = protocol_validation['compliant']
+        
+        if not validation_report['typed_compatible']:
+            validation_report['issues'].extend([
+                f"Protocol compliance issues: {protocol_validation['missing_methods']}",
+                f"Invalid signatures: {protocol_validation['invalid_signatures']}"
+            ])
+            validation_report['recommendations'].append(
+                "Fix protocol compliance issues before migration"
+            )
+        
+        # Check legacy compatibility
+        legacy_methods = [
+            'get_connection_id_by_websocket',
+            'update_connection_thread',
+            'send_to_user',
+            'emit_critical_event'
+        ]
+        
+        legacy_compatible_count = 0
+        for method_name in legacy_methods:
+            if hasattr(manager, method_name) and callable(getattr(manager, method_name)):
+                legacy_compatible_count += 1
+            else:
+                validation_report['issues'].append(f"Missing legacy method: {method_name}")
+        
+        validation_report['legacy_compatible'] = legacy_compatible_count == len(legacy_methods)
+        
+        # Overall migration safety
+        validation_report['migration_safe'] = (
+            validation_report['typed_compatible'] and 
+            validation_report['legacy_compatible']
+        )
+        
+        if validation_report['migration_safe']:
+            validation_report['recommendations'].append(
+                "Manager is safe for gradual migration - supports both legacy and typed interfaces"
+            )
+        else:
+            validation_report['recommendations'].append(
+                "Complete compatibility issues before starting migration"
+            )
+            
+    except Exception as e:
+        validation_report['issues'].append(f"Validation error: {e}")
+        validation_report['migration_safe'] = False
+    
+    return validation_report
+
+
 __all__ = [
     'WebSocketManagerProtocol',
     'WebSocketManagerProtocolValidator',
     'WebSocketProtocol',
-    'get_protocol_documentation'
+    'get_protocol_documentation',
+    # Backward Compatibility
+    'ensure_connection_id_type',
+    'ensure_user_id_type', 
+    'ensure_thread_id_type',
+    'ensure_websocket_id_type',
+    'adapt_manager_for_legacy_code',
+    'LegacyWebSocketManagerAdapter',
+    # Migration Helpers
+    'validate_migration_compatibility'
 ]

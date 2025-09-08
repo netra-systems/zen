@@ -33,6 +33,10 @@ from netra_backend.app.websocket_core.types import (
     create_error_message,
     create_server_message
 )
+from shared.types.core_types import (
+    UserID, ConnectionID, WebSocketID,
+    ensure_user_id, ensure_websocket_id
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -70,11 +74,24 @@ def _safe_websocket_state_for_logging(state) -> str:
         return "<serialization_error>"
 
 
-def generate_connection_id(user_id: str, prefix: str = "conn") -> str:
-    """Generate unique connection ID."""
+def generate_connection_id(user_id: Union[str, UserID], prefix: str = "conn") -> ConnectionID:
+    """Generate unique connection ID with type safety.
+    
+    Args:
+        user_id: User ID (accepts both str and UserID)
+        prefix: Prefix for connection ID
+        
+    Returns:
+        Strongly typed ConnectionID
+    """
+    # Ensure user_id is validated
+    validated_user_id = ensure_user_id(user_id)
+    
     timestamp = int(time.time() * 1000)
     random_suffix = uuid.uuid4().hex[:8]
-    return f"{prefix}_{user_id}_{timestamp}_{random_suffix}"
+    connection_id = f"{prefix}_{validated_user_id}_{timestamp}_{random_suffix}"
+    
+    return ConnectionID(connection_id)
 
 
 def generate_message_id() -> str:
@@ -386,7 +403,7 @@ class WebSocketHeartbeat:
 
 
 class WebSocketConnectionMonitor:
-    """Monitors WebSocket connection health and statistics."""
+    """Monitors WebSocket connection health and statistics with type safety."""
     
     def __init__(self):
         self.connections: Dict[str, Dict[str, Any]] = {}
@@ -405,11 +422,21 @@ class WebSocketConnectionMonitor:
             "check_results": []
         }
     
-    def register_connection(self, connection_id: str, user_id: str,
+    def register_connection(self, connection_id: Union[str, ConnectionID], user_id: Union[str, UserID],
                           websocket: WebSocket) -> None:
-        """Register connection for monitoring."""
-        self.connections[connection_id] = {
-            "user_id": user_id,
+        """Register connection for monitoring with type safety.
+        
+        Args:
+            connection_id: Connection ID (accepts both str and ConnectionID)
+            user_id: User ID (accepts both str and UserID)
+            websocket: WebSocket instance to monitor
+        """
+        # Validate typed IDs
+        validated_user_id = ensure_user_id(user_id)
+        validated_connection_id = str(connection_id)
+        
+        self.connections[validated_connection_id] = {
+            "user_id": validated_user_id,
             "websocket": websocket,
             "connected_at": datetime.now(timezone.utc),
             "last_activity": datetime.now(timezone.utc),
@@ -422,16 +449,27 @@ class WebSocketConnectionMonitor:
         self.global_stats["total_connections"] += 1
         self.global_stats["active_connections"] += 1
     
-    def unregister_connection(self, connection_id: str) -> None:
-        """Unregister connection."""
-        if connection_id in self.connections:
-            del self.connections[connection_id]
+    def unregister_connection(self, connection_id: Union[str, ConnectionID]) -> None:
+        """Unregister connection with type safety.
+        
+        Args:
+            connection_id: Connection ID to unregister (accepts both str and ConnectionID)
+        """
+        validated_connection_id = str(connection_id)
+        if validated_connection_id in self.connections:
+            del self.connections[validated_connection_id]
             self.global_stats["active_connections"] -= 1
     
-    def update_activity(self, connection_id: str, activity_type: str = "message") -> None:
-        """Update connection activity."""
-        if connection_id in self.connections:
-            conn = self.connections[connection_id]
+    def update_activity(self, connection_id: Union[str, ConnectionID], activity_type: str = "message") -> None:
+        """Update connection activity with type safety.
+        
+        Args:
+            connection_id: Connection ID to update (accepts both str and ConnectionID)
+            activity_type: Type of activity to record
+        """
+        validated_connection_id = str(connection_id)
+        if validated_connection_id in self.connections:
+            conn = self.connections[validated_connection_id]
             conn["last_activity"] = datetime.now(timezone.utc)
             
             if activity_type == "message_sent":
@@ -444,12 +482,20 @@ class WebSocketConnectionMonitor:
             
             self.global_stats["messages_processed"] += 1
     
-    def get_connection_health(self, connection_id: str) -> Dict[str, Any]:
-        """Get health status for specific connection."""
-        if connection_id not in self.connections:
+    def get_connection_health(self, connection_id: Union[str, ConnectionID]) -> Dict[str, Any]:
+        """Get health status for specific connection with type safety.
+        
+        Args:
+            connection_id: Connection ID to check (accepts both str and ConnectionID)
+            
+        Returns:
+            Dictionary with connection health information
+        """
+        validated_connection_id = str(connection_id)
+        if validated_connection_id not in self.connections:
             return {"status": "not_found"}
         
-        conn = self.connections[connection_id]
+        conn = self.connections[validated_connection_id]
         websocket = conn["websocket"]
         current_time = datetime.now(timezone.utc)
         last_activity = conn["last_activity"]
@@ -460,7 +506,7 @@ class WebSocketConnectionMonitor:
         is_connected = is_websocket_connected(websocket)
         
         return {
-            "connection_id": connection_id,
+            "connection_id": validated_connection_id,
             "user_id": conn["user_id"],
             "is_connected": is_connected,
             "is_stale": is_stale,
@@ -670,11 +716,24 @@ def validate_message_structure(message: Dict[str, Any]) -> bool:
 
 
 def extract_user_info_from_message(message: Dict[str, Any]) -> Optional[Dict[str, str]]:
-    """Extract user information from message."""
+    """Extract user information from message with type validation.
+    
+    Args:
+        message: Message dictionary to extract info from
+        
+    Returns:
+        Dictionary with validated user info or None if no info found
+    """
     user_info = {}
     
     if "user_id" in message:
-        user_info["user_id"] = str(message["user_id"])
+        try:
+            # Validate user_id if present
+            validated_user_id = ensure_user_id(message["user_id"])
+            user_info["user_id"] = validated_user_id
+        except ValueError as e:
+            logger.warning(f"Invalid user_id in message: {message['user_id']}: {e}")
+            return None
     
     if "thread_id" in message:
         user_info["thread_id"] = str(message["thread_id"])
@@ -724,12 +783,25 @@ def format_websocket_error_response(error_code: str, error_message: str,
     return error_response
 
 
-def create_connection_info(connection_id: str, user_id: str,
+def create_connection_info(connection_id: Union[str, ConnectionID], user_id: Union[str, UserID],
                          thread_id: Optional[str] = None) -> ConnectionInfo:
-    """Create connection info object."""
+    """Create connection info object with type safety.
+    
+    Args:
+        connection_id: Connection ID (accepts both str and ConnectionID)
+        user_id: User ID (accepts both str and UserID) 
+        thread_id: Optional thread ID
+        
+    Returns:
+        ConnectionInfo object with validated IDs
+    """
+    # Validate the typed IDs
+    validated_user_id = ensure_user_id(user_id)
+    validated_connection_id = str(connection_id) if connection_id else None
+    
     return ConnectionInfo(
-        connection_id=connection_id,
-        user_id=user_id,
+        connection_id=validated_connection_id,
+        user_id=validated_user_id,
         thread_id=thread_id,
         connected_at=datetime.now(timezone.utc),
         last_activity=datetime.now(timezone.utc),
@@ -770,19 +842,34 @@ async def websocket_heartbeat_context(websocket: WebSocket, interval: float = 45
         await heartbeat.stop()
 
 
-def check_rate_limit(client_id: str, max_requests: int = 60, window_seconds: int = 60) -> bool:
+def check_rate_limit(client_id: Union[str, UserID], max_requests: int = 60, window_seconds: int = 60) -> bool:
     """
     Utility function for backward compatibility with rate limiting.
     
     This function creates a temporary RateLimiter instance to check rate limits.
     For production use, prefer using RateLimiter class directly from auth module.
+    
+    Args:
+        client_id: Client/User ID (accepts both str and UserID)
+        max_requests: Maximum requests allowed
+        window_seconds: Time window for rate limiting
+        
+    Returns:
+        True if request is allowed, False if rate limited
     """
     # Import here to avoid circular imports
     from netra_backend.app.websocket_core.rate_limiter import AdaptiveRateLimiter
     
+    # Validate client_id
+    try:
+        validated_client_id = ensure_user_id(client_id) if isinstance(client_id, (str, UserID)) else str(client_id)
+    except ValueError:
+        logger.warning(f"Invalid client_id for rate limiting: {client_id}")
+        return False
+    
     # Create temporary rate limiter with specified limits
     rate_limiter = AdaptiveRateLimiter(base_rate=max_requests, window_seconds=window_seconds)
-    allowed = rate_limiter.is_allowed(client_id)
+    allowed = rate_limiter.is_allowed(validated_client_id)
     return allowed
 
 

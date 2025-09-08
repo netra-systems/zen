@@ -41,6 +41,11 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
+from shared.types.core_types import (
+    UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
+    ensure_user_id, ensure_thread_id, ensure_websocket_id
+)
+from typing import Union
 
 logger = central_logger.get_logger(__name__)
 
@@ -986,9 +991,9 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             "last_error": self._last_error_time.isoformat() if self._last_error_time else None
         }
     
-    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
+    def get_connection_id_by_websocket(self, websocket) -> Optional[ConnectionID]:
         """
-        Get connection ID for a given WebSocket instance.
+        Get connection ID for a given WebSocket instance with type safety.
         
         This method provides compatibility with the UnifiedWebSocketManager interface.
         It searches through active connections to find the one matching the WebSocket.
@@ -997,14 +1002,14 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             websocket: WebSocket instance to search for
             
         Returns:
-            Connection ID if found, None otherwise
+            Strongly typed ConnectionID if found, None otherwise
         """
         self._validate_active()
         
         for conn_id, connection in self._connections.items():
             if connection.websocket == websocket:
                 logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
-                return conn_id
+                return ConnectionID(conn_id)
         
         logger.debug(f"No connection found for WebSocket {id(websocket)}")
         return None
