@@ -465,11 +465,18 @@ class StartupOrchestrator:
             if registry and bridge:
                 # Set the WebSocket manager on agent registry - only latest method supported
                 if hasattr(registry, 'set_websocket_manager'):
-                    # Use the bridge's websocket_manager property to get the underlying WebSocket manager
-                    # If bridge.websocket_manager is None, pass the bridge itself as fallback
-                    websocket_manager = bridge.websocket_manager if hasattr(bridge, 'websocket_manager') else bridge
-                    registry.set_websocket_manager(websocket_manager or bridge)
-                    self.logger.info("    - WebSocket manager set on agent registry for multi-user isolation")
+                    # CRITICAL FIX: Don't pass the bridge as a WebSocket manager
+                    # The bridge is not a WebSocket manager and doesn't have add_connection method
+                    # Instead, pass the actual websocket_manager if available, or None
+                    websocket_manager = bridge.websocket_manager if hasattr(bridge, 'websocket_manager') else None
+                    
+                    if websocket_manager is not None:
+                        registry.set_websocket_manager(websocket_manager)
+                        self.logger.info("    - WebSocket manager set on agent registry for multi-user isolation")
+                    else:
+                        # For startup, we don't need a WebSocket manager yet since it will be created per-request
+                        # The bridge handles WebSocket events through its own methods, not through a manager interface
+                        self.logger.info("    - WebSocket manager deferred - will be created per-request via bridge factory pattern")
                 else:
                     # Registry must support the WebSocket manager pattern
                     raise DeterministicStartupError(

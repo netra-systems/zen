@@ -35,7 +35,7 @@ from collections import defaultdict
 
 import pytest
 import websockets
-from websockets import ConnectionClosed, InvalidStatusCode, WebSocketException
+from websockets import ConnectionClosed, InvalidStatus, WebSocketException
 
 # SSOT imports following CLAUDE.md absolute import requirements  
 from test_framework.base_integration_test import BaseIntegrationTest

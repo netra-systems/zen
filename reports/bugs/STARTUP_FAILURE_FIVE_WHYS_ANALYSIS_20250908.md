@@ -172,4 +172,39 @@ else:
 3. Confirm health checks pass for all critical services
 4. Test WebSocket events work properly after startup
 
-**Status:** COMPLETE - Root cause identified and remediation plan established
+**Status:** ✅ **RESOLVED** - Root cause fixed and validated
+
+## Resolution Summary
+
+**Date:** 2025-09-08  
+**Resolution:** Fixed async/await chain issue in SMD startup sequence  
+**Result:** Startup completes successfully, WebSocket coroutine error eliminated  
+
+### Fix Applied
+
+**File:** `netra_backend/app/smd.py:465-485`
+
+**Problem:** The startup code was passing the AgentWebSocketBridge itself as a WebSocket manager to `registry.set_websocket_manager()`. The bridge is not a WebSocket manager and doesn't have methods like `add_connection`, causing a coroutine error when health checks or other systems tried to use it as such.
+
+**Solution:** Modified the startup logic to:
+1. Only pass the actual `websocket_manager` if it exists (not `None`)  
+2. If `websocket_manager` is `None`, defer WebSocket manager creation to per-request factory pattern
+3. Never pass the bridge itself as a fallback WebSocket manager
+
+**Code Change:**
+```python
+# BEFORE: Problematic fallback
+registry.set_websocket_manager(websocket_manager or bridge)
+
+# AFTER: Fixed logic  
+websocket_manager = bridge.websocket_manager if hasattr(bridge, 'websocket_manager') else None
+if websocket_manager is not None:
+    registry.set_websocket_manager(websocket_manager)
+else:
+    # Defer to per-request factory pattern
+    pass
+```
+
+**Validation:** App creation now succeeds without the coroutine attribute error. The startup sequence completes normally.
+
+**Status:** ✅ **RESOLVED** - Root cause fixed and tested successfully

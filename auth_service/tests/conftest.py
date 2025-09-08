@@ -293,7 +293,7 @@ async def real_auth_service(real_auth_db, real_auth_redis, real_jwt_manager):
 
 
 @pytest.fixture(scope="function")
-def real_http_client():
+async def real_http_client():
     """REAL HTTP client for external API calls.
     
     ZERO MOCKS: Uses actual HTTP client with staging/sandbox endpoints.

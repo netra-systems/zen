@@ -397,6 +397,11 @@ class AgentWebSocketBridge(MonitorableComponent):
         """Start background health monitoring task."""
         if self._health_check_task is None or self._health_check_task.done():
             self._health_check_task = asyncio.create_task(self._health_monitoring_loop())
+            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
+            self._health_check_task.add_done_callback(
+                lambda t: logger.error(f"Health monitoring failed: {t.exception()}") 
+                if t.exception() else logger.debug("Health monitoring task completed")
+            )
             logger.debug("Health monitoring task started")
     
     async def health_check(self) -> HealthStatus:

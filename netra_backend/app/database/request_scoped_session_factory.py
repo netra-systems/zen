@@ -280,7 +280,72 @@ class RequestScopedSessionFactory:
         
         except Exception as e:
             session_metrics.record_error(str(e))
-            logger.error(f"Failed to create request-scoped session for user {user_id}: {e}")
+            
+            # ENHANCED DEBUG LOGGING - 10x more context
+            error_context = {
+                "user_id": user_id,
+                "request_id": request_id,
+                "thread_id": thread_id,
+                "session_id": session_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "active_sessions_count": len(self._active_sessions),
+                "pool_metrics": {
+                    "connections_created": self._pool_metrics.connections_created,
+                    "connections_leaked": self._pool_metrics.connections_leaked,
+                    "errors_encountered": self._pool_metrics.errors_encountered
+                },
+                "session_metrics": {
+                    "state": session_metrics.state.value if session_metrics.state else "unknown",
+                    "created_at": session_metrics.created_at.isoformat() if session_metrics.created_at else None,
+                    "last_activity": session_metrics.last_activity.isoformat() if session_metrics.last_activity else None,
+                    "operations_count": session_metrics.operations_count,
+                    "errors": session_metrics.errors
+                },
+                "authentication_indicators": {
+                    "user_id_type": "system" if user_id == "system" else "user",
+                    "is_service_request": user_id == "system" or user_id.startswith("system"),
+                    "request_id_pattern": request_id[:20] + "..." if request_id and len(request_id) > 20 else request_id
+                },
+                "stack_trace": str(e.__traceback__) if hasattr(e, '__traceback__') else "no_traceback"
+            }
+            
+            # Additional authentication-specific context if it's a 403 error
+            if "403" in str(e) or "Not authenticated" in str(e):
+                error_context["authentication_failure_details"] = {
+                    "likely_auth_middleware_failure": True,
+                    "error_indicates_permission_denied": "403" in str(e),
+                    "error_indicates_auth_failure": "Not authenticated" in str(e),
+                    "possible_causes": [
+                        "JWT token invalid or expired",
+                        "Service-to-service authentication failed",
+                        "User session expired",
+                        "Authentication middleware configuration issue",
+                        "Cross-service authentication key mismatch"
+                    ],
+                    "debugging_steps": [
+                        "Check JWT token validity",
+                        "Verify SERVICE_SECRET configuration",
+                        "Validate authentication middleware setup",
+                        "Check if user 'system' has proper service permissions",
+                        "Review request headers for authentication tokens"
+                    ]
+                }
+            
+            logger.error(
+                f"ENHANCED DEBUG: Failed to create request-scoped session for user {user_id}. "
+                f"Error: {e}. Full context: {error_context}"
+            )
+            
+            # Additional targeted logging for system user failures
+            if user_id == "system" or (user_id and user_id.startswith("system")):
+                logger.error(
+                    f"SYSTEM USER AUTHENTICATION FAILURE: User '{user_id}' failed authentication. "
+                    f"This indicates a service-to-service authentication problem. "
+                    f"Request ID: {request_id}, Session ID: {session_id}. "
+                    f"Check SERVICE_SECRET, JWT configuration, and inter-service auth setup."
+                )
+            
             raise
         
         finally:

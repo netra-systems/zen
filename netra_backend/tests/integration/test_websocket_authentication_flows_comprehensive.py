@@ -1432,19 +1432,24 @@ def test_comprehensive_suite_coverage():
     category_counts = {category: 0 for category in expected_categories}
     
     for method_name in test_methods:
-        if any(pattern in method_name for pattern in ["valid_jwt", "invalid_token_format", "missing_token", "expired_token", "invalid_signature"]):
+        # Basic Authentication Tests (5)
+        if any(pattern in method_name for pattern in ["valid_jwt_token_success", "invalid_token_format_failure", "missing_token_failure", "expired_token_failure", "invalid_signature_failure"]):
             category_counts["basic_authentication"] += 1
-        elif any(pattern in method_name for pattern in ["unified_authentication_service", "user_context_factory", "auth_service_error", "authentication_timeout", "ssot_authentication"]):
+        # SSOT Compliance Tests (5)
+        elif any(pattern in method_name for pattern in ["unified_authentication_service_integration", "user_context_factory_creation_validation", "auth_service_error_handling_graceful_degradation", "ssot_authentication_statistics_tracking"]) or "authentication_timeout_handling" in method_name:
             category_counts["ssot_compliance"] += 1
-        elif any(pattern in method_name for pattern in ["connection_state_validation", "disconnected_state", "missing_headers", "state_transition", "connection_cleanup"]):
+        # WebSocket State Validation Tests (5)
+        elif any(pattern in method_name for pattern in ["connection_state_validation_connected", "disconnected_state_rejection", "missing_headers_validation", "state_transition_handling", "connection_cleanup_after_auth_failure"]):
             category_counts["websocket_state_validation"] += 1
-        elif any(pattern in method_name for pattern in ["e2e_context_detection", "e2e_authentication_bypass", "e2e_context_propagation", "e2e_specific_authentication"]):
+        # E2E Context Handling Tests (5)
+        elif any(pattern in method_name for pattern in ["e2e_context_detection_via_headers", "e2e_context_detection_via_environment", "e2e_authentication_bypass_scenarios", "e2e_context_propagation_chain", "e2e_specific_authentication_flows"]):
             category_counts["e2e_context_handling"] += 1
-        elif any(pattern in method_name for pattern in ["network_failure", "service_unavailability", "partial_authentication", "timeout_recovery", "retry_backoff"]):
+        # Error Scenarios & Recovery Tests (5)
+        elif any(pattern in method_name for pattern in ["network_failure_recovery_patterns", "service_unavailability_graceful_handling", "partial_authentication_failure_recovery", "authentication_timeout_recovery_mechanisms", "authentication_retry_with_backoff_strategy"]):
             category_counts["error_scenarios_recovery"] += 1
         else:
             # Debug unmatched test
-            print(f"Unmatched test: {method_name}")
+            print(f"DEBUG: Unmatched test: {method_name}")
     
     # Validate category distribution
     for category, expected_count in expected_categories.items():

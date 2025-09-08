@@ -425,3 +425,46 @@ def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:
     return get_id_manager().is_valid_id(id_value, id_type)
 
 
+def is_valid_id_format(id_value: str) -> bool:
+    """
+    Validate ID format without requiring registration.
+    
+    Recognizes both UUID format and UnifiedIDManager structured format.
+    
+    Args:
+        id_value: ID to validate format
+        
+    Returns:
+        True if ID has valid format
+    """
+    if not id_value or not isinstance(id_value, str) or not id_value.strip():
+        return False
+    
+    # Try standard UUID format first
+    try:
+        uuid.UUID(id_value)
+        return True
+    except ValueError:
+        pass
+    
+    # Check UnifiedIDManager structured format: [prefix_]idtype_counter_uuid8
+    parts = id_value.split('_')
+    if len(parts) >= 3:
+        # Extract the UUID part (last 8 characters should be hex)
+        uuid_part = parts[-1]
+        if len(uuid_part) == 8 and all(c in '0123456789abcdefABCDEF' for c in uuid_part):
+            # Check if counter part is numeric
+            counter_part = parts[-2]
+            if counter_part.isdigit():
+                # Validate ID type part
+                id_type_part = parts[-3] if len(parts) >= 4 else parts[0]
+                valid_id_types = {id_type.value for id_type in IDType}
+                if id_type_part in valid_id_types:
+                    return True
+                # Also allow some common patterns like 'run', 'req'
+                if id_type_part in {'run', 'req', 'thread'}:
+                    return True
+    
+    return False
+
+
