@@ -36,7 +36,7 @@ import weakref
 from threading import RLock
 import logging
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.logging_config import central_logger
 
@@ -738,8 +738,10 @@ class WebSocketManagerFactory:
             Unique isolation key
         """
         # Use connection-specific isolation (stronger than per-user)
-        if user_context.websocket_connection_id:
-            return f"{user_context.user_id}:{user_context.websocket_connection_id}"
+        # Handle both websocket_connection_id (agents context) and websocket_client_id (services context)
+        connection_id = getattr(user_context, 'websocket_connection_id', None) or getattr(user_context, 'websocket_client_id', None)
+        if connection_id:
+            return f"{user_context.user_id}:{connection_id}"
         else:
             # Fallback to request-based isolation
             return f"{user_context.user_id}:{user_context.request_id}"

@@ -145,12 +145,17 @@ class UnifiedWebSocketManager:
                 
                 # CRITICAL FIX: Process any queued messages for this user after connection established
                 # This prevents race condition where messages are sent before connection is ready
-                if connection.user_id in self._message_recovery_queue:
-                    queued_messages = self._message_recovery_queue.get(connection.user_id, [])
-                    if queued_messages:
-                        logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
-                        # Process outside the lock to prevent deadlock
-                        asyncio.create_task(self._process_queued_messages(connection.user_id))
+                # Store the user_id for processing outside the lock to prevent deadlock
+                process_recovery = connection.user_id in self._message_recovery_queue
+                
+        # DEADLOCK FIX: Process recovery queue OUTSIDE the lock to prevent circular dependency
+        # add_connection -> _process_queued_messages -> send_to_user -> user_lock (deadlock)
+        if process_recovery:
+            queued_messages = self._message_recovery_queue.get(connection.user_id, [])
+            if queued_messages:
+                logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
+                # Create task AFTER releasing the lock to prevent deadlock
+                asyncio.create_task(self._process_queued_messages(connection.user_id))
     
     async def remove_connection(self, connection_id: str) -> None:
         """Remove a WebSocket connection with thread safety."""
@@ -401,28 +406,6 @@ class UnifiedWebSocketManager:
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
         # Don't return silently - emit to user notification system
         await self._emit_connection_error_notification(user_id, event_type)
-        
-        message = {
-            "type": event_type,
-            "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
-            "critical": True
-        }
-        
-        try:
-            await self.send_to_user(user_id, message)
-            logger.debug(f"Successfully emitted critical event {event_type} to user {user_id}")
-        except Exception as e:
-            # CRITICAL: Failure to emit critical events must be highly visible
-            logger.critical(
-                f"CRITICAL EVENT EMISSION FAILURE: Failed to emit {event_type} "
-                f"to user {user_id}: {e}. This breaks the user experience."
-            )
-            # Store for recovery
-            await self._store_failed_message(user_id, message, f"emission_error: {e}")
-            # Notify user of the error
-            await self._emit_system_error_notification(user_id, event_type, str(e))
-            raise
     
     async def send_to_user_with_wait(self, user_id: str, message: Dict[str, Any], 
                                       wait_timeout: float = 3.0) -> bool:
@@ -789,8 +772,17 @@ class UnifiedWebSocketManager:
                 "critical": True
             }
             
-            # Attempt to send error notification
-            await self.send_to_user(user_id, error_message)
+            # DEADLOCK FIX: Send directly to avoid circular dependency with send_to_user
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        await connection.websocket.send_json(error_message)
+                        logger.info(f"Sent system error notification to user {user_id}")
+                        return
+                    except Exception:
+                        continue  # Try next connection
             
         except Exception as e:
             logger.critical(
