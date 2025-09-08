@@ -1,346 +1,375 @@
 #!/usr/bin/env python3
 """
-Factory Contract Validation Script
+Factory Interface Contract Validation Script
 
-This script provides automated validation of factory pattern interfaces to prevent
-parameter mismatches and breaking changes. It can be run manually or as part of CI/CD.
+This script validates all factory patterns in the codebase against registered
+interface contracts to prevent parameter name mismatches and interface
+evolution violations.
+
+Business Value Justification:
+- Segment: Platform/Internal
+- Business Goal: Automated prevention of interface contract failures
+- Value Impact: Zero production failures from factory parameter mismatches
+- Strategic Impact: Implementation of ROOT CAUSE #5 governance solution
 
 Usage:
-    python scripts/validate_factory_contracts.py --validate-all
-    python scripts/validate_factory_contracts.py --check-breaking-changes
-    python scripts/validate_factory_contracts.py --save-baselines
-    python scripts/validate_factory_contracts.py --validate-user-context
+    python scripts/validate_factory_contracts.py                    # Full codebase scan
+    python scripts/validate_factory_contracts.py --dir netra_backend # Specific directory
+    python scripts/validate_factory_contracts.py --fix              # Apply automated fixes
+    python scripts/validate_factory_contracts.py --pre-commit       # Pre-commit hook mode
+
+Features:
+- Comprehensive factory pattern analysis
+- Parameter name mismatch detection
+- Automated fix recommendations
+- Pre-commit hook integration
+- Detailed violation reports
+
+Root Cause Prevention:
+This script directly addresses the root cause identified in the Five Whys analysis:
+WHY #5: Interface Evolution Governance - Systematic validation prevents future failures
 """
 
 import argparse
+import json
 import sys
-import importlib
-import inspect
 from pathlib import Path
-from typing import Dict, List, Type, Any
+from typing import Dict, Any, List, Optional
+import logging
 
-# Add project root to path
+# Add the project root to the Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.lifecycle.contract_validation_framework import (
-    get_contract_registry,
-    validate_factory_interface,
-    check_parameter_compatibility,
-    ValidationResult
+from shared.lifecycle.interface_contract_validation import (
+    validate_codebase_contracts,
+    get_global_registry,
+    InterfaceContractRegistry,
+    CodebaseContractScanner,
+    ParameterContract,
+    InterfaceContract
 )
-from netra_backend.app.services.user_execution_context import UserExecutionContext
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-class FactoryValidationRunner:
-    """Main runner for factory contract validation."""
+def create_extended_contracts() -> None:
+    """Create extended contracts for all factory patterns."""
+    registry = get_global_registry()
     
-    def __init__(self):
-        self.registry = get_contract_registry()
-        self.factory_classes = {}
-        self.validation_results: List[ValidationResult] = []
-        self._discover_factory_classes()
+    # Add more factory contracts beyond the basic ones
     
-    def _discover_factory_classes(self) -> None:
-        """Discover all factory classes in the codebase."""
-        factory_modules = [
-            "netra_backend.app.websocket_core.supervisor_factory",
-            "netra_backend.app.websocket_core.websocket_manager_factory", 
-            "netra_backend.app.core.supervisor_factory",
-            "netra_backend.app.agents.supervisor.execution_engine_factory",
-            "netra_backend.app.agents.supervisor.agent_instance_factory",
-            "netra_backend.app.core.app_factory",
-            "netra_backend.app.llm.client_factory",
-            "netra_backend.app.factories.data_access_factory",
-            "netra_backend.app.factories.redis_factory",
-        ]
-        
-        for module_name in factory_modules:
-            try:
-                module = importlib.import_module(module_name)
-                
-                # Find classes with 'Factory' in the name or factory functions
-                for name, obj in inspect.getmembers(module):
-                    if (inspect.isclass(obj) and 'Factory' in name) or \
-                       (inspect.isfunction(obj) and ('create_' in name or 'factory' in name.lower())):
-                        
-                        # Skip private members
-                        if not name.startswith('_'):
-                            self.factory_classes[f"{module_name}.{name}"] = obj
+    # Agent Instance Factory Contract
+    agent_factory_params = [
+        ParameterContract("user_id", "str", is_required=True),
+        ParameterContract("thread_id", "str", is_required=True),
+        ParameterContract("run_id", "str", is_required=True),
+        ParameterContract("agent_name", "str", is_required=True),
+        ParameterContract("websocket_client_id", "Optional[str]", is_required=False,
+                         deprecated_names={"websocket_connection_id"}),
+        ParameterContract("llm_client", "Any", is_required=False),
+        ParameterContract("tool_dispatcher", "Any", is_required=False)
+    ]
+    
+    agent_factory_contract = InterfaceContract(
+        name="create_agent_instance",
+        parameters=agent_factory_params,
+        return_type="AgentBase"
+    )
+    
+    registry.register_contract(agent_factory_contract)
+    
+    # WebSocket Manager Factory Contract
+    websocket_factory_params = [
+        ParameterContract("user_context", "UserExecutionContext", is_required=True),
+        ParameterContract("max_connections", "int", is_required=False)
+    ]
+    
+    websocket_factory_contract = InterfaceContract(
+        name="create_websocket_manager",
+        parameters=websocket_factory_params,
+        return_type="IsolatedWebSocketManager"
+    )
+    
+    registry.register_contract(websocket_factory_contract)
+    
+    # Tool Dispatcher Factory Contract
+    tool_factory_params = [
+        ParameterContract("user_context", "UserExecutionContext", is_required=True),
+        ParameterContract("websocket_bridge", "Any", is_required=False),
+        ParameterContract("tools", "List[Type]", is_required=False)
+    ]
+    
+    tool_factory_contract = InterfaceContract(
+        name="create_tool_dispatcher",
+        parameters=tool_factory_params,
+        return_type="UnifiedToolDispatcher"
+    )
+    
+    registry.register_contract(tool_factory_contract)
+    
+    # Register factory-to-constructor mappings
+    registry.register_factory_mapping("create_agent_instance", "UserExecutionContext.__init__")
+    registry.register_factory_mapping("create_websocket_manager", "UserExecutionContext.__init__")
+    registry.register_factory_mapping("create_tool_dispatcher", "UserExecutionContext.__init__")
+    
+    logger.info("Extended factory contracts created")
+    
+def scan_codebase(directory: Optional[Path] = None, pattern: str = "*.py") -> Dict[str, Any]:
+    """Scan codebase for contract violations."""
+    if directory is None:
+        directory = project_root
+    
+    logger.info(f"Scanning {directory} for factory contract violations...")
+    
+    # Create extended contracts
+    create_extended_contracts()
+    
+    # Perform the scan
+    results = validate_codebase_contracts(directory)
+    
+    return results
+    
+def generate_detailed_report(results: Dict[str, Any]) -> str:
+    """Generate detailed human-readable report."""
+    scan_results = results["scan_results"]
+    detailed_report = results["detailed_report"]
+    registry_summary = results["registry_summary"]
+    
+    report_lines = []
+    report_lines.append("=" * 80)
+    report_lines.append("FACTORY INTERFACE CONTRACT VALIDATION REPORT")
+    report_lines.append("=" * 80)
+    report_lines.append("")
+    
+    # Summary
+    report_lines.append("SUMMARY:")
+    report_lines.append(f"  Files Scanned: {scan_results['files_scanned']}")
+    report_lines.append(f"  Violations Found: {scan_results['violations_found']}")
+    report_lines.append(f"  Files with Violations: {len(scan_results['files_with_violations'])}")
+    report_lines.append(f"  Registered Contracts: {registry_summary['total_contracts']}")
+    report_lines.append("")
+    
+    # Most Common Violations
+    if detailed_report["most_common_violations"]:
+        report_lines.append("MOST COMMON VIOLATIONS:")
+        for violation, count in sorted(detailed_report["most_common_violations"].items(), 
+                                     key=lambda x: x[1], reverse=True)[:10]:
+            report_lines.append(f"  {count:3d}: {violation}")
+        report_lines.append("")
+    
+    # Recommended Fixes
+    if detailed_report["recommended_fixes"]:
+        report_lines.append("RECOMMENDED FIXES:")
+        for i, fix in enumerate(detailed_report["recommended_fixes"], 1):
+            report_lines.append(f"  {i}. {fix['fix']}")
+            report_lines.append(f"     Violation: {fix['violation']}")
+            report_lines.append(f"     Occurrences: {fix['count']}")
+            report_lines.append(f"     Automation: {fix['automation']}")
+            report_lines.append("")
+    
+    # Files with Violations
+    if scan_results["files_with_violations"]:
+        report_lines.append("FILES WITH VIOLATIONS:")
+        for file_path in sorted(scan_results["files_with_violations"]):
+            report_lines.append(f"  - {file_path}")
+        report_lines.append("")
+    
+    # Violations by Function
+    if detailed_report["violations_by_function"]:
+        report_lines.append("VIOLATIONS BY FUNCTION:")
+        for func_name, violations in detailed_report["violations_by_function"].items():
+            report_lines.append(f"  {func_name} ({len(violations)} violations):")
+            for violation in violations[:3]:  # Show first 3
+                if violation.get("source_location"):
+                    report_lines.append(f"    - {violation['source_location']}")
+                for v_msg in violation["violations"]:
+                    report_lines.append(f"      • {v_msg}")
+            if len(violations) > 3:
+                report_lines.append(f"    ... and {len(violations) - 3} more")
+            report_lines.append("")
+    
+    return "\n".join(report_lines)
+    
+def apply_automated_fixes(results: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply automated fixes for common violations."""
+    detailed_report = results["detailed_report"]
+    fixes_applied = []
+    
+    # Analyze recommended fixes
+    for fix in detailed_report["recommended_fixes"]:
+        if "websocket_connection_id" in fix["violation"] and "websocket_client_id" in fix["violation"]:
+            # This is the exact fix for our root cause issue
+            logger.info(f"Applying automated fix: {fix['fix']}")
+            
+            # Find all files with this violation
+            for func_name, violations in detailed_report["violations_by_function"].items():
+                for violation in violations:
+                    if any("websocket_connection_id" in v for v in violation["violations"]):
+                        source_location = violation.get("source_location")
+                        if source_location:
+                            file_path = source_location.split(":")[0]
+                            line_number = source_location.split(":")[1]
                             
-            except ImportError as e:
-                print(f"Warning: Could not import {module_name}: {e}")
+                            # Apply the fix
+                            success = _apply_parameter_name_fix(
+                                Path(file_path),
+                                "websocket_connection_id",
+                                "websocket_client_id"
+                            )
+                            
+                            if success:
+                                fixes_applied.append({
+                                    "file": file_path,
+                                    "line": line_number,
+                                    "fix": fix["fix"],
+                                    "function": func_name
+                                })
     
-    def validate_all_factories(self) -> bool:
-        """Validate all discovered factory classes."""
-        print("🔍 Validating Factory Contracts...")
-        print("=" * 50)
+    return {
+        "fixes_applied": fixes_applied,
+        "total_fixes": len(fixes_applied)
+    }
+    
+def _apply_parameter_name_fix(file_path: Path, old_name: str, new_name: str) -> bool:
+    """Apply parameter name fix to a specific file."""
+    try:
+        # Read the file
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
         
-        all_valid = True
+        # Simple regex replacement (more sophisticated AST-based replacement could be added)
+        import re
         
-        for factory_name, factory_class in self.factory_classes.items():
-            print(f"\nValidating: {factory_name}")
+        # Pattern to match parameter assignments
+        pattern = rf"\b{old_name}\s*="
+        replacement = f"{new_name}="
+        
+        modified_content = re.sub(pattern, replacement, content)
+        
+        if modified_content != content:
+            # Write the modified content back
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(modified_content)
             
-            if inspect.isclass(factory_class):
-                result = validate_factory_interface(factory_class)
-            else:
-                # For factory functions, create a mock class for validation
-                result = self._validate_factory_function(factory_name, factory_class)
-            
-            self.validation_results.append(result)
-            
-            if result.is_valid:
-                print(f"✅ VALID: {factory_name}")
-            else:
-                print(f"❌ INVALID: {factory_name}")
-                all_valid = False
-                
-                for error in result.errors:
-                    print(f"   ERROR: {error}")
-                
-                for warning in result.warnings:
-                    print(f"   WARNING: {warning}")
-                
-                # Print parameter mismatches with details
-                for mismatch in result.parameter_mismatches:
-                    print(f"   PARAMETER MISMATCH: {mismatch}")
-        
-        print("\n" + "=" * 50)
-        total_factories = len(self.factory_classes)
-        valid_factories = sum(1 for r in self.validation_results if r.is_valid)
-        invalid_factories = total_factories - valid_factories
-        
-        print(f"📊 VALIDATION SUMMARY:")
-        print(f"   Total Factories: {total_factories}")
-        print(f"   Valid: {valid_factories}")
-        print(f"   Invalid: {invalid_factories}")
-        
-        if all_valid:
-            print("🎉 ALL FACTORY CONTRACTS ARE VALID!")
+            logger.info(f"Applied fix to {file_path}: {old_name} -> {new_name}")
+            return True
         else:
-            print("⚠️  FACTORY CONTRACT VIOLATIONS FOUND!")
-            
-        return all_valid
+            logger.debug(f"No changes needed in {file_path}")
+            return False
     
-    def _validate_factory_function(self, function_name: str, factory_function: callable) -> ValidationResult:
-        """Validate a factory function signature."""
-        from shared.lifecycle.contract_validation_framework import SignatureAnalyzer
-        
-        result = ValidationResult(is_valid=True, interface_name=function_name)
-        
-        # Extract signature
-        try:
-            method_contract = SignatureAnalyzer.extract_method_contract(factory_function)
-            
-            # Check for critical factory function patterns
-            param_names = method_contract.get_parameter_names()
-            
-            # Check for UserExecutionContext parameter
-            if 'user_context' in param_names:
-                # This should match UserExecutionContext interface
-                result.add_warning(f"Factory function {function_name} takes user_context parameter - ensure compatibility")
-            
-            # Check for websocket parameter naming consistency
-            websocket_params = [name for name in param_names if 'websocket' in name.lower()]
-            if len(websocket_params) > 1:
-                result.add_error(f"Multiple websocket parameters found: {websocket_params} - potential naming inconsistency")
-            
-            # Check for connection_id vs client_id naming
-            connection_params = [name for name in param_names if 'connection' in name.lower() or 'client' in name.lower()]
-            if 'websocket_connection_id' in param_names and 'websocket_client_id' in param_names:
-                result.add_error("Both websocket_connection_id and websocket_client_id found - this causes the parameter mismatch bug!")
-            
-        except Exception as e:
-            result.add_error(f"Failed to analyze function signature: {e}")
-            
-        return result
+    except Exception as e:
+        logger.error(f"Error applying fix to {file_path}: {e}")
+        return False
     
-    def validate_user_execution_context(self) -> bool:
-        """Validate UserExecutionContext against its contract."""
-        print("🔍 Validating UserExecutionContext Contract...")
-        print("=" * 50)
-        
-        result = self.registry.validate_user_execution_context(UserExecutionContext)
-        
-        if result.is_valid:
-            print("✅ UserExecutionContext contract is VALID")
-        else:
-            print("❌ UserExecutionContext contract VIOLATIONS:")
-            for error in result.errors:
-                print(f"   ERROR: {error}")
-            for warning in result.warnings:
-                print(f"   WARNING: {warning}")
-        
-        return result.is_valid
     
-    def check_breaking_changes(self) -> bool:
-        """Check for breaking changes in factory interfaces."""
-        print("🔍 Checking for Breaking Changes...")
-        print("=" * 50)
-        
-        found_breaking_changes = False
-        
-        # Check UserExecutionContext specifically
-        breaking_changes = self.registry.check_for_breaking_changes("UserExecutionContext", UserExecutionContext)
-        
-        if breaking_changes:
-            print("❌ BREAKING CHANGES found in UserExecutionContext:")
-            for change in breaking_changes:
-                print(f"   {change}")
-            found_breaking_changes = True
-        else:
-            print("✅ No breaking changes in UserExecutionContext")
-        
-        # Check other factory classes
-        for factory_name, factory_class in self.factory_classes.items():
-            if inspect.isclass(factory_class):
-                changes = self.registry.check_for_breaking_changes(factory_name, factory_class)
-                if changes:
-                    print(f"❌ BREAKING CHANGES in {factory_name}:")
-                    for change in changes:
-                        print(f"   {change}")
-                    found_breaking_changes = True
-        
-        if not found_breaking_changes:
-            print("🎉 NO BREAKING CHANGES DETECTED!")
-            
-        return not found_breaking_changes
     
-    def save_contract_baselines(self) -> None:
-        """Save current contracts as baselines for future comparison."""
-        print("💾 Saving Contract Baselines...")
-        print("=" * 50)
-        
-        # Save UserExecutionContext baseline
-        implementations = {"UserExecutionContext": UserExecutionContext}
-        
-        # Add factory classes
-        for factory_name, factory_class in self.factory_classes.items():
-            if inspect.isclass(factory_class):
-                implementations[factory_name] = factory_class
-        
-        self.registry.save_baseline_contracts(implementations)
-        
-        print(f"✅ Saved {len(implementations)} contract baselines")
-    
-    def run_specific_validation_tests(self) -> bool:
-        """Run specific tests for the parameter mismatch issue."""
-        print("🧪 Running Specific Parameter Mismatch Tests...")
-        print("=" * 50)
-        
-        all_passed = True
-        
-        # Test 1: Check UserExecutionContext constructor parameters
-        print("\nTest 1: UserExecutionContext Constructor Parameters")
-        try:
-            import inspect
-            sig = inspect.signature(UserExecutionContext.__init__)
-            param_names = list(sig.parameters.keys())[1:]  # Skip 'self'
-            
-            print(f"   Parameters: {param_names}")
-            
-            # Check for the critical parameter
-            if 'websocket_client_id' in param_names:
-                print("   ✅ websocket_client_id parameter found (correct)")
-            else:
-                print("   ❌ websocket_client_id parameter missing")
-                all_passed = False
-                
-            if 'websocket_connection_id' in param_names:
-                print("   ⚠️  websocket_connection_id parameter found (legacy - should be removed)")
-                
-        except Exception as e:
-            print(f"   ❌ Test failed: {e}")
-            all_passed = False
-        
-        # Test 2: Check supervisor factory function calls
-        print("\nTest 2: Supervisor Factory Parameter Usage")
-        try:
-            # Try to import and check supervisor factory
-            from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
-            from netra_backend.app.core.supervisor_factory import create_supervisor_core
-            
-            # Check supervisor factory signatures
-            supervisor_sig = inspect.signature(get_websocket_scoped_supervisor)
-            core_sig = inspect.signature(create_supervisor_core)
-            
-            print(f"   get_websocket_scoped_supervisor params: {list(supervisor_sig.parameters.keys())}")
-            print(f"   create_supervisor_core params: {list(core_sig.parameters.keys())}")
-            
-            # Check if both use consistent websocket parameter naming
-            supervisor_websocket_params = [name for name in supervisor_sig.parameters if 'websocket' in name]
-            core_websocket_params = [name for name in core_sig.parameters if 'websocket' in name]
-            
-            print(f"   WebSocket params in supervisor: {supervisor_websocket_params}")
-            print(f"   WebSocket params in core: {core_websocket_params}")
-            
-            if 'websocket_client_id' in core_websocket_params:
-                print("   ✅ Core factory uses websocket_client_id (correct)")
-            else:
-                print("   ❌ Core factory doesn't use websocket_client_id")
-                all_passed = False
-                
-        except Exception as e:
-            print(f"   ❌ Test failed: {e}")
-            all_passed = False
-        
-        # Test 3: Check actual UserExecutionContext creation
-        print("\nTest 3: UserExecutionContext Creation Test")
-        try:
-            # Test creating with the correct parameter name using proper non-placeholder values
-            test_context = UserExecutionContext(
-                user_id="usr_12345678901234567890",  # Proper length, not placeholder
-                thread_id="thrd_12345678901234567890", 
-                run_id="run_12345678901234567890",
-                websocket_client_id="ws_client_12345678901234567890"  # This should work
-            )
-            print("   ✅ UserExecutionContext creation with websocket_client_id succeeded")
-            
-        except TypeError as e:
-            print(f"   ❌ UserExecutionContext creation failed: {e}")
-            all_passed = False
-        except Exception as e:
-            print(f"   ❌ Unexpected error: {e}")
-            all_passed = False
-        
-        print(f"\n🧪 Specific Tests Result: {'✅ ALL PASSED' if all_passed else '❌ SOME FAILED'}")
-        return all_passed
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Factory Contract Validation")
-    parser.add_argument("--validate-all", action="store_true", help="Validate all factory contracts")
-    parser.add_argument("--validate-user-context", action="store_true", help="Validate UserExecutionContext contract")
-    parser.add_argument("--check-breaking-changes", action="store_true", help="Check for breaking changes")
-    parser.add_argument("--save-baselines", action="store_true", help="Save current contracts as baselines")
-    parser.add_argument("--specific-tests", action="store_true", help="Run specific parameter mismatch tests")
+    """Main entry point."""
+    parser = argparse.ArgumentParser(
+        description="Validate factory interface contracts",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    
+    parser.add_argument(
+        "--dir", "-d",
+        type=Path,
+        help="Directory to scan (defaults to project root)"
+    )
+    
+    parser.add_argument(
+        "--pattern", "-p",
+        default="*.py",
+        help="File pattern to scan (default: *.py)"
+    )
+    
+    parser.add_argument(
+        "--output", "-o",
+        type=Path,
+        help="Output file for report (defaults to stdout)"
+    )
+    
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results in JSON format"
+    )
+    
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Apply automated fixes for common violations"
+    )
+    
+    parser.add_argument(
+        "--pre-commit",
+        action="store_true",
+        help="Pre-commit hook mode (exit with error code if violations found)"
+    )
+    
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Verbose output"
+    )
     
     args = parser.parse_args()
     
-    # Default to validate all if no specific action
-    if not any([args.validate_all, args.validate_user_context, args.check_breaking_changes, 
-                args.save_baselines, args.specific_tests]):
-        args.validate_all = True
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
     
-    runner = FactoryValidationRunner()
-    success = True
-    
-    if args.validate_all:
-        success &= runner.validate_all_factories()
-    
-    if args.validate_user_context:
-        success &= runner.validate_user_execution_context()
-    
-    if args.check_breaking_changes:
-        success &= runner.check_breaking_changes()
-    
-    if args.save_baselines:
-        runner.save_contract_baselines()
-    
-    if args.specific_tests:
-        success &= runner.run_specific_validation_tests()
-    
-    sys.exit(0 if success else 1)
+    try:
+        # Scan the codebase
+        results = scan_codebase(args.dir, args.pattern)
+        
+        # Apply fixes if requested
+        if args.fix:
+            fix_results = apply_automated_fixes(results)
+            results["fix_results"] = fix_results
+        
+        # Generate output
+        if args.json:
+            output_content = json.dumps(results, indent=2, default=str)
+        else:
+            output_content = generate_detailed_report(results)
+        
+        # Write output
+        if args.output:
+            with open(args.output, 'w', encoding='utf-8') as f:
+                f.write(output_content)
+            logger.info(f"Report written to {args.output}")
+        else:
+            print(output_content)
+        
+        # Exit with error code for pre-commit mode
+        if args.pre_commit:
+            violations_found = results["scan_results"]["violations_found"]
+            if violations_found > 0:
+                logger.error(f"Pre-commit check failed: {violations_found} contract violations found")
+                sys.exit(1)
+            else:
+                logger.info("Pre-commit check passed: No contract violations found")
+                sys.exit(0)
+        
+        # Normal exit
+        violations_found = results["scan_results"]["violations_found"]
+        if violations_found > 0:
+            logger.warning(f"Contract validation completed with {violations_found} violations")
+            if not args.fix:
+                logger.info("Use --fix to apply automated fixes")
+        else:
+            logger.info("Contract validation passed: No violations found")
+        
+    except Exception as e:
+        logger.error(f"Contract validation failed: {e}")
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
