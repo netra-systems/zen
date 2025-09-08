@@ -199,26 +199,36 @@ def _should_disable_clickhouse_for_tests() -> bool:
     """Check if ClickHouse should be disabled for the current test context."""
     from shared.isolated_environment import get_env
     
-    # Always check if we're in a real database test first
+    # CRITICAL FIX: Check explicit disable flags first - these take precedence
+    env = get_env()
+    
+    # If ClickHouse is explicitly disabled, respect that setting immediately
+    if env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true":
+        logger.debug("[ClickHouse] Disabled by DEV_MODE_DISABLE_CLICKHOUSE=true")
+        return True
+    
+    if env.get("CLICKHOUSE_ENABLED", "").lower() == "false":
+        logger.debug("[ClickHouse] Disabled by CLICKHOUSE_ENABLED=false") 
+        return True
+    
+    # Always check if we're in a real database test
     if _is_real_database_test():
+        logger.debug("[ClickHouse] Enabled for @pytest.mark.real_database test")
         return False  # Allow real ClickHouse for @pytest.mark.real_database tests
     
-    # CRITICAL FIX: Check if we're running in a ClickHouse-specific test directory
-    # ClickHouse tests in netra_backend/tests/clickhouse/ should have their own conftest override
-    import sys
-    current_test = get_env().get("PYTEST_CURRENT_TEST", "")
+    # Check if we're running in a ClickHouse-specific test directory
+    current_test = env.get("PYTEST_CURRENT_TEST", "")
     if "tests/clickhouse/" in current_test or "clickhouse" in current_test.lower():
         # ClickHouse-specific tests should use their own conftest configuration
         # Only disable if explicitly set by the conftest for these specific tests
-        return get_env().get("CLICKHOUSE_TEST_DISABLE", "").lower() == "true"
+        if env.get("CLICKHOUSE_TEST_DISABLE", "").lower() == "true":
+            logger.debug("[ClickHouse] Disabled by CLICKHOUSE_TEST_DISABLE=true for ClickHouse directory tests")
+            return True
+        # If not explicitly disabled, allow ClickHouse-specific tests to try connecting
+        return False
     
-    # Check test framework ClickHouse disable settings for regular tests
-    clickhouse_disabled_by_framework = (
-        get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        get_env().get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    
-    return clickhouse_disabled_by_framework
+    # For all other tests, default to enabled (will use NoOp client in testing environment)
+    return False
 
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
@@ -415,6 +425,9 @@ def get_clickhouse_config():
     Returns appropriate config for real ClickHouse connection.
     Uses HTTP (port 8123) for local development, HTTPS (port 8443) for production.
     Testing environment uses Docker-specific configuration.
+    
+    IMPORTANT: This function should only be called when ClickHouse is actually needed.
+    For testing environments, call use_mock_clickhouse() first to check if NoOp client should be used.
     """
     config = _get_unified_config()
     return _extract_clickhouse_config(config)
@@ -477,9 +490,11 @@ async def get_clickhouse_client(bypass_manager: bool = False):
     """
     from shared.isolated_environment import get_env
     
+    # CRITICAL FIX: Check if ClickHouse should be disabled FIRST, before any connection attempts
     if use_mock_clickhouse():
         # Only for regular testing environment where ClickHouse is explicitly disabled
         # Provide a no-op client that allows tests to run without external dependencies
+        logger.debug("[ClickHouse] Using NoOp client - ClickHouse disabled for testing")
         async with _create_test_noop_client() as client:
             yield client
             return
@@ -867,6 +882,7 @@ class ClickHouseService:
         import asyncio
         from shared.isolated_environment import get_env
         
+        # CRITICAL FIX: Always check disable flags first, before any connection attempts
         if self.force_mock or use_mock_clickhouse():
             # In testing environment with ClickHouse disabled, use NoOp client
             self._client = NoOpClickHouseClient()
