@@ -115,7 +115,7 @@ def _validate_ssot_user_context(user_context: Any) -> None:
         )
     
     logger.debug(
-        f"✅ SSOT UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
+        f"[OK] SSOT UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
         f"(client_id: {user_context.websocket_client_id})"
     )
 
