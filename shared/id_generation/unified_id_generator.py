@@ -92,6 +92,10 @@ class UnifiedIdGenerator:
     def generate_user_context_ids(user_id: str, operation: str = "context") -> Tuple[str, str, str]:
         """Generate consistent IDs for UserExecutionContext creation.
         
+        CRITICAL FIX: Thread ID consistency to prevent WebSocket Factory resource leaks.
+        This addresses the root cause where thread_id and run_id have different patterns,
+        causing cleanup logic to fail to find the right manager during disconnection.
+        
         This is the SSOT method for creating UserExecutionContext IDs,
         replacing all scattered uuid.uuid4().hex[:8] patterns.
         
@@ -100,15 +104,20 @@ class UnifiedIdGenerator:
             operation: Operation type for context naming
             
         Returns:
-            Tuple of (thread_id, run_id, request_id)
+            Tuple of (thread_id, run_id, request_id) with CONSISTENT patterns
         """
         base_timestamp = int(time.time() * 1000)
         counter_base = _get_next_counter()
         
-        # Generate related but unique IDs using sequential counters
-        thread_id = f"thread_{operation}_{base_timestamp}_{counter_base}_{secrets.token_hex(4)}"
-        run_id = f"run_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
-        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 2}_{secrets.token_hex(4)}"
+        # CRITICAL FIX: Use consistent ID pattern for both thread_id and run_id
+        # This prevents the pattern mismatch that causes WebSocket manager cleanup failures
+        base_id = f"{operation}_{base_timestamp}"
+        random_part = secrets.token_hex(4)
+        
+        # Generate related but CONSISTENT IDs - thread_id contains same base as run_id
+        thread_id = f"thread_{base_id}_{counter_base}_{random_part}"
+        run_id = f"{base_id}"  # run_id is the base that thread_id contains
+        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
         
         return thread_id, run_id, request_id
     

@@ -1240,12 +1240,16 @@ class WebSocketManagerFactory:
     - Comprehensive security metrics and monitoring
     """
     
-    def __init__(self, max_managers_per_user: int = 5, connection_timeout_seconds: int = 1800):
+    def __init__(self, max_managers_per_user: int = 20, connection_timeout_seconds: int = 1800):
         """
         Initialize the WebSocket manager factory.
         
+        CRITICAL FIX: Temporarily increased limit from 5 to 20 managers per user as safety margin
+        while thread ID consistency fix is deployed. This prevents resource exhaustion during
+        the transition period when some managers may still have the old inconsistent IDs.
+        
         Args:
-            max_managers_per_user: Maximum number of managers per user (default: 5)
+            max_managers_per_user: Maximum number of managers per user (default: 20, was 5)
             connection_timeout_seconds: Timeout for idle connections (default: 30 minutes)
         """
         self._active_managers: Dict[str, IsolatedWebSocketManager] = {}
