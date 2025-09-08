@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for netra_backend\app\core\configuration\base.py: 61.00%</title>
+    <title>Coverage for netra_backend\app\core\configuration\base.py: 64.00%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_dca529e9.css" type="text/css">
     <script src="coverage_html_cb_497bf287.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>netra_backend\app\core\configuration\base.py</b>:
-            <span class="pc_cov">61.00%</span>
+            <span class="pc_cov">64.00%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">100 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">61<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">39<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">64<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">36<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_7fb78f3478493e6c_database_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 13:10 -0700
+            created at 2025-09-08 16:26 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -191,7 +191,7 @@
     <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">            <span class="com"># CRITICAL FIX: Ensure service_secret is loaded from environment if not set</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">            <span class="com"># This handles cases where the config class doesn't properly load it</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_secret</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_secret</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">                <span class="key">from</span> <span class="nam">shared</span><span class="op">.</span><span class="nam">isolated_environment</span> <span class="key">import</span> <span class="nam">get_env</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">                <span class="nam">env</span> <span class="op">=</span> <span class="nam">get_env</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">                <span class="nam">service_secret</span> <span class="op">=</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'SERVICE_SECRET'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -202,17 +202,17 @@
     <p class="pln"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="com"># DEFENSIVE FIX: Ensure service_id is also sanitized from environment</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">            <span class="com"># This prevents header value issues from Windows line endings or whitespace</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">            <span class="key">if</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">config</span><span class="op">,</span> <span class="str">'service_id'</span><span class="op">)</span> <span class="key">and</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">                <span class="nam">original_service_id</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span> <span class="op">=</span> <span class="nam">str</span><span class="op">(</span><span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span><span class="op">)</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">                <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span> <span class="op">!=</span> <span class="nam">original_service_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">            <span class="key">if</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">config</span><span class="op">,</span> <span class="str">'service_id'</span><span class="op">)</span> <span class="key">and</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">                <span class="nam">original_service_id</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">                <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span> <span class="op">=</span> <span class="nam">str</span><span class="op">(</span><span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span><span class="op">)</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">                <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span> <span class="op">!=</span> <span class="nam">original_service_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">_logger</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="fst">f"</span><span class="fst">SERVICE_ID contained whitespace - sanitized from </span><span class="op">{</span><span class="nam">repr</span><span class="op">(</span><span class="nam">original_service_id</span><span class="op">)</span><span class="op">}</span><span class="fst"> to </span><span class="op">{</span><span class="nam">repr</span><span class="op">(</span><span class="nam">config</span><span class="op">.</span><span class="nam">service_id</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="key">return</span> <span class="nam">config</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Failed to create config for </span><span class="op">{</span><span class="nam">environment</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">e</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="key">return</span> <span class="nam">config</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Failed to create config for </span><span class="op">{</span><span class="nam">environment</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">e</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">            <span class="com"># Fallback to basic config</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">            <span class="key">return</span> <span class="nam">AppConfig</span><span class="op">(</span><span class="nam">environment</span><span class="op">=</span><span class="nam">environment</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">            <span class="key">return</span> <span class="nam">AppConfig</span><span class="op">(</span><span class="nam">environment</span><span class="op">=</span><span class="nam">environment</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">    <span class="key">def</span> <span class="nam">reload_config</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">force</span><span class="op">:</span> <span class="nam">bool</span> <span class="op">=</span> <span class="key">False</span><span class="op">)</span> <span class="op">-></span> <span class="nam">AppConfig</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="str">"""Reload the configuration.</span>&nbsp;</span><span class="r"></span></p>
@@ -384,7 +384,7 @@
             <a class="nav" href="z_7fb78f3478493e6c_database_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 13:10 -0700
+            created at 2025-09-08 16:26 -0700
         </p>
     </div>
 </footer>
