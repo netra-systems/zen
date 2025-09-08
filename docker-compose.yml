@@ -223,6 +223,7 @@ services:
 
       # Secrets
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}
+      SERVICE_ID: ${BACKEND_SERVICE_ID:-netra-backend}
       SERVICE_SECRET: ${SERVICE_SECRET:-dev-service-secret-for-cross-service-auth}
       FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development}
