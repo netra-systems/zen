@@ -504,5 +504,5 @@ async def test_cross_service_authentication_flow():
                                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: await harness.cleanup()
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                                                                                                                                                                                                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])
