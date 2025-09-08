@@ -7,6 +7,10 @@ LITERALLY WRITING AND OUTPUTING YOUR CHOICE BEFORE PROCEEDING.
 
 SUPER IMPORTANT: COMPLETE FEATURE FREEZE. ZERO NEW FEATURES. ONLY MAKE EXISTING FEATURES WORK.
 
+PROVE THAT YOUR CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
+do not introduce new problems.
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
