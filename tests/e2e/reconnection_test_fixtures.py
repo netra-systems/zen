@@ -37,7 +37,7 @@
     # REMOVED_SYNTAX_ERROR: import pytest
 
     # Import required test utilities - no fallbacks
-    # REMOVED_SYNTAX_ERROR: from test_framework.auth_helpers import ( )
+    # REMOVED_SYNTAX_ERROR: from test_framework.helpers.auth_helpers import ( )
     # REMOVED_SYNTAX_ERROR: get_test_token,
     
     # REMOVED_SYNTAX_ERROR: from netra_backend.tests.helpers.websocket_test_helpers import ( )

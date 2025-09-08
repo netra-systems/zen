@@ -13,8 +13,8 @@ from typing import Any, Dict, List
 
 # Import utilities with fallbacks
 try:
-    from test_framework.auth_helpers import (
-        create_test_token,
+    from test_framework.helpers.auth_helpers import (
+        create_test_jwt_token as create_test_token,
     )
     from netra_backend.tests.helpers.websocket_test_helpers import create_mock_websocket
 except ImportError:
