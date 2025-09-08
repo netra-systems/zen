@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <meta>
+        <title>Context Creation vs Session Management - Critical Architecture Pattern</title>
+        <date>2025-01-08</date>
+        <priority>CRITICAL</priority>
+        <business_impact>CATASTROPHIC - Breaks 90% of platform value (chat continuity)</business_impact>
+        <tags>context-creation,session-management,chat-continuity,websocket,multi-user</tags>
+    </meta>
+    
+    <problem>
+        <title>Context Creation Pattern Breaking Chat Continuity</title>
+        <description>
+            System was creating NEW contexts for EVERY WebSocket message instead of maintaining 
+            session continuity, completely breaking multi-turn AI conversations.
+        </description>
+        
+        <root_cause>
+            Architectural confusion between context CREATION vs context RETRIEVAL:
+            - WRONG: create_user_execution_context() with uuid.uuid4() every time
+            - CORRECT: get_user_execution_context() with session reuse
+        </root_cause>
+        
+        <evidence>
+            <file path="netra_backend/app/services/websocket/message_handler.py">
+                15+ instances of create_user_execution_context() with str(uuid.uuid4()) 
+                breaking conversation threads
+            </file>
+            <business_impact>
+                Users losing all conversation history between messages, making AI chat unusable
+            </business_impact>
+        </evidence>
+    </problem>
+    
+    <solution>
+        <title>UserSessionManager SSOT Pattern</title>
+        <description>
+            Implemented comprehensive session management with proper lifecycle:
+            1. UserSessionManager as SSOT for all session operations
+            2. get_or_create_user_session() pattern for continuity
+            3. Automatic cleanup to prevent memory leaks
+            4. Multi-user isolation with thread safety
+        </description>
+        
+        <implementation>
+            <ssot_location>shared/session_management/user_session_manager.py</ssot_location>
+            <integration_point>netra_backend/app/dependencies.py</integration_point>
+            <preferred_pattern>
+                ```python
+                # CORRECT: Session-based context retrieval
+                context = await get_user_session_context(user_id, thread_id)
+                
+                # WRONG: Always creating new contexts  
+                context = create_user_execution_context(user_id, str(uuid.uuid4()))
+                ```
+            </preferred_pattern>
+        </implementation>
+        
+        <validation>
+            <tests>tests/unit/test_user_session_manager_validation.py</tests>
+            <coverage>7 tests covering session reuse, multi-user isolation, lifecycle</coverage>
+            <results>ALL PASSED - Session continuity restored</results>
+        </validation>
+    </solution>
+    
+    <critical_patterns>
+        <pattern type="FORBIDDEN">
+            <description>Creating new thread_id or run_id for continuing conversations</description>
+            <code>
+                context = create_user_execution_context(
+                    user_id=user_id,
+                    thread_id=str(uuid.uuid4()),  # BREAKS CONTINUITY
+                    run_id=str(uuid.uuid4())      # LOSES CONVERSATION
+                )
+            </code>
+            <impact>Complete loss of conversation history between messages</impact>
+        </pattern>
+        
+        <pattern type="REQUIRED">
+            <description>Session-based context retrieval with reuse</description>
+            <code>
+                # Extract from message payload or use existing session
+                thread_id = payload.get("thread_id") or existing_session.thread_id
+                context = await get_user_session_context(user_id, thread_id)
+            </code>
+            <impact>Maintains conversation continuity and enables multi-turn AI interactions</impact>
+        </pattern>
+    </critical_patterns>
+    
+    <integration_requirements>
+        <websocket_handlers>
+            <requirement>
+                ALL WebSocket message handlers MUST use get_user_session_context()
+                instead of create_user_execution_context()
+            </requirement>
+            <files_updated>
+                - netra_backend/app/services/websocket/message_handler.py (15+ instances fixed)
+            </files_updated>
+        </websocket_handlers>
+        
+        <dependency_injection>
+            <requirement>
+                FastAPI dependencies MUST use UserSessionManager for context retrieval
+            </requirement>
+            <preferred_dependency>UserSessionContextDep</preferred_dependency>
+        </dependency_injection>
+        
+        <lifecycle_management>
+            <startup>await configure_session_manager(app)</startup>
+            <shutdown>await shutdown_session_manager_app(app)</shutdown>
+            <cleanup>Automatic cleanup of inactive sessions every 30 minutes</cleanup>
+        </lifecycle_management>
+    </integration_requirements>
+    
+    <monitoring_requirements>
+        <metrics>
+            - Active session count
+            - Session creation vs reuse ratio
+            - Average session duration  
+            - Memory usage estimation
+            - Cleanup operation statistics
+        </metrics>
+        
+        <logging>
+            - Session creation and reuse events
+            - WebSocket connection updates
+            - Cleanup operations
+            - Error handling and recovery
+        </logging>
+    </monitoring_requirements>
+    
+    <business_value_restored>
+        <segment>All (Free, Early, Mid, Enterprise)</segment>
+        <value_impact>
+            - Multi-turn AI conversations now work correctly (90% of platform value)
+            - Memory leak prevention ensures system stability
+            - True multi-user support with complete isolation
+            - Reliable WebSocket event handling
+        </value_impact>
+        <strategic_impact>
+            - Core chat functionality restored
+            - Scalable session management for enterprise users
+            - Foundation for advanced conversation features
+        </strategic_impact>
+    </business_value_restored>
+    
+    <prevention_checklist>
+        <title>Before ANY context-related changes</title>
+        <items>
+            <item>Check if UserSessionManager SSOT is being used</item>
+            <item>Verify get_user_session_context() vs create_user_execution_context() usage</item>
+            <item>Look for session reuse patterns vs new creation</item>
+            <item>Test multi-turn conversation continuity</item>
+            <item>Validate multi-user isolation</item>
+            <item>Check for memory leaks in session management</item>
+        </items>
+    </prevention_checklist>
+    
+    <related_learnings>
+        <learning ref="websocket_agent_integration_critical.xml">
+            WebSocket event handling depends on proper session management
+        </learning>
+        <learning ref="user_context_architecture.md">
+            Factory-based isolation patterns require session continuity
+        </learning>
+    </related_learnings>
+</learning>
