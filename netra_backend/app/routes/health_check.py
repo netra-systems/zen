@@ -403,8 +403,9 @@ async def health_configuration(
 
 # Legacy compatibility endpoints
 @router.get("/", response_model=HealthStatus)
+@router.get("", response_model=HealthStatus)  # Handle without trailing slash
 async def health_root(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:
-    """Root health endpoint - redirects to readiness probe."""
+    """Root health endpoint - redirects to readiness probe.""" 
     return await readiness_probe(user=user, force=False)
