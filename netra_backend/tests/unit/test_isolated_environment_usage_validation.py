@@ -16,7 +16,7 @@ import os
 from unittest.mock import patch, Mock
 from test_framework.base import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from netra_backend.app.core.backend_environment import BackendIsolatedEnvironment
+from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
 class TestIsolatedEnvironmentUsageValidation(BaseTestCase):

@@ -18,11 +18,11 @@ from typing import Dict, Any, List
 import time
 import uuid
 
-from netra_backend.websocket.websocket_manager import WebSocketManager  
-from netra_backend.websocket.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager  
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from shared.types import UserID, ConnectionID, ThreadID
-from test_framework.ssot.websocket_test_client import WebSocketTestClient
-from test_framework.ssot.database_test_client import DatabaseTestClient
+from test_framework.ssot.websocket import WebSocketTestClient
+from test_framework.ssot.database import DatabaseTestUtility
 
 
 class TestWebSocketConnectionManagementIntegration:

@@ -228,7 +228,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             if agent_name != agent_names[-1]:  # Not the last agent
                 current_context = current_context.create_child_context(
                     operation_name=f"handoff_to_next_agent",
-                    additional_metadata={
+                    additional_agent_context={
                         f"{agent_name}_result": result,
                         "handoff_sequence": len(handoff_chain)
                     }
@@ -333,7 +333,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Create new context with accumulated data
             shared_context = shared_context.create_child_context(
                 operation_name=f"context_sharing_stage_{i+1}",
-                additional_metadata=agent_contribution
+                additional_agent_context=agent_contribution
             )
             
             # Capture context state after agent execution
@@ -572,7 +572,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Update context with result for next agent
             current_context = current_context.create_child_context(
                 operation_name=f"coordination_{agent_name}_complete",
-                additional_metadata={f"{agent_name}_result": result}
+                additional_agent_context={f"{agent_name}_result": result}
             )
         
         # Validate coordinated workflow results
@@ -681,7 +681,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             # Update context with evolved state
             current_context = current_context.create_child_context(
                 operation_name=f"state_sync_{agent_name}",
-                additional_metadata={
+                additional_agent_context={
                     "workflow_state": workflow_state.copy(),
                     f"{agent_name}_result": result
                 }
@@ -859,7 +859,7 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
             if agent_name in communication_results:
                 current_context = current_context.create_child_context(
                     operation_name=f"communication_handling_{agent_name}",
-                    additional_metadata={
+                    additional_agent_context={
                         f"{agent_name}_result": communication_results[agent_name],
                         "error_count": len(error_log)
                     }

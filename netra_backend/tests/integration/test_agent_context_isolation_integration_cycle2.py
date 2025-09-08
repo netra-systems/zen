@@ -17,13 +17,12 @@ import asyncio
 from unittest.mock import AsyncMock
 from typing import Dict, Any, List
 
-from netra_backend.app.agents.agent_registry import AgentRegistry
-from netra_backend.app.agents.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
-from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.websocket.websocket_manager import WebSocketManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine, EnhancedToolExecutionEngine
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from shared.types import UserID, ThreadID, RunID
-from test_framework.ssot.database_test_client import DatabaseTestClient
-from test_framework.ssot.websocket_test_client import WebSocketTestClient
+from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.ssot.websocket import WebSocketTestClient
 
 
 class TestAgentContextIsolationIntegration:
