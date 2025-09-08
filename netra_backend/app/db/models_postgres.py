@@ -66,7 +66,7 @@ class CreditTransaction(Base):
     __tablename__ = 'credit_transactions'
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(String, ForeignKey('users.id'))  # FIX: Changed from Integer to String to match User.id type
     amount = Column(Float, nullable=False)
     transaction_type = Column(String(50), nullable=False)  # 'credit' or 'debit'
     description = Column(Text)
@@ -79,7 +79,7 @@ class Subscription(Base):
     __tablename__ = 'subscriptions'
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(String, ForeignKey('users.id'))  # FIX: Changed from Integer to String to match User.id type
     plan_name = Column(String(100), nullable=False)
     status = Column(String(50), nullable=False, default='active')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
