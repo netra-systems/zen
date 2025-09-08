@@ -84,8 +84,8 @@ class GCPDeployer:
         
         # Service configurations (Alpine-optimized if flag is set)
         backend_dockerfile = "docker/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
-        backend_memory = "512Mi" if self.use_alpine else "4Gi"
-        backend_cpu = "1" if self.use_alpine else "2"
+        backend_memory = "2Gi" if self.use_alpine else "4Gi"
+        backend_cpu = "2" if self.use_alpine else "2"
         
         self.services = [
             ServiceConfig(
@@ -1058,7 +1058,7 @@ CMD ["npm", "start"]
             cmd.extend(["--add-cloudsql-instances", cloud_sql_instance])
             
             # Extended timeout and CPU boost for database initialization
-            cmd.extend(["--timeout", "300"])  # 5 minutes for DB init
+            cmd.extend(["--timeout", "600"])  # 10 minutes for DB init - fixed startup timeout
             cmd.extend(["--cpu-boost"])       # Faster cold starts
         
         # Add service-specific configurations
