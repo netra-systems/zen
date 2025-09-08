@@ -25,7 +25,7 @@ current_dir = Path(__file__).parent
 netra_backend_dir = current_dir.parent.parent.parent
 sys.path.insert(0, str(netra_backend_dir))
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

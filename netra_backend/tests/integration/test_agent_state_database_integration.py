@@ -33,7 +33,7 @@ from netra_backend.app.core.managers.unified_state_manager import (
     StateEntry, StateQuery, StateChangeEvent, StateManagerFactory
 )
 from netra_backend.app.database.session_manager import DatabaseSessionManager, SessionIsolationError
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 

@@ -14,7 +14,7 @@ from typing import Any, Dict
 from shared.isolated_environment import IsolatedEnvironment
 
 # Core imports for Phase 0 migration - only essential ones
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager

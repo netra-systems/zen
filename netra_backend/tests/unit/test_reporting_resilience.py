@@ -14,7 +14,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestReportingResilience:

@@ -66,7 +66,7 @@
     # Removed problematic line: async def test_websocket_to_tool_dispatcher_wiring(self):
         # REMOVED_SYNTAX_ERROR: """SMOKE: WebSocket manager properly wired to tool dispatcher."""
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
 
         # Create mock components
         # REMOVED_SYNTAX_ERROR: websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -97,7 +97,7 @@
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
 
             # Create mock components
             # REMOVED_SYNTAX_ERROR: mock_llm = Mock(spec=LLMManager)

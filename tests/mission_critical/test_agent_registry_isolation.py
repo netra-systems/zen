@@ -967,7 +967,7 @@
     # TODO: Initialize real service
     # REMOVED_SYNTAX_ERROR: """Create mock user execution context."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
     # REMOVED_SYNTAX_ERROR: return UserExecutionContext.from_request( )
     # REMOVED_SYNTAX_ERROR: user_id="test_user_123",
     # REMOVED_SYNTAX_ERROR: thread_id="thread_456",

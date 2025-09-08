@@ -42,7 +42,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
     SecurityViolationError,
     create_request_scoped_dispatcher
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 
 

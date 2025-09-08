@@ -55,7 +55,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
 
 # Import WebSocket and agent infrastructure
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 

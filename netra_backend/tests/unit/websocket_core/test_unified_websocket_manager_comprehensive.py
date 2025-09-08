@@ -44,7 +44,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
     RegistryCompat
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class MockWebSocket:

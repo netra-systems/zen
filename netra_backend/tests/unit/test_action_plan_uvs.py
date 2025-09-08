@@ -25,7 +25,7 @@ from netra_backend.app.agents.actions_goals_plan_builder_uvs import (
     create_uvs_action_plan_builder
 )
 from netra_backend.app.agents.state import ActionPlanResult, PlanStep
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestActionPlanUVS:

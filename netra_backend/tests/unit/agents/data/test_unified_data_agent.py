@@ -21,7 +21,7 @@ from netra_backend.app.agents.data.unified_data_agent import (
     UsagePatternStrategy,
     CostOptimizationStrategy
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestUnifiedDataAgentFactory:
@@ -424,7 +424,7 @@ class TestUnifiedDataAgentExecution:
             request_id="test_req_ws",
             thread_id="test_thread",
             run_id="test_run_ws",
-            websocket_connection_id="test_ws_connection"
+            websocket_client_id="test_ws_connection"
         )
         
         # Mock WebSocket manager (this should be patched at the agent level)

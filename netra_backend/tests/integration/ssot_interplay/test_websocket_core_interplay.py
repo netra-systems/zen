@@ -54,7 +54,7 @@ from netra_backend.app.websocket_core import (
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.types import MessageType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession  
-from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext, ExecutionStatus
+from netra_backend.app.services.user_execution_context import UserExecutionContext, ExecutionStatus
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.agent_service_factory import get_agent_service
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge

@@ -62,7 +62,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent

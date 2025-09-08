@@ -8,7 +8,7 @@ import pytest
 import sys
 from unittest.mock import patch
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestImportTimeFactoryCompliance:

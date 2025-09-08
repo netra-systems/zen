@@ -36,7 +36,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import (
     UserIntent,
     ToolRecommendation
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.db.models_postgres import User, Thread, Message

@@ -44,7 +44,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture, with_test_database
 from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
-from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import SessionScopeValidator, SessionIsolationError
 from netra_backend.app.websocket_core import create_websocket_manager
 from shared.database_url_builder import DatabaseURLBuilder

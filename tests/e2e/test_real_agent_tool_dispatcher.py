@@ -62,7 +62,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
     ToolDispatchResponse
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager

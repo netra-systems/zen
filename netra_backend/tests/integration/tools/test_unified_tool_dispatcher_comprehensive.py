@@ -29,7 +29,7 @@ import pytest
 import websockets
 from langchain_core.tools import BaseTool
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.tools.unified_tool_dispatcher import (
     UnifiedToolDispatcher,
     UnifiedToolDispatcherFactory,

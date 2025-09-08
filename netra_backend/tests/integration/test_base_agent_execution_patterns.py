@@ -38,7 +38,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from netra_backend.app.agents.base_agent import BaseAgent
 
 # Import core SSOT classes and dependencies for testing
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base.executor import BaseExecutionEngine, ExecutionStrategy
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor

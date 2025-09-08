@@ -42,7 +42,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestAgentWebSocketIntegration(BaseIntegrationTest):

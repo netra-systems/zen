@@ -30,10 +30,10 @@ class StagingE2ETestRunner:
         self.all_results = []
         self.staging_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
         
-    def run_tests(self, test_pattern: str = "test_*.py") -> Tuple[int, int, List[str]]:
+    def run_tests(self, test_pattern: Optional[str] = None) -> Tuple[int, int, List[str]]:
         """Run E2E tests and return passed, failed counts and failed test names"""
         print(f"\n{'='*70}")
-        print(f"Running E2E Tests - Pattern: {test_pattern}")
+        print(f"Running E2E Tests - Pattern: {test_pattern or 'all tests'}")
         print(f"{'='*70}")
         
         # Run pytest with real services
@@ -43,9 +43,19 @@ class StagingE2ETestRunner:
             "-v", "--tb=short",
             "--maxfail=100",  # Don't stop on failures
             "--json-report",
-            f"--json-report-file={self.results_dir / f'iteration_{self.iteration}.json'}",
-            "-k", test_pattern
+            f"--json-report-file={self.results_dir / f'iteration_{self.iteration}.json'}"
         ]
+        
+        # Add test pattern filter if provided (using -k for keyword expressions)
+        if test_pattern:
+            # Convert file patterns to pytest keyword expressions
+            if "*" in test_pattern and test_pattern.endswith(".py"):
+                # Convert file pattern like "test_*.py" to appropriate test discovery
+                # Just let pytest discover all tests in the directory
+                pass  # Don't add -k filter for file patterns
+            else:
+                # Use as pytest keyword expression (test names, not file names)
+                cmd.extend(["-k", test_pattern])
         
         # Set environment for staging
         env = os.environ.copy()

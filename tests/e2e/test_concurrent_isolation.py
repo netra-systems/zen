@@ -64,7 +64,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import real production components - NO MOCKS
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent

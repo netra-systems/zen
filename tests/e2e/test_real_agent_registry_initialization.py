@@ -53,7 +53,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.websocket_helpers import WebSocketTestHelpers, MockWebSocketConnection
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext, ExecutionEngineFactory
+from netra_backend.app.services.user_execution_context import UserExecutionContext, ExecutionEngineFactory
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge

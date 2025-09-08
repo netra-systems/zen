@@ -43,7 +43,7 @@ from shared.isolated_environment import get_env
 
 # Import production components for supervisor isolation testing
 from netra_backend.app.core.supervisor_factory import create_supervisor_core
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.dependencies import get_request_scoped_db_session
 from test_framework.base_integration_test import BaseIntegrationTest as DockerTestBase

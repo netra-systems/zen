@@ -27,7 +27,7 @@ import pytest
 import jwt
 import redis.asyncio as redis
 from fastapi import HTTPException, status
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Import token and auth components
 from netra_backend.app.core.auth_constants import (
@@ -86,7 +86,7 @@ class TestRealTokenRefresh:
     @pytest.fixture
     async def async_client(self):
         """Create async HTTP client for token refresh API testing."""
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
             yield client
 
     @pytest.fixture

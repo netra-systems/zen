@@ -40,7 +40,7 @@ from netra_backend.app.agents.supervisor.agent_registry import (
     UserAgentSession,
     AgentLifecycleManager
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher

@@ -49,7 +49,7 @@
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # Core imports
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.database.session_manager import DatabaseSessionManager
 
     # Phase 2 Agent imports

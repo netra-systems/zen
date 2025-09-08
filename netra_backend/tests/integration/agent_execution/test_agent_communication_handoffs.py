@@ -21,7 +21,7 @@ import pytest
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.tests.integration.agent_execution.base_agent_execution_test import BaseAgentExecutionTest

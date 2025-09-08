@@ -20,7 +20,7 @@ import pytest
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.schemas.tool import BaseTool

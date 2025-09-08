@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     get_execution_engine_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.tool_dispatcher import (
     UnifiedToolDispatcher,
     UnifiedToolDispatcherFactory,
@@ -142,7 +142,14 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
     @pytest.fixture
     async def execution_engine_factory(self, tool_dispatcher_factory):
         """Execution engine factory with tool dispatcher integration."""
-        exec_factory = get_execution_engine_factory()
+        from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        
+        # Create a test websocket bridge for the factory
+        websocket_bridge = AgentWebSocketBridge()
+        
+        # Create factory directly for tests
+        exec_factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
         exec_factory.set_tool_dispatcher_factory(tool_dispatcher_factory)
         yield exec_factory
         await exec_factory.cleanup_all_contexts()
@@ -150,7 +157,13 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
     @pytest.fixture
     async def agent_registry(self, tool_dispatcher_factory):
         """Real agent registry with tool dispatcher integration."""
-        registry = AgentRegistry()
+        from unittest.mock import MagicMock
+        
+        # Create mock LLM manager for tests
+        mock_llm_manager = MagicMock()
+        mock_llm_manager.name = "test_llm_manager"
+        
+        registry = AgentRegistry(llm_manager=mock_llm_manager)
         registry.set_tool_dispatcher_factory(tool_dispatcher_factory)
         await registry.initialize()
         yield registry
@@ -183,7 +196,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         # Create user execution context
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
+            run_id=f"run_{test_ctx.test_id}",
             thread_id=test_ctx.thread_id
         )
         test_ctx.execution_context = exec_ctx
@@ -212,7 +225,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         
         # Verify tool execution result
         assert tool_result is not None, "Tool execution should return result"
-        assert tool_result.success, f"Tool execution should succeed: {tool_result.error_message}"
+        assert tool_result.success, f"Tool execution should succeed: {tool_result.error}"
         assert tool_result.user_context.user_id == test_ctx.user_id, "Tool result should have correct user context"
         
         # Verify tool result contains user-specific data
@@ -272,7 +285,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
             # Create execution context
             exec_ctx = UserExecutionContext(
                 user_id=ctx.user_id,
-                session_id=ctx.session_id,
+                run_id=f"run_{ctx.test_id}",
                 thread_id=ctx.thread_id
             )
             ctx.execution_context = exec_ctx
@@ -408,7 +421,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
             # Create execution context
             exec_ctx = UserExecutionContext(
                 user_id=test_ctx.user_id,
-                session_id=test_ctx.session_id,
+                run_id=f"run_{test_ctx.test_id}",
                 thread_id=test_ctx.thread_id
             )
             
@@ -492,10 +505,10 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         # Create user execution context with limited permissions
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
-            session_id=test_ctx.session_id,
-            thread_id=test_ctx.thread_id,
-            permissions=["READ_USER_DATA"]  # Limited permissions
+            run_id=f"run_{test_ctx.test_id}",
+            thread_id=test_ctx.thread_id
         )
+        # TODO: Add permissions to context once supported
         
         # Create tool dispatcher
         tool_dispatcher = await tool_dispatcher_factory.create_dispatcher(exec_ctx)
@@ -564,10 +577,10 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         # Test with elevated permissions
         admin_exec_ctx = UserExecutionContext(
             user_id=f"admin_{test_ctx.user_id}",
-            session_id=test_ctx.session_id,
-            thread_id=test_ctx.thread_id,
-            permissions=["READ_USER_DATA", "ADMIN", "EXECUTE"]
+            run_id=f"admin_run_{test_ctx.test_id}",
+            thread_id=test_ctx.thread_id
         )
+        # TODO: Add admin permissions to context once supported
         
         admin_dispatcher = await tool_dispatcher_factory.create_dispatcher(admin_exec_ctx)
         
@@ -601,6 +614,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
+            run_id=f"run_{test_ctx.test_id}",
             session_id=test_ctx.session_id,
             thread_id=test_ctx.thread_id
         )
@@ -712,6 +726,7 @@ class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
         
         exec_ctx = UserExecutionContext(
             user_id=test_ctx.user_id,
+            run_id=f"run_{test_ctx.test_id}",
             session_id=test_ctx.session_id,
             thread_id=test_ctx.thread_id
         )

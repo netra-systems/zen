@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactoryError,
     configure_execution_engine_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 

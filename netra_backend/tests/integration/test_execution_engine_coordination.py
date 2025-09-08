@@ -41,7 +41,7 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     execute_agent,
     execution_engine_context
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 
 # Test framework imports

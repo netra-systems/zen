@@ -396,7 +396,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         # Verification should be skipped
         mock_validation.assert_not_called()
 
-    @patch('netra_backend.app.startup_module.validate_database_environment')
+    @patch('netra_backend.app.services.database_env_service.validate_database_environment')
     @patch('netra_backend.app.startup_module.os._exit')
     def test_perform_database_validation_exits_on_failure(self, mock_exit, mock_validate):
         """Test database validation exits on critical failure."""
@@ -438,6 +438,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_config = Mock()
         mock_config.fast_startup_mode = "true"
         mock_config.skip_migrations = "false"
+        mock_config.database_url = "postgresql://user:pass@localhost/testdb"
         mock_get_config.return_value = mock_config
         
         startup_module.run_database_migrations(self.mock_logger)
@@ -471,7 +472,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
             self.assertFalse(startup_module._is_mock_database_url(url),
                            f"Should not detect {url} as mock database URL")
 
-    @patch('netra_backend.app.startup_module.Path')
+    @patch('pathlib.Path')
     @patch('builtins.open')
     @patch('json.load')
     def test_is_postgres_service_mock_mode_reads_config(self, mock_json, mock_open, mock_path):
@@ -479,10 +480,12 @@ class TestStartupModuleComprehensive(BaseTestCase):
         # Mock config file existence and content
         mock_config_path = Mock()
         mock_config_path.exists.return_value = True
-        # Fix the path assignment
-        mock_cwd = Mock()
-        mock_cwd.__truediv__ = Mock(return_value=mock_config_path)
-        mock_path.cwd.return_value = mock_cwd
+        
+        # Properly mock the Path operations chain
+        mock_cwd_path = Mock()
+        # Set the magic method for division operation
+        mock_cwd_path.__truediv__ = Mock(return_value=mock_config_path)
+        mock_path.cwd.return_value = mock_cwd_path
         
         mock_json.return_value = {"postgres": {"mode": "mock"}}
         

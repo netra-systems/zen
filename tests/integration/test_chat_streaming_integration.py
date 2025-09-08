@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 import jwt
 
 from netra_backend.app.main import create_app
@@ -69,7 +69,7 @@ async def app() -> FastAPI:
 @pytest.fixture
 async def test_client(app: FastAPI) -> AsyncIterator[AsyncClient]:
     """Create async test client."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
 

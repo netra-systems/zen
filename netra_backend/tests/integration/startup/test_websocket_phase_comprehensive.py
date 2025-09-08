@@ -63,7 +63,7 @@ from netra_backend.app.websocket_core.event_validation_framework import EventVal
 from netra_backend.app.websocket_core.broadcast_core import BroadcastCore
 
 # Agent execution context
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Mock WebSocket for testing
 from fastapi import WebSocket

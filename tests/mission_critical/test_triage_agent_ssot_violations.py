@@ -63,7 +63,7 @@
             # REMOVED_SYNTAX_ERROR: TriageSubAgent = ImportedAgent if 'ImportedAgent' in locals() else None
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.triage.unified_triage_agent import TriageCore
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env

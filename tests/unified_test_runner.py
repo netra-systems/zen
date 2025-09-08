@@ -1060,6 +1060,10 @@ class UnifiedTestRunner:
             # For staging, don't use Docker port discovery - use remote staging services
             # Configure test environment with discovered ports
             env = get_env()
+            # CRITICAL: Enable local config file loading for all staging tests
+            # This allows staging.env to be loaded for ClickHouse and other configurations
+            env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_config')
+            env.set('ENVIRONMENT', 'staging', 'staging_config')
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -1320,7 +1324,9 @@ class UnifiedTestRunner:
                 env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
                 env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
-                print("[INFO] ✅ E2E bypass key configured successfully")
+                # CRITICAL: Enable local config file loading for staging tests
+                env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_e2e_auth')
+                print("[INFO] ✅ E2E bypass key and staging config loading configured successfully")
             else:
                 print(f"[WARNING] Could not fetch E2E bypass key from Google Secrets Manager: {result.stderr}")
                 print("[WARNING] E2E tests requiring authentication may fail")

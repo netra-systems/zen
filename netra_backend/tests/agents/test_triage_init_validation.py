@@ -14,7 +14,7 @@ from shared.isolated_environment import get_env
 
 # Import target classes
 from netra_backend.app.agents.triage_sub_agent import UnifiedTriageAgent
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, InvalidContextError
+from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 from netra_backend.app.llm.llm_manager import LLMManager
 
 

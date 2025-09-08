@@ -217,7 +217,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         
         try:
             from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Mock user execution context
             mock_user_context = MagicMock(spec=UserExecutionContext)
@@ -462,7 +462,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         
         try:
             from netra_backend.app.websocket_core import create_websocket_manager
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Mock user context
             mock_user_context = MagicMock(spec=UserExecutionContext)
@@ -534,7 +534,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         start_time = time.time()
         
         try:
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Create multiple user contexts to test isolation
             user_context_1 = UserExecutionContext(

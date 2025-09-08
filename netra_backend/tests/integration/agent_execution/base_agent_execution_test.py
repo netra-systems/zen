@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock
 import pytest
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager

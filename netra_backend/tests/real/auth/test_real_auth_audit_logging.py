@@ -25,7 +25,7 @@ from enum import Enum
 import pytest
 import redis.asyncio as redis
 from fastapi import HTTPException, status
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
@@ -107,7 +107,7 @@ class TestRealAuthAuditLogging:
     @pytest.fixture
     async def async_client(self):
         """Create async HTTP client for audit logging testing."""
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
             yield client
 
     @pytest.fixture

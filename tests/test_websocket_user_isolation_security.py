@@ -51,7 +51,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Import modules under test
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.websocket_connection_pool import ( )
         # REMOVED_SYNTAX_ERROR: WebSocketConnectionPool,
         # REMOVED_SYNTAX_ERROR: ConnectionInfo,

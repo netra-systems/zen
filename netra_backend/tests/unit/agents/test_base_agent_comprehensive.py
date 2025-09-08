@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Import BaseAgent and core dependencies 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus

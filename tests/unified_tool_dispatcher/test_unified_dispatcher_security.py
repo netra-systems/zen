@@ -61,7 +61,7 @@
             # REMOVED_SYNTAX_ERROR: ToolDispatchRequest,
             # REMOVED_SYNTAX_ERROR: ToolDispatchResponse
             
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.tool import ToolStatus
             # REMOVED_SYNTAX_ERROR: from langchain_core.tools import BaseTool

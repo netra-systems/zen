@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.logging_config import central_logger

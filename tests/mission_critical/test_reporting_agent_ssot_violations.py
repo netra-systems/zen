@@ -55,7 +55,7 @@
     # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.agent_error_types import AgentValidationError
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.serialization.unified_json_handler import LLMResponseParser
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.cache.cache_helpers import CacheHelpers

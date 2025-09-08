@@ -23,7 +23,7 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.fixture
 async def websocket_manager():

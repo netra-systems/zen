@@ -61,7 +61,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.database.session_manager import DatabaseSessionManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_sub_agent.core.data_analysis_core import DataAnalysisCore
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_sub_agent.core.data_processor import DataProcessor

@@ -46,7 +46,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     configure_agent_instance_factory,
     UserWebSocketEmitter
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -153,6 +153,15 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
         factory_module._factory_instance = None
         
+        # If a factory instance exists, reset its state for clean testing
+        try:
+            factory = factory_module.get_agent_instance_factory()
+            if hasattr(factory, 'reset_for_testing'):
+                factory.reset_for_testing()
+        except Exception:
+            # Ignore errors during test setup cleanup
+            pass
+        
         # Standard test data
         self.test_user_id = "user_factory_test_12345"
         self.test_thread_id = "thread_factory_test_67890" 
@@ -185,8 +194,19 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
     def teardown_method(self, method=None):
         """Clean up test environment."""
-        # Reset singleton
+        # Reset singleton and factory state for clean tests
         import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
+        
+        # Reset factory state if instance exists
+        try:
+            if factory_module._factory_instance is not None:
+                if hasattr(factory_module._factory_instance, 'reset_for_testing'):
+                    factory_module._factory_instance.reset_for_testing()
+        except Exception:
+            # Ignore errors during test teardown cleanup
+            pass
+        
+        # Reset singleton
         factory_module._factory_instance = None
         super().teardown_method(method)
 
@@ -379,7 +399,6 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             db_session=self.mock_db_session,
-            websocket_connection_id=self.test_websocket_id,
             metadata={"test": "data"}
         )
         
@@ -389,7 +408,6 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         assert context.thread_id == self.test_thread_id
         assert context.run_id == self.test_run_id
         assert context.db_session is self.mock_db_session
-        assert context.websocket_connection_id == self.test_websocket_id
         assert context.metadata["test"] == "data"
         assert isinstance(context.created_at, datetime)
         
@@ -909,9 +927,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             run_id="old_run"
         )
         
-        # Mock old context age
+        # Mock old context age using object replacement
         old_time = datetime.now(timezone.utc).replace(year=2020)  # Very old
-        old_context.created_at = old_time
+        object.__setattr__(old_context, 'created_at', old_time)
         
         new_context = await factory.create_user_execution_context(
             user_id="new_user",
@@ -1283,9 +1301,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
 class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
     """Comprehensive tests for UserWebSocketEmitter component."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up WebSocket emitter tests."""
-        super().setUp()
+        super().setup_method(method)
         
         self.test_user_id = "ws_user_12345"
         self.test_thread_id = "ws_thread_67890"
@@ -1386,9 +1404,9 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
 class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
     """Performance-focused tests for AgentInstanceFactory optimizations."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up performance tests."""
-        super().setUp()
+        super().setup_method(method)
         
         # Mock WebSocket bridge for performance tests
         self.mock_bridge = Mock(spec=AgentWebSocketBridge)

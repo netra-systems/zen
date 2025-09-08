@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLo
 from netra_backend.app.agents.supervisor.comprehensive_observability import ComprehensiveObservabilityManager
 from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Import canonical SSOT implementations to verify usage
 from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler

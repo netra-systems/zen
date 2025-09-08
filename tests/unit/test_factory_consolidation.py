@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     configure_agent_instance_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.factory_performance_config import (
     FactoryPerformanceConfig,
     set_factory_performance_config
