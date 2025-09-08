@@ -546,3 +546,7 @@ async def deliver_user_messages(user_id: str, delivery_callback) -> int:
     """Convenience function to deliver buffered messages."""
     buffer = get_message_buffer()
     return await buffer.deliver_buffered_messages(user_id, delivery_callback)
+
+
+# Backward compatibility alias
+MessageBuffer = WebSocketMessageBuffer

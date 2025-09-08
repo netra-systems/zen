@@ -1,2 +1,2 @@
 # Shim module for backward compatibility
-from netra_backend.app.monitoring.metrics_collector import PerformanceMonitor
+from netra_backend.app.monitoring.performance_metrics import PerformanceMonitor
