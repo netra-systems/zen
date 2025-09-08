@@ -46,9 +46,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import (
-    create_test_jwt_token,
-    create_test_user_context,
-    generate_valid_user_claims,
+    get_test_jwt_token,
     E2EAuthHelper
 )
 
@@ -132,7 +130,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         self.test_users.append(user_data)
         
         # Generate valid JWT token
-        token = create_test_jwt_token(
+        token = get_test_jwt_token(
             user_id=user_data['user_id'],
             email=user_data['email'],
             permissions=user_data['permissions']
@@ -202,7 +200,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
             )
             
             # Generate JWT token
-            token = create_test_jwt_token(
+            token = get_test_jwt_token(
                 user_id=user_data['user_id'],
                 email=user_data['email'],
                 permissions=user_data['permissions']
@@ -293,7 +291,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
             "",  # Empty token
             "header.payload",  # Missing signature
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature",  # Invalid signature
-            create_test_jwt_token(
+            get_test_jwt_token(
                 user_id=str(uuid.uuid4()),
                 email="expired@netra.ai", 
                 permissions=["read"],
@@ -346,7 +344,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         )
         self.test_users.append(user_data)
         
-        token = create_test_jwt_token(
+        token = get_test_jwt_token(
             user_id=user_data['user_id'],
             email=user_data['email'],
             permissions=user_data['permissions']
@@ -418,7 +416,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         self.test_users.append(user_data)
         
         # Step 2: Generate token with specific claims
-        token = create_test_jwt_token(
+        token = get_test_jwt_token(
             user_id=user_data['user_id'],
             email=user_data['email'],
             permissions=user_data['permissions'],
@@ -501,7 +499,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         
         # Valid JWT formats
         valid_tokens = [
-            create_test_jwt_token(str(uuid.uuid4()), "test@netra.ai", ["read"]),
+            get_test_jwt_token(str(uuid.uuid4()), "test@netra.ai", ["read"]),
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         ]
         
