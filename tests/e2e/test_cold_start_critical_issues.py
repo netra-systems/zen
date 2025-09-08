@@ -260,7 +260,7 @@ class TestColdStartCriticalIssues:
             "Host": "localhost:8000"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers
@@ -284,7 +284,7 @@ class TestColdStartCriticalIssues:
             "Authorization": f"Bearer {token}"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers

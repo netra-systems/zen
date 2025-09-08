@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import "../styles/connection-status.css";
 
+/* Ensure full height for layout inheritance */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent horizontal overflow on mobile */
+html {
+  overflow-x: hidden;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

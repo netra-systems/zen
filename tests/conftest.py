@@ -40,6 +40,13 @@ if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
 # Import mock fixtures (lightweight, good for most unit tests)
 from tests.conftest_mocks import *
 
+# Import no-docker mode plugin for integration test management
+try:
+    from test_framework.ssot.pytest_no_docker_plugin import *
+except ImportError:
+    # Plugin not available, continue without it
+    pass
+
 # Lazy loading to prevent resource exhaustion during pytest collection
 # CRITICAL: Do NOT check environment at module level - causes Docker crash on Windows
 _env_checked = False

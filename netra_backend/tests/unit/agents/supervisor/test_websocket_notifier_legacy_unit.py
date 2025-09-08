@@ -66,18 +66,22 @@ class TestWebSocketNotifierLegacyUnit:
             correlation_id="z" * 300  # Long correlation ID
         )
     
-    def test_websocket_notifier_with_none_manager(self):
+    async def test_websocket_notifier_with_none_manager(self):
         """Test WebSocketNotifier handles None manager gracefully."""
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(None)
+            notifier = WebSocketNotifier(None, test_mode=True)
         
-        # Verify initialization with None manager
-        assert notifier.websocket_manager is None
-        assert isinstance(notifier.event_queue, deque)
-        assert isinstance(notifier.delivery_confirmations, dict)
-        assert isinstance(notifier.active_operations, dict)
+        try:
+            # Verify initialization with None manager
+            assert notifier.websocket_manager is None
+            assert isinstance(notifier.event_queue, deque)
+            assert isinstance(notifier.delivery_confirmations, dict)
+            assert isinstance(notifier.active_operations, dict)
+        finally:
+            # Cleanup
+            await notifier.shutdown()
     
     @pytest.mark.asyncio
     async def test_send_operations_with_none_manager(self, context_with_unicode):
@@ -85,29 +89,33 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(None)
+            notifier = WebSocketNotifier(None, test_mode=True)
         
-        # All operations should complete without error
-        await notifier.send_agent_started(context_with_unicode)
-        await notifier.send_agent_thinking(
-            context_with_unicode, 
-            "Unicode思考: Processing 🎯 data"
-        )
-        await notifier.send_tool_executing(
-            context_with_unicode, 
-            "unicode_tool_🔧"
-        )
-        await notifier.send_agent_completed(
-            context_with_unicode, 
-            {"result": "Unicode成功 ✅"}
-        )
-        await notifier.send_agent_failed(
-            context_with_unicode,
-            error_message="Unicode错误 ❌"
-        )
-        
-        # Operations tracking should still work
-        assert context_with_unicode.thread_id in notifier.active_operations
+        try:
+            # All operations should complete without error
+            await notifier.send_agent_started(context_with_unicode)
+            await notifier.send_agent_thinking(
+                context_with_unicode, 
+                "Unicode思考: Processing 🎯 data"
+            )
+            await notifier.send_tool_executing(
+                context_with_unicode, 
+                "unicode_tool_🔧"
+            )
+            await notifier.send_agent_completed(
+                context_with_unicode, 
+                {"result": "Unicode成功 ✅"}
+            )
+            await notifier.send_agent_failed(
+                context_with_unicode,
+                error_message="Unicode错误 ❌"
+            )
+            
+            # Operations tracking should still work
+            assert context_with_unicode.thread_id in notifier.active_operations
+        finally:
+            # Cleanup
+            await notifier.shutdown()
     
     @pytest.mark.asyncio
     async def test_unicode_message_handling(self, context_with_unicode):
@@ -118,7 +126,7 @@ class TestWebSocketNotifierLegacyUnit:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_manager)
+            notifier = WebSocketNotifier(mock_manager, test_mode=True)
         
         # Send unicode message
         await notifier.send_agent_thinking(
@@ -136,6 +144,9 @@ class TestWebSocketNotifierLegacyUnit:
         payload = message_data['payload']
         assert payload['thought'] == "正在分析数据 📊 using AI 🤖"
         assert payload['current_operation'] == "unicode_processing_🌍"
+        
+        # Cleanup
+        await notifier.shutdown()
     
     @pytest.mark.asyncio
     async def test_large_message_handling(self, context_with_long_strings):

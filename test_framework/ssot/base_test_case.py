@@ -39,7 +39,7 @@ import pytest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.unified import (
-    TestResult, TestExecutionState, TestCategory, TestConfiguration
+    TestResult, TestExecutionState, CategoryType, TestConfiguration
 )
 
 
@@ -83,7 +83,7 @@ class SsotTestContext:
     """SSOT test execution context."""
     test_id: str
     test_name: str
-    test_category: TestCategory = TestCategory.UNIT
+    test_category: CategoryType = CategoryType.UNIT
     user_id: Optional[str] = None
     trace_id: Optional[str] = None
     session_id: Optional[str] = None

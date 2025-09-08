@@ -112,9 +112,15 @@ async def lightweight_test_database(lightweight_postgres_connection):
         from netra_backend.app.models.database import Base
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.debug("Database tables created for lightweight testing")
-    except ImportError:
-        logger.info("Database models not available - using raw SQL")
+        logger.info("Database tables created successfully for lightweight testing")
+    except ImportError as e:
+        logger.error(f"Failed to import database models: {e}")
+        logger.error("Critical: Integration tests require database tables to be created")
+        # Re-raise to make the failure visible
+        raise ImportError(f"Database models not available for table creation: {e}") from e
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}")
+        raise
     
     # Create session
     from sqlalchemy.ext.asyncio import AsyncSession

@@ -20,11 +20,11 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from unittest.mock import Mock, patch
 
-from auth_service.auth_core.business.user_business_logic import UserBusinessLogic
-from auth_service.auth_core.business.subscription_validator import SubscriptionValidator
-from auth_service.auth_core.models.user import User, UserRole, SubscriptionTier
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.models.auth_models import LoginRequest, LoginResponse
 from auth_service.auth_core.auth_environment import AuthEnvironment
 from shared.isolated_environment import get_env
+from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
 class TestAuthBusinessLogicValidation:
@@ -32,21 +32,16 @@ class TestAuthBusinessLogicValidation:
 
     @pytest.fixture
     def auth_env(self):
-        env = get_env()
-        auth_env = AuthEnvironment(env)
-        auth_env.load_environment()
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        auth_env = AuthEnvironment()
         return auth_env
 
     @pytest.fixture 
-    def user_business_logic(self, auth_env):
-        return UserBusinessLogic(auth_env)
-
-    @pytest.fixture
-    def subscription_validator(self, auth_env):
-        return SubscriptionValidator(auth_env)
+    def auth_service(self, auth_env):
+        return AuthService()
 
     @pytest.mark.unit
-    def test_user_registration_business_rules(self, user_business_logic):
+    def test_user_registration_business_rules(self, auth_service):
         """Test user registration follows business rules."""
         valid_registration = {
             "email": "new.user@company.com",
@@ -181,8 +176,8 @@ class TestAuthCrossServiceValidation:
 
     @pytest.fixture
     def auth_env(self):
-        env = get_env()
-        return AuthEnvironment(env)
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        return AuthEnvironment()
 
     @pytest.mark.unit
     def test_cross_service_token_validation_business_logic(self, auth_env):
@@ -220,8 +215,8 @@ class TestAuthSecurityPolicyValidation:
 
     @pytest.fixture
     def auth_env(self):
-        env = get_env()
-        return AuthEnvironment(env)
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        return AuthEnvironment()
 
     @pytest.mark.unit
     def test_password_policy_business_rules(self, auth_env):
@@ -272,8 +267,8 @@ class TestAuthIntegrationBusinessLogic:
 
     @pytest.fixture
     def auth_env(self):
-        env = get_env()
-        return AuthEnvironment(env)
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        return AuthEnvironment()
 
     @pytest.mark.unit
     def test_oauth_integration_business_rules(self, auth_env):
@@ -312,8 +307,8 @@ class TestAuthAuditBusinessLogic:
 
     @pytest.fixture
     def auth_env(self):
-        env = get_env()
-        return AuthEnvironment(env)
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        return AuthEnvironment()
 
     @pytest.mark.unit
     def test_audit_logging_business_rules(self, auth_env):

@@ -391,7 +391,7 @@ class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
                     if not invalid_websocket.closed:
                         await invalid_websocket.close()
                         
-            except (websockets.exceptions.InvalidStatusCode, 
+            except (websockets.exceptions.InvalidStatus, 
                    websockets.exceptions.InvalidHandshake,
                    asyncio.TimeoutError,
                    ConnectionRefusedError):
@@ -426,7 +426,7 @@ class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
                     if not no_auth_websocket.closed:
                         await no_auth_websocket.close()
                         
-            except (websockets.exceptions.InvalidStatusCode, 
+            except (websockets.exceptions.InvalidStatus, 
                    websockets.exceptions.InvalidHandshake,
                    asyncio.TimeoutError,
                    ConnectionRefusedError):

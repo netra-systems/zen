@@ -71,7 +71,7 @@ async def debug_websocket_connection():
     except websockets.exceptions.ConnectionClosedError as e:
         print(f"❌ WebSocket connection closed: code={e.code}, reason='{e.reason}'")
         
-    except websockets.exceptions.InvalidStatusCode as e:
+    except websockets.exceptions.InvalidStatus as e:
         print(f"❌ WebSocket connection failed: {e.status_code}")
         
     except Exception as e:

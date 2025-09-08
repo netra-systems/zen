@@ -147,7 +147,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Invalid token rejection
         """
         # Mock auth service client for token validation
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_client:
             # Test valid token
             valid_token = "valid.jwt.token"
             mock_validation_result = {
@@ -216,7 +216,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         - Security service integration
         """
         # Mock auth service for password operations and database
-        with patch('netra_backend.app.services.security_service.auth_client') as mock_client:
+        with patch('netra_backend.app.services.security_service.auth_client', new_callable=AsyncMock) as mock_client:
             # Mock database session
             mock_db_session = AsyncMock()
             
@@ -301,7 +301,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         )
         
         # Test JWT claims extraction for admin
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_client:
             mock_client.validate_token_jwt.return_value = {
                 "valid": True,
                 "user_id": admin_user_id,
@@ -401,7 +401,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             is_active=True
         )
         
-        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth_client:
+        with patch('netra_backend.app.auth_integration.auth.auth_client', new_callable=AsyncMock) as mock_auth_client:
             # Mock successful token validation
             mock_auth_client.validate_token_jwt.return_value = {
                 "valid": True,
@@ -413,7 +413,8 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             
             # Mock database query to return test user
             from sqlalchemy import select
-            mock_result = AsyncMock()
+            from unittest.mock import MagicMock
+            mock_result = MagicMock()  # Use MagicMock instead of AsyncMock for query result
             mock_result.scalar_one_or_none.return_value = test_user
             mock_db_session.execute.return_value = mock_result
             
@@ -474,6 +475,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
         
         db_session.add(admin_user)
         await db_session.commit()
+        await db_session.refresh(admin_user)  # Ensure attributes are loaded
         
         try:
             # Test database admin validation passes
@@ -493,6 +495,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             
             db_session.add(regular_user)
             await db_session.commit()
+            await db_session.refresh(regular_user)  # Ensure attributes are loaded
             
             # Test database non-admin validation fails
             assert _check_admin_permissions(regular_user) == False
@@ -563,7 +566,7 @@ class TestAuthServiceIntegration(BaseIntegrationTest):
             pytest.skip("Real database service not available")
         
         # Mock auth service client
-        with patch('netra_backend.app.services.security_service.auth_client') as mock_client:
+        with patch('netra_backend.app.services.security_service.auth_client', new_callable=AsyncMock) as mock_client:
             security_service = SecurityService()
             
             # Test new OAuth user creation

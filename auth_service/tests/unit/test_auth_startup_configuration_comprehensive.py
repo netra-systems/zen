@@ -27,10 +27,10 @@ from pathlib import Path
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.auth_environment import AuthEnvironment
-from auth_service.auth_core.startup.service_initializer import ServiceInitializer
-from auth_service.auth_core.startup.dependency_checker import DependencyChecker
-from auth_service.auth_core.startup.health_manager import HealthManager
-from auth_service.auth_core.startup.configuration_validator import ConfigurationValidator
+from auth_service.auth_core.performance.startup_optimizer import AuthServiceStartupOptimizer
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.services.health_check_service import HealthCheckService
+from auth_service.auth_core.validation.pre_deployment_validator import PreDeploymentValidator
 from shared.isolated_environment import get_env
 
 

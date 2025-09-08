@@ -43,16 +43,6 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
     - Cross-tier functionality and limits
     - Output quality and user value delivery
     """
-    
-    def __init__(self):
-        """Initialize agent execution business logic test suite."""
-        super().__init__()
-        self.env = get_env()
-        self.db_helper = DatabaseTestHelper()
-        self.isolated_helper = IsolatedTestHelper()
-        
-        # Test configuration
-        self.test_prefix = f"agent_business_{uuid.uuid4().hex[:8]}"
         
     async def setup_agent_system(self) -> tuple:
         """Set up agent execution system with business logic components."""
@@ -76,6 +66,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Agent quality directly impacts customer satisfaction.
         Poor agent responses reduce customer retention and expansion.
         """
+        test_prefix = f"agent_business_{uuid.uuid4().hex[:8]}"
         agent_registry, execution_engine, quality_validator, usage_tracker = await self.setup_agent_system()
         
         try:
@@ -124,7 +115,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                     "user_id": f"test_user_{uuid.uuid4().hex[:8]}",
                     "agent_type": scenario["agent_type"],
                     "query": scenario["user_query"],
-                    "test_id": f"{self.test_prefix}_{scenario['agent_type']}",
+                    "test_id": f"{test_prefix}_{scenario['agent_type']}",
                     "subscription_tier": "mid",  # Standard tier for baseline testing
                     "execution_timeout": scenario["quality_metrics"]["response_time_sla_ms"] / 1000
                 }
@@ -215,7 +206,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                 f"Average business value too low: {avg_business_value:.2f} < 0.75"
                 
         finally:
-            await usage_tracker.cleanup_test_data(test_prefix=self.test_prefix)
+            await usage_tracker.cleanup_test_data(test_prefix=test_prefix)
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -226,6 +217,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Tier enforcement protects revenue and prevents abuse.
         Incorrect limits can lead to revenue leakage or customer dissatisfaction.
         """
+        test_prefix = f"agent_business_{uuid.uuid4().hex[:8]}"
         agent_registry, execution_engine, quality_validator, usage_tracker = await self.setup_agent_system()
         
         try:
@@ -293,7 +285,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                         "user_id": test_user_id,
                         "subscription_tier": tier,
                         "estimated_duration": rules["max_execution_time_seconds"] + 10,
-                        "test_id": f"{self.test_prefix}_timeout_test"
+                        "test_id": f"{test_prefix}_timeout_test"
                     }
                     
                     timeout_check = await execution_engine.validate_execution_limits(
@@ -313,7 +305,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                         "user_id": test_user_id,
                         "subscription_tier": tier,
                         "execution_id": f"concurrent_{i}",
-                        "test_id": self.test_prefix
+                        "test_id": test_prefix
                     }
                     for i in range(rules["concurrent_executions"] + 2)  # Try to exceed limit
                 ]
@@ -342,7 +334,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                         "user_id": test_user_id,
                         "subscription_tier": tier,
                         "current_monthly_usage": current_usage,
-                        "test_id": self.test_prefix
+                        "test_id": test_prefix
                     }
                     
                     # Should allow execution within limit
@@ -407,7 +399,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
                     f"Upgrade {from_tier} to {to_tier} should increase concurrent limits"
                 
         finally:
-            await usage_tracker.cleanup_test_data(test_prefix=self.test_prefix)
+            await usage_tracker.cleanup_test_data(test_prefix=test_prefix)
 
 
 if __name__ == "__main__":

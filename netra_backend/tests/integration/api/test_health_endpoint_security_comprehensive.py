@@ -43,23 +43,16 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
     - Security headers and CORS
     """
     
-    def __init__(self):
-        """Initialize health endpoint security test suite."""
-        super().__init__()
-        self.env = get_env()
-        self.isolated_helper = IsolatedTestHelper()
-        
-        # Test configuration
-        self.test_prefix = f"health_security_{uuid.uuid4().hex[:8]}"
-        self.base_url = self.env.get("BACKEND_URL", "http://localhost:8000")
-        self.health_endpoint = f"{self.base_url}/health"
-        
     def setup_auth_helper(self) -> E2EAuthHelper:
         """Set up authentication helper for API tests."""
+        env = get_env()
+        test_prefix = f"health_security_{uuid.uuid4().hex[:8]}"
+        base_url = env.get("BACKEND_URL", "http://localhost:8000")
+        
         auth_config = E2EAuthConfig(
-            auth_service_url=self.env.get("AUTH_SERVICE_URL", "http://localhost:8081"),
-            backend_url=self.base_url,
-            test_user_email=f"{self.test_prefix}@security.test",
+            auth_service_url=env.get("AUTH_SERVICE_URL", "http://localhost:8081"),
+            backend_url=base_url,
+            test_user_email=f"{test_prefix}@security.test",
             timeout=10.0
         )
         
@@ -74,6 +67,8 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Unauthenticated access exposes system internals.
         Must require proper authentication for sensitive health data.
         """
+        env = get_env()
+        base_url = env.get("BACKEND_URL", "http://localhost:8000")
         auth_helper = self.setup_auth_helper()
         
         # Test endpoints that should require authentication
@@ -94,7 +89,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Test unauthenticated access to protected endpoints
             for endpoint in protected_endpoints:
-                url = f"{self.base_url}{endpoint}"
+                url = f"{base_url}{endpoint}"
                 
                 response = await client.get(url)
                 
@@ -112,7 +107,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
             
             # Test public endpoints (should work without auth)
             for endpoint in public_endpoints:
-                url = f"{self.base_url}{endpoint}"
+                url = f"{base_url}{endpoint}"
                 
                 response = await client.get(url)
                 
@@ -140,16 +135,17 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
             
             # Test authenticated access to protected endpoints
             # Create valid authentication token
+            test_prefix = f"health_security_{uuid.uuid4().hex[:8]}"
             auth_token = auth_helper.create_test_jwt_token(
                 user_id=f"health_test_{uuid.uuid4().hex[:8]}",
-                email=f"{self.test_prefix}_auth@security.test",
+                email=f"{test_prefix}_auth@security.test",
                 permissions=["health_read", "health_admin"]
             )
             
             auth_headers = auth_helper.get_auth_headers(auth_token)
             
             for endpoint in protected_endpoints:
-                url = f"{self.base_url}{endpoint}"
+                url = f"{base_url}{endpoint}"
                 
                 if endpoint == "/health/cache/clear":
                     # POST endpoint
@@ -188,6 +184,8 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Improper input handling enables injection attacks.
         Must validate and sanitize all inputs to prevent security breaches.
         """
+        env = get_env()
+        base_url = env.get("BACKEND_URL", "http://localhost:8000")
         auth_helper = self.setup_auth_helper()
         auth_token = auth_helper.create_test_jwt_token(
             user_id=f"validation_test_{uuid.uuid4().hex[:8]}",
@@ -197,7 +195,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Test query parameter validation
-            base_health_url = f"{self.base_url}/health"
+            base_health_url = f"{base_url}/health"
             
             # Test valid query parameters
             valid_params = [
@@ -253,7 +251,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
             invalid_methods = ["PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
             
             for endpoint, allowed_methods in endpoints_methods:
-                url = f"{self.base_url}{endpoint}"
+                url = f"{base_url}{endpoint}"
                 
                 for method in invalid_methods:
                     if method not in allowed_methods:
@@ -296,6 +294,8 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Unlimited requests enable DoS attacks.
         Must implement rate limiting to protect system availability.
         """
+        env = get_env()
+        base_url = env.get("BACKEND_URL", "http://localhost:8000")
         auth_helper = self.setup_auth_helper()
         auth_token = auth_helper.create_test_jwt_token(
             user_id=f"rate_limit_test_{uuid.uuid4().hex[:8]}",
@@ -305,7 +305,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Test normal request rate (should succeed)
-            health_url = f"{self.base_url}/health"
+            health_url = f"{base_url}/health"
             
             normal_requests = []
             for i in range(5):  # Normal rate: 5 requests
@@ -368,7 +368,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
             ]
             
             for endpoint in endpoints_to_test:
-                url = f"{self.base_url}{endpoint}"
+                url = f"{base_url}{endpoint}"
                 
                 # Test burst on each endpoint
                 endpoint_responses = []
@@ -406,11 +406,13 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Missing security headers enable various attacks.
         Must implement proper security headers and CORS policies.
         """
+        env = get_env()
+        base_url = env.get("BACKEND_URL", "http://localhost:8000")
         auth_helper = self.setup_auth_helper()
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Test security headers on health endpoint
-            health_url = f"{self.base_url}/health"
+            health_url = f"{base_url}/health"
             response = await client.get(health_url)
             
             assert response.status_code in [200, 503], \

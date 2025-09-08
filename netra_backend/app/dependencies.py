@@ -180,6 +180,9 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     request_id = UnifiedIdGenerator.generate_base_id("req")
     correlation_id = UnifiedIdGenerator.generate_base_id("corr")  # For tracing across services
     
+    # ENHANCED DEBUG: Use placeholder user ID - will be overridden by actual user context when available
+    user_id = "system"  # This gets overridden in practice by request context
+    
     # ENHANCED DEBUGGING: Log the exact moment and values at function start
     logger.info(
         f"📍 FUNCTION_START: get_request_scoped_db_session called | "
@@ -187,8 +190,6 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
         f"Hardcoded user_id='{user_id}' (THIS IS WHERE 'system' COMES FROM!) | "
         f"Function: netra_backend.app.dependencies.get_request_scoped_db_session:182"
     )
-    # ENHANCED DEBUG: Use placeholder user ID - will be overridden by actual user context when available
-    user_id = "system"  # This gets overridden in practice by request context
     
     # CRITICAL DEBUG CONTEXT: This is where the 'system' user_id originates!
     session_init_context = {

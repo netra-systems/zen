@@ -35,19 +35,23 @@ class TestWebSocketNotifier:
         return manager
 
     @pytest.fixture
-    def websocket_notifier(self, mock_websocket_manager):
+    async def websocket_notifier(self, mock_websocket_manager):
         """WebSocketNotifier instance with mocked WebSocket manager."""
         # Capture deprecation warning
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            notifier = WebSocketNotifier(mock_websocket_manager)
+            # Use test_mode=True to prevent background task hanging
+            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
             
             # Verify deprecation warning was issued
             assert len(w) >= 1
             assert issubclass(w[0].category, DeprecationWarning)
             assert "WebSocketNotifier is deprecated" in str(w[0].message)
             
-        return notifier
+        yield notifier
+        
+        # CRITICAL: Ensure proper cleanup to prevent hanging tests
+        await notifier.shutdown()
 
     @pytest.fixture
     def sample_context(self):
@@ -60,12 +64,12 @@ class TestWebSocketNotifier:
             correlation_id="test-correlation"
         )
 
-    def test_initialization_with_deprecation_warning(self, mock_websocket_manager):
+    async def test_initialization_with_deprecation_warning(self, mock_websocket_manager):
         """Test that initialization shows deprecation warning."""
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            notifier = WebSocketNotifier(mock_websocket_manager)
+            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
             
             # Verify warning was issued
             assert len(w) >= 1
@@ -78,6 +82,9 @@ class TestWebSocketNotifier:
         assert isinstance(notifier.delivery_confirmations, dict)
         assert notifier.max_queue_size == 1000
         assert notifier.retry_delay == 0.1
+        
+        # Cleanup
+        await notifier.shutdown()
 
     def test_critical_events_configuration(self, websocket_notifier):
         """Test critical events are properly configured."""
@@ -316,15 +323,19 @@ class TestWebSocketNotifier:
         # Create notifier with None manager
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(None)
+            notifier = WebSocketNotifier(None, test_mode=True)
         
-        # All methods should handle None gracefully
-        await notifier.send_agent_started(sample_context)
-        await notifier.send_agent_thinking(sample_context, "test thought")
-        await notifier.send_tool_executing(sample_context, "test_tool")
-        await notifier.send_agent_completed(sample_context)
-        
-        # Should not raise exceptions
+        try:
+            # All methods should handle None gracefully
+            await notifier.send_agent_started(sample_context)
+            await notifier.send_agent_thinking(sample_context, "test thought")
+            await notifier.send_tool_executing(sample_context, "test_tool")
+            await notifier.send_agent_completed(sample_context)
+            
+            # Should not raise exceptions
+        finally:
+            # Cleanup
+            await notifier.shutdown()
 
     @pytest.mark.asyncio
     async def test_delivery_stats(self, websocket_notifier):

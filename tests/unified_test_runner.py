@@ -1454,7 +1454,11 @@ class UnifiedTestRunner:
             'performance',  # Performance tests can run on mock data
             'security',  # Security tests can run on static analysis
             'startup',  # Startup tests are about service initialization
-            'integration',  # Integration tests can run offline with mocks
+        }
+        
+        # Categories that can be mixed (some need services, some don't)
+        docker_conditional_categories = {
+            'integration',  # Some integration tests need services, some can run standalone
         }
         
         # Check if any of the selected categories require Docker
@@ -1462,6 +1466,13 @@ class UnifiedTestRunner:
             if category in docker_required_categories:
                 print(f"[INFO] Docker required for category: {category}")
                 return True
+        
+        # Handle conditional categories (like integration) when --no-docker is specified
+        has_conditional_categories = any(cat in docker_conditional_categories for cat in categories_to_run)
+        if has_conditional_categories and hasattr(args, 'no_docker') and args.no_docker:
+            print(f"[INFO] Conditional categories {[cat for cat in categories_to_run if cat in docker_conditional_categories]} running in --no-docker mode - will skip service-dependent tests")
+            # Return False to skip Docker, tests will individually skip based on service availability
+            return False
         
         # If only running categories that don't need Docker, skip it
         if all(cat in docker_optional_categories for cat in categories_to_run if cat):
@@ -1479,6 +1490,11 @@ class UnifiedTestRunner:
             if any(pattern in test_pattern for pattern in ['mock', 'fake', 'stub']):
                 print(f"[INFO] Mock test pattern detected, Docker not required: {test_pattern}")
                 return False
+        
+        # If we have conditional categories but no --no-docker flag, require Docker
+        if has_conditional_categories:
+            print(f"[INFO] Docker required for conditional categories: {[cat for cat in categories_to_run if cat in docker_conditional_categories]}")
+            return True
         
         # Default to requiring Docker for safety if we can't determine
         print(f"[INFO] Unable to determine Docker requirement, defaulting to required for categories: {categories_to_run}")

@@ -179,7 +179,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
                 
         except websockets.exceptions.ConnectionClosed:
             pytest.fail("WebSocket connection was closed unexpectedly")
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.exceptions.InvalidStatus as e:
             pytest.fail(f"WebSocket connection failed with status code: {e}")
         except Exception as e:
             pytest.fail(f"WebSocket connection failed: {e}")

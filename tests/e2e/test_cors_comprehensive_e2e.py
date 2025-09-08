@@ -108,7 +108,7 @@ class TestCORSValidationer:
             ws = await websockets.connect(ws_url, additional_headers=extra_headers)
             await ws.close()
             return {"connection_successful": True, "origin": origin}
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.exceptions.InvalidStatus as e:
             return {
                 "connection_successful": False,
                 "status_code": e.status_code,

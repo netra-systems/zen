@@ -153,7 +153,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
                 "X-User-ID": user_id
             }
             
-            with pytest.raises((InvalidStatusCode, ConnectionClosed, WebSocketException)):
+            with pytest.raises((InvalidStatus, ConnectionClosed, WebSocketException)):
                 websocket = await asyncio.wait_for(
                     websockets.connect(
                         self.auth_helper.config.websocket_url,
@@ -174,7 +174,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
                 "Content-Type": "application/json"
             }
             
-            with pytest.raises((InvalidStatusCode, ConnectionClosed, WebSocketException)):
+            with pytest.raises((InvalidStatus, ConnectionClosed, WebSocketException)):
                 websocket = await asyncio.wait_for(
                     websockets.connect(
                         self.auth_helper.config.websocket_url,
@@ -196,7 +196,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             
             expired_headers = self.auth_helper.get_websocket_headers(expired_token)
             
-            with pytest.raises((InvalidStatusCode, ConnectionClosed, WebSocketException)):
+            with pytest.raises((InvalidStatus, ConnectionClosed, WebSocketException)):
                 websocket = await asyncio.wait_for(
                     websockets.connect(
                         self.auth_helper.config.websocket_url,

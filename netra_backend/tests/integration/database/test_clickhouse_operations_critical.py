@@ -23,6 +23,7 @@ import uuid
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.database import DatabaseTestHelper
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
+from test_framework.ssot.no_docker_mode_detector import skip_if_no_docker_and_services_unavailable_async
 from shared.isolated_environment import get_env
 
 from netra_backend.app.db.clickhouse import ClickHouseClient
@@ -80,6 +81,7 @@ class TestClickHouseOperationsCritical(SSotBaseTestCase):
     
     @pytest.mark.integration
     @pytest.mark.real_services
+    @skip_if_no_docker_and_services_unavailable_async("clickhouse")
     async def test_clickhouse_event_insertion_and_retrieval(self):
         """
         Test critical event insertion and retrieval operations.
@@ -151,6 +153,7 @@ class TestClickHouseOperationsCritical(SSotBaseTestCase):
     
     @pytest.mark.integration
     @pytest.mark.real_services
+    @skip_if_no_docker_and_services_unavailable_async("clickhouse")
     async def test_clickhouse_metrics_aggregation_accuracy(self):
         """
         Test metrics aggregation accuracy for business reporting.
@@ -248,6 +251,7 @@ class TestClickHouseOperationsCritical(SSotBaseTestCase):
     
     @pytest.mark.integration
     @pytest.mark.real_services
+    @skip_if_no_docker_and_services_unavailable_async("clickhouse")
     async def test_clickhouse_query_performance_under_load(self):
         """
         Test query performance under realistic load conditions.
@@ -347,6 +351,7 @@ class TestClickHouseOperationsCritical(SSotBaseTestCase):
     
     @pytest.mark.integration 
     @pytest.mark.real_services
+    @skip_if_no_docker_and_services_unavailable_async("clickhouse")
     async def test_clickhouse_data_consistency_validation(self):
         """
         Test data consistency across operations and time.
@@ -497,6 +502,7 @@ class TestClickHouseOperationsCritical(SSotBaseTestCase):
     
     @pytest.mark.integration
     @pytest.mark.real_services
+    @skip_if_no_docker_and_services_unavailable_async("clickhouse")
     async def test_clickhouse_schema_migration_integrity(self):
         """
         Test schema migration maintains data integrity.

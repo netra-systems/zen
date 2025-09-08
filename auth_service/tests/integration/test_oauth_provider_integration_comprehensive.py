@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, patch, AsyncMock
 from urllib.parse import urlparse, parse_qs
 
-from auth_service.auth_core.oauth.oauth_manager import OAuthManager
+from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 from auth_service.auth_core.oauth.oauth_config import OAuthConfig
 from auth_service.auth_core.oauth.oauth_state_manager import OAuthStateManager

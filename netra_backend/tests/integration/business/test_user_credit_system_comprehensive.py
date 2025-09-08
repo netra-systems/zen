@@ -45,15 +45,6 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
     - Revenue protection mechanisms
     """
     
-    def __init__(self):
-        """Initialize credit system test suite."""
-        super().__init__()
-        self.env = get_env()
-        self.db_helper = DatabaseTestHelper()
-        self.isolated_helper = IsolatedTestHelper()
-        
-        # Test configuration
-        self.test_user_prefix = f"credit_test_{uuid.uuid4().hex[:8]}"
         
     async def setup_credit_system(self) -> Tuple[CreditManager, SubscriptionManager, BillingCalculator]:
         """Set up credit system with real business logic."""
@@ -80,11 +71,12 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
         BUSINESS CRITICAL: Credit allocation determines revenue per user.
         Must ensure each tier gets correct credit limits and allocations.
         """
+        test_user_prefix = f"credit_test_{uuid.uuid4().hex[:8]}"
         credit_manager, subscription_manager, billing_calculator = await self.setup_credit_system()
         
         try:
             # Test Free tier credit allocation
-            free_user_email = f"{self.test_user_prefix}_free@example.com"
+            free_user_email = f"{test_user_prefix}_free@example.com"
             free_user = await self._create_test_user(
                 credit_manager, 
                 free_user_email,
@@ -107,7 +99,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
                 f"Free user credits incorrect: {updated_free_user.credits_remaining}"
             
             # Test Early tier credit allocation (paid tier)
-            early_user_email = f"{self.test_user_prefix}_early@example.com"
+            early_user_email = f"{test_user_prefix}_early@example.com"
             early_user = await self._create_test_user(
                 credit_manager,
                 early_user_email,
@@ -125,7 +117,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
                 f"Early tier should get 1000 credits, got {early_allocation.credits_allocated}"
             
             # Test Mid tier (higher tier)
-            mid_user_email = f"{self.test_user_prefix}_mid@example.com"
+            mid_user_email = f"{test_user_prefix}_mid@example.com"
             mid_user = await self._create_test_user(
                 credit_manager,
                 mid_user_email, 
@@ -143,7 +135,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
                 f"Mid tier should get 5000 credits, got {mid_allocation.credits_allocated}"
             
             # Test Enterprise tier (highest tier)
-            enterprise_user_email = f"{self.test_user_prefix}_enterprise@example.com"
+            enterprise_user_email = f"{test_user_prefix}_enterprise@example.com"
             enterprise_user = await self._create_test_user(
                 credit_manager,
                 enterprise_user_email,
@@ -205,7 +197,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
         
         try:
             # Create test user with known credit balance
-            test_user_email = f"{self.test_user_prefix}_deduction@example.com"
+            test_user_email = f"{test_user_prefix}_deduction@example.com"
             test_user = await self._create_test_user(
                 credit_manager,
                 test_user_email,
@@ -313,7 +305,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
         
         try:
             # Create users in different tiers
-            free_user_email = f"{self.test_user_prefix}_enforcement_free@example.com"
+            free_user_email = f"{test_user_prefix}_enforcement_free@example.com"
             free_user = await self._create_test_user(
                 credit_manager,
                 free_user_email,
@@ -321,7 +313,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
                 initial_credits=100
             )
             
-            paid_user_email = f"{self.test_user_prefix}_enforcement_paid@example.com"
+            paid_user_email = f"{test_user_prefix}_enforcement_paid@example.com"
             paid_user = await self._create_test_user(
                 credit_manager,
                 paid_user_email,
@@ -470,7 +462,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
             billing_test_results = []
             
             for tier_info in tiers_to_test:
-                user_email = f"{self.test_user_prefix}_billing_{tier_info['tier']}@example.com"
+                user_email = f"{test_user_prefix}_billing_{tier_info['tier']}@example.com"
                 user = await self._create_test_user(
                     credit_manager,
                     user_email,
@@ -606,7 +598,7 @@ class TestUserCreditSystemComprehensive(SSotBaseTestCase):
     
     async def _cleanup_test_users(self, credit_manager: CreditManager):
         """Helper to cleanup test users."""
-        await credit_manager.cleanup_test_users_by_prefix(self.test_user_prefix)
+        await credit_manager.cleanup_test_users_by_prefix(test_user_prefix)
 
 
 if __name__ == "__main__":

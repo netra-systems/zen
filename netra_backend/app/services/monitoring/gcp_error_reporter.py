@@ -17,11 +17,12 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional
 from contextvars import ContextVar
 
+from loguru import logger
+
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.monitoring_schemas import ErrorSeverity
-from netra_backend.app.core.unified_logging import get_logger
 
-logger = get_logger(__name__)
+# Use loguru directly to avoid circular import with unified_logging
 
 # Context variable for request metadata
 request_context: ContextVar[Dict[str, Any]] = ContextVar('request_context', default={})

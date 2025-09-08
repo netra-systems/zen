@@ -54,7 +54,7 @@ class WebSocketNotifier:
     - Backlog processing indicators
     """
     
-    def __init__(self, websocket_manager: 'WebSocketManager'):
+    def __init__(self, websocket_manager: 'WebSocketManager', test_mode: bool = False):
         import warnings
         warnings.warn(
             "WebSocketNotifier is deprecated. Use AgentWebSocketBridge instead. "
@@ -82,6 +82,10 @@ class WebSocketNotifier:
         self._queue_processor_task = None
         self._shutdown = False
         self._processing_lock = asyncio.Lock()
+        
+        # TEST MODE: Disable background tasks during testing to prevent hanging
+        self._test_mode = test_mode
+        self._auto_start_queue_processor = not test_mode
     
     async def send_agent_started(self, context: AgentExecutionContext) -> None:
         """Send agent started notification with guaranteed delivery."""
@@ -1175,6 +1179,10 @@ class WebSocketNotifier:
     
     async def _ensure_queue_processor_running(self) -> None:
         """Ensure the background queue processor is running."""
+        # Skip in test mode to prevent hanging tests
+        if not self._auto_start_queue_processor:
+            return
+            
         if (self._queue_processor_task is None or 
             self._queue_processor_task.done()) and not self._shutdown:
             self._queue_processor_task = asyncio.create_task(self._process_event_queue())
@@ -1258,16 +1266,25 @@ class WebSocketNotifier:
         """Shutdown the notifier and clean up resources."""
         self._shutdown = True
         
+        # Aggressive cleanup for Windows compatibility and test reliability
         if self._queue_processor_task and not self._queue_processor_task.done():
             self._queue_processor_task.cancel()
             try:
-                await self._queue_processor_task
-            except asyncio.CancelledError:
+                # Use shorter timeout for Windows compatibility - prevents GetQueuedCompletionStatus hanging
+                await asyncio.wait_for(self._queue_processor_task, timeout=1.0)
+            except (asyncio.CancelledError, asyncio.TimeoutError):
+                # Expected on cancellation or timeout - don't log as error
                 pass
+            except Exception as e:
+                # Unexpected error - log but don't fail shutdown
+                logger.debug(f"Unexpected error during queue processor shutdown: {e}")
         
-        # Clear queues
+        # Clear queues and release memory
         self.event_queue.clear()
         self.delivery_confirmations.clear()
         self.active_operations.clear()
         self.backlog_notifications.clear()
+        
+        # Clear task reference to prevent memory leaks
+        self._queue_processor_task = None
 

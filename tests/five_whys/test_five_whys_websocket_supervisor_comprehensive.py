@@ -97,7 +97,7 @@ class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
         user_id: str = None,
         thread_id: str = None,
         run_id: str = None
-    ) -> Tuple[WebSocketContext, websockets.WebSocketServerProtocol]:
+    ) -> Tuple[WebSocketContext, websockets.ServerConnection]:
         """Create real WebSocket context for testing."""
         user_id = user_id or f"test_user_{int(time.time())}"
         thread_id = thread_id or f"test_thread_{uuid.uuid4().hex[:8]}"
@@ -263,7 +263,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
         """Real database test manager."""
         return DatabaseTestManager()
     
-    async def _create_test_context(self, auth_helper) -> Tuple[WebSocketContext, websockets.WebSocketServerProtocol]:
+    async def _create_test_context(self, auth_helper) -> Tuple[WebSocketContext, websockets.ServerConnection]:
         """Create test WebSocket context."""
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         context = WebSocketContext.create_for_user(

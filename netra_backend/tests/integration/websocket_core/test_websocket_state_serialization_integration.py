@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketState(Enum):
+class WebSocketTestState(Enum):
     """Test WebSocket state enum for serialization testing."""
     CONNECTING = 1
     CONNECTED = 2
@@ -67,7 +67,7 @@ class MockWebSocketState(Enum):
 class ComplexNestedData:
     """Complex nested data structure for serialization testing."""
     id: str
-    status: TestWebSocketState
+    status: WebSocketTestState
     metadata: Dict[str, Any]
     timestamp: datetime
     optional_field: Optional[str] = None
@@ -113,7 +113,7 @@ class ObjectWithToDict:
 
 
 @pytest.mark.integration
-class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
+class WebSocketTestStateSerializationIntegration(SSotBaseTestCase):
     """
     Integration tests for WebSocket state serialization with complex objects.
     
@@ -162,7 +162,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
         """
         # Test various enum types
         test_enums = [
-            TestWebSocketState.CONNECTED,
+            WebSocketTestState.CONNECTED,
             MockWebSocketState.CONNECTED,
             AgentStatus.ACTIVE,
             AgentStatus.COMPLETED
@@ -214,14 +214,14 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
         # Create deeply nested complex object
         complex_data = ComplexNestedData(
             id=str(uuid.uuid4()),
-            status=TestWebSocketState.CONNECTED,
+            status=WebSocketTestState.CONNECTED,
             metadata={
                 "agent_type": "supervisor",
                 "capabilities": ["reasoning", "tool_use"],
                 "config": {
                     "timeout": 30.5,
                     "retries": 3,
-                    "nested_status": TestWebSocketState.CONNECTING,
+                    "nested_status": WebSocketTestState.CONNECTING,
                     "timestamps": {
                         "created": datetime.now(timezone.utc),
                         "modified": datetime.now(timezone.utc)
@@ -230,7 +230,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
             },
             timestamp=datetime.now(timezone.utc),
             nested_list=[
-                {"type": "event", "status": TestWebSocketState.CONNECTED},
+                {"type": "event", "status": WebSocketTestState.CONNECTED},
                 {"type": "result", "enum_field": AgentStatus.ACTIVE}
             ]
         )
@@ -261,7 +261,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
             "type": "complex_agent_state",
             "data": complex_data,
             "meta": {
-                "nested_enum": TestWebSocketState.CONNECTED,
+                "nested_enum": WebSocketTestState.CONNECTED,
                 "timestamp": datetime.now(timezone.utc)
             }
         }
@@ -342,7 +342,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
             "type": "partial_data",
             "result": None,
             "optional_field": None,
-            "metadata": {"value": None, "status": TestWebSocketState.CONNECTED}
+            "metadata": {"value": None, "status": WebSocketTestState.CONNECTED}
         }
         
         serialized = _serialize_message_safely(message_with_nones)
@@ -366,7 +366,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
         # Test objects with to_dict method
         obj_with_method = ObjectWithToDict({
             "public_data": "visible",
-            "nested": {"status": TestWebSocketState.CONNECTED}
+            "nested": {"status": WebSocketTestState.CONNECTED}
         })
         
         serialized = _serialize_message_safely(obj_with_method)
@@ -380,7 +380,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
             "level_1": {
                 "level_2": {
                     "level_3": {
-                        "data": [{"item": i, "status": TestWebSocketState.CONNECTED} for i in range(100)]
+                        "data": [{"item": i, "status": WebSocketTestState.CONNECTED} for i in range(100)]
                     }
                 }
             }
@@ -451,12 +451,12 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
                 "type": f"concurrent_test_{i}",
                 "data": ComplexNestedData(
                     id=str(uuid.uuid4()),
-                    status=TestWebSocketState.CONNECTED,
+                    status=WebSocketTestState.CONNECTED,
                     metadata={"index": i, "enum": AgentStatus.ACTIVE},
                     timestamp=datetime.now(timezone.utc)
                 ),
                 "pydantic": PydanticTestModel(f"model_{i}", i, datetime.now(timezone.utc)),
-                "enum": TestWebSocketState.CONNECTING
+                "enum": WebSocketTestState.CONNECTING
             }
             messages.append(message)
         
@@ -511,7 +511,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
         message = {
             "type": "fallback_test",
             "unknown_object": unserializable,
-            "normal_data": {"status": TestWebSocketState.CONNECTED}
+            "normal_data": {"status": WebSocketTestState.CONNECTED}
         }
         
         safe_message = _serialize_message_safely(message)
@@ -537,7 +537,7 @@ class TestWebSocketStateSerializationIntegration(SSotBaseTestCase):
             "large_list": [
                 {
                     "index": i,
-                    "status": TestWebSocketState.CONNECTED,
+                    "status": WebSocketTestState.CONNECTED,
                     "data": f"data_{'x' * 100}_{i}",  # 100 chars each
                     "nested": {
                         "timestamp": datetime.now(timezone.utc),

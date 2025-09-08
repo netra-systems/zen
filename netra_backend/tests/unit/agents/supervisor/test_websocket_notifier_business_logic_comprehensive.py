@@ -63,11 +63,16 @@ class TestWebSocketNotifierBusinessLogic(SSotBaseTestCase):
         return manager
 
     @pytest.fixture
-    def websocket_notifier(self, mock_websocket_manager):
+    async def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier with mocked dependencies - suppress deprecation warning for testing."""
         with patch('warnings.warn'):  # Suppress deprecation warning during testing
-            notifier = WebSocketNotifier(mock_websocket_manager)
-        return notifier
+            # Use test_mode=True to prevent background task hanging
+            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+        
+        yield notifier
+        
+        # CRITICAL: Ensure proper cleanup to prevent hanging tests
+        await notifier.shutdown()
 
     @pytest.fixture
     def business_context(self):
@@ -449,7 +454,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):  # Suppress deprecation warning
             manager = AsyncMock() 
-            notifier = WebSocketNotifier(manager)
+            notifier = WebSocketNotifier(manager, test_mode=True)
         
         # Create high-value customer context
         vip_context = AgentExecutionContext(
@@ -468,6 +473,9 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         # Record business fairness metrics
         metrics = SsotTestMetrics()
         metrics.record_custom("enterprise_customer_service_quality", True)
+        
+        # Cleanup
+        await notifier.shutdown()
 
     async def test_free_tier_user_service_parity(self):
         """Test that free tier users receive equivalent notification service."""
@@ -475,7 +483,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):
             manager = AsyncMock()
-            notifier = WebSocketNotifier(manager)
+            notifier = WebSocketNotifier(manager, test_mode=True)
         
         # Create free tier context
         free_context = AgentExecutionContext(
@@ -497,3 +505,6 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         metrics = SsotTestMetrics()
         metrics.record_custom("service_parity_maintained", True)
         metrics.record_custom("brand_reputation_protected", True)
+        
+        # Cleanup
+        await notifier.shutdown()

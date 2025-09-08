@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_90dc4a9a6f7a019f_websocket_core_info_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 13:10 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -1732,7 +1732,7 @@
     <p class="mis show_mis"><span class="n"><a id="t1650" href="#t1650">1650</a></span><span class="t">        <span class="key">return</span> <span class="nam">_factory_instance</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1651" href="#t1651">1651</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1652" href="#t1652">1652</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t1653" href="#t1653">1653</a></span><span class="t"><span class="key">def</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">:</span> <span class="nam">UserExecutionContext</span><span class="op">)</span> <span class="op">-></span> <span class="nam">IsolatedWebSocketManager</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t1653" href="#t1653">1653</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">:</span> <span class="nam">UserExecutionContext</span><span class="op">)</span> <span class="op">-></span> <span class="nam">IsolatedWebSocketManager</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1654" href="#t1654">1654</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1655" href="#t1655">1655</a></span><span class="t"><span class="str">    Create an isolated WebSocket manager for a user context.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1656" href="#t1656">1656</a></span><span class="t"><span class="str">    </span>&nbsp;</span><span class="r"></span></p>
@@ -1760,7 +1760,7 @@
     <p class="mis show_mis"><span class="n"><a id="t1678" href="#t1678">1678</a></span><span class="t">        <span class="nam">_validate_ssot_user_context_staging_safe</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1679" href="#t1679">1679</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1680" href="#t1680">1680</a></span><span class="t">        <span class="nam">factory</span> <span class="op">=</span> <span class="nam">get_websocket_manager_factory</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t1681" href="#t1681">1681</a></span><span class="t">        <span class="key">return</span> <span class="nam">factory</span><span class="op">.</span><span class="nam">create_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t1681" href="#t1681">1681</a></span><span class="t">        <span class="key">return</span> <span class="key">await</span> <span class="nam">factory</span><span class="op">.</span><span class="nam">create_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1682" href="#t1682">1682</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1683" href="#t1683">1683</a></span><span class="t">    <span class="key">except</span> <span class="nam">ValueError</span> <span class="key">as</span> <span class="nam">validation_error</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1684" href="#t1684">1684</a></span><span class="t">        <span class="com"># CRITICAL FIX: Handle SSOT validation failures gracefully</span>&nbsp;</span><span class="r"></span></p>
@@ -1805,7 +1805,7 @@
             <a class="nav" href="z_90dc4a9a6f7a019f_websocket_core_info_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 13:10 -0700
         </p>
     </div>
 </footer>

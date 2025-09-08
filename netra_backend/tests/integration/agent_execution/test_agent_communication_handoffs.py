@@ -399,8 +399,12 @@ class TestAgentCommunicationHandoffs(BaseAgentExecutionTest):
         initial_metadata_count = len(business_context.metadata)
         final_metadata_count = len(shared_context.metadata)
         
-        assert final_metadata_count > initial_metadata_count * 2, \
-            "Final context should have significantly more business data from agent contributions"
+        # Expect significant growth in metadata from agent contributions
+        # Each of 3 agents should contribute at least 3 pieces of data (insights, recommendations, timestamp)
+        expected_minimum_growth = initial_metadata_count + (3 * 3)  # 3 agents × 3 contributions
+        assert final_metadata_count >= expected_minimum_growth, \
+            f"Final context should have significantly more business data from agent contributions. " \
+            f"Got {final_metadata_count}, expected >= {expected_minimum_growth} (initial {initial_metadata_count} + 9 agent contributions)"
 
     @pytest.mark.asyncio
     async def test_multi_agent_workflow_coordination(self):

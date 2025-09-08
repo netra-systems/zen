@@ -155,7 +155,7 @@ class TestWebSocketConnectionAuthentication(BaseIntegrationTest):
                 # The fact that connection was established proves auth worked
                 await websocket.close()
                 
-        except InvalidStatusCode as e:
+        except InvalidStatus as e:
             if e.response.status_code == 403:
                 pytest.fail("WebSocket authentication failed with 403 - JWT validation issue")
             else:
@@ -183,7 +183,7 @@ class TestWebSocketConnectionAuthentication(BaseIntegrationTest):
         }
         
         # Attempt connection with invalid token - should be rejected
-        with pytest.raises((InvalidStatusCode, ConnectionClosed)):
+        with pytest.raises((InvalidStatus, ConnectionClosed)):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.auth_helper.config.websocket_url,
@@ -216,7 +216,7 @@ class TestWebSocketConnectionAuthentication(BaseIntegrationTest):
         headers = self.auth_helper.get_websocket_headers(expired_token)
         
         # Attempt connection with expired token - should be rejected
-        with pytest.raises((InvalidStatusCode, ConnectionClosed)):
+        with pytest.raises((InvalidStatus, ConnectionClosed)):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.auth_helper.config.websocket_url,
@@ -245,7 +245,7 @@ class TestWebSocketConnectionAuthentication(BaseIntegrationTest):
             "X-Test-Mode": "true"
         }
         
-        with pytest.raises((InvalidStatusCode, ConnectionClosed)):
+        with pytest.raises((InvalidStatus, ConnectionClosed)):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.auth_helper.config.websocket_url,

@@ -33,7 +33,7 @@ from contextlib import asynccontextmanager
 import pytest
 import httpx
 import websockets
-from websockets import ConnectionClosed, ConnectionClosedError, InvalidStatusCode, InvalidStatus
+from websockets import ConnectionClosed, ConnectionClosedError, InvalidStatus
 
 from tests.e2e.staging_test_config import get_staging_config, StagingConfig
 
@@ -212,7 +212,7 @@ class RealAgentExecutionValidator:
             logger.info(f"WebSocket connected in {connection_time:.3f}s to {self.config.websocket_url}")
             yield websocket
             
-        except (InvalidStatusCode, InvalidStatus) as e:
+        except (InvalidStatus, InvalidStatus) as e:
             # Extract status code from various exception types
             status_code = 403  # default
             if hasattr(e, 'status_code'):
@@ -250,7 +250,7 @@ class RealAgentExecutionValidator:
             if websocket and websocket.state == 1:  # OPEN state
                 await websocket.close()
     
-    async def send_agent_request(self, websocket: websockets.WebSocketServerProtocol, 
+    async def send_agent_request(self, websocket: websockets.ServerConnection, 
                                agent_type: str, request_data: Dict[str, Any]) -> str:
         """Send agent execution request via WebSocket"""
         
@@ -301,7 +301,7 @@ class RealAgentExecutionValidator:
         
         return True
     
-    async def listen_for_events(self, websocket: websockets.WebSocketServerProtocol,
+    async def listen_for_events(self, websocket: websockets.ServerConnection,
                                request_id: str, timeout: float = 120.0) -> List[Dict[str, Any]]:
         """Listen for WebSocket events from agent execution"""
         

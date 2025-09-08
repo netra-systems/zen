@@ -1,0 +1,43 @@
+{
+  "P0-TEST-001": {
+    "issue_id": "P0-TEST-001",
+    "title": "Critical Fix: Async/await chain broken in SMD startup",
+    "description": "Fix WebSocket manager initialization returning coroutine instead of instance",
+    "analysis_file": "reports/bugs/STARTUP_FAILURE_FIVE_WHYS_ANALYSIS_20250908.md",
+    "priority": "p0",
+    "status": "completed",
+    "owner": "Senior Engineer",
+    "deadline": "2025-09-09T13:45:34.160795",
+    "created_at": "2025-09-08T13:45:34.160795",
+    "updated_at": "2025-09-08T13:45:34.163500",
+    "business_impact": "Complete system startup failure preventing user access",
+    "technical_debt": null,
+    "affected_systems": [
+      "WebSocket",
+      "SMD",
+      "Agent Registry"
+    ],
+    "remediation_plan": [
+      "Fix async/await chain in SMD startup sequence",
+      "Ensure WebSocket manager is properly awaited",
+      "Add health check validation for WebSocket manager",
+      "Test complete startup sequence"
+    ],
+    "validation_steps": [
+      "Verify startup completes without DeterministicStartupError",
+      "Confirm WebSocket manager is properly instantiated",
+      "Check health checks pass for all critical services",
+      "Test WebSocket events work after startup"
+    ],
+    "business_value_protected": null,
+    "execution_notes": [
+      "2025-09-08T13:45:34.162498: Assigned for systematic remediation execution",
+      "2025-09-08T13:45:34.163500: Fixed async/await chain - startup now completes successfully"
+    ],
+    "recurrence_prevention": [
+      "Added startup integration tests for async/await patterns",
+      "Implemented linting rules to catch coroutine vs. instance errors",
+      "Enhanced health check error reporting with specific diagnostics"
+    ]
+  }
+}

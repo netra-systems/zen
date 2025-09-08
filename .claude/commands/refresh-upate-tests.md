@@ -1,5 +1,5 @@
 ---
-description: "Refresh tests for existing area"
+description: "Refresh tests for existing area command"
 argument-hint: "[focus area]"
 ---
 
@@ -13,10 +13,11 @@ and all of the latest testing best practices as per claude.md
 
 PROCESS:
 For each test suite, the creation the process is:
-0) PLAN: Spawn a sub agent to PLAN ONLY the update, align, or create the required unit, integration (non-docker), or e2e gcp staging test suites focused on: $1
+0) PLAN: Spawn a sub agent to PLAN ONLY the update, align, or creation of: the required unit, integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused on: $1
 1) EXECUTE THE PLAN with new spawned sub agent
-2) Spawn a new sub agent to audit and review the test. Fix issues.
-3) Run the tests
+2) Spawn a new sub agent to audit and review the test. And run the fake test checks. Fix issues if fixable or 
+if entirely bad mark and report as such and go back to 0) with the new added info.
+3) Run the tests and log results with evidence of output and pass fail, timing etc.
 4) Spawn a sub agent If needed, fix the system under test based on the failure
 5) Spawn a sub agent PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
 otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and

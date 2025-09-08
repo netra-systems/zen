@@ -236,7 +236,7 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
         self, 
         auth_helper: E2EWebSocketAuthHelper,
         user_suffix: str = None
-    ) -> Tuple[WebSocketContext, websockets.WebSocketServerProtocol]:
+    ) -> Tuple[WebSocketContext, websockets.ServerConnection]:
         """Create test WebSocket context with authentication."""
         suffix = user_suffix or str(int(time.time()))
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)

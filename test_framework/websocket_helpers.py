@@ -423,7 +423,7 @@ class WebSocketTestHelpers:
                 return connection
                 
             except (websockets.exceptions.ConnectionClosedError, 
-                   websockets.exceptions.InvalidStatusCode,
+                   websockets.exceptions.InvalidStatus,
                    asyncio.TimeoutError) as e:
                 last_error = e
                 if attempt < max_retries - 1:

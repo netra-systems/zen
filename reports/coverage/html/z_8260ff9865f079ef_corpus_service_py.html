@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for netra_backend\app\services\corpus_service.py: 26.50%</title>
+    <title>Coverage for netra_backend\app\services\corpus_service.py: 26.38%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_dca529e9.css" type="text/css">
     <script src="coverage_html_cb_497bf287.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>netra_backend\app\services\corpus_service.py</b>:
-            <span class="pc_cov">26.50%</span>
+            <span class="pc_cov">26.38%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">234 statements &nbsp;</span>
+            <span class="text">235 statements &nbsp;</span>
             <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">62<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">172<span class="text"> missing</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">173<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_8260ff9865f079ef_corpus_service_helpers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 13:10 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -605,25 +605,30 @@
     <p class="pln"><span class="n"><a id="t523" href="#t523">523</a></span><span class="t">            <span class="com"># This allows the method to return quickly as expected by tests</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t524" href="#t524">524</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Table creation for </span><span class="op">{</span><span class="nam">table_name</span><span class="op">}</span><span class="fst"> timed out, running in background</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t525" href="#t525">525</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t526" href="#t526">526</a></span><span class="t">            <span class="com"># Start table creation in background without awaiting</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t527" href="#t527">527</a></span><span class="t">            <span class="nam">asyncio</span><span class="op">.</span><span class="nam">create_task</span><span class="op">(</span><span class="nam">_perform_table_creation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t528" href="#t528">528</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t529" href="#t529">529</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t530" href="#t530">530</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Error during table creation timeout handling: </span><span class="op">{</span><span class="nam">e</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t531" href="#t531">531</a></span><span class="t">            <span class="com"># Don't raise exception to allow tests to continue</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t532" href="#t532">532</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t526" href="#t526">526</a></span><span class="t">            <span class="com"># Start table creation in background with proper exception handling</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t527" href="#t527">527</a></span><span class="t">            <span class="nam">task</span> <span class="op">=</span> <span class="nam">asyncio</span><span class="op">.</span><span class="nam">create_task</span><span class="op">(</span><span class="nam">_perform_table_creation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t528" href="#t528">528</a></span><span class="t">            <span class="com"># Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t529" href="#t529">529</a></span><span class="t">            <span class="nam">task</span><span class="op">.</span><span class="nam">add_done_callback</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t530" href="#t530">530</a></span><span class="t">                <span class="key">lambda</span> <span class="nam">t</span><span class="op">:</span> <span class="nam">logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Background table creation failed: </span><span class="op">{</span><span class="nam">t</span><span class="op">.</span><span class="nam">exception</span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t531" href="#t531">531</a></span><span class="t">                <span class="key">if</span> <span class="nam">t</span><span class="op">.</span><span class="nam">exception</span><span class="op">(</span><span class="op">)</span> <span class="key">else</span> <span class="nam">logger</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Background table creation completed for </span><span class="op">{</span><span class="nam">table_name</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t532" href="#t532">532</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t533" href="#t533">533</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t534" href="#t534">534</a></span><span class="t"><span class="com"># Legacy functions removed - migrate to async CorpusService methods</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t535" href="#t535">535</a></span><span class="t"><span class="com"># For backward compatibility in tests, create minimal implementations</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t536" href="#t536">536</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t537" href="#t537">537</a></span><span class="t"><span class="com"># Create module-level instance for compatibility</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t538" href="#t538">538</a></span><span class="t"><span class="nam">corpus_service_instance</span> <span class="op">=</span> <span class="nam">CorpusService</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t539" href="#t539">539</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t540" href="#t540">540</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">create_document</span><span class="op">(</span><span class="nam">db</span><span class="op">:</span> <span class="nam">AsyncSession</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">:</span> <span class="nam">schemas</span><span class="op">.</span><span class="nam">DocumentCreate</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Dict</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t541" href="#t541">541</a></span><span class="t">    <span class="str">"""Create a document in the corpus with proper validation"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t542" href="#t542">542</a></span><span class="t">    <span class="nam">validate_document_creation_params</span><span class="op">(</span><span class="nam">db</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t543" href="#t543">543</a></span><span class="t">    <span class="key">return</span> <span class="key">await</span> <span class="nam">corpus_service</span><span class="op">.</span><span class="nam">create_document</span><span class="op">(</span><span class="nam">db</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t534" href="#t534">534</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t535" href="#t535">535</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Error during table creation timeout handling: </span><span class="op">{</span><span class="nam">e</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t536" href="#t536">536</a></span><span class="t">            <span class="com"># Don't raise exception to allow tests to continue</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t537" href="#t537">537</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t538" href="#t538">538</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t539" href="#t539">539</a></span><span class="t"><span class="com"># Legacy functions removed - migrate to async CorpusService methods</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t540" href="#t540">540</a></span><span class="t"><span class="com"># For backward compatibility in tests, create minimal implementations</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t541" href="#t541">541</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t542" href="#t542">542</a></span><span class="t"><span class="com"># Create module-level instance for compatibility</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t543" href="#t543">543</a></span><span class="t"><span class="nam">corpus_service_instance</span> <span class="op">=</span> <span class="nam">CorpusService</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t544" href="#t544">544</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t545" href="#t545">545</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">create_document</span><span class="op">(</span><span class="nam">db</span><span class="op">:</span> <span class="nam">AsyncSession</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">:</span> <span class="nam">schemas</span><span class="op">.</span><span class="nam">DocumentCreate</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Dict</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t546" href="#t546">546</a></span><span class="t">    <span class="str">"""Create a document in the corpus with proper validation"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t547" href="#t547">547</a></span><span class="t">    <span class="nam">validate_document_creation_params</span><span class="op">(</span><span class="nam">db</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t548" href="#t548">548</a></span><span class="t">    <span class="key">return</span> <span class="key">await</span> <span class="nam">corpus_service</span><span class="op">.</span><span class="nam">create_document</span><span class="op">(</span><span class="nam">db</span><span class="op">,</span> <span class="nam">corpus_id</span><span class="op">,</span> <span class="nam">document_data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t549" href="#t549">549</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -633,7 +638,7 @@
             <a class="nav" href="z_8260ff9865f079ef_corpus_service_helpers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 13:10 -0700
         </p>
     </div>
 </footer>

@@ -28,7 +28,7 @@ import threading
 import websocket
 import random
 import websockets
-from websockets import ConnectionClosedError, InvalidStatusCode, InvalidHandshake
+from websockets import ConnectionClosedError, InvalidStatus, InvalidHandshake
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

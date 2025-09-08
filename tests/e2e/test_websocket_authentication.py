@@ -193,7 +193,7 @@ async def test_websocket_invalid_jwt_token(websocket_auth_runner):
         # If we get here, the test FAILED - invalid token should not connect
         raise AssertionError("Invalid JWT token was accepted - authentication security failure")
     except (websockets.exceptions.ConnectionClosedError, 
-            websockets.exceptions.InvalidStatusCode,
+            websockets.exceptions.InvalidStatus,
             OSError) as e:
         # Expected - invalid token should cause connection failure
         connection_failed = True
@@ -238,7 +238,7 @@ async def test_websocket_expired_jwt_token(websocket_auth_runner):
         # If we get here, the test FAILED - expired token should not connect
         raise AssertionError("Expired JWT token was accepted - authentication security failure")
     except (websockets.exceptions.ConnectionClosedError,
-            websockets.exceptions.InvalidStatusCode,
+            websockets.exceptions.InvalidStatus,
             OSError) as e:
         # Expected - expired token should cause connection failure
         connection_failed = True
