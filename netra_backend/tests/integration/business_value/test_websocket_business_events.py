@@ -491,6 +491,9 @@ class TestWebSocketBusinessEvents(EnhancedBaseIntegrationTest):
                         "business_value_rating": {"enterprise": 9, "mid": 7, "early": 6}[user["subscription_tier"]]
                     })
                     
+                    # Track all events before collecting metrics
+                    ws_context["track_events"]()
+                    
                     # Collect session metrics
                     session_data = {
                         "user_tier": user["subscription_tier"],

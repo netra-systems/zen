@@ -38,7 +38,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture, with_test_database
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionStatus
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -90,7 +90,7 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
     def setup_method(self):
         """Set up each test with clean registry state."""
         super().setup_method()
-        self.test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        self.test_user_id = f"user_{uuid.uuid4().hex[:8]}"
         self.test_request_id = f"req_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
         
