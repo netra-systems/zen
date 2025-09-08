@@ -14,6 +14,7 @@ Business Value Justification (BVJ):
 
 # Import User model from canonical source
 from netra_backend.app.schemas.core_models import User, UserBase, UserCreate, UserCreateOAuth
+from shared.session_management.user_session_manager import UserSession
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
@@ -42,4 +43,4 @@ class UserState:
             self.preferences = UserPreferences()
 
 # Re-export for backward compatibility
-__all__ = ["User", "UserBase", "UserCreate", "UserCreateOAuth", "UserPreferences", "UserState"]
+__all__ = ["User", "UserBase", "UserCreate", "UserCreateOAuth", "UserSession", "UserPreferences", "UserState"]

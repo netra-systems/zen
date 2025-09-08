@@ -15,7 +15,7 @@ Key Areas Addressed:
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 from datetime import datetime, timezone
 from enum import Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from dataclasses import dataclass, field
 
 from shared.types.core_types import (
@@ -242,23 +242,27 @@ class StronglyTypedWebSocketEvent(BaseModel):
     
     # Event payload and metadata
     data: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     retry_count: int = 0
     max_retries: int = 3
     
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         return ensure_user_id(v)
         
-    @validator('thread_id', pre=True)
+    @field_validator('thread_id', mode='before')
+    @classmethod
     def validate_thread_id(cls, v):
         return ensure_thread_id(v)
         
-    @validator('request_id', pre=True)
+    @field_validator('request_id', mode='before')
+    @classmethod
     def validate_request_id(cls, v):
         return ensure_request_id(v)
         
-    @validator('websocket_id', pre=True)
+    @field_validator('websocket_id', mode='before')
+    @classmethod
     def validate_websocket_id(cls, v):
         return ensure_websocket_id(v)
     
@@ -290,10 +294,10 @@ class ToolExecutionRequest(BaseModel):
     timeout_seconds: Optional[int] = None
     retry_on_failure: bool = True
     
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    @validator('execution_id', pre=True)
+    @field_validator('execution_id', mode='before')
+    @classmethod
     def validate_execution_id(cls, v):
         if isinstance(v, str):
             return ExecutionID(v)
@@ -324,7 +328,8 @@ class ToolExecutionResult(BaseModel):
     retry_count: int = 0
     resource_usage: Dict[str, Any] = Field(default_factory=dict)
     
-    @validator('execution_id', pre=True)
+    @field_validator('execution_id', mode='before')
+    @classmethod
     def validate_execution_id(cls, v):
         if isinstance(v, str):
             return ExecutionID(v)

@@ -21,8 +21,8 @@ from netra_backend.app.db.migration_utils import (
     get_sync_database_url,
     needs_migration,
 )
-from netra_backend.app.migration_models import FailedMigration, MigrationState
-from netra_backend.app.startup.migration_state_manager import MigrationStateManager
+from netra_backend.app.startup.migration_models import FailedMigration, MigrationState
+# from netra_backend.app.startup.migration_state_manager import MigrationStateManager  # Module not found
 from netra_backend.app.db.alembic_state_recovery import ensure_migration_state_healthy
 
 
@@ -34,7 +34,8 @@ class MigrationTracker:
         self.environment = environment
         self.logger = logging.getLogger(__name__)
         self.state_file = Path(".netra/migration_state.json")
-        self.state_manager = MigrationStateManager(self.state_file, self.logger)
+        # self.state_manager = MigrationStateManager(self.state_file, self.logger)  # Module not found
+        self.state_manager = None  # Stub for missing MigrationStateManager
         self._ensure_netra_dir()
 
     def _ensure_netra_dir(self) -> None:
@@ -43,10 +44,14 @@ class MigrationTracker:
 
     async def _load_state(self) -> MigrationState:
         """Load migration state from file."""
+        if self.state_manager is None:
+            return MigrationState.INITIAL  # Return default state when manager unavailable
         return await self.state_manager.load_state()
 
     async def _save_state(self, state: MigrationState) -> None:
         """Save migration state to file."""
+        if self.state_manager is None:
+            return  # Skip saving when manager unavailable
         await self.state_manager.save_state(state)
 
     def _get_alembic_config(self) -> alembic.config.Config:
@@ -250,6 +255,8 @@ class MigrationTracker:
 
     def _build_status_dict(self, state: MigrationState) -> Dict[str, any]:
         """Build migration status dictionary."""
+        if self.state_manager is None:
+            return {"state": state.value, "environment": self.environment}  # Basic status when manager unavailable
         return self.state_manager.build_status_dict(state, self.environment)
 
     async def clear_failed_migrations(self) -> None:

@@ -18,9 +18,9 @@ Key Type Safety Principles:
 """
 
 from typing import NewType, Dict, Any, Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from dataclasses import dataclass
 
 
@@ -83,7 +83,8 @@ class AuthValidationResult(BaseModel):
     error_message: Optional[str] = None
     expires_at: Optional[datetime] = None
     
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         if v is not None and isinstance(v, str):
             return UserID(v)
@@ -98,13 +99,15 @@ class SessionValidationResult(BaseModel):
     permissions: List[str] = Field(default_factory=list)
     expires_at: Optional[datetime] = None
     
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         if v is not None and isinstance(v, str):
             return UserID(v)
         return v
         
-    @validator('session_id', pre=True)
+    @field_validator('session_id', mode='before')
+    @classmethod
     def validate_session_id(cls, v):
         if v is not None and isinstance(v, str):
             return SessionID(v)
@@ -119,19 +122,22 @@ class TokenResponse(BaseModel):
     expires_in: Optional[int] = None
     user_id: Optional[UserID] = None
     
-    @validator('access_token', pre=True)
+    @field_validator('access_token', mode='before')
+    @classmethod
     def validate_access_token(cls, v):
         if isinstance(v, str):
             return TokenString(v)
         return v
         
-    @validator('refresh_token', pre=True)
+    @field_validator('refresh_token', mode='before')
+    @classmethod
     def validate_refresh_token(cls, v):
         if v is not None and isinstance(v, str):
             return TokenString(v)
         return v
         
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         if v is not None and isinstance(v, str):
             return UserID(v)
@@ -181,21 +187,24 @@ class WebSocketMessage(BaseModel):
     thread_id: ThreadID
     request_id: RequestID
     data: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         if isinstance(v, str):
             return UserID(v)
         return v
         
-    @validator('thread_id', pre=True)
+    @field_validator('thread_id', mode='before')
+    @classmethod
     def validate_thread_id(cls, v):
         if isinstance(v, str):
             return ThreadID(v)
         return v
         
-    @validator('request_id', pre=True)  
+    @field_validator('request_id', mode='before')
+    @classmethod
     def validate_request_id(cls, v):
         if isinstance(v, str):
             return RequestID(v)
@@ -238,46 +247,53 @@ class AgentExecutionContext(BaseModel):
     request_id: RequestID
     websocket_id: Optional[WebSocketID] = None
     state: ExecutionContextState = ExecutionContextState.CREATED
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
-    @validator('execution_id', pre=True)
+    @field_validator('execution_id', mode='before')
+    @classmethod
     def validate_execution_id(cls, v):
         if isinstance(v, str):
             return ExecutionID(v)
         return v
         
-    @validator('agent_id', pre=True)
+    @field_validator('agent_id', mode='before')
+    @classmethod
     def validate_agent_id(cls, v):
         if isinstance(v, str):
             return AgentID(v)
         return v
         
-    @validator('user_id', pre=True)
+    @field_validator('user_id', mode='before')
+    @classmethod
     def validate_user_id(cls, v):
         if isinstance(v, str):
             return UserID(v)
         return v
         
-    @validator('thread_id', pre=True)
+    @field_validator('thread_id', mode='before')
+    @classmethod
     def validate_thread_id(cls, v):
         if isinstance(v, str):
             return ThreadID(v)
         return v
         
-    @validator('run_id', pre=True)
+    @field_validator('run_id', mode='before')
+    @classmethod
     def validate_run_id(cls, v):
         if isinstance(v, str):
             return RunID(v)
         return v
         
-    @validator('request_id', pre=True)
+    @field_validator('request_id', mode='before')
+    @classmethod
     def validate_request_id(cls, v):
         if isinstance(v, str):
             return RequestID(v)
         return v
         
-    @validator('websocket_id', pre=True)
+    @field_validator('websocket_id', mode='before')
+    @classmethod
     def validate_websocket_id(cls, v):
         if v is not None and isinstance(v, str):
             return WebSocketID(v)
@@ -305,8 +321,7 @@ class DatabaseConnectionInfo:
 
 def ensure_user_id(value: Any) -> UserID:
     """Convert string to UserID with validation."""
-    if isinstance(value, UserID):
-        return value
+    # NewType objects are just strings at runtime, so check if already a valid string
     if isinstance(value, str) and value.strip():
         return UserID(value.strip())
     raise ValueError(f"Invalid user_id: {value}")
@@ -314,8 +329,7 @@ def ensure_user_id(value: Any) -> UserID:
 
 def ensure_thread_id(value: Any) -> ThreadID:
     """Convert string to ThreadID with validation."""
-    if isinstance(value, ThreadID):
-        return value
+    # NewType objects are just strings at runtime, so check if already a valid string
     if isinstance(value, str) and value.strip():
         return ThreadID(value.strip())
     raise ValueError(f"Invalid thread_id: {value}")
@@ -323,8 +337,7 @@ def ensure_thread_id(value: Any) -> ThreadID:
 
 def ensure_run_id(value: Any) -> RunID:
     """Convert string to RunID with validation."""
-    if isinstance(value, RunID):
-        return value
+    # NewType objects are just strings at runtime, so check if already a valid string
     if isinstance(value, str) and value.strip():
         return RunID(value.strip())
     raise ValueError(f"Invalid run_id: {value}")
@@ -332,8 +345,7 @@ def ensure_run_id(value: Any) -> RunID:
 
 def ensure_request_id(value: Any) -> RequestID:
     """Convert string to RequestID with validation."""
-    if isinstance(value, RequestID):
-        return value
+    # NewType objects are just strings at runtime, so check if already a valid string
     if isinstance(value, str) and value.strip():
         return RequestID(value.strip())
     raise ValueError(f"Invalid request_id: {value}")
@@ -343,8 +355,7 @@ def ensure_websocket_id(value: Any) -> Optional[WebSocketID]:
     """Convert string to WebSocketID with validation."""
     if value is None:
         return None
-    if isinstance(value, WebSocketID):
-        return value
+    # NewType objects are just strings at runtime, so check if already a valid string
     if isinstance(value, str) and value.strip():
         return WebSocketID(value.strip())
     raise ValueError(f"Invalid websocket_id: {value}")

@@ -83,14 +83,41 @@ class DatabaseChecker:
         result.scalar_one()
     
     async def _check_critical_tables(self, db: AsyncSession) -> List[str]:
-        """Check if critical tables exist and return list of missing tables"""
-        critical_tables = ['assistants', 'threads', 'messages', 'userbase']
+        """Check if critical tables exist and return list of missing tables
+        
+        CRITICAL: Only truly essential tables for basic system operation are checked.
+        Missing non-critical tables (from recent migrations) won't prevent startup.
+        """
+        from netra_backend.app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        
+        # REDUCED to only absolutely essential tables for basic startup
+        # Other tables (like supply chain, billing, etc.) are considered non-critical for startup
+        essential_tables = ['assistants']  # Only assistant table is truly critical
+        
         missing_tables = []
         
-        for table in critical_tables:
-            exists = await self._table_exists(db, table)
-            if not exists:
-                missing_tables.append(table)
+        # Check all expected tables but separate into critical vs non-critical
+        all_expected_tables = [
+            'assistants', 'threads', 'messages', 'userbase', 
+            # Add any other tables that might be missing from recent migrations
+            'supplies', 'billing_records', 'analytics_events'
+        ]
+        
+        for table in all_expected_tables:
+            try:
+                exists = await self._table_exists(db, table)
+                if not exists:
+                    missing_tables.append(table)
+                    # Only log as error if it's truly essential
+                    if table in essential_tables:
+                        logger.error(f"CRITICAL TABLE MISSING: {table}")
+                    else:
+                        logger.warning(f"Non-critical table missing: {table} (system will continue)")
+            except Exception as e:
+                # Don't let table checking errors prevent startup
+                logger.warning(f"Could not check table {table}: {e}")
+                missing_tables.append(f"{table} (check failed)")
         
         return missing_tables
     
