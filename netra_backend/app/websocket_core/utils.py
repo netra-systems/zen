@@ -183,7 +183,10 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
             if isinstance(data, str):
                 await websocket.send_text(data)
             else:
-                await websocket.send_json(data)
+                # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                safe_data = _serialize_message_safely(data)
+                await websocket.send_json(safe_data)
             
             if attempt > 0:
                 logger.info(f"WebSocket send succeeded on attempt {attempt + 1}")
