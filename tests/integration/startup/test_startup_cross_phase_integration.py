@@ -38,9 +38,8 @@ from netra_backend.app.smd import (
 )
 from netra_backend.app.core.registry.universal_registry import UniversalRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_init import UnifiedWebSocketInit
-from netra_backend.app.services.user_execution_context import UserExecutionContextService
+# UnifiedWebSocketInit class does not exist - removed import
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestStartupCrossPhaseIntegration(BaseIntegrationTest):

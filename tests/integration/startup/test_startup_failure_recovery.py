@@ -41,7 +41,7 @@ from netra_backend.app.smd import (
 )
 from netra_backend.app.core.registry.universal_registry import UniversalRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.unified_init import UnifiedWebSocketInit
+# UnifiedWebSocketInit class does not exist - removed import
 
 
 class TestStartupFailureRecovery(BaseIntegrationTest):
