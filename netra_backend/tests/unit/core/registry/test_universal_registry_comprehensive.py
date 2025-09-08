@@ -264,6 +264,23 @@ class TestUniversalRegistryCore:
         assert item.value is None
         assert item.factory == agent_factory
     
+    def test_register_factory_duplicate_factory(self, mock_context):
+        """Test registering duplicate factory fails when override disabled."""
+        registry = UniversalRegistry[MockAgent]("TestRegistry", allow_override=False)
+        
+        def factory1(ctx):
+            return MockAgent("factory1")
+        
+        def factory2(ctx):
+            return MockAgent("factory2")
+        
+        # Register first factory
+        registry.register_factory("duplicate-factory", factory1)
+        
+        # Should fail on duplicate factory registration
+        with pytest.raises(ValueError, match="Factory duplicate-factory already registered"):
+            registry.register_factory("duplicate-factory", factory2)
+    
     def test_register_duplicate_without_override(self, sample_agent):
         """Test registering duplicate key fails when override disabled."""
         registry = UniversalRegistry[MockAgent]("TestRegistry", allow_override=False)
@@ -665,6 +682,28 @@ class TestUniversalRegistryMetrics:
         assert health["status"] in ["degraded", "warning"]
         # Should have some issue about failures
         assert len(health["issues"]) > 0
+    
+    def test_validate_health_degraded_status_high_failure_rate(self):
+        """Test health validation specifically triggers degraded status for >10% failure rate."""
+        registry = UniversalRegistry[MockAgent]("TestRegistry")
+        
+        # Register successful items to avoid empty registry warning
+        for i in range(5):
+            registry.register(f"success{i}", MockAgent(f"success{i}"))
+            # Access each item to avoid unused items warning
+            registry.get(f"success{i}")
+        
+        # Manually set metrics to simulate high failure rate
+        # total_registrations = 10, failed_registrations = 2 for 20% failure rate
+        registry._metrics['total_registrations'] = 10
+        registry._metrics['successful_registrations'] = 8
+        registry._metrics['failed_registrations'] = 2
+        
+        health = registry.validate_health()
+        
+        # With 20% failure rate, status should be 'degraded'
+        assert health["status"] == "degraded"
+        assert any("High failure rate: 20.0%" in issue for issue in health["issues"])
 
 
 # ===================== CONFIGURATION TESTS =====================
@@ -1249,17 +1288,29 @@ class TestAgentRegistry:
         # Should not crash and should still be None
         assert registry._tool_dispatcher is None
     
-    def test_agent_validation_with_class_type(self):
-        """Test agent validation with class types instead of instances."""
+    def test_agent_validation_with_class_subclass_check(self):
+        """Test agent validation performs issubclass check for class types."""
         registry = AgentRegistry()
         
-        # Mock a class that inherits from BaseAgent
-        class MockAgentClass:
+        # Create a mock class that we can control issubclass behavior for
+        class MockAgentBase:
             pass
         
-        # Test with class validation - should pass through validation
-        registry.register("agent-class", MockAgentClass)
-        assert "agent-class" in registry
+        class MockAgentClass(MockAgentBase):
+            pass
+        
+        # Patch the BaseAgent import to use our mock class 
+        import sys
+        from unittest.mock import patch
+        
+        mock_module = type(sys)('mock_base_agent')
+        mock_module.BaseAgent = MockAgentBase
+        
+        with patch.dict(sys.modules, {'netra_backend.app.agents.base_agent': mock_module}):
+            # This should pass because MockAgentClass inherits from MockAgentBase (our mock BaseAgent)
+            registry.register("valid-agent-class", MockAgentClass)
+            assert "valid-agent-class" in registry
+    
     
     def test_enhance_tool_dispatcher_with_real_dispatcher_success(self):
         """Test successful WebSocket enhancement with real dispatcher."""

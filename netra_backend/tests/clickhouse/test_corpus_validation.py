@@ -89,8 +89,9 @@ class TestCorpusCloning:
             # Mock source corpus
             source = _create_source_corpus()
 
-            # Setup async mock for database execute calls
-            mock_result = AsyncMock()
+            # Setup mock for database execute calls
+            # db.execute() is awaited, so it should return a regular Mock result object
+            mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = source
             db.execute.return_value = mock_result
 
