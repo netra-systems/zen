@@ -45,6 +45,28 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
+    
+    CRITICAL FIX: GCP Cloud Run structured logging cannot serialize WebSocketState
+    enum objects directly. This causes "Object of type WebSocketState is not JSON serializable"
+    errors that manifest as 503/1011 WebSocket failures.
+    
+    Args:
+        state: WebSocketState enum or any object that needs safe logging
+        
+    Returns:
+        String representation safe for JSON serialization
+    """
+    try:
+        if hasattr(state, 'name') and hasattr(state, 'value'):
+            return str(state.name).lower()  # CONNECTED -> "connected"
+        return str(state)
+    except Exception:
+        return "<serialization_error>"
+
+
 class AuthResult:
     """Authentication result with standardized format."""
     
@@ -330,7 +352,7 @@ class UnifiedAuthenticationService:
             "client_port": getattr(websocket.client, 'port', 'unknown') if websocket.client else 'no_client', 
             "headers_count": len(websocket.headers) if websocket.headers else 0,
             "available_headers": list(websocket.headers.keys()) if websocket.headers else [],
-            "websocket_state": getattr(websocket, 'client_state', 'unknown'),
+            "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
@@ -387,7 +409,7 @@ class UnifiedAuthenticationService:
             websocket_error_debug = {
                 "error_type": type(e).__name__,
                 "error_message": str(e),
-                "websocket_state": getattr(websocket, 'client_state', 'unknown'),
+                "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
                 "websocket_available": websocket is not None,
                 "client_info": {
                     "host": getattr(websocket.client, 'host', 'unknown') if websocket and websocket.client else 'no_client',

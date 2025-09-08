@@ -150,9 +150,10 @@ class UnifiedWebSocketAuthenticator:
         """
         self._websocket_auth_attempts += 1
         
-        # Track WebSocket connection state
+        # Track WebSocket connection state - CRITICAL FIX: Use safe string key to prevent JSON serialization errors
         connection_state = getattr(websocket, 'client_state', 'unknown')
-        self._connection_states_seen[connection_state] = self._connection_states_seen.get(connection_state, 0) + 1
+        connection_state_safe = _safe_websocket_state_for_logging(connection_state)
+        self._connection_states_seen[connection_state_safe] = self._connection_states_seen.get(connection_state_safe, 0) + 1
         
         # Enhanced authentication attempt logging (handle Mock objects for tests)
         def safe_get_attr(obj, attr, default='unknown'):
@@ -330,7 +331,9 @@ class UnifiedWebSocketAuthenticator:
                 "ssot_authenticated": False
             }
             
-            await websocket.send_json(error_message)
+            # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+            safe_error_message = _serialize_message_safely(error_message)
+            await websocket.send_json(safe_error_message)
             logger.debug(f"SSOT WEBSOCKET AUTH: Sent error response - {auth_result.error_code}")
             
         except Exception as e:
@@ -360,7 +363,9 @@ class UnifiedWebSocketAuthenticator:
                 "ssot_authenticated": True
             }
             
-            await websocket.send_json(success_message)
+            # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+            safe_success_message = _serialize_message_safely(success_message)
+            await websocket.send_json(safe_success_message)
             logger.debug(f"SSOT WEBSOCKET AUTH: Sent success response for {auth_result.user_context.user_id[:8]}...")
             
         except Exception as e:
