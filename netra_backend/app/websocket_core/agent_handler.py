@@ -226,7 +226,7 @@ class AgentMessageHandler(BaseMessageHandler):
                         thread_id=thread_id,
                         run_id=run_id,
                         db_session=db_session,
-                        websocket_connection_id=connection_id if connection_id else None
+                        websocket_client_id=connection_id if connection_id else None
                     )
                     
                     # Create request-scoped supervisor using v2 factory pattern
