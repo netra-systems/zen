@@ -180,11 +180,11 @@ class TestSystem2_WebSocketManagerFactory:
     @pytest.fixture
     def mock_user_context(self):
         return UserExecutionContext(
-            user_id="test_user",
-            thread_id="thread_001", 
-            run_id="run_001",
-            request_id="req_001",
-            websocket_client_id="client_001"
+            user_id="00000000-0000-0000-0000-000000000001",
+            thread_id="00000000-0000-0000-0000-000000000002", 
+            run_id="00000000-0000-0000-0000-000000000003",
+            request_id="00000000-0000-0000-0000-000000000004",
+            websocket_client_id="00000000-0000-0000-0000-000000000005"
         )
     
     @pytest.fixture
@@ -202,7 +202,7 @@ class TestSystem2_WebSocketManagerFactory:
         
         connection = WebSocketConnection(
             connection_id="conn_factory_001",
-            user_id="test_user",
+            user_id=mock_user_context.user_id,
             websocket=mock_websocket,
             connected_at=datetime.now(timezone.utc)
         )
@@ -234,7 +234,7 @@ class TestSystem2_WebSocketManagerFactory:
         mock_websocket.send_json = AsyncMock()
         connection = WebSocketConnection(
             connection_id="conn_critical_001",
-            user_id="test_user", 
+            user_id=mock_user_context.user_id, 
             websocket=mock_websocket,
             connected_at=datetime.now(timezone.utc)
         )
