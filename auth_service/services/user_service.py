@@ -183,25 +183,40 @@ class UserService:
             Authentication result with user data or None if failed
         """
         try:
-            db_user = await self.user_repository.get_by_email(email)
-            if not db_user or not db_user.is_active:
-                return None
+            async with await self._get_repository_session() as session:
+                repository = AuthUserRepository(session)
+                db_user = await repository.get_by_email(email)
                 
-            # Verify password
-            if not bcrypt.checkpw(password.encode('utf-8'), db_user.password_hash.encode('utf-8')):
-                return None
+                if not db_user or not db_user.is_active:
+                    raise Exception("User not found")
+                    
+                if not db_user.hashed_password:
+                    raise Exception("Invalid credentials")
                 
-            return {
-                "user": User(
-                    id=db_user.id,
+                # Verify password
+                if not bcrypt.checkpw(password.encode('utf-8'), db_user.hashed_password.encode('utf-8')):
+                    raise Exception("Invalid credentials")
+                
+                # Create JWT token (simplified for now)
+                from auth_service.services.jwt_service import JWTService
+                jwt_service = JWTService(self.auth_config)
+                access_token = await jwt_service.create_access_token(
+                    user_id=str(db_user.id),
                     email=db_user.email,
-                    name=db_user.name,
-                    is_active=db_user.is_active,
-                    created_at=db_user.created_at,
-                    updated_at=db_user.updated_at
-                ),
-                "success": True
-            }
+                    permissions=["read", "write"]
+                )
+                
+                return {
+                    "user": User(
+                        id=db_user.id,
+                        email=db_user.email,
+                        name=db_user.full_name,
+                        is_active=db_user.is_active,
+                        created_at=db_user.created_at,
+                        updated_at=db_user.updated_at
+                    ),
+                    "access_token": access_token
+                }
             
         except Exception as e:
             logger.error(f"Failed to authenticate user {email}: {e}")
