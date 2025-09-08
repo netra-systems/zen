@@ -249,40 +249,64 @@ class AuthService:
             return None
     
     async def blacklist_token(self, token: str) -> None:
-        """Add a token to the blacklist."""
+        """Add a token to the blacklist.
+        
+        SSOT: This is the single async interface for blacklist operations.
+        Handles both sync JWT handler methods and async Redis operations.
+        """
         try:
-            # Simple blacklist implementation
+            # Check if JWT handler has blacklist_token method
             if hasattr(self.jwt_handler, 'blacklist_token'):
-                await self.jwt_handler.blacklist_token(token)
+                # JWT handler's blacklist_token is synchronous - do NOT await
+                # Five Whys Fix: Properly handle sync/async boundary
+                result = self.jwt_handler.blacklist_token(token)
+                logger.debug(f"Token blacklisted via JWT handler: {result}")
             else:
                 # Fallback to in-memory blacklist
                 if not hasattr(self, '_blacklisted_tokens'):
                     self._blacklisted_tokens = set()
                 self._blacklisted_tokens.add(token)
+                logger.debug("Token blacklisted in memory")
         except Exception as e:
+            # Log but don't fail - blacklisting is best-effort
             logger.error(f"Token blacklist error: {e}")
+            # Fallback to in-memory blacklist on any error
+            if not hasattr(self, '_blacklisted_tokens'):
+                self._blacklisted_tokens = set()
+            self._blacklisted_tokens.add(token)
     
     async def is_token_blacklisted(self, token: str) -> bool:
-        """Check if a token is blacklisted."""
+        """Check if a token is blacklisted.
+        
+        SSOT: This is the single async interface for blacklist checking.
+        Handles both sync JWT handler methods and async Redis operations.
+        """
         try:
-            # TEMPORARY: Token blacklist feature disabled - always return False
-            logger.debug("Token blacklist feature is temporarily disabled")
+            # Check JWT handler blacklist first (synchronous)
+            if hasattr(self.jwt_handler, 'is_token_blacklisted'):
+                # JWT handler's is_token_blacklisted is synchronous - do NOT await
+                # Five Whys Fix: Properly handle sync/async boundary
+                is_blacklisted = self.jwt_handler.is_token_blacklisted(token)
+                if is_blacklisted:
+                    logger.debug(f"Token found in JWT handler blacklist")
+                    return True
+            elif hasattr(self.jwt_handler, 'blacklisted_tokens'):
+                # Direct check on blacklisted_tokens set
+                if token in self.jwt_handler.blacklisted_tokens:
+                    logger.debug(f"Token found in JWT handler blacklisted_tokens set")
+                    return True
+            
+            # Check in-memory blacklist
+            if hasattr(self, '_blacklisted_tokens') and token in self._blacklisted_tokens:
+                logger.debug(f"Token found in memory blacklist")
+                return True
+            
+            # Token not found in any blacklist
             return False
             
-            # FIXME: Re-enable when async/await issues are resolved
-            # Check JWT handler blacklist first
-            # if hasattr(self.jwt_handler, 'is_token_blacklisted'):
-            #     return self.jwt_handler.is_token_blacklisted(token)  # Fixed: removed await
-            # elif hasattr(self.jwt_handler, 'blacklisted_tokens'):
-            #     return token in self.jwt_handler.blacklisted_tokens
-            # 
-            # # Fallback to in-memory blacklist
-            # if hasattr(self, '_blacklisted_tokens'):
-            #     return token in self._blacklisted_tokens
-            # 
-            # return False
         except Exception as e:
-            logger.error(f"Token blacklist check error: {e}")
+            # Log error but return False (fail-open for availability)
+            logger.error(f"Token blacklist check error: {e}", exc_info=True)
             return False
     
     async def verify_password(self, password: str, hash_value: str) -> bool:
