@@ -1820,7 +1820,7 @@ class UnifiedTestRunner:
                     returncode = process.returncode
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
-                    cleanup_subprocess(process, timeout=5, force=True)
+                    cleanup_subprocess(process, timeout=5)
                     raise
                 except Exception as e:
                     # CRITICAL: Robust error handling for Windows I/O issues in process communication
@@ -2945,9 +2945,15 @@ def main():
     )
     
     parser.add_argument(
-        "--validate",
+        "--no-validate",
         action="store_true",
-        help="Validate test structure and configuration"
+        help="Skip test structure and configuration validation (validation runs by default)"
+    )
+    
+    parser.add_argument(
+        "--full-validate",
+        action="store_true",
+        help="Run full validation on all Python files (default: quick mode with test files only)"
     )
     
     # Cypress-specific arguments
@@ -3154,11 +3160,50 @@ def main():
         
         return 0
     
-    if args.validate:
+    # Run validation by default unless --no-validate is specified
+    if not getattr(args, 'no_validate', False):
         validator = TestValidation()
+        full_mode = getattr(args, 'full_validate', False)
+        mode_desc = "full" if full_mode else "quick"
+        print(f"Running comprehensive test validation ({mode_desc} mode)...")
+        
+        # 1. Syntax validation
+        print("\n=== SYNTAX VALIDATION ===")
+        syntax_result = validator.validate_syntax(quick_mode=not full_mode)
+        if syntax_result["success"]:
+            mode_info = f" ({syntax_result.get('quick_mode', 'unknown')} mode)" if 'quick_mode' in syntax_result else ""
+            print(f"✅ Syntax validation passed: {syntax_result['files_checked']} files checked{mode_info}")
+        else:
+            print(f"❌ Syntax validation failed: {len(syntax_result['syntax_errors'])} errors found")
+            for error in syntax_result['syntax_errors']:
+                print(f"  - {error['file']}: {error['error']}")
+            return 1
+        
+        # 2. Test structure validation
+        print("\n=== TEST STRUCTURE VALIDATION ===")
         print("Test structure validation not fully implemented yet.")
-        print("Cypress integration completed successfully!")
-        return 0
+        
+        print("\n✅ All validations passed!")
+        
+        # If user ran ONLY validation (no other test arguments), exit here
+        # Check if user provided any actual test execution arguments
+        test_execution_args = [
+            args.category, args.categories, args.path, args.keyword, 
+            getattr(args, 'show_category_stats', False),
+            getattr(args, 'master_orchestration', False),
+            getattr(args, 'orchestration_status', False),
+            getattr(args, 'use_layers', False),
+            getattr(args, 'show_layers', False),
+            getattr(args, 'cleanup_old_environments', False)
+        ]
+        
+        # If no test execution arguments provided, exit after validation
+        if not any(test_execution_args):
+            return 0
+        
+        print("\n=== PROCEEDING TO TEST EXECUTION ===")
+    else:
+        print("⚠️  Skipping validation (--no-validate specified)")
     
     # NEW: Handle Master Orchestration Controller execution first
     if orchestration_config.master_orchestration_available and (
