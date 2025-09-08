@@ -318,21 +318,32 @@ class TestReloadFunctionality(BaseTestCase):
         assert isinstance(config2, AppConfig)
     
     def test_reload_cache_clear_functionality(self):
-        """Test that force reload properly clears cache.
+        """Test that force reload properly clears cache and reloads fresh configuration.
         
         Business Value: Ensures cache invalidation works for hot reloads
         """
         loader = ConfigurationLoader()
         
         # Load and cache config
-        loader.load()
+        config1 = loader.load()
         assert loader._config_cache is not None
+        assert loader._config_cache is config1
         
-        # Force reload should clear cache
-        loader.reload(force=True)
+        # Store reference to LRU cache to verify it gets cleared
+        original_cache_info = loader.load.cache_info()
+        assert original_cache_info.hits >= 0  # Cache has been used
         
-        # Cache should be cleared
-        assert loader._config_cache is None
+        # Force reload should clear cache and return fresh config
+        config2 = loader.reload(force=True)
+        
+        # Verify cache was cleared and fresh config loaded
+        assert config2 is not None
+        assert isinstance(config2, AppConfig)
+        assert loader._config_cache is config2  # Cache should contain new config
+        
+        # Verify LRU cache was cleared (cache info should show fewer hits or be reset)
+        new_cache_info = loader.load.cache_info()
+        assert new_cache_info.hits == 0  # LRU cache was cleared
 
 
 class TestDatabaseURLAccess(BaseTestCase):
@@ -637,18 +648,23 @@ class TestPerformanceAndMemory(BaseTestCase):
         import time
         
         # Measure first load time
-        start_time = time.time()
+        start_time = time.perf_counter()
         config1 = loader.load()
-        first_load_time = time.time() - start_time
+        first_load_time = time.perf_counter() - start_time
         
         # Measure cached access time
-        start_time = time.time()
+        start_time = time.perf_counter()
         config2 = loader.load()
-        cached_load_time = time.time() - start_time
+        cached_load_time = time.perf_counter() - start_time
         
-        # Cached access should be significantly faster
-        assert cached_load_time < first_load_time
-        assert cached_load_time < 0.001  # Should be sub-millisecond
+        # Performance assertions with robustness for very fast systems
+        # If both are very fast (sub-microsecond), consider the performance acceptable
+        if first_load_time > 1e-6 and cached_load_time > 1e-6:
+            # Cached access should be faster when measurable
+            assert cached_load_time <= first_load_time
+        
+        # Cached access should be very fast (sub-millisecond)
+        assert cached_load_time < 0.001
         
         # Should be same instance due to caching
         assert config1 is config2

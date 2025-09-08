@@ -272,12 +272,12 @@ class TestWebSocketErrorRecoveryHandler:
         # Create buffered messages
         buffered_messages = [
             WebSocketMessage(
-                message_type=MessageType.AGENT_THINKING,
+                type=MessageType.AGENT_THINKING,
                 payload={"status": "processing"},
                 user_id=connection_error_context.user_id
             ),
             WebSocketMessage(
-                message_type=MessageType.TOOL_COMPLETED,
+                type=MessageType.AGENT_PROGRESS,  # Using AGENT_PROGRESS since TOOL_COMPLETED doesn't exist
                 payload={"result": "analysis done"},
                 user_id=connection_error_context.user_id
             )
