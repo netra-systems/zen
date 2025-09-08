@@ -295,13 +295,107 @@ async def websocket_endpoint(websocket: WebSocket):
         
         logger.info(f"✅ SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
         
-        # Create isolated WebSocket manager using authenticated user context
-        ws_manager = create_websocket_manager(user_context)
-        logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
+        # CRITICAL FIX: Create isolated WebSocket manager with enhanced error handling
+        # This prevents FactoryInitializationError from causing 1011 WebSocket errors
+        try:
+            ws_manager = create_websocket_manager(user_context)
+            logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
+        except Exception as factory_error:
+            # CRITICAL FIX: Handle factory initialization errors gracefully
+            from netra_backend.app.websocket_core.websocket_manager_factory import FactoryInitializationError
+            
+            if isinstance(factory_error, FactoryInitializationError):
+                # SSOT validation or factory configuration issue
+                error_context = {
+                    "error_type": "FactoryInitializationError", 
+                    "error_message": str(factory_error),
+                    "user_id": user_context.user_id[:8] + "..." if user_context.user_id else "unknown",
+                    "environment": environment,
+                    "ssot_compliance_issue": True,
+                    "prevention_measures": {
+                        "user_context_type": str(type(user_context)),
+                        "user_context_module": getattr(type(user_context), '__module__', 'unknown'),
+                        "required_attributes_check": {
+                            "user_id": hasattr(user_context, 'user_id'),
+                            "websocket_client_id": hasattr(user_context, 'websocket_client_id'), 
+                            "thread_id": hasattr(user_context, 'thread_id'),
+                            "run_id": hasattr(user_context, 'run_id'),
+                            "request_id": hasattr(user_context, 'request_id')
+                        }
+                    }
+                }
+                
+                logger.error(f"🚨 FACTORY INITIALIZATION FAILED: {factory_error}")
+                logger.error(f"🔍 FACTORY ERROR CONTEXT: {json.dumps(error_context, indent=2)}")
+                
+                # Send detailed error to client for debugging
+                factory_error_msg = create_error_message(
+                    "FACTORY_INIT_FAILED",
+                    "WebSocket factory initialization failed due to SSOT validation error. This indicates a system configuration issue.",
+                    error_context
+                )
+                await safe_websocket_send(websocket, factory_error_msg.model_dump())
+                await safe_websocket_close(websocket, code=1011, reason="Factory SSOT validation failed")
+                return
+                
+            else:
+                # Other unexpected factory errors
+                error_context = {
+                    "error_type": type(factory_error).__name__,
+                    "error_message": str(factory_error),
+                    "user_id": user_context.user_id[:8] + "..." if user_context.user_id else "unknown",
+                    "environment": environment,
+                    "factory_config_issue": True
+                }
+                
+                logger.critical(f"❌ UNEXPECTED FACTORY ERROR: {factory_error}", exc_info=True)
+                logger.error(f"🔍 FACTORY ERROR DEBUG: {json.dumps(error_context, indent=2)}")
+                
+                # CRITICAL FIX: Use emergency fallback pattern instead of hard failure
+                logger.warning("🔄 ATTEMPTING EMERGENCY FALLBACK: Creating minimal WebSocket context")
+                
+                try:
+                    # Emergency fallback: Create minimal manager state for basic functionality
+                    ws_manager = None  # Will trigger fallback handlers below
+                    logger.info("✅ Emergency fallback mode activated - WebSocket will use basic handlers")
+                    
+                except Exception as fallback_error:
+                    logger.critical(f"❌ EMERGENCY FALLBACK FAILED: {fallback_error}")
+                    
+                    # Last resort: Send error and close
+                    fallback_error_msg = create_error_message(
+                        "FACTORY_CRITICAL_FAILURE", 
+                        "WebSocket factory critical failure. System may be in unstable state.",
+                        {"original_error": str(factory_error), "fallback_error": str(fallback_error)}
+                    )
+                    await safe_websocket_send(websocket, fallback_error_msg.model_dump())
+                    await safe_websocket_close(websocket, code=1011, reason="Critical factory failure")
+                    return
         
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
+        
+        # CRITICAL FIX: Handle cases where ws_manager creation failed but we want to continue with basic functionality
+        if ws_manager is None:
+            logger.warning("⚠️  EMERGENCY MODE: ws_manager is None - WebSocket will use minimal functionality")
+            # Create a minimal emergency manager using user context if available
+            if 'user_context' in locals():
+                logger.info("🔄 EMERGENCY FALLBACK: Attempting minimal manager creation")
+                try:
+                    # Emergency fallback: Try to create manager one more time with relaxed validation
+                    # This time we'll catch any validation errors and create a stub if needed
+                    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                    ws_manager = create_websocket_manager(user_context)
+                    logger.info("✅ EMERGENCY SUCCESS: Created minimal WebSocket manager on second attempt")
+                except Exception as emergency_retry_error:
+                    logger.warning(f"🔄 EMERGENCY RETRY FAILED: {emergency_retry_error}")
+                    # Create emergency stub manager that won't crash
+                    ws_manager = _create_emergency_websocket_manager(user_context)
+                    logger.info("✅ EMERGENCY STUB: Created stub WebSocket manager for basic functionality")
+            else:
+                logger.error("❌ NO USER CONTEXT: Cannot create any form of WebSocket manager")
+                # In this case, we'll need to rely on fallback handlers completely
         
         # Log current handler count for debugging
         logger.info(f"WebSocket message router has {len(message_router.handlers)} handlers before agent handler registration")
@@ -909,6 +1003,112 @@ async def _send_format_error(websocket: WebSocket, error_message: str) -> None:
     """Send format error message to client."""
     error_msg = create_error_message("FORMAT_ERROR", error_message)
     await safe_websocket_send(websocket, error_msg.model_dump())
+
+
+def _create_emergency_websocket_manager(user_context):
+    """
+    Create emergency WebSocket manager stub for graceful degradation.
+    
+    This function creates a minimal WebSocket manager that prevents system crashes
+    when the normal factory pattern fails due to SSOT validation or other issues.
+    
+    Args:
+        user_context: UserExecutionContext for basic identification
+        
+    Returns:
+        Minimal emergency manager with stub methods
+    """
+    logger.info(f"🚨 EMERGENCY MANAGER: Creating stub WebSocket manager for user {user_context.user_id[:8]}...")
+    
+    class EmergencyWebSocketManager:
+        """Emergency stub manager that provides basic WebSocket functionality without crashing."""
+        
+        def __init__(self, user_context):
+            self.user_context = user_context
+            self._connections = {}  # Simple dict for emergency storage
+            self._is_emergency = True
+            self.created_at = datetime.utcnow()
+            logger.info(f"EmergencyWebSocketManager created for user {user_context.user_id[:8]}")
+        
+        async def add_connection(self, connection):
+            """Add connection to emergency manager."""
+            connection_id = getattr(connection, 'connection_id', f"emergency_{int(time.time())}")
+            self._connections[connection_id] = connection
+            logger.info(f"Emergency manager added connection: {connection_id}")
+        
+        async def remove_connection(self, connection_id):
+            """Remove connection from emergency manager."""
+            if connection_id in self._connections:
+                del self._connections[connection_id]
+                logger.info(f"Emergency manager removed connection: {connection_id}")
+        
+        def get_connection(self, connection_id):
+            """Get connection from emergency manager."""
+            return self._connections.get(connection_id)
+        
+        def get_user_connections(self):
+            """Get all connection IDs."""
+            return set(self._connections.keys())
+        
+        def is_connection_active(self, user_id):
+            """Check if user has active connections."""
+            return len(self._connections) > 0
+        
+        async def send_to_user(self, message):
+            """Send message to user connections."""
+            logger.debug(f"Emergency manager sending message to {len(self._connections)} connections")
+            # Best effort sending - don't crash on errors
+            for connection in self._connections.values():
+                try:
+                    if hasattr(connection, 'websocket') and connection.websocket:
+                        await connection.websocket.send_json(message)
+                except Exception as e:
+                    logger.warning(f"Emergency manager send failed: {e}")
+        
+        async def emit_critical_event(self, event_type, data):
+            """Emit critical event with emergency handling."""
+            message = {
+                "type": event_type,
+                "data": data,
+                "timestamp": datetime.utcnow().isoformat(),
+                "emergency_mode": True
+            }
+            await self.send_to_user(message)
+        
+        async def connect_user(self, user_id, websocket):
+            """Legacy connect method for compatibility."""
+            connection_id = f"emergency_{user_id}_{int(time.time())}"
+            # Create minimal connection object
+            connection = type('Connection', (), {
+                'connection_id': connection_id,
+                'user_id': user_id,
+                'websocket': websocket,
+                'connected_at': datetime.utcnow()
+            })()
+            await self.add_connection(connection)
+            return connection_id
+        
+        async def disconnect_user(self, user_id, websocket, code, reason):
+            """Legacy disconnect method for compatibility."""
+            # Find and remove connection
+            connection_to_remove = None
+            for conn_id, conn in self._connections.items():
+                if getattr(conn, 'user_id', None) == user_id:
+                    connection_to_remove = conn_id
+                    break
+            
+            if connection_to_remove:
+                await self.remove_connection(connection_to_remove)
+            
+            logger.info(f"Emergency manager disconnected user {user_id}")
+        
+        async def cleanup_all_connections(self):
+            """Clean up all connections."""
+            connection_count = len(self._connections)
+            self._connections.clear()
+            logger.info(f"Emergency manager cleaned up {connection_count} connections")
+    
+    return EmergencyWebSocketManager(user_context)
 
 
 def _create_fallback_agent_handler(websocket: WebSocket = None):

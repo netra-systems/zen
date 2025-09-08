@@ -34,7 +34,7 @@ from netra_backend.app.dependencies import (
 )
 from netra_backend.app.logging_config import central_logger
 # WebSocket manager accessed via factory pattern for security
-from netra_backend.app.websocket_core.auth import get_websocket_authenticator
+from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
 from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
 
 logger = central_logger.get_logger(__name__)
