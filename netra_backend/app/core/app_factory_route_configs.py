@@ -34,6 +34,7 @@ def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
     return {"threads": (modules["threads_router"], "", ["threads"]),
         "messages": (modules["messages_router"], "/api/chat", ["messages"]),
+        "messages_root": (modules["messages_root_router"], "/api/messages", ["messages-root"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
         "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"]),
         "events_stream": (modules["events_stream_router"], "/api/events", ["events"])}
