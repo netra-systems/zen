@@ -1,60 +1,81 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-05 18:28:09
+**Generated:** 2025-09-08 12:18:45
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 10
-- **Passed:** 10 (100.0%)
-- **Failed:** 0 (0.0%)
+- **Total Tests:** 4
+- **Passed:** 0 (0.0%)
+- **Failed:** 4 (100.0%)
 - **Skipped:** 0
-- **Duration:** 17.79 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 60.90 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### HIGH Priority Tests
+### CRITICAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_026_jwt_authentication_real | PASS passed | 1.098s | test_priority2_high.py |
-| test_027_oauth_google_login_real | PASS passed | 0.748s | test_priority2_high.py |
-| test_028_token_refresh_real | PASS passed | 0.931s | test_priority2_high.py |
-| test_029_token_expiry_real | PASS passed | 1.651s | test_priority2_high.py |
-| test_030_logout_flow_real | PASS passed | 1.097s | test_priority2_high.py |
-| test_031_session_security_real | PASS passed | 0.595s | test_priority2_high.py |
-| test_032_https_certificate_validation_real | PASS passed | 0.646s | test_priority2_high.py |
-| test_033_cors_policy_real | PASS passed | 1.614s | test_priority2_high.py |
-| test_034_rate_limiting_real | PASS passed | 8.355s | test_priority2_high.py |
-| test_035_websocket_security_real | PASS passed | 0.602s | test_priority2_high.py |
+| test_001_http_connectivity | FAIL failed | 10.176s | test_staging_connectivity_validation.py |
+| test_002_websocket_connectivity | FAIL failed | 6.073s | test_staging_connectivity_validation.py |
+| test_003_agent_request_pipeline | FAIL failed | 10.005s | test_staging_connectivity_validation.py |
+| test_004_generate_connectivity_report | FAIL failed | 34.500s | test_staging_connectivity_validation.py |
+
+## Failed Tests Details
+
+### FAILED: test_001_http_connectivity
+- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
+- **Duration:** 10.176s
+- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:312: in test_001_http_connectivity
+    assert result["success"], f"HTTP connectivity failed: {result.get('error', 'Unknown error')}"
+E   AssertionError: HTTP connectivity failed: 
+E   assert False...
+
+### FAILED: test_002_websocket_connectivity
+- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
+- **Duration:** 6.073s
+- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:327: in test_002_websocket_connectivity
+    assert result["success"], f"WebSocket connectivity failed: {result.get('error', 'Unknown error')}"
+E   AssertionError: WebSocket connectivity failed: server rejected WebSocket connection: HTTP 503
+E   assert False...
+
+### FAILED: test_003_agent_request_pipeline
+- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
+- **Duration:** 10.005s
+- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:342: in test_003_agent_request_pipeline
+    assert result["success"], f"Agent pipeline test failed: {result.get('error', 'Unknown error')}"
+E   AssertionError: Agent pipeline test failed: 
+E   assert False...
+
+### FAILED: test_004_generate_connectivity_report
+- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
+- **Duration:** 34.500s
+- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:406: in test_004_generate_connectivity_report
+    assert success_rate >= 100.0, f"All connectivity tests should pass for staging validation"
+E   AssertionError: All connectivity tests should pass for staging validation
+E   assert 0.0 >= 100.0...
 
 ## Pytest Output Format
 
 ```
-test_priority2_high.py::test_026_jwt_authentication_real PASSED
-test_priority2_high.py::test_027_oauth_google_login_real PASSED
-test_priority2_high.py::test_028_token_refresh_real PASSED
-test_priority2_high.py::test_029_token_expiry_real PASSED
-test_priority2_high.py::test_030_logout_flow_real PASSED
-test_priority2_high.py::test_031_session_security_real PASSED
-test_priority2_high.py::test_032_https_certificate_validation_real PASSED
-test_priority2_high.py::test_033_cors_policy_real PASSED
-test_priority2_high.py::test_034_rate_limiting_real PASSED
-test_priority2_high.py::test_035_websocket_security_real PASSED
+test_staging_connectivity_validation.py::test_001_http_connectivity FAILED
+test_staging_connectivity_validation.py::test_002_websocket_connectivity FAILED
+test_staging_connectivity_validation.py::test_003_agent_request_pipeline FAILED
+test_staging_connectivity_validation.py::test_004_generate_connectivity_report FAILED
 
 ==================================================
-10 passed, 0 failed in 17.79s
+0 passed, 4 failed in 60.90s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 1 | 0 | 100.0% |
-| Authentication | 2 | 2 | 0 | 100.0% |
-| Security | 3 | 3 | 0 | 100.0% |
+| WebSocket | 1 | 0 | 1 | 0.0% |
+| Agent | 1 | 0 | 1 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
