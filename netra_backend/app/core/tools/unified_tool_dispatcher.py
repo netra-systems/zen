@@ -209,7 +209,7 @@ class UnifiedToolDispatcher:
         finally:
             # Ensure cleanup
             if dispatcher._is_active:
-                dispatcher.cleanup()
+                await dispatcher.cleanup()
     
     @classmethod
     def _create_from_factory(

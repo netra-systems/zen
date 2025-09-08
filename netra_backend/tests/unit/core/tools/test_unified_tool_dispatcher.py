@@ -64,10 +64,10 @@ class MockBaseTool:
         self.delay = delay
         self.last_kwargs = {}
         
-    async def arun(self, tool_input: Dict[str, Any]) -> Any:
+    async def arun(self, **kwargs) -> Any:
         """Mock async tool execution."""
         self.call_count += 1
-        self.last_kwargs = tool_input
+        self.last_kwargs = kwargs
         
         if self.delay > 0:
             await asyncio.sleep(self.delay)
@@ -116,6 +116,25 @@ class MockWebSocketManager:
     def clear_events(self):
         """Clear all recorded events."""
         self.events_sent.clear()
+        
+    async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Dict[str, Any]) -> bool:
+        """Bridge method for tool executing notifications."""
+        return await self.send_event("tool_executing", {
+            "run_id": run_id,
+            "agent_name": agent_name,
+            "tool_name": tool_name,
+            "parameters": parameters
+        })
+        
+    async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Dict[str, Any], execution_time_ms: float) -> bool:
+        """Bridge method for tool completed notifications."""
+        return await self.send_event("tool_completed", {
+            "run_id": run_id,
+            "agent_name": agent_name,
+            "tool_name": tool_name,
+            "result": result,
+            "execution_time_ms": execution_time_ms
+        })
 
 
 class MockAgentWebSocketBridge:
@@ -756,7 +775,12 @@ class TestPerformanceAndStress:
     async def test_rapid_tool_execution_stress(self):
         """Test rapid consecutive tool execution stress."""
         user_context = create_user_context()
-        dispatcher = await UnifiedToolDispatcher.create_for_user(user_context)
+        # Use working WebSocket manager for performance testing
+        websocket_manager = MockWebSocketManager()
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
+            user_context=user_context,
+            websocket_bridge=websocket_manager
+        )
         
         tool = MockBaseTool("stress_tool")
         dispatcher.register_tool(tool)
@@ -790,7 +814,12 @@ class TestPerformanceAndStress:
     async def test_memory_stability_under_load(self):
         """Test memory stability under sustained load."""
         user_context = create_user_context()
-        dispatcher = await UnifiedToolDispatcher.create_for_user(user_context)
+        # Use working WebSocket manager for load testing
+        websocket_manager = MockWebSocketManager()
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
+            user_context=user_context,
+            websocket_bridge=websocket_manager
+        )
         
         tool = MockBaseTool("memory_tool")
         dispatcher.register_tool(tool)
@@ -945,7 +974,13 @@ class TestContextManagers:
         """Test basic request-scoped context manager functionality."""
         user_context = create_user_context()
         
-        async with create_request_scoped_dispatcher(user_context) as dispatcher:
+        # Use working WebSocket manager for context manager testing
+        websocket_manager = MockWebSocketManager()
+        
+        async with create_request_scoped_dispatcher(
+            user_context,
+            websocket_manager=websocket_manager
+        ) as dispatcher:
             assert dispatcher._is_active
             assert dispatcher.user_context == user_context
             

@@ -579,11 +579,8 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception instead of silent return
-            raise ConnectionError(
-                operation=f"tool_executing({tool_name})",
-                user_id=context.user_id,
-                thread_id=context.thread_id
-            )
+            error_details = f"operation=tool_executing({tool_name}), user_id={context.user_id}, thread_id={context.thread_id}"
+            raise ConnectionError(f"WebSocket notification failed: {error_details}")
         
         # MONITORING: Track notification attempt
         correlation_id = self.notification_monitor.track_notification_attempted(
@@ -680,11 +677,8 @@ class UnifiedToolExecutionEngine:
             )
             
             # LOUD FAILURE: Raise exception
-            raise ConnectionError(
-                operation=f"tool_completed({tool_name})",
-                user_id=context.user_id,
-                thread_id=context.thread_id
-            )
+            error_details = f"operation=tool_completed({tool_name}), user_id={context.user_id}, thread_id={context.thread_id}"
+            raise ConnectionError(f"WebSocket notification failed: {error_details}")
         
         # MONITORING: Track notification attempt  
         correlation_id = self.notification_monitor.track_notification_attempted(
