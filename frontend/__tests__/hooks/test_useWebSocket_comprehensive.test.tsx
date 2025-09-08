@@ -154,6 +154,11 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     require('../../utils/unique-id-generator').generateMessageId = mockUniqueIdGenerator.generateMessageId;
     require('../../utils/unique-id-generator').generateTemporaryId = mockUniqueIdGenerator.generateTemporaryId;
     require('../../lib/logger').logger = mockLogger;
+    require('../../auth/unified-auth-service').unifiedAuthService = mockUnifiedAuthService;
+    require('../../config').config = mockConfig;
+    require('../../store/authStore').useAuthStore = jest.fn(() => mockAuthStore);
+    require('../../hooks/useGTMEvent').useGTMEvent = jest.fn(() => mockGTMEvent);
+    require('../../lib/auth-validation').monitorAuthState = mockAuthValidation.monitorAuthState;
   });
 
   afterEach(() => {
