@@ -571,14 +571,11 @@ class MessageQueue:
     async def _send_failure_message(self, message: QueuedMessage) -> None:
         """Send failure message to user."""
         try:
-            from netra_backend.app.dependencies import create_user_execution_context
+            from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
             
-            user_context = create_user_execution_context(
-                user_id=message.user_id,
-                thread_id=str(uuid.uuid4()),
-                run_id=str(uuid.uuid4())
-            )
+            # Use session-based context to maintain conversation continuity
+            user_context = get_user_execution_context(user_id=message.user_id)
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({
                 "type": "error",

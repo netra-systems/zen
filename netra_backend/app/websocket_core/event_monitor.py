@@ -901,5 +901,112 @@ class ChatEventMonitor(ComponentMonitor):
         return summary
 
 
+# Backward compatibility WebSocketEventMonitor that matches test expectations
+class WebSocketEventMonitor:
+    """
+    WebSocket Event Monitor that wraps ChatEventMonitor with test-compatible interface.
+    
+    This class provides the interface expected by unit tests while delegating
+    actual monitoring functionality to the existing ChatEventMonitor.
+    """
+    
+    def __init__(self, track_critical_events: bool = True, validate_event_order: bool = True, metrics_enabled: bool = True):
+        """Initialize with configuration options expected by tests."""
+        self.track_critical_events = track_critical_events
+        self.validate_event_order = validate_event_order
+        self.metrics_enabled = metrics_enabled
+        self._session_trackers = {}  # Track active sessions
+        self._validation_lock = asyncio.Lock()  # For thread safety
+        
+        # Delegate to actual monitor
+        self._delegate = chat_event_monitor
+    
+    async def start_session_tracking(self, session_id: str, session_data: dict):
+        """Start tracking an agent session."""
+        async with self._validation_lock:
+            self._session_trackers[session_id] = EventTracker()
+            # Delegate to actual monitor
+            await self._delegate.record_event("agent_started", session_data.get("thread_id", session_id))
+    
+    async def record_event(self, event_type: str, session_id: str, event_data: dict = None):
+        """Record an event for a session."""
+        if session_id in self._session_trackers:
+            self._session_trackers[session_id].track_event(event_type, session_id, event_data)
+        
+        # Delegate to actual monitor
+        await self._delegate.record_event(event_type, session_id, metadata=event_data)
+    
+    async def validate_critical_events(self, session_id: str) -> bool:
+        """Validate that all critical events were received for a session."""
+        if not self.track_critical_events:
+            return True
+            
+        if session_id not in self._session_trackers:
+            return False
+            
+        tracker = self._session_trackers[session_id]
+        critical_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
+        
+        for event in critical_events:
+            if not any(e["event_type"] == event for e in tracker.events):
+                raise MissingCriticalEventError(f"Missing critical event: {event}")
+        
+        return True
+    
+    async def get_session_metrics(self, session_id: str) -> dict:
+        """Get metrics for a specific session."""
+        if not self.metrics_enabled or session_id not in self._session_trackers:
+            return {}
+            
+        tracker = self._session_trackers[session_id]
+        return {
+            "total_events": len(tracker.events),
+            "event_types": list(set(e["event_type"] for e in tracker.events)),
+            "session_duration": time.time() - (tracker.events[0]["timestamp"] if tracker.events else time.time())
+        }
+    
+    async def stop_session_tracking(self, session_id: str):
+        """Stop tracking a session and clean up."""
+        async with self._validation_lock:
+            if session_id in self._session_trackers:
+                del self._session_trackers[session_id]
+
+# Exception classes for test compatibility
+class EventValidationError(Exception):
+    """Raised when event validation fails."""
+    pass
+
+class MissingCriticalEventError(EventValidationError):
+    """Raised when a critical event is missing."""
+    pass
+
+# Additional classes for test compatibility
+class EventTracker:
+    """Simple event tracker for unit testing."""
+    def __init__(self):
+        self.events = []
+    
+    def track_event(self, event_type: str, thread_id: str, metadata: dict = None):
+        self.events.append({
+            "event_type": event_type,
+            "thread_id": thread_id,
+            "metadata": metadata or {},
+            "timestamp": time.time()
+        })
+
+class EventMetrics:
+    """Event metrics container for unit testing."""
+    def __init__(self):
+        self.total_events = 0
+        self.events_by_type = {}
+        self.avg_processing_time = 0.0
+    
+    def update(self, event_type: str, processing_time: float = 0.0):
+        self.total_events += 1
+        self.events_by_type[event_type] = self.events_by_type.get(event_type, 0) + 1
+        # Simple running average
+        self.avg_processing_time = ((self.avg_processing_time * (self.total_events - 1)) + processing_time) / self.total_events
+
+
 # Global monitor instance
 chat_event_monitor = ChatEventMonitor()

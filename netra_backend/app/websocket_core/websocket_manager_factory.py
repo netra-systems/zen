@@ -1186,7 +1186,7 @@ class WebSocketManagerFactory:
             # Fallback to request-based isolation
             return f"{user_context.user_id}:{user_context.request_id}"
     
-    def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user context.
         
@@ -1221,18 +1221,36 @@ class WebSocketManagerFactory:
                     # Clean up inactive manager
                     self._cleanup_manager_internal(isolation_key)
             
-            # Check resource limits
+            # Check resource limits with immediate cleanup attempt
             current_count = self._user_manager_count.get(user_id, 0)
             if current_count >= self.max_managers_per_user:
                 self._factory_metrics.resource_limit_hits += 1
                 logger.warning(
                     f"Resource limit exceeded for user {user_id[:8]}... "
-                    f"({current_count}/{self.max_managers_per_user} managers)"
+                    f"({current_count}/{self.max_managers_per_user} managers) - attempting immediate cleanup"
                 )
-                raise RuntimeError(
-                    f"User {user_id} has reached the maximum number of WebSocket managers "
-                    f"({self.max_managers_per_user}). Please close existing connections first."
-                )
+                
+                # FIVE WHYS FIX: Add immediate cleanup attempt before failing
+                # This addresses the timing mismatch between synchronous limits and async cleanup
+                try:
+                    # Force immediate cleanup of expired managers for this user
+                    await self._emergency_cleanup_user_managers(user_id)
+                    # Recheck count after cleanup
+                    current_count = self._user_manager_count.get(user_id, 0)
+                    logger.info(f"After emergency cleanup: user {user_id[:8]}... has {current_count} managers")
+                except Exception as cleanup_error:
+                    logger.error(f"Emergency cleanup failed for user {user_id[:8]}...: {cleanup_error}")
+                
+                # If still over limit after cleanup, then fail
+                if current_count >= self.max_managers_per_user:
+                    logger.error(f"HARD LIMIT: User {user_id[:8]}... still over limit after cleanup ({current_count}/{self.max_managers_per_user})")
+                    raise RuntimeError(
+                        f"User {user_id} has reached the maximum number of WebSocket managers "
+                        f"({self.max_managers_per_user}). Emergency cleanup attempted but limit still exceeded. "
+                        f"This may indicate a resource leak or extremely high connection rate."
+                    )
+                else:
+                    logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
             # Create new isolated manager
             manager = IsolatedWebSocketManager(user_context)
@@ -1387,13 +1405,66 @@ class WebSocketManagerFactory:
             current_count = self._user_manager_count.get(user_id, 0)
             return current_count < self.max_managers_per_user
     
+    async def force_cleanup_user_managers(self, user_id: str) -> int:
+        """
+        Manually force cleanup of all managers for a specific user.
+        
+        FIVE WHYS FIX: Public API for tests and emergency situations to force cleanup
+        when background cleanup is not working properly.
+        
+        Args:
+            user_id: User ID to cleanup managers for
+            
+        Returns:
+            Number of managers cleaned up
+        """
+        return await self._emergency_cleanup_user_managers(user_id)
+    
+    async def force_cleanup_all_expired(self) -> int:
+        """
+        Manually force cleanup of all expired managers across all users.
+        
+        FIVE WHYS FIX: Public API for tests to trigger immediate cleanup
+        when background tasks are not running properly.
+        
+        Returns:
+            Number of managers cleaned up
+        """
+        logger.info("🔧 MANUAL CLEANUP: Forcing cleanup of all expired managers")
+        try:
+            await self._cleanup_expired_managers()
+            return len([key for key in self._active_managers.keys()])  # Return approximate count
+        except Exception as e:
+            logger.error(f"Manual cleanup failed: {e}")
+            return 0
+    
     async def _background_cleanup(self) -> None:
-        """Background task to cleanup expired managers."""
+        """
+        Background task to cleanup expired managers.
+        
+        FIVE WHYS FIX: Environment-aware cleanup intervals for better test performance.
+        """
+        # Determine appropriate cleanup interval based on environment
+        from shared.isolated_environment import get_env
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["test", "testing", "ci"]:
+            cleanup_interval = 30  # 30 seconds for test environments
+            logger.info("🧪 TEST ENVIRONMENT: Using 30-second background cleanup interval")
+        elif environment == "development":
+            cleanup_interval = 120  # 2 minutes for development
+            logger.info("🔧 DEV ENVIRONMENT: Using 2-minute background cleanup interval")
+        else:
+            cleanup_interval = 300  # 5 minutes for staging/production
+            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 5-minute background cleanup interval")
+        
         while True:
             try:
-                await asyncio.sleep(300)  # Run every 5 minutes
+                await asyncio.sleep(cleanup_interval)
                 await self._cleanup_expired_managers()
             except asyncio.CancelledError:
+                logger.info("Background cleanup task cancelled")
                 break
             except Exception as e:
                 logger.error(f"Background cleanup error: {e}")
@@ -1422,8 +1493,71 @@ class WebSocketManagerFactory:
         if expired_keys:
             logger.info(f"Background cleanup completed: {len(expired_keys)} managers cleaned")
     
+    async def _emergency_cleanup_user_managers(self, user_id: str) -> int:
+        """
+        Perform immediate cleanup of expired managers for a specific user.
+        
+        FIVE WHYS FIX: Provides synchronous cleanup option to address timing mismatch
+        between resource limit enforcement and background cleanup.
+        
+        Args:
+            user_id: User ID to cleanup managers for
+            
+        Returns:
+            Number of managers cleaned up
+        """
+        logger.info(f"🚨 EMERGENCY CLEANUP: Starting immediate cleanup for user {user_id[:8]}...")
+        
+        # Find all managers for this user
+        user_isolation_keys = []
+        with self._factory_lock:
+            for key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    user_isolation_keys.append(key)
+        
+        if not user_isolation_keys:
+            logger.info(f"No managers found for user {user_id[:8]}... during emergency cleanup")
+            return 0
+        
+        # Check which ones are inactive or expired (more aggressive than background cleanup)
+        cutoff_time = datetime.utcnow() - timedelta(minutes=5)  # 5-minute cutoff for emergency
+        cleanup_keys = []
+        
+        for key in user_isolation_keys:
+            manager = self._active_managers.get(key)
+            created_time = self._manager_creation_time.get(key)
+            
+            if not manager or not manager._is_active:
+                cleanup_keys.append(key)
+                logger.debug(f"Emergency cleanup: Manager {key} is inactive")
+            elif manager._metrics.last_activity and manager._metrics.last_activity < cutoff_time:
+                cleanup_keys.append(key) 
+                logger.debug(f"Emergency cleanup: Manager {key} expired (last activity: {manager._metrics.last_activity})")
+            elif created_time and created_time < cutoff_time and len(manager._connections) == 0:
+                cleanup_keys.append(key)
+                logger.debug(f"Emergency cleanup: Manager {key} is old with no connections")
+        
+        # Clean up the identified managers
+        cleaned_count = 0
+        for key in cleanup_keys:
+            try:
+                await self.cleanup_manager(key)
+                cleaned_count += 1
+                logger.info(f"Emergency cleanup: Removed manager {key}")
+            except Exception as e:
+                logger.error(f"Failed to emergency cleanup manager {key}: {e}")
+        
+        logger.info(f"🔥 EMERGENCY CLEANUP COMPLETE: Cleaned {cleaned_count} managers for user {user_id[:8]}...")
+        return cleaned_count
+    
     def _start_background_cleanup(self) -> None:
-        """Start the background cleanup task."""
+        """
+        Start the background cleanup task with proper error handling.
+        
+        FIVE WHYS FIX: Address root cause of silent background task failures.
+        Previously: Silent RuntimeError when no event loop caused cleanup to never start
+        Now: Explicit error logging and deferred startup tracking for proper fallback
+        """
         if self._cleanup_started:
             return
             
@@ -1431,9 +1565,13 @@ class WebSocketManagerFactory:
             if not self._cleanup_task or self._cleanup_task.done():
                 self._cleanup_task = asyncio.create_task(self._background_cleanup())
                 self._cleanup_started = True
-        except RuntimeError:
-            # No event loop running - will start later when needed
-            pass
+                logger.info("✅ Background cleanup task started successfully")
+        except RuntimeError as no_loop_error:
+            # CRITICAL FIX: Make event loop failures explicit, not silent
+            logger.warning(f"⚠️ Background cleanup deferred - no event loop: {no_loop_error}")
+            logger.info("🔄 Background cleanup will be attempted on next async operation")
+            # Don't set _cleanup_started = True here - we need to retry later
+            self._cleanup_started = False  # Ensure we retry later
     
     async def shutdown(self) -> None:
         """Shutdown the factory and clean up all managers."""

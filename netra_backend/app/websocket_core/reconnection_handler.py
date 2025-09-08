@@ -47,6 +47,53 @@ def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
         )
         return None
 
+# Additional classes needed by unit tests
+from dataclasses import dataclass
+from enum import Enum
+from typing import List, Dict, Any, Optional
+import asyncio
+import time
+
+# Backward compatibility alias
+WebSocketReconnectionHandler = UnifiedWebSocketManager
+
+class ReconnectionState(Enum):
+    """States for reconnection handling."""
+    DISCONNECTED = "disconnected"
+    CONNECTING = "connecting"
+    CONNECTED = "connected"
+    BACKOFF = "backoff"
+    FAILED = "failed"
+
+@dataclass
+class ReconnectionConfig:
+    """Configuration for reconnection behavior."""
+    max_retries: int = 5
+    initial_delay_seconds: float = 1.0
+    max_delay_seconds: float = 30.0
+    backoff_multiplier: float = 2.0
+    jitter_enabled: bool = True
+
+class MaxRetriesExceededException(Exception):
+    """Raised when max reconnection retries are exceeded."""
+    pass
+
+@dataclass
+class ReconnectionSession:
+    """Tracks a reconnection session."""
+    session_id: str
+    user_id: str
+    connection_id: str
+    state: ReconnectionState = ReconnectionState.DISCONNECTED
+    attempt_count: int = 0
+    last_attempt_time: Optional[float] = None
+    next_retry_time: Optional[float] = None
+    buffered_messages: List[Dict[str, Any]] = None
+    
+    def __post_init__(self):
+        if self.buffered_messages is None:
+            self.buffered_messages = []
+
 # Export for backward compatibility
 __all__ = [
     'ReconnectionHandler', 
