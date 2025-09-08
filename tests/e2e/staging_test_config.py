@@ -16,6 +16,9 @@ class StagingConfig:
     api_url: str = "https://api.staging.netrasystems.ai/api"
     websocket_url: str = "wss://api.staging.netrasystems.ai/ws"
     
+    # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
+    base_url: str = "https://api.staging.netrasystems.ai"
+    
     # Auth service URLs (when deployed)
     auth_url: str = "https://auth.staging.netrasystems.ai"
     
