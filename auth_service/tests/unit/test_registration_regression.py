@@ -4,6 +4,7 @@ Ensures database persistence is working correctly and not using test/in-memory s
 """
 import pytest
 from datetime import datetime, UTC
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseManager
@@ -24,13 +25,13 @@ class TestRegistrationRegression:
         
         # Mock database connection
         mock_db_connection = DatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
-        mock_repo = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
+        mock_repo = AsyncMock()  # TODO: Use real service instance
         
         # Configure mocks
-        mock_db_connection.get_session = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session = AsyncMock()  # TODO: Use real service instance
         mock_db_connection.get_session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_db_connection.get_session.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session.return_value.__aexit__ = AsyncMock()  # TODO: Use real service instance
         
         # Mock repository methods
         mock_repo.get_by_email = AsyncMock(return_value=None)  # User doesn't exist
@@ -61,8 +62,8 @@ class TestRegistrationRegression:
         
         # Mock database connection
         mock_db_connection = DatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
-        mock_repo = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
+        mock_repo = AsyncMock()  # TODO: Use real service instance
         
         # Create mock user
         mock_user = Mock(spec=AuthUser)
@@ -75,9 +76,9 @@ class TestRegistrationRegression:
         mock_user.last_login_at = None
         
         # Configure mocks
-        mock_db_connection.get_session = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session = AsyncMock()  # TODO: Use real service instance
         mock_db_connection.get_session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_db_connection.get_session.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session.return_value.__aexit__ = AsyncMock()  # TODO: Use real service instance
         
         # Mock repository methods
         mock_repo.get_by_email = AsyncMock(return_value=mock_user)
@@ -171,7 +172,7 @@ class TestRegistrationRegression:
         
         # Mock database to inspect what gets stored
         mock_db_connection = DatabaseManager().get_session()
-        mock_session = AsyncNone  # TODO: Use real service instance
+        mock_session = AsyncMock()  # TODO: Use real service instance
         stored_user = None
         
         def capture_user(user):
@@ -180,14 +181,14 @@ class TestRegistrationRegression:
         
         mock_session.add.side_effect = capture_user
         
-        mock_db_connection.get_session = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session = AsyncMock()  # TODO: Use real service instance
         mock_db_connection.get_session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_db_connection.get_session.return_value.__aexit__ = AsyncNone  # TODO: Use real service instance
+        mock_db_connection.get_session.return_value.__aexit__ = AsyncMock()  # TODO: Use real service instance
         
         service._db_connection = mock_db_connection
         
         with patch('auth_service.auth_core.services.auth_service.AuthUserRepository') as mock_repo_class:
-            mock_repo = AsyncNone  # TODO: Use real service instance
+            mock_repo = AsyncMock()  # TODO: Use real service instance
             mock_repo.get_by_email = AsyncMock(return_value=None)
             mock_repo_class.return_value = mock_repo
             
