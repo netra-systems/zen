@@ -37,7 +37,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 

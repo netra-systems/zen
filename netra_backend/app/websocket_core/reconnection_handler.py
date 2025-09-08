@@ -38,8 +38,14 @@ def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
     else:
         # BACKWARD COMPATIBILITY: Default context for legacy callers
         # TODO: All callers should provide user_id for security
-        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-        return get_websocket_manager()
+        # SECURITY FIX: Log warning and return None to encourage proper usage
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            "ReconnectionHandler called without user_id - this is a security risk. "
+            "Please provide user_id for proper isolation."
+        )
+        return None
 
 # Export for backward compatibility
 __all__ = [

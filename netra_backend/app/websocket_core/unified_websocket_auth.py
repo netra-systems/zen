@@ -25,6 +25,7 @@ service while maintaining full SSOT compliance.
 """
 
 import asyncio
+import json
 import logging
 from typing import Dict, Optional, Any, Tuple
 from dataclasses import dataclass
@@ -39,7 +40,7 @@ from netra_backend.app.services.unified_authentication_service import (
     AuthenticationContext,
     AuthenticationMethod
 )
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -130,7 +131,20 @@ class UnifiedWebSocketAuthenticator:
         connection_state = getattr(websocket, 'client_state', 'unknown')
         self._connection_states_seen[connection_state] = self._connection_states_seen.get(connection_state, 0) + 1
         
+        # Enhanced authentication attempt logging
+        auth_attempt_debug = {
+            "connection_state": connection_state,
+            "websocket_client_info": {
+                "host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                "port": getattr(websocket.client, 'port', 'unknown') if websocket.client else 'no_client'
+            },
+            "headers_available": len(websocket.headers) if websocket.headers else 0,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "attempt_number": self._websocket_auth_attempts
+        }
+        
         logger.info(f"SSOT WEBSOCKET AUTH: Starting authentication (state: {connection_state})")
+        logger.debug(f"🔐 WEBSOCKET AUTH ATTEMPT DEBUG: {json.dumps(auth_attempt_debug, indent=2)}")
         
         try:
             # Validate WebSocket connection state first
@@ -149,7 +163,24 @@ class UnifiedWebSocketAuthenticator:
             auth_result, user_context = await self._auth_service.authenticate_websocket(websocket)
             
             if not auth_result.success:
+                # Enhanced failure debugging
+                failure_debug = {
+                    "error_code": auth_result.error_code,
+                    "error_message": auth_result.error,
+                    "connection_state": connection_state,
+                    "failure_count": self._websocket_auth_failures + 1,
+                    "success_rate": (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100,
+                    "websocket_info": {
+                        "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                        "headers_count": len(websocket.headers) if websocket.headers else 0,
+                        "state": connection_state
+                    },
+                    "metadata_keys": list(auth_result.metadata.keys()) if auth_result.metadata else [],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                
                 logger.warning(f"SSOT WEBSOCKET AUTH: Authentication failed - {auth_result.error}")
+                logger.error(f"🚨 WEBSOCKET AUTH FAILURE DEBUG: {json.dumps(failure_debug, indent=2)}")
                 self._websocket_auth_failures += 1
                 
                 return WebSocketAuthResult(
@@ -159,8 +190,23 @@ class UnifiedWebSocketAuthenticator:
                     error_code=auth_result.error_code
                 )
             
-            # Authentication successful
-            logger.info(f"SSOT WEBSOCKET AUTH: Success for user {auth_result.user_id[:8]}... (client_id: {user_context.websocket_client_id})")
+            # Authentication successful - Enhanced success logging  
+            success_debug = {
+                "user_id_prefix": auth_result.user_id[:8] if auth_result.user_id else '[NO_USER_ID]',
+                "client_id": user_context.websocket_client_id,
+                "success_count": self._websocket_auth_successes + 1,
+                "success_rate": ((self._websocket_auth_successes + 1) / max(1, self._websocket_auth_attempts)) * 100,
+                "connection_state": connection_state,
+                "permissions_count": len(auth_result.permissions) if auth_result.permissions else 0,
+                "websocket_info": {
+                    "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                    "state": connection_state
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            logger.info(f"SSOT WEBSOCKET AUTH: Success for user {auth_result.user_id[:8] if auth_result.user_id else '[NO_USER_ID]'}... (client_id: {user_context.websocket_client_id})")
+            logger.debug(f"✅ WEBSOCKET AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._websocket_auth_successes += 1
             
             return WebSocketAuthResult(
@@ -170,7 +216,23 @@ class UnifiedWebSocketAuthenticator:
             )
             
         except Exception as e:
+            # Enhanced exception debugging
+            exception_debug = {
+                "exception_type": type(e).__name__,
+                "exception_message": str(e),
+                "connection_state": connection_state,
+                "websocket_available": websocket is not None,
+                "client_info": {
+                    "host": getattr(websocket.client, 'host', 'unknown') if websocket and websocket.client else 'no_client',
+                    "port": getattr(websocket.client, 'port', 'unknown') if websocket and websocket.client else 'no_client'
+                },
+                "auth_service_available": self._auth_service is not None,
+                "failure_count": self._websocket_auth_failures + 1,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
             logger.error(f"SSOT WEBSOCKET AUTH: Unexpected error during authentication: {e}", exc_info=True)
+            logger.error(f"🔥 WEBSOCKET AUTH EXCEPTION DEBUG: {json.dumps(exception_debug, indent=2)}")
             self._websocket_auth_failures += 1
             
             return WebSocketAuthResult(

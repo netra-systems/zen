@@ -37,7 +37,7 @@ from contextlib import contextmanager
 import weakref
 import threading
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
     IsolatedWebSocketManager,
