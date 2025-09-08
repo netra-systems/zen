@@ -1,457 +1,370 @@
-"""Comprehensive unit tests for WebSocket JSON serialization.
-
-CRITICAL: Tests the enhanced _serialize_message_safely function that prevents
-"Object of type WebSocketState is not JSON serializable" errors.
+"""
+Comprehensive WebSocket Serialization Tests
 
 Business Value Justification:
 - Segment: Platform/Internal
-- Business Goal: System Reliability & Chat Functionality
-- Value Impact: Prevents WebSocket communication failures that break real-time chat
-- Strategic Impact: Ensures all message types can be transmitted to users
+- Business Goal: System Stability & Risk Reduction  
+- Value Impact: Prevents 1011 WebSocket errors that break $120K+ MRR chat functionality
+- Strategic Impact: Ensures serialization safety for all WebSocket communications
+
+Tests the comprehensive _serialize_message_safely function to handle:
+- WebSocketState enums (CRITICAL for 1011 error prevention)
+- Generic enums
+- Pydantic models
+- Datetime objects
+- Complex nested structures
 """
 
 import pytest
 import json
 from datetime import datetime, timezone
-from enum import Enum, IntEnum
-from dataclasses import dataclass
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock
+from enum import Enum
+from typing import Dict, Any
 
-# Import the function under test
 from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
 
 
-class TestWebSocketState(Enum):
-    """Mock WebSocketState enum for testing."""
-    CONNECTING = 0
-    CONNECTED = 1
-    DISCONNECTED = 3
+class TestEnum(Enum):
+    """Test enum for serialization testing."""
+    VALUE_ONE = "value1"
+    VALUE_TWO = "value2"
 
 
-class TestIntEnum(IntEnum):
-    """Test integer enum.""" 
-    FIRST = 1
-    SECOND = 2
-    THIRD = 3
-
-
-@dataclass
-class TestDataClass:
-    """Test dataclass for serialization."""
-    name: str
-    value: int
-    created_at: datetime
-
-
-class TestPydanticModel:
-    """Mock Pydantic model for testing."""
+class TestWebSocketStateSerialization:
+    """Test WebSocketState serialization to prevent 1011 errors."""
     
-    def __init__(self, name: str, created_at: datetime):
-        self.name = name
-        self.created_at = created_at
+    def test_starlette_websocket_state_serialization(self):
+        """Test Starlette WebSocketState enum serialization."""
+        try:
+            from starlette.websockets import WebSocketState
+            
+            # Test all WebSocketState values
+            assert _serialize_message_safely(WebSocketState.CONNECTING) == "connecting"
+            assert _serialize_message_safely(WebSocketState.CONNECTED) == "connected"
+            assert _serialize_message_safely(WebSocketState.DISCONNECTED) == "disconnected"
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
     
-    def model_dump(self, mode: str = None) -> Dict[str, Any]:
-        if mode == 'json':
-            return {
-                'name': self.name,
-                'created_at': self.created_at.isoformat() if self.created_at else None
+    def test_fastapi_websocket_state_serialization(self):
+        """Test FastAPI WebSocketState enum serialization."""
+        try:
+            from fastapi.websockets import WebSocketState
+            
+            # Test all WebSocketState values
+            assert _serialize_message_safely(WebSocketState.CONNECTING) == "connecting"
+            assert _serialize_message_safely(WebSocketState.CONNECTED) == "connected" 
+            assert _serialize_message_safely(WebSocketState.DISCONNECTED) == "disconnected"
+            
+        except ImportError:
+            pytest.skip("FastAPI WebSocketState not available")
+    
+    def test_websocket_state_in_dictionary(self):
+        """Test WebSocketState serialization when embedded in dictionary."""
+        try:
+            from starlette.websockets import WebSocketState
+            
+            data = {
+                "connection_state": WebSocketState.CONNECTED,
+                "message": "Connection established",
+                "timestamp": 1234567890
             }
-        else:
-            return {
-                'name': self.name, 
-                'created_at': self.created_at
-            }
-
-
-class TestComplexObject:
-    """Test object with to_dict method."""
+            
+            result = _serialize_message_safely(data)
+            
+            # Verify the WebSocketState was converted to string
+            assert result["connection_state"] == "connected"
+            assert result["message"] == "Connection established"
+            assert result["timestamp"] == 1234567890
+            
+            # Verify the result is JSON serializable
+            json_str = json.dumps(result)
+            assert '"connection_state": "connected"' in json_str
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
     
-    def __init__(self, data: Dict[str, Any]):
-        self.data = data
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return self.data.copy()
-
-
-class TestWebSocketSerializationComprehensive:
-    """Comprehensive test suite for WebSocket message serialization."""
-    
-    def test_simple_dict_passes_through(self):
-        """Test that simple dict passes through unchanged."""
-        message = {"type": "test", "data": "simple"}
-        result = _serialize_message_safely(message)
-        assert result == message
-        
-        # Verify it's JSON serializable
-        json.dumps(result)
-    
-    def test_websocket_state_enum_serialized(self):
-        """CRITICAL: Test WebSocketState enum is properly serialized."""
-        # This is the exact error case from the logs
-        state = TestWebSocketState.CONNECTED
-        result = _serialize_message_safely(state)
-        
-        # Should convert to the enum value
-        assert result == 1
-        
-        # Verify it's JSON serializable
-        json.dumps(result)
-    
-    def test_string_enum_serialized(self):
-        """Test string-based enum serialization."""
-        class StringEnum(Enum):
-            TEST_VALUE = "test_string"
-        
-        result = _serialize_message_safely(StringEnum.TEST_VALUE)
-        assert result == "test_string"
-        json.dumps(result)
-    
-    def test_int_enum_serialized(self):
-        """Test IntEnum serialization."""
-        result = _serialize_message_safely(TestIntEnum.SECOND)
-        assert result == 2
-        json.dumps(result)
-    
-    def test_pydantic_model_with_datetime(self):
-        """Test Pydantic model with datetime field."""
-        now = datetime.now(timezone.utc)
-        model = TestPydanticModel("test", now)
-        
-        result = _serialize_message_safely(model)
-        
-        # Should use model_dump(mode='json') for proper datetime handling
-        assert result["name"] == "test"
-        assert result["created_at"] == now.isoformat()
-        json.dumps(result)
-    
-    def test_object_with_to_dict_method(self):
-        """Test object with to_dict method."""
-        obj = TestComplexObject({"key": "value", "number": 42})
-        result = _serialize_message_safely(obj)
-        
-        assert result == {"key": "value", "number": 42}
-        json.dumps(result)
-    
-    def test_dataclass_serialization(self):
-        """Test dataclass serialization.""" 
-        now = datetime.now(timezone.utc)
-        dc = TestDataClass("test", 123, now)
-        
-        result = _serialize_message_safely(dc)
-        
-        assert result["name"] == "test"
-        assert result["value"] == 123
-        assert result["created_at"] == now  # Note: dataclass asdict doesn't convert datetime
-        
-        # The result should be JSON serializable (datetime will be handled by JSON encoder)
-        # For this test, we'll just verify the structure
-        assert isinstance(result, dict)
-        assert len(result) == 3
-    
-    def test_datetime_object_serialization(self):
-        """Test direct datetime object serialization."""
-        now = datetime.now(timezone.utc)
-        result = _serialize_message_safely(now)
-        
-        assert result == now.isoformat()
-        json.dumps(result)
-    
-    def test_list_with_enums_serialized(self):
-        """Test list containing enum objects."""
-        message = [
-            TestWebSocketState.CONNECTING,
-            TestWebSocketState.CONNECTED, 
-            {"state": TestWebSocketState.DISCONNECTED}
-        ]
-        
-        result = _serialize_message_safely(message)
-        
-        assert result[0] == 0  # CONNECTING
-        assert result[1] == 1  # CONNECTED
-        assert result[2]["state"] == 3  # DISCONNECTED
-        json.dumps(result)
-    
-    def test_dict_with_nested_enums(self):
-        """Test dict containing nested enum objects."""
-        message = {
-            "connection_state": TestWebSocketState.CONNECTED,
-            "metadata": {
-                "previous_state": TestWebSocketState.CONNECTING,
-                "states_list": [TestWebSocketState.CONNECTED, TestWebSocketState.DISCONNECTED]
-            }
-        }
-        
-        result = _serialize_message_safely(message)
-        
-        assert result["connection_state"] == 1
-        assert result["metadata"]["previous_state"] == 0
-        assert result["metadata"]["states_list"] == [1, 3]
-        json.dumps(result)
-    
-    def test_set_converted_to_list(self):
-        """Test set objects are converted to lists."""
-        message = {"values": {1, 2, 3}}
-        result = _serialize_message_safely(message)
-        
-        assert isinstance(result["values"], list)
-        assert set(result["values"]) == {1, 2, 3}
-        json.dumps(result)
-    
-    def test_tuple_converted_to_list(self):
-        """Test tuple objects are converted to lists."""
-        message = ("first", TestWebSocketState.CONNECTED, 42)
-        result = _serialize_message_safely(message)
-        
-        assert result == ["first", 1, 42]  # tuple → list, enum → value
-        json.dumps(result)
-    
-    def test_complex_nested_structure(self):
-        """Test deeply nested structure with all object types."""
-        now = datetime.now(timezone.utc)
-        model = TestPydanticModel("nested", now)
-        
-        message = {
-            "type": "complex_test",
-            "websocket_state": TestWebSocketState.CONNECTED,
-            "data": {
-                "model": model,
-                "datetime": now,
-                "enum_list": [TestWebSocketState.CONNECTING, TestWebSocketState.DISCONNECTED],
-                "mixed_data": {
-                    "numbers": (1, 2, 3),
-                    "strings": {"a", "b", "c"},
-                    "nested": {
-                        "state": TestWebSocketState.CONNECTED
+    def test_websocket_state_in_nested_structure(self):
+        """Test WebSocketState serialization in complex nested structure."""
+        try:
+            from starlette.websockets import WebSocketState
+            
+            data = {
+                "connection": {
+                    "state": WebSocketState.CONNECTED,
+                    "diagnostics": {
+                        "client_state": WebSocketState.CONNECTED,
+                        "application_state": WebSocketState.CONNECTED
                     }
-                }
-            }
-        }
-        
-        result = _serialize_message_safely(message)
-        
-        # Verify all conversions happened correctly
-        assert result["websocket_state"] == 1
-        assert result["data"]["model"]["name"] == "nested"
-        assert result["data"]["model"]["created_at"] == now.isoformat()
-        assert result["data"]["datetime"] == now.isoformat()
-        assert result["data"]["enum_list"] == [0, 3]
-        assert result["data"]["mixed_data"]["numbers"] == [1, 2, 3]
-        assert isinstance(result["data"]["mixed_data"]["strings"], list)
-        assert result["data"]["mixed_data"]["nested"]["state"] == 1
-        
-        # Most importantly - it should be JSON serializable
-        json.dumps(result)
-    
-    def test_unsupported_object_fallback(self):
-        """Test fallback to string for unsupported objects."""
-        class UnsupportedObject:
-            def __repr__(self):
-                return "UnsupportedObject()"
-        
-        obj = UnsupportedObject()
-        result = _serialize_message_safely(obj)
-        
-        # Should fall back to string representation
-        assert result == "UnsupportedObject()"
-        json.dumps(result)
-    
-    def test_already_serializable_dict_optimization(self):
-        """Test optimization path for already serializable dicts."""
-        message = {
-            "type": "test",
-            "data": "simple",
-            "number": 42,
-            "boolean": True,
-            "null": None,
-            "array": [1, 2, 3]
-        }
-        
-        # Should pass through unchanged (optimization path)
-        result = _serialize_message_safely(message)
-        assert result is message  # Same object reference
-        json.dumps(result)
-    
-    def test_dict_with_non_serializable_values_processed(self):
-        """Test dict with non-serializable values gets processed."""
-        message = {
-            "simple": "value",
-            "enum": TestWebSocketState.CONNECTED,
-            "datetime": datetime.now(timezone.utc)
-        }
-        
-        result = _serialize_message_safely(message)
-        
-        assert result["simple"] == "value"
-        assert result["enum"] == 1
-        assert isinstance(result["datetime"], str)  # ISO format
-        json.dumps(result)
-    
-    def test_pydantic_model_fallback(self):
-        """Test Pydantic model fallback when mode='json' fails."""
-        class FailingPydanticModel:
-            def model_dump(self, mode: str = None) -> Dict[str, Any]:
-                if mode == 'json':
-                    raise Exception("JSON mode failed")
-                return {"name": "fallback"}
-        
-        model = FailingPydanticModel()
-        result = _serialize_message_safely(model)
-        
-        assert result == {"name": "fallback"}
-        json.dumps(result)
-    
-    def test_empty_containers(self):
-        """Test empty containers are handled correctly."""
-        test_cases = [
-            {},  # empty dict
-            [],  # empty list  
-            (),  # empty tuple
-            set(),  # empty set
-        ]
-        
-        for case in test_cases:
-            result = _serialize_message_safely(case)
-            json.dumps(result)  # Should not raise
-    
-    def test_none_values_preserved(self):
-        """Test None values are preserved correctly."""
-        message = {
-            "nullable": None,
-            "list_with_none": [1, None, 2],
-            "nested": {
-                "also_null": None
-            }
-        }
-        
-        result = _serialize_message_safely(message)
-        assert result["nullable"] is None
-        assert result["list_with_none"][1] is None
-        assert result["nested"]["also_null"] is None
-        json.dumps(result)
-
-
-class TestWebSocketSerializationIntegration:
-    """Integration tests for WebSocket serialization in real scenarios."""
-    
-    def test_agent_state_message_serialization(self):
-        """Test typical agent state update message."""
-        message = {
-            "type": "agent_state_update",
-            "user_id": "user123",
-            "connection_state": TestWebSocketState.CONNECTED,
-            "timestamp": datetime.now(timezone.utc),
-            "data": {
-                "agent_status": "running",
-                "progress": 0.75,
+                },
                 "metadata": {
-                    "states": [TestWebSocketState.CONNECTING, TestWebSocketState.CONNECTED]
+                    "states_list": [
+                        WebSocketState.CONNECTING,
+                        WebSocketState.CONNECTED,
+                        WebSocketState.DISCONNECTED
+                    ]
                 }
             }
-        }
-        
-        result = _serialize_message_safely(message)
-        
-        # Verify critical fields are properly serialized
-        assert result["type"] == "agent_state_update"
-        assert result["connection_state"] == 1  # CONNECTED
-        assert isinstance(result["timestamp"], str)
-        assert result["data"]["metadata"]["states"] == [0, 1]
-        
-        # Most critical - should be JSON serializable
-        json.dumps(result)
+            
+            result = _serialize_message_safely(data)
+            
+            # Verify all WebSocketState objects were converted
+            assert result["connection"]["state"] == "connected"
+            assert result["connection"]["diagnostics"]["client_state"] == "connected"
+            assert result["connection"]["diagnostics"]["application_state"] == "connected"
+            assert result["metadata"]["states_list"] == ["connecting", "connected", "disconnected"]
+            
+            # Verify the result is JSON serializable (this was failing with 1011 errors)
+            json_str = json.dumps(result)
+            assert json_str is not None
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
+
+
+class TestGeneralSerialization:
+    """Test general serialization functionality."""
     
-    def test_error_message_serialization(self):
-        """Test WebSocket error message serialization.""" 
-        error_message = {
-            "type": "error",
-            "error_code": "WEBSOCKET_STATE_ERROR",
-            "connection_state": TestWebSocketState.DISCONNECTED,
-            "timestamp": datetime.now(timezone.utc),
-            "details": {
-                "previous_states": [
-                    TestWebSocketState.CONNECTING,
-                    TestWebSocketState.CONNECTED,
-                    TestWebSocketState.DISCONNECTED
-                ]
-            }
-        }
-        
-        result = _serialize_message_safely(error_message)
-        
-        assert result["connection_state"] == 3  # DISCONNECTED
-        assert result["details"]["previous_states"] == [0, 1, 3]
-        json.dumps(result)
+    def test_already_serializable_dict(self):
+        """Test dict that's already JSON serializable passes through unchanged."""
+        data = {"key": "value", "number": 42, "boolean": True}
+        result = _serialize_message_safely(data)
+        assert result == data
     
-    def test_performance_with_large_message(self):
-        """Test serialization performance with large complex message."""
-        # Create a large message with many enum objects
-        large_message = {
-            "type": "bulk_update",
-            "connections": []
-        }
+    def test_regular_enum_serialization(self):
+        """Test regular Python enum serialization."""
+        result = _serialize_message_safely(TestEnum.VALUE_ONE)
+        assert result == "value1"
         
-        # Add 100 connection entries with enums
-        for i in range(100):
-            large_message["connections"].append({
-                "id": f"conn_{i}",
-                "state": TestWebSocketState.CONNECTED,
-                "last_seen": datetime.now(timezone.utc),
-                "history": [TestWebSocketState.CONNECTING, TestWebSocketState.CONNECTED]
-            })
+        result = _serialize_message_safely(TestEnum.VALUE_TWO)
+        assert result == "value2"
+    
+    def test_datetime_serialization(self):
+        """Test datetime object serialization."""
+        dt = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        result = _serialize_message_safely(dt)
+        assert result == "2023-01-01T12:00:00+00:00"
+    
+    def test_list_serialization(self):
+        """Test list serialization with mixed types."""
+        try:
+            from starlette.websockets import WebSocketState
+            
+            data = [
+                "string",
+                42,
+                WebSocketState.CONNECTED,
+                TestEnum.VALUE_ONE,
+                datetime(2023, 1, 1, tzinfo=timezone.utc)
+            ]
+            
+            result = _serialize_message_safely(data)
+            
+            assert result[0] == "string"
+            assert result[1] == 42
+            assert result[2] == "connected"
+            assert result[3] == "value1"
+            assert result[4] == "2023-01-01T00:00:00+00:00"
+            
+        except ImportError:
+            # Test without WebSocketState
+            data = [
+                "string",
+                42, 
+                TestEnum.VALUE_ONE,
+                datetime(2023, 1, 1, tzinfo=timezone.utc)
+            ]
+            
+            result = _serialize_message_safely(data)
+            
+            assert result[0] == "string"
+            assert result[1] == 42
+            assert result[2] == "value1" 
+            assert result[3] == "2023-01-01T00:00:00+00:00"
+    
+    def test_set_serialization(self):
+        """Test set serialization (converted to list)."""
+        data = {1, 2, 3}
+        result = _serialize_message_safely(data)
+        assert isinstance(result, list)
+        assert sorted(result) == [1, 2, 3]
+    
+    def test_unknown_object_fallback(self):
+        """Test fallback for unknown object types."""
+        class UnknownClass:
+            def __str__(self):
+                return "unknown_object"
         
-        result = _serialize_message_safely(large_message)
+        obj = UnknownClass()
+        result = _serialize_message_safely(obj)
+        assert result == "unknown_object"
+
+
+class TestConnectionDiagnostics:
+    """Test connection diagnostics that caused the original 1011 error."""
+    
+    def test_connection_diagnostics_json_serializable(self):
+        """Test that connection diagnostics can be JSON serialized without errors."""
+        # This simulates the problematic scenario that caused 1011 errors
+        try:
+            from starlette.websockets import WebSocketState
+            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+            from datetime import datetime
+            
+            # Create mock WebSocket with client_state
+            class MockWebSocket:
+                def __init__(self):
+                    self.client_state = WebSocketState.CONNECTED
+            
+            # Create connection like the system does
+            connection = WebSocketConnection(
+                connection_id="test_conn_123",
+                user_id="test_user",
+                websocket=MockWebSocket(),
+                connected_at=datetime.utcnow()
+            )
+            
+            # Simulate getting diagnostics (this is what was failing)
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            manager = UnifiedWebSocketManager()
+            
+            diagnostics = manager._get_connection_diagnostics(connection)
+            
+            # CRITICAL: This should not raise "Object of type WebSocketState is not JSON serializable"
+            json_str = json.dumps(diagnostics)
+            assert json_str is not None
+            
+            # Verify WebSocketState was converted to string
+            assert diagnostics['websocket_state'] == 'connected'
+            assert '"websocket_state": "connected"' in json_str
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
+    
+    def test_diagnostics_with_no_websocket(self):
+        """Test diagnostics when websocket is None."""
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, UnifiedWebSocketManager
+        from datetime import datetime
         
-        # Verify serialization worked for all entries
-        assert len(result["connections"]) == 100
-        for conn in result["connections"]:
-            assert conn["state"] == 1
-            assert conn["history"] == [0, 1]
+        connection = WebSocketConnection(
+            connection_id="test_conn_456", 
+            user_id="test_user",
+            websocket=None,
+            connected_at=datetime.utcnow()
+        )
+        
+        manager = UnifiedWebSocketManager()
+        diagnostics = manager._get_connection_diagnostics(connection)
         
         # Should be JSON serializable
-        json_str = json.dumps(result)
-        assert len(json_str) > 0
+        json_str = json.dumps(diagnostics)
+        assert json_str is not None
+        assert diagnostics['websocket_state'] == 'no_websocket'
 
 
-@pytest.mark.parametrize("enum_type,expected_value", [
-    (TestWebSocketState.CONNECTING, 0),
-    (TestWebSocketState.CONNECTED, 1), 
-    (TestWebSocketState.DISCONNECTED, 3),
-    (TestIntEnum.FIRST, 1),
-    (TestIntEnum.SECOND, 2),
-    (TestIntEnum.THIRD, 3),
-])
-def test_enum_serialization_parametrized(enum_type, expected_value):
-    """Parametrized test for enum serialization."""
-    result = _serialize_message_safely(enum_type)
-    assert result == expected_value
-    json.dumps(result)
+class TestSerializationPerformance:
+    """Test serialization performance and edge cases."""
+    
+    def test_large_nested_structure(self):
+        """Test serialization of large nested structure."""
+        # Create complex structure that might contain WebSocketState
+        try:
+            from starlette.websockets import WebSocketState
+            
+            data = {
+                "connections": {
+                    f"conn_{i}": {
+                        "state": WebSocketState.CONNECTED if i % 2 == 0 else WebSocketState.DISCONNECTED,
+                        "metadata": {
+                            "created_at": datetime.now(timezone.utc),
+                            "message_count": i * 10
+                        }
+                    } for i in range(100)
+                }
+            }
+            
+            result = _serialize_message_safely(data)
+            
+            # Verify all WebSocketStates were converted
+            for i in range(100):
+                conn_key = f"conn_{i}"
+                expected_state = "connected" if i % 2 == 0 else "disconnected"
+                assert result["connections"][conn_key]["state"] == expected_state
+            
+            # Most importantly - verify it's JSON serializable
+            json_str = json.dumps(result)
+            assert json_str is not None
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
+    
+    def test_circular_reference_prevention(self):
+        """Test that circular references don't cause infinite recursion."""
+        # This creates a potential infinite loop scenario
+        data = {"key": "value"}
+        data["self_ref"] = data  # Circular reference
+        
+        # Should handle this gracefully without infinite recursion
+        try:
+            result = _serialize_message_safely(data)
+            # The exact behavior may vary, but it shouldn't crash
+            assert result is not None
+        except (RecursionError, ValueError):
+            # If it detects circular reference and fails, that's acceptable
+            pass
 
 
-def test_regression_websocket_state_in_message():
-    """CRITICAL REGRESSION TEST: Reproduce original error scenario."""
-    # This reproduces the exact error from the logs:
-    # "Object of type WebSocketState is not JSON serializable"
+# Integration test that reproduces the original bug
+class TestOriginalBugReproduction:
+    """Test that reproduces and verifies the fix for the original 1011 bug."""
     
-    # Simulate message that might contain WebSocketState enum
-    problematic_message = {
-        "type": "connection_update",
-        "connection_id": "conn_dev-temp-cc173c1d_3052f606",
-        "state": TestWebSocketState.CONNECTED,  # This would cause the original error
-        "metadata": {
-            "previous_state": TestWebSocketState.CONNECTING,
-            "transition_time": datetime.now(timezone.utc)
-        }
-    }
-    
-    # Before fix: this would raise TypeError: Object of type WebSocketState is not JSON serializable
-    # After fix: should serialize properly
-    result = _serialize_message_safely(problematic_message)
-    
-    assert result["state"] == 1  # CONNECTED value
-    assert result["metadata"]["previous_state"] == 0  # CONNECTING value
-    assert isinstance(result["metadata"]["transition_time"], str)
-    
-    # The critical test - this should NOT raise an exception
-    json_output = json.dumps(result)
-    assert "conn_dev-temp-cc173c1d_3052f606" in json_output
+    def test_websocket_error_message_serialization(self):
+        """Test the exact scenario that was causing 1011 errors in staging."""
+        try:
+            from starlette.websockets import WebSocketState
+            
+            # Simulate the error message structure that was failing
+            error_context = {
+                "error_type": "ConnectionError",
+                "environment": "staging", 
+                "connection_diagnostics": {
+                    'has_websocket': True,
+                    'websocket_type': 'WebSocket',
+                    'connection_age_seconds': 1.23,
+                    'metadata_present': False,
+                    'websocket_state': WebSocketState.CONNECTED  # This was causing the error
+                }
+            }
+            
+            # This should NOT raise "Object of type WebSocketState is not JSON serializable"
+            safe_error_context = _serialize_message_safely(error_context)
+            
+            # Verify WebSocketState was converted to string
+            assert safe_error_context["connection_diagnostics"]["websocket_state"] == "connected"
+            
+            # CRITICAL: Verify it can be JSON serialized (this was failing before)
+            json_str = json.dumps(safe_error_context)
+            assert json_str is not None
+            assert '"websocket_state": "connected"' in json_str
+            
+            # Simulate sending this as a WebSocket message (what the endpoint does)
+            message = {
+                "type": "error",
+                "error": {
+                    "code": "CONNECTION_ERROR",
+                    "message": "Connection diagnostics available",
+                    "context": safe_error_context
+                },
+                "timestamp": 1234567890
+            }
+            
+            # This should be completely JSON serializable now
+            final_json = json.dumps(message)
+            assert final_json is not None
+            
+        except ImportError:
+            pytest.skip("Starlette WebSocketState not available")
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

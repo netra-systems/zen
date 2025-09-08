@@ -44,7 +44,32 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
             return message
         except (TypeError, ValueError):
             # Dict contains non-serializable objects, need to process recursively
-            return {k: _serialize_message_safely(v) for k, v in message.items()}
+            # Process both keys AND values for enum objects
+            result = {}
+            for key, value in message.items():
+                # Convert enum keys to their values or strings
+                if isinstance(key, Enum):
+                    safe_key = key.value if hasattr(key, 'value') else str(key)
+                else:
+                    safe_key = key
+                # Recursively serialize values
+                result[safe_key] = _serialize_message_safely(value)
+            return result
+    
+    # CRITICAL FIX: Handle WebSocketState enum specifically (from FastAPI/Starlette)
+    try:
+        from starlette.websockets import WebSocketState as StarletteWebSocketState
+        if isinstance(message, StarletteWebSocketState):
+            return message.name.lower()  # CONNECTED → "connected"
+    except ImportError:
+        pass
+    
+    try:
+        from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
+        if isinstance(message, FastAPIWebSocketState):
+            return message.name.lower()  # CONNECTED → "connected"
+    except ImportError:
+        pass
     
     # Handle enum objects (CRITICAL FIX for WebSocketState)
     if isinstance(message, Enum):
@@ -65,7 +90,9 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
     # Handle dataclasses
     if hasattr(message, '__dataclass_fields__'):
         from dataclasses import asdict
-        return asdict(message)
+        # Convert dataclass to dict, then recursively serialize the result
+        dict_data = asdict(message)
+        return _serialize_message_safely(dict_data)
     
     # Handle datetime objects
     if hasattr(message, 'isoformat'):
@@ -751,17 +778,31 @@ class UnifiedWebSocketManager:
     # ============================================================================
     
     def _get_connection_diagnostics(self, connection: WebSocketConnection) -> Dict[str, Any]:
-        """Get detailed diagnostics for a connection."""
+        """Get detailed diagnostics for a connection with safe serialization."""
         try:
             websocket = connection.websocket
-            return {
+            diagnostics = {
                 'has_websocket': websocket is not None,
                 'websocket_type': type(websocket).__name__ if websocket else None,
                 'connection_age_seconds': (datetime.utcnow() - connection.connected_at).total_seconds(),
                 'metadata_present': bool(connection.metadata),
-                # Add more WebSocket-specific diagnostics if available
-                'websocket_state': getattr(websocket, 'client_state', 'unknown') if websocket else None,
             }
+            
+            # CRITICAL FIX: Safe WebSocketState handling
+            if websocket:
+                try:
+                    client_state = getattr(websocket, 'client_state', None)
+                    if client_state is not None:
+                        # Use safe serialization to convert WebSocketState enum to string
+                        diagnostics['websocket_state'] = _serialize_message_safely(client_state)
+                    else:
+                        diagnostics['websocket_state'] = 'unknown'
+                except Exception as state_error:
+                    diagnostics['websocket_state'] = f'error_getting_state_{str(state_error)}'
+            else:
+                diagnostics['websocket_state'] = 'no_websocket'
+                
+            return diagnostics
         except Exception as e:
             return {'diagnostics_error': str(e)}
     
