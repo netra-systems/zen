@@ -81,7 +81,7 @@ services:
 
   # Dev ClickHouse Analytics (Optional - can be ephemeral)
   dev-clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:25.7.6.21-stable
     # No profile specified - runs by default
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
@@ -366,7 +366,7 @@ services:
 
   # Test ClickHouse Analytics
   test-clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:25.7.6.21-stable
     profiles: ["test"]
     environment:
       CLICKHOUSE_DB: netra_test_analytics

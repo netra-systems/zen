@@ -279,7 +279,7 @@ services:
           memory: 256M
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:25.7.6.21-stable
     environment:
       CLICKHOUSE_DB: netra_staging
       CLICKHOUSE_USER: staging_user
