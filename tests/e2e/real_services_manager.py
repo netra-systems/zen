@@ -145,11 +145,31 @@ class RealServicesManager:
     
     def _detect_project_root(self) -> Path:
         """Detect project root directory."""
+        # Start from the file location and walk up
         current = Path(__file__).parent
+        
+        # Go up from tests/e2e/ to find project root
         while current.parent != current:
-            if (current / "netra_backend").exists() or (current / "app").exists():
+            # Look for key project indicators - must have CLAUDE.md AND netra_backend or auth_service
+            has_claude = (current / "CLAUDE.md").exists()
+            has_netra_backend = (current / "netra_backend").exists()
+            has_auth_service = (current / "auth_service").exists()
+            
+            if has_claude and (has_netra_backend or has_auth_service):
                 return current
             current = current.parent
+        
+        # If we can't find it by walking up, try a more direct approach
+        # From tests/e2e/real_services_manager.py, go up 2 levels to project root
+        direct_path = Path(__file__).parent.parent.parent
+        if (direct_path / "CLAUDE.md").exists() and (direct_path / "netra_backend").exists():
+            return direct_path
+        
+        # Final fallback - use current working directory if it has project indicators
+        cwd = Path.cwd()
+        if (cwd / "CLAUDE.md").exists() and (cwd / "netra_backend").exists():
+            return cwd
+        
         raise RuntimeError("Cannot detect project root from real_services_manager.py")
     
     def _configure_service_endpoints(self) -> List[ServiceEndpoint]:
