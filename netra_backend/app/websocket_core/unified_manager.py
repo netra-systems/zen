@@ -57,18 +57,27 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
             return result
     
     # CRITICAL FIX: Handle WebSocketState enum specifically (from FastAPI/Starlette)
+    # CLOUD RUN FIX: More resilient import handling to prevent startup failures
     try:
         from starlette.websockets import WebSocketState as StarletteWebSocketState
         if isinstance(message, StarletteWebSocketState):
             return message.name.lower()  # CONNECTED → "connected"
-    except ImportError:
-        pass
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"Starlette WebSocketState import failed (non-critical): {e}")
     
     try:
         from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
         if isinstance(message, FastAPIWebSocketState):
             return message.name.lower()  # CONNECTED → "connected"
-    except ImportError:
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"FastAPI WebSocketState import failed (non-critical): {e}")
+    
+    # CLOUD RUN FALLBACK: Handle generic WebSocket state patterns
+    try:
+        if hasattr(message, 'name') and hasattr(message, 'value'):
+            # This is likely a WebSocketState enum from any framework
+            return str(message.name).lower()
+    except (AttributeError, TypeError):
         pass
     
     # Handle enum objects (CRITICAL FIX for WebSocketState)

@@ -131,12 +131,22 @@ class UnifiedWebSocketAuthenticator:
         connection_state = getattr(websocket, 'client_state', 'unknown')
         self._connection_states_seen[connection_state] = self._connection_states_seen.get(connection_state, 0) + 1
         
-        # Enhanced authentication attempt logging
+        # Enhanced authentication attempt logging (handle Mock objects for tests)
+        def safe_get_attr(obj, attr, default='unknown'):
+            try:
+                value = getattr(obj, attr, default)
+                # Handle Mock objects by converting to string
+                if hasattr(value, '_mock_name'):
+                    return f"mock_{attr}"
+                return str(value)
+            except Exception:
+                return default
+        
         auth_attempt_debug = {
             "connection_state": str(connection_state),  # Convert enum to string for JSON serialization
             "websocket_client_info": {
-                "host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
-                "port": getattr(websocket.client, 'port', 'unknown') if websocket.client else 'no_client'
+                "host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
+                "port": safe_get_attr(websocket.client, 'port', 'no_client') if websocket.client else 'no_client'
             },
             "headers_available": len(websocket.headers) if websocket.headers else 0,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -171,7 +181,7 @@ class UnifiedWebSocketAuthenticator:
                     "failure_count": self._websocket_auth_failures + 1,
                     "success_rate": (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100,
                     "websocket_info": {
-                        "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                        "client_host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
                         "headers_count": len(websocket.headers) if websocket.headers else 0,
                         "state": str(connection_state)
                     },
@@ -199,7 +209,7 @@ class UnifiedWebSocketAuthenticator:
                 "connection_state": str(connection_state),
                 "permissions_count": len(auth_result.permissions) if auth_result.permissions else 0,
                 "websocket_info": {
-                    "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                    "client_host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
                     "state": str(connection_state)
                 },
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -223,8 +233,8 @@ class UnifiedWebSocketAuthenticator:
                 "connection_state": str(connection_state),
                 "websocket_available": websocket is not None,
                 "client_info": {
-                    "host": getattr(websocket.client, 'host', 'unknown') if websocket and websocket.client else 'no_client',
-                    "port": getattr(websocket.client, 'port', 'unknown') if websocket and websocket.client else 'no_client'
+                    "host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket and websocket.client else 'no_client',
+                    "port": safe_get_attr(websocket.client, 'port', 'no_client') if websocket and websocket.client else 'no_client'
                 },
                 "auth_service_available": self._auth_service is not None,
                 "failure_count": self._websocket_auth_failures + 1,
