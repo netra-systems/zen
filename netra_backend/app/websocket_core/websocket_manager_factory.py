@@ -38,6 +38,7 @@ import logging
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -472,9 +473,18 @@ class ConnectionLifecycleManager:
                 pass
 
 
-class IsolatedWebSocketManager:
+class IsolatedWebSocketManager(WebSocketManagerProtocol):
     """
     User-isolated WebSocket manager with completely private state.
+    
+    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class explicitly implements 
+    WebSocketManagerProtocol to prevent interface drift during migrations.
+    
+    This addresses the root cause identified in Five Whys analysis:
+    "lack of formal interface contracts causing implementation drift."
+    
+    PROTOCOL COMPLIANCE: This manager implements ALL required methods from
+    WebSocketManagerProtocol, ensuring consistent interface across migrations.
     
     This class provides the same interface as UnifiedWebSocketManager but with
     complete user isolation. Each instance manages connections for only one user
@@ -930,6 +940,108 @@ class IsolatedWebSocketManager:
                 return False
         else:
             logger.warning(f"Connection {connection_id} not found for thread update")
+            return False
+    
+    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
+        """
+        Get detailed connection health information for a user.
+        
+        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        
+        Args:
+            user_id: User ID to check health for
+            
+        Returns:
+            Dictionary containing health metrics and connection status
+        """
+        self._validate_active()
+        
+        # Validate that the requested user_id matches this manager's user
+        if user_id != self.user_context.user_id:
+            logger.warning(
+                f"Health check requested for user {user_id} from manager for user {self.user_context.user_id}. "
+                f"Returning empty health data due to user isolation."
+            )
+            return {
+                'user_id': user_id,
+                'error': 'user_isolation_violation',
+                'message': 'Cannot get health for different user in isolated manager'
+            }
+        
+        connection_ids = list(self._connection_ids)
+        total_connections = len(connection_ids)
+        active_connections = 0
+        connection_details = []
+        
+        for conn_id in connection_ids:
+            connection = self._connections.get(conn_id)
+            if connection:
+                is_active = connection.websocket is not None
+                if is_active:
+                    active_connections += 1
+                
+                connection_details.append({
+                    'connection_id': conn_id,
+                    'active': is_active,
+                    'connected_at': connection.connected_at.isoformat(),
+                    'metadata': connection.metadata or {},
+                    'thread_id': getattr(connection, 'thread_id', None)
+                })
+        
+        return {
+            'user_id': user_id,
+            'total_connections': total_connections,
+            'active_connections': active_connections,
+            'has_active_connections': active_connections > 0,
+            'connections': connection_details,
+            'manager_active': self._is_active,
+            'manager_created_at': self.created_at.isoformat(),
+            'metrics': self._metrics.to_dict(),
+            'recovery_queue_size': len(self._message_recovery_queue),
+            'error_count': self._connection_error_count
+        }
+    
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """
+        Send message to a thread (compatibility method).
+        
+        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        
+        In the isolated manager context, we route thread messages to the user
+        if the thread belongs to this manager's user context.
+        
+        Args:
+            thread_id: Thread ID to send to 
+            message: Message to send
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        try:
+            self._validate_active()
+            
+            # In isolated manager, check if this thread belongs to our user
+            if hasattr(self.user_context, 'thread_id') and self.user_context.thread_id == thread_id:
+                # Send to our user
+                await self.send_to_user(message)
+                logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via thread {thread_id}")
+                return True
+            else:
+                # Check if any of our connections match this thread
+                for connection in self._connections.values():
+                    if hasattr(connection, 'thread_id') and connection.thread_id == thread_id:
+                        await self.send_to_user(message)
+                        logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via connection thread {thread_id}")
+                        return True
+                
+                logger.debug(
+                    f"Thread {thread_id} not found in isolated manager for user {self.user_context.user_id[:8]}... "
+                    f"(manager thread: {getattr(self.user_context, 'thread_id', 'none')})"
+                )
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to send message to thread {thread_id}: {e}")
             return False
 
 
