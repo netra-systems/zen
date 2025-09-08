@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.postgres_session import (
     validate_session,
-    safe_session_context,
-    handle_session_error
+    get_async_db,
+    get_postgres_session
 )
 from netra_backend.app.logging_config import central_logger
 
