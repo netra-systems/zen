@@ -1036,13 +1036,12 @@ class AgentInstanceFactory:
         if self._performance_config.enable_emitter_pooling:
             # Initialize emitter pool if needed
             if self._emitter_pool is None:
-                # Create a new WebSocketEmitterPool instance
-                from netra_backend.app.websocket_core import create_websocket_manager
-                ws_manager = create_websocket_manager()
-                self._emitter_pool = WebSocketEmitterPool(
-                    manager=ws_manager,
-                    max_size=self._performance_config.pool_max_size if self._performance_config else 100
-                )
+                # MIGRATION NOTE: WebSocket pooling requires user context but pool is shared
+                # For now, disable pooling until architecture supports shared pools
+                logger.debug("WebSocket emitter pooling temporarily disabled - requires user context migration")
+                # Future implementation should use a different pooling strategy or
+                # create user-agnostic pool managers
+                pass
             
             # Get from pool (this will return an OptimizedUserWebSocketEmitter)
             # Note: For now we maintain backward compatibility by creating regular emitters

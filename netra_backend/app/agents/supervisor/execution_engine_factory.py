@@ -67,12 +67,17 @@ class ExecutionEngineFactory:
     is completely isolated per user request.
     """
     
-    def __init__(self, websocket_bridge: Optional[AgentWebSocketBridge] = None):
+    def __init__(self, 
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 database_session_manager=None,
+                 redis_manager=None):
         """Initialize the execution engine factory.
         
         Args:
             websocket_bridge: WebSocket bridge for agent notifications.
                              Required for proper agent execution with WebSocket events.
+            database_session_manager: Database session manager for infrastructure access.
+            redis_manager: Redis manager for caching and session management.
         """
         # CRITICAL: Validate dependencies early (fail fast)
         if not websocket_bridge:
@@ -84,6 +89,10 @@ class ExecutionEngineFactory:
         
         # Store validated websocket bridge
         self._websocket_bridge = websocket_bridge
+        
+        # Store infrastructure managers (optional - for tests and infrastructure validation)
+        self._database_session_manager = database_session_manager
+        self._redis_manager = redis_manager
         
         # Active engines registry for lifecycle management
         self._active_engines: Dict[str, UserExecutionEngine] = {}
@@ -161,6 +170,13 @@ class ExecutionEngineFactory:
                     agent_factory=agent_factory,
                     websocket_emitter=websocket_emitter
                 )
+                
+                # Attach infrastructure managers for tests and validation
+                # These are optional dependencies that enable infrastructure validation
+                if self._database_session_manager:
+                    engine.database_session_manager = self._database_session_manager
+                if self._redis_manager:
+                    engine.redis_manager = self._redis_manager
                 
                 # Register engine for lifecycle management
                 self._active_engines[engine_key] = engine
@@ -542,7 +558,11 @@ async def get_execution_engine_factory() -> ExecutionEngineFactory:
         return _factory_instance
 
 
-async def configure_execution_engine_factory(websocket_bridge: AgentWebSocketBridge) -> ExecutionEngineFactory:
+async def configure_execution_engine_factory(
+    websocket_bridge: AgentWebSocketBridge,
+    database_session_manager=None,
+    redis_manager=None
+) -> ExecutionEngineFactory:
     """Configure the singleton ExecutionEngineFactory with dependencies.
     
     This function should be called during system startup to properly initialize
@@ -550,6 +570,8 @@ async def configure_execution_engine_factory(websocket_bridge: AgentWebSocketBri
     
     Args:
         websocket_bridge: WebSocket bridge for agent notifications
+        database_session_manager: Optional database session manager for infrastructure validation
+        redis_manager: Optional Redis manager for infrastructure validation
         
     Returns:
         ExecutionEngineFactory: Configured factory instance
@@ -564,8 +586,12 @@ async def configure_execution_engine_factory(websocket_bridge: AgentWebSocketBri
             logger.warning("ExecutionEngineFactory already configured - replacing with new instance")
         
         # Create new factory with validated dependencies
-        _factory_instance = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
-        logger.info("✅ ExecutionEngineFactory configured with WebSocket bridge")
+        _factory_instance = ExecutionEngineFactory(
+            websocket_bridge=websocket_bridge,
+            database_session_manager=database_session_manager,
+            redis_manager=redis_manager
+        )
+        logger.info("✅ ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers")
         
         return _factory_instance
 
