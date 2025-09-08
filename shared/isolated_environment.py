@@ -200,6 +200,8 @@ class IsolatedEnvironment:
         
         CRITICAL: .env files are NEVER loaded in staging or production environments
         to ensure secrets come only from the deployment system.
+        EXCEPTION: For local testing, environment-specific files (staging.env, production.env)
+        can be loaded when ENABLE_LOCAL_CONFIG_FILES=true is set.
         """
         # Skip auto-loading during pytest to allow test configuration to take precedence
         import sys
@@ -212,10 +214,16 @@ class IsolatedEnvironment:
             logger.debug("Skipping env file auto-load due to DISABLE_SECRETS_LOADING")
             return
             
-        # Check current environment - never load .env in staging/production
+        # Check current environment
         environment = os.environ.get('ENVIRONMENT', '').lower()
+        
+        # For staging/production: only load environment-specific config if explicitly enabled for local testing
         if environment in ['staging', 'production']:
-            logger.debug(f"Skipping .env file loading in {environment} environment")
+            enable_local_config = os.environ.get("ENABLE_LOCAL_CONFIG_FILES", "").lower() == "true"
+            if enable_local_config:
+                self._load_environment_specific_file(environment)
+            else:
+                logger.debug(f"Skipping .env file loading in {environment} environment (set ENABLE_LOCAL_CONFIG_FILES=true for local testing)")
             return
         
         try:
@@ -243,6 +251,34 @@ class IsolatedEnvironment:
                         
         except Exception as e:
             logger.warning(f"Failed to auto-load env file: {e}")
+    
+    def _load_environment_specific_file(self, environment: str) -> None:
+        """Load environment-specific configuration file for local testing.
+        
+        This method loads config/{environment}.env files when ENABLE_LOCAL_CONFIG_FILES=true.
+        Used for local testing of staging/production configurations.
+        
+        Args:
+            environment: The environment name (e.g., 'staging', 'production')
+        """
+        try:
+            config_dir = Path.cwd() / "config"
+            env_file = config_dir / f"{environment}.env"
+            
+            if env_file.exists():
+                # Load environment-specific file but DO NOT override existing variables
+                # This ensures deployment system values take precedence
+                loaded_count, errors = self.load_from_file(env_file, override_existing=False)
+                if loaded_count > 0:
+                    logger.debug(f"Auto-loaded {loaded_count} variables from {environment}.env (without overriding existing)")
+                if errors:
+                    for error in errors:
+                        logger.warning(f"Auto-load error from {environment}.env: {error}")
+            else:
+                logger.debug(f"Environment-specific file {env_file} not found")
+                
+        except Exception as e:
+            logger.warning(f"Failed to load environment-specific file for {environment}: {e}")
     
     def _set_optimized_persistence_defaults(self) -> None:
         """Set default configuration for optimized persistence features."""

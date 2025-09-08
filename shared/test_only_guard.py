@@ -16,19 +16,19 @@ import sys
 import functools
 import logging
 from typing import Callable, TypeVar, Optional, Any
-from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
 F = TypeVar('F', bound=Callable[..., Any])
 
 
-@dataclass  
 class TestModeViolation(Exception):
     """Exception raised when test-only function is called outside test mode."""
-    function_name: str
-    reason: str
-    suggestion: str = "Ensure TESTING=true or use unified_test_runner.py"
+    def __init__(self, function_name: str, reason: str, suggestion: str = "Ensure TESTING=true or use unified_test_runner.py"):
+        self.function_name = function_name
+        self.reason = reason
+        self.suggestion = suggestion
+        super().__init__(self.__str__())
     
     def __str__(self) -> str:
         return (
