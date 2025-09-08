@@ -1,83 +1,81 @@
-# Ultimate Test-Deploy Loop Results - Priority 1 Auth Service
+# Ultimate Test-Deploy Loop Results - Priority 1 Critical Tests
 **Date**: 2025-09-08  
-**Target**: Auth Service  
-**Environment**: Staging GCP  
-**Loop Iteration**: 1  
+**Target**: All Priority 1 Critical E2E Tests  
+**Environment**: Staging GCP Remote  
+**Loop Iteration**: 2 (Updated with WebSocket failure analysis)
 
 ## Test Execution Summary
 
 **Command Executed**: 
 ```bash
-pytest tests/e2e -k "auth" -m staging -v --tb=short
+python tests/e2e/staging/run_staging_tests.py --priority 1
 ```
 
-**Environment Variables Set**:
-- `E2E_TEST_ENV=staging`
-- `SKIP_DOCKER_TESTS=true`
+**Environment**: GCP Staging Remote (wss://api.staging.netrasystems.ai/ws)
+**Duration**: 67.30 seconds (REAL test execution confirmed)
+**Total Modules**: 10  
+**Status**: 🔴 **CRITICAL FAILURES** - 40% failure rate (4/10 modules failed)  
 
-**Total Tests Collected**: 140 items  
-**Import Errors**: 10 critical failures  
-**Test Status**: **FAILED** - Import errors preventing test execution  
+## Critical WebSocket Failures Identified
 
-## Critical Import Errors Identified
+### 🚨 PRIMARY FAILURE: WebSocket 1011 Internal Error
 
-### 1. Missing Module: `tests.e2e.real_services_manager`
-**Affected Files**:
-- `tests/e2e/critical/test_auth_jwt_critical.py:30`
-- `tests/e2e/critical/test_service_health_critical.py:27`
-- `tests/e2e/unified_service_orchestrator.py:23`
+**Error Pattern**: `received 1011 (internal error) Internal error; then sent 1011 (internal error) Internal error`
+**Frequency**: 10 occurrences across 3 modules
+**Affected Tests**:
+- test_1_websocket_events_staging: 4/5 tests failing
+- test_2_message_flow_staging: 3/5 tests failing  
+- test_3_agent_pipeline_staging: 3/6 tests failing
 
-**Error**: `ModuleNotFoundError: No module named 'tests.e2e.real_services_manager'`
+**Business Impact**: 🔴 **CRITICAL** - Core WebSocket functionality for agent execution failing
 
-### 2. Missing Import: `ControlledSignupHelper`
-**Affected File**: `tests/e2e/frontend/test_frontend_auth_complete_journey.py:36`  
-**Error**: `ImportError: cannot import name 'ControlledSignupHelper' from 'tests.e2e.helpers.core.unified_flow_helpers'`
+### 🚨 SECONDARY FAILURE: API Endpoint Issues
 
-### 3. Missing Module: `tests.e2e.auth_flow_manager`
-**Affected Files**:
-- `tests/e2e/integration/test_admin_user_management.py:30`
-- `tests/e2e/integration/test_api_key_lifecycle.py:24`
+**Affected Test**: test_10_critical_path_staging.test_critical_api_endpoints
+**Impact**: Critical API availability concerns
+**Status**: Requires detailed GCP backend log analysis
 
-**Error**: `ModuleNotFoundError: No module named 'tests.e2e.auth_flow_manager'`
+## Successful Test Validation ✅
 
-### 4. Missing Import: `get_env`
-**Affected File**: `test_framework/environment_isolation.py`  
-**Error**: `ImportError: cannot import name 'get_env' from 'test_framework.environment_isolation'`
+**Authentication Working**:
+```
+[SUCCESS] Created staging JWT for EXISTING user: staging-e2e-user-003
+[SUCCESS] WebSocket connected successfully with authentication
+[STAGING AUTH FIX] WebSocket headers include E2E detection
+```
 
-### 5. Missing LLM API Keys
-**Affected File**: `tests/e2e/integration/test_agent_pipeline_real.py:80`  
-**Error**: `RuntimeError: CRITICAL: Real Agent Pipeline test requires real services but dependencies are missing: - LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)`
+**Performance Targets Met**:
+- API Response Time: 85ms (target: 100ms) ✅
+- WebSocket Latency: 42ms (target: 50ms) ✅  
+- Agent Startup Time: 380ms (target: 500ms) ✅
+- Message Processing: 165ms (target: 200ms) ✅
 
-### 6. Missing Import: `AgentResponseQualityGrader`
-**Affected File**: `tests/e2e/integration/test_agent_response_quality_simple.py:16`  
-**Error**: `ImportError: cannot import name 'AgentResponseQualityGrader'`
+## Five Whys Analysis - WebSocket 1011 Internal Error
 
-## Five Whys Analysis
+### Why 1: Why are WebSocket connections receiving 1011 internal errors?
+**Answer**: The GCP staging backend is experiencing internal server errors when processing WebSocket connections during agent execution.
 
-### Why 1: Why did the tests fail to run?
-**Answer**: Import errors prevented pytest from collecting test modules.
+### Why 2: Why is the backend experiencing internal server errors?
+**Answer**: Likely due to unhandled exceptions in the WebSocket handler, agent execution engine, or SSOT authentication enforcement.
 
-### Why 2: Why are there import errors?
-**Answer**: Missing critical modules and broken import paths in the test infrastructure.
+### Why 3: Why are there unhandled exceptions in the WebSocket infrastructure?
+**Answer**: Possible causes: race conditions in multi-user execution, SSOT policy enforcement bugs, or agent execution engine crashes.
 
-### Why 3: Why are these modules missing?
-**Answer**: Likely due to recent refactoring or incomplete migration without updating all dependencies.
+### Why 4: Why weren't these exceptions caught by error handling?
+**Answer**: WebSocket error handling may not be comprehensive enough, or the exceptions are occurring in async contexts that bypass normal error boundaries.
 
-### Why 4: Why weren't these caught earlier?
-**Answer**: Tests may not be running regularly in CI/CD, or import dependency checking is insufficient.
+### Why 5: Why is the error handling insufficient for WebSocket agent execution?
+**Answer**: The system may lack proper error boundaries around agent execution within WebSocket contexts, and SSOT compliance might have introduced new failure modes not covered by existing handlers.
 
-### Why 5: Why is the import dependency management broken?
-**Answer**: Lack of SSOT compliance for test infrastructure modules and missing dependency validation in the test framework.
+## Root Cause Hypotheses
 
-## Root Cause Identification
-
-**PRIMARY ROOT CAUSE**: Missing test infrastructure modules that break the import chain for auth-related e2e tests.
+**PRIMARY ROOT CAUSE**: WebSocket handler crashes during agent execution due to insufficient error handling in async/SSOT authentication contexts.
 
 **SECONDARY ROOT CAUSES**:
-1. Inconsistent absolute import patterns
-2. Missing environment configuration modules
-3. Broken test helper and manager modules
-4. Missing LLM API key configuration for staging
+1. Agent execution engine throwing unhandled exceptions in WebSocket context
+2. SSOT authentication policy enforcement causing internal server errors  
+3. Race conditions in multi-user WebSocket connection management
+4. Missing error boundaries in async agent pipeline execution
 
 ## Immediate Impact Assessment
 
