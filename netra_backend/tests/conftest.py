@@ -143,6 +143,8 @@ from test_framework.conftest_base import *
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *
 from test_framework.fixtures.service_fixtures import *
+# CRITICAL: Import ExecutionEngineFactory fixtures for integration tests
+from test_framework.fixtures.execution_engine_factory_fixtures import *
 from test_framework.mocks.service_mocks import MockClickHouseService, MockLLMService
 
 # Setup Python path for imports

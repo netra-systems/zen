@@ -848,7 +848,8 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                 "performance_metrics_analyzed": True,
                 "expected_improvement": "45% latency reduction",
                 "root_causes_identified": 3,
-                "optimization_recommendations": 2
+                "optimization_recommendations": 2,
+                "performance_recommendations": ["Optimize database queries", "Implement caching layer", "Scale API endpoints"]
             })
         elif "resource" in agent_name.lower():
             base_outcomes.update({

@@ -29,6 +29,12 @@ jest.mock('../../services/reconciliation');
 jest.mock('../../services/chatStatePersistence');
 jest.mock('../../utils/unique-id-generator');
 jest.mock('../../lib/logger');
+jest.mock('../../auth/unified-auth-service');
+jest.mock('../../config');
+jest.mock('../../store/authStore');
+jest.mock('../../hooks/useGTMEvent');
+jest.mock('../../lib/auth-validation');
+jest.mock('../../store/unified-chat');
 
 const mockedWebSocketService = webSocketService as jest.Mocked<typeof webSocketService>;
 
@@ -56,6 +62,40 @@ const mockChatStatePersistence = {
 const mockUniqueIdGenerator = {
   generateMessageId: jest.fn(() => 'msg-123'),
   generateTemporaryId: jest.fn(() => 'temp-456'),
+};
+
+// Mock Auth Store
+const mockAuthStore = {
+  token: 'test-token',
+  user: { id: 'test-user', email: 'test@example.com' },
+  initialized: true,
+  loading: false,
+};
+
+// Mock Unified Auth Service
+const mockUnifiedAuthService = {
+  getWebSocketAuthConfig: jest.fn(() => ({
+    refreshToken: jest.fn().mockResolvedValue('new-test-token'),
+  })),
+};
+
+// Mock Config
+const mockConfig = {
+  wsUrl: 'ws://localhost:8000/ws',
+  apiUrl: 'http://localhost:8000',
+};
+
+// Mock GTM Event Hook
+const mockGTMEvent = {
+  trackLogin: jest.fn(),
+  trackLogout: jest.fn(),
+  trackOAuthComplete: jest.fn(),
+  trackError: jest.fn(),
+};
+
+// Mock Auth Validation
+const mockAuthValidation = {
+  monitorAuthState: jest.fn(),
 };
 
 // Test wrapper component

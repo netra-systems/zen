@@ -179,11 +179,10 @@ class TestStartupOrchestratorInitialization(BaseTestCase):
         orchestrator = StartupOrchestrator(self.app)
         
         self.assertIsNotNone(orchestrator.logger)
-        self.assertIsInstance(orchestrator.logger, logging.Logger)
-        # Logger should be configured by central_logger system
+        # Logger should be configured by central_logger system (may be loguru or logging)
         self.assertTrue(hasattr(orchestrator.logger, 'info'))
         self.assertTrue(hasattr(orchestrator.logger, 'error'))
-        self.assertTrue(hasattr(orchestrator.logger, 'critical'))
+        self.assertTrue(hasattr(orchestrator.logger, 'critical') or hasattr(orchestrator.logger, 'critical'))
 
 
 class TestPhaseTransitionAndTiming(BaseTestCase):

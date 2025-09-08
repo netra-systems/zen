@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 WebSocket Deployment Validation Script
 Validates WebSocket connectivity after GCP deployment.
@@ -10,9 +11,18 @@ import asyncio
 import json
 import sys
 import time
+import os
 from typing import Dict, Optional, List, Tuple
 from datetime import datetime
 import logging
+
+# Fix Windows Unicode encoding issues
+if sys.platform == "win32":
+    import locale
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
 
 # Try to import websockets - graceful fallback if not available
 try:
@@ -94,23 +104,23 @@ class WebSocketDeploymentValidator:
                         response_data = json.loads(response)
                         
                         if response_data.get("type") in ["connection_established", "pong", "error"]:
-                            self.logger.info(f"✅ WebSocket handshake successful on {endpoint}")
+                            self.logger.info(f"[OK] WebSocket handshake successful on {endpoint}")
                             return True, f"Successful handshake on {endpoint}"
                         else:
-                            self.logger.info(f"⚠️ Unexpected response on {endpoint}: {response_data}")
+                            self.logger.info(f"[WARN] Unexpected response on {endpoint}: {response_data}")
                             continue
                     except asyncio.TimeoutError:
-                        self.logger.info(f"⚠️ No response on {endpoint}, but connection established")
+                        self.logger.info(f"[WARN] No response on {endpoint}, but connection established")
                         return True, f"Connection established on {endpoint} (no response timeout)"
                         
             except websockets.exceptions.WebSocketException as e:
-                self.logger.info(f"❌ WebSocket protocol error on {endpoint}: {e}")
+                self.logger.info(f"[ERROR] WebSocket protocol error on {endpoint}: {e}")
                 continue
             except asyncio.TimeoutError:
-                self.logger.info(f"❌ WebSocket connection timeout on {endpoint}")
+                self.logger.info(f"[ERROR] WebSocket connection timeout on {endpoint}")
                 continue
             except Exception as e:
-                self.logger.info(f"❌ WebSocket connection error on {endpoint}: {e}")
+                self.logger.info(f"[ERROR] WebSocket connection error on {endpoint}: {e}")
                 continue
         
         return False, "All WebSocket endpoints failed"
@@ -251,7 +261,7 @@ class WebSocketDeploymentValidator:
     
     async def run_validation(self) -> bool:
         """Run complete WebSocket validation."""
-        print(f"\n🔌 WebSocket Deployment Validation - {self.environment.upper()}")
+        print(f"\n[WEBSOCKET] WebSocket Deployment Validation - {self.environment.upper()}")
         print("=" * 80)
         
         if not WEBSOCKETS_AVAILABLE:

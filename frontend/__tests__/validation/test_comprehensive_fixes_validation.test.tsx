@@ -253,24 +253,50 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
     });
 
     test('should properly simulate agent events', async () => {
-      const ws = new WebSocket('ws://agent-test');
       const receivedEvents: any[] = [];
+      let connectionResolve: any;
+      const connectionPromise = new Promise(resolve => {
+        connectionResolve = resolve;
+      });
+
+      const ws = new WebSocket('ws://agent-test');
       
+      // Set up both handlers before connection
       ws.onmessage = (event) => {
-        receivedEvents.push(JSON.parse(event.data));
+        console.log('DEBUG: Received message event:', event.data);
+        try {
+          receivedEvents.push(JSON.parse(event.data));
+        } catch (error) {
+          console.warn('Failed to parse message:', error);
+        }
+      };
+      
+      ws.onopen = () => {
+        console.log('DEBUG: Connection opened for agent events test');
+        connectionResolve();
       };
       
       // Wait for connection
-      await new Promise(resolve => {
-        ws.onopen = resolve;
-      });
+      await connectionPromise;
       
-      // Use helper to simulate agent workflow
+      // Get the most recent WebSocket instance
       const mockWs = global.mockWebSocketInstances?.[global.mockWebSocketInstances.length - 1];
+      console.log('DEBUG: Found mock instance:', !!mockWs, 'readyState:', mockWs?.readyState);
+      
       if (mockWs && mockWs.simulateMessage) {
+        console.log('DEBUG: Starting agent event simulation');
         // Simulate agent events sequence
         await WebSocketTestHelpers.simulateAgentEvents(mockWs, 'test-thread');
+        console.log('DEBUG: Agent event simulation completed');
+        
+        // Give a small delay for events to propagate
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } else {
+        console.warn('DEBUG: No mock WebSocket instance found or simulateMessage not available');
       }
+      
+      console.log('DEBUG: Received events count:', receivedEvents.length);
+      console.log('DEBUG: Received events:', receivedEvents);
       
       // Should receive all 5 critical events
       expect(receivedEvents.length).toBe(5);
