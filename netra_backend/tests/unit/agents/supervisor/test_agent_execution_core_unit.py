@@ -83,8 +83,13 @@ class TestAgentExecutionCore:
     def mock_agent(self):
         """Mock agent that can be executed."""
         agent = AsyncMock()
-        agent.execute = AsyncMock(return_value={"success": True, "result": "test result"})
+        agent.execute = AsyncMock(return_value={"success": True, "result": "test result", "metrics": {"duration": 1.0}})
         agent.__class__.__name__ = "TestAgent"
+        # Fix AsyncMock warnings by making synchronous methods use Mock()
+        agent.set_trace_context = Mock()
+        agent.set_websocket_bridge = Mock()
+        agent.websocket_bridge = None
+        agent.execution_engine = None
         return agent
 
     def test_init_creates_proper_dependencies(self, mock_registry, mock_websocket_bridge):

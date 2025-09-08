@@ -344,7 +344,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         self.logger.info(f"🎉 COMPLETE USER AUTH TO AGENT FLOW SUCCESS: {duration:.2f}s (execution: {execution_time:.3f}s)")
         self.logger.info(f"✅ Revenue pipeline validated: Auth → WebSocket → Agent → Business Value")
         self.logger.info(f"📊 Events received: {len(collected_events)}, Types: {event_types}")
-        self.logger.info(f"⏱️ Execution timing validated: {execution_time:.3f}s (real services confirmed)"
+        self.logger.info(f"⏱️ Execution timing validated: {execution_time:.3f}s (real services confirmed)")
     
     @pytest.mark.e2e
     @pytest.mark.real_services

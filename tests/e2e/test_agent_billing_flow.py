@@ -31,6 +31,10 @@ import pytest
 import pytest_asyncio
 from shared.isolated_environment import IsolatedEnvironment
 
+# CLAUDE.md: E2E tests MUST use SSOT authentication patterns
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+
 from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestCore, 
     AgentRequestSimulator, 
@@ -44,12 +48,30 @@ from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentBillingFlow:
-    """Test #2: Agent Request → Processing → Response → Billing Record Flow."""
+class TestAgentBillingFlow(SSotBaseTestCase):
+    """Test #2: Agent Request → Processing → Response → Billing Record Flow.
+    
+    CLAUDE.md Compliance:
+    - Uses SSOT authentication patterns (E2EAuthHelper)
+    - NO mocks - real services only
+    - Proper error handling - tests MUST raise errors
+    - WebSocket authentication with E2E detection headers
+    - Multi-user isolation testing
+    """
     
     @pytest_asyncio.fixture
-    async def test_core(self):
-        """Initialize billing test core with isolated environment."""
+    async def auth_helper(self):
+        """SSOT authentication helper for all tests."""
+        return E2EAuthHelper(environment=self.get_test_environment())
+        
+    @pytest_asyncio.fixture
+    async def websocket_auth_helper(self):
+        """SSOT WebSocket authentication helper."""
+        return E2EWebSocketAuthHelper(environment=self.get_test_environment())
+    
+    @pytest_asyncio.fixture
+    async def test_core(self, auth_helper, websocket_auth_helper):
+        """Initialize billing test core with isolated environment and SSOT patterns."""
         # Setup REAL services environment per CLAUDE.md requirements - NO MOCKS
         # Use proper environment management through shared.isolated_environment
         env = get_env()
@@ -62,9 +84,22 @@ class TestAgentBillingFlow:
         # Configure real LLM testing per CLAUDE.md standards
         configure_llm_testing(mode=LLMTestMode.REAL)
         
+        # Create test core with SSOT auth integration
         core = AgentBillingTestCore()
+        core.auth_helper = auth_helper
+        core.websocket_auth_helper = websocket_auth_helper
+        
+        # CLAUDE.md: Execution time tracking to prevent 0.00s completion
+        core.test_start_time = time.time()
+        
         await core.setup_test_environment()
         yield core
+        
+        # CLAUDE.md: Validate execution time - E2E tests with 0.00s = HARD FAILURE
+        execution_time = time.time() - core.test_start_time
+        if execution_time < 0.1:  # Less than 100ms indicates test didn't really run
+            raise AssertionError(f"E2E test completed in {execution_time:.3f}s - this indicates test was not executed properly (mocks/bypasses)")
+        
         await core.teardown_test_environment()
         
         # Cleanup environment variables
@@ -90,58 +125,95 @@ class TestAgentBillingFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_complete_agent_billing_flow_triage(self, test_core, request_simulator,
-                                                    billing_validator):
-        """Test complete billing flow for triage agent."""
-        # Setup authenticated session
-        session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
+    async def test_complete_agent_billing_flow_triage(self, test_core, auth_helper, websocket_auth_helper, 
+                                                    request_simulator, billing_validator):
+        """Test complete billing flow for triage agent with SSOT authentication."""
+        # CLAUDE.md: E2E tests MUST authenticate - create real authenticated user
+        token, user_data = await create_authenticated_user(
+            environment=self.get_test_environment(),
+            permissions=["read", "write", "billing"]
+        )
         
-        try:
-            # Create and send triage request
-            request = request_simulator.create_triage_request(session["user_data"]["id"])
-            
-            # Test with REAL LLM per CLAUDE.md requirements
-            response = await self._execute_real_agent_request(session, request)
-            
-            # Validate complete billing flow
-            validation = await billing_validator.validate_agent_response_flow(
-                session, request, response
-            )
-            
-            # Assert all billing flow components
-            self._assert_billing_flow_success(validation)
+        # CLAUDE.md: Use SSOT WebSocket authentication
+        websocket_client = await websocket_auth_helper.connect_authenticated_websocket()
         
-        finally:
-            await session["client"].close()
+        test_start_time = time.time()
+        
+        # CLAUDE.md: NO exception swallowing - tests must raise errors
+        # Create and send triage request
+        request = request_simulator.create_triage_request(user_data["id"])
+        
+        # Test with REAL LLM per CLAUDE.md requirements - NO MOCKS
+        response = await self._execute_real_agent_request(
+            websocket_client, request, token, user_data
+        )
+        
+        # Validate complete billing flow
+        validation = await billing_validator.validate_agent_response_flow(
+            {"user_data": user_data, "tier": PlanTier.PRO, "token": token}, 
+            request, response
+        )
+        
+        # CLAUDE.md: Tests must raise errors - NO try/except hiding failures
+        self._assert_billing_flow_success(validation)
+        
+        # CLAUDE.md: Validate execution time to prevent 0.00s fake tests
+        execution_time = time.time() - test_start_time
+        assert execution_time >= 0.1, f"Test completed too quickly ({execution_time:.3f}s) - indicates mocking/bypassing"
+        
+        await websocket_client.close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_multiple_agent_types_billing_accuracy(self, test_core, request_simulator,
-                                                       billing_validator):
-        """Test billing accuracy across different agent types."""
-        session = await test_core.establish_authenticated_user_session(PlanTier.ENTERPRISE)
+    async def test_multiple_agent_types_billing_accuracy(self, test_core, auth_helper, websocket_auth_helper,
+                                                       request_simulator, billing_validator):
+        """Test billing accuracy across different agent types with multi-user isolation."""
+        # CLAUDE.md: Multi-user isolation testing - create separate users for each agent type
+        test_users = []
+        websocket_clients = []
+        test_start_time = time.time()
         
-        try:
-            billing_results = {}
-            
-            # Test each agent type
-            for agent_type in request_simulator.get_agent_types():
-                request = getattr(request_simulator, f"create_{agent_type}_request")(
-                    session["user_data"]["id"]
-                )
-                
-                response = await self._execute_real_agent_request(session, request)
-                validation = await billing_validator.validate_agent_response_flow(
-                    session, request, response
-                )
-                
-                billing_results[agent_type] = validation
-            
-            # Validate all agent types processed correctly
-            self._assert_all_agent_types_success(billing_results)
+        # CLAUDE.md: NO exception swallowing - tests must raise errors
+        billing_results = {}
         
-        finally:
-            await session["client"].close()
+        # Test each agent type with separate authenticated users for isolation
+        for agent_type in request_simulator.get_agent_types():
+            # Create isolated authenticated user for this agent type
+            token, user_data = await create_authenticated_user(
+                environment=self.get_test_environment(),
+                permissions=["read", "write", "billing", f"agent_{agent_type}"]
+            )
+            test_users.append((token, user_data))
+            
+            # Create authenticated WebSocket connection
+            ws_client = await websocket_auth_helper.connect_authenticated_websocket()
+            websocket_clients.append(ws_client)
+            
+            # Create request for this agent type
+            request = getattr(request_simulator, f"create_{agent_type}_request")(user_data["id"])
+            
+            # Execute with REAL services - NO MOCKS
+            response = await self._execute_real_agent_request(
+                ws_client, request, token, user_data
+            )
+            
+            validation = await billing_validator.validate_agent_response_flow(
+                {"user_data": user_data, "tier": PlanTier.ENTERPRISE, "token": token},
+                request, response
+            )
+            
+            billing_results[agent_type] = validation
+        
+        # Clean up WebSocket connections
+        for ws_client in websocket_clients:
+            await ws_client.close()
+        
+        # CLAUDE.md: Tests must raise errors - validate all agent types
+        self._assert_all_agent_types_success(billing_results)
+        
+        # CLAUDE.md: Validate execution time to prevent fake tests
+        execution_time = time.time() - test_start_time
+        assert execution_time >= 0.5, f"Multi-agent test completed too quickly ({execution_time:.3f}s) - indicates mocking"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -244,13 +316,26 @@ class TestAgentBillingFlow:
             finally:
                 await session["client"].close()
     
-    async def _execute_real_agent_request(self, session: Dict, request: Dict) -> Dict[str, Any]:
+    async def _execute_real_agent_request(self, websocket_client, request: Dict, 
+                                        token: str, user_data: Dict) -> Dict[str, Any]:
         """Execute agent request with REAL LLM per CLAUDE.md requirements - NO MOCKS."""
         # CLAUDE.md: Real Everything (LLM, Services) E2E > E2E > Integration > Unit
+        # Add authentication context to request
+        authenticated_request = {
+            **request,
+            "auth_token": token,
+            "user_context": user_data,
+            "test_environment": self.get_test_environment()
+        }
+        
         # Send actual agent request through real WebSocket to real backend with real LLM
         response = await AgentBillingTestUtils.send_agent_request(
-            session["client"], request
+            websocket_client, authenticated_request
         )
+        
+        # CLAUDE.md: Validate response is real (not mocked)
+        if not response or response.get("mocked", False):
+            raise AssertionError("Response appears to be mocked - E2E tests must use real services")
         
         return response
     
@@ -270,13 +355,22 @@ class TestAgentBillingFlow:
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestAgentBillingPerformance:
-    """Performance validation for agent billing operations."""
+class TestAgentBillingPerformance(SSotBaseTestCase):
+    """Performance validation for agent billing operations with SSOT patterns."""
     
     @pytest_asyncio.fixture
-    @pytest.mark.e2e
-    async def test_core(self):
-        """Initialize performance test core with REAL services per CLAUDE.md."""
+    async def auth_helper(self):
+        """SSOT authentication helper for performance tests."""
+        return E2EAuthHelper(environment=self.get_test_environment())
+        
+    @pytest_asyncio.fixture
+    async def websocket_auth_helper(self):
+        """SSOT WebSocket authentication helper for performance tests."""
+        return E2EWebSocketAuthHelper(environment=self.get_test_environment())
+    
+    @pytest_asyncio.fixture
+    async def test_core(self, auth_helper, websocket_auth_helper):
+        """Initialize performance test core with REAL services and SSOT patterns."""
         # Setup REAL services environment - NO MOCKS
         # Use proper environment management through shared.isolated_environment
         env = get_env()

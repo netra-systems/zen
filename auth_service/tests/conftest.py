@@ -192,6 +192,10 @@ async def real_auth_db(setup_real_services):
     if not auth_db._initialized:
         await auth_db.initialize()
     
+    # CRITICAL FIX: Ensure tables exist for in-memory SQLite databases
+    # This is needed because each test may get a fresh in-memory database
+    await auth_db.create_tables()
+    
     # Use auth service's own database connection system
     async with auth_db.get_session() as session:
         try:
