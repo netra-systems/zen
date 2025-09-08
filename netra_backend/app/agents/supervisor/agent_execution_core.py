@@ -254,7 +254,6 @@ class AgentExecutionCore:
                     # Agent didn't return proper result format
                     return AgentExecutionResult(
                         success=True,
-                        state=state,
                         duration=duration,
                         metrics=self._calculate_performance_metrics(start_time, heartbeat)
                     )

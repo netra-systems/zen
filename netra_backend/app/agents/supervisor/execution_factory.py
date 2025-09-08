@@ -39,7 +39,8 @@ if TYPE_CHECKING:
     # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
     from netra_backend.app.core.resilience.fallback import FallbackManager
     from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
-    from netra_backend.app.core.types import DeepAgentState, AgentExecutionResult, AgentExecutionContext
+    from netra_backend.app.core.types import AgentExecutionResult, AgentExecutionContext
+    # DeepAgentState removed - using UserExecutionContext pattern
 
 logger = central_logger.get_logger(__name__)
 
@@ -516,7 +517,7 @@ class IsolatedExecutionEngine:
         
     async def execute_agent_pipeline(self, 
                                    agent_name: str, 
-                                   state: 'DeepAgentState') -> 'AgentExecutionResult':
+                                   user_context: Optional['UserExecutionContext'] = None) -> 'AgentExecutionResult':
         """
         Execute agent pipeline with complete user isolation.
         
@@ -537,13 +538,16 @@ class IsolatedExecutionEngine:
         # Import here to avoid circular imports
         from netra_backend.app.core.types import AgentExecutionContext, AgentExecutionResult
         
+        # Use provided user_context or instance context
+        effective_user_context = user_context or self.user_context
+        
         # Create execution context - stored in USER-SPECIFIC active_runs
         execution_context = AgentExecutionContext(
             run_id=run_id,
             agent_name=agent_name,
-            state=state,
-            user_id=self.user_context.user_id,
-            thread_id=self.user_context.thread_id,
+            user_context=effective_user_context,
+            user_id=effective_user_context.user_id,
+            thread_id=effective_user_context.thread_id,
             started_at=datetime.now(timezone.utc)
         )
         
@@ -563,7 +567,7 @@ class IsolatedExecutionEngine:
                 
                 # Execute with timeout
                 result = await asyncio.wait_for(
-                    self._execute_with_monitoring(execution_context),
+                    self._execute_with_monitoring(execution_context, effective_user_context),
                     timeout=self.execution_timeout
                 )
                 
@@ -612,7 +616,7 @@ class IsolatedExecutionEngine:
             # Clean up USER-SPECIFIC active run
             self.user_context.active_runs.pop(run_id, None)
             
-    async def _execute_with_monitoring(self, context: 'AgentExecutionContext') -> 'AgentExecutionResult':
+    async def _execute_with_monitoring(self, context: 'AgentExecutionContext', user_context: 'UserExecutionContext') -> 'AgentExecutionResult':
         """Execute agent with user-specific monitoring."""
         from netra_backend.app.core.types import AgentExecutionResult
         
@@ -621,7 +625,7 @@ class IsolatedExecutionEngine:
             agent_core = await self._get_or_create_agent_core()
             
             # Execute through user-specific core
-            result = await agent_core.execute_agent(context)
+            result = await agent_core.execute_agent(context, user_context)
             
             # Send completion notification
             await self.websocket_emitter.notify_agent_completed(

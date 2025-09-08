@@ -28,7 +28,7 @@ class PipelineBuilder:
         self._add_optimization_step_if_needed(pipeline, state)
         self._add_actions_step_if_needed(pipeline, state)
     
-    def _add_data_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+    def _add_data_step_if_needed(self, pipeline: List[PipelineStepConfig], state: DeepAgentState) -> None:
         """Add data analysis step if needed."""
         if self._needs_data_analysis(state):
             pipeline.append(PipelineStepConfig(agent_name="data"))

@@ -9,12 +9,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
 from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
     MCPIntentDetector,
 )
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState removed - using UserExecutionContext pattern
+# from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -55,12 +57,12 @@ class MCPRequestRouter:
     def __init__(self, intent_detector: MCPIntentDetector):
         self.intent_detector = intent_detector
     
-    def analyze_request(self, state: DeepAgentState) -> Dict[str, Any]:
+    def analyze_request(self, user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Analyze request for MCP requirements."""
-        if not state.current_request:
+        if not user_context or not user_context.metadata.get('current_request'):
             return {"requires_mcp": False}
         
-        intent = self.intent_detector.detect_intent(state.current_request)
+        intent = self.intent_detector.detect_intent(user_context.metadata['current_request'])
         return self._build_routing_decision(intent)
     
     def _build_routing_decision(self, intent) -> Dict[str, Any]:
@@ -106,15 +108,15 @@ class MCPExecutionPlanner:
         self.mcp_bridge = mcp_bridge
     
     async def plan_mcp_execution(self, context: MCPExecutionContext,
-                                state: DeepAgentState) -> Dict[str, Any]:
+                                user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Plan MCP tool execution strategy."""
         if not context.requires_mcp:
             return {"execution_type": "standard"}
         
-        return await self._create_mcp_execution_plan(context, state)
+        return await self._create_mcp_execution_plan(context, user_context)
     
     async def _create_mcp_execution_plan(self, context: MCPExecutionContext,
-                                       state: DeepAgentState) -> Dict[str, Any]:
+                                       user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Create detailed MCP execution plan."""
         available_tools = await self._get_available_tools(context)
         plan_data = self._build_execution_plan_data(context, available_tools)
@@ -177,19 +179,19 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
         self.execution_planner = MCPExecutionPlanner(self.mcp_bridge)
     
     async def execute_agent(self, context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute agent with MCP capability detection."""
-        mcp_context = await self._prepare_mcp_context(context, state)
+        mcp_context = await self._prepare_mcp_context(context, user_context)
         
         if mcp_context.requires_mcp:
-            return await self._execute_with_mcp(mcp_context, state)
-        return await super().execute_agent(context, state)
+            return await self._execute_with_mcp(mcp_context, user_context)
+        return await super().execute_agent(context, user_context)
     
     async def _prepare_mcp_context(self, context: AgentExecutionContext,
-                                  state: DeepAgentState) -> MCPExecutionContext:
+                                  user_context: Optional['UserExecutionContext']) -> MCPExecutionContext:
         """Prepare MCP execution context."""
         mcp_context = MCPExecutionContext(context)
-        routing_info = self.request_router.analyze_request(state)
+        routing_info = self.request_router.analyze_request(user_context)
         await self._apply_mcp_routing(mcp_context, routing_info, context)
         return mcp_context
 
@@ -227,43 +229,43 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
         )
     
     async def _execute_with_mcp(self, mcp_context: MCPExecutionContext,
-                               state: DeepAgentState) -> AgentExecutionResult:
+                               user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute agent with MCP tool integration."""
         try:
-            execution_plan = await self.execution_planner.plan_mcp_execution(mcp_context, state)
-            return await self._execute_mcp_plan(mcp_context, state, execution_plan)
+            execution_plan = await self.execution_planner.plan_mcp_execution(mcp_context, user_context)
+            return await self._execute_mcp_plan(mcp_context, user_context, execution_plan)
         except Exception as e:
-            return await self._handle_mcp_execution_error(e, mcp_context, state)
+            return await self._handle_mcp_execution_error(e, mcp_context, user_context)
 
     async def _handle_mcp_execution_error(self, error: Exception, mcp_context: MCPExecutionContext, 
-                                         state: DeepAgentState) -> AgentExecutionResult:
+                                         user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Handle MCP execution error with fallback."""
         logger.error(f"MCP execution failed: {error}")
-        return await self._fallback_to_standard_execution(mcp_context.base_context, state)
+        return await self._fallback_to_standard_execution(mcp_context.base_context, user_context)
     
     async def _execute_mcp_plan(self, mcp_context: MCPExecutionContext,
-                               state: DeepAgentState,
+                               user_context: Optional['UserExecutionContext'],
                                execution_plan: Dict[str, Any]) -> AgentExecutionResult:
         """Execute the planned MCP strategy."""
         if execution_plan["execution_type"] == "mcp":
-            return await self._execute_mcp_tool(mcp_context, state, execution_plan)
-        return await super().execute_agent(mcp_context.base_context, state)
+            return await self._execute_mcp_tool(mcp_context, user_context, execution_plan)
+        return await super().execute_agent(mcp_context.base_context, user_context)
     
     async def _execute_mcp_tool(self, mcp_context: MCPExecutionContext,
-                               state: DeepAgentState,
+                               user_context: Optional['UserExecutionContext'],
                                execution_plan: Dict[str, Any]) -> AgentExecutionResult:
         """Execute MCP tool directly."""
         try:
-            result = await self._perform_mcp_tool_execution(mcp_context, state, execution_plan)
-            return self._create_mcp_success_result(state, result)
+            result = await self._perform_mcp_tool_execution(mcp_context, user_context, execution_plan)
+            return self._create_mcp_success_result(user_context, result)
         except Exception as e:
-            return self._handle_mcp_tool_error(state, e)
+            return self._handle_mcp_tool_error(user_context, e)
 
     async def _perform_mcp_tool_execution(self, mcp_context: MCPExecutionContext, 
-                                         state: DeepAgentState, execution_plan: Dict[str, Any]) -> Dict[str, Any]:
+                                         user_context: Optional['UserExecutionContext'], execution_plan: Dict[str, Any]) -> Dict[str, Any]:
         """Perform the actual MCP tool execution."""
         await self._notify_tool_execution(mcp_context, execution_plan)
-        return await self._execute_tool_with_bridge(mcp_context, state, execution_plan)
+        return await self._execute_tool_with_bridge(mcp_context, user_context, execution_plan)
     
     async def _notify_tool_execution(self, mcp_context: MCPExecutionContext,
                                     execution_plan: Dict[str, Any]) -> None:
@@ -272,60 +274,61 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
             mcp_context.base_context, execution_plan["tool"])
     
     async def _execute_tool_with_bridge(self, mcp_context: MCPExecutionContext,
-                                       state: DeepAgentState,
+                                       user_context: Optional['UserExecutionContext'],
                                        execution_plan: Dict[str, Any]) -> Dict[str, Any]:
         """Execute tool using MCP bridge."""
-        return await self._call_bridge_execution(mcp_context, state, execution_plan)
+        return await self._call_bridge_execution(mcp_context, user_context, execution_plan)
     
     async def _call_bridge_execution(self, mcp_context: MCPExecutionContext,
-                                    state: DeepAgentState,
+                                    user_context: Optional['UserExecutionContext'],
                                     execution_plan: Dict[str, Any]) -> Dict[str, Any]:
         """Call bridge for tool execution."""
-        bridge_params = self._prepare_bridge_params(mcp_context, execution_plan, state)
+        bridge_params = self._prepare_bridge_params(mcp_context, execution_plan, user_context)
         return await self.mcp_bridge.execute_tool_for_agent(**bridge_params)
 
     def _prepare_bridge_params(self, mcp_context: MCPExecutionContext, 
-                              execution_plan: Dict[str, Any], state: DeepAgentState) -> Dict[str, Any]:
+                              execution_plan: Dict[str, Any], user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Prepare parameters for bridge execution."""
         return {
             "mcp_context": mcp_context.mcp_context,
             "server": execution_plan["server"],
             "tool": execution_plan["tool"],
-            "arguments": self._extract_tool_arguments(state)
+            "arguments": self._extract_tool_arguments(user_context)
         }
     
-    def _handle_mcp_tool_error(self, state: DeepAgentState, error: Exception) -> AgentExecutionResult:
+    def _handle_mcp_tool_error(self, user_context: Optional['UserExecutionContext'], error: Exception) -> AgentExecutionResult:
         """Handle MCP tool execution error."""
         logger.error(f"MCP tool execution failed: {error}")
-        return self._create_mcp_error_result(state, error)
+        return self._create_mcp_error_result(user_context, error)
     
-    def _extract_tool_arguments(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _extract_tool_arguments(self, user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Extract tool arguments from state."""
-        return getattr(state, 'tool_arguments', {})
+        return user_context.metadata.get('tool_arguments', {}) if user_context else {}
     
-    def _create_mcp_success_result(self, state: DeepAgentState, 
+    def _create_mcp_success_result(self, user_context: Optional['UserExecutionContext'], 
                                   mcp_result: Dict[str, Any]) -> AgentExecutionResult:
         """Create successful MCP execution result."""
-        state.add_result("mcp_tool_result", mcp_result)
+        if user_context:
+            user_context.metadata["mcp_tool_result"] = mcp_result
         metadata = self._build_success_metadata(mcp_result)
-        return AgentExecutionResult(success=True, state=state, metadata=metadata)
+        return AgentExecutionResult(success=True, user_context=user_context, metadata=metadata)
 
     def _build_success_metadata(self, mcp_result: Dict[str, Any]) -> Dict[str, Any]:
         """Build metadata for successful MCP result."""
         return {"execution_type": "mcp", "mcp_result": mcp_result}
     
-    def _create_mcp_error_result(self, state: DeepAgentState, 
+    def _create_mcp_error_result(self, user_context: Optional['UserExecutionContext'], 
                                 error: Exception) -> AgentExecutionResult:
         """Create error result for MCP execution."""
         error_message = f"MCP execution failed: {str(error)}"
         metadata = {"execution_type": "mcp_failed"}
-        return AgentExecutionResult(success=False, state=state, error=error_message, metadata=metadata)
+        return AgentExecutionResult(success=False, user_context=user_context, error=error_message, metadata=metadata)
     
     async def _fallback_to_standard_execution(self, context: AgentExecutionContext,
-                                             state: DeepAgentState) -> AgentExecutionResult:
+                                             user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Fallback to standard agent execution."""
         logger.info(f"Falling back to standard execution for {context.agent_name}")
-        return await super().execute_agent(context, state)
+        return await super().execute_agent(context, user_context)
     
     def cleanup_mcp_context(self, run_id: str) -> None:
         """Cleanup MCP context after execution."""

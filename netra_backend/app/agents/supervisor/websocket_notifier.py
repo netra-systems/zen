@@ -420,7 +420,7 @@ class WebSocketNotifier:
         """Create agent started content."""
         return AgentStarted(
             agent_name=context.agent_name,
-            run_id=context.run_id,
+            run_id=str(context.run_id),
             timestamp=datetime.now(timezone.utc).timestamp()
         )
     
@@ -850,17 +850,17 @@ class WebSocketNotifier:
                 "Ensure all required fields are provided",
                 "Review the request parameters and try again"
             ]
-        elif "network" in error_type_lower or "connection" in error_message_lower:
-            suggestions = [
-                "There was a network connectivity issue",
-                "Please check your internet connection",
-                "The issue may resolve automatically"
-            ]
         elif "database" in error_type_lower or "db" in error_message_lower:
             suggestions = [
                 "There was a temporary database issue",
                 "Your data is safe, please try again",
                 "If this persists, please contact support"
+            ]
+        elif "network" in error_type_lower or "connection" in error_message_lower:
+            suggestions = [
+                "There was a network connectivity issue",
+                "Please check your internet connection",
+                "The issue may resolve automatically"
             ]
         else:
             suggestions = [

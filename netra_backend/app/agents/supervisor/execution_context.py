@@ -5,13 +5,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState removed - using UserExecutionContext pattern
+# from netra_backend.app.agents.state import DeepAgentState
 
 # Import ExecutionStrategy from the authoritative source for compatibility
 from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
 if TYPE_CHECKING:
     from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class AgentExecutionStrategy(Enum):
@@ -65,11 +67,12 @@ class AgentExecutionContext:
 class AgentExecutionResult:
     """Result of agent execution"""
     success: bool
-    state: Optional[DeepAgentState] = None
+    user_context: Optional['UserExecutionContext'] = None
     error: Optional[str] = None
     duration: float = 0.0
     metadata: Dict[str, Any] = field(default_factory=dict)
     metrics: Optional[Dict[str, Any]] = None  # Performance metrics
+    data: Optional[Any] = None  # Result data from execution
 
 
 @dataclass

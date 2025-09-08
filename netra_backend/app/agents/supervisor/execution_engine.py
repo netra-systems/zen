@@ -24,7 +24,8 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState removed - using UserExecutionContext pattern
+# from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -313,18 +314,19 @@ class ExecutionEngine:
                 )
         
     async def execute_agent(self, context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           user_context: Optional['UserExecutionContext'] = None) -> AgentExecutionResult:
         """Execute a single agent with UserExecutionContext support and concurrency control.
         
         NEW: Supports UserExecutionContext for complete user isolation and per-user WebSocket events.
         RECOMMENDED: Use create_user_engine() or UserExecutionEngine directly for new code.
         """
-        # NEW: If UserExecutionContext is available, delegate to UserExecutionEngine
-        if self.user_context:
-            logger.info(f"Delegating execution to UserExecutionEngine for user {self.user_context.user_id}")
+        # NEW: Use UserExecutionContext - prefer passed context over instance context
+        effective_user_context = user_context or self.user_context
+        if effective_user_context:
+            logger.info(f"Delegating execution to UserExecutionEngine for user {effective_user_context.user_id}")
             try:
-                user_engine = await self.create_user_engine(self.user_context)
-                result = await user_engine.execute_agent(context, state)
+                user_engine = await self.create_user_engine(effective_user_context)
+                result = await user_engine.execute_agent(context, effective_user_context)
                 await user_engine.cleanup()
                 return result
             except Exception as e:
@@ -338,8 +340,8 @@ class ExecutionEngine:
         self._validate_execution_context(context)
         
         # NEW: Log user isolation status
-        if self.user_context:
-            logger.debug(f"Executing agent {context.agent_name} with user isolation for user {self.user_context.user_id}")
+        if effective_user_context:
+            logger.debug(f"Executing agent {context.agent_name} with user isolation for user {effective_user_context.user_id}")
         else:
             logger.warning(f"Executing agent {context.agent_name} without UserExecutionContext - isolation not guaranteed")
         
@@ -381,7 +383,7 @@ class ExecutionEngine:
             try:
                 # periodic_update_manager removed - execute without tracking
                 # NEW: Send agent started via UserWebSocketEmitter if available
-                if self.user_context:
+                if effective_user_context:
                     success = await self._send_via_user_emitter(
                         'notify_agent_started',
                         context.agent_name,
@@ -418,7 +420,7 @@ class ExecutionEngine:
                 
                 # Execute with timeout and death monitoring
                 result = await asyncio.wait_for(
-                    self._execute_with_death_monitoring(context, state, execution_id),
+                    self._execute_with_death_monitoring(context, effective_user_context, execution_id),
                     timeout=self.AGENT_EXECUTION_TIMEOUT
                 )
                 
@@ -433,14 +435,14 @@ class ExecutionEngine:
                 # CRITICAL: Always send completion events, regardless of success/failure
                 # This ensures WebSocket clients know when agent execution is complete
                 if result.success:
-                    await self._send_final_execution_report(context, result, state)
+                    await self._send_final_execution_report(context, result, effective_user_context)
                     # Mark execution as completed
                     self.execution_tracker.update_execution_state(
                         execution_id, ExecutionState.COMPLETED, result=result.data
                     )
                 else:
                     # Send completion event for failed/fallback cases
-                    await self._send_completion_for_failed_execution(context, result, state)
+                    await self._send_completion_for_failed_execution(context, result, effective_user_context)
                     # Mark execution as failed
                     self.execution_tracker.update_execution_state(
                         execution_id, ExecutionState.FAILED, error=result.error
@@ -481,7 +483,7 @@ class ExecutionEngine:
                     {'execution_id': execution_id, 'timeout': self.AGENT_EXECUTION_TIMEOUT}
                 )
                 timeout_result = self._create_timeout_result(context)
-                await self._send_completion_for_failed_execution(context, timeout_result, state)
+                await self._send_completion_for_failed_execution(context, timeout_result, effective_user_context)
                 self._update_history(timeout_result)
                 return timeout_result
                 
@@ -531,7 +533,7 @@ class ExecutionEngine:
             pass
     
     async def _execute_with_death_monitoring(self, context: AgentExecutionContext,
-                                            state: DeepAgentState,
+                                            user_context: Optional['UserExecutionContext'],
                                             execution_id: str) -> AgentExecutionResult:
         """Execute agent with death monitoring wrapper."""
         try:
@@ -539,7 +541,7 @@ class ExecutionEngine:
             self.execution_tracker.heartbeat(execution_id)
             
             # Execute with error handling
-            result = await self._execute_with_error_handling(context, state)
+            result = await self._execute_with_error_handling(context, user_context)
             
             # Final heartbeat after execution
             self.execution_tracker.heartbeat(execution_id)
@@ -560,34 +562,35 @@ class ExecutionEngine:
             raise
     
     async def _execute_with_error_handling(self, context: AgentExecutionContext,
-                                          state: DeepAgentState) -> AgentExecutionResult:
+                                          user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute agent with error handling and fallback."""
         start_time = time.time()
         try:
             # Send thinking updates during execution
+            task_preview = user_context.metadata.get('user_prompt', 'Task') if user_context else 'Task'
             await self.send_agent_thinking(
                 context,
-                f"Processing request: {getattr(state, 'user_prompt', 'Task')[:100]}...",
+                f"Processing request: {str(task_preview)[:100]}...",
                 step_number=2
             )
             
             # Execute the agent
-            result = await self.agent_core.execute_agent(context, state)
+            result = await self.agent_core.execute_agent(context, user_context)
             
             # Send partial result if available
-            if result.success and hasattr(state, 'final_answer'):
+            if result.success and user_context and hasattr(user_context, 'final_answer'):
                 await self.send_partial_result(
                     context,
-                    str(state.final_answer)[:500],
+                    str(user_context.final_answer)[:500],
                     is_complete=True
                 )
             
             return result
         except Exception as e:
-            return await self._handle_execution_error(context, state, e, start_time)
+            return await self._handle_execution_error(context, user_context, e, start_time)
     
     async def _handle_execution_error(self, context: AgentExecutionContext,
-                                     state: DeepAgentState, error: Exception,
+                                     user_context: Optional['UserExecutionContext'], error: Exception,
                                      start_time: float) -> AgentExecutionResult:
         """Handle execution errors with enhanced user notification and loud error reporting."""
         # LOUD ERROR: Make agent execution failures highly visible
@@ -613,44 +616,44 @@ class ExecutionEngine:
                 f"Attempting retry {context.retry_count + 1}/{context.max_retries} "
                 f"for agent {context.agent_name} (user: {context.user_id})"
             )
-            return await self._retry_execution(context, state)
+            return await self._retry_execution(context, user_context)
         
         # Execute fallback strategy as last resort
         logger.critical(
             f"NO RETRY POSSIBLE: Executing fallback strategy for {context.agent_name} "
             f"(user: {context.user_id}). Max retries ({context.max_retries}) exceeded."
         )
-        return await self._execute_fallback_strategy(context, state, error, start_time)
+        return await self._execute_fallback_strategy(context, user_context, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
         """Check if retry is allowed."""
         return context.retry_count < context.max_retries
     
     async def _retry_execution(self, context: AgentExecutionContext,
-                              state: DeepAgentState) -> AgentExecutionResult:
+                              user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Retry agent execution."""
         self._prepare_retry_context(context)
         self._log_retry_attempt(context)
         await self._wait_for_retry(context.retry_count)
-        return await self.execute_agent(context, state)
+        return await self.execute_agent(context, user_context)
     
     async def execute_pipeline(self, steps: List[PipelineStep],
                               context: AgentExecutionContext,
-                              state: DeepAgentState) -> List[AgentExecutionResult]:
+                              user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
         """Execute a pipeline of agents."""
-        return await self._execute_pipeline_steps(steps, context, state)
+        return await self._execute_pipeline_steps(steps, context, user_context)
     
     async def _execute_pipeline_steps(self, steps: List[PipelineStep],
                                      context: AgentExecutionContext,
-                                     state: DeepAgentState) -> List[AgentExecutionResult]:
+                                     user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
         """Execute pipeline steps with optimal parallelization strategy."""
         # Check if steps can be executed in parallel (no dependencies)
         if self._can_execute_parallel(steps):
-            return await self._execute_steps_parallel(steps, context, state)
+            return await self._execute_steps_parallel(steps, context, user_context)
         else:
             # Fall back to sequential execution with early termination
             results = []
-            await self._process_steps_with_early_termination(steps, context, state, results)
+            await self._process_steps_with_early_termination(steps, context, user_context, results)
             return results
     
     def _can_execute_parallel(self, steps: List[PipelineStep]) -> bool:
@@ -692,16 +695,16 @@ class ExecutionEngine:
     
     async def _execute_steps_parallel(self, steps: List[PipelineStep],
                                     context: AgentExecutionContext,
-                                    state: DeepAgentState) -> List[AgentExecutionResult]:
+                                    user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
         """Execute steps in parallel using asyncio.gather for improved performance."""
         # Create tasks for all executable steps
         tasks = []
         executable_steps = []
         
         for step in steps:
-            if await self._should_execute_step(step, state):
+            if await self._should_execute_step(step, user_context):
                 step_context = self._create_step_context(context, step)
-                task = self._execute_step_parallel_safe(step, step_context, state)
+                task = self._execute_step_parallel_safe(step, step_context, user_context)
                 tasks.append(task)
                 executable_steps.append(step)
         
@@ -727,13 +730,13 @@ class ExecutionEngine:
         except Exception as e:
             logger.error(f"Parallel execution failed: {e}")
             # Fall back to sequential execution
-            return await self._execute_steps_sequential_fallback(steps, context, state)
+            return await self._execute_steps_sequential_fallback(steps, context, user_context)
     
     async def _execute_step_parallel_safe(self, step: PipelineStep,
                                         context: AgentExecutionContext,
-                                        state: DeepAgentState) -> AgentExecutionResult:
+                                        user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute a single step safely for parallel execution."""
-        return await self._execute_with_fallback(context, state)
+        return await self._execute_with_fallback(context, user_context)
     
     def _create_error_result(self, step: PipelineStep, error: Exception) -> AgentExecutionResult:
         """Create an error result for a failed step."""
@@ -748,57 +751,57 @@ class ExecutionEngine:
     
     async def _execute_steps_sequential_fallback(self, steps: List[PipelineStep],
                                                context: AgentExecutionContext,
-                                               state: DeepAgentState) -> List[AgentExecutionResult]:
+                                               user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
         """Fallback to sequential execution if parallel fails."""
         logger.warning("Falling back to sequential execution")
         results = []
-        await self._process_steps_with_early_termination(steps, context, state, results)
+        await self._process_steps_with_early_termination(steps, context, user_context, results)
         return results
     
     async def _process_steps_with_early_termination(self, steps: List[PipelineStep],
                                                   context: AgentExecutionContext,
-                                                  state: DeepAgentState, results: List) -> None:
+                                                  user_context: Optional['UserExecutionContext'], results: List) -> None:
         """Process steps with early termination on failure."""
         for step in steps:
-            should_stop = await self._process_pipeline_step(step, context, state, results)
+            should_stop = await self._process_pipeline_step(step, context, user_context, results)
             if should_stop:
                 break
     
     async def _process_pipeline_step(self, step: PipelineStep, context: AgentExecutionContext,
-                                    state: DeepAgentState, results: List) -> bool:
+                                    user_context: Optional['UserExecutionContext'], results: List) -> bool:
         """Process single pipeline step. Returns True to stop pipeline."""
-        if not await self._should_execute_step(step, state):
+        if not await self._should_execute_step(step, user_context):
             return False
-        return await self._execute_and_check_result(step, context, state, results)
+        return await self._execute_and_check_result(step, context, user_context, results)
     
     async def _execute_and_check_result(self, step: PipelineStep, context: AgentExecutionContext,
-                                       state: DeepAgentState, results: List) -> bool:
+                                       user_context: Optional['UserExecutionContext'], results: List) -> bool:
         """Execute step and check if pipeline should stop."""
-        result = await self._execute_step(step, context, state)
+        result = await self._execute_step(step, context, user_context)
         results.append(result)
         return self._should_stop_pipeline(result, step)
     
     async def _should_execute_step(self, step: PipelineStep,
-                                  state: DeepAgentState) -> bool:
+                                  user_context: Optional['UserExecutionContext']) -> bool:
         """Check if step should be executed."""
         if not step.condition:
             return True
-        return await self._evaluate_condition(step.condition, state)
+        return await self._evaluate_condition(step.condition, user_context)
     
-    async def _evaluate_condition(self, condition, state: DeepAgentState) -> bool:
+    async def _evaluate_condition(self, condition, user_context: Optional['UserExecutionContext']) -> bool:
         """Safely evaluate step condition."""
         try:
-            return await condition(state)
+            return await condition(user_context)
         except Exception as e:
             logger.error(f"Error evaluating condition: {e}")
             return False
     
     async def _execute_step(self, step: PipelineStep,
                            context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute a single pipeline step."""
         step_context = self._create_step_context(context, step)
-        return await self._execute_with_fallback(step_context, state)
+        return await self._execute_with_fallback(step_context, user_context)
     
     def _create_step_context(self, base_context: AgentExecutionContext,
                            step: PipelineStep) -> AgentExecutionContext:
@@ -839,10 +842,10 @@ class ExecutionEngine:
         return not result.success and not step.metadata.get("continue_on_error")
     
     async def _execute_with_fallback(self, context: AgentExecutionContext,
-                                   state: DeepAgentState) -> AgentExecutionResult:
+                                   user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute agent with fallback handling."""
         # Fallback manager removed - execute directly
-        return await self.agent_core.execute_agent(context, state)
+        return await self.agent_core.execute_agent(context, user_context)
     
     def _update_history(self, result: AgentExecutionResult) -> None:
         """Update run history with size limit."""
@@ -966,7 +969,7 @@ class ExecutionEngine:
     
     async def _send_final_execution_report(self, context: AgentExecutionContext,
                                           result: AgentExecutionResult,
-                                          state: DeepAgentState) -> None:
+                                          user_context: Optional['UserExecutionContext']) -> None:
         """Send comprehensive final report after successful execution."""
         try:
             # Build comprehensive report
@@ -974,9 +977,9 @@ class ExecutionEngine:
                 "agent_name": context.agent_name,
                 "success": result.success,
                 "duration_ms": result.duration * 1000 if result.duration else 0,
-                "user_prompt": getattr(state, 'user_prompt', 'N/A'),
-                "final_answer": getattr(state, 'final_answer', 'Completed'),
-                "step_count": getattr(state, 'step_count', 0),
+                "user_prompt": user_context.metadata.get('user_prompt', 'N/A') if user_context else 'N/A',
+                "final_answer": user_context.metadata.get('final_answer', 'Completed') if user_context else 'Completed',
+                "step_count": user_context.metadata.get('step_count', 0) if user_context else 0,
                 "status": "completed"
             }
             
@@ -999,7 +1002,7 @@ class ExecutionEngine:
     
     async def _send_completion_for_failed_execution(self, context: AgentExecutionContext,
                                                    result: AgentExecutionResult,
-                                                   state: DeepAgentState) -> None:
+                                                   user_context: Optional['UserExecutionContext']) -> None:
         """Send completion event for failed/fallback execution scenarios."""
         try:
             # Build error/fallback completion report
@@ -1039,7 +1042,7 @@ class ExecutionEngine:
             self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
     
     async def _execute_fallback_strategy(self, context: AgentExecutionContext,
-                                       state: DeepAgentState, error: Exception,
+                                       user_context: Optional['UserExecutionContext'], error: Exception,
                                        start_time: float) -> AgentExecutionResult:
         """Execute fallback strategy for failed execution."""
         self._log_fallback_trigger(context)
@@ -1064,7 +1067,7 @@ class ExecutionEngine:
         pass
     
     async def _execute_fallback_strategy(self, context: AgentExecutionContext, 
-                                        state: DeepAgentState, error: Exception, 
+                                        user_context: Optional['UserExecutionContext'], error: Exception, 
                                         start_time: float) -> AgentExecutionResult:
         """Execute fallback strategy for failed agent."""
         self._log_fallback_trigger(context)
@@ -1303,7 +1306,7 @@ class ExecutionEngine:
     @staticmethod
     async def execute_with_user_isolation(context: UserExecutionContext,
                                          agent_context: AgentExecutionContext,
-                                         state: DeepAgentState) -> AgentExecutionResult:
+                                         user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:
         """Execute agent with complete user isolation (static method).
         
         RECOMMENDED: Use this static method for new code requiring complete isolation.
@@ -1322,7 +1325,7 @@ class ExecutionEngine:
             )
         """
         async with user_execution_engine(context) as engine:
-            return await engine.execute_agent(agent_context, state)
+            return await engine.execute_agent(agent_context, user_context)
     
     def has_user_context(self) -> bool:
         """Check if this engine has UserExecutionContext support."""

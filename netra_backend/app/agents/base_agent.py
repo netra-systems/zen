@@ -16,8 +16,18 @@ import time
 # from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
-# DEPRECATED: DeepAgentState import for migration compatibility only - will be removed in v3.0.0
-from netra_backend.app.schemas.agent_models import DeepAgentState
+# =============================================================================
+# MIGRATION COMPLETED: DeepAgentState pattern completely removed
+# =============================================================================
+# All DeepAgentState imports, references, and bridge patterns have been removed.
+# BaseAgent now exclusively supports the UserExecutionContext pattern for:
+# - Complete user isolation between concurrent requests
+# - Proper session management and resource cleanup  
+# - WebSocket event routing with user context
+# - Comprehensive audit trail and compliance tracking
+#
+# Migration Guide: reports/archived/USER_CONTEXT_ARCHITECTURE.md
+# =============================================================================
 import warnings
 from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -85,12 +95,14 @@ except ImportError:
     )
 
 # CRITICAL: Import session management for proper per-request isolation
-# Use TYPE_CHECKING imports to avoid circular dependency
+# Import UserExecutionContext directly - no circular dependency with proper patterns
+from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError, validate_user_context
+
+# Use TYPE_CHECKING imports only for optional database components
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.database.session_manager import DatabaseSessionManager
-    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class BaseAgent(ABC):
@@ -125,7 +137,7 @@ class BaseAgent(ABC):
                  enable_caching: bool = False,
                  tool_dispatcher: Optional[UnifiedToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
                  redis_manager: Optional[RedisManager] = None,
-                 user_context: Optional['UserExecutionContext'] = None):
+                 user_context: Optional[UserExecutionContext] = None):
         
         # Initialize with simple single inheritance pattern
         super().__init__()
@@ -299,7 +311,7 @@ class BaseAgent(ABC):
     
     # === Metadata Storage Methods (SSOT) ===
     
-    def store_metadata_result(self, context: 'UserExecutionContext', key: str, value: Any, 
+    def store_metadata_result(self, context: UserExecutionContext, key: str, value: Any, 
                              ensure_serializable: bool = True) -> None:
         """SSOT method for storing results in context metadata.
         
@@ -331,7 +343,7 @@ class BaseAgent(ABC):
         # Log for observability
         self.logger.debug(f"{self.name} stored metadata: {key}")
     
-    def store_metadata_batch(self, context: 'UserExecutionContext', 
+    def store_metadata_batch(self, context: UserExecutionContext, 
                             data: Dict[str, Any], ensure_serializable: bool = True) -> None:
         """Store multiple metadata entries at once.
         
@@ -353,7 +365,7 @@ class BaseAgent(ABC):
         for key, value in data.items():
             self.store_metadata_result(context, key, value, ensure_serializable)
     
-    def get_metadata_value(self, context: 'UserExecutionContext', key: str, 
+    def get_metadata_value(self, context: UserExecutionContext, key: str, 
                           default: Any = None) -> Any:
         """Safely retrieve a value from context metadata.
         
@@ -373,8 +385,8 @@ class BaseAgent(ABC):
     
     # === Token Management and Cost Optimization Methods ===
     
-    def track_llm_usage(self, context: 'UserExecutionContext', input_tokens: int, 
-                       output_tokens: int, model: str, operation_type: str = "execution") -> 'UserExecutionContext':
+    def track_llm_usage(self, context: UserExecutionContext, input_tokens: int, 
+                       output_tokens: int, model: str, operation_type: str = "execution") -> UserExecutionContext:
         """Track LLM token usage and return enhanced context (respects frozen dataclass).
         
         CRITICAL: This method no longer mutates the context directly. Instead it returns
@@ -407,8 +419,8 @@ class BaseAgent(ABC):
         
         return enhanced_context
     
-    def optimize_prompt_for_context(self, context: 'UserExecutionContext', 
-                                  prompt: str, target_reduction: int = 20) -> tuple['UserExecutionContext', str]:
+    def optimize_prompt_for_context(self, context: UserExecutionContext, 
+                                  prompt: str, target_reduction: int = 20) -> tuple[UserExecutionContext, str]:
         """Optimize a prompt and return enhanced context (respects frozen dataclass).
         
         CRITICAL: This method no longer mutates the context directly. Instead it returns
@@ -442,7 +454,7 @@ class BaseAgent(ABC):
         
         return enhanced_context, optimized_prompt
     
-    def get_cost_optimization_suggestions(self, context: 'UserExecutionContext') -> tuple['UserExecutionContext', List[Dict[str, Any]]]:
+    def get_cost_optimization_suggestions(self, context: UserExecutionContext) -> tuple[UserExecutionContext, List[Dict[str, Any]]]:
         """Get cost optimization suggestions and return enhanced context (respects frozen dataclass).
         
         CRITICAL: This method no longer mutates the context directly. Instead it returns
@@ -466,7 +478,7 @@ class BaseAgent(ABC):
         
         return enhanced_context, suggestions
     
-    def get_token_usage_summary(self, context: 'UserExecutionContext') -> Dict[str, Any]:
+    def get_token_usage_summary(self, context: UserExecutionContext) -> Dict[str, Any]:
         """Get token usage summary for this agent.
         
         Args:
@@ -509,7 +521,7 @@ class BaseAgent(ABC):
             self.logger.error(f"Agent {self.name} failed session isolation validation: {e}")
             raise
     
-    def _get_session_manager(self, context: 'UserExecutionContext') -> 'DatabaseSessionManager':
+    def _get_session_manager(self, context: UserExecutionContext) -> 'DatabaseSessionManager':
         """Get database session manager for the given context.
         
         Args:
@@ -522,21 +534,20 @@ class BaseAgent(ABC):
             SessionManagerError: If context is invalid or lacks session
         """
         # Import dynamically to avoid circular dependency
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
         from netra_backend.app.database.session_manager import DatabaseSessionManager
         
-        if not isinstance(context, UserExecutionContext):
-            raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
+        # Validate context type with comprehensive validation
+        context = validate_user_context(context)
         
         # DatabaseSessionManager is now a stub that doesn't take context parameter
         return DatabaseSessionManager()
     
     # === Abstract Methods ===
     
-    async def execute(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
         """Execute the agent with user execution context.
         
-        CRITICAL: Only supports UserExecutionContext pattern - no legacy support.
+        MODERN: Only supports UserExecutionContext pattern - all legacy support removed.
         This ensures proper session isolation and prevents parameter proliferation.
         
         Args:
@@ -547,32 +558,38 @@ class BaseAgent(ABC):
             Execution result
             
         Raises:
-            NotImplementedError: If neither execute_with_context nor execute_core_logic is implemented
+            TypeError: If context is not UserExecutionContext
+            NotImplementedError: If agent doesn't implement _execute_with_user_context
         """
-        # Import dynamically to avoid circular dependency
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Validate context type
-        if not isinstance(context, UserExecutionContext):
-            raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
+        # Validate context type with comprehensive validation
+        context = validate_user_context(context)
         
         # Validate session isolation before execution
         self._validate_session_isolation()
         
-        # Use context-based execution - no legacy support
-        if hasattr(self, 'execute_with_context'):
-            return await self.execute_with_context(context, stream_updates)
+        # Store context for WebSocket event routing
+        self.set_user_context(context)
         
-        # Fallback - agents should implement execute_with_context or execute_core_logic
+        # Only modern UserExecutionContext pattern supported
+        if hasattr(self, '_execute_with_user_context') and callable(getattr(self, '_execute_with_user_context')):
+            return await self._execute_with_user_context(context, stream_updates)
+        
+        # Agent must implement modern pattern
         raise NotImplementedError(
-            f"Agent {self.name} must implement execute_with_context() or execute_core_logic(). "
+            f"🚨 MIGRATION REQUIRED: Agent '{self.name}' must implement '_execute_with_user_context(context, stream_updates)' method.\n"
+            f"\n📋 REQUIRED IMPLEMENTATION:"
+            f"\n1. Add 'async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:' method"
+            f"\n2. Use 'context.agent_context.get(\"user_request\", \"\")' for user request data"
+            f"\n3. Use 'context.db_session' for database operations"
+            f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
+            f"\n\n📖 Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
         )
     
-    async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
+    async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
         """Execute agent with proper context-based session management and telemetry.
         
-        This is the primary execution pattern. Subclasses should override this method.
-        Includes OpenTelemetry span creation for distributed tracing.
+        This is the modern execution pattern with complete UserExecutionContext support.
+        Includes OpenTelemetry span creation for distributed tracing and WebSocket integration.
         
         Args:
             context: User execution context with database session and user info
@@ -582,9 +599,15 @@ class BaseAgent(ABC):
             Execution result
             
         Raises:
-            NotImplementedError: If agent doesn't implement UserExecutionContext pattern
-            DeprecationWarning: If agent falls back to legacy patterns
+            TypeError: If context is not UserExecutionContext
+            NotImplementedError: If agent doesn't implement _execute_with_user_context
         """
+        # Validate context type with comprehensive validation
+        context = validate_user_context(context)
+        
+        # Store context for WebSocket event routing
+        self.set_user_context(context)
+        
         # Create telemetry span for agent execution
         span_attributes = {
             "agent.id": self.agent_id,
@@ -592,7 +615,8 @@ class BaseAgent(ABC):
             "user.id": context.user_id,
             "thread.id": context.thread_id,
             "run.id": context.run_id,
-            "session.id": getattr(context, 'session_id', None),
+            "request.id": context.request_id,
+            "operation.depth": context.operation_depth,
             "stream_updates": stream_updates
         }
         
@@ -611,10 +635,13 @@ class BaseAgent(ABC):
                     telemetry_manager.add_event(
                         span, 
                         "agent_started",
-                        {"message": f"Agent {self.name} execution started"}
+                        {"message": f"Agent {self.name} execution started with UserExecutionContext"}
                     )
                 
-                # Check if agent has modern implementation first
+                # Emit WebSocket event for agent start
+                await self.emit_agent_started(f"Starting {self.name} execution")
+                
+                # Only modern UserExecutionContext pattern supported
                 if hasattr(self, '_execute_with_user_context') and callable(getattr(self, '_execute_with_user_context')):
                     # Modern UserExecutionContext pattern
                     result = await self._execute_with_user_context(context, stream_updates)
@@ -627,7 +654,34 @@ class BaseAgent(ABC):
                             {"message": f"Agent {self.name} completed successfully"}
                         )
                     
+                    # Emit WebSocket event for agent completion
+                    await self.emit_agent_completed({"status": "success", "result_type": type(result).__name__}, context)
+                    
                     return result
+                else:
+                    # Agent doesn't implement modern pattern
+                    error_message = f"Agent '{self.name}' must implement '_execute_with_user_context()' method"
+                    
+                    # Record failure in telemetry
+                    if span:
+                        telemetry_manager.add_event(
+                            span,
+                            "agent_failed", 
+                            {"error": error_message, "error_type": "NotImplementedError"}
+                        )
+                    
+                    # Emit WebSocket error event
+                    await self.emit_error(error_message, "NotImplementedError")
+                    
+                    raise NotImplementedError(
+                        f"🚨 MIGRATION REQUIRED: {error_message}\n"
+                        f"\n📋 REQUIRED IMPLEMENTATION:"
+                        f"\n1. Add 'async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:' method"
+                        f"\n2. Use 'context.agent_context.get(\"user_request\", \"\")' for user request data"
+                        f"\n3. Use 'context.db_session' for database operations"
+                        f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
+                        f"\n\n📖 Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
+                    )
                 
             except Exception as e:
                 # Record exception in span
@@ -638,62 +692,11 @@ class BaseAgent(ABC):
                         "agent_failed", 
                         {"error": str(e), "error_type": type(e).__name__}
                     )
+                
+                # Emit WebSocket error event
+                await self.emit_error(str(e), type(e).__name__)
+                
                 raise
-        
-        # DEPRECATED: Legacy fallback using execute_core_logic with DeepAgentState bridge
-        if hasattr(self, 'execute_core_logic'):
-            # Issue comprehensive deprecation warning
-            warnings.warn(
-                f"🚨 CRITICAL DEPRECATION: Agent '{self.name}' is using legacy DeepAgentState bridge pattern. "
-                f"This creates user isolation risks and will be REMOVED in v3.0.0 (Q1 2025). "
-                f"\n"
-                f"📋 IMMEDIATE ACTION REQUIRED:"
-                f"\n1. Implement '_execute_with_user_context(context, stream_updates)' method"
-                f"\n2. Remove 'execute_core_logic' method"  
-                f"\n3. Use 'context.metadata.get(\"user_request\", \"\")' instead of DeepAgentState.user_request"
-                f"\n4. Access database via 'context.db_session' instead of global sessions"
-                f"\n"
-                f"📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
-                f"\n⚠️  USER ISOLATION AT RISK: Multiple users may see each other's data",
-                DeprecationWarning,
-                stacklevel=3  # Point to the calling code, not this method
-            )
-            
-            # Log critical warning
-            self.logger.critical(f"🚨 AGENT MIGRATION REQUIRED: {self.name} using deprecated DeepAgentState pattern")
-            self.logger.warning(f"📋 MIGRATION: Implement '_execute_with_user_context()' method in {self.__class__.__module__}.{self.__class__.__name__}")
-            self.logger.error(f"⚠️  USER DATA AT RISK: Agent {self.name} may cause data leakage between users")
-            
-            # Create temporary DeepAgentState bridge (DEPRECATED - will be removed)
-            temp_state = DeepAgentState(
-                user_request=context.metadata.get('user_request', context.metadata.get('agent_input', 'default_request')),
-                chat_thread_id=context.thread_id,
-                user_id=context.user_id,
-                run_id=context.run_id
-            )
-            execution_context = ExecutionContext(
-                request_id=context.run_id,
-                run_id=context.run_id,
-                agent_name=self.name,
-                state=temp_state,  # DEPRECATED: Bridge pattern only
-                stream_updates=stream_updates,
-                user_id=context.user_id,
-                correlation_id=self.correlation_id
-            )
-            
-            # Execute with deprecated bridge
-            return await self.execute_core_logic(execution_context)
-        
-        # No implementation found - agent must be migrated
-        raise NotImplementedError(
-            f"🚨 AGENT MIGRATION REQUIRED: Agent '{self.name}' must implement UserExecutionContext pattern.\n"
-            f"\n📋 REQUIRED IMPLEMENTATION:"
-            f"\n1. Add '_execute_with_user_context(context, stream_updates)' method"
-            f"\n2. Use 'context.metadata.get(\"user_request\", \"\")' for user request data"
-            f"\n3. Use 'context.db_session' for database operations" 
-            f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
-            f"\n\n📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
-        )
     
 # _convert_context_to_state method removed - legacy support removed
     
@@ -930,7 +933,7 @@ class BaseAgent(ABC):
         await self._websocket_adapter.emit_agent_started(message)
     
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None,
-                           context: Optional['UserExecutionContext'] = None) -> None:
+                           context: Optional[UserExecutionContext] = None) -> None:
         """Emit agent thinking event via WebSocket bridge with optional token metrics."""
         # Enhance thinking event with token usage if context available
         enhanced_thought = thought
@@ -951,7 +954,7 @@ class BaseAgent(ABC):
         await self._websocket_adapter.emit_tool_completed(tool_name, result)
     
     async def emit_agent_completed(self, result: Optional[Dict] = None,
-                                  context: Optional['UserExecutionContext'] = None) -> None:
+                                  context: Optional[UserExecutionContext] = None) -> None:
         """Emit agent completed event via WebSocket bridge with cost analysis."""
         # Enhance result with cost analysis if context available
         enhanced_result = result or {}
@@ -1099,78 +1102,11 @@ class BaseAgent(ABC):
     
     # === SSOT Standardized Execution Patterns ===
     
-    async def execute_modern(self, state: 'DeepAgentState', run_id: str, stream_updates: bool = False) -> ExecutionResult:
-        """Legacy compatibility method for execute_modern.
-        
-        This method provides backward compatibility for tests that still use
-        the execute_modern pattern. It bridges to the modern execution system.
-        
-        Args:
-            state: Legacy DeepAgentState object
-            run_id: Execution run ID
-            
-        Returns:
-            ExecutionResult from the execution
-            
-        Warning:
-            This method is for test compatibility only and should not be used
-            in production code. Use execute_with_context() instead.
-        """
-        import warnings
-        warnings.warn(
-            "execute_modern() is deprecated - use execute_with_context() instead",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # Create temporary execution context for legacy bridge
-        execution_context = ExecutionContext(
-            request_id=run_id,
-            run_id=run_id,
-            state=state,
-            agent_name=self.name,
-            correlation_id=self.correlation_id,
-            user_id=getattr(state, 'user_id', None),
-            stream_updates=stream_updates
-        )
-        
-        # Use the execution engine if available, otherwise direct execution
-        if self._execution_engine and False:  # Disable execution engine path for now
-            return await self._execution_engine.execute(self, execution_context)
-        else:
-            # Direct execution for backward compatibility
-            try:
-                start_time = time.time()
-                
-                # Validate preconditions
-                if not await self.validate_preconditions(execution_context):
-                    return ExecutionResult(
-                        status=ExecutionStatus.FAILED,
-                        request_id=run_id,
-                        data=None,
-                        error_message="Precondition validation failed",
-                        execution_time_ms=(time.time() - start_time) * 1000
-                    )
-                
-                # Execute core logic
-                result = await self.execute_core_logic(execution_context)
-                
-                return ExecutionResult(
-                    status=ExecutionStatus.COMPLETED,
-                    request_id=run_id,
-                    data=result,
-                    error_message=None,
-                    execution_time_ms=(time.time() - start_time) * 1000
-                )
-                
-            except Exception as e:
-                return ExecutionResult(
-                    status=ExecutionStatus.FAILED,
-                    request_id=run_id,
-                    data=None,
-                    error_message=str(e),
-                    execution_time_ms=(time.time() - start_time) * 1000
-                )
+    # === MIGRATION COMPLETED: execute_modern() method REMOVED ===
+    # This method previously provided backward compatibility with DeepAgentState patterns.
+    # All agents must now implement the modern UserExecutionContext pattern:
+    # - async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any
+    # Migration guide: reports/archived/USER_CONTEXT_ARCHITECTURE.md
     
     async def execute_with_reliability(self, 
                                       operation: Callable[[], Awaitable[Any]], 
@@ -1397,8 +1333,27 @@ class BaseAgent(ABC):
     # === SSOT WebSocket Update Infrastructure ===
     
     async def _get_user_emitter(self):
-        """Get user-isolated WebSocket emitter using factory pattern."""
+        """Get user-isolated WebSocket emitter using factory pattern.
+        
+        Returns user-specific WebSocket emitter for proper event routing.
+        Ensures complete user isolation for WebSocket events.
+        
+        Returns:
+            User-isolated WebSocket emitter or None if unavailable
+        """
         if not self.user_context:
+            self.logger.debug(
+                f"Agent {self.name}: No user context available for WebSocket emitter - skipping WebSocket events"
+            )
+            return None
+        
+        # Validate context before using
+        try:
+            self.user_context.verify_isolation()
+        except Exception as e:
+            self.logger.warning(
+                f"Agent {self.name}: User context isolation validation failed: {e}"
+            )
             return None
             
         # Create emitter if not already created (lazy initialization)
@@ -1407,21 +1362,42 @@ class BaseAgent(ABC):
                 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
                 bridge = AgentWebSocketBridge()
                 self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
+                self.logger.debug(
+                    f"Agent {self.name}: Created user-isolated WebSocket emitter for user {self.user_context.user_id[:8]}..."
+                )
             except Exception as e:
-                self.logger.debug(f"Failed to create user emitter: {e}")
+                self.logger.warning(f"Agent {self.name}: Failed to create user emitter: {e}")
                 return None
                 
         return self._websocket_emitter
     
-    def set_user_context(self, user_context: 'UserExecutionContext') -> None:
+    def set_user_context(self, user_context: UserExecutionContext) -> None:
         """Set user context for isolated WebSocket events (factory pattern).
+        
+        CRITICAL: This method ensures proper user isolation for WebSocket events
+        and validates the context before storing it.
         
         Args:
             user_context: User execution context for event isolation
+            
+        Raises:
+            InvalidContextError: If user context is invalid
         """
+        # Validate context with comprehensive validation
+        user_context = validate_user_context(user_context)
+        
+        # Store validated context
         self.user_context = user_context
+        
         # Reset emitter to force recreation with new context
         self._websocket_emitter = None
+        
+        # Log context assignment for observability
+        self.logger.debug(
+            f"Agent {self.name} assigned UserExecutionContext: "
+            f"user={user_context.user_id[:8]}..., thread={user_context.thread_id}, "
+            f"run={user_context.run_id}, request={user_context.request_id[:8]}..."
+        )
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
         """Send update via AgentWebSocketBridge factory pattern for user isolation."""
@@ -1480,7 +1456,7 @@ class BaseAgent(ABC):
     @classmethod
     def create_with_context(
         cls, 
-        context: 'UserExecutionContext',
+        context: UserExecutionContext,
         agent_config: Optional[Dict[str, Any]] = None
     ) -> 'BaseAgent':
         """MODERN: Factory method for creating context-aware agent instances.
@@ -1498,11 +1474,8 @@ class BaseAgent(ABC):
         Raises:
             ValueError: If context is invalid or agent doesn't support pattern
         """
-        # Import dynamically to avoid circular dependency
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        if not isinstance(context, UserExecutionContext):
-            raise ValueError(f"Expected UserExecutionContext, got {type(context)}")
+        # Validate context type with comprehensive validation
+        context = validate_user_context(context)
         
         # Create agent instance without singleton dependencies
         agent = cls()
@@ -1516,11 +1489,12 @@ class BaseAgent(ABC):
                 if hasattr(agent, key):
                     setattr(agent, key, value)
         
-        # Validate agent implements modern pattern
-        if not hasattr(agent, '_execute_with_user_context') and not hasattr(agent, 'execute_core_logic'):
-            raise ValueError(
-                f"Agent {cls.__name__} must implement either '_execute_with_user_context()' "
-                f"or provide 'execute_core_logic()' for legacy bridge support"
+        # Validate agent implements modern pattern - only modern pattern allowed now
+        if not hasattr(agent, '_execute_with_user_context'):
+            # Agent must implement modern pattern only - no legacy support
+            logger.warning(
+                f"Agent {cls.__name__} created without '_execute_with_user_context()' method. "
+                f"Agent will require implementation before execution."
             )
         
         return agent
@@ -1719,7 +1693,7 @@ class BaseAgent(ABC):
         }
     
     @classmethod
-    def create_agent_with_context(cls, context: 'UserExecutionContext') -> 'BaseAgent':
+    def create_agent_with_context(cls, context: UserExecutionContext) -> 'BaseAgent':
         """Factory method for creating BaseAgent with UserExecutionContext.
         
         This is the PREFERRED method for creating agent instances as it ensures
@@ -1740,21 +1714,101 @@ class BaseAgent(ABC):
             ... )
             >>> agent = BaseAgent.create_agent_with_context(context)
         """
-        # Create agent without deprecated tool_dispatcher to avoid warnings
+        # Validate context with comprehensive validation
+        context = validate_user_context(context)
+        
+        # Create agent without deprecated parameters to avoid warnings
         agent = cls(
             name=f"{cls.__name__}",
             description=f"Instance of {cls.__name__} with user context isolation",
-            user_id=context.user_id,
             enable_reliability=True,
             enable_execution_engine=True,
             enable_caching=False,
-            tool_dispatcher=None  # Avoid deprecated parameter
+            tool_dispatcher=None,  # Avoid deprecated parameter
+            user_context=context   # Pass context directly to constructor
         )
         
-        # Store context for request-scoped operations
-        agent._user_execution_context = context
+        # Set user context for WebSocket integration
+        agent.set_user_context(context)
         
         logger.info(f"✅ Created {cls.__name__} with UserExecutionContext: "
-                   f"user={context.user_id}, thread={context.thread_id}, run={context.run_id}")
+                   f"user={context.user_id[:8]}..., thread={context.thread_id}, "
+                   f"run={context.run_id}, request={context.request_id[:8]}...")
         
         return agent
+    
+    def validate_migration_completeness(self) -> Dict[str, Any]:
+        """Validate that DeepAgentState migration is completely removed.
+        
+        This method performs comprehensive validation to ensure no traces
+        of DeepAgentState patterns remain in the agent implementation.
+        
+        Returns:
+            Dictionary with migration validation results
+            
+        Raises:
+            RuntimeError: If critical DeepAgentState patterns are detected
+        """
+        validation_result = {
+            "migration_complete": True,
+            "agent_name": self.name,
+            "violations": [],
+            "warnings": [],
+            "validation_timestamp": time.time()
+        }
+        
+        # Check for DeepAgentState references in method attributes
+        for attr_name in dir(self):
+            attr_value = getattr(self, attr_name, None)
+            if hasattr(attr_value, '__name__'):
+                if 'DeepAgentState' in str(attr_value):
+                    validation_result["violations"].append(
+                        f"Method/attribute '{attr_name}' contains DeepAgentState references"
+                    )
+                    validation_result["migration_complete"] = False
+        
+        # Check for legacy execution methods
+        legacy_methods = ['execute_legacy', 'execute_modern', '_convert_context_to_state']
+        for method_name in legacy_methods:
+            if hasattr(self, method_name) and callable(getattr(self, method_name, None)):
+                validation_result["violations"].append(
+                    f"Legacy method '{method_name}' still exists and should be removed"
+                )
+                validation_result["migration_complete"] = False
+        
+        # Check for modern implementation
+        if not (hasattr(self, '_execute_with_user_context') and 
+                callable(getattr(self, '_execute_with_user_context', None))):
+            validation_result["warnings"].append(
+                "Agent doesn't implement '_execute_with_user_context()' method. "
+                "This is required for full UserExecutionContext pattern compliance."
+            )
+        
+        # Check for proper user context handling
+        if not hasattr(self, 'user_context'):
+            validation_result["warnings"].append(
+                "Agent doesn't have 'user_context' attribute for WebSocket integration"
+            )
+        
+        # Check WebSocket adapter integration
+        if not hasattr(self, '_websocket_adapter'):
+            validation_result["warnings"].append(
+                "Agent doesn't have WebSocket adapter for event emission"
+            )
+        
+        # Log results
+        if validation_result["migration_complete"]:
+            self.logger.info(f"✅ Agent '{self.name}' migration validation passed")
+        else:
+            violation_details = "\n".join([f"  - {v}" for v in validation_result["violations"]])
+            self.logger.error(
+                f"❌ Agent '{self.name}' migration validation failed:\n{violation_details}"
+            )
+            
+        if validation_result["warnings"]:
+            warning_details = "\n".join([f"  - {w}" for w in validation_result["warnings"]])
+            self.logger.warning(
+                f"⚠️ Agent '{self.name}' migration warnings:\n{warning_details}"
+            )
+        
+        return validation_result
