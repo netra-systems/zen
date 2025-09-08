@@ -440,79 +440,71 @@ class AuthEnvironment:
     
     # Redis Configuration (for session management)
     def get_redis_url(self) -> str:
-        """Get Redis connection URL with environment-specific behavior."""
-        env = self.get_environment()
+        """Get Redis connection URL using AuthRedisConfigurationBuilder.
         
-        url = self.env.get("REDIS_URL")
-        if url:
-            return url
-            
-        # Environment-specific behavior (no fallback pattern)
+        CRITICAL: Uses AuthRedisConfigurationBuilder SSOT pattern following the 
+        Five Whys solution for unified configuration management with auth-specific
+        database isolation.
+        """
+        from auth_service.auth_core.redis_config_builder import get_auth_redis_builder
+        
+        # Use AuthRedisConfigurationBuilder for service-specific Redis config
+        builder = get_auth_redis_builder(self.env.as_dict())
+        
+        # Get URL for current environment
+        redis_url = builder.get_url_for_environment()
+        
+        if redis_url:
+            logger.info(builder.get_safe_log_message())
+            return redis_url
+        
+        # Environment-specific behavior following Five Whys patterns
+        env = self.get_environment()
         if env == "production":
-            # Production requires explicit Redis configuration
-            raise ValueError("REDIS_URL must be explicitly set in production")
+            raise ValueError("Redis configuration required but not found for production environment")
         elif env == "staging":
-            # Staging requires explicit Redis configuration
-            raise ValueError("REDIS_URL must be explicitly set in staging")
+            raise ValueError("Redis configuration required but not found for staging environment")
         elif env == "development":
-            # Development: Standard local Redis with auth-specific database
-            return "redis://localhost:6379/1"
+            fallback_url = "redis://localhost:6379/1"  # Auth dev database
+            logger.warning(f"Redis configuration not found, using auth development fallback: {fallback_url}")
+            return fallback_url
         elif env == "test":
-            # Test: Separate Redis database for test isolation
-            return "redis://localhost:6379/2"
+            fallback_url = "redis://localhost:6379/2"  # Auth test database
+            logger.warning(f"Redis configuration not found, using auth test fallback: {fallback_url}")
+            return fallback_url
         else:
             return "redis://localhost:6379/1"
     
     def get_redis_host(self) -> str:
-        """Get Redis host with environment-specific defaults."""
-        env = self.get_environment()
+        """Get Redis host using AuthRedisConfigurationBuilder for consistency."""
+        from auth_service.auth_core.redis_config_builder import get_auth_redis_builder
         
-        host = self.env.get("REDIS_HOST")
-        if host:
-            return host
-            
-        # Environment-specific defaults (no fallback pattern)
+        builder = get_auth_redis_builder(self.env.as_dict())
+        redis_host = builder.redis_host
+        
+        if redis_host:
+            return redis_host
+        
+        # Environment-appropriate defaults
+        env = self.get_environment()
         if env == "production":
-            # Production requires explicit Redis host
             raise ValueError("REDIS_HOST must be explicitly set in production")
         elif env == "staging":
-            # Staging requires explicit Redis host  
             raise ValueError("REDIS_HOST must be explicitly set in staging")
-        elif env == "development":
-            # Development: Local Redis
-            return "localhost"
-        elif env == "test":
-            # Test: Local Redis
-            return "localhost"
         else:
             return "localhost"
     
     def get_redis_port(self) -> int:
-        """Get Redis port with environment-specific defaults."""
-        env = self.get_environment()
+        """Get Redis port using AuthRedisConfigurationBuilder for consistency."""
+        from auth_service.auth_core.redis_config_builder import get_auth_redis_builder
         
-        port_str = self.env.get("REDIS_PORT")
-        if port_str:
-            try:
-                return int(port_str)
-            except ValueError:
-                logger.warning(f"Invalid REDIS_PORT: {port_str} in {env} environment")
-                raise ValueError(f"REDIS_PORT must be a valid integer in {env} environment")
+        builder = get_auth_redis_builder(self.env.as_dict())
+        port_str = builder.redis_port
         
-        # Environment-specific defaults (no fallback pattern)
-        if env == "production":
-            # Production requires explicit Redis port
-            raise ValueError("REDIS_PORT must be explicitly set in production")
-        elif env == "staging":
-            # Staging requires explicit Redis port
-            raise ValueError("REDIS_PORT must be explicitly set in staging")
-        elif env == "development":
-            # Development: Standard Redis port
-            return 6379
-        elif env == "test":
-            # Test: Alternative Redis port to avoid conflicts
-            return 6381
-        else:
+        try:
+            return int(port_str)
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid REDIS_PORT: {port_str}, using default 6379")
             return 6379
     
     def get_session_ttl(self) -> int:
