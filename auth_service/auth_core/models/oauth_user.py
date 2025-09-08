@@ -17,14 +17,12 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, JSON
 from sqlalchemy.ext.declarative import declarative_base
 
-from auth_service.auth_core.database.models import BaseModel
+from auth_service.auth_core.database.models import Base
 
 logger = logging.getLogger(__name__)
 
-Base = declarative_base()
 
-
-class OAuthUser(BaseModel):
+class OAuthUser(Base):
     """
     OAuth User database model.
     

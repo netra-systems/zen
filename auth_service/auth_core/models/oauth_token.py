@@ -18,14 +18,12 @@ from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-from auth_service.auth_core.database.models import BaseModel
+from auth_service.auth_core.database.models import Base
 
 logger = logging.getLogger(__name__)
 
-Base = declarative_base()
 
-
-class OAuthToken(BaseModel):
+class OAuthToken(Base):
     """
     OAuth Token database model.
     
