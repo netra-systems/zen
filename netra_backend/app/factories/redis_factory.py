@@ -28,6 +28,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Union
 from uuid import uuid4
 
+# Alias for backward compatibility
+RedisConnectionFactory = None  # Will be set after class definition
+
 from netra_backend.app.core.configuration import get_configuration
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.redis_manager import RedisManager
@@ -899,10 +902,14 @@ async def cleanup_redis_factory():
     logger.info("[RedisFactory] Global factory cleaned up")
 
 
+# Alias for backward compatibility
+RedisConnectionFactory = RedisFactory
+
 __all__ = [
     "RedisFactory",
-    "UserRedisClient",
+    "UserRedisClient", 
     "get_redis_factory",
     "get_user_redis_client",
-    "cleanup_redis_factory"
+    "cleanup_redis_factory",
+    "RedisConnectionFactory"  # Backward compatibility alias
 ]

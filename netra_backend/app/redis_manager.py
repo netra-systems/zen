@@ -693,3 +693,34 @@ async def get_redis() -> RedisManager:
 def get_redis_manager() -> RedisManager:
     """Get Redis manager instance - synchronous version for compatibility with integration tests."""
     return redis_manager
+
+
+class UserCacheManager:
+    """User-specific caching operations using Redis."""
+    
+    def __init__(self, redis_manager: RedisManager = None):
+        self.redis_manager = redis_manager or redis_manager
+    
+    async def get_user_cache(self, user_id: str, key: str) -> Optional[str]:
+        """Get user-specific cached value."""
+        cache_key = f"user:{user_id}:{key}"
+        return await self.redis_manager.get(cache_key)
+    
+    async def set_user_cache(self, user_id: str, key: str, value: str, ttl: int = 3600) -> bool:
+        """Set user-specific cached value."""
+        cache_key = f"user:{user_id}:{key}"
+        return await self.redis_manager.set(cache_key, value, ex=ttl)
+    
+    async def clear_user_cache(self, user_id: str, key: str = None) -> bool:
+        """Clear user-specific cache."""
+        if key:
+            cache_key = f"user:{user_id}:{key}"
+            return await self.redis_manager.delete(cache_key)
+        else:
+            # Clear all user cache
+            pattern = f"user:{user_id}:*"
+            keys = await self.redis_manager.keys(pattern)
+            if keys:
+                for k in keys:
+                    await self.redis_manager.delete(k)
+            return True
