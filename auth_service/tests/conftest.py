@@ -78,8 +78,13 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("REDIS_DB", "2", "auth_conftest_real")  # Use separate test database
     
     # REAL OAuth credentials for testing (safe test values)
+    # Set for ALL environments that tests might check
     env.set("GOOGLE_OAUTH_CLIENT_ID_TEST", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest_real")
     env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "GOCSPX-test-client-secret-1234567890123456789", "auth_conftest_real")
+    env.set("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest_real")
+    env.set("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT", "GOCSPX-test-client-secret-1234567890123456789", "auth_conftest_real")
+    env.set("GOOGLE_OAUTH_CLIENT_ID", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest_real")
+    env.set("GOOGLE_OAUTH_CLIENT_SECRET", "GOCSPX-test-client-secret-1234567890123456789", "auth_conftest_real")
     
     # Disable file-based DB for tests
     env.set("AUTH_USE_FILE_DB", "false", "auth_conftest_real")
@@ -114,18 +119,25 @@ async def setup_real_services():
     
     try:
         # Initialize auth service database using its own connection system
-        await auth_db.initialize()
-        
-        if fast_test_mode:
-            logger.info("In-memory SQLite database initialized successfully via auth_db")
-        else:
-            logger.info("Real PostgreSQL connected successfully via auth_db")
-        
-        # Create auth service tables using the initialized connection
-        async with auth_db.engine.begin() as conn:
-            # Create all auth service tables
-            await conn.run_sync(Base.metadata.create_all)
-            logger.info("Auth service database schema created")
+        try:
+            await auth_db.initialize()
+            
+            if fast_test_mode:
+                logger.info("In-memory SQLite database initialized successfully via auth_db")
+            else:
+                logger.info("Real PostgreSQL connected successfully via auth_db")
+                
+            # Explicitly call create_tables() method since initialization may skip it in test mode
+            await auth_db.create_tables()
+            logger.info("Auth service database schema created successfully")
+            
+        except Exception as db_init_error:
+            logger.error(f"Failed to initialize auth service database: {db_init_error}")
+            if fast_test_mode:
+                logger.error("SQLite in-memory database initialization failed - this will cause test failures")
+            else:
+                logger.error("PostgreSQL database initialization failed - this will cause test failures")
+            raise
         
         # Handle Redis based on mode
         if not fast_test_mode:
@@ -153,16 +165,33 @@ async def setup_real_services():
         # Cleanup services
         try:
             await services.close_all()
+            await auth_db.close()
         except Exception:
             pass  # Ignore cleanup errors
+        
+        # Clean up test database file if it exists
+        if fast_test_mode:
+            try:
+                import tempfile
+                import os
+                test_db_path = os.path.join(tempfile.gettempdir(), "auth_service_test.db")
+                if os.path.exists(test_db_path):
+                    os.unlink(test_db_path)
+                    logger.info("Test database file cleaned up")
+            except Exception:
+                pass  # Ignore cleanup errors
 
 
 @pytest.fixture(scope="function")
 async def real_auth_db(setup_real_services):
-    """REAL PostgreSQL database session for auth service.
+    """REAL database session for auth service (ASYNC).
     
-    ZERO MOCKS: Uses actual PostgreSQL with transaction isolation.
+    ZERO MOCKS: Uses actual database with transaction isolation.
     """
+    # Ensure database is initialized first
+    if not auth_db._initialized:
+        await auth_db.initialize()
+    
     # Use auth service's own database connection system
     async with auth_db.get_session() as session:
         try:
@@ -170,6 +199,43 @@ async def real_auth_db(setup_real_services):
         finally:
             # Session cleanup handled by context manager
             pass
+
+
+@pytest.fixture(scope="function")
+def sync_auth_db(setup_real_services):
+    """SYNCHRONOUS database session for unit tests that aren't async.
+    
+    ZERO MOCKS: Uses actual database with proper sync interface.
+    """
+    import asyncio
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker, Session
+    
+    env = get_env()
+    fast_test_mode = env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    
+    if fast_test_mode:
+        # Create sync SQLite engine for unit tests
+        sync_engine = create_engine("sqlite:///:memory:", echo=False)
+        
+        # Create all tables synchronously
+        Base.metadata.create_all(sync_engine)
+        
+        # Create session factory
+        sync_session_maker = sessionmaker(bind=sync_engine)
+        
+        # Create session
+        session = sync_session_maker()
+        
+        try:
+            yield session
+        finally:
+            session.close()
+            sync_engine.dispose()
+    else:
+        # For real PostgreSQL, we need to convert async to sync
+        # This is a fallback - most tests should use async fixtures
+        pytest.skip("Unit tests with real PostgreSQL should use async fixtures")
 
 
 @pytest.fixture(scope="function") 

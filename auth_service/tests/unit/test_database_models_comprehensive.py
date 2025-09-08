@@ -32,12 +32,24 @@ class TestAuthUserModel:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self, real_services_fixture):
         """Setup clean database for each test"""
+        # Ensure database is initialized and tables exist
+        if not auth_db._initialized:
+            await auth_db.initialize()
+            
+        # Ensure tables are created
+        await auth_db.create_tables()
+        
         async with auth_db.get_session() as session:
-            # Clean up any existing test data
-            await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'test_%@example.com'"))
-            await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'oauth_%@example.com'"))
-            await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'model_test_%@example.com'"))
-            await session.commit()
+            try:
+                # Clean up any existing test data - handle table not existing gracefully
+                await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'test_%@example.com'"))
+                await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'oauth_%@example.com'"))
+                await session.execute(text("DELETE FROM auth_users WHERE email LIKE 'model_test_%@example.com'"))
+                await session.commit()
+            except Exception:
+                # If delete fails (e.g. tables don't exist), just ensure tables are created
+                await auth_db.create_tables()
+                # No need to commit for table creation
     
     @pytest.mark.unit
     @pytest.mark.real_services

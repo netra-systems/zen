@@ -54,6 +54,7 @@ from shared.isolated_environment import get_env
 class TestAuthServiceHealthCheckScript:
     """Test standalone health_check.py script functionality"""
     
+    @pytest.mark.unit
     def test_health_check_script_basic_functionality(self):
         """
         Test health_check.py script basic functionality
@@ -82,6 +83,7 @@ class TestAuthServiceHealthCheckScript:
             assert "/health" in request.full_url
             assert "auth-health-checker/1.0" in request.headers.get('User-agent', '')
     
+    @pytest.mark.unit
     def test_health_check_script_environment_port_handling(self):
         """
         Test health check script handles environment-specific ports correctly
@@ -125,6 +127,7 @@ class TestAuthServiceHealthCheckScript:
                     
                     mock_urlopen.reset_mock()
     
+    @pytest.mark.unit
     def test_health_check_script_failure_scenarios(self):
         """
         Test health check script handles failure scenarios correctly
@@ -163,6 +166,7 @@ class TestAuthServiceHealthCheckScript:
                 result = check_health()
                 assert result == expected_result
                 
+    @pytest.mark.unit
     def test_readiness_check_script_functionality(self):
         """
         Test readiness check script functionality
@@ -201,6 +205,7 @@ class TestAuthServiceHealthCheckScript:
 class TestAuthServiceHealthEndpoints:
     """Test FastAPI health endpoints in main.py"""
     
+    @pytest.mark.unit
     def test_health_endpoints_response_formats(self):
         """
         Test /health and /readiness endpoints return correct response formats
@@ -333,11 +338,14 @@ class TestAuthServiceHealthEndpoints:
                 mock_manager = Mock()
                 mock_manager.get_available_providers.return_value = ["google"]
                 
-                # Mock unhealthy Google provider
+                # Mock unhealthy Google provider with serializable data
                 mock_provider = Mock()
                 mock_provider.self_check.return_value = {
                     "is_healthy": False,
                     "error": "Client ID not configured"
+                }
+                mock_provider.get_configuration_status.return_value = {
+                    "client_id_configured": False
                 }
                 mock_manager.get_provider.return_value = mock_provider
                 mock_oauth_manager.return_value = mock_manager
@@ -355,6 +363,7 @@ class TestAuthServiceHealthEndpoints:
                 content = json.loads(response.body.decode())
                 assert content["oauth_healthy"] is False
     
+    @pytest.mark.unit
     def test_health_check_performance_timing(self):
         """
         Test health check endpoints meet performance requirements
@@ -383,6 +392,7 @@ class TestAuthServiceHealthEndpoints:
             assert field in basic_health, f"Missing required field: {field}"
             assert basic_health[field] is not None, f"Null value for required field: {field}"
     
+    @pytest.mark.unit
     def test_health_check_environment_differences(self):
         """
         Test health check behavior varies appropriately by environment
@@ -422,6 +432,7 @@ class TestAuthServiceHealthEndpoints:
 class TestHealthConfigModule:
     """Test health_config.py health check functions"""
     
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_auth_postgres_health_check_success(self):
         """
@@ -446,6 +457,7 @@ class TestHealthConfigModule:
             assert result["status"] == HealthStatus.HEALTHY.value
             assert "database connection successful" in result["message"].lower()
             
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_auth_postgres_health_check_failure(self):
         """
@@ -464,6 +476,7 @@ class TestHealthConfigModule:
             assert "database connection failed" in result["message"].lower()
             assert "Connection failed" in result["message"]
     
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_oauth_providers_health_check(self):
         """
@@ -500,7 +513,8 @@ class TestHealthConfigModule:
             assert "No OAuth providers configured" in result["message"]
             assert result["details"]["configured_providers"] == []
     
-    @pytest.mark.asyncio 
+    @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_jwt_configuration_health_check(self):
         """
         Test JWT configuration health check functionality
@@ -545,6 +559,7 @@ class TestHealthConfigModule:
             assert result["status"] == HealthStatus.UNHEALTHY.value
             assert "JWT secret key not configured" in result["message"]
     
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_overall_auth_health_status_aggregation(self):
         """
@@ -603,6 +618,7 @@ class TestHealthConfigModule:
 class TestHealthCheckBusinessValue:
     """Test health check functionality delivers real business value"""
     
+    @pytest.mark.unit
     def test_health_monitoring_prevents_service_outages(self):
         """
         Test health monitoring enables operational excellence
@@ -649,6 +665,7 @@ class TestHealthCheckBusinessValue:
             assert result["status"] == HealthStatus.HEALTHY.value
             assert result["service"] == "auth_service"
     
+    @pytest.mark.unit
     def test_health_check_supports_deployment_automation(self):
         """
         Test health checks enable automated deployment workflows
@@ -689,6 +706,7 @@ class TestHealthCheckBusinessValue:
         assert isinstance(health_response["uptime_seconds"], (int, float))
         assert health_response["uptime_seconds"] >= 0
     
+    @pytest.mark.unit
     def test_health_check_enables_monitoring_and_alerting(self):
         """
         Test health checks provide sufficient data for operational monitoring

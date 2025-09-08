@@ -313,10 +313,12 @@ class TestDatabaseConfiguration:
         self.env = AuthEnvironment()
 
     def test_get_database_url_uses_sqlite_for_test(self):
-        """Test database URL uses in-memory SQLite for test environment."""
+        """Test database URL uses file-based SQLite for test environment."""
         with patch.object(self.env, 'get_environment', return_value="test"):
             url = self.env.get_database_url()
-            assert url == "sqlite+aiosqlite:///:memory:"
+            # Should use file-based SQLite for proper connection sharing
+            assert url.startswith("sqlite+aiosqlite:///")
+            assert "auth_service_test.db" in url
 
     def test_get_database_url_uses_builder_for_non_test(self):
         """Test database URL uses DatabaseURLBuilder for non-test environments."""
