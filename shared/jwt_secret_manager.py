@@ -105,17 +105,7 @@ class JWTSecretManager:
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
-            # 2. Try generic JWT_SECRET_KEY (second priority)
-            jwt_secret = env.get("JWT_SECRET_KEY")
-            if jwt_secret and len(jwt_secret.strip()) >= 32:
-                logger.info(f"Using generic JWT_SECRET_KEY (length: {len(jwt_secret.strip())})")
-                self._cached_secret = jwt_secret.strip()
-                return self._cached_secret
-            
-            # 3. No more legacy fallbacks - must use proper env vars
-            
-            # 5. Environment-specific fallbacks for development/testing only
-            # CRITICAL FIX: Check if we're in a test context even for staging environment
+            # CRITICAL FIX: Check if we're in a test context first
             is_testing_context = (
                 environment in ["testing", "development", "test"] or 
                 env.get("TESTING", "false").lower() == "true" or
@@ -124,11 +114,41 @@ class JWTSecretManager:
                 (environment == "staging" and env.get("JWT_SECRET_KEY") == "short")
             )
             
+            # 2. Try generic JWT_SECRET_KEY (second priority)
+            jwt_secret = env.get("JWT_SECRET_KEY")
+            
+            # In testing context, check if JWT_SECRET_KEY is a default test value
+            if is_testing_context and jwt_secret:
+                # Check if it's a default test secret that should be replaced with deterministic one
+                default_test_secrets = [
+                    'development-jwt-secret-minimum-32-characters-long',
+                    'test-jwt-secret-key-32-characters-long-for-testing-only',
+                    'dev-jwt-secret-key-must-be-at-least-32-characters',
+                    'your-secret-key', 'test-secret', 'secret'
+                ]
+                
+                if jwt_secret in default_test_secrets:
+                    logger.warning(f"JWT_SECRET_KEY is a default test value, using deterministic secret for {environment}")
+                    # Generate consistent deterministic secret for dev/test environments
+                    import hashlib
+                    deterministic_secret = hashlib.sha256(f"netra_{environment}_jwt_key".encode()).hexdigest()[:32]
+                    self._cached_secret = deterministic_secret
+                    return self._cached_secret
+            
+            # Use generic JWT_SECRET_KEY if it's valid and not a default test value
+            if jwt_secret and len(jwt_secret.strip()) >= 32:
+                logger.info(f"Using generic JWT_SECRET_KEY (length: {len(jwt_secret.strip())})")
+                self._cached_secret = jwt_secret.strip()
+                return self._cached_secret
+            
+            # 3. No more legacy fallbacks - must use proper env vars
+            
+            # 5. Environment-specific fallbacks for development/testing only
             if is_testing_context:
-                logger.warning(f"Using default JWT secret for {environment} (test context) - NOT FOR PRODUCTION")
+                logger.warning(f"Using deterministic JWT secret for {environment} (test context) - NOT FOR PRODUCTION")
                 # Generate consistent deterministic secret for dev/test environments
                 import hashlib
-                deterministic_secret = hashlib.sha256(f"netra_{environment}_test_jwt_key".encode()).hexdigest()[:32]
+                deterministic_secret = hashlib.sha256(f"netra_{environment}_jwt_key".encode()).hexdigest()[:32]
                 self._cached_secret = deterministic_secret
                 return self._cached_secret
                 
