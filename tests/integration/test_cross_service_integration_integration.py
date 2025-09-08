@@ -21,8 +21,8 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.core.middleware_setup import setup_cors_middleware
 from shared.isolated_environment import get_env
-setup_cors_middleware
 
 
 # REMOVED_SYNTAX_ERROR: class TestSyntaxFix:

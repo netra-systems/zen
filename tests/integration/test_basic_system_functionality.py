@@ -234,7 +234,7 @@ class TestBasicSystemFunctionality:
             # Attempt connection with proper timeout parameter
             async with connect(
                 ws_url,
-                open_timeout=10,  # Fixed parameter name
+                open_timeout=10,  # Correct parameter name for websockets.connect
                 ping_interval=20,
                 ping_timeout=10
             ) as websocket:

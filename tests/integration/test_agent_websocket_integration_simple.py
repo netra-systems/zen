@@ -64,7 +64,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             # Create a simple test connection
             async with websockets.connect(
                 websocket_url,
-                timeout=10.0,
+                open_timeout=10.0,
                 close_timeout=5.0
             ) as websocket:
                 # Send a test message

@@ -11,6 +11,7 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
+from unittest.mock import patch, MagicMock, AsyncMock
 from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
