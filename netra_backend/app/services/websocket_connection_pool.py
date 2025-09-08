@@ -169,7 +169,7 @@ class WebSocketConnectionPool:
             
             # Validate WebSocket is in correct state
             if websocket.client_state != WebSocketState.CONNECTED:
-                logger.error(f"WebSocket not in connected state: {websocket.client_state}")
+                logger.error(f"WebSocket not in connected state: {websocket.client_state.name}")
                 return False
             
             # Create connection info

@@ -643,7 +643,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # Additional connection validation for Cloud Run
                 if websocket.client_state != WebSocketState.CONNECTED:
-                    logger.warning(f"WebSocket not in CONNECTED state after registration: {websocket.client_state}")
+                    logger.warning(f"WebSocket not in CONNECTED state after registration: {websocket.client_state.name}")
                     await asyncio.sleep(0.05)  # Additional 50ms if not connected
             elif environment == "testing":
                 await asyncio.sleep(0.01)  # Minimal delay for tests
