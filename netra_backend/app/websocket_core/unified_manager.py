@@ -47,9 +47,28 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
             # Process both keys AND values for enum objects
             result = {}
             for key, value in message.items():
-                # Convert enum keys to their values or strings
+                # Convert enum keys consistently with enum value handling
                 if isinstance(key, Enum):
-                    safe_key = key.value if hasattr(key, 'value') else str(key)
+                    # For WebSocketState enums, use name.lower() to match value handling
+                    try:
+                        from starlette.websockets import WebSocketState as StarletteWebSocketState
+                        if isinstance(key, StarletteWebSocketState):
+                            safe_key = key.name.lower()
+                        else:
+                            safe_key = key.value if hasattr(key, 'value') else str(key)
+                    except (ImportError, AttributeError):
+                        try:
+                            from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
+                            if isinstance(key, FastAPIWebSocketState):
+                                safe_key = key.name.lower()
+                            else:
+                                safe_key = key.value if hasattr(key, 'value') else str(key)
+                        except (ImportError, AttributeError):
+                            # Generic enum handling - check if it has name attribute (like WebSocketState)
+                            if hasattr(key, 'name') and hasattr(key, 'value'):
+                                safe_key = str(key.name).lower()
+                            else:
+                                safe_key = key.value if hasattr(key, 'value') else str(key)
                 else:
                     safe_key = key
                 # Recursively serialize values
