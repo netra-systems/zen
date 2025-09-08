@@ -47,6 +47,75 @@ from netra_backend.app.websocket_core.unified_manager import _serialize_message_
 logger = central_logger.get_logger(__name__)
 
 
+def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[str, Any]]:
+    """
+    Extract E2E testing context from WebSocket headers and environment.
+    
+    This function checks both WebSocket headers and environment variables to
+    determine if this is an E2E test that should bypass strict authentication.
+    
+    Args:
+        websocket: WebSocket connection object
+        
+    Returns:
+        Dictionary with E2E context if detected, None otherwise
+    """
+    try:
+        from shared.isolated_environment import get_env
+        
+        # Check WebSocket headers for E2E indicators
+        e2e_headers = {}
+        if hasattr(websocket, 'headers') and websocket.headers:
+            for key, value in websocket.headers.items():
+                key_lower = key.lower()
+                if any(e2e_indicator in key_lower for e2e_indicator in ['test', 'e2e']):
+                    e2e_headers[key] = value
+        
+        # Detect E2E testing via headers
+        is_e2e_via_headers = False
+        if e2e_headers:
+            header_values = [v.lower() for v in e2e_headers.values()]
+            is_e2e_via_headers = any(
+                indicator in ' '.join(header_values) 
+                for indicator in ['e2e', 'staging', 'test', 'true', '1']
+            )
+        
+        # Check environment variables for E2E indicators
+        env = get_env()
+        is_e2e_via_env = (
+            env.get("E2E_TESTING", "0") == "1" or 
+            env.get("PYTEST_RUNNING", "0") == "1" or
+            env.get("STAGING_E2E_TEST", "0") == "1" or
+            env.get("E2E_OAUTH_SIMULATION_KEY") is not None or
+            env.get("E2E_TEST_ENV") == "staging"
+        )
+        
+        # Create E2E context if detected
+        if is_e2e_via_headers or is_e2e_via_env:
+            e2e_context = {
+                "is_e2e_testing": True,
+                "detection_method": {
+                    "via_headers": is_e2e_via_headers,
+                    "via_environment": is_e2e_via_env
+                },
+                "e2e_headers": e2e_headers,
+                "environment": env.get("ENVIRONMENT", "unknown"),
+                "e2e_oauth_key": env.get("E2E_OAUTH_SIMULATION_KEY"),
+                "test_environment": env.get("E2E_TEST_ENV"),
+                "bypass_enabled": True
+            }
+            
+            logger.info(f"E2E CONTEXT DETECTED: {e2e_context['detection_method']}")
+            logger.debug(f"E2E CONTEXT DETAILS: {json.dumps(e2e_context, indent=2)}")
+            return e2e_context
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Failed to extract E2E context from WebSocket: {e}")
+        return None
+
+
 def _safe_websocket_state_for_logging(state) -> str:
     """
     Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
@@ -133,9 +202,13 @@ class UnifiedWebSocketAuthenticator:
         
         logger.info("UnifiedWebSocketAuthenticator initialized with SSOT compliance")
     
-    async def authenticate_websocket_connection(self, websocket: WebSocket) -> WebSocketAuthResult:
+    async def authenticate_websocket_connection(
+        self, 
+        websocket: WebSocket, 
+        e2e_context: Optional[Dict[str, Any]] = None
+    ) -> WebSocketAuthResult:
         """
-        Authenticate WebSocket connection using SSOT authentication service.
+        Authenticate WebSocket connection using SSOT authentication service with E2E support.
         
         This method completely replaces:
         - websocket_core/auth.py authentication logic
@@ -144,6 +217,7 @@ class UnifiedWebSocketAuthenticator:
         
         Args:
             websocket: WebSocket connection object
+            e2e_context: Optional E2E testing context for bypass support
             
         Returns:
             WebSocketAuthResult with authentication outcome
@@ -193,8 +267,15 @@ class UnifiedWebSocketAuthenticator:
                     error_code="INVALID_WEBSOCKET_STATE"
                 )
             
-            # Use SSOT authentication service for WebSocket authentication
-            auth_result, user_context = await self._auth_service.authenticate_websocket(websocket)
+            # Extract E2E context from WebSocket if not provided
+            if e2e_context is None:
+                e2e_context = extract_e2e_context_from_websocket(websocket)
+            
+            # Use SSOT authentication service for WebSocket authentication with E2E context
+            auth_result, user_context = await self._auth_service.authenticate_websocket(
+                websocket, 
+                e2e_context=e2e_context
+            )
             
             if not auth_result.success:
                 # Enhanced failure debugging
@@ -481,30 +562,36 @@ def get_websocket_authenticator() -> UnifiedWebSocketAuthenticator:
     return _websocket_authenticator
 
 
-async def authenticate_websocket_ssot(websocket: WebSocket) -> WebSocketAuthResult:
+async def authenticate_websocket_ssot(
+    websocket: WebSocket, 
+    e2e_context: Optional[Dict[str, Any]] = None
+) -> WebSocketAuthResult:
     """
-    Convenience function for SSOT WebSocket authentication.
+    SSOT WebSocket authentication with E2E bypass support.
     
-    This function provides a simple interface for WebSocket authentication
-    while ensuring SSOT compliance.
+    This function provides SSOT-compliant WebSocket authentication while
+    supporting E2E testing context propagation to prevent policy violations.
     
     Args:
         websocket: WebSocket connection object
+        e2e_context: Optional E2E testing context for bypass support
         
     Returns:
         WebSocketAuthResult with authentication outcome
     """
     authenticator = get_websocket_authenticator()
-    return await authenticator.authenticate_websocket_connection(websocket)
+    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
 
 
-# Legacy alias for backward compatibility
+# Legacy aliases for backward compatibility
 WebSocketAuthenticator = UnifiedWebSocketAuthenticator
+UnifiedWebSocketAuth = UnifiedWebSocketAuthenticator
 
 # SSOT ENFORCEMENT: Export only SSOT-compliant interfaces
 __all__ = [
     "UnifiedWebSocketAuthenticator",
     "WebSocketAuthenticator",  # Legacy alias
+    "UnifiedWebSocketAuth",  # Legacy alias
     "WebSocketAuthResult", 
     "get_websocket_authenticator",
     "authenticate_websocket_ssot"

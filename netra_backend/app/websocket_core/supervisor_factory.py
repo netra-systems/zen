@@ -340,6 +340,10 @@ async def create_websocket_supervisor_with_validation(
         raise
 
 
+# Alias for backward compatibility
+create_websocket_supervisor = get_websocket_scoped_supervisor
+
+
 def get_websocket_supervisor_health() -> dict:
     """Get health status of WebSocket supervisor factory components.
     
