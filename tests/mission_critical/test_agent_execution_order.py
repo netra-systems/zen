@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from netra_backend.app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 
 
 # REMOVED_SYNTAX_ERROR: class TestAgentExecutionOrder:
