@@ -33,7 +33,6 @@ from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reporta
 from netra_backend.app.websocket_core import (
     WebSocketManager,
     MessageRouter,
-    WebSocketAuthenticator,
     ConnectionSecurityManager,
     get_websocket_manager,
     get_message_router,
@@ -363,34 +362,46 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info(f"Startup complete after {total_waited}s wait - proceeding with WebSocket connection")
         
         # CRITICAL FIX: After waiting for startup, services should be initialized
-        # If they're still missing, it's a critical error - don't try to create them here
-        if supervisor is None and environment in ["staging", "production"]:
-            logger.error(f"CRITICAL: agent_supervisor is None after startup in {environment}")
-            logger.error("This indicates a startup sequence failure - services not properly initialized")
+        # If they're still missing, use graceful degradation instead of 1011 failure
+        if supervisor is None:
+            logger.warning(f"agent_supervisor is None in {environment} - using graceful degradation")
             
-            # Send error to client and close connection
-            error_msg = create_error_message(
-                "SERVICE_UNAVAILABLE",
-                "Required services not initialized. Please contact support.",
-                {"environment": environment, "missing_service": "agent_supervisor"}
-            )
-            await safe_websocket_send(websocket, error_msg.model_dump())
-            await safe_websocket_close(websocket, code=1011, reason="Service unavailable")
-            return
+            # CRITICAL FIX: Don't fail immediately - use fallback pattern for staging
+            if environment in ["staging", "production"]:
+                # Wait briefly for supervisor initialization (might be race condition)
+                supervisor_wait_attempts = 3
+                for attempt in range(supervisor_wait_attempts):
+                    await asyncio.sleep(0.5)  # Wait 500ms
+                    supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+                    if supervisor is not None:
+                        logger.info(f"supervisor initialized after {(attempt + 1) * 0.5}s wait")
+                        break
+                
+                # If supervisor still None, use fallback but don't fail connection
+                if supervisor is None:
+                    logger.warning(f"Supervisor still None after {supervisor_wait_attempts * 0.5}s - using fallback")
+            
+            # No 1011 error - proceed with graceful degradation
         
-        if thread_service is None and environment in ["staging", "production"]:
-            logger.error(f"CRITICAL: thread_service is None after startup in {environment}")
-            logger.error("This indicates a startup sequence failure - services not properly initialized")
+        if thread_service is None:
+            logger.warning(f"thread_service is None in {environment} - using graceful degradation")
             
-            # Send error to client and close connection
-            error_msg = create_error_message(
-                "SERVICE_UNAVAILABLE",
-                "Required services not initialized. Please contact support.",
-                {"environment": environment, "missing_service": "thread_service"}
-            )
-            await safe_websocket_send(websocket, error_msg.model_dump())
-            await safe_websocket_close(websocket, code=1011, reason="Service unavailable")
-            return
+            # CRITICAL FIX: Use same graceful approach for thread_service
+            if environment in ["staging", "production"]:
+                # Wait briefly for thread_service initialization (might be race condition)
+                thread_wait_attempts = 3
+                for attempt in range(thread_wait_attempts):
+                    await asyncio.sleep(0.5)  # Wait 500ms
+                    thread_service = getattr(websocket.app.state, 'thread_service', None)
+                    if thread_service is not None:
+                        logger.info(f"thread_service initialized after {(attempt + 1) * 0.5}s wait")
+                        break
+                
+                # If thread_service still None, use fallback but don't fail connection
+                if thread_service is None:
+                    logger.warning(f"ThreadService still None after {thread_wait_attempts * 0.5}s - using fallback")
+            
+            # No 1011 error - proceed with graceful degradation
         
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:
@@ -408,24 +419,31 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info(f"Registered new AgentMessageHandler for connection (will cleanup on disconnect)")
                 
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
-            except Exception as e:
-                # CRITICAL FIX: Use fallback in ALL environments to prevent 500 errors
-                # Changed from hard failure in staging/production to graceful degradation
-                logger.error(f"Failed to register AgentMessageHandler in {environment}: {e}")
-                logger.warning(f"🔄 Using fallback handler to prevent WebSocket 500 error in {environment}")
+            except Exception as handler_error:
+                # CRITICAL FIX: Log error but don't cause 1011 - use fallback as per bug fix report
+                logger.error(f"AgentMessageHandler creation failed: {handler_error}", exc_info=True)
+                logger.info("Using fallback handler to prevent 1011 WebSocket error")
                 
-                # Create fallback agent handler for ALL environments to prevent 500 errors
-                # This ensures WebSocket connections succeed even with limited functionality
                 try:
                     fallback_handler = _create_fallback_agent_handler(websocket)
                     message_router.add_handler(fallback_handler)
-                    logger.info(f"✅ Successfully registered fallback AgentMessageHandler for {environment} environment")
-                    logger.info(f"🤖 Fallback handler will provide basic agent responses to maintain business value")
-                    
-                    logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
+                    logger.info("Fallback handler created successfully")
                 except Exception as fallback_error:
-                    logger.critical(f"❌ CRITICAL: Failed to create fallback handler in {environment}: {fallback_error}")
-                    # Log critical error but don't raise - let connection proceed with basic message routing
+                    logger.critical(f"CRITICAL: Fallback handler also failed: {fallback_error}")
+                    
+                    # LAST RESORT: Send error but allow connection to proceed
+                    try:
+                        error_msg = create_error_message(
+                            "HANDLER_INIT_FAILED",
+                            "Agent handler initialization failed - limited functionality available",
+                            {"environment": environment, "error": str(handler_error)}
+                        )
+                        await safe_websocket_send(websocket, error_msg.model_dump())
+                    except Exception:
+                        pass  # Best effort error notification
+                    
+                    # Don't close connection - let it proceed with basic WebSocket functionality
+                    logger.warning("Proceeding with basic WebSocket connection despite handler failures")
                     
         else:
             # CRITICAL FIX: Use fallback handlers instead of failing in staging/production
