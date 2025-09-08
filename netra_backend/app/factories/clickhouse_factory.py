@@ -31,7 +31,7 @@ from uuid import uuid4
 from netra_backend.app.core.configuration import get_configuration
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 

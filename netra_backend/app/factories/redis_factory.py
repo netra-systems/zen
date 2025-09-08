@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from uuid import uuid4
 
 from netra_backend.app.core.configuration import get_configuration
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.redis_manager import RedisManager
 
 logger = logging.getLogger(__name__)

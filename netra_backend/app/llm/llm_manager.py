@@ -47,7 +47,7 @@ class LLMManager:
         Args:
             user_context: Optional UserExecutionContext for user-scoped operations
         """
-        from netra_backend.app.models.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         self._logger = logger
         self._config = None
@@ -318,7 +318,7 @@ def create_llm_manager(user_context: 'UserExecutionContext' = None) -> LLMManage
         manager = create_llm_manager(user_context)
         response = await manager.ask_llm("Hello", use_cache=True)
     """
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     

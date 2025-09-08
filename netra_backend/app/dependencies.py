@@ -23,8 +23,8 @@ from dataclasses import dataclass
 if TYPE_CHECKING:
     pass  # Legacy session manager imports removed - using SSOT database module
 
-# NEW: Split architecture imports
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+# SSOT COMPLIANCE FIX: Import UserExecutionContext from services (SSOT) instead of models
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import (
     validate_user_context
 )
@@ -152,10 +152,13 @@ class RequestScopedContext:
     request_id: Optional[str] = None
     
     def __post_init__(self):
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID generation
+        from shared.id_generation import UnifiedIdGenerator
+        
         if not self.run_id:
-            self.run_id = str(uuid.uuid4())
+            self.run_id = UnifiedIdGenerator.generate_base_id("run")
         if not self.request_id:
-            self.request_id = str(uuid.uuid4())
+            self.request_id = UnifiedIdGenerator.generate_base_id("req")
             
         # CRITICAL: Log that this context contains NO database sessions
         logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
@@ -172,8 +175,9 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     from netra_backend.app.database.request_scoped_session_factory import get_session_factory
     
-    # Generate unique request ID for this session
-    request_id = f"req_{uuid.uuid4().hex[:12]}"
+    # SSOT COMPLIANCE FIX: Generate unique request ID using UnifiedIdGenerator
+    from shared.id_generation import UnifiedIdGenerator
+    request_id = UnifiedIdGenerator.generate_base_id("req")
     # Use placeholder user ID - will be overridden by actual user context when available
     user_id = "system"  # This gets overridden in practice by request context
     
@@ -226,7 +230,9 @@ async def get_user_scoped_db_session(
     from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
     
     if not request_id:
-        request_id = f"req_{uuid.uuid4().hex[:12]}"
+        # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for request ID generation
+        from shared.id_generation import UnifiedIdGenerator
+        request_id = UnifiedIdGenerator.generate_base_id("req")
     
     logger.debug(f"Creating user-scoped database session for user {user_id}, request {request_id}")
     
@@ -315,26 +321,14 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
         logger.error("CRITICAL: Global supervisor has stored database session - this violates request scoping!")
         raise RuntimeError("Global supervisor must never store database sessions")
     
-    # Verify supervisor has WebSocket capabilities
+    # Verify supervisor has WebSocket capabilities - CRITICAL: Avoid creation during startup
     if supervisor and hasattr(supervisor, 'agent_registry'):
-        # Create user context for proper isolation
-        user_context = UserExecutionContext(
-            user_id="system",
-            request_id=f"supervisor_init_{time.time()}",
-            thread_id="supervisor_main",
-            run_id=f"run_{time.time()}"
-        )
-        websocket_manager = create_websocket_manager(user_context)
-        if websocket_manager and hasattr(supervisor.agent_registry, 'set_websocket_manager'):
-            # Ensure WebSocket manager is properly configured
-            if asyncio.iscoroutinefunction(supervisor.agent_registry.set_websocket_manager):
-                # Handle async set_websocket_manager
-                logger.warning("Cannot await set_websocket_manager in sync context - WebSocket events may be limited")
-            else:
-                supervisor.agent_registry.set_websocket_manager(websocket_manager)
-                logger.debug("Verified WebSocket manager is set on supervisor agent registry")
+        # SSOT COMPLIANCE FIX: Don't create WebSocket manager during startup/dependency injection
+        # WebSocket managers should only be created per-request with valid UserExecutionContext
+        if hasattr(supervisor.agent_registry, 'websocket_manager') and supervisor.agent_registry.websocket_manager:
+            logger.debug("Supervisor agent registry already has WebSocket manager configured")
         else:
-            logger.warning("WebSocket manager not available or supervisor lacks agent_registry")
+            logger.info("WebSocket manager will be set per-request via factory pattern - SSOT compliance")
     else:
         logger.warning("Supervisor lacks agent_registry - WebSocket events may not work")
     
@@ -365,9 +359,10 @@ async def get_request_scoped_user_context(
         HTTPException: If context creation fails
     """
     try:
-        # Generate run_id if not provided
+        # SSOT COMPLIANCE FIX: Generate run_id using UnifiedIdGenerator if not provided
         if not run_id:
-            run_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
         
         # Create request-scoped context (no session storage)
         context = RequestScopedContext(
@@ -424,16 +419,19 @@ def create_user_execution_context(user_id: str,
             if hasattr(db_session, 'info'):
                 if not db_session.info:
                     db_session.info = {}
+                # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for ID generation
+                from shared.id_generation import UnifiedIdGenerator
                 db_session.info.update({
                     'user_id': user_id,
-                    'run_id': run_id or str(uuid.uuid4()),
-                    'request_id': str(uuid.uuid4()),
+                    'run_id': run_id or UnifiedIdGenerator.generate_base_id("run"),
+                    'request_id': UnifiedIdGenerator.generate_base_id("req"),
                     'tagged_at': time.time()
                 })
         
-        # Generate run_id if not provided
+        # SSOT COMPLIANCE FIX: Generate run_id using UnifiedIdGenerator if not provided
         if not run_id:
-            run_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            run_id = UnifiedIdGenerator.generate_base_id("run")
         
         # Create user execution context
         user_context = UserExecutionContext.from_request(
@@ -857,23 +855,11 @@ def get_message_handler_service(request: Request):
     supervisor = get_agent_supervisor(request)  # This validates no stored sessions
     thread_service = get_thread_service(request)
     
-    # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
-    # This ensures WebSocket events work in all scenarios, not just direct WebSocket routes
-    try:
-        # Create user context for proper isolation
-        user_context = UserExecutionContext(
-            user_id="system",
-            request_id=f"message_handler_{time.time()}",
-            thread_id="message_handler_main",
-            run_id=f"run_{time.time()}"
-        )
-        websocket_manager = create_websocket_manager(user_context)
-        logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
-        return MessageHandlerService(supervisor, thread_service, websocket_manager)
-    except Exception as e:
-        # Backward compatibility: if WebSocket manager isn't available, still work without it
-        logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
-        return MessageHandlerService(supervisor, thread_service)
+    # SSOT COMPLIANCE FIX: Don't create WebSocket managers during global dependency injection
+    # WebSocket managers should only be created per-request with proper UserExecutionContext
+    # This legacy service will have limited WebSocket capabilities - use request-scoped alternatives
+    logger.info("Creating legacy MessageHandlerService without WebSocket manager - use request-scoped message handlers for WebSocket events")
+    return MessageHandlerService(supervisor, thread_service)
 
 
 async def get_request_scoped_message_handler(
@@ -906,7 +892,16 @@ async def get_request_scoped_message_handler(
             thread_id=context.thread_id,
             run_id=context.run_id
         )
-        websocket_manager = create_websocket_manager(user_context)
+        
+        # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling
+        try:
+            websocket_manager = create_websocket_manager(user_context)
+            if not websocket_manager:
+                logger.warning(f"WebSocket manager creation returned None for user {context.user_id}")
+                websocket_manager = None
+        except Exception as e:
+            logger.error(f"Failed to create WebSocket manager for user {context.user_id}: {e}")
+            websocket_manager = None
         
         # Create MessageHandlerService with request-scoped components
         from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -1088,9 +1083,10 @@ async def get_factory_execution_engine(
         # Get factory from app state
         factory = get_execution_engine_factory(request)
         
-        # Create user execution context
+        # SSOT COMPLIANCE FIX: Create user execution context with UnifiedIdGenerator
         if not request_id:
-            request_id = str(uuid.uuid4())
+            from shared.id_generation import UnifiedIdGenerator
+            request_id = UnifiedIdGenerator.generate_base_id("req")
         
         user_context = FactoryUserExecutionContext(
             user_id=user_id,
@@ -1140,9 +1136,10 @@ async def get_factory_websocket_emitter(
         # Get factory from app state
         factory = get_websocket_bridge_factory(request)
         
-        # Generate connection ID if not provided
+        # SSOT COMPLIANCE FIX: Generate connection ID using UnifiedIdGenerator
         if not connection_id:
-            connection_id = f"conn_{user_id}_{int(time.time() * 1000)}"
+            from shared.id_generation import UnifiedIdGenerator
+            connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         
         # Create isolated WebSocket emitter
         emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
