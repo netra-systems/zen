@@ -31,7 +31,11 @@
       "Bash(cat:*)",
       "Bash(docker:*)",
       "Bash(echo \"Current ENVIRONMENT: $ENVIRONMENT\")",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
