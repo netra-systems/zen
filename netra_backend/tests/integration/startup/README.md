@@ -1,201 +1,350 @@
-# System Startup Integration Tests
+# WebSocket Phase Integration Tests
 
 ## Overview
 
-This directory contains comprehensive integration tests for the system startup phases that are critical for enabling chat functionality. These tests validate the INIT and DEPENDENCIES phases of the deterministic startup sequence.
+This directory contains comprehensive integration tests for the **WebSocket Phase** of the system startup sequence. These tests validate that all WebSocket infrastructure components are properly initialized and configured to enable real-time chat communication between users and AI agents.
 
-## Business Value Justification (BVJ)
+## Business Value Justification
 
-- **Segment:** Platform/Internal
-- **Business Goal:** Reliable Chat Service Initialization
-- **Value Impact:** Ensures system can consistently initialize all components required for chat functionality
-- **Strategic Impact:** Prevents startup failures that cause user abandonment and revenue loss
+- **Segment**: Platform/Internal
+- **Business Goal**: Platform Stability & Chat Value Delivery  
+- **Value Impact**: Ensures WebSocket infrastructure properly supports revenue-generating chat interactions
+- **Strategic Impact**: Validates system readiness for delivering real-time AI business value to users
 
 ## Test Coverage
 
-### INIT Phase Tests (`test_init_phase_comprehensive.py`)
-**18 comprehensive tests covering:**
+### Core WebSocket Components (25 Tests)
 
-1. Environment variable loading and validation
-2. Critical environment variable validation for chat
-3. .env file loading hierarchy (base → dev → local)
-4. Cloud Run vs local environment detection
-5. Dev launcher integration detection
-6. Project root resolution for file loading
-7. Logging system initialization
-8. Configuration setup and validation
-9. Environment isolation for testing
-10. .env loading error handling
-11. Unicode and encoding handling (Windows compatibility)
-12. INIT phase timing and performance
-13. Environment variable precedence rules
-14. Production safety checks
-15. INIT phase error recovery
-16. Concurrent environment access (thread safety)
+1. **UnifiedWebSocketManager Initialization** 
+   - Connection storage and management
+   - Thread-safe operations
+   - Connection health monitoring
+   - Multi-user connection tracking
 
-### DEPENDENCIES Phase Tests (`test_dependencies_phase_comprehensive.py`)
-**17 comprehensive tests covering:**
+2. **WebSocketManagerFactory Setup**
+   - Factory pattern for user isolation
+   - Resource limit enforcement
+   - Manager lifecycle management
+   - Connection timeout handling
 
-1. **CRITICAL:** SSOT auth validation
-2. **CRITICAL:** Key Manager initialization
-3. **CRITICAL:** LLM Manager initialization
-4. **CRITICAL:** Startup fixes application
-5. Security Service initialization
-6. Error handler registration
-7. Middleware configuration setup
-8. CORS middleware for chat compatibility
-9. Authentication middleware setup
-10. Session middleware configuration
-11. Health checker initialization
-12. OAuth client delegation to auth service
-13. Configuration validation comprehensive
-14. Dependencies phase timing and performance
-15. Dependency failure error handling
-16. Environment-specific dependency configuration
-17. Concurrent dependency initialization
+3. **WebSocket Connection Handler**
+   - Connection lifecycle management
+   - Health checks and monitoring
+   - Automatic cleanup of expired connections
+   - Connection state validation
+
+4. **WebSocket Authentication Middleware**
+   - JWT token validation
+   - User scope verification
+   - Secure connection establishment
+   - Authorization enforcement
+
+5. **WebSocket CORS Middleware**
+   - Cross-origin request validation
+   - Security header management
+   - Origin whitelist enforcement
+   - Credential handling
+
+6. **WebSocket Rate Limiting**
+   - Per-user rate limit enforcement
+   - Subscription tier-based limits
+   - Burst protection
+   - Fair usage policies
+
+7. **WebSocket Message Handling**
+   - Message type routing (start_agent, user_message, chat)
+   - Payload validation
+   - Error handling and recovery
+   - Message processing statistics
+
+8. **WebSocket Agent Handler Integration**
+   - Agent execution lifecycle events
+   - Real-time status updates
+   - Tool execution notifications
+   - Business outcome delivery
+
+9. **WebSocket User Context Extraction**
+   - Multi-user isolation
+   - Context validation
+   - Session management
+   - Security boundary enforcement
+
+10. **WebSocket Error Recovery Handler**
+    - Connection failure recovery
+    - Message queuing and replay
+    - Automatic reconnection
+    - Error notification system
+
+11. **WebSocket Performance Monitor**
+    - Message latency tracking
+    - Connection performance metrics  
+    - SLA compliance monitoring
+    - Performance alerting
+
+12. **WebSocket Reconnection Manager**
+    - Network failure handling
+    - Session state preservation
+    - Exponential backoff
+    - Priority reconnection for enterprise users
+
+13. **WebSocket Message Buffer**
+    - Reliable message delivery
+    - Priority handling for critical messages
+    - Persistence during network issues
+    - Buffer size management
+
+14. **WebSocket Event Validation Framework**
+    - Critical event validation
+    - Business context verification
+    - Event schema enforcement
+    - Compliance checking
+
+15. **WebSocket Broadcast Capabilities**
+    - System-wide notifications
+    - Targeted messaging by subscription tier
+    - Delivery confirmation
+    - Broadcast performance optimization
+
+## Critical Chat Events (5 Required Events)
+
+The tests validate the **5 critical WebSocket events** required for chat business value delivery:
+
+1. **`agent_started`** - User knows AI is working on their problem
+2. **`agent_thinking`** - Real-time AI reasoning visibility
+3. **`tool_executing`** - Shows AI using tools to solve problems  
+4. **`tool_completed`** - Demonstrates problem-solving progress
+5. **`agent_completed`** - Delivers final business value to user
+
+These events are **MANDATORY** for revenue-generating chat interactions.
+
+## Test Architecture
+
+### Base Test Class
+- **`WebSocketPhaseIntegrationTest`** - Extends `EnhancedBaseIntegrationTest`
+- Provides WebSocket-specific test utilities
+- Mock WebSocket components for testing without server dependencies
+- Business value validation helpers
+- Multi-user simulation capabilities
+
+### Mock Components
+- **`MockWebSocket`** - Simulates WebSocket connections without server
+- **`MockLLMManager`** - Provides realistic business value responses
+- **`MockDatabaseConnection`** - Realistic business data for testing
+- **`BusinessValueMetrics`** - Tracks business outcome delivery
+
+### Test Categories (Markers)
+
+Tests are organized with pytest markers for selective execution:
+
+- `@pytest.mark.websocket` - WebSocket infrastructure tests
+- `@pytest.mark.startup` - System startup sequence tests  
+- `@pytest.mark.business_value` - Business value delivery validation
+- `@pytest.mark.multi_user` - Multi-user isolation tests
+- `@pytest.mark.chat_events` - Critical chat event tests
+- `@pytest.mark.performance` - Performance and reliability tests
+- `@pytest.mark.security` - Security and authentication tests
+- `@pytest.mark.error_recovery` - Error handling tests
 
 ## Running the Tests
 
-### Individual Test Files
-```bash
-# Run INIT phase tests
-python tests/unified_test_runner.py --test-file netra_backend/tests/integration/startup/test_init_phase_comprehensive.py
+### Quick Start
 
-# Run DEPENDENCIES phase tests  
-python tests/unified_test_runner.py --test-file netra_backend/tests/integration/startup/test_dependencies_phase_comprehensive.py
+```bash
+# Run all WebSocket startup integration tests
+python run_websocket_startup_tests.py --all --verbose
+
+# Run specific test categories  
+python run_websocket_startup_tests.py --chat-events --multi-user
+
+# Run with fast-fail (stop on first failure)
+python run_websocket_startup_tests.py --websocket --startup --fast-fail
 ```
 
-### All Startup Tests
+### Using pytest directly
+
 ```bash
-# Run all startup integration tests
-python tests/unified_test_runner.py --category integration --filter startup
+# Run all tests
+pytest test_websocket_phase_comprehensive.py -v
+
+# Run specific test methods
+pytest test_websocket_phase_comprehensive.py::WebSocketPhaseIntegrationTest::test_websocket_critical_chat_events -v
+
+# Run tests by marker
+pytest -m "chat_events or multi_user" -v
+
+# Run with coverage
+pytest --cov=netra_backend.app.websocket_core test_websocket_phase_comprehensive.py
 ```
 
-### With Real Services
+### Test Categories
+
 ```bash
-# Run with real database and Redis (recommended)
-python tests/unified_test_runner.py --real-services --test-file netra_backend/tests/integration/startup/test_init_phase_comprehensive.py
+# WebSocket infrastructure only
+python run_websocket_startup_tests.py --websocket
+
+# Multi-user isolation tests
+python run_websocket_startup_tests.py --multi-user
+
+# Critical chat events validation
+python run_websocket_startup_tests.py --chat-events
+
+# Performance and reliability
+python run_websocket_startup_tests.py --performance
+
+# Security and authentication  
+python run_websocket_startup_tests.py --security
+
+# Error recovery capabilities
+python run_websocket_startup_tests.py --error-recovery
 ```
 
-## Test Architecture Compliance
+## Test Environment Configuration
 
-These tests follow the **TEST_CREATION_GUIDE.md** requirements:
+The tests use the following environment configuration:
 
-### ✅ Real Services Usage
-- **NO MOCKS** for core system components
-- Uses **real environment variables** and **real configuration**
-- Uses **real file system** operations for .env loading
-- Uses **real logging** system for validation
-- Only mocks external APIs (LLM calls) when necessary
+```bash
+ENVIRONMENT=test
+TESTING=true
+WEBSOCKET_TEST_MODE=integration
+USE_MOCK_COMPONENTS=false     # Use real components
+DISABLE_EXTERNAL_DEPENDENCIES=true
+USE_WEBSOCKET_SUPERVISOR_V3=true
+```
 
-### ✅ BaseIntegrationTest Pattern
-- All test classes inherit from `BaseIntegrationTest`
-- Proper setup/teardown methods
-- Isolated environment per test
-- Comprehensive cleanup
+## Key Integration Points Tested
 
-### ✅ Business Value Justifications
-- Every test has explicit BVJ comments
-- Links startup components to chat functionality
-- Explains user impact of failures
-- Strategic business value documented
+### 1. WebSocket Manager Integration
+- UnifiedWebSocketManager with Factory pattern
+- Thread-safe connection management
+- User isolation enforcement
+- Connection health monitoring
 
-### ✅ IsolatedEnvironment Usage
-- **NO `os.environ` direct access**
-- All environment access through `get_env()`
-- Proper isolation between tests
-- Test-specific environment configuration
+### 2. Authentication Integration  
+- JWT token validation pipeline
+- User context extraction and validation
+- Security boundary enforcement
+- Multi-user session isolation
 
-### ✅ Absolute Imports
-- All imports use absolute paths from package root
-- No relative imports (`.` or `..`)
-- Follows `SPEC/import_management_architecture.xml`
+### 3. Agent Execution Integration
+- WebSocket event generation for agent lifecycle
+- Real-time progress updates
+- Tool execution notifications
+- Business outcome delivery via WebSocket
 
-### ✅ Integration Test Categories
-- Proper pytest markers: `@pytest.mark.integration`
-- Specific startup markers: `@pytest.mark.startup_init`, `@pytest.mark.startup_dependencies`
-- No Docker requirements (integration level)
+### 4. Error Recovery Integration
+- Connection failure detection
+- Message queuing and replay
+- Automatic reconnection handling
+- User notification system
 
-## Critical Startup Dependencies Validated
+### 5. Performance Monitoring Integration
+- Real-time performance metrics
+- SLA compliance checking
+- Alert system integration
+- Performance optimization
 
-### INIT Phase Dependencies
-- Environment variable loading system
-- Project root resolution
-- Logging system initialization
-- Configuration validation
-- Dev/production environment detection
+## Business Value Validation
 
-### DEPENDENCIES Phase Dependencies  
-- Authentication validation (JWT, OAuth)
-- Encryption key management
-- LLM API connectivity
-- Security middleware stack
-- Error handling infrastructure
-- Health monitoring system
+Each test includes **Business Value Justification (BVJ)** and validates:
 
-## Performance Requirements
+1. **User Experience** - Events provide real-time feedback
+2. **Enterprise Features** - Subscription tier-specific capabilities
+3. **Security** - Multi-user isolation and data protection
+4. **Reliability** - Error recovery and performance monitoring
+5. **Scalability** - Resource limits and performance optimization
 
-### INIT Phase Performance
-- Environment access: < 100ms for 100 operations
-- Project root resolution: < 50ms for 10 operations
-- .env file loading: < 200ms per file
+### Business Outcome Assertions
 
-### DEPENDENCIES Phase Performance
-- Total dependencies: < 10 seconds
-- Individual dependency: < 5 seconds
-- Auth validation: < 3 seconds
-- Key Manager: < 2 seconds
-- LLM Manager: < 3 seconds
+Tests validate specific business outcomes:
+- Cost optimization recommendations delivered
+- Performance improvements quantified  
+- Risk assessments completed
+- Compliance reports generated
+- Resource utilization optimized
 
-## Failure Modes Tested
+## Troubleshooting
 
-### INIT Phase Failures
-- Missing critical environment variables
-- Malformed .env files
-- Project root resolution failures
-- Unicode encoding issues
-- Concurrent access race conditions
+### Common Issues
 
-### DEPENDENCIES Phase Failures
-- Auth validation failures
-- Missing encryption keys
-- LLM API unavailability
-- Middleware configuration errors
-- Health checker failures
+1. **WebSocket Connection Errors**
+   ```bash
+   # Tests use MockWebSocket - no real server needed
+   # Check test environment configuration
+   ```
 
-## Windows Compatibility
+2. **Multi-user Isolation Failures** 
+   ```bash
+   # Verify UserExecutionContext creation
+   # Check factory isolation logic
+   ```
 
-Tests specifically validate:
-- Unicode handling in environment variables
-- Windows-specific path handling
-- UTF-8 encoding for .env files
-- Windows-specific logging configuration
+3. **Event Timing Issues**
+   ```bash
+   # Review event sequence validation
+   # Check async/await patterns
+   ```
 
-## Multi-User System Validation
+4. **Performance Test Failures**
+   ```bash
+   # Verify performance thresholds
+   # Check system resource availability
+   ```
 
-Tests ensure startup supports:
-- Isolated user contexts
-- Concurrent request processing
-- Per-user authentication
-- Thread-safe environment access
+### Debug Mode
 
-## Integration with Chat Functionality
+```bash
+# Run with debug logging
+python run_websocket_startup_tests.py --all --verbose
 
-Every test validates components required for:
-- **User Authentication:** JWT tokens, OAuth flows
-- **Message Processing:** LLM API connections, security validation
-- **Real-time Communication:** WebSocket middleware, CORS configuration
-- **Data Persistence:** Database connections, session management
-- **Error Handling:** Graceful failure modes, user-friendly errors
+# Run single test with detailed output
+pytest test_websocket_phase_comprehensive.py::WebSocketPhaseIntegrationTest::test_websocket_critical_chat_events -vvs
+```
 
-## Continuous Integration
+## Test Reporting
 
-These tests are designed to:
-- Run in CI/CD pipelines
-- Detect configuration drift
-- Validate deployment readiness
-- Prevent breaking changes to startup sequence
+Test results include:
+- Component initialization tracking
+- Business value delivery metrics
+- Performance measurements
+- Security validation results
+- Error recovery statistics
+- Multi-user isolation verification
 
----
+## Integration with CI/CD
 
-**CRITICAL:** These tests ensure the foundation of chat functionality. Any failures indicate critical system issues that will prevent users from accessing chat services.
+These tests are designed to run in CI/CD pipelines:
+
+```yaml
+# Example GitHub Actions
+- name: Run WebSocket Startup Integration Tests
+  run: |
+    cd netra_backend/tests/integration/startup
+    python run_websocket_startup_tests.py --all --fast-fail
+```
+
+## Compliance and Security
+
+Tests validate compliance with:
+- Enterprise security requirements
+- Multi-user data isolation standards
+- Performance SLA requirements
+- Error recovery best practices
+- Authentication and authorization policies
+
+## Contributing
+
+When adding new WebSocket components:
+
+1. Add initialization test in appropriate category
+2. Include business value validation  
+3. Add multi-user isolation test if applicable
+4. Include performance validation
+5. Add error recovery test if needed
+6. Update this README with new test coverage
+
+## Related Documentation
+
+- [User Context Architecture](../../../reports/archived/USER_CONTEXT_ARCHITECTURE.md)
+- [WebSocket Modernization Report](../../../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md)  
+- [Agent Architecture Guide](../../../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)
+- [Test Architecture Overview](../../TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)

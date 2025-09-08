@@ -309,13 +309,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         mock_global_registry.__len__ = Mock(return_value=3)
         mock_get_global_registry.return_value = mock_global_registry
         
-        # Configure mock registry to return length
-        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
-        
-        factory.configure(
-            agent_class_registry=self.mock_agent_class_registry,
-            websocket_bridge=self.mock_websocket_bridge
-        )
+        factory.configure(websocket_bridge=self.mock_websocket_bridge)
         
         assert factory._agent_class_registry is mock_global_registry
         mock_get_global_registry.assert_called_once()
@@ -420,18 +414,19 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         """Test 14: Creating context with unconfigured factory raises error."""
         factory = AgentInstanceFactory()
         
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_user_execution_context(
                 user_id=self.test_user_id,
                 thread_id=self.test_thread_id,
                 run_id=self.test_run_id
             )
-        self.assertIn("Factory not configured", str(ctx.exception))
+        assert "Factory not configured" in str(ctx.value)
             
     @pytest.mark.asyncio
     async def test_create_user_execution_context_websocket_registration(self):
         """Test 15: Context creation registers WebSocket mapping."""
         factory = AgentInstanceFactory()
+        
         # Configure mock registry to return length
         self.mock_agent_class_registry.__len__ = Mock(return_value=5)
         
@@ -449,10 +444,10 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         # Verify run-thread mapping was registered
         self.mock_websocket_bridge.register_run_thread_mapping.assert_called_once()
         call_args = self.mock_websocket_bridge.register_run_thread_mapping.call_args
-        self.assertEqual(call_args.kwargs['run_id'], self.test_run_id)
-        self.assertEqual(call_args.kwargs['thread_id'], self.test_thread_id)
-        self.assertIn('user_id', call_args.kwargs['metadata'])
-        self.assertEqual(call_args.kwargs['metadata']['user_id'], self.test_user_id)
+        assert call_args.kwargs['run_id'] == self.test_run_id
+        assert call_args.kwargs['thread_id'] == self.test_thread_id
+        assert 'user_id' in call_args.kwargs['metadata']
+        assert call_args.kwargs['metadata']['user_id'] == self.test_user_id
 
     # =========================================================================
     # AGENT CREATION TESTS
@@ -462,15 +457,17 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_with_agent_class_registry_success(self):
         """Test 16: Create agent instance using AgentClassRegistry successfully."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge,
             llm_manager=self.mock_llm_manager,
             tool_dispatcher=self.mock_tool_dispatcher
         )
-        
-        # Mock registry to return our test agent class
-        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
         
         # Create user context
         context = await factory.create_user_execution_context(
@@ -483,17 +480,17 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         agent = await factory.create_agent_instance("test_agent", context)
         
         # Verify agent creation
-        self.assertIsInstance(agent, MockAgent)
-        self.assertIs(agent.llm_manager, self.mock_llm_manager)
-        self.assertIs(agent.tool_dispatcher, self.mock_tool_dispatcher)
+        assert isinstance(agent, MockAgent)
+        assert agent.llm_manager is self.mock_llm_manager
+        assert agent.tool_dispatcher is self.mock_tool_dispatcher
         
         # Verify WebSocket bridge was set
-        self.assertIs(agent.websocket_bridge, self.mock_websocket_bridge)
-        self.assertEqual(agent.run_id, self.test_run_id)
+        assert agent.websocket_bridge is self.mock_websocket_bridge
+        assert agent.run_id == self.test_run_id
         
         # Verify factory tracking
-        self.assertTrue(hasattr(factory, '_agent_instances'))
-        self.assertEqual(len(factory._agent_instances), 1)
+        assert hasattr(factory, '_agent_instances')
+        assert len(factory._agent_instances) == 1
         
     @pytest.mark.asyncio
     async def test_create_agent_instance_with_factory_method(self):
@@ -516,9 +513,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         agent = await factory.create_agent_instance("test_agent", context)
         
         # Verify agent was created with factory method
-        self.assertIsInstance(agent, MockAgentWithFactory)
-        self.assertTrue(hasattr(agent, 'user_context'))
-        self.assertIs(agent.user_context, context)
+        assert isinstance(agent, MockAgentWithFactory)
+        assert hasattr(agent, 'user_context')
+        assert agent.user_context is context
         
     @pytest.mark.asyncio
     async def test_create_agent_instance_no_param_agent(self):
@@ -539,7 +536,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         agent = await factory.create_agent_instance("test_agent", context)
         
-        self.assertIsInstance(agent, MockNoParamAgent)
+        assert isinstance(agent, MockNoParamAgent)
         
     @pytest.mark.asyncio
     async def test_create_agent_instance_with_provided_class(self):
@@ -565,7 +562,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             agent_class=MockAgent
         )
         
-        self.assertIsInstance(agent, MockAgent)
+        assert isinstance(agent, MockAgent)
         
     @pytest.mark.asyncio
     async def test_create_agent_instance_unknown_agent_raises_error(self):
@@ -586,9 +583,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             run_id=self.test_run_id
         )
         
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_agent_instance("unknown_agent", context)
-        self.assertIn("Agent 'unknown_agent' not found", str(ctx.exception))
+        assert "Agent 'unknown_agent' not found" in str(ctx.value)
             
     @pytest.mark.asyncio
     async def test_create_agent_instance_missing_user_context_raises_error(self):
@@ -602,9 +599,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             websocket_bridge=self.mock_websocket_bridge
         )
         
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_agent_instance("test_agent", None)
-        self.assertIn("UserExecutionContext is required", str(ctx.exception))
+        assert "UserExecutionContext is required" in str(ctx.value)
             
     @pytest.mark.asyncio
     async def test_create_agent_instance_unconfigured_websocket_bridge_raises_error(self):
@@ -616,9 +613,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         context_mock.user_id = self.test_user_id
         context_mock.run_id = self.test_run_id
         
-        with self.assertRaises(RuntimeError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             await factory.create_agent_instance("test_agent", context_mock)
-        self.assertIn("AgentInstanceFactory not configured", str(ctx.exception))
+        assert "AgentInstanceFactory not configured" in str(ctx.value)
 
     # =========================================================================
     # DEPENDENCY VALIDATION TESTS
@@ -639,9 +636,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         factory = AgentInstanceFactory()
         factory._llm_manager = None
         
-        with self.assertRaises(RuntimeError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             factory._validate_agent_dependencies("DataSubAgent")
-        self.assertIn("Cannot create DataSubAgent: Required dependency 'llm_manager' not available", str(ctx.exception))
+        assert "Cannot create DataSubAgent: Required dependency 'llm_manager' not available" in str(ctx.value)
             
     def test_validate_agent_dependencies_by_class_name_matching(self):
         """Test 25: Dependency validation works with class name matching."""
@@ -649,9 +646,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         factory._llm_manager = None
         
         # Test class name matching - this should match OptimizationsCoreSubAgent
-        with self.assertRaises(RuntimeError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             factory._validate_agent_dependencies("optimization_core")
-        self.assertIn("Required dependency 'llm_manager' not available", str(ctx.exception))
+        assert "Required dependency 'llm_manager' not available" in str(ctx.value)
             
     def test_validate_agent_dependencies_unknown_agent_no_error(self):
         """Test 26: Unknown agents don't trigger dependency validation errors."""
@@ -687,13 +684,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         context_id = f"{self.test_user_id}_{self.test_thread_id}_{self.test_run_id}"
         emitter_key = f"{context_id}_emitter"
         
-        self.assertTrue(hasattr(factory, '_websocket_emitters'))
-        self.assertIn(emitter_key, factory._websocket_emitters)
+        assert hasattr(factory, '_websocket_emitters')
+        assert emitter_key in factory._websocket_emitters
         emitter = factory._websocket_emitters[emitter_key]
-        self.assertIsInstance(emitter, UserWebSocketEmitter)
-        self.assertEqual(emitter.user_id, self.test_user_id)
-        self.assertEqual(emitter.thread_id, self.test_thread_id)
-        self.assertEqual(emitter.run_id, self.test_run_id)
+        assert isinstance(emitter, UserWebSocketEmitter)
+        assert emitter.user_id == self.test_user_id
+        assert emitter.thread_id == self.test_thread_id
+        assert emitter.run_id == self.test_run_id
         
     @pytest.mark.asyncio
     async def test_websocket_emitter_event_delivery(self):
@@ -784,9 +781,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         emitter = factory._websocket_emitters[emitter_key]
         
         # Test that failure raises exception
-        with self.assertRaises(ConnectionError) as ctx:
+        with pytest.raises(ConnectionError) as ctx:
             await emitter.notify_agent_started("test_agent")
-        self.assertIn("WebSocket bridge returned failure", str(ctx.exception))
+        assert "WebSocket bridge returned failure" in str(ctx.value)
 
     # =========================================================================
     # CLEANUP AND RESOURCE MANAGEMENT TESTS
@@ -812,14 +809,14 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         )
         
         # Verify context is tracked
-        self.assertEqual(len(factory._active_contexts), 1)
+        assert len(factory._active_contexts) == 1
         
         # Clean up context
         await factory.cleanup_user_context(context)
         
         # Verify cleanup
-        self.assertEqual(len(factory._active_contexts), 0)
-        self.assertEqual(factory._factory_metrics['total_contexts_cleaned'], 1)
+        assert len(factory._active_contexts) == 0
+        assert factory._factory_metrics['total_contexts_cleaned'] == 1
         
         # Verify WebSocket unregistration
         self.mock_websocket_bridge.unregister_run_mapping.assert_called_once_with(self.test_run_id)
@@ -848,13 +845,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         # Verify emitter exists
         context_id = f"{self.test_user_id}_{self.test_thread_id}_{self.test_run_id}"
         emitter_key = f"{context_id}_emitter"
-        self.assertIn(emitter_key, factory._websocket_emitters)
+        assert emitter_key in factory._websocket_emitters
         
         # Clean up
         await factory.cleanup_user_context(context)
         
         # Verify emitter was cleaned up
-        self.assertNotIn(emitter_key, factory._websocket_emitters)
+        assert emitter_key not in factory._websocket_emitters
         
     @pytest.mark.asyncio
     async def test_cleanup_inactive_contexts_by_age(self):
@@ -885,14 +882,14 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             run_id="new_run"
         )
         
-        self.assertEqual(len(factory._active_contexts), 2)
+        assert len(factory._active_contexts) == 2
         
         # Clean up contexts older than 1 hour
         cleaned_count = await factory.cleanup_inactive_contexts(max_age_seconds=3600)
         
         # Should clean up only the old context
-        self.assertEqual(cleaned_count, 1)
-        self.assertEqual(len(factory._active_contexts), 1)
+        assert cleaned_count == 1
+        assert len(factory._active_contexts) == 1
         
     @pytest.mark.asyncio
     async def test_user_execution_scope_context_manager(self):
@@ -918,12 +915,12 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             context_instance = context
             
             # Verify context is active
-            self.assertIsInstance(context, UserExecutionContext)
-            self.assertEqual(context.user_id, self.test_user_id)
-            self.assertEqual(len(factory._active_contexts), 1)
+            assert isinstance(context, UserExecutionContext)
+            assert context.user_id == self.test_user_id
+            assert len(factory._active_contexts) == 1
         
         # Verify cleanup happened automatically
-        self.assertEqual(len(factory._active_contexts), 0)
+        assert len(factory._active_contexts) == 0
 
     # =========================================================================
     # CONCURRENCY TESTS  
@@ -954,12 +951,12 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         agents = await asyncio.gather(*tasks)
         
         # Verify all agents were created successfully
-        self.assertEqual(len(agents), 5)
-        self.assertTrue(all(isinstance(agent, MockAgent) for agent in agents))
+        assert len(agents) == 5
+        assert all(isinstance(agent, MockAgent) for agent in agents)
         
         # Verify no conflicts in factory state
-        self.assertEqual(len(factory._active_contexts), 5)
-        self.assertEqual(factory._factory_metrics['total_instances_created'], 5)
+        assert len(factory._active_contexts) == 5
+        assert factory._factory_metrics['total_instances_created'] == 5
         
     @pytest.mark.asyncio
     async def test_user_semaphore_creation_and_access(self):
@@ -972,15 +969,15 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         sem1_again = await factory.get_user_semaphore("user1")
         
         # Verify semaphore properties
-        self.assertIsInstance(sem1, asyncio.Semaphore)
-        self.assertIsInstance(sem2, asyncio.Semaphore)
-        self.assertIs(sem1, sem1_again)  # Same user gets same semaphore
-        self.assertIsNot(sem1, sem2)    # Different users get different semaphores
+        assert isinstance(sem1, asyncio.Semaphore)
+        assert isinstance(sem2, asyncio.Semaphore)
+        assert sem1 is sem1_again  # Same user gets same semaphore
+        assert sem1 is not sem2    # Different users get different semaphores
         
         # Verify factory tracking
-        self.assertEqual(len(factory._user_semaphores), 2)
-        self.assertIn("user1", factory._user_semaphores)
-        self.assertIn("user2", factory._user_semaphores)
+        assert len(factory._user_semaphores) == 2
+        assert "user1" in factory._user_semaphores
+        assert "user2" in factory._user_semaphores
 
     # =========================================================================
     # PERFORMANCE AND METRICS TESTS
@@ -1000,9 +997,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         # Initial metrics
         initial_metrics = factory.get_factory_metrics()
-        self.assertEqual(initial_metrics['total_instances_created'], 0)
-        self.assertEqual(initial_metrics['active_contexts'], 0)
-        self.assertEqual(initial_metrics['total_contexts_cleaned'], 0)
+        assert initial_metrics['total_instances_created'] == 0
+        assert initial_metrics['active_contexts'] == 0
+        assert initial_metrics['total_contexts_cleaned'] == 0
         
         # Create and clean up context
         context = await factory.create_user_execution_context(
@@ -1013,14 +1010,14 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         # Check metrics after creation
         metrics_after_create = factory.get_factory_metrics()
-        self.assertEqual(metrics_after_create['total_instances_created'], 1)
-        self.assertEqual(metrics_after_create['active_contexts'], 1)
+        assert metrics_after_create['total_instances_created'] == 1
+        assert metrics_after_create['active_contexts'] == 1
         
         # Clean up and check metrics
         await factory.cleanup_user_context(context)
         final_metrics = factory.get_factory_metrics()
-        self.assertEqual(final_metrics['total_contexts_cleaned'], 1)
-        self.assertEqual(final_metrics['active_contexts'], 0)
+        assert final_metrics['total_contexts_cleaned'] == 1
+        assert final_metrics['active_contexts'] == 0
         
     def test_factory_metrics_structure(self):
         """Test 37: Factory metrics have correct structure."""
@@ -1054,13 +1051,13 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         ]
         
         for field in required_fields:
-            self.assertIn(field, metrics)
+            assert field in metrics
             
         # Verify configuration status structure
         config_status = metrics['configuration_status']
-        self.assertIn('agent_registry_configured', config_status)
-        self.assertIn('websocket_bridge_configured', config_status)
-        self.assertIn('websocket_manager_configured', config_status)
+        assert 'agent_registry_configured' in config_status
+        assert 'websocket_bridge_configured' in config_status
+        assert 'websocket_manager_configured' in config_status
         
     @pytest.mark.asyncio
     async def test_active_contexts_summary(self):
@@ -1089,12 +1086,12 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         summary = factory.get_active_contexts_summary()
         
         # Verify summary structure
-        self.assertIn('total_active_contexts', summary)
-        self.assertIn('contexts', summary)
-        self.assertIn('summary_timestamp', summary)
+        assert 'total_active_contexts' in summary
+        assert 'contexts' in summary
+        assert 'summary_timestamp' in summary
         
-        self.assertEqual(summary['total_active_contexts'], 2)
-        self.assertEqual(len(summary['contexts']), 2)
+        assert summary['total_active_contexts'] == 2
+        assert len(summary['contexts']) == 2
 
     # =========================================================================
     # ERROR HANDLING AND EDGE CASES
@@ -1122,12 +1119,12 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             run_id=self.test_run_id
         )
         
-        with self.assertRaises(RuntimeError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             await factory.create_agent_instance("faulty_agent", context)
-        self.assertIn("Agent creation failed", str(ctx.exception))
+        assert "Agent creation failed" in str(ctx.value)
             
         # Verify error metrics
-        self.assertEqual(factory._factory_metrics['creation_errors'], 1)
+        assert factory._factory_metrics['creation_errors'] == 1
         
     @pytest.mark.asyncio
     async def test_cleanup_with_errors_continues(self):
@@ -1156,8 +1153,8 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         await factory.cleanup_user_context(context)
         
         # Verify cleanup still completed
-        self.assertEqual(len(factory._active_contexts), 0)
-        self.assertEqual(factory._factory_metrics['total_contexts_cleaned'], 1)
+        assert len(factory._active_contexts) == 0
+        assert factory._factory_metrics['total_contexts_cleaned'] == 1
 
     # =========================================================================
     # INTEGRATION TESTS (REAL BEHAVIOR)
@@ -1189,20 +1186,20 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             agent = await factory.create_agent_instance("test_agent", context)
             
             # Verify complete setup
-            self.assertIsInstance(agent, MockAgent)
-            self.assertIs(agent.websocket_bridge, self.mock_websocket_bridge)
-            self.assertEqual(agent.run_id, self.test_run_id)
-            self.assertIs(agent.llm_manager, self.mock_llm_manager)
-            self.assertIs(agent.tool_dispatcher, self.mock_tool_dispatcher)
+            assert isinstance(agent, MockAgent)
+            assert agent.websocket_bridge is self.mock_websocket_bridge
+            assert agent.run_id == self.test_run_id
+            assert agent.llm_manager is self.mock_llm_manager
+            assert agent.tool_dispatcher is self.mock_tool_dispatcher
             
             # Verify context and WebSocket integration
             context_id = f"{self.test_user_id}_{self.test_thread_id}_{self.test_run_id}"
             emitter_keys = [key for key in factory._websocket_emitters.keys() if key.startswith(context_id)]
-            self.assertTrue(len(emitter_keys) > 0)
+            assert len(emitter_keys) > 0
             
         # After context exit, everything should be cleaned up
-        self.assertEqual(len(factory._active_contexts), 0)
-        self.assertEqual(len([key for key in getattr(factory, '_websocket_emitters', {}).keys()]), 0)
+        assert len(factory._active_contexts) == 0
+        assert len([key for key in getattr(factory, '_websocket_emitters', {}).keys()]) == 0
         
     @pytest.mark.asyncio
     async def test_synthetic_data_agent_special_handling(self):
@@ -1224,9 +1221,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         )
         
         # Verify special error message for synthetic_data agent
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_agent_instance("synthetic_data", context)
-        self.assertIn("KNOWN ISSUE: synthetic_data agent registration may have failed", str(ctx.exception))
+        assert "KNOWN ISSUE: synthetic_data agent registration may have failed" in str(ctx.value)
 
 
 # =========================================================================
@@ -1262,13 +1259,13 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
             self.mock_bridge
         )
         
-        self.assertEqual(emitter.user_id, self.test_user_id)
-        self.assertEqual(emitter.thread_id, self.test_thread_id)
-        self.assertEqual(emitter.run_id, self.test_run_id)
-        self.assertIs(emitter.websocket_bridge, self.mock_bridge)
-        self.assertIsInstance(emitter.created_at, datetime)
-        self.assertEqual(emitter._event_count, 0)
-        self.assertIsNone(emitter._last_event_time)
+        assert emitter.user_id == self.test_user_id
+        assert emitter.thread_id == self.test_thread_id
+        assert emitter.run_id == self.test_run_id
+        assert emitter.websocket_bridge is self.mock_bridge
+        assert isinstance(emitter.created_at, datetime)
+        assert emitter._event_count == 0
+        assert emitter._last_event_time is None
         
     @pytest.mark.asyncio
     async def test_websocket_emitter_event_counting(self):
@@ -1285,8 +1282,8 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
         await emitter.notify_agent_thinking("test_agent", "thinking")
         await emitter.notify_agent_completed("test_agent")
         
-        self.assertEqual(emitter._event_count, 3)
-        self.assertIsNotNone(emitter._last_event_time)
+        assert emitter._event_count == 3
+        assert emitter._last_event_time is not None
         
     @pytest.mark.asyncio
     async def test_websocket_emitter_status_reporting(self):
@@ -1303,13 +1300,13 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
         
         status = emitter.get_emitter_status()
         
-        self.assertEqual(status['user_id'], self.test_user_id)
-        self.assertEqual(status['thread_id'], self.test_thread_id)
-        self.assertEqual(status['run_id'], self.test_run_id)
-        self.assertEqual(status['event_count'], 1)
-        self.assertIsNotNone(status['last_event_time'])
-        self.assertIsNotNone(status['created_at'])
-        self.assertTrue(status['has_websocket_bridge'])
+        assert status['user_id'] == self.test_user_id
+        assert status['thread_id'] == self.test_thread_id
+        assert status['run_id'] == self.test_run_id
+        assert status['event_count'] == 1
+        assert status['last_event_time'] is not None
+        assert status['created_at'] is not None
+        assert status['has_websocket_bridge']
         
     @pytest.mark.asyncio
     async def test_websocket_emitter_cleanup(self):
@@ -1329,7 +1326,7 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
         await emitter.cleanup()
         
         # Verify cleanup
-        self.assertIsNone(emitter.websocket_bridge)
+        assert emitter.websocket_bridge is None
 
 
 # =========================================================================
@@ -1364,21 +1361,21 @@ class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
             
             # Check if metrics were collected
             if hasattr(factory, '_perf_stats'):
-                self.assertIn('context_creation_ms', factory._perf_stats)
+                assert 'context_creation_ms' in factory._perf_stats
                 
     def test_performance_config_integration(self):
         """Test 48: Performance configuration is properly integrated."""
         factory = AgentInstanceFactory()
         
         # Verify performance config is loaded and used
-        self.assertIsNotNone(factory._performance_config)
-        self.assertTrue(hasattr(factory._performance_config, 'max_concurrent_per_user'))
-        self.assertTrue(hasattr(factory._performance_config, 'enable_emitter_pooling'))
-        self.assertTrue(hasattr(factory._performance_config, 'enable_class_caching'))
-        self.assertTrue(hasattr(factory._performance_config, 'enable_metrics'))
+        assert factory._performance_config is not None
+        assert hasattr(factory._performance_config, 'max_concurrent_per_user')
+        assert hasattr(factory._performance_config, 'enable_emitter_pooling')
+        assert hasattr(factory._performance_config, 'enable_class_caching')
+        assert hasattr(factory._performance_config, 'enable_metrics')
         
         # Verify factory uses config values
-        self.assertEqual(factory._max_concurrent_per_user, factory._performance_config.max_concurrent_per_user)
+        assert factory._max_concurrent_per_user == factory._performance_config.max_concurrent_per_user
         
     def test_weak_references_configuration(self):
         """Test 49: Weak references are configured when enabled."""
@@ -1387,11 +1384,11 @@ class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
         # Check if weak references are being used when enabled
         if factory._performance_config.enable_weak_references:
             import weakref
-            self.assertIsInstance(factory._active_contexts, weakref.WeakValueDictionary)
-            self.assertIsInstance(factory._user_semaphores, weakref.WeakValueDictionary)
+            assert isinstance(factory._active_contexts, weakref.WeakValueDictionary)
+            assert isinstance(factory._user_semaphores, weakref.WeakValueDictionary)
         else:
-            self.assertIsInstance(factory._active_contexts, dict)
-            self.assertIsInstance(factory._user_semaphores, dict)
+            assert isinstance(factory._active_contexts, dict)
+            assert isinstance(factory._user_semaphores, dict)
             
     def test_class_caching_functionality(self):
         """Test 50: Class caching works when enabled."""
@@ -1400,10 +1397,10 @@ class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
         if factory._performance_config.enable_class_caching:
             # Test caching functionality
             cached_class = factory._get_cached_agent_class("test_agent")
-            self.assertIsNone(cached_class)  # Initially empty
+            assert cached_class is None  # Initially empty
             
             # Verify cache exists
-            self.assertTrue(hasattr(factory, '_cache_lock'))
+            assert hasattr(factory, '_cache_lock')
             
     @pytest.mark.asyncio
     async def test_emitter_pool_statistics(self):
@@ -1412,7 +1409,7 @@ class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
         
         # Get pool stats (should work regardless of pooling enabled)
         stats = factory.get_pool_stats()
-        self.assertIsInstance(stats, dict)
+        assert isinstance(stats, dict)
         
         # If pooling is enabled, stats should contain pool metrics
         if factory._performance_config.enable_emitter_pooling:

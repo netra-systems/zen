@@ -69,7 +69,7 @@ class TestAgentOrchestrationValue(EnhancedBaseIntegrationTest):
         
         async with self.websocket_business_context(user) as ws_context:
             # Mock supervisor that demonstrates intelligent routing
-            with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorConsolidatedAgent') as mock_supervisor:
+            with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent') as mock_supervisor:
                 
                 # Setup orchestrated agent flow
                 async def mock_orchestrated_execution(request, thread_id, user_id, run_id):
