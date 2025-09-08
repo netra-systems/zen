@@ -45,8 +45,9 @@ logger = logging.getLogger(__name__)
 class TestCompleteOAuthLoginFlow(BaseE2ETest):
     """Test complete OAuth login flow with real services."""
     
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Set up method called before each test method."""
+        super().setup_method()
         self.docker_manager = None
         self.auth_service_url = None
         self.test_start_time = None
