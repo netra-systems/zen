@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -71,10 +71,10 @@ class TestSupervisorWebSocketIntegration:
         session = AsyncMock(spec=AsyncSession)
 
         # Mock: Session isolation for controlled testing without external state
-        session.websocket = TestWebSocketConnection()
+        session.websocket = MockWebSocketConnection()
 
         # Mock: Session isolation for controlled testing without external state
-        session.websocket = TestWebSocketConnection()
+        session.websocket = MockWebSocketConnection()
 
         return session
 
@@ -154,7 +154,7 @@ class TestSupervisorWebSocketIntegration:
             # If initialization fails, create a mock agent with the minimum required interface
             mock_agent = AsyncMock(spec=SupervisorAgent)
             mock_agent.websocket_manager = mock_websocket_manager
-            mock_agent.websocket = TestWebSocketConnection()
+            mock_agent.websocket = MockWebSocketConnection()
             return mock_agent
 
 
@@ -241,7 +241,7 @@ class TestSupervisorWebSocketIntegration:
         # Create mock supervisor
 
         # Mock: Generic component isolation for controlled unit testing
-        websocket = TestWebSocketConnection()
+        websocket = MockWebSocketConnection()
 
         mock_supervisor.run.return_value = "Agent processed the message"
 
@@ -265,7 +265,7 @@ class TestSupervisorWebSocketIntegration:
         with patch.object(agent_service, "message_handler") as mock_handler:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_handler.websocket = TestWebSocketConnection()
+            mock_handler.websocket = MockWebSocketConnection()
 
             # Process WebSocket message
 
@@ -462,7 +462,7 @@ class TestSupervisorWebSocketIntegration:
         """Test WebSocket message validation in agent service."""
 
         # Mock: Generic component isolation for controlled unit testing
-        websocket = TestWebSocketConnection()
+        websocket = MockWebSocketConnection()
 
         agent_service = AgentService(mock_supervisor)
 
@@ -470,7 +470,7 @@ class TestSupervisorWebSocketIntegration:
         user_id = "validation-user"
 
         # Mock: Session isolation for controlled testing without external state
-        websocket = TestWebSocketConnection()
+        websocket = MockWebSocketConnection()
 
         # Test valid message
 
@@ -486,7 +486,7 @@ class TestSupervisorWebSocketIntegration:
         with patch.object(agent_service, "message_handler") as mock_handler:
 
             # Mock: Generic component isolation for controlled unit testing
-            mock_handler.websocket = TestWebSocketConnection()
+            mock_handler.websocket = MockWebSocketConnection()
 
 
             await agent_service.handle_websocket_message(
@@ -510,7 +510,7 @@ class TestSupervisorWebSocketIntegration:
         ):
             # Mock the websocket manager to capture send_error calls
             with patch("netra_backend.app.services.agent_service_core.manager") as mock_manager:
-                mock_manager.websocket = TestWebSocketConnection()
+                mock_manager.websocket = MockWebSocketConnection()
                 await agent_service.handle_websocket_message(
 
                     user_id, invalid_message, db_session

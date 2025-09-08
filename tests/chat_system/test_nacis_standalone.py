@@ -37,7 +37,7 @@ env.set("NACIS_ENABLED", "true", "test")
 env.set("GUARDRAILS_ENABLED", "true", "test")
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -76,7 +76,7 @@ async def test_basic_components():
         )
 
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = MockWebSocketConnection()  # Real WebSocket implementation
         mock_llm = MagicMock()
         mock_llm.call_llm = AsyncMock(return_value={
             "content": "tco_analysis"
@@ -84,7 +84,7 @@ async def test_basic_components():
 
         classifier = IntentClassifier(mock_llm)
         context = MagicMock()
-        context.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        context.websocket = MockWebSocketConnection()  # Real WebSocket implementation
         context.state.user_request = "What is the TCO for GPT-4?"
         intent, confidence = await classifier.classify(context)
 
@@ -128,7 +128,7 @@ async def test_orchestration_mock():
 
         # Create mocks
         mock_session = MagicMock()
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = MockWebSocketConnection()  # Real WebSocket implementation
         mock_llm = MagicMock()
         mock_llm.call_llm = AsyncMock(return_value={
             "content": "TCO is approximately $12,000 annually",
