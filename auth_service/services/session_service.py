@@ -52,7 +52,15 @@ class SessionService:
         """Generate Redis key for user sessions list."""
         return f"{self.user_sessions_prefix}{user_id}"
     
-    async def create_session(self, user_id: str, user_data: Dict[str, Any], expires_in: Optional[int] = None) -> Dict[str, Any]:
+    async def create_session(
+        self, 
+        user_id: str, 
+        email: str = None,
+        access_token: str = None,
+        session_data: Dict[str, Any] = None,
+        user_data: Dict[str, Any] = None,
+        expires_in: Optional[int] = None
+    ) -> str:
         """
         Create a new user session.
         
