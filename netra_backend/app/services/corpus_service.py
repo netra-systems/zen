@@ -523,8 +523,13 @@ class CorpusService:
             # This allows the method to return quickly as expected by tests
             logger.warning(f"Table creation for {table_name} timed out, running in background")
             
-            # Start table creation in background without awaiting
-            asyncio.create_task(_perform_table_creation())
+            # Start table creation in background with proper exception handling
+            task = asyncio.create_task(_perform_table_creation())
+            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
+            task.add_done_callback(
+                lambda t: logger.error(f"Background table creation failed: {t.exception()}") 
+                if t.exception() else logger.info(f"Background table creation completed for {table_name}")
+            )
             
         except Exception as e:
             logger.error(f"Error during table creation timeout handling: {e}")

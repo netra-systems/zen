@@ -520,7 +520,9 @@ class ServiceStartupCoordinator:
             if result.success:
                 startup_results[service_name] = result.result
             else:
-                logger.error(f"{service_name} startup failed: {result.error}")
+                error_type = type(result.error).__name__ if result.error else "UNKNOWN"
+                startup_error_code = f"{service_name.upper()}_STARTUP_{error_type.upper()}"
+                logger.error(f"ERROR [{startup_error_code}] {service_name} startup failed: {error_type} - {str(result.error)[:200]}")
                 startup_results[service_name] = (None, None)
         
         elapsed = time.time() - start_time

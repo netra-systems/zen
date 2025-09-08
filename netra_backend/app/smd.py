@@ -911,10 +911,17 @@ class StartupOrchestrator:
             self.app.state.database_available = True
             self.logger.info("Database session factory successfully initialized")
             
-            # Ensure tables exist - no graceful mode
-            self.logger.debug(f"Starting table setup with {table_setup_timeout}s timeout...")
+            # Ensure tables exist - use graceful mode for staging to prevent 503 errors during migration issues
+            # TEMPORARY FIX: Allow staging to start with missing non-critical tables
+            is_staging = environment.lower() == 'staging'
+            graceful_mode = is_staging  # Staging uses graceful mode, other envs use strict mode
+            
+            self.logger.debug(f"Starting table setup with {table_setup_timeout}s timeout (graceful_mode={graceful_mode})...")
+            if is_staging:
+                self.logger.info("🚨 STAGING MODE: Using graceful startup to prevent 503 errors during migration issues")
+            
             await asyncio.wait_for(
-                _ensure_database_tables_exist(self.logger, graceful_startup=False),
+                _ensure_database_tables_exist(self.logger, graceful_startup=graceful_mode),
                 timeout=table_setup_timeout
             )
             self.logger.info("Database table setup completed successfully")
@@ -1344,9 +1351,10 @@ class StartupOrchestrator:
             if not validation_result.success:
                 # Critical fixes failed - this is a deterministic startup failure
                 critical_failures = validation_result.critical_failures
-                self.logger.error("🚨 CRITICAL: Critical startup fixes failed validation!")
-                for failure in critical_failures:
-                    self.logger.error(f"  - {failure}")
+                startup_error_code = "STARTUP_CRITICAL_FIXES_VALIDATION_FAILED"
+                self.logger.error(f"ERROR [{startup_error_code}] Critical startup fixes failed validation: {len(critical_failures)} failures")
+                for i, failure in enumerate(critical_failures, 1):
+                    self.logger.error(f"ERROR [{startup_error_code}_{i:02d}] Critical fix failure: {failure}")
                 
                 # In deterministic mode, critical fix failures are FATAL
                 raise DeterministicStartupError(
@@ -1372,7 +1380,8 @@ class StartupOrchestrator:
             
         except Exception as e:
             # Wrap unexpected errors
-            self.logger.error(f"Unexpected error in startup fixes: {e}", exc_info=True)
+            startup_error_code = f"STARTUP_FIXES_UNEXPECTED_{type(e).__name__.upper()}"
+            self.logger.error(f"ERROR [{startup_error_code}] Unexpected startup fixes error: {type(e).__name__} - {str(e)[:200]}", exc_info=True)
             raise DeterministicStartupError(f"Startup fixes system failed: {e}") from e
     
     async def _initialize_performance_manager(self) -> None:

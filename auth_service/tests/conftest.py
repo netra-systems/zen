@@ -62,8 +62,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     
     # FAST TEST MODE: Skip #removed-legacyto let fast test mode use SQLite
     # REAL SERVICES: Configure real database connection (unused in fast test mode)
-    if not env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true":
-        env.set("DATABASE_URL", "postgresql://test_user:test_pass@localhost:5434/auth_test_db", "auth_conftest_real")
+    # Note: DATABASE_URL will be built by DatabaseURLBuilder from component parts below
     env.set("POSTGRES_HOST", "localhost", "auth_conftest_real")
     env.set("POSTGRES_PORT", "5434", "auth_conftest_real") 
     env.set("POSTGRES_USER", "test_user", "auth_conftest_real")
@@ -309,8 +308,8 @@ def real_http_client():
     
     yield client
     
-    # Cleanup
-    asyncio.create_task(client.aclose())
+    # Cleanup: Properly await client close to prevent "Task exception was never retrieved"
+    await client.aclose()
 
 
 @pytest.fixture(scope="function")

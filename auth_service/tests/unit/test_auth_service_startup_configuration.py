@@ -741,8 +741,8 @@ class TestAuthServiceStartupConfiguration:
                     'POSTGRES_PORT': '5432',
                     'POSTGRES_DB': 'netra_auth_production',
                     'POSTGRES_USER': 'auth_prod_user',
-                    'POSTGRES_PASSWORD': 'secure_production_password_123',
-                    'DATABASE_URL': 'postgresql+asyncpg://auth_prod_user:secure_production_password_123@prod-postgresql.example.com:5432/netra_auth_production'
+                    'POSTGRES_PASSWORD': 'secure_production_password_123'
+                    # Note: DATABASE_URL will be built by DatabaseURLBuilder from component parts
                 },
                 'expected_behavior': 'success'
             },

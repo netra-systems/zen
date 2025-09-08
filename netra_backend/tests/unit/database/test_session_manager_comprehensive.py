@@ -700,8 +700,8 @@ class TestSessionValidationUtilities(BaseIntegrationTest):
         # BVJ: Validates validation utility works with real sessions
         from sqlalchemy.ext.asyncio import AsyncSession
         
-        # Create a mock that looks like AsyncSession
-        mock_session = MagicMock(spec=AsyncSession)
+        # Create a mock that looks like AsyncSession using AsyncMock for async operations
+        mock_session = AsyncMock(spec=AsyncSession)
         
         # Should not raise exception
         validate_db_session(mock_session, "test_context")

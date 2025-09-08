@@ -107,8 +107,8 @@ class MigrationRunner:
             "--memory", "512Mi",
             "--cpu", "1",
             "--max-retries", "1",
-            "--timeout", "600",
-            "--service-account", f"netra-backend@{self.project_id}.iam.gserviceaccount.com"
+            "--task-timeout", "600",
+            "--service-account", f"netra-staging-deploy@{self.project_id}.iam.gserviceaccount.com"
         ]
         
         # Add environment-specific secrets
@@ -125,6 +125,13 @@ class MigrationRunner:
         
         # Add environment variable
         job_cmd.extend(["--set-env-vars", f"ENVIRONMENT={self.environment.upper()}"])
+        
+        # CRITICAL: Add Cloud SQL connection for staging deployment compatibility
+        # This fixes the "No such file or directory" socket connection error
+        cloud_sql_instance = f"{self.project_id}:us-central1:{self.environment}-shared-postgres"
+        job_cmd.extend(["--set-cloudsql-instances", cloud_sql_instance])
+        
+        print(f"🔌 Configuring Cloud SQL connection: {cloud_sql_instance}")
         
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         

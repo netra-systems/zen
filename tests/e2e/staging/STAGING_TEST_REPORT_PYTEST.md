@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-08 09:42:00
+**Generated:** 2025-09-08 12:01:45
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 4.54 seconds
+- **Duration:** 4.25 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,18 +19,22 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | FAIL failed | 3.002s | test_priority1_critical.py |
+| test_001_websocket_connection_real | FAIL failed | 3.462s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_001_websocket_connection_real
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_priority1_critical.py
-- **Duration:** 3.002s
-- **Error:** test_priority1_critical.py:37: in test_001_websocket_connection_real
-    assert response.status_code == 200, f"Backend not healthy: {response.text}"
-E   AssertionError: Backend not healthy: Service Unavailable
-E   assert 503 == 200
-E    +  where 503 = <Response [503 Service Unavailable]>.status_code...
+- **Duration:** 3.462s
+- **Error:** test_priority1_critical.py:83: in test_001_websocket_connection_real
+    welcome_response = await asyncio.wait_for(ws.recv(), timeout=10)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\antho\miniconda3\Lib\asyncio\tasks.py:520: in wait_for
+    return await fut
+           ^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\connection.py:322: in recv
+    raise self.protocol.close_exc from self.recv_exc
+E   websockets.exceptions....
 
 ## Pytest Output Format
 
@@ -38,7 +42,7 @@ E    +  where 503 = <Response [503 Service Unavailable]>.status_code...
 test_priority1_critical.py::test_001_websocket_connection_real FAILED
 
 ==================================================
-0 passed, 1 failed in 4.54s
+0 passed, 1 failed in 4.25s
 ```
 
 ## Test Coverage Matrix

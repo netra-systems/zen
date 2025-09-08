@@ -146,7 +146,12 @@ class AuthStartupValidator:
                     break
             
             if is_default_secret or not jwt_secret or is_deterministic_fallback:
-                result.error = "No JWT secret configured (JWT_SECRET, JWT_SECRET_KEY, or JWT_SECRET_STAGING)"
+                if is_default_secret:
+                    result.error = f"JWT secret is configured but invalid (using default/test value: '{jwt_secret[:20]}...')"
+                elif is_deterministic_fallback:
+                    result.error = "JWT secret is configured but rejected (using deterministic test fallback - not acceptable for secure environments)"
+                else:
+                    result.error = "No JWT secret configured (JWT_SECRET, JWT_SECRET_KEY, or JWT_SECRET_STAGING)"
                 debug_info = jwt_manager.get_debug_info()
                 result.details = {
                     "environment": self.environment,

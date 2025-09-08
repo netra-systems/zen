@@ -1081,8 +1081,12 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _handle_startup_failure(logger: logging.Logger, error: Exception) -> None:
     """Handle startup check failures."""
+    error_type = type(error).__name__
+    error_msg = str(error)
+    startup_error_code = f"STARTUP_FAILURE_{error_type.upper()}"
+    
     logger.critical(f"CRITICAL: Startup checks failed: {error}")
-    logger.error("Application shutting down due to startup failure.")
+    logger.error(f"ERROR [{startup_error_code}] Application shutdown: {error_type} - {error_msg[:200]}")
     await _emergency_cleanup(logger)
     raise RuntimeError(f"Application startup failed: {error}")
 

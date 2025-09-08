@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-08 10:56:41
+**Generated:** 2025-09-08 12:02:57
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
 - **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 4 (100.0%)
+- **Passed:** 1 (25.0%)
+- **Failed:** 3 (75.0%)
 - **Skipped:** 0
-- **Duration:** 58.50 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 7.42 seconds
+- **Pass Rate:** 25.0%
 
 ## Test Results by Priority
 
@@ -19,55 +19,47 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_http_connectivity | FAIL failed | 10.732s | test_staging_connectivity_validation.py |
-| test_002_websocket_connectivity | FAIL failed | 6.280s | test_staging_connectivity_validation.py |
-| test_003_agent_request_pipeline | FAIL failed | 10.007s | test_staging_connectivity_validation.py |
-| test_004_generate_connectivity_report | FAIL failed | 30.927s | test_staging_connectivity_validation.py |
+| test_001_http_connectivity | PASS passed | 1.049s | test_staging_connectivity_validation.py |
+| test_002_websocket_connectivity | FAIL failed | 2.018s | test_staging_connectivity_validation.py |
+| test_003_agent_request_pipeline | FAIL failed | 0.581s | test_staging_connectivity_validation.py |
+| test_004_generate_connectivity_report | FAIL failed | 2.547s | test_staging_connectivity_validation.py |
 
 ## Failed Tests Details
 
-### FAILED: test_001_http_connectivity
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 10.732s
-- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:312: in test_001_http_connectivity
-    assert result["success"], f"HTTP connectivity failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: HTTP connectivity failed: 
-E   assert False...
-
 ### FAILED: test_002_websocket_connectivity
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 6.280s
+- **Duration:** 2.018s
 - **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:327: in test_002_websocket_connectivity
     assert result["success"], f"WebSocket connectivity failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: WebSocket connectivity failed: server rejected WebSocket connection: HTTP 503
+E   AssertionError: WebSocket connectivity failed: received 1011 (internal error) Internal error; then sent 1011 (internal error) Internal error
 E   assert False...
 
 ### FAILED: test_003_agent_request_pipeline
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 10.007s
+- **Duration:** 0.581s
 - **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:342: in test_003_agent_request_pipeline
     assert result["success"], f"Agent pipeline test failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: Agent pipeline test failed: 
+E   AssertionError: Agent pipeline test failed: received 1011 (internal error) Internal error; then sent 1011 (internal error) Internal error
 E   assert False...
 
 ### FAILED: test_004_generate_connectivity_report
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_staging_connectivity_validation.py
-- **Duration:** 30.927s
+- **Duration:** 2.547s
 - **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:406: in test_004_generate_connectivity_report
     assert success_rate >= 100.0, f"All connectivity tests should pass for staging validation"
 E   AssertionError: All connectivity tests should pass for staging validation
-E   assert 0.0 >= 100.0...
+E   assert 33.33333333333333 >= 100.0...
 
 ## Pytest Output Format
 
 ```
-test_staging_connectivity_validation.py::test_001_http_connectivity FAILED
+test_staging_connectivity_validation.py::test_001_http_connectivity PASSED
 test_staging_connectivity_validation.py::test_002_websocket_connectivity FAILED
 test_staging_connectivity_validation.py::test_003_agent_request_pipeline FAILED
 test_staging_connectivity_validation.py::test_004_generate_connectivity_report FAILED
 
 ==================================================
-0 passed, 4 failed in 58.50s
+1 passed, 3 failed in 7.42s
 ```
 
 ## Test Coverage Matrix

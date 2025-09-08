@@ -51,7 +51,12 @@ class TestAuthStartupConfiguration:
         
         # Set required startup configuration
         auth_env.set("JWT_SECRET_KEY", "test-jwt-secret-key-32-characters", source="test")
-        auth_env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/test_auth", source="test")
+        # Set component parts for DatabaseURLBuilder SSOT
+        auth_env.set("POSTGRES_HOST", "localhost", source="test")
+        auth_env.set("POSTGRES_PORT", "5434", source="test")
+        auth_env.set("POSTGRES_USER", "test", source="test")
+        auth_env.set("POSTGRES_PASSWORD", "test", source="test")
+        auth_env.set("POSTGRES_DB", "test_auth", source="test")
         auth_env.set("REDIS_URL", "redis://localhost:6381/0", source="test")
         auth_env.set("GOOGLE_CLIENT_ID", "test-google-client-id", source="test")
         auth_env.set("GOOGLE_CLIENT_SECRET", "test-google-secret", source="test")
@@ -139,7 +144,11 @@ class TestAuthStartupConfiguration:
         # Test missing required configuration
         required_configs = [
             "JWT_SECRET_KEY",
-            "DATABASE_URL", 
+            # Note: DATABASE_URL not required - DatabaseURLBuilder uses component parts
+            "POSTGRES_HOST",  # Component parts for DatabaseURLBuilder SSOT
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
+            "POSTGRES_DB",
             "REDIS_URL",
             "GOOGLE_CLIENT_ID",
             "GOOGLE_CLIENT_SECRET"
@@ -389,7 +398,7 @@ class TestAuthStartupConfiguration:
         # Test non-reloadable configuration (should require restart)
         critical_configs = {
             "JWT_SECRET_KEY": "new-secret-key-32-characters-long",
-            "DATABASE_URL": "postgresql://new_host:5432/auth"
+            "POSTGRES_HOST": "new_host"  # Database component changes require restart
         }
         
         for config_key, new_value in critical_configs.items():

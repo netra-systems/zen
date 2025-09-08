@@ -31,6 +31,7 @@ from typing import Any, Dict, Optional
 # ZERO MOCKS: All mock imports eliminated - using real services per CLAUDE.md requirement
 from urllib.parse import parse_qs, urlparse
 from shared.isolated_environment import IsolatedEnvironment
+from shared.database_url_builder import DatabaseURLBuilder
 
 import httpx
 import pytest
@@ -89,7 +90,9 @@ class TestDatabaseOperations:
         """Test database connection parameters are environment-specific."""
         # PostgreSQL-specific parameters should be conditional
         env_vars = get_env()
-        db_url = env_vars.get("DATABASE_URL", "")
+        # Use DatabaseURLBuilder SSOT to get database URL
+        builder = DatabaseURLBuilder(env_vars.get_all())
+        db_url = builder.get_url_for_environment() or ""
         
         if "sqlite" in db_url.lower():
             # SQLite connections should not use PostgreSQL-specific parameters

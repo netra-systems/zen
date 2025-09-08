@@ -602,7 +602,7 @@ async def get_request_scoped_supervisor(
             logger.error("WebSocket bridge not available in app state")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocket bridge not configured"
+                detail="WebSocket bridge unavailable (startup failed or invalid configuration - check app startup logs)"
             )
         
         # Get tool dispatcher from legacy supervisor for now
@@ -612,7 +612,7 @@ async def get_request_scoped_supervisor(
             logger.error("Tool dispatcher not available")
             raise HTTPException(
                 status_code=500,
-                detail="Tool dispatcher not configured"
+                detail="Tool dispatcher unavailable (check supervisor initialization and configuration validity)"
             )
         
         # Use core supervisor factory for consistency with WebSocket pattern
@@ -1108,7 +1108,7 @@ def get_execution_engine_factory(request: Request) -> ExecutionEngineFactory:
             logger.error("ExecutionEngineFactory not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="ExecutionEngineFactory not configured"
+                detail="ExecutionEngineFactory unavailable (startup initialization failed or configuration invalid)"
             )
         
         return factory
@@ -1139,7 +1139,7 @@ def get_websocket_bridge_factory(request: Request) -> WebSocketBridgeFactory:
             logger.error("WebSocketBridgeFactory not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocketBridgeFactory not configured"
+                detail="WebSocketBridgeFactory unavailable (startup initialization failed or configuration invalid)"
             )
         
         return factory
@@ -1170,7 +1170,7 @@ def get_factory_adapter(request: Request) -> FactoryAdapter:
             logger.error("FactoryAdapter not found in app state - ensure it's configured during startup")
             raise HTTPException(
                 status_code=500,
-                detail="FactoryAdapter not configured"
+                detail="FactoryAdapter unavailable (startup initialization failed or configuration invalid)"
             )
         
         return adapter

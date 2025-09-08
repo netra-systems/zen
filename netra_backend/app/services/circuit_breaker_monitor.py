@@ -67,6 +67,11 @@ class CircuitBreakerMonitor:
         """Start the monitoring task"""
         self._monitoring_active = True
         self._monitor_task = asyncio.create_task(self._monitor_loop(interval_seconds))
+        # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
+        self._monitor_task.add_done_callback(
+            lambda t: logger.error(f"Circuit breaker monitoring failed: {t.exception()}") 
+            if t.exception() else logger.info("Circuit breaker monitoring task completed")
+        )
         logger.info(f"Circuit breaker monitoring started (interval: {interval_seconds}s)")
 
     async def start_monitoring(self, interval_seconds: float = 5.0) -> None:
@@ -200,7 +205,8 @@ class CircuitBreakerMonitor:
         """Dispatch alert to all handlers"""
         for handler in self._alert_handlers:
             try:
-                await asyncio.create_task(self._call_handler(handler, alert))
+                # No need to create_task for awaiting - just await directly to prevent race conditions
+                await self._call_handler(handler, alert)
             except Exception as e:
                 logger.error(f"Alert handler error: {e}")
 

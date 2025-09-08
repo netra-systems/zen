@@ -18,6 +18,7 @@ import pytest
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock, patch
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -31,8 +32,8 @@ from netra_backend.app.dependencies import (
 @pytest.mark.asyncio
 async def test_get_db_dependency_returns_async_generator():
     """Test that get_db_dependency returns an async generator."""
-    # Create a mock AsyncSession
-    mock_session = MagicMock(spec=AsyncSession)
+    # Create a mock AsyncSession using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     
     # Mock get_db as async context manager (SSOT method)
     @asynccontextmanager
@@ -59,8 +60,8 @@ async def test_get_db_dependency_returns_async_generator():
 @pytest.mark.asyncio
 async def test_get_db_dependency_validates_session_type():
     """Test that get_db_dependency validates the session type."""
-    # Create a mock AsyncSession
-    mock_session = MagicMock(spec=AsyncSession)
+    # Create a mock AsyncSession using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     
     # Mock get_db as async context manager (SSOT method)
     @asynccontextmanager
@@ -79,8 +80,8 @@ async def test_get_db_dependency_validates_session_type():
 @pytest.mark.asyncio
 async def test_get_db_dependency_handles_multiple_sessions():
     """Test that get_db_dependency correctly handles a single session from get_db context manager."""
-    # Create mock session
-    mock_session = MagicMock(spec=AsyncSession)
+    # Create mock session using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     
     # Mock get_db as async context manager (SSOT method - returns one session)
     @asynccontextmanager
@@ -99,8 +100,8 @@ async def test_get_db_dependency_handles_multiple_sessions():
 @pytest.mark.asyncio
 async def test_get_db_session_legacy_function():
     """Test that the legacy get_db_session function works correctly."""
-    # Create a mock AsyncSession
-    mock_session = MagicMock(spec=AsyncSession)
+    # Create a mock AsyncSession using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     
     # Mock get_db as async context manager (SSOT method)
     @asynccontextmanager
@@ -109,7 +110,7 @@ async def test_get_db_session_legacy_function():
     
     with patch('netra_backend.app.dependencies.get_db', mock_get_db):
         # Test that get_db_session is an async generator
-        gen = get_db()
+        gen = get_db_session()
         assert hasattr(gen, '__anext__'), "get_db_session should return an async generator"
         
         # Get the session from the generator
@@ -120,8 +121,8 @@ async def test_get_db_session_legacy_function():
 @pytest.mark.asyncio
 async def test_async_for_iteration_pattern():
     """Test that async for iteration works correctly with get_db_dependency."""
-    # Create a mock AsyncSession
-    mock_session = MagicMock(spec=AsyncSession)
+    # Create a mock AsyncSession using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     
     # Mock get_db as async context manager (SSOT method)
     @asynccontextmanager
@@ -145,20 +146,20 @@ async def test_async_with_pattern_fails():
     # Create a mock that simulates a proper async context manager
     @asynccontextmanager
     async def mock_get_db_context_manager():
-        yield MagicMock(spec=AsyncSession)
+        yield AsyncMock(spec=AsyncSession)
     
     # Verify that async with works with proper context manager
     try:
         async with mock_get_db_context_manager() as session:
-            assert isinstance(session, MagicMock)
+            assert isinstance(session, AsyncMock)
     except TypeError:
         pytest.fail("Async with should work with proper async context manager")
 
 
 def test_validate_session_type():
     """Test the _validate_session_type function."""
-    # Test with valid AsyncSession
-    mock_session = MagicMock(spec=AsyncSession)
+    # Test with valid AsyncSession using AsyncMock for async operations
+    mock_session = AsyncMock(spec=AsyncSession)
     try:
         _validate_session_type(mock_session)
     except RuntimeError:
@@ -198,7 +199,7 @@ async def test_generator_cleanup_on_exception():
     async def mock_get_db():
         nonlocal cleanup_called
         try:
-            yield MagicMock(spec=AsyncSession)
+            yield AsyncMock(spec=AsyncSession)
         finally:
             cleanup_called = True
     

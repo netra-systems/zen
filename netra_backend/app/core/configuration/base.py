@@ -41,25 +41,41 @@ class UnifiedConfigManager:
         self._config_cache: Optional[AppConfig] = None
         self._environment: Optional[str] = None
     
-    @lru_cache(maxsize=1)
     def get_config(self) -> AppConfig:
         """Get the unified application configuration.
+        
+        CRITICAL FIX: Removed @lru_cache decorator to prevent test configuration caching issues.
+        Test environments need fresh configuration loading to properly reflect environment variables.
         
         Returns:
             AppConfig: The validated application configuration
         """
-        if self._config_cache is None:
-            self._logger.info("Loading unified configuration")
-            environment = self._get_environment()
-            config = self._create_config_for_environment(environment)
+        # CRITICAL FIX: Always check if we're in test environment to avoid caching issues
+        current_environment = self._get_environment()
+        
+        # For test environments, always reload configuration to ensure fresh environment variable reads
+        is_test_environment = current_environment == "testing"
+        
+        if self._config_cache is None or is_test_environment:
+            if is_test_environment:
+                self._logger.debug("Test environment detected - forcing fresh configuration load")
+            else:
+                self._logger.info("Loading unified configuration")
+                
+            config = self._create_config_for_environment(current_environment)
             
             # Validate the configuration
             validation_result = self._validator.validate_complete_config(config)
             if not validation_result.is_valid:
                 self._logger.warning(f"Configuration validation issues: {validation_result.errors}")
             
-            self._config_cache = config
-            self._logger.info(f"Configuration loaded for environment: {environment}")
+            # Only cache for non-test environments
+            if not is_test_environment:
+                self._config_cache = config
+                self._logger.info(f"Configuration loaded and cached for environment: {current_environment}")
+            else:
+                self._logger.debug(f"Configuration loaded (not cached) for test environment: {current_environment}")
+                return config
         
         return self._config_cache
     
@@ -128,7 +144,7 @@ class UnifiedConfigManager:
         if force:
             self._config_cache = None
             self._environment = None
-            self.get_config.cache_clear()
+            # Note: No cache_clear() needed since @lru_cache was removed
         
         return self.get_config()
     

@@ -61,8 +61,13 @@ class TestAuthDatabaseOperationsIntegration(SSotBaseTestCase):
     async def db_session(self):
         """Get real database session for integration testing."""
         env = get_env()
-        # Use test database configuration
-        env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/test_auth", source="test")
+        # Use test database configuration - set component parts for DatabaseURLBuilder SSOT
+        env.set("POSTGRES_HOST", "localhost", source="test")
+        env.set("POSTGRES_PORT", "5434", source="test")
+        env.set("POSTGRES_USER", "test", source="test")
+        env.set("POSTGRES_PASSWORD", "test", source="test")
+        env.set("POSTGRES_DB", "test_auth", source="test")
+        env.set("ENVIRONMENT", "test", source="test")
         
         async with get_db_session() as session:
             yield session

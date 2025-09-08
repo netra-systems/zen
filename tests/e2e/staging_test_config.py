@@ -11,7 +11,7 @@ from dataclasses import dataclass
 class StagingConfig:
     """Configuration for staging environment tests"""
     
-    # Backend URLs - Using proper staging domain
+    # Backend URLs - Using proper staging domain (cross-linked to GCP backends)
     backend_url: str = "https://api.staging.netrasystems.ai"
     api_url: str = "https://api.staging.netrasystems.ai/api"
     websocket_url: str = "wss://api.staging.netrasystems.ai/ws"

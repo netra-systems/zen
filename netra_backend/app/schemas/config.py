@@ -1202,7 +1202,7 @@ class NetraTestingConfig(AppConfig):
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env_dict)
         
-        # Get URL for test environment - uses test.auto_url which handles DATABASE_URL or test defaults
+        # Get URL for test environment - uses DatabaseURLBuilder SSOT test.auto_url which handles environment variables or test defaults
         database_url = builder.test.auto_url
         
         if database_url:
@@ -1238,6 +1238,7 @@ class NetraTestingConfig(AppConfig):
         
         # Load security keys from environment (override defaults)
         security_key_mappings = {
+            'SECRET_KEY': 'secret_key',  # CRITICAL FIX: Load SECRET_KEY for FastAPI sessions
             'JWT_SECRET_KEY': 'jwt_secret_key',
             'FERNET_KEY': 'fernet_key',
             'SERVICE_SECRET': 'service_secret',
@@ -1269,6 +1270,39 @@ class NetraTestingConfig(AppConfig):
         redis_url = get_env_value('REDIS_URL')
         if redis_url:
             data['redis_url'] = redis_url
+        
+        # Load ClickHouse configuration from corrected environment
+        clickhouse_host = get_env_value('CLICKHOUSE_HOST')
+        clickhouse_port = get_env_value('CLICKHOUSE_PORT')
+        clickhouse_user = get_env_value('CLICKHOUSE_USER')
+        clickhouse_password = get_env_value('CLICKHOUSE_PASSWORD')
+        clickhouse_database = get_env_value('CLICKHOUSE_DATABASE') or get_env_value('CLICKHOUSE_DB')
+        
+        if clickhouse_host or clickhouse_port or clickhouse_user or clickhouse_password or clickhouse_database:
+            if 'clickhouse_native' not in data:
+                data['clickhouse_native'] = {}
+            if 'clickhouse_https' not in data:
+                data['clickhouse_https'] = {}
+            if clickhouse_host:
+                data['clickhouse_native']['host'] = clickhouse_host
+                data['clickhouse_https']['host'] = clickhouse_host
+            if clickhouse_port:
+                try:
+                    port_value = int(clickhouse_port)
+                    data['clickhouse_native']['port'] = port_value
+                    # Also set HTTPS port for test compatibility
+                    data['clickhouse_https']['port'] = port_value
+                except (ValueError, TypeError):
+                    pass
+            if clickhouse_user:
+                data['clickhouse_native']['user'] = clickhouse_user
+                data['clickhouse_https']['user'] = clickhouse_user
+            if clickhouse_password:
+                data['clickhouse_native']['password'] = clickhouse_password
+                data['clickhouse_https']['password'] = clickhouse_password
+            if clickhouse_database:
+                data['clickhouse_native']['database'] = clickhouse_database
+                data['clickhouse_https']['database'] = clickhouse_database
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
         """Load API keys from environment variables for testing."""
@@ -1286,6 +1320,7 @@ class NetraTestingConfig(AppConfig):
         
         # Load security keys from environment (override defaults)
         security_key_mappings = {
+            'SECRET_KEY': 'secret_key',  # CRITICAL FIX: Load SECRET_KEY for FastAPI sessions
             'JWT_SECRET_KEY': 'jwt_secret_key',
             'FERNET_KEY': 'fernet_key',
             'SERVICE_SECRET': 'service_secret',
@@ -1375,7 +1410,7 @@ class NetraTestingConfig(AppConfig):
             data['clickhouse_mode'] = clickhouse_mode
         
         # Load database configuration
-        # NOTE: DATABASE_URL is handled by DatabaseURLBuilder in __init__ - don't override it here
+        # NOTE: Database configuration is handled by DatabaseURLBuilder in __init__ via SSOT patterns - don't override it here
         
         redis_url = env.get('REDIS_URL')
         if redis_url:

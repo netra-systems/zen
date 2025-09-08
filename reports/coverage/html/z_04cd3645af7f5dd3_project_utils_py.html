@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for netra_backend\app\core\project_utils.py: 51.61%</title>
+    <title>Coverage for netra_backend\app\core\project_utils.py: 71.43%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_dca529e9.css" type="text/css">
     <script src="coverage_html_cb_497bf287.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>netra_backend\app\core\project_utils.py</b>:
-            <span class="pc_cov">51.61%</span>
+            <span class="pc_cov">71.43%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -26,7 +26,6 @@
                         <kbd>r</kbd>
                         <kbd>m</kbd>
                         <kbd>x</kbd>
-                        <kbd>p</kbd>
                         &nbsp; toggle line displays
                     </p>
                     <p>
@@ -56,10 +55,9 @@
         </aside>
         <h2>
             <span class="text">21 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">12<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">9<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">15<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">6<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">4<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="z_04cd3645af7f5dd3_performance_query_optimizer_py.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_04cd3645af7f5dd3_quality_analysis_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-07 20:39 -0700
+            created at 2025-09-08 11:56 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -128,26 +126,26 @@
     <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">    <span class="nam">env</span> <span class="op">=</span> <span class="nam">get_env</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">    <span class="com"># Method 1: Check pytest-specific environment variables</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">    <span class="key">if</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'PYTEST_CURRENT_TEST'</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">47&#x202F;&#x219B;&#x202F;48</span><span class="annotate long">line 47 didn't jump to line 48 because the condition on line 47 was never true</span></span></p>
+    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">    <span class="key">if</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'PYTEST_CURRENT_TEST'</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">    <span class="com"># Method 2: Check explicit testing flag</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="key">if</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'TESTING'</span><span class="op">)</span> <span class="op">==</span> <span class="str">'1'</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">51&#x202F;&#x219B;&#x202F;52</span><span class="annotate long">line 51 didn't jump to line 52 because the condition on line 51 was never true</span></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="key">if</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'TESTING'</span><span class="op">)</span> <span class="op">==</span> <span class="str">'1'</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">    <span class="com"># Method 3: Check if pytest is in the command line  </span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">    <span class="key">if</span> <span class="str">'pytest'</span> <span class="key">in</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'_'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">55&#x202F;&#x219B;&#x202F;56</span><span class="annotate long">line 55 didn't jump to line 56 because the condition on line 55 was never true</span></span></p>
+    <p class="run"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">    <span class="key">if</span> <span class="str">'pytest'</span> <span class="key">in</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'_'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">    <span class="com"># Method 4: Check environment name</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">    <span class="nam">env_name</span> <span class="op">=</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'ENVIRONMENT'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">    <span class="key">if</span> <span class="nam">env_name</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">60&#x202F;&#x219B;&#x202F;64</span><span class="annotate long">line 60 didn't jump to line 64 because the condition on line 60 was always true</span></span></p>
-    <p class="run"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">    <span class="key">if</span> <span class="nam">env_name</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="com"># Method 5: Check NETRA_ENV</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">    <span class="nam">netra_env</span> <span class="op">=</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'NETRA_ENV'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="key">if</span> <span class="nam">netra_env</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">    <span class="nam">netra_env</span> <span class="op">=</span> <span class="nam">env</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'NETRA_ENV'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="key">if</span> <span class="nam">netra_env</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">    <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
 </main>
@@ -159,7 +157,7 @@
             <a class="nav" href="z_04cd3645af7f5dd3_quality_analysis_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-07 20:39 -0700
+            created at 2025-09-08 11:56 -0700
         </p>
     </div>
 </footer>

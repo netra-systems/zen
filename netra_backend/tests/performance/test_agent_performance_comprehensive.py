@@ -72,7 +72,7 @@ class TestAgentLatencyPerformance:
     async def test_agent_task_execution_latency(self):
         """Test agent task execution latency under different loads."""
         # Mock database operations with realistic delays
-        mock_db_manager = DatabaseTestManager().get_session()
+        mock_db_manager = DatabaseTestManager().create_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         
         async def mock_db_operation(*args, **kwargs):
@@ -145,7 +145,7 @@ class TestAgentLatencyPerformance:
     async def test_agent_concurrent_execution_latency(self):
         """Test agent latency under concurrent execution."""
         # Mock shared resources
-        mock_db_manager = DatabaseTestManager().get_session()
+        mock_db_manager = DatabaseTestManager().create_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         
         # Simulate connection pool contention
@@ -445,7 +445,7 @@ class TestAgentThroughputOptimization:
     async def test_agent_batch_processing_throughput(self):
         """Test agent throughput with batch processing optimization."""
         # Mock database for batch operations
-        mock_db_manager = DatabaseTestManager().get_session()
+        mock_db_manager = DatabaseTestManager().create_session()
         mock_session = AsyncNone  # TODO: Use real service instance
         
         # Track batch operations

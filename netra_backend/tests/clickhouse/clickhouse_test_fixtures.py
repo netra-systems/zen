@@ -28,9 +28,17 @@ def get_clickhouse_config():
 
 def create_clickhouse_client(config):
     """Create ClickHouse client with given configuration"""
+    # Determine if we should use secure connection based on environment
+    from shared.isolated_environment import get_env
+    env = get_env()
+    environment = env.get("ENVIRONMENT", "development").lower()
+    
+    # Use HTTP for test environment (port 8126), HTTPS for production/staging
+    secure = environment not in ["testing", "development"]
+    
     return ClickHouseDatabase(
         host=config.host, port=config.port, user=config.user,
-        password=config.password, database=config.database, secure=True
+        password=config.password, database=config.database, secure=secure
     )
 
 async def check_system_metrics_permission(client):

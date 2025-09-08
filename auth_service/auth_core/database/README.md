@@ -1,12 +1,25 @@
 # Auth Service Database Configuration
 
 ## Overview
-The auth service uses two database connections:
+The auth service uses DatabaseURLBuilder SSOT for database connections:
 1. **Auth Database** - For auth-specific data (users, sessions, audit logs)
 2. **Main Database Sync** - For syncing users to the main application database
 
 ## Environment Variables
 
+### Database Configuration (DatabaseURLBuilder SSOT)
+The auth service uses DatabaseURLBuilder to construct database URLs from component parts:
+
+**Postgres Component Variables:**
+- `POSTGRES_HOST` - Database host (required)
+- `POSTGRES_PORT` - Database port (default: 5432)
+- `POSTGRES_USER` - Database user (required)
+- `POSTGRES_PASSWORD` - Database password (required)
+- `POSTGRES_DB` - Database name (required)
+- `ENVIRONMENT` - Environment (test/development/staging/production)
+
+**Legacy Support:**
+- `DATABASE_URL` - Direct URL override (takes precedence when set)
 
 ### Main Database (User Sync)
 - `MAIN_DATABASE_URL` - Primary main app database URL (recommended for clarity)
@@ -20,8 +33,18 @@ Set these environment variables in your Cloud Run service:
 
 ```yaml
 env:
-  - name: DATABASE_URL
-    value: "postgresql://user:password@/auth_db?host=/cloudsql/project:region:instance"
+  # DatabaseURLBuilder SSOT approach (recommended)
+  - name: POSTGRES_HOST
+    value: "/cloudsql/project:region:instance"
+  - name: POSTGRES_USER
+    value: "auth_user"
+  - name: POSTGRES_PASSWORD
+    value: "secure_password"
+  - name: POSTGRES_DB
+    value: "auth_db"
+  - name: ENVIRONMENT
+    value: "production"
+  # Main database for user sync
   - name: MAIN_DATABASE_URL
     value: "postgresql://user:password@/apex_db?host=/cloudsql/project:region:instance"
 ```
@@ -34,9 +57,26 @@ resource "google_cloud_run_service" "auth_service" {
   template {
     spec {
       containers {
+        # DatabaseURLBuilder SSOT approach
         env {
-          name  = "DATABASE_URL"
-          value = var.DATABASE_URL
+          name  = "POSTGRES_HOST"
+          value = var.postgres_host
+        }
+        env {
+          name  = "POSTGRES_USER"
+          value = var.postgres_user
+        }
+        env {
+          name  = "POSTGRES_PASSWORD"
+          value = var.postgres_password
+        }
+        env {
+          name  = "POSTGRES_DB"
+          value = var.postgres_db
+        }
+        env {
+          name  = "ENVIRONMENT"
+          value = var.environment
         }
         env {
           name  = "MAIN_DATABASE_URL"

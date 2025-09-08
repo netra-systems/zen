@@ -43,6 +43,7 @@ from datetime import datetime, timezone
 import threading
 import random
 import time
+from unittest.mock import AsyncMock
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
@@ -361,9 +362,9 @@ class TestDatabaseSessionIsolation:
         
         sessions_created = []
         
-        # Mock the database session creation
+        # Mock the database session creation using AsyncMock for async operations
         async def mock_get_db():
-            session = MagicMock(spec=AsyncSession)
+            session = AsyncMock(spec=AsyncSession)
             session.id = uuid.uuid4()
             session.is_active = True
             session.in_transaction = False

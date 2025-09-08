@@ -226,7 +226,7 @@ services:
       SERVICE_ID: ${BACKEND_SERVICE_ID:-netra-backend}
       SERVICE_SECRET: ${SERVICE_SECRET:-dev-service-secret-for-cross-service-auth}
       FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
-      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development-32-chars}
       
       # AI/LLM Configuration
       GEMINI_API_KEY: ${GEMINI_API_KEY}

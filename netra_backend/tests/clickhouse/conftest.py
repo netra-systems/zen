@@ -18,10 +18,10 @@ def _check_docker_clickhouse_available():
     """Check if Docker ClickHouse service is available"""
     import socket
     try:
-        # Test connection to Docker ClickHouse port
+        # Test connection to Docker ClickHouse port (alpine-test service uses 8126)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(1)
-        result = sock.connect_ex(('localhost', 8125))
+        result = sock.connect_ex(('localhost', 8126))
         sock.close()
         return result == 0
     except Exception:
@@ -29,12 +29,14 @@ def _check_docker_clickhouse_available():
 
 # Configure ClickHouse based on Docker availability
 if _check_docker_clickhouse_available():
-    # Docker ClickHouse is available - use real connection
+    # Docker ClickHouse is available - use real connection with alpine-test service configuration
     env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest_setup")
-    env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest_setup") 
-    env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest_setup")
-    env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest_setup")
-    env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_PORT", env.get("TEST_CLICKHOUSE_PORT", "8126"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8126"), source="clickhouse_conftest_setup") 
+    env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_DATABASE", env.get("TEST_CLICKHOUSE_DATABASE", "test_analytics"), source="clickhouse_conftest_setup")
+    env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "test_analytics"), source="clickhouse_conftest_setup")
     # Enable ClickHouse for these specific tests
     env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest_setup")
     env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest_setup")
@@ -85,10 +87,10 @@ def _create_clickhouse_client(config):
     
     # Use test settings if available, otherwise fall back to config
     host = test_host or config.host or "localhost"
-    port = int(test_port or config.port or 8125)
-    user = test_user or config.user or "test_user"  
-    password = test_password or config.password or "test_pass"
-    database = test_database or config.database or "netra_test_analytics"
+    port = int(test_port or config.port or 8126)
+    user = test_user or config.user or "test"  
+    password = test_password or config.password or "test"
+    database = test_database or config.database or "test_analytics"
     
     # Never use HTTPS for localhost connections to avoid SSL errors
     is_localhost = host in ["localhost", "127.0.0.1", "::1"]
@@ -112,12 +114,14 @@ def _check_clickhouse_availability():
     # Override disabled ClickHouse for these specific tests by setting the necessary env vars
     # This allows ClickHouse-specific tests to run even when globally disabled
     if not env.get("CLICKHOUSE_HOST"):
-        # Use Docker container configuration for ClickHouse tests
+        # Use Docker container configuration for ClickHouse tests (alpine-test service)
         env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest")
-        env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest") 
-        env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest")
-        env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest")
-        env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_PORT", env.get("TEST_CLICKHOUSE_PORT", "8126"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8126"), source="clickhouse_conftest") 
+        env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_DATABASE", env.get("TEST_CLICKHOUSE_DATABASE", "test_analytics"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "test_analytics"), source="clickhouse_conftest")
         # Enable ClickHouse for these specific tests
         env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest")
         env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest")
@@ -133,8 +137,8 @@ def _check_clickhouse_availability():
     try:
         # Check if basic environment variables are set
         clickhouse_host = env.get("CLICKHOUSE_HOST", "localhost")
-        clickhouse_port = env.get("CLICKHOUSE_HTTP_PORT", "8125")
-        clickhouse_user = env.get("CLICKHOUSE_USER", "default")
+        clickhouse_port = env.get("CLICKHOUSE_HTTP_PORT", "8126")
+        clickhouse_user = env.get("CLICKHOUSE_USER", "test")
         return bool(clickhouse_host and clickhouse_port and clickhouse_user)
     except Exception:
         return False

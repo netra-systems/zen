@@ -28,7 +28,7 @@ import sys
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-from netra_backend.app.core.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 
 logger = logging.getLogger(__name__)
 

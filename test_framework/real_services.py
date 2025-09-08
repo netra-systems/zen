@@ -56,11 +56,11 @@ class ServiceEndpoints:
     redis_password: Optional[str] = None
     
     clickhouse_host: str = "localhost"
-    clickhouse_http_port: int = 8125
-    clickhouse_tcp_port: int = 9002
-    clickhouse_user: str = "test_user"  
-    clickhouse_password: str = "test_pass"
-    clickhouse_db: str = "netra_test_analytics"
+    clickhouse_http_port: int = 8126  # Updated to match ALPINE_TEST_CLICKHOUSE_HTTP_PORT
+    clickhouse_tcp_port: int = 9003   # Updated to match ALPINE_TEST_CLICKHOUSE_TCP_PORT
+    clickhouse_user: str = "test"          # Updated to match Docker container
+    clickhouse_password: str = "test"      # Updated to match Docker container
+    clickhouse_db: str = "test_analytics"  # Updated to match Docker container
     
     backend_service_url: str = "http://localhost:8000"
     auth_service_url: str = "http://localhost:8081"
@@ -89,11 +89,11 @@ class ServiceEndpoints:
             redis_password=env.get("TEST_REDIS_PASSWORD"),
             
             clickhouse_host=env.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            clickhouse_http_port=int(env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125")),
-            clickhouse_tcp_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9002")),
-            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test_user"),
-            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"),
-            clickhouse_db=env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"),
+            clickhouse_http_port=int(env.get("TEST_CLICKHOUSE_HTTP_PORT", "8126")),  # Updated fallback
+            clickhouse_tcp_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9003")),   # Updated fallback
+            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test"),      # Updated fallback
+            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test"),  # Updated fallback
+            clickhouse_db=env.get("TEST_CLICKHOUSE_DB", "test_analytics"),    # Updated fallback
             
             backend_service_url=env.get("TEST_BACKEND_URL", "http://localhost:8000"),
             auth_service_url=env.get("TEST_AUTH_URL", "http://localhost:8081"),

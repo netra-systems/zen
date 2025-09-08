@@ -153,9 +153,67 @@
         <values>staging, production, development</values>
       </variable>
       
-      <variable name="DATABASE_URL" type="env_var">
-        <description>PostgreSQL connection string</description>
+      <variable name="DATABASE_URL" type="env_var" status="DEPRECATED">
+        <description>PostgreSQL connection string - DEPRECATED: Use multi-part SSOT approach</description>
         <cascade_impact>No database connection, complete backend failure</cascade_impact>
+        <migration_status>SSOT_REQUIRED</migration_status>
+        <ssot_replacement>DatabaseURLBuilder with component variables</ssot_replacement>
+        <critical_learning date="2025-09-08">
+          <discovery>Direct DATABASE_URL usage violates SSOT principles and causes configuration drift</discovery>
+          <cross_reference>docs/DATABASE_CONFIGURATION_SSOT.md</cross_reference>
+          <note>Use DatabaseURLBuilder with POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB components</note>
+        </critical_learning>
+        <migration_completed>
+          <auth_service>2025-09-08</auth_service>
+          <netra_backend_core>2025-09-08</netra_backend_core>
+        </migration_completed>
+      </variable>
+      
+      <variable name="POSTGRES_HOST" type="env_var">
+        <description>PostgreSQL host address (SSOT component)</description>
+        <cascade_impact>Database connection failure, complete service failure</cascade_impact>
+        <ssot_component>true</ssot_component>
+        <used_by>DatabaseURLBuilder</used_by>
+        <example_values>
+          <staging>/cloudsql/PROJECT:REGION:INSTANCE</staging>
+          <production>/cloudsql/PROJECT:REGION:INSTANCE</production>
+          <development>localhost</development>
+        </example_values>
+      </variable>
+      
+      <variable name="POSTGRES_USER" type="env_var">
+        <description>PostgreSQL username (SSOT component)</description>
+        <cascade_impact>Authentication failure, no database access</cascade_impact>
+        <ssot_component>true</ssot_component>
+        <used_by>DatabaseURLBuilder</used_by>
+      </variable>
+      
+      <variable name="POSTGRES_PASSWORD" type="env_var">
+        <description>PostgreSQL password (SSOT component)</description>
+        <cascade_impact>Authentication failure, no database access</cascade_impact>
+        <ssot_component>true</ssot_component>
+        <used_by>DatabaseURLBuilder</used_by>
+        <security>ULTRA_SENSITIVE</security>
+      </variable>
+      
+      <variable name="POSTGRES_DB" type="env_var">
+        <description>PostgreSQL database name (SSOT component)</description>
+        <cascade_impact>Wrong database connection, data corruption risk</cascade_impact>
+        <ssot_component>true</ssot_component>
+        <used_by>DatabaseURLBuilder</used_by>
+        <example_values>
+          <staging>netra_staging</staging>
+          <production>netra_production</production>
+          <development>netra_dev</development>
+        </example_values>
+      </variable>
+      
+      <variable name="POSTGRES_PORT" type="env_var">
+        <description>PostgreSQL port (SSOT component)</description>
+        <cascade_impact>Connection failure, wrong service endpoint</cascade_impact>
+        <ssot_component>true</ssot_component>
+        <used_by>DatabaseURLBuilder</used_by>
+        <default_value>5432</default_value>
       </variable>
       
       <variable name="REDIS_URL" type="env_var">
@@ -320,6 +378,50 @@
 
   <!-- SECTION 8: CRITICAL SSOT COMPONENTS -->
   <ssot_components>
+    <component name="DatabaseURLBuilder" critical="true">
+      <location>shared/database_url_builder.py</location>
+      <cascade_impact>Database connection failures, configuration drift, SSOT violations</cascade_impact>
+      <description>Centralized database URL construction from component environment variables</description>
+      <migration_completed date="2025-09-08">
+        <service>auth_service</service>
+        <service>netra_backend/app/core</service>
+      </migration_completed>
+      <usage_patterns>
+        <pattern name="Service Configuration">
+          <code>
+            env = get_env()
+            builder = DatabaseURLBuilder(env.get_all())
+            database_url = builder.get_url_for_environment()
+          </code>
+        </pattern>
+        <pattern name="Test Fixture">
+          <code>
+            builder = DatabaseURLBuilder(test_env_vars)
+            database_url = builder.test.auto_url
+          </code>
+        </pattern>
+        <pattern name="Environment-Specific">
+          <code>
+            builder = DatabaseURLBuilder(env.get_all())
+            staging_url = builder.staging.auto_url
+            production_url = builder.production.auto_url
+          </code>
+        </pattern>
+      </usage_patterns>
+      <component_variables>
+        <variable>POSTGRES_HOST</variable>
+        <variable>POSTGRES_USER</variable>
+        <variable>POSTGRES_PASSWORD</variable>
+        <variable>POSTGRES_DB</variable>
+        <variable>POSTGRES_PORT</variable>
+      </component_variables>
+      <forbidden_patterns>
+        <anti_pattern>env.get("DATABASE_URL") - SSOT violation</anti_pattern>
+        <anti_pattern>os.environ["DATABASE_URL"] - Direct access forbidden</anti_pattern>
+        <anti_pattern>Direct URL construction - Use builder patterns</anti_pattern>
+      </forbidden_patterns>
+    </component>
+    
     <component name="UserExecutionContext" critical="true">
       <location>netra_backend/app/agents/supervisor/user_execution_context.py</location>
       <cascade_impact>User context leakage, multi-user failures, security breach</cascade_impact>
@@ -354,6 +456,26 @@
       <location>netra_backend/app/services/redis/session_manager.py</location>
       <cascade_impact>None - stub implementation for backward compatibility</cascade_impact>
       <note>Actual session management via DatabaseSessionManager</note>
+    </component>
+    
+    <component name="AgentRegistry" critical="true">
+      <location>netra_backend/app/core/registry/universal_registry.py</location>
+      <extension_location>netra_backend/app/agents/supervisor/agent_registry.py</extension_location>
+      <cascade_impact>Multi-user agent isolation breaks, WebSocket notifications fail, chat value lost</cascade_impact>
+      <forbidden_duplicates>
+        <anti_pattern>netra_backend/app/agents/agent_registry.py - DELETED (SSOT violation)</anti_pattern>
+        <violation_type>Global singleton patterns, missing user isolation, no WebSocket integration</violation_type>
+      </forbidden_duplicates>
+      <ssot_access>
+        <global_registry>get_global_registry('agent')</global_registry>
+        <factory_pattern>get_agent_registry(llm_manager, tool_dispatcher)</factory_pattern>
+      </ssot_access>
+      <critical_features>
+        <feature>UserAgentSession for complete user isolation</feature>
+        <feature>WebSocket manager integration for real-time chat</feature>
+        <feature>Factory-based patterns for concurrent execution</feature>
+        <feature>Thread-safe multi-user support</feature>
+      </critical_features>
     </component>
   </ssot_components>
 

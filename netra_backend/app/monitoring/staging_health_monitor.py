@@ -324,7 +324,7 @@ class ConfigurationHealthChecker(BaseHealthChecker):
                     "environment_config_valid": environment_config_valid
                 },
                 "critical_configs_checked": [
-                    "DATABASE_URL", "JWT_SECRET_KEY", "WEBSOCKET_ENABLED", "ENVIRONMENT"
+                    "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_DB", "JWT_SECRET_KEY", "WEBSOCKET_ENABLED", "ENVIRONMENT"
                 ],
                 "response_time_ms": response_time
             }
@@ -344,10 +344,20 @@ class ConfigurationHealthChecker(BaseHealthChecker):
             return self._create_config_error_result(str(e), time.time() - start_time)
     
     async def _check_database_configuration(self) -> bool:
-        """Check if database configuration is valid."""
+        """Check if database configuration is valid using DatabaseURLBuilder SSOT."""
         try:
+            from shared.database_url_builder import DatabaseURLBuilder
+            
             env = get_env()
-            database_url = env.get("DATABASE_URL")
+            builder = DatabaseURLBuilder(env.get_all())
+            
+            # Validate that database configuration is available
+            is_valid, error = builder.validate()
+            if not is_valid:
+                return False
+            
+            # Ensure we can get a valid URL for the current environment
+            database_url = builder.get_url_for_environment()
             return database_url is not None and len(database_url) > 0
         except Exception:
             return False

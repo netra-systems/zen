@@ -141,13 +141,27 @@ class StartupFixesIntegration:
                 fixes["redis_mode_configured"] = f"REDIS_MODE already set to '{redis_mode}'"
                 logger.debug(f"Redis mode already configured: {redis_mode}")
             
-            # Additional environment validations
-            critical_vars = ["DATABASE_URL", "ENVIRONMENT"]
-            for var in critical_vars:
-                if get_env().get(var):
-                    fixes[f"{var.lower()}_validated"] = f"{var} environment variable is set"
+            # Additional environment validations using SSOT patterns
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            # Validate database configuration using DatabaseURLBuilder SSOT
+            builder = DatabaseURLBuilder(get_env().get_all())
+            is_db_valid, db_error = builder.validate()
+            if is_db_valid:
+                database_url = builder.get_url_for_environment()
+                if database_url:
+                    fixes["database_configuration_validated"] = "Database configuration is valid via DatabaseURLBuilder"
                 else:
-                    logger.warning(f"Critical environment variable {var} not set")
+                    fixes["database_configuration_warning"] = "Database validation passed but no URL generated"
+            else:
+                logger.warning(f"Database configuration validation failed: {db_error}")
+                fixes["database_configuration_failed"] = f"Database validation failed: {db_error}"
+            
+            # Validate ENVIRONMENT variable
+            if get_env().get("ENVIRONMENT"):
+                fixes["environment_validated"] = "ENVIRONMENT variable is set"
+            else:
+                logger.warning("Critical environment variable ENVIRONMENT not set")
             
             self.environment_fixes = fixes
             self.fixes_applied.add("environment_variables")

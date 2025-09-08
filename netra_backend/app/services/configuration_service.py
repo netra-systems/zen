@@ -21,9 +21,21 @@ class EnvironmentConfigLoader:
         return dict(os.environ)
     
     def get_database_config(self) -> Dict[str, Any]:
-        """Get database configuration."""
+        """Get database configuration using DatabaseURLBuilder SSOT."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        builder = DatabaseURLBuilder(env.get_all())
+        
+        # Get database URL using SSOT pattern
+        database_url = builder.get_url_for_environment()
+        if not database_url:
+            # Fallback for development/test environments
+            database_url = builder.development.default_url
+        
         return {
-            'DATABASE_URL': 'postgresql://localhost/test',
+            'DATABASE_URL': database_url,
             'DATABASE_POOL_SIZE': 10
         }
     
@@ -39,12 +51,24 @@ class ConfigurationValidator:
     
     @staticmethod
     def validate_database_config(config: Dict[str, Any]) -> bool:
-        """Validate database configuration."""
-        required_keys = ['DATABASE_URL']
-        for key in required_keys:
-            if key not in config:
-                return False
-        return True
+        """Validate database configuration using DatabaseURLBuilder SSOT."""
+        from shared.database_url_builder import DatabaseURLBuilder
+        from shared.isolated_environment import get_env
+        
+        # First check if DATABASE_URL key exists in config
+        if 'DATABASE_URL' not in config:
+            return False
+        
+        # Validate using DatabaseURLBuilder if environment is available
+        try:
+            env = get_env()
+            builder = DatabaseURLBuilder(env.get_all())
+            is_valid, error = builder.validate()
+            return is_valid
+        except Exception:
+            # Fallback to basic validation if DatabaseURLBuilder fails
+            database_url = config.get('DATABASE_URL', '')
+            return bool(database_url and len(database_url) > 0)
     
     @staticmethod
     def validate_redis_config(config: Dict[str, Any]) -> bool:
