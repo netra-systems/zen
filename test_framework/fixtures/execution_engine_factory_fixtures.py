@@ -289,7 +289,9 @@ def get_or_create_websocket_bridge_for_tests() -> AgentWebSocketBridge:
 @pytest.fixture(scope="function")
 async def execution_engine_factory(execution_engine_factory_test_initialized):
     """Backward compatibility fixture - same as execution_engine_factory_test_initialized."""
-    return execution_engine_factory_test_initialized
+    # execution_engine_factory_test_initialized is already the factory instance from the async generator
+    # Just yield it directly to maintain proper async generator behavior
+    yield execution_engine_factory_test_initialized
 
 
 @pytest.fixture(scope="function") 

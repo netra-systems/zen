@@ -1218,13 +1218,46 @@ async def cleanup_global_websocket_utility():
         _global_websocket_utility = None
 
 
+async def create_test_websocket_manager():
+    """
+    Create a mock WebSocket manager for integration testing.
+    
+    This function provides SSOT compatibility with legacy tests that expect
+    a WebSocketManager-like object for testing WebSocket notifications.
+    
+    Returns:
+        Mock WebSocket manager with send_to_thread and broadcast methods
+    """
+    from unittest.mock import AsyncMock
+    
+    mock_manager = AsyncMock()
+    
+    # Configure send_to_thread to always return True (success)
+    async def mock_send_to_thread(thread_id: str, message: dict) -> bool:
+        """Mock implementation of send_to_thread."""
+        logger.debug(f"Mock WebSocket send_to_thread: {thread_id} -> {message.get('type', 'unknown')}")
+        return True
+    
+    # Configure broadcast to always return True (success)  
+    async def mock_broadcast(message: dict) -> bool:
+        """Mock implementation of broadcast."""
+        logger.debug(f"Mock WebSocket broadcast: {message.get('type', 'unknown')}")
+        return True
+    
+    mock_manager.send_to_thread.side_effect = mock_send_to_thread
+    mock_manager.broadcast.side_effect = mock_broadcast
+    
+    return mock_manager
+
+
 # Export SSOT WebSocket utilities
 __all__ = [
     'WebSocketTestUtility',
     'WebSocketTestClient',
-    'WebSocketMessage',
+    'WebSocketMessage', 
     'WebSocketEventType',
     'WebSocketTestMetrics',
     'get_websocket_test_utility',
-    'cleanup_global_websocket_utility'
+    'cleanup_global_websocket_utility',
+    'create_test_websocket_manager'
 ]
