@@ -132,12 +132,13 @@ async def stream_events(
                     
                     # Limit stream duration for testing (10 minutes max)
                     if event_counter > 600:
-                        yield f"data: {json.dumps({
+                        timeout_data = {
                             'event': 'stream_timeout',
                             'connection_id': connection_id,
                             'message': 'Stream ended after 10 minutes',
                             'timestamp': datetime.now(timezone.utc).isoformat()
-                        })}\n\n"
+                        }
+                        yield f"data: {json.dumps(timeout_data)}\n\n"
                         break
                         
                 except asyncio.CancelledError:
@@ -145,27 +146,30 @@ async def stream_events(
                     break
                 except Exception as e:
                     logger.error(f"Error in event stream: {e}")
-                    yield f"data: {json.dumps({
+                    error_data = {
                         'event': 'stream_error',
                         'error': str(e),
                         'timestamp': datetime.now(timezone.utc).isoformat()
-                    })}\n\n"
+                    }
+                    yield f"data: {json.dumps(error_data)}\n\n"
                     break
             
             # Send final disconnect event
-            yield f"data: {json.dumps({
+            disconnect_data = {
                 'event': 'stream_disconnected',
                 'connection_id': connection_id,
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield f"data: {json.dumps(disconnect_data)}\n\n"
             
         except Exception as e:
             logger.error(f"Fatal error in event stream: {e}")
-            yield f"data: {json.dumps({
+            fatal_error_data = {
                 'event': 'stream_fatal_error',
                 'error': str(e),
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield f"data: {json.dumps(fatal_error_data)}\n\n"
     
     return StreamingResponse(
         generate_event_stream(),
