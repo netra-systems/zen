@@ -30,29 +30,27 @@ import { WebSocketMessage } from '../../types/registry';
 import { WebSocketStatus } from '../../services/webSocketService';
 import { WebSocketContextType } from '../../types/websocket-context-types';
 
-// Create proper mock for the WebSocketProvider with correct module structure
-jest.mock('../../providers/WebSocketProvider', () => {
-  const actualModule = jest.requireActual('../../providers/WebSocketProvider');
-  
-  return {
-    ...actualModule,
-    useWebSocketContext: jest.fn(),
-    WebSocketProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  };
-});
+// Override the global jest.setup.js mock with a controllable mock for unit testing
+jest.mock('../../hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn(),
+}));
 
 // Get the mocked function with proper typing
-const mockUseWebSocketContext = jest.mocked(
-  require('../../providers/WebSocketProvider').useWebSocketContext
+const mockUseWebSocket = jest.mocked(
+  require('../../hooks/useWebSocket').useWebSocket
 );
 
 describe('useWebSocket Hook - Comprehensive Test Suite', () => {
-  // Base mock context value that matches the actual ReconciliationStats interface
+  // Persistent mock functions for referential stability
+  const persistentSendMessage = jest.fn();
+  const persistentSendOptimisticMessage = jest.fn();
+  
+  // Base mock context value that maintains referential stability for functions
   const createMockContextValue = (overrides: Partial<WebSocketContextType> = {}): WebSocketContextType => ({
     status: 'CLOSED' as WebSocketStatus,
     messages: [] as WebSocketMessage[],
-    sendMessage: jest.fn(),
-    sendOptimisticMessage: jest.fn(),
+    sendMessage: persistentSendMessage,
+    sendOptimisticMessage: persistentSendOptimisticMessage,
     reconciliationStats: { 
       totalOptimistic: 0,
       totalConfirmed: 0, 
@@ -65,8 +63,11 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseWebSocketContext.mockReturnValue(createMockContextValue());
+    // Clear only the mock call history, not the function references
+    persistentSendMessage.mockClear();
+    persistentSendOptimisticMessage.mockClear();
+    mockUseWebSocket.mockClear();
+    mockUseWebSocket.mockReturnValue(createMockContextValue());
   });
 
   afterEach(() => {
@@ -81,7 +82,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     test('should successfully delegate to useWebSocketContext', () => {
       const { result } = renderHook(() => useWebSocket());
 
-      expect(mockUseWebSocketContext).toHaveBeenCalled();
+      expect(mockUseWebSocket).toHaveBeenCalled();
       expect(result.current).toBeDefined();
     });
 
@@ -90,7 +91,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         status: 'OPEN',
         messages: [{ type: 'user_message', payload: { content: 'test' } }],
       });
-      mockUseWebSocketContext.mockReturnValue(mockContext);
+      mockUseWebSocket.mockReturnValue(mockContext);
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -98,7 +99,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle context provider errors gracefully', () => {
-      mockUseWebSocketContext.mockImplementation(() => {
+      mockUseWebSocket.mockImplementation(() => {
         throw new Error('useWebSocketContext must be used within a WebSocketProvider');
       });
 
@@ -109,7 +110,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
 
     test('should maintain consistent return value across re-renders', () => {
       const mockContext = createMockContextValue();
-      mockUseWebSocketContext.mockReturnValue(mockContext);
+      mockUseWebSocket.mockReturnValue(mockContext);
 
       const { result, rerender } = renderHook(() => useWebSocket());
       const firstResult = result.current;
@@ -120,7 +121,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle undefined context values gracefully', () => {
-      mockUseWebSocketContext.mockReturnValue(undefined as any);
+      mockUseWebSocket.mockReturnValue(undefined as any);
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -134,7 +135,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
 
   describe('Connection Status Management', () => {
     test('should handle CLOSED status', () => {
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'CLOSED' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'CLOSED' }));
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -142,7 +143,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle CONNECTING status', () => {
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'CONNECTING' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'CONNECTING' }));
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -150,7 +151,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle OPEN status for active connections', () => {
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -158,7 +159,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle CLOSING status during disconnection', () => {
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'CLOSING' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'CLOSING' }));
 
       const { result } = renderHook(() => useWebSocket());
 
@@ -171,7 +172,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       expect(result.current.status).toBe('CLOSED');
 
       // Simulate status change
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
       rerender();
 
       expect(result.current.status).toBe('OPEN');
@@ -183,7 +184,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       const { result, rerender } = renderHook(() => useWebSocket());
 
       statusSequence.forEach((status) => {
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status }));
+        mockUseWebSocket.mockReturnValue(createMockContextValue({ status }));
         rerender();
         expect(result.current.status).toBe(status);
       });
@@ -194,7 +195,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       
       const initialSendMessage = result.current.sendMessage;
       
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
+      mockUseWebSocket.mockReturnValue(createMockContextValue({ status: 'OPEN' }));
       rerender();
 
       expect(result.current.sendMessage).toBe(initialSendMessage);
@@ -208,7 +209,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       // Simulate 100 rapid status changes
       for (let i = 0; i < 100; i++) {
         const status = i % 2 === 0 ? 'OPEN' : 'CLOSED';
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status }));
+        mockUseWebSocket.mockReturnValue(createMockContextValue({ status }));
         rerender();
       }
       
@@ -234,7 +235,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [agentStartedMessage],
       }));
 
@@ -254,7 +255,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [agentThinkingMessage],
       }));
 
@@ -278,7 +279,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [toolExecutingMessage],
       }));
 
@@ -301,7 +302,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [toolCompletedMessage],
       }));
 
@@ -323,7 +324,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [agentCompletedMessage],
       }));
 
@@ -357,7 +358,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: workflowEvents,
         status: 'OPEN',
       }));
@@ -392,7 +393,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: concurrentEvents,
       }));
 
@@ -434,7 +435,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [complexEvent],
       }));
 
@@ -454,7 +455,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         { type: 'agent_completed', payload: { message_id: 'step-5', sequence: 5 } },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: orderedEvents,
       }));
 
@@ -473,7 +474,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         { type: 'agent_completed', payload: { message_id: 'minimal-3', result: 'Done' } },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: minimalEvents,
       }));
 
@@ -504,7 +505,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         
         streamedMessages.push(message);
         
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+        mockUseWebSocket.mockReturnValue(createMockContextValue({
           messages: [...streamedMessages],
         }));
         
@@ -523,7 +524,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
   describe('Message Handling and Performance', () => {
     test('should properly expose sendMessage function', () => {
       const mockSendMessage = jest.fn();
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         sendMessage: mockSendMessage,
       }));
 
@@ -541,7 +542,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         tempId: 'temp-456',
       });
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         sendOptimisticMessage: mockSendOptimistic,
       }));
 
@@ -552,7 +553,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
     });
 
     test('should handle empty message arrays efficiently', () => {
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [],
       }));
 
@@ -574,7 +575,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
 
       const startTime = performance.now();
       
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: largeMessageArray,
       }));
 
@@ -595,7 +596,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         { type: 'thread_created', payload: { thread_id: 'thread-123' } },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: mixedMessages,
       }));
 
@@ -639,7 +640,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [complexMessage],
       }));
 
@@ -661,7 +662,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
           payload: { message_id: `rapid-${j}`, content: `Update ${j}` },
         }));
 
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+        mockUseWebSocket.mockReturnValue(createMockContextValue({
           messages,
         }));
 
@@ -687,7 +688,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         { type: 'user_message', payload: {} },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: messagesWithNullPayloads,
       }));
 
@@ -708,7 +709,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         { type: 123, payload: { content: 'numeric type' } }, // Wrong type format
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: malformedMessages,
       }));
 
@@ -745,7 +746,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       ];
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: unicodeMessages,
       }));
 
@@ -769,7 +770,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
 
       const startTime = performance.now();
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [longMessage],
       }));
 
@@ -791,7 +792,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         currentPendingCount: 0
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         reconciliationStats: edgeCaseStats,
       }));
 
@@ -809,7 +810,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       expect(result.current.status).toBe('CLOSED');
 
       // Simulate error condition
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         status: 'CLOSED',
         messages: [
           { type: 'error_message', payload: { error: 'Connection failed', code: 1006 } }
@@ -822,7 +823,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       expect(result.current.messages[0].type).toBe('error_message');
 
       // Recovery scenario
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         status: 'OPEN',
         messages: [
           { type: 'system_message', payload: { content: 'Connection restored' } }
@@ -846,7 +847,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
           payload: { message_id: `rapid-${i}-${j}`, content: `Rapid update ${i}-${j}` },
         }));
 
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+        mockUseWebSocket.mockReturnValue(createMockContextValue({
           status: randomStatus,
           messages: randomMessages,
         }));
@@ -870,7 +871,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       const validStatuses: WebSocketStatus[] = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 
       validStatuses.forEach((status) => {
-        mockUseWebSocketContext.mockReturnValue(createMockContextValue({ status }));
+        mockUseWebSocket.mockReturnValue(createMockContextValue({ status }));
 
         const { result } = renderHook(() => useWebSocket());
 
@@ -890,7 +891,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         },
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         messages: [typedMessage],
       }));
 
@@ -907,7 +908,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
       const mockSendMessage = jest.fn();
       const mockSendOptimistic = jest.fn();
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         sendMessage: mockSendMessage,
         sendOptimisticMessage: mockSendOptimistic,
       }));
@@ -931,7 +932,7 @@ describe('useWebSocket Hook - Comprehensive Test Suite', () => {
         currentPendingCount: 3
       };
 
-      mockUseWebSocketContext.mockReturnValue(createMockContextValue({
+      mockUseWebSocket.mockReturnValue(createMockContextValue({
         reconciliationStats: typedStats,
       }));
 

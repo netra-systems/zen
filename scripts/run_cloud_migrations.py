@@ -27,6 +27,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from shared.isolated_environment import get_env
+# Import Windows encoding SSOT
+from shared.windows_encoding import setup_windows_encoding
+
+# Fix Unicode encoding issues on Windows - using SSOT
+setup_windows_encoding()
 
 
 class MigrationRunner:
@@ -60,7 +65,7 @@ class MigrationRunner:
         # Build the image
         build_cmd = [
             self.docker_cmd, "build",
-            "-f", "docker/migrations.alpine.Dockerfile",
+            "-f", "docker/migration.alpine.Dockerfile",
             "-t", self.image_name,
             "."
         ]
