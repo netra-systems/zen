@@ -36,9 +36,7 @@ from shared.types.core_types import (
 # User context and factory components
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
-    UserContextFactory,
-    ContextIsolationLevel,
-    UserSessionManager
+    UserContextFactory
 )
 from netra_backend.app.agents.supervisor.execution_factory import (
     ExecutionEngineFactory,
@@ -99,7 +97,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
             thread_id=thread1_id,
             run_id=ensure_run_id(str(uuid.uuid4())),
             database_session=db,
-            isolation_level=ContextIsolationLevel.PER_USER
+            isolation_level="per_user"
         )
         
         context2 = await context_factory.create_user_context(
@@ -107,7 +105,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
             thread_id=thread2_id,
             run_id=ensure_run_id(str(uuid.uuid4())),
             database_session=db,
-            isolation_level=ContextIsolationLevel.PER_USER
+            isolation_level="per_user"
         )
         
         # Verify contexts are properly isolated
@@ -181,7 +179,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
                 thread_id=ensure_thread_id(thread.id),
                 run_id=ensure_run_id(str(uuid.uuid4())),
                 database_session=db,
-                isolation_level=ContextIsolationLevel.PER_REQUEST
+                isolation_level="per_request"
             )
         
         # Create contexts concurrently

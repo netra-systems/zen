@@ -37,7 +37,7 @@ from shared.types.core_types import (
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
-from netra_backend.app.websocket_core.unified_emitter import UnifiedEventEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
 
 # Agent and execution components

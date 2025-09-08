@@ -35,7 +35,7 @@ from netra_backend.app.services.configuration_service import (
     EnvironmentConfigLoader,
     ConfigurationValidator
 )
-from netra_backend.app.startup_module import ConfigurationManager
+from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager as ConfigurationManager
 
 
 class TestConfigurationManagementIntegration(BaseIntegrationTest):

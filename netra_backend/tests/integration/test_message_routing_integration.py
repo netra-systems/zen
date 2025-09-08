@@ -35,7 +35,8 @@ from shared.types.core_types import (
 from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
 from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
-from netra_backend.app.services.message_service import MessageService, MessageProcessor
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 # Models for message testing
