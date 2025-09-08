@@ -1,11 +1,858 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="9.902" timestamp="2025-09-07T17:45:57.554793-07:00" hostname="Anthony"><testcase classname="tests.e2e.test_auth_service_business_flows" name="TestAuthServiceBusinessFlows" time="0.000"><error message="collection failure">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthServiceBusinessFlows' because it has a __init__ constructor (from: tests/e2e/test_auth_service_business_flows.py)</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="49" failures="71" skipped="2" tests="138" time="51.739" timestamp="2025-09-07T18:19:43.868441-07:00" hostname="Anthony"><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTTokenValidationIntegration" name="test_jwt_token_creation_and_validation" time="0.615" /><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTTokenValidationIntegration" name="test_jwt_token_expiry_validation" time="0.003"><failure message="AttributeError: 'JWTHandler' object has no attribute 'validate_token_safely'. Did you mean: 'validate_token_jwt'?">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:115: in test_jwt_token_expiry_validation
+    validation_result = self.jwt_handler.validate_token_safely(expired_token)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'JWTHandler' object has no attribute 'validate_token_safely'. Did you mean: 'validate_token_jwt'?</failure></testcase><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTTokenValidationIntegration" name="test_jwt_token_malformed_validation" time="0.002"><failure message="AttributeError: 'JWTHandler' object has no attribute 'validate_token_safely'. Did you mean: 'validate_token_jwt'?">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:154: in test_jwt_token_malformed_validation
+    validation_result = self.jwt_handler.validate_token_safely(malformed_token)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'JWTHandler' object has no attribute 'validate_token_safely'. Did you mean: 'validate_token_jwt'?</failure></testcase><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTTokenValidationIntegration" name="test_jwt_subscription_tier_validation" time="0.003"><failure message="TypeError: 'NoneType' object is not subscriptable">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:193: in test_jwt_subscription_tier_validation
+    assert decoded["subscription_tier"] == tier
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable</failure></testcase><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTTokenValidationIntegration" name="test_jwt_multi_user_isolation_validation" time="0.004"><failure message="TypeError: 'NoneType' object is not subscriptable">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:247: in test_jwt_multi_user_isolation_validation
+    assert user1_decoded["sub"] != user2_decoded["sub"]
+           ^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable</failure></testcase><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTSecretSynchronizationIntegration" name="test_jwt_cross_service_secret_consistency" time="0.005"><failure message="TypeError: 'NoneType' object is not subscriptable">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:301: in test_jwt_cross_service_secret_consistency
+    assert decoded_in_backend["sub"] == "cross-service-user"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable</failure></testcase><testcase classname="tests.integration.auth.test_jwt_token_validation_integration.TestJWTSecretSynchronizationIntegration" name="test_jwt_secret_rotation_compatibility" time="0.003"><failure message="TypeError: 'NoneType' object is not subscriptable">auth_service\tests\integration\auth\test_jwt_token_validation_integration.py:337: in test_jwt_secret_rotation_compatibility
+    assert old_decoded["rotation_test"] is True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: 'NoneType' object is not subscriptable</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthAuthorizationFlowIntegration" name="test_oauth_authorization_url_generation" time="0.002"><failure message="AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:66: in test_oauth_authorization_url_generation
+    oauth_state = self._generate_oauth_state()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthAuthorizationFlowIntegration" name="test_oauth_authorization_callback_validation" time="0.002"><failure message="AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:111: in test_oauth_authorization_callback_validation
+    oauth_state = self._generate_oauth_state()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthAuthorizationFlowIntegration" name="test_oauth_state_parameter_security_validation" time="0.002"><failure message="AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:160: in test_oauth_state_parameter_security_validation
+    valid_state = self._generate_oauth_state()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_oauth_state'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthAuthorizationFlowIntegration" name="test_oauth_pkce_security_validation" time="0.002"><failure message="AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_pkce_code_verifier'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:200: in test_oauth_pkce_security_validation
+    original_code_verifier = self._generate_pkce_code_verifier()
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthAuthorizationFlowIntegration' object has no attribute '_generate_pkce_code_verifier'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthTokenManagementIntegration" name="test_oauth_access_token_lifecycle" time="0.002"><failure message="AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:266: in test_oauth_access_token_lifecycle
+    "user_id": self.test_user["user_id"],
+               ^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthTokenManagementIntegration" name="test_oauth_refresh_token_flow" time="0.002"><failure message="AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:302: in test_oauth_refresh_token_flow
+    "user_id": self.test_user["user_id"],
+               ^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'</failure></testcase><testcase classname="tests.integration.auth.test_oauth_flow_integration.TestOAuthTokenManagementIntegration" name="test_oauth_scope_validation_and_restriction" time="0.002"><failure message="AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'">auth_service\tests\integration\auth\test_oauth_flow_integration.py:364: in test_oauth_scope_validation_and_restriction
+    "user_id": self.test_user["user_id"],
+               ^^^^^^^^^^^^^^
+E   AttributeError: 'TestOAuthTokenManagementIntegration' object has no attribute 'test_user'</failure></testcase><testcase classname="tests.integration.auth.test_session_management_integration.TestSessionLifecycleIntegration" name="test_user_session_creation_and_validation" time="0.002" /><testcase classname="tests.integration.auth.test_session_management_integration.TestSessionLifecycleIntegration" name="test_session_activity_tracking_and_renewal" time="0.005"><failure message="assert False is True">auth_service\tests\integration\auth\test_session_management_integration.py:161: in test_session_activity_tracking_and_renewal
+    assert renewal_result["needs_renewal"] is True
+E   assert False is True</failure></testcase><testcase classname="tests.integration.auth.test_session_management_integration.TestSessionLifecycleIntegration" name="test_multi_user_session_isolation" time="0.002" /><testcase classname="tests.integration.auth.test_session_management_integration.TestSessionLifecycleIntegration" name="test_session_expiry_and_cleanup" time="0.002"><failure message="AssertionError: Session 'expired_session' validity should be False, got True&#10;assert True == False">auth_service\tests\integration\auth\test_session_management_integration.py:284: in test_session_expiry_and_cleanup
+    assert actual == expected, f"Session '{scenario_name}' validity should be {expected}, got {actual}"
+E   AssertionError: Session 'expired_session' validity should be False, got True
+E   assert True == False</failure></testcase><testcase classname="tests.integration.auth.test_session_management_integration.TestSessionLifecycleIntegration" name="test_concurrent_session_management" time="0.003" /><testcase classname="tests.integration.interservice.test_backend_auth_communication.TestAuthServiceBackendCommunication" name="test_user_session_context_propagation" time="2.491" /><testcase classname="tests.integration.interservice.test_backend_auth_communication.TestAuthServiceBackendCommunication" name="test_session_invalidation_notification" time="0.662" /><testcase classname="tests.integration.interservice.test_backend_auth_communication.TestAuthServiceBackendCommunication" name="test_permission_changes_propagation" time="0.637" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_status_endpoint" time="0.009" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_config_endpoint" time="0.025" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_register_user" time="0.349"><failure message="KeyError: 'username'">auth_service\tests\integration\test_auth_api_integration.py:75: in test_register_user
+    assert data["user"]["username"] == self.username
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'username'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_register_duplicate_email_fails" time="0.329"><failure message="assert 409 == 400&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">auth_service\tests\integration\test_auth_api_integration.py:95: in test_register_duplicate_email_fails
+    assert response.status_code == 400
+E   assert 409 == 400
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_login_with_valid_credentials" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:103: in test_login_with_valid_credentials
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_login_with_invalid_password_fails" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:120: in test_login_with_invalid_password_fails
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_refresh_token_endpoint" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:135: in test_refresh_token_endpoint
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_refresh_with_invalid_token_fails" time="0.010" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_validate_token_endpoint" time="0.005"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:165: in test_validate_token_endpoint
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_validate_invalid_token_fails" time="0.006"><failure message="assert 405 == 401&#10; +  where 405 = &lt;Response [405 Method Not Allowed]&gt;.status_code">auth_service\tests\integration\test_auth_api_integration.py:187: in test_validate_invalid_token_fails
+    assert response.status_code == 401
+E   assert 405 == 401
+E    +  where 405 = &lt;Response [405 Method Not Allowed]&gt;.status_code</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_logout_endpoint" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:195: in test_logout_endpoint
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_me_endpoint" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:219: in test_me_endpoint
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_update_password_endpoint" time="0.006"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:238: in test_update_password_endpoint
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIIntegration" name="test_update_profile_endpoint" time="0.017"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:263: in test_update_profile_endpoint
+    await self.auth_service.register(self.email, self.password, self.username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIPermissions" name="test_admin_access_to_protected_endpoint" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:299: in test_admin_access_to_protected_endpoint
+    admin = await self.auth_service.register(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIPermissions" name="test_regular_user_denied_admin_endpoint" time="0.028"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:317: in test_regular_user_denied_admin_endpoint
+    await self.auth_service.register(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIRateLimiting" name="test_multiple_failed_login_attempts" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:346: in test_multiple_failed_login_attempts
+    await auth_service.register(self.email, self.password, "ratelimit_user")
+          ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIRateLimiting" name="test_registration_rate_limiting" time="0.439"><failure message="RuntimeError: Cannot reopen a client instance, once it has been closed.">auth_service\tests\integration\test_auth_api_integration.py:371: in test_registration_rate_limiting
+    async with self.client as ac:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\httpx\_client.py:1998: in __aenter__
+    raise RuntimeError(msg)
+E   RuntimeError: Cannot reopen a client instance, once it has been closed.</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIOAuth" name="test_oauth_login_redirect" time="0.007" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIOAuth" name="test_oauth_callback_without_code_fails" time="0.005" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIOAuth" name="test_oauth_callback_with_invalid_state_fails" time="0.006" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIHealthCheck" name="test_health_endpoint" time="0.013"><failure message="AssertionError: assert 'unhealthy' in ['healthy', 'ok']">auth_service\tests\integration\test_auth_api_integration.py:446: in test_health_endpoint
+    assert data["status"] in ["healthy", "ok"]
+E   AssertionError: assert 'unhealthy' in ['healthy', 'ok']</failure></testcase><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIHealthCheck" name="test_metrics_endpoint" time="0.007" /><testcase classname="tests.integration.test_auth_api_integration.TestAuthAPIHealthCheck" name="test_database_connectivity" time="0.018"><failure message="Failed: Database connectivity test failed: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_api_integration.py:462: in test_database_connectivity
+    user = await auth_service.register(
+                 ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\integration\test_auth_api_integration.py:471: in test_database_connectivity
+    pytest.fail(f"Database connectivity test failed: {e}")
+E   Failed: Database connectivity test failed: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_user_creation_and_retrieval_business_flow" time="0.005"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_session_persistence_with_real_redis" time="0.005"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_oauth_user_linking_with_database_relationships" time="0.013"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_token_storage_and_validation_business_security" time="0.005"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_audit_logging_with_real_database" time="0.006"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_database_business_integration.TestAuthDatabaseBusinessIntegration" name="test_multi_user_data_isolation_concurrent_access" time="0.005"><error message="failed on setup with &quot;AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?&quot;">auth_service\tests\integration\test_auth_database_business_integration.py:67: in setup
+    await self.redis_manager.initialize()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRedisManager' object has no attribute 'initialize'. Did you mean: '_initialized'?</error></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestCompleteUserLifecycle" name="test_complete_user_lifecycle" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:36: in test_complete_user_lifecycle
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestCompleteUserLifecycle" name="test_multiple_sessions_management" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:92: in test_multiple_sessions_management
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestSecurityFlows" name="test_account_lockout_flow" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:138: in test_account_lockout_flow
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestSecurityFlows" name="test_token_blacklist_flow" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:168: in test_token_blacklist_flow
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestSecurityFlows" name="test_user_blacklist_flow" time="0.006"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:194: in test_user_blacklist_flow
+    user = await self.auth_service.register(self.email, self.password, self.username)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestConcurrencyAndPerformance" name="test_concurrent_registrations" time="0.005"><failure message="assert False&#10; +  where False = all([False, False, False, False, False, False, False, False, False, False])">auth_service\tests\integration\test_auth_e2e_flows.py:253: in test_concurrent_registrations
+    assert all(results)
+E   assert False
+E    +  where False = all([False, False, False, False, False, False, False, False, False, False])</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestConcurrencyAndPerformance" name="test_concurrent_logins" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:261: in test_concurrent_logins
+    await self.auth_service.register(email, password, f"concurrent_{uuid.uuid4()}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestConcurrencyAndPerformance" name="test_concurrent_token_validations" time="0.006"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:283: in test_concurrent_token_validations
+    await self.auth_service.register(email, password, f"validate_{uuid.uuid4()}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestConcurrencyAndPerformance" name="test_token_validation_caching" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:306: in test_token_validation_caching
+    await self.auth_service.register(email, password, f"cache_{uuid.uuid4()}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestDatabaseTransactions" name="test_transaction_rollback_on_error" time="0.012"><failure message="RuntimeError: Database session not available">auth_service\tests\integration\test_auth_e2e_flows.py:343: in test_transaction_rollback_on_error
+    user = await self.repository.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthRepository' object has no attribute 'create_user'
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\integration\test_auth_e2e_flows.py:350: in test_transaction_rollback_on_error
+    user = await self.repository.get_user_by_email(email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\auth_core\database\repository.py:348: in get_user_by_email
+    self._ensure_repositories()
+auth_service\auth_core\database\repository.py:339: in _ensure_repositories
+    raise RuntimeError("Database session not available")
+E   RuntimeError: Database session not available</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestDatabaseTransactions" name="test_cascade_delete" time="0.004"><failure message="AttributeError: 'AuthService' object has no attribute 'register'">auth_service\tests\integration\test_auth_e2e_flows.py:358: in test_cascade_delete
+    user = await self.auth_service.register(email, "Cascade123!", f"cascade_{uuid.uuid4()}")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AuthService' object has no attribute 'register'</failure></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestRedisIntegration" name="test_redis_cache_functionality" time="0.004"><skipped type="pytest.skip" message="Redis not enabled">C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_e2e_flows.py:393: Redis not enabled</skipped></testcase><testcase classname="tests.integration.test_auth_e2e_flows.TestRedisIntegration" name="test_redis_blacklist_persistence" time="0.004"><skipped type="pytest.skip" message="Redis not enabled">C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_e2e_flows.py:415: Redis not enabled</skipped></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_health_endpoint_with_real_database_validation" time="2.307"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:111: in test_health_endpoint_with_real_database_validation
+    async with self.session.get(self.health_endpoint) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_status_endpoint_service_readiness" time="2.290"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:147: in test_status_endpoint_service_readiness
+    async with self.session.get(self.status_endpoint) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_oauth_login_endpoint_business_flow" time="2.295"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:180: in test_oauth_login_endpoint_business_flow
+    async with self.session.get(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_oauth_callback_endpoint_token_exchange" time="2.335"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:231: in test_oauth_callback_endpoint_token_exchange
+    async with self.session.get(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_refresh_endpoint_token_management" time="2.301"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:278: in test_refresh_endpoint_token_management
+    async with self.session.post(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_logout_endpoint_session_cleanup" time="2.306"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:326: in test_logout_endpoint_session_cleanup
+    async with self.session.post(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_concurrent_endpoint_requests_business_load" time="2.305"><failure message="AssertionError: Auth service must handle concurrent health checks for business reliability&#10;assert 0 &gt;= 8">auth_service\tests\integration\test_auth_endpoints_business_integration.py:378: in test_concurrent_endpoint_requests_business_load
+    assert successful_health_checks &gt;= 8, "Auth service must handle concurrent health checks for business reliability"
+E   AssertionError: Auth service must handle concurrent health checks for business reliability
+E   assert 0 &gt;= 8</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_endpoint_response_times_business_performance" time="2.288"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:410: in test_endpoint_response_times_business_performance
+    async with self.session.get(self.health_endpoint) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_endpoints_business_integration.TestAuthEndpointsBusinessIntegration" name="test_multi_user_token_isolation_business_security" time="2.292"><failure message="aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_endpoints_business_integration.py:467: in test_multi_user_token_isolation_business_security
+    async with self.session.get(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_invalid_credentials_error_handling" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_jwt_token_error_handling" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_permission_denied_error_handling" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_rate_limiting_error_handling" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_database_error_handling" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_redis_error_handling" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_error_handling_integration.TestAuthErrorHandlingIntegration" name="test_concurrent_error_handling" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_error_handling_integration.py:51: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_database_health_check" time="0.007"><failure message="AssertionError: assert 'unhealthy' == 'healthy'&#10;  &#10;  - healthy&#10;  + unhealthy&#10;  ? ++">auth_service\tests\integration\test_auth_health_check_integration.py:82: in test_database_health_check
+    assert db_health["status"] == "healthy"
+E   AssertionError: assert 'unhealthy' == 'healthy'
+E     
+E     - healthy
+E     + unhealthy
+E     ? ++</failure></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_redis_health_check" time="0.007"><failure message="AssertionError: Redis should be healthy and responsive&#10;assert False">auth_service\tests\integration\test_auth_health_check_integration.py:108: in test_redis_health_check
+    assert redis_healthy, "Redis should be healthy and responsive"
+E   AssertionError: Redis should be healthy and responsive
+E   assert False</failure></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_comprehensive_service_health" time="0.007" /><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_health_endpoint_response" time="0.010" /><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_readiness_check" time="0.007"><failure message="AssertionError: Auth service should be ready when core components are healthy&#10;assert False">auth_service\tests\integration\test_auth_health_check_integration.py:263: in test_readiness_check
+    assert service_ready, "Auth service should be ready when core components are healthy"
+E   AssertionError: Auth service should be ready when core components are healthy
+E   assert False</failure></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_health_check_failure_scenarios" time="0.008"><failure message="AttributeError: &lt;auth_service.services.redis_service.RedisService object at 0x0000018CD9F558E0&gt; does not have the attribute 'ping'">auth_service\tests\integration\test_auth_health_check_integration.py:298: in test_health_check_failure_scenarios
+    with patch.object(self.redis_service, 'ping') as mock_redis_ping:
+..\..\..\..\miniconda3\Lib\unittest\mock.py:1458: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\unittest\mock.py:1431: in get_original
+    raise AttributeError(
+E   AttributeError: &lt;auth_service.services.redis_service.RedisService object at 0x0000018CD9F558E0&gt; does not have the attribute 'ping'</failure></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_health_monitoring_metrics" time="2.595"><failure message="AssertionError: assert 0 &gt;= (5 * 0.8)&#10; +  where 5 = len([{'timestamp': '2025-09-08T01:20:27.232186+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:27.742488+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:28.256391+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 2.0170211791992188, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:28.781143+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:29.313059+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.5137920379638672, 'service': 'auth_service', 'version': '1.0.0'}])">auth_service\tests\integration\test_auth_health_check_integration.py:366: in test_health_monitoring_metrics
+    assert healthy_count &gt;= len(metrics_collection) * 0.8  # At least 80% healthy
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert 0 &gt;= (5 * 0.8)
+E    +  where 5 = len([{'timestamp': '2025-09-08T01:20:27.232186+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:27.742488+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:28.256391+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 2.0170211791992188, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:28.781143+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.0, 'service': 'auth_service', 'version': '1.0.0'}, {'timestamp': '2025-09-08T01:20:29.313059+00:00', 'overall_status': 'unhealthy', 'health_check_duration_ms': 0.5137920379638672, 'service': 'auth_service', 'version': '1.0.0'}])</failure></testcase><testcase classname="tests.integration.test_auth_health_check_integration.TestAuthHealthCheckIntegration" name="test_concurrent_health_checks" time="0.010"><failure message="AssertionError: assert 0 &gt;= (10 * 0.7)&#10; +  where 10 = len([{'check_id': 0, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 1, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 2, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 3, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 4, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 5, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 6, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 7, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 8, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 9, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}])">auth_service\tests\integration\test_auth_health_check_integration.py:457: in test_concurrent_health_checks
+    assert healthy_count &gt;= len(successful_checks) * 0.7
+E   AssertionError: assert 0 &gt;= (10 * 0.7)
+E    +  where 10 = len([{'check_id': 0, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 1, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 2, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 3, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 4, 'success': True, 'duration_ms': 2.015829086303711, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 5, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 6, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 7, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 8, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}, {'check_id': 9, 'success': True, 'duration_ms': 0.0, 'status': 'unhealthy', 'component_count': 3}])</failure></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_jwt_token_generation_and_validation" time="0.004"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_jwt_token_expiry_handling" time="0.004"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_jwt_token_invalid_signature" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_refresh_token_generation_and_validation" time="0.004"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_multiple_concurrent_token_operations" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_token_blacklist_functionality" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_jwt_integration.TestJWTIntegration" name="test_token_with_different_permission_levels" time="0.004"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_jwt_integration.py:43: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_jwt_validation_between_services_business_flow" time="0.006"><failure message="TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'">auth_service\tests\integration\test_auth_microservice_business_integration.py:145: in test_jwt_validation_between_services_business_flow
+    access_token, service_token = await self.create_business_jwt_token(self.test_user_data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\integration\test_auth_microservice_business_integration.py:127: in create_business_jwt_token
+    access_token = await self.jwt_handler.create_access_token(access_payload)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'</failure></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_cross_service_authentication_business_scenarios" time="0.006"><failure message="TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'">auth_service\tests\integration\test_auth_microservice_business_integration.py:217: in test_cross_service_authentication_business_scenarios
+    access_token, service_token = await self.create_business_jwt_token(self.test_user_data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\integration\test_auth_microservice_business_integration.py:127: in create_business_jwt_token
+    access_token = await self.jwt_handler.create_access_token(access_payload)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'</failure></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_service_token_validation_and_refresh_business_continuity" time="0.005"><failure message="TypeError: JWTHandler.create_service_token() missing 1 required positional argument: 'service_name'">auth_service\tests\integration\test_auth_microservice_business_integration.py:345: in test_service_token_validation_and_refresh_business_continuity
+    short_token = await self.jwt_handler.create_service_token(short_lived_payload)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.create_service_token() missing 1 required positional argument: 'service_name'</failure></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_health_check_endpoints_service_discovery" time="2.298"><failure message="Failed: Auth service health check failed for business monitoring: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1268: in _wrap_create_connection
+    sock = await aiohappyeyeballs.start_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:127: in start_connection
+    raise first_exception
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\_staggered.py:132: in run_one_coro
+    result = await coro_fn()
+             ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohappyeyeballs\impl.py:208: in _connect_sock
+    await loop.sock_connect(sock, address)
+..\..\..\..\miniconda3\Lib\asyncio\proactor_events.py:729: in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:803: in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\windows_events.py:599: in finish_connect
+    ov.getresult()
+E   ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+
+The above exception was the direct cause of the following exception:
+auth_service\tests\integration\test_auth_microservice_business_integration.py:413: in test_health_check_endpoints_service_discovery
+    async with self.session.get(self.auth_health_endpoint) as response:
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:1488: in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:770: in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\client.py:725: in _connect_and_send_request
+    conn = await self._connector.connect(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:642: in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1209: in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1581: in _create_direct_connection
+    raise last_exc
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1550: in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\aiohttp\connector.py:1291: in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+E   aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\integration\test_auth_microservice_business_integration.py:430: in test_health_check_endpoints_service_discovery
+    pytest.fail(f"Auth service health check failed for business monitoring: {e}")
+E   Failed: Auth service health check failed for business monitoring: Cannot connect to host localhost:8081 ssl:default [The remote computer refused the network connection]</failure></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_error_propagation_between_services_business_resilience" time="0.006"><failure message="TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'">auth_service\tests\integration\test_auth_microservice_business_integration.py:496: in test_error_propagation_between_services_business_resilience
+    access_token, service_token = await self.create_business_jwt_token(self.test_user_data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\integration\test_auth_microservice_business_integration.py:127: in create_business_jwt_token
+    access_token = await self.jwt_handler.create_access_token(access_payload)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.create_access_token() missing 1 required positional argument: 'email'</failure></testcase><testcase classname="tests.integration.test_auth_microservice_business_integration.TestAuthMicroserviceBusinessIntegration" name="test_service_isolation_and_security_boundaries_business_security" time="0.006"><failure message="TypeError: JWTHandler.create_service_token() missing 1 required positional argument: 'service_name'">auth_service\tests\integration\test_auth_microservice_business_integration.py:622: in test_service_isolation_and_security_boundaries_business_security
+    limited_scope_token = await self.jwt_handler.create_service_token({
+E   TypeError: JWTHandler.create_service_token() missing 1 required positional argument: 'service_name'</failure></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_user_data_isolation_in_database" time="0.008"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_session_isolation_in_redis" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_jwt_token_isolation" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_concurrent_multi_user_operations" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_user_tier_isolation" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_multi_user_isolation_integration.TestMultiUserIsolationIntegration" name="test_session_cleanup_isolation" time="0.023"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_multi_user_isolation_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_authorization_url_generation" time="0.007"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:139: in test_oauth_authorization_url_generation
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_callback_flow_google" time="0.008"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:183: in test_oauth_callback_flow_google
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_callback_flow_github" time="0.007"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:252: in test_oauth_callback_flow_github
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_state_validation_security" time="0.009"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:310: in test_oauth_state_validation_security
+    auth_url, legitimate_state = await self.oauth_service.generate_auth_url(
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_error_handling_external_api_failures" time="0.008"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:397: in test_oauth_error_handling_external_api_failures
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_concurrent_authentications" time="0.006"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:506: in test_oauth_concurrent_authentications
+    results = await asyncio.gather(*tasks)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\integration\test_auth_oauth_integration.py:461: in authenticate_user
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_oauth_integration.TestOAuthIntegration" name="test_oauth_session_creation_with_redis_persistence" time="0.007"><failure message="AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'">auth_service\tests\integration\test_auth_oauth_integration.py:555: in test_oauth_session_creation_with_redis_persistence
+    auth_url, state = await self.oauth_service.generate_auth_url(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'OAuthService' object has no attribute 'generate_auth_url'</failure></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_user_registration_complete_flow" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_user_login_complete_flow" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_login_with_invalid_credentials" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_duplicate_registration_prevention" time="0.007"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_password_strength_validation" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_concurrent_user_registrations" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_user_profile_update_after_registration" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_password_change_flow" time="0.008"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_registration_login_integration.TestRegistrationLoginIntegration" name="test_session_cleanup_on_logout" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_registration_login_integration.py:52: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_session_creation_and_retrieval" time="0.004"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_session_update_and_last_accessed" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_session_expiry_and_cleanup" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_multi_user_session_isolation" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_concurrent_session_operations" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_session_refresh_token_integration" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_session_persistence.TestSessionPersistenceIntegration" name="test_bulk_session_cleanup_operations" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_session_persistence.py:47: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_refresh_token_generation_and_storage" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_access_token_refresh_flow" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_refresh_token_validation_and_security" time="0.005"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_refresh_token_rotation_security" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_concurrent_refresh_operations" time="0.007"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_refresh_token_family_tracking" time="0.006"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase><testcase classname="tests.integration.test_auth_token_refresh_integration.TestTokenRefreshIntegration" name="test_refresh_token_cleanup_and_expiry" time="0.009"><error message="failed on setup with &quot;TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given&quot;">auth_service\tests\integration\test_auth_token_refresh_integration.py:50: in setup
+    self.jwt_service = JWTService(self.auth_config)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\services\jwt_service.py:26: in __init__
+    self._jwt_handler = JWTHandler(auth_config)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: JWTHandler.__init__() takes 1 positional argument but 2 were given</error></testcase></testsuite></testsuites>
