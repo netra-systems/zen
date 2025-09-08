@@ -190,9 +190,9 @@ async def websocket_endpoint(websocket: WebSocket):
         
         if is_e2e_testing:
             detection_method = "headers" if is_e2e_via_headers else "env_vars"
-            logger.info(f"✅ E2E testing detected via {detection_method} - bypassing pre-connection JWT validation")
+            logger.info(f"[OK] E2E testing detected via {detection_method} - bypassing pre-connection JWT validation")
         else:
-            logger.info("❌ E2E testing NOT detected - full JWT validation required")
+            logger.info("[ERROR] E2E testing NOT detected - full JWT validation required")
         
         # 🚨 SSOT ENFORCEMENT: Pre-connection authentication ELIMINATED
         # This violates SSOT by duplicating authentication logic
@@ -217,9 +217,9 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:
-        # ❌ user_context_extractor.py - 4 duplicate JWT validation methods
-        # ❌ websocket_core/auth.py - WebSocketAuthenticator
-        # ❌ Pre-connection validation logic above
+        # [ERROR] user_context_extractor.py - 4 duplicate JWT validation methods
+        # [ERROR] websocket_core/auth.py - WebSocketAuthenticator
+        # [ERROR] Pre-connection validation logic above
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         
@@ -289,7 +289,7 @@ async def websocket_endpoint(websocket: WebSocket):
         user_context = auth_result.user_context
         auth_info = auth_result.auth_result.to_dict()
         
-        logger.info(f"✅ SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
+        logger.info(f"[OK] SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
         
         # CRITICAL FIX: Create isolated WebSocket manager with enhanced error handling
         # This prevents FactoryInitializationError from causing 1011 WebSocket errors
@@ -344,7 +344,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     "factory_config_issue": True
                 }
                 
-                logger.critical(f"❌ UNEXPECTED FACTORY ERROR: {factory_error}", exc_info=True)
+                logger.critical(f"[ERROR] UNEXPECTED FACTORY ERROR: {factory_error}", exc_info=True)
                 logger.error(f"🔍 FACTORY ERROR DEBUG: {json.dumps(error_context, indent=2)}")
                 
                 # CRITICAL FIX: Use emergency fallback pattern instead of hard failure
@@ -353,10 +353,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 try:
                     # Emergency fallback: Create minimal manager state for basic functionality
                     ws_manager = None  # Will trigger fallback handlers below
-                    logger.info("✅ Emergency fallback mode activated - WebSocket will use basic handlers")
+                    logger.info("[OK] Emergency fallback mode activated - WebSocket will use basic handlers")
                     
                 except Exception as fallback_error:
-                    logger.critical(f"❌ EMERGENCY FALLBACK FAILED: {fallback_error}")
+                    logger.critical(f"[ERROR] EMERGENCY FALLBACK FAILED: {fallback_error}")
                     
                     # Last resort: Send error and close
                     fallback_error_msg = create_error_message(
@@ -374,7 +374,7 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # CRITICAL FIX: Handle cases where ws_manager creation failed but we want to continue with basic functionality
         if ws_manager is None:
-            logger.warning("⚠️  EMERGENCY MODE: ws_manager is None - WebSocket will use minimal functionality")
+            logger.warning("[WARNING]  EMERGENCY MODE: ws_manager is None - WebSocket will use minimal functionality")
             # Create a minimal emergency manager using user context if available
             if 'user_context' in locals():
                 logger.info("🔄 EMERGENCY FALLBACK: Attempting minimal manager creation")
@@ -383,14 +383,14 @@ async def websocket_endpoint(websocket: WebSocket):
                     # This time we'll catch any validation errors and create a stub if needed
                     from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
                     ws_manager = create_websocket_manager(user_context)
-                    logger.info("✅ EMERGENCY SUCCESS: Created minimal WebSocket manager on second attempt")
+                    logger.info("[OK] EMERGENCY SUCCESS: Created minimal WebSocket manager on second attempt")
                 except Exception as emergency_retry_error:
                     logger.warning(f"🔄 EMERGENCY RETRY FAILED: {emergency_retry_error}")
                     # Create emergency stub manager that won't crash
                     ws_manager = _create_emergency_websocket_manager(user_context)
-                    logger.info("✅ EMERGENCY STUB: Created stub WebSocket manager for basic functionality")
+                    logger.info("[OK] EMERGENCY STUB: Created stub WebSocket manager for basic functionality")
             else:
-                logger.error("❌ NO USER CONTEXT: Cannot create any form of WebSocket manager")
+                logger.error("[ERROR] NO USER CONTEXT: Cannot create any form of WebSocket manager")
                 # In this case, we'll need to rely on fallback handlers completely
         
         # Log current handler count for debugging
@@ -551,7 +551,7 @@ async def websocket_endpoint(websocket: WebSocket):
             try:
                 fallback_handler = _create_fallback_agent_handler(websocket)
                 message_router.add_handler(fallback_handler)
-                logger.info(f"✅ Successfully created fallback AgentMessageHandler for {environment}")
+                logger.info(f"[OK] Successfully created fallback AgentMessageHandler for {environment}")
                 logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
                 logger.info(f"🤖 This prevents 500 errors while providing basic agent functionality")
                 
@@ -580,7 +580,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Don't fail if we can't send the info message
                     
             except Exception as critical_fallback_error:
-                logger.critical(f"❌ CRITICAL FALLBACK FAILURE in {environment}: {critical_fallback_error}")
+                logger.critical(f"[ERROR] CRITICAL FALLBACK FAILURE in {environment}: {critical_fallback_error}")
                 # Last resort: log critical error but still allow basic WebSocket functionality
                 # This prevents 500 errors even in the worst-case scenario
         
@@ -1217,7 +1217,7 @@ def _create_fallback_agent_handler(websocket: WebSocket = None):
                     logger.error(f"Failed to send agent_completed event to {user_id}")
                     return False
                 
-                logger.info(f"✅ Successfully sent ALL 5 critical WebSocket events to {user_id}")
+                logger.info(f"[OK] Successfully sent ALL 5 critical WebSocket events to {user_id}")
                 return True
                 
             except Exception as e:

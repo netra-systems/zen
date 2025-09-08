@@ -7,7 +7,7 @@ creates isolated WebSocket manager instances per user connection, ensuring compl
 user isolation and preventing message cross-contamination.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free -> Enterprise)
 - Business Goal: Eliminate critical security vulnerabilities in WebSocket communication
 - Value Impact: Enables safe multi-user AI interactions without data leakage
 - Revenue Impact: Prevents catastrophic security breaches that could destroy business
@@ -1148,7 +1148,7 @@ def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebS
     except ValueError as validation_error:
         # CRITICAL FIX: Handle SSOT validation failures gracefully
         if "SSOT" in str(validation_error) or "factory" in str(validation_error).lower():
-            logger.error(f"🚨 SSOT FACTORY VALIDATION FAILURE: {validation_error}")
+            logger.error(f"[U+1F6A8] SSOT FACTORY VALIDATION FAILURE: {validation_error}")
             raise FactoryInitializationError(
                 f"WebSocket factory SSOT validation failed: {validation_error}. "
                 f"This indicates UserExecutionContext type incompatibility."
@@ -1159,7 +1159,7 @@ def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebS
             
     except Exception as unexpected_error:
         # CRITICAL FIX: Catch any other factory creation errors
-        logger.critical(f"❌ UNEXPECTED FACTORY ERROR: {unexpected_error}", exc_info=True)
+        logger.critical(f"[ERROR] UNEXPECTED FACTORY ERROR: {unexpected_error}", exc_info=True)
         raise FactoryInitializationError(
             f"WebSocket factory initialization failed unexpectedly: {unexpected_error}. "
             f"This may indicate a system configuration issue."
