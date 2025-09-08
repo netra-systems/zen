@@ -439,7 +439,7 @@ def create_user_execution_context(user_id: str,
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_connection_id  # FIX: Correct parameter name
         )
         
         logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")
