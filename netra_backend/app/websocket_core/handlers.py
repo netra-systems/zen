@@ -1024,10 +1024,14 @@ class MessageRouter:
                 "status": "acknowledged"
             }
             
+            # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+            safe_ack_response = _serialize_message_safely(ack_response)
+            
             # Check if websocket is connected or is a mock (for testing)
             if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
-                await websocket.send_json(ack_response)
+                await websocket.send_json(safe_ack_response)
                 return True
             
             return False
