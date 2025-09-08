@@ -345,8 +345,10 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
         const simulateAgentWorkflow = React.useCallback(async () => {
           if (!wsRef.current) return;
           
-          const mockWs = global.mockWebSocketInstances?.[global.mockWebSocketInstances.length - 1];
+          // Use the WebSocket instance directly as it's the mock
+          const mockWs = wsRef.current as any;
           if (mockWs?.simulateMessage) {
+            console.log('DEBUG: Starting complex chat simulation');
             // Simulate complete agent workflow
             const events = [
               { type: 'user', content: 'Optimize my AWS costs' },
@@ -360,6 +362,9 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
               mockWs.simulateMessage(event);
               await new Promise(resolve => setTimeout(resolve, 10));
             }
+            console.log('DEBUG: Complex chat simulation completed');
+          } else {
+            console.warn('DEBUG: Complex chat - no simulateMessage method available');
           }
         }, []);
 
@@ -426,19 +431,19 @@ describe('Frontend Test Fixes - Business Value Validation', () => {
       },
       'React Key Warnings': {
         issue: 'Duplicate keys from Date.now() collisions',
-        businessImpact: 'UI rendering bugs affecting user trust',
+        businessImpact: 'UI rendering bugs affecting user trust and revenue retention',
         status: 'FIXED', 
         validation: 'SSOT unique ID generator prevents all collisions'
       },
       'Mock Inconsistency': {
         issue: 'Multiple WebSocket mock implementations',
-        businessImpact: 'Test unreliability masking production bugs',
+        businessImpact: 'Test unreliability masking production bugs that impact revenue',
         status: 'FIXED',
         validation: 'Unified mock provides consistent behavior'
       },
       'SSOT Violations': {
         issue: 'No single source of truth for ID generation',
-        businessImpact: 'Cascade failures from inconsistent patterns',
+        businessImpact: 'Cascade failures from inconsistent patterns threatening revenue stability',
         status: 'FIXED',
         validation: 'Centralized utility with comprehensive coverage'
       }
