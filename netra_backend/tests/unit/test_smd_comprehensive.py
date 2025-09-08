@@ -400,7 +400,7 @@ class TestDeterministicFailureScenarios(BaseTestCase):
         mock_logger.get_logger.return_value = Mock()
         
         # Mock database initialization to fail
-        with patch('netra_backend.app.smd.initialize_postgres', side_effect=Exception("Database connection failed")):
+        with patch('netra_backend.app.db.postgres.initialize_postgres', side_effect=Exception("Database connection failed")):
             with patch('asyncio.wait_for', side_effect=Exception("Database connection failed")):
                 
                 # Database failure should be fatal
@@ -419,7 +419,7 @@ class TestDeterministicFailureScenarios(BaseTestCase):
         mock_redis_manager = Mock()
         mock_redis_manager.initialize = AsyncMock(side_effect=Exception("Redis connection failed"))
         
-        with patch('netra_backend.app.smd.redis_manager', mock_redis_manager):
+        with patch('netra_backend.app.redis_manager.redis_manager', mock_redis_manager):
             # Redis failure should be fatal
             with self.assertRaises(Exception) as context:
                 asyncio.run(self.orchestrator._initialize_redis())
