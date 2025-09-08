@@ -62,6 +62,15 @@ from netra_backend.app.startup_health_checks import validate_startup_health
 
 # SSOT compliance: _get_project_root now imported from netra_backend.app.core.project_utils
 
+async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
+    """Ensure that required database tables exist (created by migration service).
+    
+    CRITICAL: This function ONLY verifies table existence - it does NOT create tables.
+    Table creation is EXCLUSIVELY handled by the migration service.
+    """
+    await _verify_required_database_tables_exist(logger, graceful_startup)
+
+
 async def _verify_required_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
     """Verify that required database tables exist (created by migration service).
     
@@ -211,6 +220,10 @@ def _import_all_models() -> None:
         
         # User models
         from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
+        
+        # CRITICAL FIX: Import SQLAlchemy models from netra_backend.app.models directory
+        # The AgentExecution model exists but wasn't being imported, causing table verification failures
+        from netra_backend.app.models.agent_execution import AgentExecution
         
     except ImportError as e:
         # Some models might not be available in certain environments
@@ -1241,88 +1254,8 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         return False
 
 
-async def _deprecated_run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """DEPRECATED - Run initial startup phase."""
-    start_time, logger = initialize_logging()
-    setup_multiprocessing_env(logger)
-    validate_database_environment(logger)
-    run_database_migrations(logger)
-    return start_time, logger
-
-
-async def _deprecated_run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
-    """DEPRECATED - Run service initialization phase."""
-    logger.debug("Starting Phase 2: Service initialization")
-    
-    try:
-        logger.debug("Setting up database connections...")
-        await setup_database_connections(app)  # Move database setup first
-        logger.debug("Database connections established successfully")
-    except Exception as e:
-        logger.error(f"Failed to setup database connections: {e}", exc_info=True)
-        raise
-    
-    try:
-        logger.debug("Initializing core services...")
-        key_manager = initialize_core_services(app, logger)
-        logger.debug("Core services initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize core services: {e}", exc_info=True)
-        raise
-    
-    try:
-        logger.debug("Setting up security services and LLM manager...")
-        setup_security_services(app, key_manager)
-        logger.debug(f"Security services initialized - LLM manager: {app.state.llm_manager is not None}")
-    except Exception as e:
-        logger.error(f"Failed to setup security services: {e}", exc_info=True)
-        raise
-    
-    try:
-        logger.debug("Initializing ClickHouse...")
-        await initialize_clickhouse(logger)
-        logger.debug("ClickHouse initialization completed")
-    except Exception as e:
-        logger.error(f"Failed to initialize ClickHouse: {e}", exc_info=True)
-        # ClickHouse failures are non-critical in some environments
-        from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        if environment not in ["staging", "production"]:
-            logger.warning(f"Continuing without ClickHouse in {environment}")
-        else:
-            raise
-    
-    # FIX: Initialize background task manager to prevent 4-minute crash
-    logger.debug("Initializing background task manager...")
-    app.state.background_task_manager = background_task_manager
-    logger.debug("Background task manager initialized")
-    
-    # FIX: Apply all startup fixes for critical cold start issues
-    logger.debug("Applying startup fixes...")
-    try:
-        fix_results = await startup_fixes.run_comprehensive_verification()
-        applied_fixes = fix_results.get('total_fixes', 0)
-        logger.debug(f"Startup fixes applied: {applied_fixes}/5 fixes")
-        
-        if applied_fixes < 5:
-            logger.warning("Some startup fixes could not be applied - check system configuration")
-            logger.debug(startup_fixes.get_fix_status_summary())
-        else:
-            logger.debug("All critical startup fixes successfully applied")
-            
-    except Exception as e:
-        logger.error(f"Error applying startup fixes: {e}")
-        logger.warning("Continuing startup despite fix application errors")
-
-
-async def _deprecated_run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None:
-    """DEPRECATED - Run validation and setup phase."""
-    await startup_health_checks(app, logger)
-    await validate_schema(logger)
-    register_websocket_handlers(app)
-    await initialize_websocket_components(logger)
-    _create_agent_supervisor(app)
-    await start_monitoring(app, logger)
+# CLEANED UP: Legacy deprecated phase functions removed
+# Use run_complete_startup() -> run_deterministic_startup() for all startup needs
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
@@ -1343,11 +1276,10 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     return await run_deterministic_startup(app)
 
 
-# LEGACY CODE BELOW - DEPRECATED AND WILL BE REMOVED
-# Only kept temporarily for reference during transition
-# DO NOT USE - ALWAYS USE run_complete_startup() ABOVE
+# CLEANED UP: All legacy startup code removed
+# Only deterministic startup via run_complete_startup() is supported
 
-async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
+# REMOVED: _deprecated_legacy_startup function
     """DEPRECATED - Legacy startup code. DO NOT USE."""
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
@@ -1422,85 +1354,12 @@ async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logge
             app.state.startup_failed = True
             app.state.startup_error = f"Robust startup exception: {str(e)}"
             error_logger.warning("Falling back to legacy startup sequence...")
-            return await _run_legacy_startup(app)
+            # No fallback - deterministic startup only
+            raise RuntimeError(f"Startup failed: {e}") from e
     else:
-        # Use the legacy startup sequence
-        return await _run_legacy_startup(app)
+        # Always use deterministic startup - no legacy fallbacks
+        from netra_backend.app.smd import run_deterministic_startup
+        return await run_deterministic_startup(app)
 
 
-async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run legacy startup sequence (fallback)."""
-    start_time, logger = await _run_startup_phase_one(app)
-    
-    # Set startup in progress flags if not already set
-    if not hasattr(app.state, 'startup_in_progress') or not app.state.startup_in_progress:
-        app.state.startup_complete = False
-        app.state.startup_in_progress = True
-        app.state.startup_failed = False
-        app.state.startup_error = None
-        app.state.startup_start_time = start_time
-        logger.debug("Legacy startup in progress flags set")
-    
-    try:
-        await _run_startup_phase_two(app, logger)
-        logger.debug("Phase 2 completed - core services initialized")
-    except Exception as e:
-        error_msg = f"Phase 2 (service initialization) failed: {e}"
-        logger.error(error_msg, exc_info=True)
-        
-        # Check environment for critical failure handling
-        from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        
-        if environment in ["staging", "production"]:
-            # In staging/production, Phase 2 failure is critical
-            app.state.startup_complete = False
-            app.state.startup_in_progress = False
-            app.state.startup_failed = True
-            app.state.startup_error = error_msg
-            raise RuntimeError(error_msg) from e
-        else:
-            # In development, log but continue with degraded functionality
-            logger.warning(f"Continuing with degraded functionality in {environment} after Phase 2 failure")
-            # Set minimal state to prevent complete failure
-            if not hasattr(app.state, 'llm_manager'):
-                app.state.llm_manager = None
-            if not hasattr(app.state, 'db_session_factory'):
-                app.state.db_session_factory = None
-    
-    try:
-        await _run_startup_phase_three(app, logger)
-        logger.debug("Phase 3 completed - agent supervisor initialized")
-    except Exception as e:
-        error_msg = f"Phase 3 (agent supervisor) failed: {e}"
-        logger.error(error_msg, exc_info=True)
-        
-        # Check environment for critical failure handling
-        from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        
-        if environment in ["staging", "production"]:
-            # CRITICAL FIX: Phase 3 failure is CRITICAL - chat is broken
-            # Chat delivers 90% of value - we cannot run without it
-            logger.critical(f"CRITICAL: Phase 3 failure in {environment} - CHAT IS BROKEN!")
-            logger.critical("Cannot continue without agent supervisor - chat delivers 90% of value")
-            # Mark as failed and re-raise
-            app.state.startup_complete = False
-            app.state.startup_in_progress = False
-            app.state.startup_failed = True
-            app.state.startup_error = error_msg
-            # Re-raise to fail startup - chat MUST work
-            raise RuntimeError(f"Phase 3 critical failure in {environment} - chat is broken") from e
-        else:
-            # In development, log but continue for debugging
-            logger.warning(f"Continuing with broken chat in {environment} after Phase 3 failure - FOR DEBUGGING ONLY")
-    
-    # CRITICAL: Set startup_complete flag for health endpoint
-    app.state.startup_complete = True
-    app.state.startup_in_progress = False
-    app.state.startup_failed = False
-    app.state.startup_error = None
-    logger.debug("Legacy startup completion flags set")
-    
-    log_startup_complete(start_time, logger)
-    return start_time, logger
+# REMOVED: All legacy startup functions eliminated - only deterministic startup supported

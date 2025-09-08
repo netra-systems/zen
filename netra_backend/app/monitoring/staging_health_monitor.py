@@ -106,8 +106,9 @@ class WebSocketHealthChecker(BaseHealthChecker):
     async def _check_event_pipeline(self) -> bool:
         """Check if the WebSocket event pipeline is functional."""
         try:
-            # Check if agent registry has WebSocket integration
-            from netra_backend.app.agents.agent_registry import agent_registry
+            # Check if agent registry has WebSocket integration using SSOT
+            from netra_backend.app.core.registry.universal_registry import get_global_registry
+            agent_registry = get_global_registry('agent')
             return hasattr(agent_registry, 'websocket_manager') and agent_registry.websocket_manager is not None
         except Exception as e:
             logger.warning(f"Event pipeline check failed: {e}")

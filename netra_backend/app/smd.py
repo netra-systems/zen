@@ -331,9 +331,8 @@ class StartupOrchestrator:
         await self._start_connection_monitoring()
         self.logger.info("  ✓ Step 23: Connection monitoring started")
         
-        # Step 24a: Apply startup validation fixes before validation
-        await self._apply_startup_validation_fixes()
-        self.logger.info("  ✓ Step 24a: Startup validation fixes applied")
+        # Step 24a: REMOVED - Legacy startup validation fixes eliminated
+        self.logger.info("  ✓ Step 24a: Skipped legacy startup validation fixes (eliminated)")
         
         # Step 24b: Run comprehensive startup health checks (CRITICAL)
         from netra_backend.app.startup_health_checks import validate_startup_health
@@ -1405,36 +1404,7 @@ class StartupOrchestrator:
         from netra_backend.app.services.database.connection_monitor import start_connection_monitoring
         await start_connection_monitoring()
     
-    async def _apply_startup_validation_fixes(self) -> None:
-        """Apply startup validation fixes to prevent common failures."""
-        try:
-            from netra_backend.app.core.startup_validation_fix import apply_startup_validation_fixes
-            
-            self.logger.info("Applying startup validation fixes...")
-            results = apply_startup_validation_fixes(self.app)
-            
-            if results['overall_success']:
-                total_fixes = results.get('total_fixes_applied', 0)
-                if total_fixes > 0:
-                    self.logger.info(f"✅ Applied {total_fixes} startup validation fixes")
-                else:
-                    self.logger.info("✅ No startup validation fixes needed")
-            else:
-                # Log detailed error information but don't fail startup
-                self.logger.warning("⚠️ Some startup validation fixes failed:")
-                if results.get('websocket_fix'):
-                    websocket_results = results['websocket_fix']
-                    for error in websocket_results.get('errors', []):
-                        self.logger.warning(f"  - WebSocket fix error: {error}")
-                
-                if results.get('critical_error'):
-                    self.logger.warning(f"  - Critical error: {results['critical_error']}")
-            
-        except ImportError:
-            self.logger.warning("Startup validation fix module not available - skipping fixes")
-        except Exception as e:
-            # Don't fail startup for fix errors, just log them
-            self.logger.warning(f"Failed to apply startup validation fixes: {e}")
+    # REMOVED: _apply_startup_validation_fixes function - legacy startup validation eliminated
     
     async def _initialize_health_service(self) -> None:
         """Initialize health service registry - optional."""
