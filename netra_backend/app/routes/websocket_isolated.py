@@ -43,9 +43,8 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.websocket.connection_handler import connection_scope
 
 # Import authentication and security
-from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
+from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
 from netra_backend.app.websocket_core import (
-    get_websocket_authenticator,
     get_connection_security_manager,
     WebSocketHeartbeat,
     create_server_message,
@@ -129,11 +128,10 @@ async def isolated_websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("Isolated WebSocket accepted without subprotocol")
         
-        # Authenticate user
-        authenticator = get_websocket_authenticator()
-        auth_info = await authenticator.authenticate_websocket(websocket)
+        # Authenticate user using SSOT method
+        auth_result = await authenticate_websocket_ssot(websocket)
         
-        if not auth_info.is_authenticated or not auth_info.user_id:
+        if not auth_result.success:
             error_msg = create_error_message(
                 "Authentication failed",
                 {"reason": "JWT token required for isolated endpoint"}
@@ -142,8 +140,8 @@ async def isolated_websocket_endpoint(websocket: WebSocket):
             await websocket.close(code=1008, reason="Authentication required")
             return
         
-        user_id = auth_info.user_id
-        thread_id = auth_info.thread_id
+        user_id = auth_result.user_context.user_id
+        thread_id = auth_result.user_context.thread_id
         
         logger.info(f"🔐 Isolated WebSocket authenticated for user: {user_id[:8]}... "
                    f"thread_id: {thread_id}")

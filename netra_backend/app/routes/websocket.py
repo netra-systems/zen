@@ -33,12 +33,8 @@ from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reporta
 from netra_backend.app.websocket_core import (
     WebSocketManager,
     MessageRouter,
-    ConnectionSecurityManager,
     get_websocket_manager,
     get_message_router,
-    get_websocket_authenticator,
-    get_connection_security_manager,
-    secure_websocket_context,
     WebSocketHeartbeat,
     get_connection_monitor,
     safe_websocket_send,
@@ -598,7 +594,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # Get security manager (still uses singleton as it doesn't hold user state)
                 from netra_backend.app.websocket_core import get_connection_security_manager
-                security_manager = get_connection_security_manager()
+                security_manager = None  # Legacy security manager removed - SSOT auth handles security
                 
                 logger.info(f"WebSocket authenticated using factory pattern for user: {user_id[:8]}...")
                 
@@ -842,7 +838,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if 'connection_monitor' not in locals():
                     connection_monitor = get_connection_monitor()
                 if 'security_manager' not in locals():
-                    security_manager = get_connection_security_manager()
+                    security_manager = None  # Legacy security manager removed - SSOT auth handles security
                 
                 connection_monitor.unregister_connection(connection_id)
                 security_manager.unregister_connection(connection_id)
@@ -860,8 +856,8 @@ async def _handle_websocket_messages(
     ws_manager: WebSocketManager,
     message_router: MessageRouter,
     connection_monitor,
-    security_manager: ConnectionSecurityManager,
-    heartbeat: WebSocketHeartbeat
+    security_manager=None,  # Legacy parameter - not needed with SSOT auth
+    heartbeat: WebSocketHeartbeat = None
 ) -> None:
     """Handle WebSocket message loop with error recovery."""
     error_count = 0
@@ -1661,7 +1657,7 @@ async def websocket_detailed_stats():
     factory = get_websocket_manager_factory()
     message_router = get_message_router()
     authenticator = get_websocket_authenticator()
-    security_manager = get_connection_security_manager()
+    security_manager = None  # Legacy security manager removed - SSOT auth handles security
     connection_monitor = get_connection_monitor()
     
     return {

@@ -89,14 +89,7 @@ from netra_backend.app.websocket_core.handlers import (
     get_message_router,
 )
 
-# Import auth
-from netra_backend.app.websocket_core.auth import (
-    WebSocketAuthenticator,
-    ConnectionSecurityManager,
-    get_websocket_authenticator,
-    get_connection_security_manager,
-    secure_websocket_context,
-)
+# Auth imports removed - using SSOT unified_websocket_auth instead
 
 # Try to import existing types (if available)
 try:
@@ -201,12 +194,7 @@ __all__ = [
     "UserMessageHandler",
     "get_message_router",
     
-    # Auth
-    "WebSocketAuthenticator",
-    "ConnectionSecurityManager",
-    "get_websocket_authenticator",
-    "get_connection_security_manager",
-    "secure_websocket_context",
+    # Auth - Removed legacy auth, using SSOT unified_websocket_auth instead
     
     # Rate limiting
     "RateLimiter",

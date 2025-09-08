@@ -43,6 +43,83 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class FactoryInitializationError(Exception):
+    """Raised when WebSocket manager factory initialization fails due to SSOT violations or other configuration issues."""
+    pass
+
+
+def _validate_ssot_user_context(user_context: Any) -> None:
+    """
+    CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation.
+    
+    This function validates that the provided user_context is the correct SSOT
+    UserExecutionContext type with all required attributes, preventing the type
+    inconsistencies that cause 1011 WebSocket errors.
+    
+    Args:
+        user_context: Object to validate as SSOT UserExecutionContext
+        
+    Raises:
+        ValueError: If validation fails with detailed error information
+    """
+    # CRITICAL FIX: Validate SSOT UserExecutionContext type
+    if not isinstance(user_context, UserExecutionContext):
+        # Enhanced error message with type information  
+        actual_type = type(user_context)
+        expected_module = "netra_backend.app.services.user_execution_context"
+        actual_module = getattr(actual_type, '__module__', 'unknown')
+        
+        raise ValueError(
+            f"SSOT VIOLATION: Expected netra_backend.app.services.user_execution_context.UserExecutionContext, "
+            f"got {actual_type}. "
+            f"Expected module: {expected_module}, Actual module: {actual_module}. "
+            f"This indicates incomplete SSOT migration - factory pattern requires SSOT compliance."
+        )
+    
+    # CRITICAL FIX: Validate all required SSOT attributes are present
+    required_attrs = ['user_id', 'thread_id', 'websocket_client_id', 'run_id', 'request_id']
+    missing_attrs = []
+    
+    for attr in required_attrs:
+        if not hasattr(user_context, attr):
+            missing_attrs.append(attr)
+        elif getattr(user_context, attr, None) is None and attr != 'websocket_client_id':
+            # websocket_client_id can be None, but others cannot
+            missing_attrs.append(f"{attr} (is None)")
+    
+    if missing_attrs:
+        raise ValueError(
+            f"SSOT CONTEXT INCOMPLETE: UserExecutionContext missing required attributes: {missing_attrs}. "
+            f"This indicates incomplete SSOT migration or improper context initialization."
+        )
+    
+    # CRITICAL FIX: Validate attribute types and values
+    validation_errors = []
+    
+    # Check string fields are actual strings and not empty
+    string_fields = ['user_id', 'thread_id', 'run_id', 'request_id']
+    for field in string_fields:
+        value = getattr(user_context, field, None)
+        if not isinstance(value, str) or not value.strip():
+            validation_errors.append(f"{field} must be non-empty string, got {type(value)}: {value!r}")
+    
+    # Check websocket_client_id if present
+    websocket_client_id = getattr(user_context, 'websocket_client_id', None)
+    if websocket_client_id is not None and (not isinstance(websocket_client_id, str) or not websocket_client_id.strip()):
+        validation_errors.append(f"websocket_client_id must be None or non-empty string, got {type(websocket_client_id)}: {websocket_client_id!r}")
+    
+    if validation_errors:
+        raise ValueError(
+            f"SSOT CONTEXT VALIDATION FAILED: {'; '.join(validation_errors)}. "
+            f"Factory pattern requires properly formatted UserExecutionContext."
+        )
+    
+    logger.debug(
+        f"✅ SSOT UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
+        f"(client_id: {user_context.websocket_client_id})"
+    )
+
+
 @dataclass
 class FactoryMetrics:
     """Metrics for monitoring factory performance and security."""
@@ -1046,6 +1123,9 @@ def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebS
     This is the main factory function that applications should use to create
     WebSocket managers with proper user isolation.
     
+    CRITICAL FIX: Enhanced SSOT type validation and exception handling
+    to prevent 1011 WebSocket errors from factory validation failures.
+    
     Args:
         user_context: User execution context for the manager
         
@@ -1055,9 +1135,35 @@ def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebS
     Raises:
         ValueError: If user_context is invalid
         RuntimeError: If resource limits are exceeded
+        FactoryInitializationError: If SSOT factory validation fails
     """
-    factory = get_websocket_manager_factory()
-    return factory.create_manager(user_context)
+    try:
+        # CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation
+        # This prevents type inconsistencies that cause 1011 errors
+        _validate_ssot_user_context(user_context)
+        
+        factory = get_websocket_manager_factory()
+        return factory.create_manager(user_context)
+        
+    except ValueError as validation_error:
+        # CRITICAL FIX: Handle SSOT validation failures gracefully
+        if "SSOT" in str(validation_error) or "factory" in str(validation_error).lower():
+            logger.error(f"🚨 SSOT FACTORY VALIDATION FAILURE: {validation_error}")
+            raise FactoryInitializationError(
+                f"WebSocket factory SSOT validation failed: {validation_error}. "
+                f"This indicates UserExecutionContext type incompatibility."
+            ) from validation_error
+        else:
+            # Re-raise other ValueError types
+            raise
+            
+    except Exception as unexpected_error:
+        # CRITICAL FIX: Catch any other factory creation errors
+        logger.critical(f"❌ UNEXPECTED FACTORY ERROR: {unexpected_error}", exc_info=True)
+        raise FactoryInitializationError(
+            f"WebSocket factory initialization failed unexpectedly: {unexpected_error}. "
+            f"This may indicate a system configuration issue."
+        ) from unexpected_error
 
 
 __all__ = [
@@ -1066,6 +1172,7 @@ __all__ = [
     "ConnectionLifecycleManager",
     "FactoryMetrics",
     "ManagerMetrics",
+    "FactoryInitializationError",
     "get_websocket_manager_factory",
     "create_websocket_manager"
 ]
