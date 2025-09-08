@@ -70,31 +70,34 @@ class TestRedisConfigurationIntegration:
         assert backend_env.get_redis_port() == 6379
     
     def test_redis_url_construction_with_explicit_url(self, backend_env):
-        """Test Redis URL when REDIS_URL is explicitly set."""
-        test_url = "redis://custom-host:6380/1"
-        self.env.set("REDIS_URL", test_url, "test")
+        """Test Redis URL when Redis components are explicitly set (SSOT approach)."""
+        # SSOT PATTERN: Set Redis components instead of direct REDIS_URL
+        # The RedisConfigurationBuilder builds from components, not direct URLs
+        self.env.set("REDIS_HOST", "custom-host", "test")
+        self.env.set("REDIS_PORT", "6380", "test") 
+        self.env.set("REDIS_DB", "1", "test")
         
         redis_url = backend_env.get_redis_url()
-        assert redis_url == test_url
+        expected_url = "redis://custom-host:6380/1"
+        assert redis_url == expected_url
     
     def test_redis_url_construction_from_components(self, backend_env):
-        """Test Redis URL construction from individual components."""
-        # Set individual components (without REDIS_URL)
+        """Test Redis URL construction from individual components (SSOT approach)."""
+        # Set individual components - RedisConfigurationBuilder will use these
         self.env.set("REDIS_HOST", "redis-server", "test")
         self.env.set("REDIS_PORT", "6380", "test")
         
         # Ensure REDIS_URL is not set to force component-based construction
         self.env.delete("REDIS_URL")
         
-        # BackendEnvironment should use REDIS_URL if set, otherwise default
-        # Since we're testing the current implementation, it uses REDIS_URL with fallback
+        # SSOT PATTERN: RedisConfigurationBuilder builds from components
+        # When components are set, they should be used to build the URL
         redis_url = backend_env.get_redis_url()
         
-        # With current implementation, it uses REDIS_URL env var directly
-        # If not set, it returns the default
-        assert redis_url == "redis://localhost:6379/0"
+        # Should construct URL from the individual components we set
+        assert redis_url == "redis://redis-server:6380/0"
         
-        # But individual components should return the set values
+        # Individual components should return the set values  
         assert backend_env.get_redis_host() == "redis-server"
         assert backend_env.get_redis_port() == 6380
 

@@ -49,10 +49,14 @@ class WebSocketTestClient:
                 url = url.split("?token=")[0]
             elif "&token=" in url:
                 url = url.split("&token=")[0]
-                
-            self._websocket = await asyncio.wait_for(
-                websockets.connect(url, additional_headers=additional_headers),
-                timeout=timeout
+            
+            # FIXED: Use open_timeout instead of timeout in connect call
+            self._websocket = await websockets.connect(
+                url, 
+                additional_headers=additional_headers,
+                open_timeout=timeout,  # Correct parameter name
+                ping_interval=20,
+                ping_timeout=10
             )
             
             # Start background task to receive messages
@@ -62,7 +66,7 @@ class WebSocketTestClient:
             return True
             
         except asyncio.TimeoutError:
-            logger.error(f"WebSocket connection timeout: {url}")
+            logger.error(f"WebSocket connection timeout after {timeout}s: {url}")
             return False
         except Exception as e:
             logger.error(f"WebSocket connection failed: {e}")
@@ -257,3 +261,67 @@ class WebSocketTestClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         await self.disconnect()
+    
+    async def detailed_health_check(self, token: Optional[str] = None, timeout: float = 5.0) -> Dict[str, Any]:
+        """Perform detailed WebSocket health check with diagnostic information.
+        
+        Args:
+            token: Optional JWT token for authentication
+            timeout: Connection timeout in seconds
+            
+        Returns:
+            Dictionary with health status and diagnostic information
+        """
+        import time
+        start_time = time.time()
+        
+        try:
+            # Try to connect
+            connected = await self.connect(token=token, timeout=timeout)
+            if not connected:
+                return {
+                    "available": False,
+                    "response_time_ms": (time.time() - start_time) * 1000,
+                    "url": self.url,
+                    "service_type": "websocket",
+                    "error": "Failed to connect (no specific error)"
+                }
+            
+            # Try to send a ping and wait for response
+            ping_time = time.time()
+            await self.send_ping()
+            
+            # Wait for any response (pong or other message)
+            response = await self.receive(timeout=2.0)
+            response_time_ms = (time.time() - start_time) * 1000
+            
+            # Clean up connection
+            await self.disconnect()
+            
+            return {
+                "available": True,
+                "response_time_ms": response_time_ms,
+                "url": self.url,
+                "service_type": "websocket", 
+                "ping_response": response,
+                "error": None
+            }
+            
+        except asyncio.TimeoutError:
+            await self.disconnect()  # Cleanup
+            return {
+                "available": False,
+                "response_time_ms": (time.time() - start_time) * 1000,
+                "url": self.url,
+                "service_type": "websocket",
+                "error": f"WebSocket timeout after {timeout}s"
+            }
+        except Exception as e:
+            await self.disconnect()  # Cleanup
+            return {
+                "available": False,
+                "response_time_ms": (time.time() - start_time) * 1000,
+                "url": self.url,
+                "service_type": "websocket",
+                "error": f"WebSocket connection failed: {str(e)}"
+            }

@@ -10,7 +10,7 @@ import asyncio
 import pytest
 from datetime import datetime
 from uuid import uuid4
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext

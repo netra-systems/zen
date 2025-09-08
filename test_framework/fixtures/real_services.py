@@ -79,13 +79,26 @@ async def real_postgres_connection():
     engine = None
     
     try:
+        # Check if Docker is running first
+        try:
+            import subprocess
+            docker_check = subprocess.run(['docker', 'ps'], capture_output=True, timeout=5)
+            if docker_check.returncode != 0:
+                raise RuntimeError(f"Docker not accessible: {docker_check.stderr.decode()}")
+        except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+            raise RuntimeError(f"Docker not running or not installed: {e}")
+        
         # Start Docker services if manager available
         if UnifiedDockerManager is None:
             raise RuntimeError("UnifiedDockerManager not available - cannot start Docker services")
             
         docker_manager = UnifiedDockerManager()
-        env_info = docker_manager.acquire_environment("test", use_alpine=True)
-        logger.info(f"Acquired test environment: {env_info}")
+        
+        try:
+            env_info = docker_manager.acquire_environment("test", use_alpine=True)
+            logger.info(f"Acquired test environment: {env_info}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to acquire Docker test environment: {e}")
         
         # Build database URL
         database_url = f"postgresql+asyncpg://test_user:test_password@localhost:5434/netra_test"
@@ -120,14 +133,39 @@ async def real_postgres_connection():
         }
         
     except Exception as e:
-        logger.error(f"Failed to set up real PostgreSQL connection: {e}")
+        error_msg = str(e)
+        logger.error(f"Failed to set up real PostgreSQL connection: {error_msg}")
+        
+        # Provide detailed error guidance based on the type of failure
+        if "Docker not running" in error_msg or "Docker not accessible" in error_msg:
+            guidance = (
+                "Docker is required for real database testing. "
+                "Start Docker Desktop and run: python tests/unified_test_runner.py --real-services"
+            )
+        elif "UnifiedDockerManager not available" in error_msg:
+            guidance = (
+                "Docker manager not available. "
+                "Ensure test framework is properly installed."
+            )
+        elif "Database not ready" in error_msg:
+            guidance = (
+                "Database container failed to start or connect. "
+                "Try: docker compose down && python tests/unified_test_runner.py --real-services"
+            )
+        else:
+            guidance = (
+                "Unknown database setup error. "
+                "Check Docker, database containers, and environment configuration."
+            )
+        
         # Provide fallback for tests that can handle missing database
         yield {
             "engine": None,
             "database_url": None,
             "environment": None,
             "available": False,
-            "error": str(e)
+            "error": error_msg,
+            "guidance": guidance
         }
     finally:
         # Cleanup

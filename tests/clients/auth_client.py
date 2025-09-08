@@ -142,6 +142,60 @@ class AuthTestClient:
             return response.status_code == 200
         except Exception:
             return False
+    
+    async def detailed_health_check(self) -> Dict[str, Any]:
+        """Perform detailed health check with diagnostic information.
+        
+        Returns:
+            Dictionary with health status and diagnostic information
+        """
+        import time
+        start_time = time.time()
+        
+        try:
+            response = await self.client.get("/health")
+            response_time_ms = (time.time() - start_time) * 1000
+            
+            return {
+                "available": response.status_code == 200,
+                "status_code": response.status_code,
+                "response_time_ms": response_time_ms,
+                "url": f"{self.base_url}/health",
+                "service_type": "auth",
+                "response_data": response.json() if response.status_code == 200 else None,
+                "error": None
+            }
+            
+        except httpx.ConnectError as e:
+            return {
+                "available": False,
+                "status_code": None,
+                "response_time_ms": (time.time() - start_time) * 1000,
+                "url": f"{self.base_url}/health",
+                "service_type": "auth",
+                "response_data": None,
+                "error": f"Connection failed: {str(e)}"
+            }
+        except httpx.TimeoutException as e:
+            return {
+                "available": False,
+                "status_code": None,
+                "response_time_ms": (time.time() - start_time) * 1000,
+                "url": f"{self.base_url}/health",
+                "service_type": "auth",
+                "response_data": None,
+                "error": f"Timeout: {str(e)}"
+            }
+        except Exception as e:
+            return {
+                "available": False,
+                "status_code": None,
+                "response_time_ms": (time.time() - start_time) * 1000,
+                "url": f"{self.base_url}/health",
+                "service_type": "auth",
+                "response_data": None,
+                "error": f"Unexpected error: {str(e)}"
+            }
             
     async def create_test_user(self, email: Optional[str] = None, 
                              password: str = "TestPass123#") -> Dict[str, Any]:
