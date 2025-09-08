@@ -52,6 +52,11 @@ def validate_configuration() -> tuple[bool, list]:
 
 config_manager = unified_config_manager
 
+# BACKWARD COMPATIBILITY ALIASES
+Config = AppConfig
+DatabaseConfig = AppConfig  # For now, alias to full config - tests can access .database
+RedisConfig = AppConfig     # For now, alias to full config - tests can access .redis
+
 # LAZY LOADING: Don't auto-load at import time to allow environment setup
 _settings_cache = None
 

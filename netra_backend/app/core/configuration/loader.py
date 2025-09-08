@@ -68,9 +68,9 @@ class ConfigurationLoader:
         }
         
         config_class = config_classes.get(environment, DevelopmentConfig)
-        self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
         
         try:
+            self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
             config = config_class()
             return config
         except Exception as e:
