@@ -75,7 +75,11 @@ try:
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
-    pytest.skip("websockets not available", allow_module_level=True)
+    # CLAUDE.md: TESTS MUST RAISE ERRORS - No skipping for critical business functionality
+    raise ImportError(
+        "websockets library required for agent execution WebSocket E2E validation. "
+        "Install with: pip install websockets"
+    )
 
 
 # ============================================================================
