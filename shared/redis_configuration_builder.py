@@ -159,9 +159,10 @@ class RedisConfigurationBuilder:
             # Apply Docker hostname resolution
             resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.redis_host)
             
-            # URL encode password if present
-            if self.parent.redis_password:
-                password_part = f":{quote(self.parent.redis_password, safe='')}"
+            # URL encode password if present and non-empty
+            password = self.parent.redis_password
+            if password and password.strip():
+                password_part = f":{quote(password, safe='')}"
                 return (
                     f"redis://"
                     f"{password_part}@"
@@ -194,8 +195,9 @@ class RedisConfigurationBuilder:
                 host, port = host_port.split(":", 1)
                 resolved_host = self.parent.apply_docker_hostname_resolution(host)
                 
-                if self.parent.redis_password:
-                    password_part = f":{quote(self.parent.redis_password, safe='')}"
+                password = self.parent.redis_password
+                if password and password.strip():
+                    password_part = f":{quote(password, safe='')}"
                     url = f"redis://{password_part}@{resolved_host}:{port}/{self.parent.redis_db}"
                 else:
                     url = f"redis://{resolved_host}:{port}/{self.parent.redis_db}"

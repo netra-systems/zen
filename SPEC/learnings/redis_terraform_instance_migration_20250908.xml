@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="redis_terraform_instance_migration_20250908" priority="critical">
+  <title>Redis Terraform Instance Migration and Authentication Fix</title>
+  <date>2025-09-08</date>
+  <category>infrastructure</category>
+  <tags>redis,terraform,authentication,staging,configuration</tags>
+  
+  <issue>
+    <description>Staging backend service failing to start due to Redis connection failures</description>
+    <symptoms>
+      - Backend Cloud Run service returning 503/timeout errors
+      - Logs showing: "Redis reconnection failed (attempt 7)"
+      - Connection attempts to old Redis instance at 10.78.53.20:6379
+      - "CRITICAL STARTUP FAILURE: Health check validation failed"
+    </symptoms>
+    <root_cause>Application configured to use deprecated Redis instance instead of Terraform-managed instance</root_cause>
+  </issue>
+
+  <solution>
+    <overview>Migration from deprecated Redis instance to Terraform-managed instance with authentication</overview>
+    
+    <steps>
+      <step id="1">
+        <action>Identify correct Terraform Redis instance</action>
+        <details>
+          - Instance: staging-redis-f1adc35c
+          - IP: 10.166.204.83:6379
+          - Region: us-central1
+          - Network: staging-vpc (10.166.204.80/29)
+        </details>
+      </step>
+      
+      <step id="2">
+        <action>Update GCP secrets with correct Redis host</action>
+        <commands>
+          - echo "10.166.204.83" | gcloud secrets versions add redis-host-staging --data-file=- --project netra-staging
+          - echo "6379" | gcloud secrets versions add redis-port-staging --data-file=- --project netra-staging
+        </commands>
+      </step>
+      
+      <step id="3">
+        <action>Enable authentication on Terraform Redis instance</action>
+        <commands>
+          - gcloud redis instances update staging-redis-f1adc35c --region=us-central1 --project netra-staging --enable-auth
+          - gcloud redis instances get-auth-string staging-redis-f1adc35c --region=us-central1 --project netra-staging
+        </commands>
+        <result>Auth string: 1e8c1a73-ee45-4d2a-ac14-cb92fedc2c3b</result>
+      </step>
+      
+      <step id="4">
+        <action>Update Redis secrets with authentication</action>
+        <commands>
+          - echo "1e8c1a73-ee45-4d2a-ac14-cb92fedc2c3b" | gcloud secrets versions add redis-password-staging --data-file=- --project netra-staging
+          - echo "redis://:1e8c1a73-ee45-4d2a-ac14-cb92fedc2c3b@10.166.204.83:6379/0" | gcloud secrets versions add redis-url-staging --data-file=- --project netra-staging
+        </commands>
+        <note>CRITICAL: Redis URL format for GCP Redis auth is redis://:password@host:port/db (no username)</note>
+      </step>
+      
+      <step id="5">
+        <action>Fix RedisConfigurationBuilder password validation logic</action>
+        <file>shared/redis_configuration_builder.py</file>
+        <change>Update password check from `if self.parent.redis_password:` to `if password and password.strip():` to handle empty/whitespace passwords correctly</change>
+      </step>
+      
+      <step id="6">
+        <action>Redeploy services</action>
+        <services>
+          - netra-backend-staging (picks up new Redis config)
+          - netra-auth-service (shares same Redis secrets)
+        </services>
+        <commands>
+          - gcloud run deploy netra-backend-staging --project netra-staging --region us-central1 --image gcr.io/netra-staging/netra-backend-staging:latest --platform managed
+          - gcloud run deploy netra-auth-service --project netra-staging --region us-central1 --image gcr.io/netra-staging/netra-auth-service:latest --platform managed
+        </commands>
+      </step>
+    </steps>
+  </solution>
+
+  <validation>
+    <tests>
+      <test>Backend health endpoint returns 200</test>
+      <test>Auth service health endpoint returns 200</test>
+      <test>Redis logs show "Redis initial connection successful"</test>
+      <test>No more Redis reconnection failures in logs</test>
+    </tests>
+    <results>All services healthy and connecting to Redis successfully</results>
+  </validation>
+
+  <anti_regression>
+    <critical_points>
+      - ALWAYS use Terraform-managed Redis instance (staging-redis-f1adc35c) for staging
+      - Redis auth URL format: redis://:password@host:port/db (no username for GCP Redis)
+      - Both backend and auth services share same Redis configuration via GCP secrets
+      - RedisConfigurationBuilder must properly handle empty/whitespace passwords
+    </critical_points>
+    
+    <monitoring>
+      - Monitor Redis connection status in service logs
+      - Alert on "Redis reconnection failed" messages
+      - Verify correct Redis instance IP (10.166.204.83) in connection logs
+    </monitoring>
+  </anti_regression>
+
+  <cross_references>
+    <related_files>
+      - shared/redis_configuration_builder.py (configuration logic)
+      - netra_backend/app/core/backend_environment.py (environment config)
+      - auth_service/auth_core/auth_environment.py (auth environment config)
+    </related_files>
+    
+    <related_learnings>
+      - SPEC/learnings/redis_configuration_ssot_20250825.xml
+      - SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml (Redis config values)
+    </related_learnings>
+  </cross_references>
+
+  <business_impact>
+    <segment>Platform/Internal</segment>
+    <goal>Stability</goal>
+    <impact>CRITICAL - Staging environment completely non-functional without working Redis</impact>
+    <resolution>Complete staging environment restoration, enabling E2E testing and development workflows</resolution>
+  </business_impact>
+</learning>
