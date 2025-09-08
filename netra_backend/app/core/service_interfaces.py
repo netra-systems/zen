@@ -7,6 +7,8 @@ and re-exporting from the focused modular structure.
 # Import from service layer interfaces
 # Import from agent interfaces
 from netra_backend.app.core.interfaces_agent import AsyncTaskService
+# Import health status enum
+from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthStatus
 
 # Import from base interfaces
 from netra_backend.app.core.interfaces_base import BaseService, BaseServiceMixin
@@ -40,6 +42,7 @@ from netra_backend.app.core.interfaces_websocket import (
 __all__ = [
     # Service layer interfaces
     'ServiceHealth',
+    'ServiceHealthStatus',
     'ServiceMetrics',
     'BaseServiceInterface',
     'CRUDServiceInterface',
