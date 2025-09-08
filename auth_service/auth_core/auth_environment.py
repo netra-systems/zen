@@ -255,12 +255,18 @@ class AuthEnvironment:
         """Get database connection URL using DatabaseURLBuilder."""
         env = self.get_environment()
         
-        # CRITICAL: Test environment gets SQLite in-memory for isolation and speed (per CLAUDE.md)
-        # This takes priority over any explicit #removed-legacyto ensure "permissive" test behavior
+        # CRITICAL: Test environment gets SQLite for isolation and speed (per CLAUDE.md)
+        # This takes priority over any explicit config to ensure "permissive" test behavior
         if env == "test":
-            # Test: Always use in-memory SQLite for isolation (permissive test behavior)
-            url = "sqlite+aiosqlite:///:memory:"
-            logger.info("Using in-memory SQLite for test environment (permissive test mode per CLAUDE.md)")
+            # Test: Use file-based SQLite for proper connection sharing across test methods
+            # In-memory databases don't work well with async connection pooling
+            import tempfile
+            import os
+            
+            # Use a temporary file that gets cleaned up automatically
+            test_db_path = os.path.join(tempfile.gettempdir(), "auth_service_test.db")
+            url = f"sqlite+aiosqlite:///{test_db_path}"
+            logger.info(f"Using file-based SQLite for test environment: {test_db_path}")
             return url
         
         # Use DatabaseURLBuilder for all non-test environments
