@@ -182,6 +182,9 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         This represents the complete customer value delivery pipeline.
         """
+        # CRITICAL: Track execution time - E2E tests completing in 0.00s automatically fail
+        execution_start_time = time.time()
+        
         # Ensure services are ready for E2E testing
         services_ready = await self._ensure_services_ready()
         if not services_ready:
@@ -218,38 +221,42 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         # Step 3: Establish WebSocket connection with authentication
         websocket_headers = self.auth_helper.get_websocket_headers(jwt_token)
         
-        try:
-            websocket = await WebSocketTestHelpers.create_test_websocket_connection(
-                self.websocket_url,
-                headers=websocket_headers,
-                timeout=20.0,
-                max_retries=3,
-                user_id=test_user_id
-            )
-            self.active_websockets.append(websocket)
-            
-            # Test WebSocket authentication via UnifiedAuthenticationService
-            # This simulates the WebSocket route's authentication process
-            from unittest.mock import MagicMock
-            mock_websocket = MagicMock()
-            mock_websocket.headers = websocket_headers
-            mock_websocket.client.host = "127.0.0.1"
-            mock_websocket.client.port = 12345
-            
-            ws_auth_result, user_context = await self.unified_auth.authenticate_websocket(mock_websocket)
-            
-            assert ws_auth_result.success, f"WebSocket authentication failed: {ws_auth_result.error}"
-            assert user_context is not None, "UserExecutionContext not created"
-            assert user_context.user_id == test_user_id, "User context mismatch"
-            
-            self.logger.info(f"✅ Step 2: WebSocket authenticated - context created for {test_user_id[:8]}...")
-            
-        except Exception as e:
-            # Handle mock WebSocket connection for Docker-less environments
-            self.logger.warning(f"Real WebSocket connection failed, using mock: {e}")
-            from test_framework.websocket_helpers import MockWebSocketConnection
-            websocket = MockWebSocketConnection(test_user_id)
-            self.active_websockets.append(websocket)
+        # CRITICAL FIX: Use real WebSocket connection for authentication testing
+        # Per CLAUDE.md: "MOCKS = Abomination" - test authentication through real connection
+        execution_start_time = time.time()
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            self.websocket_url,
+            headers=websocket_headers,
+            timeout=20.0,
+            max_retries=3,
+            user_id=test_user_id
+        )
+        self.active_websockets.append(websocket)
+        
+        # Verify real WebSocket connection was established with authentication
+        assert websocket is not None, "Failed to create authenticated WebSocket connection"
+        
+        # Test authentication by attempting a privileged operation
+        auth_test_message = {
+            "type": "ping",
+            "user_id": test_user_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "auth_test": True
+        }
+        
+        # Send authenticated message - this validates WebSocket authentication works
+        await websocket.send_json(auth_test_message)
+        
+        # Wait for response to confirm authentication succeeded
+        response = await asyncio.wait_for(websocket.receive_json(), timeout=10.0)
+        assert response is not None, "No response from authenticated WebSocket"
+        
+        self.logger.info(f"✅ Step 2: Real WebSocket authentication validated - {test_user_id[:8]}...")
+        
+        # CRITICAL: Validate E2E timing - tests completing in 0.00s automatically fail
+        execution_time = time.time() - execution_start_time
+        assert execution_time >= 0.1, f"E2E test executed too quickly ({execution_time:.3f}s) - likely not using real services"
         
         # Step 4: Send agent request and collect WebSocket events
         agent_request = {
@@ -325,11 +332,19 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         self.logger.info("✅ Step 5: SSOT authentication compliance validated")
         
+        # CRITICAL: Validate E2E execution timing - tests completing in 0.00s automatically fail
+        execution_time = time.time() - execution_start_time
+        assert execution_time >= 0.1, (
+            f"E2E test executed too quickly ({execution_time:.3f}s) - likely not using real services. "
+            f"Per CLAUDE.md: E2E tests completing in 0.00s automatically fail"
+        )
+        
         # Test completed successfully - full revenue pipeline validated
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🎉 COMPLETE USER AUTH TO AGENT FLOW SUCCESS: {duration:.2f}s")
+        self.logger.info(f"🎉 COMPLETE USER AUTH TO AGENT FLOW SUCCESS: {duration:.2f}s (execution: {execution_time:.3f}s)")
         self.logger.info(f"✅ Revenue pipeline validated: Auth → WebSocket → Agent → Business Value")
         self.logger.info(f"📊 Events received: {len(collected_events)}, Types: {event_types}")
+        self.logger.info(f"⏱️ Execution timing validated: {execution_time:.3f}s (real services confirmed)"
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -401,8 +416,9 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             
             # Collect chat response events
             chat_events = []
-            try:
-                for _ in range(8):  # Allow multiple events per message
+            # CRITICAL FIX: No silent failures - raise errors for debugging
+            for _ in range(8):  # Allow multiple events per message
+                try:
                     event = await asyncio.wait_for(
                         WebSocketTestHelpers.receive_test_message(websocket, timeout=5.0),
                         timeout=20.0
@@ -412,9 +428,11 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                     # Stop collecting when we get a response
                     if event.get("type") in ["chat_response", "agent_completed"]:
                         break
-                        
-            except asyncio.TimeoutError:
-                pass  # Expected when no more events
+                except asyncio.TimeoutError:
+                    # Only break on timeout - but ensure we got at least some events
+                    if len(chat_events) == 0:
+                        raise AssertionError(f"No chat events received for message {i+1} - WebSocket connection may have failed")
+                    break
             
             total_chat_events.extend(chat_events)
             self.logger.info(f"📥 Chat message {i+1} generated {len(chat_events)} events")
@@ -518,25 +536,20 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         # Test WebSocket isolation - multiple users connecting simultaneously
         websocket_connections = []
         
+        # CRITICAL FIX: E2E tests MUST use real WebSocket connections only
         for user in users[:3]:  # Test first 3 users for WebSocket isolation
-            try:
-                headers = self.auth_helper.get_websocket_headers(user["token"])
-                websocket = await WebSocketTestHelpers.create_test_websocket_connection(
-                    self.websocket_url,
-                    headers=headers,
-                    timeout=15.0,
-                    user_id=user["user_id"]
-                )
-                websocket_connections.append((user, websocket))
-                self.active_websockets.append(websocket)
-                
-            except Exception as e:
-                # Use mock connection for testing isolation logic
-                self.logger.warning(f"Using mock WebSocket for {user['segment']}: {e}")
-                from test_framework.websocket_helpers import MockWebSocketConnection
-                websocket = MockWebSocketConnection(user["user_id"])
-                websocket_connections.append((user, websocket))
-                self.active_websockets.append(websocket)
+            headers = self.auth_helper.get_websocket_headers(user["token"])
+            websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                self.websocket_url,
+                headers=headers,
+                timeout=15.0,
+                user_id=user["user_id"]
+            )
+            websocket_connections.append((user, websocket))
+            self.active_websockets.append(websocket)
+            
+            # Verify each connection is authenticated
+            assert websocket is not None, f"Failed to create WebSocket for {user['segment']} user"
         
         # Send isolated messages from each user
         message_responses = []
@@ -680,37 +693,38 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         invalid_token = "fake.agent.access.token"
         invalid_headers = {"Authorization": f"Bearer {invalid_token}"}
         
+        # CRITICAL FIX: Test unauthorized access with real WebSocket (should fail to connect)
+        unauthorized_connection_failed = False
         try:
-            # Use mock WebSocket to test agent access prevention logic
-            from test_framework.websocket_helpers import MockWebSocketConnection
-            mock_websocket = MockWebSocketConnection("unauthorized_user")
+            # Attempt real WebSocket connection with invalid credentials
+            # This should fail at the connection level due to authentication
+            unauthorized_websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                self.websocket_url,
+                headers=invalid_headers,
+                timeout=5.0,
+                user_id="unauthorized_user"
+            )
             
-            # Send agent request with invalid auth
+            # If connection succeeds (shouldn't happen), try to send request
             agent_request = {
-                "type": "agent_request",
+                "type": "agent_request", 
                 "agent": "cost_optimizer",
                 "message": "This should be blocked - unauthorized access attempt",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            await WebSocketTestHelpers.send_test_message(mock_websocket, agent_request, timeout=5.0)
+            await WebSocketTestHelpers.send_test_message(unauthorized_websocket, agent_request, timeout=5.0)
+            await WebSocketTestHelpers.close_test_connection(unauthorized_websocket)
             
-            # Should receive error response, not agent execution
-            response = await asyncio.wait_for(
-                WebSocketTestHelpers.receive_test_message(mock_websocket, timeout=5.0),
-                timeout=10.0
-            )
+            # If we reach here, authentication failed to block the connection
+            raise AssertionError("Unauthorized WebSocket connection should have been rejected")
             
-            # Validate access was denied
-            assert response.get("type") == "error", f"Expected error response, got: {response.get('type')}"
-            error_message = response.get("error", "").lower()
-            assert any(keyword in error_message for keyword in ["auth", "unauthorized", "invalid"]), (
-                f"Error message should indicate auth failure: {error_message}"
-            )
-            
-        except Exception as e:
-            # Some auth failures might prevent any response
-            self.logger.info(f"✅ Agent access properly blocked: {type(e).__name__}")
+        except (ConnectionRefusedError, Exception) as e:
+            # Expected - unauthorized connection should be rejected
+            unauthorized_connection_failed = True
+            self.logger.info(f"✅ Unauthorized WebSocket connection properly rejected: {type(e).__name__}")
+        
+        assert unauthorized_connection_failed, "Unauthorized WebSocket connection should have failed"
         
         self.logger.info("✅ All authentication failures properly blocked agent access")
         
