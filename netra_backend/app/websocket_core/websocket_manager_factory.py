@@ -1466,5 +1466,7 @@ __all__ = [
     "FactoryInitializationError",
     "get_websocket_manager_factory",
     "create_websocket_manager",
-    "create_defensive_user_execution_context"
+    "create_defensive_user_execution_context",
+    # Five Whys Root Cause Prevention
+    "WebSocketManagerProtocol"  # Re-exported from protocols module
 ]
