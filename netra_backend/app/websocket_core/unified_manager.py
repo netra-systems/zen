@@ -296,8 +296,17 @@ class UnifiedWebSocketManager:
             queued_messages = self._message_recovery_queue.get(connection.user_id, [])
             if queued_messages:
                 logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
-                # Create task AFTER releasing the lock to prevent deadlock
-                asyncio.create_task(self._process_queued_messages(connection.user_id))
+                # HANG FIX: Await the processing to ensure messages are sent before method returns
+                # This prevents test hanging where the test expects messages but they're still processing
+                try:
+                    await asyncio.wait_for(
+                        self._process_queued_messages(connection.user_id), 
+                        timeout=5.0  # Reasonable timeout to prevent infinite hang
+                    )
+                except asyncio.TimeoutError:
+                    logger.error(f"Timeout processing queued messages for user {connection.user_id}")
+                except Exception as e:
+                    logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
     
     async def remove_connection(self, connection_id: str) -> None:
         """Remove a WebSocket connection with thread safety."""
@@ -360,8 +369,16 @@ class UnifiedWebSocketManager:
             # Check if user has any connections
             if self.get_user_connections(user_id):
                 logger.debug(f"Connection established for user {user_id} after {asyncio.get_event_loop().time() - start_time:.2f}s")
-                # Process any queued messages for this user
-                await self.process_recovery_queue(user_id)
+                # HANG FIX: Process queued messages with timeout to prevent infinite wait
+                try:
+                    await asyncio.wait_for(
+                        self.process_recovery_queue(user_id), 
+                        timeout=min(2.0, timeout - (asyncio.get_event_loop().time() - start_time))
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning(f"Timeout processing recovery queue for user {user_id}")
+                except Exception as e:
+                    logger.error(f"Error processing recovery queue for user {user_id}: {e}")
                 return True
             
             # Wait before next check
@@ -1322,7 +1339,7 @@ class UnifiedWebSocketManager:
         # Small delay to ensure connection is fully established
         await asyncio.sleep(0.1)
         
-        # Send each queued message
+        # Send each queued message with timeout to prevent hanging
         for msg in messages:
             try:
                 # Remove recovery metadata before sending
@@ -1332,9 +1349,15 @@ class UnifiedWebSocketManager:
                 # Add a flag indicating this is a recovered message
                 clean_msg['recovered'] = True
                 
-                await self.send_to_user(user_id, clean_msg)
+                # HANG FIX: Add timeout to prevent infinite wait on send_to_user
+                await asyncio.wait_for(
+                    self.send_to_user(user_id, clean_msg),
+                    timeout=3.0  # Reasonable timeout per message
+                )
                 logger.debug(f"Successfully delivered queued message type '{clean_msg.get('type')}' to user {user_id}")
                 
+            except asyncio.TimeoutError:
+                logger.error(f"Timeout delivering queued message to user {user_id}: {clean_msg.get('type', 'unknown')}")
             except Exception as e:
                 logger.error(f"Failed to deliver queued message to user {user_id}: {e}")
         

@@ -121,10 +121,47 @@ class TestUnifiedWebSocketManagerComprehensive:
                 self.manager._user_connections.clear()
                 self.manager.active_connections.clear()
                 
-                # Stop background monitoring
-                loop = asyncio.get_event_loop()
-                if not loop.is_running():
-                    loop.run_until_complete(self.manager.shutdown_background_monitoring())
+                # HANG FIX: Proper async cleanup - create async function and run it
+                async def async_cleanup():
+                    try:
+                        # Cancel any background tasks first
+                        for task_name, task in list(self.manager._background_tasks.items()):
+                            if not task.done():
+                                task.cancel()
+                                try:
+                                    await asyncio.wait_for(task, timeout=0.1)
+                                except (asyncio.CancelledError, asyncio.TimeoutError):
+                                    pass
+                        
+                        # Clear background task registry
+                        self.manager._background_tasks.clear()
+                        
+                        # Stop background monitoring
+                        await asyncio.wait_for(
+                            self.manager.shutdown_background_monitoring(), 
+                            timeout=2.0
+                        )
+                    except asyncio.TimeoutError:
+                        print("Timeout during background monitoring shutdown")
+                    except Exception as e:
+                        print(f"Error during async cleanup: {e}")
+                
+                # Run cleanup in event loop
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # If loop is running, create task and don't block
+                        cleanup_task = asyncio.create_task(async_cleanup())
+                        # Add done callback to log completion
+                        cleanup_task.add_done_callback(
+                            lambda t: print(f"Cleanup task completed: {t.exception() if t.exception() else 'success'}")
+                        )
+                    else:
+                        # If loop is not running, run until complete
+                        loop.run_until_complete(async_cleanup())
+                except Exception as cleanup_error:
+                    print(f"Error setting up async cleanup: {cleanup_error}")
+                    
             except Exception as e:
                 # Log cleanup error but don't fail test
                 print(f"Cleanup warning: {e}")

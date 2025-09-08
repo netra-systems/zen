@@ -62,18 +62,22 @@ from netra_backend.app.startup_health_checks import validate_startup_health
 
 # SSOT compliance: _get_project_root now imported from netra_backend.app.core.project_utils
 
-async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
-    """Ensure all required database tables exist, creating them if necessary."""
+async def _verify_required_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
+    """Verify that required database tables exist (created by migration service).
+    
+    CRITICAL: This function ONLY verifies table existence - it does NOT create tables.
+    Table creation is EXCLUSIVELY handled by the migration service.
+    """
     try:
         from netra_backend.app.db.base import Base
         from sqlalchemy import text
         import asyncio
         
         # Import all model classes to ensure they're registered with Base.metadata
-        logger.debug("Importing database models to register tables...")
+        logger.debug("Importing database models to verify table requirements...")
         _import_all_models()
         
-        logger.debug("Checking if database tables exist...")
+        logger.debug("Verifying required database tables exist...")
         
         # Get async engine from SSOT
         from netra_backend.app.database import get_engine
@@ -110,63 +114,43 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
                     raise e
             
             if missing_tables:
-                logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
-                logger.debug("Creating missing database tables automatically...")
+                # SSOT: Define critical vs non-critical tables
+                critical_tables = {
+                    'users', 'threads', 'messages', 'runs', 'assistants'  # Core chat functionality
+                }
+                critical_missing = missing_tables & critical_tables
+                non_critical_missing = missing_tables - critical_tables
                 
-                # Create missing tables in a separate transaction
-                async with conn.begin() as trans:
-                    try:
-                        await conn.run_sync(Base.metadata.create_all)
-                        await trans.commit()
-                    except Exception as create_error:
-                        await trans.rollback()
-                        # Handle duplicate table/constraint errors gracefully
-                        error_msg = str(create_error).lower()
-                        if any(keyword in error_msg for keyword in [
-                            'already exists', 'duplicate', 'relation', 
-                            'constraint', 'violates unique'
-                        ]):
-                            logger.warning(f"Some tables already exist during creation (expected): {create_error}")
-                            logger.debug("Continuing - tables may have been created by another process")
-                        else:
-                            # Re-raise unexpected errors
-                            raise create_error
+                if critical_missing:
+                    error_msg = f"CRITICAL STARTUP FAILURE: Missing CRITICAL database tables: {critical_missing}"
+                    logger.error(error_msg)
+                    logger.error("🚨 CRITICAL: Core chat functionality requires these tables")
+                    logger.error("🔧 SOLUTION: Run the migration service to create critical tables")
+                    logger.error("⚠️  Backend CANNOT function without critical tables")
+                    
+                    # Critical tables missing = HARD FAILURE regardless of graceful_startup
+                    raise RuntimeError(f"Missing critical database tables: {critical_missing}. Run migration service first.")
                 
-                # Verify tables were created in a new transaction
-                async with conn.begin() as trans:
-                    try:
-                        result = await conn.execute(text("""
-                            SELECT table_name 
-                            FROM information_schema.tables 
-                            WHERE table_schema = 'public' 
-                            ORDER BY table_name
-                        """))
-                        
-                        new_existing_tables = set(row[0] for row in result.fetchall())
-                        still_missing = expected_tables - new_existing_tables
-                        await trans.commit()
-                    except Exception as e:
-                        await trans.rollback()
-                        raise e
-                
-                if still_missing:
-                    error_msg = f"Failed to create tables: {still_missing}"
+                if non_critical_missing:
+                    logger.warning(f"ARCHITECTURE NOTICE: Missing non-critical database tables: {non_critical_missing}")
+                    logger.warning("🔧 These tables should be created by migration service for full functionality")
+                    logger.warning("⚠️  Some features may be degraded until tables are created")
+                    
                     if graceful_startup:
-                        logger.error(f"{error_msg} - continuing with degraded functionality")
+                        logger.info("✅ Continuing with degraded functionality - core chat will work")
                     else:
-                        raise RuntimeError(error_msg)
-                else:
-                    logger.debug(f"Successfully created {len(missing_tables)} missing database tables")
+                        logger.error(f"Non-critical tables missing in strict mode: {non_critical_missing}")
+                        raise RuntimeError(f"Missing required database tables: {non_critical_missing}. Run migration service first.")
             else:
-                logger.debug(f"All {len(expected_tables)} database tables are present")
+                logger.debug(f"✅ All {len(expected_tables)} required database tables are present")
         
         # Log final pool status before disposal
-        logger.debug(f"Database engine ready for disposal")
+        logger.debug(f"Database table verification complete")
         
         await engine.dispose()
         
     except Exception as e:
-        error_msg = f"Failed to ensure database tables exist: {e}"
+        error_msg = f"Failed to verify database tables exist: {e}"
         if graceful_startup:
             logger.warning(f"{error_msg} - continuing with potential database issues")
         else:
@@ -541,10 +525,10 @@ async def setup_database_connections(app: FastAPI) -> None:
             else:
                 raise RuntimeError(error_msg)
         
-        # Ensure database tables exist with timeout protection
-        logger.debug(f"Ensuring database tables exist with {table_setup_timeout}s timeout...")
+        # Verify database tables exist (created by migration service) with timeout protection
+        logger.debug(f"Verifying database tables exist with {table_setup_timeout}s timeout...")
         await asyncio.wait_for(
-            _ensure_database_tables_exist(logger, graceful_startup),
+            _verify_required_database_tables_exist(logger, graceful_startup),
             timeout=table_setup_timeout
         )
             
