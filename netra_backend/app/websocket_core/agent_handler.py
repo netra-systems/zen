@@ -23,6 +23,8 @@ from netra_backend.app.dependencies import (
     create_user_execution_context,
     get_request_scoped_supervisor
 )
+from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
@@ -89,8 +91,8 @@ class AgentMessageHandler(BaseMessageHandler):
             run_id = message.payload.get("run_id") or str(uuid.uuid4())
             
             # CRITICAL FIX: Update thread association for WebSocket routing
-            from netra_backend.app.websocket_core import get_websocket_manager
-            ws_manager = get_websocket_manager()
+            context = UserExecutionContext.get_context(user_id)
+            ws_manager = create_websocket_manager(context=context)
             connection_id = None
             
             if thread_id and ws_manager:
@@ -168,8 +170,8 @@ class AgentMessageHandler(BaseMessageHandler):
             thread_id = message.payload.get("thread_id") or message.thread_id
             if thread_id:
                 # Get WebSocket manager and update thread association
-                from netra_backend.app.websocket_core import get_websocket_manager
-                ws_manager = get_websocket_manager()
+                context = UserExecutionContext.get_context(user_id)
+                ws_manager = create_websocket_manager(context=context)
                 if ws_manager:
                     # Get connection ID from the WebSocket instance
                     connection_id = ws_manager.get_connection_id_by_websocket(websocket)
@@ -370,8 +372,8 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                from netra_backend.app.websocket_core import get_websocket_manager
-                manager = get_websocket_manager()
+                context = UserExecutionContext.get_context(websocket_context.user_id)
+                manager = create_websocket_manager(context=context)
                 await manager.send_error(
                     websocket_context.user_id, 
                     f"Failed to process {message.type}. Please try again."
@@ -432,8 +434,8 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                from netra_backend.app.websocket_core import get_websocket_manager
-                manager = get_websocket_manager()
+                context = UserExecutionContext.get_context(user_context.user_id)
+                manager = create_websocket_manager(context=context)
                 await manager.send_error(
                     user_context.user_id, 
                     f"Failed to process {message.type}. Please try again."
@@ -472,8 +474,8 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                from netra_backend.app.websocket_core import get_websocket_manager
-                manager = get_websocket_manager()
+                context = UserExecutionContext.get_context(user_id)
+                manager = create_websocket_manager(context=context)
                 await manager.send_error(user_id, "Failed to start agent. Please try again.")
             except:
                 pass  # Best effort to notify user
@@ -514,8 +516,8 @@ class AgentMessageHandler(BaseMessageHandler):
             
             # Send error to user via WebSocket if possible
             try:
-                from netra_backend.app.websocket_core import get_websocket_manager
-                manager = get_websocket_manager()
+                context = UserExecutionContext.get_context(user_id)
+                manager = create_websocket_manager(context=context)
                 await manager.send_error(user_id, "Failed to process message. Please try again.")
             except:
                 pass  # Best effort to notify user

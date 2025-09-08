@@ -8,6 +8,7 @@ import base64
 from typing import Optional, Dict, Any, Tuple
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from uuid import uuid4
 
 from fastapi import WebSocket, HTTPException
 
@@ -340,6 +341,57 @@ def get_connection_security_manager() -> ConnectionSecurityManager:
     if _security_manager is None:
         _security_manager = ConnectionSecurityManager()
     return _security_manager
+
+
+class WebSocketAuthMiddleware:
+    """Middleware for WebSocket authentication and security."""
+    
+    def __init__(self):
+        """Initialize WebSocket authentication middleware."""
+        self.authenticator = get_websocket_authenticator()
+        self.security_manager = get_connection_security_manager()
+        self.rate_limiter = RateLimiter()
+        
+    async def authenticate_connection(self, websocket: WebSocket) -> Tuple[AuthInfo, str]:
+        """Authenticate WebSocket connection and return auth info and connection ID."""
+        
+        # Generate connection ID
+        connection_id = str(uuid4())
+        
+        # Authenticate the WebSocket
+        auth_info = await self.authenticator.authenticate_websocket(websocket)
+        
+        # Register with security manager
+        self.security_manager.register_connection(connection_id, auth_info, websocket)
+        
+        # Check rate limits
+        if not await self.rate_limiter.check_rate_limit(auth_info.user_id):
+            logger.warning(f"Rate limit exceeded for user: {auth_info.user_id}")
+            self.security_manager.report_security_violation(
+                connection_id, 
+                "rate_limit_exceeded", 
+                {"user_id": auth_info.user_id}
+            )
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+        
+        logger.info(f"WebSocket connection authenticated: {connection_id} for user: {auth_info.user_id}")
+        return auth_info, connection_id
+    
+    async def validate_message_auth(self, connection_id: str, message: Dict[str, Any]) -> bool:
+        """Validate authentication for incoming WebSocket messages."""
+        
+        # Check connection security
+        if not self.security_manager.validate_connection_security(connection_id):
+            logger.warning(f"Message authentication failed for connection: {connection_id}")
+            return False
+        
+        # Additional message-level authentication checks can be added here
+        return True
+    
+    def cleanup_connection(self, connection_id: str):
+        """Clean up connection authentication resources."""
+        self.security_manager.unregister_connection(connection_id)
+        logger.debug(f"Cleaned up authentication for connection: {connection_id}")
 
 
 @asynccontextmanager
