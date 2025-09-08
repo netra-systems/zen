@@ -17,7 +17,6 @@ from netra_backend.app.dependencies import (
     RequestScopedContextDep,
     RequestScopedSupervisorDep,
     get_request_scoped_supervisor_dependency,
-    create_user_execution_context,
     get_request_scoped_user_context
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext

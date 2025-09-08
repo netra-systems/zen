@@ -5,7 +5,6 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Any, Dict
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.dependencies import get_user_execution_context
@@ -56,18 +55,11 @@ class QualityAlertHandler(BaseMessageHandler):
         await self.monitoring_service.subscribe_to_updates(user_id)
         message = self._build_subscription_message("subscribed")
         
-        # Use existing context IDs instead of generating new ones
-        thread_id = getattr(self, '_current_thread_id', None)
-        run_id = getattr(self, '_current_run_id', None)
-        
-        if not thread_id or not run_id:
-            thread_id = UnifiedIdGenerator.generate_base_id("thread")
-            run_id = UnifiedIdGenerator.generate_base_id("run")
-        
+        # ✅ CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
         )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
@@ -77,18 +69,11 @@ class QualityAlertHandler(BaseMessageHandler):
         await self.monitoring_service.unsubscribe_from_updates(user_id)
         message = self._build_subscription_message("unsubscribed")
         
-        # Use existing context IDs instead of generating new ones
-        thread_id = getattr(self, '_current_thread_id', None)
-        run_id = getattr(self, '_current_run_id', None)
-        
-        if not thread_id or not run_id:
-            thread_id = UnifiedIdGenerator.generate_base_id("thread")
-            run_id = UnifiedIdGenerator.generate_base_id("run")
-        
+        # ✅ CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id
+            thread_id=None,  # Let session manager handle missing IDs
+            run_id=None      # Let session manager handle missing IDs
         )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
@@ -97,18 +82,11 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle invalid subscription action."""
         error_message = f"Invalid action: {action}. Use 'subscribe' or 'unsubscribe'"
         try:
-            # Use existing context IDs instead of generating new ones
-            thread_id = getattr(self, '_current_thread_id', None)
-            run_id = getattr(self, '_current_run_id', None)
-            
-            if not thread_id or not run_id:
-                thread_id = UnifiedIdGenerator.generate_base_id("action_error_thread")
-                run_id = UnifiedIdGenerator.generate_base_id("action_error_run")
-            
+            # ✅ CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
             )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
@@ -128,18 +106,11 @@ class QualityAlertHandler(BaseMessageHandler):
         logger.error(f"Error handling quality alert subscription: {str(error)}")
         error_message = f"Failed to handle subscription: {str(error)}"
         try:
-            # Use existing context IDs instead of generating new ones
-            thread_id = getattr(self, '_current_thread_id', None)
-            run_id = getattr(self, '_current_run_id', None)
-            
-            if not thread_id or not run_id:
-                thread_id = UnifiedIdGenerator.generate_base_id("action_error_thread")
-                run_id = UnifiedIdGenerator.generate_base_id("action_error_run")
-            
+            # ✅ CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
             )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})

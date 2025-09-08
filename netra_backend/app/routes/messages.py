@@ -341,7 +341,6 @@ async def stream_chat(
     """
     from fastapi.responses import StreamingResponse
     from netra_backend.app.dependencies import get_request_scoped_supervisor_dependency
-    from netra_backend.app.agents.supervisor.user_execution_context import create_user_execution_context
     
     try:
         logger.info(f"Starting chat stream for user {current_user[:8]}... in thread {request.thread_id}")
