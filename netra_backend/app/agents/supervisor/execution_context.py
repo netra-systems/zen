@@ -21,6 +21,17 @@ class AgentExecutionStrategy(Enum):
     CONDITIONAL = "conditional"
 
 
+class PipelineStep(Enum):
+    """Pipeline execution step states"""
+    INITIALIZATION = "initialization"
+    VALIDATION = "validation"
+    EXECUTION = "execution"
+    PROCESSING = "processing"
+    COMPLETION = "completion"
+    ERROR = "error"
+    CANCELLED = "cancelled"
+
+
 @dataclass
 class AgentExecutionContext:
     """Context for agent execution with trace propagation"""
@@ -35,6 +46,11 @@ class AgentExecutionContext:
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     correlation_id: Optional[str] = None
     trace_context: Optional['UnifiedTraceContext'] = None
+    # Additional parameters for pipeline execution
+    request_id: Optional[str] = None
+    step: Optional[PipelineStep] = None
+    execution_timestamp: Optional[datetime] = None
+    pipeline_step_num: Optional[int] = None
     
     def with_trace_context(self, trace_context: 'UnifiedTraceContext') -> 'AgentExecutionContext':
         """Create a copy of this context with the given trace context."""
@@ -57,8 +73,8 @@ class AgentExecutionResult:
 
 
 @dataclass
-class PipelineStep:
-    """Represents a step in an execution pipeline"""
+class PipelineStepConfig:
+    """Represents a step configuration in an execution pipeline"""
     agent_name: str
     strategy: AgentExecutionStrategy = AgentExecutionStrategy.SEQUENTIAL
     condition: Optional[callable] = None

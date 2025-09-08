@@ -3,25 +3,25 @@
 from typing import List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 
 
 class PipelineBuilder:
     """Builds execution pipelines based on state and requirements."""
     
     def get_execution_pipeline(self, prompt: str, 
-                               state: DeepAgentState) -> List[PipelineStep]:
+                               state: DeepAgentState) -> List[PipelineStepConfig]:
         """Determine execution pipeline based on prompt."""
         pipeline = self._build_base_pipeline()
         self._add_conditional_steps(pipeline, state)
-        pipeline.append(PipelineStep(agent_name="reporting"))
+        pipeline.append(PipelineStepConfig(agent_name="reporting"))
         return pipeline
     
-    def _build_base_pipeline(self) -> List[PipelineStep]:
+    def _build_base_pipeline(self) -> List[PipelineStepConfig]:
         """Build base pipeline with triage."""
-        return [PipelineStep(agent_name="triage")]
+        return [PipelineStepConfig(agent_name="triage")]
     
-    def _add_conditional_steps(self, pipeline: List[PipelineStep],
+    def _add_conditional_steps(self, pipeline: List[PipelineStepConfig],
                               state: DeepAgentState) -> None:
         """Add conditional pipeline steps."""
         self._add_data_step_if_needed(pipeline, state)
@@ -31,17 +31,17 @@ class PipelineBuilder:
     def _add_data_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
         """Add data analysis step if needed."""
         if self._needs_data_analysis(state):
-            pipeline.append(PipelineStep(agent_name="data"))
+            pipeline.append(PipelineStepConfig(agent_name="data"))
     
-    def _add_optimization_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+    def _add_optimization_step_if_needed(self, pipeline: List[PipelineStepConfig], state: DeepAgentState) -> None:
         """Add optimization step if needed."""
         if self._needs_optimization(state):
-            pipeline.append(PipelineStep(agent_name="optimization"))
+            pipeline.append(PipelineStepConfig(agent_name="optimization"))
     
-    def _add_actions_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+    def _add_actions_step_if_needed(self, pipeline: List[PipelineStepConfig], state: DeepAgentState) -> None:
         """Add actions step if needed."""
         if self._needs_actions(state):
-            pipeline.append(PipelineStep(agent_name="actions"))
+            pipeline.append(PipelineStepConfig(agent_name="actions"))
     
     def _needs_data_analysis(self, state: DeepAgentState) -> bool:
         """Check if data analysis is needed."""

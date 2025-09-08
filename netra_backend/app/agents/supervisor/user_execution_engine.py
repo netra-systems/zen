@@ -723,16 +723,17 @@ class UserExecutionEngine:
             )
             
             # Create agent state from input data
-            state = DeepAgentState()
-            state.initialize_from_dict({
-                'user_request': input_data,
-                'current_state': 'initialized',
-                'agent_context': {
+            state = DeepAgentState(
+                user_request=input_data,
+                user_id=execution_context.user_id,
+                chat_thread_id=execution_context.thread_id,
+                run_id=execution_context.run_id,
+                agent_input={
                     'agent_name': agent_name,
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id
                 }
-            })
+            )
             
             # Execute agent with the created context and state
             result = await self.execute_agent(agent_context, state)
@@ -744,23 +745,21 @@ class UserExecutionEngine:
             logger.error(f"Error in execute_agent_pipeline for {agent_name}: {e}")
             # Return a failed result instead of raising the exception
             return AgentExecutionResult(
-                context=AgentExecutionContext(
-                    user_id=execution_context.user_id,
-                    thread_id=execution_context.thread_id,
-                    run_id=execution_context.run_id,
-                    request_id=execution_context.request_id,
-                    agent_name=agent_name,
-                    step=PipelineStep.ERROR,
-                    execution_timestamp=datetime.now(timezone.utc),
-                    pipeline_step_num=1,
-                    metadata={"error": str(e)}
-                ),
-                result={'error': str(e), 'success': False},
                 success=False,
-                error_message=str(e),
-                execution_time_ms=0.0,
-                pipeline_steps=[],
-                final_state=None
+                error=str(e),
+                duration=0.0,
+                state=None,
+                metadata={
+                    'user_id': execution_context.user_id,
+                    'thread_id': execution_context.thread_id,
+                    'run_id': execution_context.run_id,
+                    'request_id': execution_context.request_id,
+                    'agent_name': agent_name,
+                    'step': PipelineStep.ERROR.value,
+                    'execution_timestamp': datetime.now(timezone.utc).isoformat(),
+                    'pipeline_step_num': 1,
+                    'error': str(e)
+                }
             )
     
     async def cleanup(self) -> None:

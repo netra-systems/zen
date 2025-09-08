@@ -9,7 +9,7 @@ Business Value: Modular workflow execution with standardized patterns.
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -78,14 +78,14 @@ class SupervisorWorkflowExecutor:
         self.supervisor.flow_logger.step_completed(flow_id, "initialize_state", "state_management")
         return state
     
-    async def _build_pipeline_step(self, flow_id: str, user_prompt: str, state: DeepAgentState) -> List[PipelineStep]:
+    async def _build_pipeline_step(self, flow_id: str, user_prompt: str, state: DeepAgentState) -> List[PipelineStepConfig]:
         """Execute build pipeline step."""
         self.supervisor.flow_logger.step_started(flow_id, "build_pipeline", "planning")
         pipeline = self.supervisor.pipeline_builder.get_execution_pipeline(user_prompt, state)
         self.supervisor.flow_logger.step_completed(flow_id, "build_pipeline", "planning")
         return pipeline
     
-    async def _execute_pipeline_step(self, flow_id: str, pipeline: List[PipelineStep], 
+    async def _execute_pipeline_step(self, flow_id: str, pipeline: List[PipelineStepConfig], 
                                    state: DeepAgentState, context: dict) -> None:
         """Execute pipeline step."""
         self.supervisor.flow_logger.step_started(flow_id, "execute_pipeline", "execution")
@@ -100,7 +100,7 @@ class SupervisorWorkflowExecutor:
             "run_id": run_id
         }
     
-    async def _execute_with_context(self, pipeline: List[PipelineStep],
+    async def _execute_with_context(self, pipeline: List[PipelineStepConfig],
                                    state: DeepAgentState, context: Dict[str, str]) -> None:
         """Execute pipeline with context."""
         await self.supervisor.pipeline_executor.execute_pipeline(

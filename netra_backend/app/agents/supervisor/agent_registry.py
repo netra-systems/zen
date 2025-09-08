@@ -162,48 +162,45 @@ class UserAgentSession:
 class AgentLifecycleManager:
     """Prevent memory leaks in multi-user agent execution."""
     
-    def __init__(self):
-        self._user_sessions: Dict[str, weakref.ReferenceType] = {}
+    def __init__(self, registry=None):
+        self._registry = registry  # Reference to the AgentRegistry for accessing user sessions
         self._memory_thresholds = {
             'max_agents_per_user': 50,
             'max_session_age_hours': 24
         }
+        # Keep weak references for cleanup tracking, but don't use for monitoring
+        self._cleanup_refs: Dict[str, weakref.ReferenceType] = {}
         
     async def cleanup_agent_resources(self, user_id: str, agent_id: str) -> None:
         """Complete resource cleanup for agent."""
         try:
-            # Get user session if exists
-            session_ref = self._user_sessions.get(user_id)
-            if session_ref:
-                session = session_ref()
-                if session:
-                    user_session = session.get(user_id)
-                    if user_session:
-                        # Cleanup specific agent
-                        async with user_session._access_lock:
-                            if agent_id in user_session._agents:
-                                agent = user_session._agents.pop(agent_id)
-                                if hasattr(agent, 'cleanup'):
-                                    await agent.cleanup()
+            # FIXED: Access user sessions from the registry directly
+            if not self._registry:
+                logger.error(f"No registry reference for cleanup of agent {agent_id} for user {user_id}")
+                return
+                
+            user_session = self._registry._user_sessions.get(user_id)
+            if user_session:
+                # Cleanup specific agent
+                async with user_session._access_lock:
+                    if agent_id in user_session._agents:
+                        agent = user_session._agents.pop(agent_id)
+                        if hasattr(agent, 'cleanup'):
+                            await agent.cleanup()
                         
-                        logger.debug(f"Cleaned up agent {agent_id} for user {user_id}")
+                logger.debug(f"Cleaned up agent {agent_id} for user {user_id}")
         except Exception as e:
             logger.error(f"Error cleaning up agent {agent_id} for user {user_id}: {e}")
     
     async def monitor_memory_usage(self, user_id: str) -> Dict[str, Any]:
         """Monitor and prevent memory leaks."""
         try:
-            session_ref = self._user_sessions.get(user_id)
-            if not session_ref:
-                return {'status': 'no_session', 'user_id': user_id}
+            # FIXED: Access user sessions from the registry directly
+            if self._registry is None:
+                return {'status': 'no_registry', 'user_id': user_id}
             
-            session = session_ref()
-            if not session:
-                # Clean up dead reference
-                del self._user_sessions[user_id]
-                return {'status': 'session_expired', 'user_id': user_id}
-            
-            user_session = session.get(user_id)
+            # Get user session directly from registry
+            user_session = self._registry._user_sessions.get(user_id)
             if not user_session:
                 return {'status': 'no_session', 'user_id': user_id}
             
@@ -230,17 +227,17 @@ class AgentLifecycleManager:
     async def trigger_cleanup(self, user_id: str) -> None:
         """Trigger emergency cleanup for user."""
         try:
-            session_ref = self._user_sessions.get(user_id)
-            if session_ref:
-                session = session_ref()
-                if session:
-                    user_session = session.get(user_id)
-                    if user_session:
-                        await user_session.cleanup_all_agents()
-            
-            # Remove session reference
-            if user_id in self._user_sessions:
-                del self._user_sessions[user_id]
+            # FIXED: Access user sessions from the registry directly
+            if not self._registry:
+                logger.error(f"No registry reference for cleanup of user {user_id}")
+                return
+                
+            user_session = self._registry._user_sessions.get(user_id)
+            if user_session:
+                await user_session.cleanup_all_agents()
+                # Remove from registry
+                if user_id in self._registry._user_sessions:
+                    del self._registry._user_sessions[user_id]
                 
             logger.info(f"✅ Emergency cleanup completed for user {user_id}")
         except Exception as e:
@@ -280,7 +277,7 @@ class AgentRegistry(UniversalAgentRegistry):
         # HARDENING: User isolation features
         self._user_sessions: Dict[str, UserAgentSession] = {}
         self._session_lock = asyncio.Lock()
-        self._lifecycle_manager = AgentLifecycleManager()
+        self._lifecycle_manager = AgentLifecycleManager(registry=self)  # FIXED: Pass registry reference
         self._created_at = datetime.now(timezone.utc)
         
         # DEPRECATED: Legacy tool_dispatcher for backward compatibility
@@ -660,7 +657,8 @@ class AgentRegistry(UniversalAgentRegistry):
                     user_context = UserExecutionContext(
                         user_id=user_id,
                         request_id=f"websocket_update_{user_id}_{id(self)}",
-                        thread_id=f"ws_thread_{user_id}"
+                        thread_id=f"ws_thread_{user_id}",
+                        run_id=f"ws_run_{user_id}_{id(self)}"
                     )
                     # Set WebSocket manager on user session
                     await user_session.set_websocket_manager(manager, user_context)
