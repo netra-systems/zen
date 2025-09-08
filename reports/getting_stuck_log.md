@@ -419,4 +419,86 @@ headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
 
 ---
 
+## Entry 6: MockAnalysisAgent Concurrency Test Resolution - 2025-09-08
+
+### **Issue Pattern**: Async Concurrency Management in Test Infrastructure
+
+**Problem Identified**: `test_agent_lifecycle_management_integration` was failing due to race conditions and improper async concurrency handling in MockAnalysisAgent implementation.
+
+**Root Cause**: **Missing Async Lock Protection and Execution Slot Management** - Mock agents were missing proper concurrency control mechanisms needed for concurrent execution testing, leading to state corruption during parallel test execution.
+
+**Process Success Factors**:
+✅ **Evidence-Based Investigation** - Ran actual failing tests to capture concrete error details rather than assuming problems
+✅ **Concurrency Architecture Focus** - Implemented proper async lock patterns and slot-based execution management
+✅ **Test Stability Validation** - Ran tests multiple times to confirm consistent passing behavior
+✅ **Systematic Implementation** - Applied same concurrency fixes across all mock agent types (Analysis, Optimization, Reporting)
+✅ **SSOT Compliance** - Enhanced existing mock infrastructure rather than creating new test patterns
+
+**Key Finding**: The failure was resolved by implementing proper **async concurrency primitives** in mock test infrastructure that mirror production patterns:
+- `asyncio.Lock()` for state protection
+- Execution slot management (`_acquire_execution_slot()` / `_release_execution_slot()`)
+- Proper resource cleanup with `finally` blocks
+- Thread-safe execution counting
+
+**Evidence of Proper Methodology** (no hasty fixes):
+1. **Actual Error Capture** - Ran specific failing test to get concrete failure details vs. guessing
+2. **Root Cause Analysis** - Identified missing async concurrency primitives in MockAnalysisAgent
+3. **Systematic Fix Application** - Applied same pattern to all mock agent types consistently  
+4. **Stability Validation** - Multiple test runs confirmed consistent passing behavior
+5. **Test Suite Verification** - Confirmed all tests in file pass after fix
+
+**Files Fixed**:
+- `tests/integration/offline/test_agent_factory_integration_offline.py` - Enhanced MockAnalysisAgent, MockOptimizationAgent, MockReportingAgent with proper async concurrency control (lines 94-152, 160-198, 206-244)
+
+**Technical Implementation**:
+```python
+# Added proper async concurrency management
+self._execution_lock = asyncio.Lock()
+self._active_executions = 0
+self._max_concurrent = config.max_concurrent_executions
+
+async def _acquire_execution_slot(self) -> bool:
+    async with self._execution_lock:
+        if self._active_executions < self._max_concurrent:
+            self._active_executions += 1
+            return True
+        return False
+
+async def _release_execution_slot(self):
+    async with self._execution_lock:
+        if self._active_executions > 0:
+            self._active_executions -= 1
+```
+
+**Success Verification**: Test now consistently passes with concurrent execution support (3/3 runs successful) and all related lifecycle management tests in the suite are stable.
+
+**Prevent Repetition**: For future async test infrastructure issues:
+1. **Always implement proper async lock protection** for shared state in mock objects
+2. **Use execution slot management** for concurrency testing that mirrors production patterns
+3. **Test stability validation** - run multiple times to confirm consistency vs. fluke passes
+4. **Apply patterns systematically** across all similar mock implementations
+5. **Implement proper resource cleanup** with finally blocks for async operations
+
+### **Process Reflection**
+
+**What Worked Exceptionally Well**:
+- **Evidence-first approach** - Captured actual test failure details rather than assuming problems
+- **Concurrency-aware mock design** - Implemented production-like async patterns in test infrastructure
+- **Systematic pattern application** - Applied same fix across all mock agent types for consistency
+- **Thorough validation** - Multiple test runs confirmed consistent behavior vs. one-time success
+- **SSOT test infrastructure** - Enhanced existing patterns rather than creating new test approaches
+
+**Critical Success Pattern**: **Async Concurrency Primitives in Test Infrastructure** - Mock objects used for concurrent testing must implement proper async locking and resource management to prevent race conditions.
+
+**What to Watch For Next Time**:
+- Similar async concurrency issues in other test infrastructure components
+- Mock objects that don't properly simulate production async behavior
+- Race conditions in test execution that appear intermittently
+- State corruption issues in shared test resources
+
+**Repetition Prevention Keywords**: 
+`async concurrency`, `mock agent race conditions`, `execution slot management`, `asyncio.Lock()`, `test infrastructure stability`
+
+---
+
 *Next entry: TBD - Add when encountering repetition patterns or sub-optimal approaches*

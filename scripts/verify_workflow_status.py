@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from manage_workflows import WorkflowManager, WorkflowStatus
+from scripts.manage_workflows import WorkflowManager, WorkflowStatus
 
 # Import from workflow_introspection for compatibility
 try:
