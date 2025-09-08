@@ -29,7 +29,9 @@
       "Bash(gcloud run services describe:*)",
       "Bash(gcloud run services list:*)",
       "Bash(cat:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(echo \"Current ENVIRONMENT: $ENVIRONMENT\")",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "ask": []
