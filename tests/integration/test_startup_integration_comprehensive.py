@@ -37,10 +37,8 @@ import httpx
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-from shared.isolated_environment import IsolatedEnvironment
-
-from shared.isolated_environment import get_env
+from unittest.mock import patch
+from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.unified_docker_manager import UnifiedDockerManager, ContainerState
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -72,15 +70,8 @@ class TestFullStartupIntegration:
         required_services = ["postgres", "redis"]
         
         # Start services if needed
-        await docker_manager.ensure_services_running(required_services)
-        
-        # Wait for services to be healthy
-        for service in required_services:
-            health = await docker_manager.wait_for_service_health(
-                service, 
-                timeout=30
-            )
-            assert health.is_healthy, f"{service} failed health check"
+        result = await docker_manager.start_services_smart(required_services, wait_healthy=True)
+        assert result, "Failed to start required services"
         
         yield
         
@@ -169,7 +160,7 @@ class TestFullStartupIntegration:
             AgentWebSocketBridge, 
             IntegrationState
         )
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
         
         # Create components
         websocket_manager = WebSocketManager()

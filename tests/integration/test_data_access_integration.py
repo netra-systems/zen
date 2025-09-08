@@ -153,8 +153,8 @@ class TestAgentDataAccessIntegration:
     
     async def test_data_analysis_core_with_capabilities(self, user_context):
         """Test DataAnalysisCore with data access capabilities."""
-        # Create database session manager
-        session_manager = DatabaseSessionManager(user_context)
+        # Create database session manager (stub implementation)
+        session_manager = DatabaseSessionManager()
         
         # Create data access capabilities
         capabilities = DataAccessCapabilities(user_context)
@@ -169,8 +169,8 @@ class TestAgentDataAccessIntegration:
     
     async def test_data_analysis_core_legacy_fallback(self, user_context):
         """Test DataAnalysisCore legacy fallback without capabilities."""
-        # Create database session manager
-        session_manager = DatabaseSessionManager(user_context)
+        # Create database session manager (stub implementation)
+        session_manager = DatabaseSessionManager()
         
         # Create DataAnalysisCore without capabilities (legacy mode)
         core = DataAnalysisCore(session_manager, None)
