@@ -18,7 +18,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
 from netra_backend.app.services.streaming_service import (
@@ -27,6 +27,7 @@ from netra_backend.app.services.streaming_service import (
 )
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
+from shared.id_generation import UnifiedIdGenerator, create_user_execution_context_factory
 
 logger = central_logger.get_logger(__name__)
 
@@ -187,23 +188,26 @@ class AgentService(IAgentService):
             if await self._ensure_bridge_ready():
                 status = await self._bridge.get_status()
                 if status["dependencies"]["websocket_manager_available"]:
-                    # Create user context for WebSocket operations
-                    import uuid
+                    # Create user context for WebSocket operations using SSOT
+                    context_data = create_user_execution_context_factory(user_id, "stop_agent")
                     user_context = UserExecutionContext(
-                        user_id=user_id,
-                        thread_id=f"stop-thread-{uuid.uuid4().hex[:8]}",
-                        run_id=f"stop-run-{uuid.uuid4().hex[:8]}"
+                        user_id=context_data['user_id'],
+                        thread_id=context_data['thread_id'],
+                        run_id=context_data['run_id'],
+                        request_id=context_data['request_id']
                     )
                     websocket_manager = create_websocket_manager(user_context)
                     await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
             # Fallback to direct manager access (preserve existing behavior)
-            import uuid
+            # Use SSOT for fallback context creation
+            context_data = create_user_execution_context_factory(user_id, "fallback_stop")
             fallback_context = UserExecutionContext(
-                user_id=user_id,
-                thread_id=f"fallback-thread-{uuid.uuid4().hex[:8]}",
-                run_id=f"fallback-run-{uuid.uuid4().hex[:8]}"
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
             )
             websocket_manager = create_websocket_manager(fallback_context)
             await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
@@ -353,11 +357,13 @@ class AgentService(IAgentService):
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         # Send error to user for unknown message type (through bridge-managed WebSocket)
         try:
-            import uuid
+            # Use SSOT for error context creation
+            context_data = create_user_execution_context_factory(user_id, "error_handling")
             error_context = UserExecutionContext(
-                user_id=user_id,
-                thread_id=f"error-thread-{uuid.uuid4().hex[:8]}",
-                run_id=f"error-run-{uuid.uuid4().hex[:8]}"
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
             )
             websocket_manager = create_websocket_manager(error_context)
             await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
@@ -386,11 +392,13 @@ class AgentService(IAgentService):
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
             # Use bridge-managed WebSocket communication (preserve boundary)
-            import uuid
+            # Use SSOT for JSON error context creation
+            context_data = create_user_execution_context_factory(user_id, "json_error")
             json_error_context = UserExecutionContext(
-                user_id=user_id,
-                thread_id=f"json-error-thread-{uuid.uuid4().hex[:8]}",
-                run_id=f"json-error-run-{uuid.uuid4().hex[:8]}"
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
             )
             websocket_manager = create_websocket_manager(json_error_context)
             await websocket_manager.send_error(user_id, "Invalid JSON message format")
@@ -416,11 +424,13 @@ class AgentService(IAgentService):
             
         # WebSocket concern: Send error through WebSocket channel
         try:
-            import uuid
+            # Use SSOT for exception context creation
+            context_data = create_user_execution_context_factory(user_id, "exception_handling")
             exception_context = UserExecutionContext(
-                user_id=user_id,
-                thread_id=f"exception-thread-{uuid.uuid4().hex[:8]}",
-                run_id=f"exception-run-{uuid.uuid4().hex[:8]}"
+                user_id=context_data['user_id'],
+                thread_id=context_data['thread_id'],
+                run_id=context_data['run_id'],
+                request_id=context_data['request_id']
             )
             websocket_manager = create_websocket_manager(exception_context)
             await websocket_manager.send_error(user_id, error_message)

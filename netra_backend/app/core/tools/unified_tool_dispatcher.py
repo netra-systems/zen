@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING, Set
 from enum import Enum
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     from langchain_core.tools import BaseTool
     from netra_backend.app.agents.state import DeepAgentState
@@ -805,6 +805,56 @@ class UnifiedToolDispatcherFactory:
     
     Ensures proper user isolation and prevents shared state issues.
     """
+    
+    def __init__(self):
+        """Initialize the factory with tracking for active dispatchers."""
+        self._active_dispatchers: List[UnifiedToolDispatcher] = []
+        self._tool_registry = None
+    
+    def set_tool_registry(self, tool_registry):
+        """Set the tool registry for this factory.
+        
+        Args:
+            tool_registry: The tool registry to use for tool registration
+        """
+        self._tool_registry = tool_registry
+        logger.info(f"Tool registry set for UnifiedToolDispatcherFactory: {type(tool_registry).__name__}")
+    
+    async def create_dispatcher(
+        self,
+        user_context: 'UserExecutionContext',
+        websocket_manager: Optional['WebSocketManager'] = None,
+        tools: Optional[List['BaseTool']] = None
+    ) -> UnifiedToolDispatcher:
+        """Create a dispatcher for the given user context.
+        
+        Args:
+            user_context: User execution context for isolation
+            websocket_manager: WebSocket manager for event emission
+            tools: Initial tools to register
+            
+        Returns:
+            Request-scoped UnifiedToolDispatcher instance
+        """
+        dispatcher = self.create_for_request(
+            user_context=user_context,
+            websocket_manager=websocket_manager,
+            tools=tools
+        )
+        
+        # Track the dispatcher for cleanup
+        self._active_dispatchers.append(dispatcher)
+        
+        return dispatcher
+    
+    async def cleanup_all_dispatchers(self):
+        """Clean up all dispatchers created by this factory."""
+        for dispatcher in self._active_dispatchers[:]:  # Copy list to avoid modification during iteration
+            if dispatcher._is_active:
+                await dispatcher.cleanup()
+        
+        self._active_dispatchers.clear()
+        logger.info(f"Cleaned up all dispatchers in UnifiedToolDispatcherFactory")
     
     @staticmethod
     def create_for_request(

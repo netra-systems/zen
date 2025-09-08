@@ -37,8 +37,9 @@ from dataclasses import asdict
 from fastapi import WebSocket, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
+from shared.id_generation import UnifiedIdGenerator
 
 logger = central_logger.get_logger(__name__)
 
@@ -392,29 +393,27 @@ class UserContextExtractor:
             if not user_id or user_id == "None":
                 raise ValueError("JWT payload missing valid 'sub' (user ID) claim")
             
-            # Generate unique identifiers for this connection
+            # Generate unique identifiers for this connection using SSOT
             connection_timestamp = datetime.now(timezone.utc).timestamp()
-            unique_id = str(uuid.uuid4())
             
-            # Extract or generate thread ID
+            # Use SSOT for thread_id and run_id generation
             thread_id = (
                 jwt_payload.get("thread_id") or
                 additional_metadata.get("thread_id") if additional_metadata else None or
-                f"thread_{unique_id[:8]}"
+                UnifiedIdGenerator.generate_base_id("thread_ws", True, 8)
             )
             
-            # Extract or generate run ID  
             run_id = (
                 jwt_payload.get("run_id") or
                 additional_metadata.get("run_id") if additional_metadata else None or
-                f"run_{unique_id[:8]}"
+                UnifiedIdGenerator.generate_base_id("run_ws", True, 8)
             )
             
-            # Generate request ID (unique per connection)
-            request_id = f"ws_req_{int(connection_timestamp)}_{unique_id[:8]}"
+            # Generate request ID using SSOT (unique per connection)
+            request_id = UnifiedIdGenerator.generate_base_id("ws_req", True, 8)
             
-            # Generate WebSocket client ID (unique per WebSocket connection)
-            websocket_client_id = f"ws_{user_id[:8]}_{int(connection_timestamp)}_{unique_id[:8]}"
+            # Generate WebSocket client ID using SSOT (unique per WebSocket connection)
+            websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id, connection_timestamp)
             
             # Create UserExecutionContext
             user_context = UserExecutionContext(
@@ -559,15 +558,22 @@ class UserContextExtractor:
         Returns:
             UserExecutionContext instance for testing
         """
-        unique_id = str(uuid.uuid4())
         timestamp = datetime.now(timezone.utc).timestamp()
+        
+        # Use SSOT for test context ID generation
+        thread_id = (additional_metadata.get("thread_id") if additional_metadata 
+                    else UnifiedIdGenerator.generate_base_id("test_thread", True, 8))
+        run_id = (additional_metadata.get("run_id") if additional_metadata 
+                 else UnifiedIdGenerator.generate_base_id("test_run", True, 8))
+        request_id = UnifiedIdGenerator.generate_base_id("test_req", True, 8)
+        websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id, timestamp)
         
         context = UserExecutionContext(
             user_id=user_id,
-            thread_id=additional_metadata.get("thread_id", f"test_thread_{unique_id[:8]}") if additional_metadata else f"test_thread_{unique_id[:8]}",
-            run_id=additional_metadata.get("run_id", f"test_run_{unique_id[:8]}") if additional_metadata else f"test_run_{unique_id[:8]}",
-            request_id=f"test_req_{int(timestamp)}_{unique_id[:8]}",
-            websocket_client_id=f"test_ws_{int(timestamp)}_{unique_id[:8]}"
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
         )
         
         logger.debug(f"Created test UserExecutionContext: {context}")

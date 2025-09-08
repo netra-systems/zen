@@ -1275,3 +1275,150 @@ class SupervisorAgent(BaseAgent):
     def agents(self) -> Dict[str, BaseAgent]:
         """Get all registered agents (legacy compatibility)."""
         return self.registry.agents if self.registry else {}
+    
+    # === LEGACY COMPATIBILITY ===
+    
+    async def run(self, user_request: str, thread_id: str, user_id: str, run_id: str) -> Any:
+        """
+        Legacy run method wrapper for AgentService compatibility.
+        
+        CRITICAL: Converts legacy parameters to UserExecutionContext pattern
+        and emits WebSocket events required for user chat business value.
+        
+        Args:
+            user_request: The user's request message
+            thread_id: Thread identifier 
+            user_id: User identifier
+            run_id: Execution run identifier
+            
+        Returns:
+            Agent execution result
+        """
+        logger.info(f"🔄 Legacy run() method called for user {user_id}")
+        
+        try:
+            # Import necessary modules for context creation
+            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from shared.id_generation import UnifiedIdGenerator
+            
+            # Create UserExecutionContext from legacy parameters
+            # This ensures the new execute() method gets proper context
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=UnifiedIdGenerator.generate_request_id(),
+                user_request=user_request,
+                websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+            )
+            
+            # CRITICAL BUSINESS VALUE: Send agent_started event
+            # This is required for user chat experience - users must see agent began processing
+            await self._emit_agent_started(user_context, user_request)
+            
+            # Execute using modern UserExecutionContext pattern
+            logger.info(f"🚀 Converting legacy run() to execute() with UserExecutionContext for user {user_id}")
+            result = await self.execute(user_context, stream_updates=True)
+            
+            # CRITICAL BUSINESS VALUE: Send agent_completed event  
+            # This tells users the agent has finished and results are ready
+            await self._emit_agent_completed(user_context, result)
+            
+            # Extract the actual result content for backward compatibility
+            if isinstance(result, dict):
+                # Return the actual agent results for legacy compatibility
+                if "results" in result:
+                    return result["results"]
+                elif "supervisor_result" in result:
+                    return result.get("results", result.get("supervisor_result", result))
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Legacy run() method failed for user {user_id}: {e}")
+            
+            # Send completion event even on error (best effort for user experience)
+            try:
+                if 'user_context' in locals():
+                    await self._emit_agent_completed(user_context, {"error": str(e), "status": "failed"})
+            except Exception:
+                pass  # Best effort - don't fail on WebSocket emission errors
+            
+            raise
+    
+    async def _emit_agent_started(self, context: UserExecutionContext, user_request: str) -> None:
+        """
+        Emit agent_started WebSocket event for user chat business value.
+        
+        BUSINESS CRITICAL: Users must see that agent began processing their request.
+        This provides immediate feedback and builds trust in the AI system.
+        """
+        try:
+            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
+                websocket_manager = self.websocket_bridge._websocket_manager
+                if websocket_manager:
+                    event_data = {
+                        "type": "agent_started", 
+                        "agent_id": "supervisor",
+                        "user_id": context.user_id,
+                        "timestamp": context.created_at.isoformat(),
+                        "details": {
+                            "agent_name": "Supervisor Agent",
+                            "request_preview": user_request[:100] + "..." if len(user_request) > 100 else user_request,
+                            "run_id": context.run_id,
+                            "thread_id": context.thread_id
+                        }
+                    }
+                    
+                    await websocket_manager.send_to_user(context.user_id, event_data)
+                    logger.info(f"📤 Sent agent_started event for user {context.user_id}")
+                else:
+                    logger.warning(f"⚠️ WebSocket manager not available for agent_started event (user {context.user_id})")
+            else:
+                logger.warning(f"⚠️ WebSocket bridge not available for agent_started event (user {context.user_id})")
+        except Exception as e:
+            logger.error(f"❌ Failed to emit agent_started event for user {context.user_id}: {e}")
+            # Don't fail the entire operation due to WebSocket event failure
+    
+    async def _emit_agent_completed(self, context: UserExecutionContext, result: Any) -> None:
+        """
+        Emit agent_completed WebSocket event for user chat business value.
+        
+        BUSINESS CRITICAL: Users must know when the agent has finished and results are ready.
+        This completes the user experience loop and signals results availability.
+        """
+        try:
+            if self.websocket_bridge and hasattr(self.websocket_bridge, '_websocket_manager'):
+                websocket_manager = self.websocket_bridge._websocket_manager
+                if websocket_manager:
+                    # Determine completion status
+                    status = "completed"
+                    if isinstance(result, dict):
+                        if result.get("error") or result.get("status") == "failed":
+                            status = "failed"
+                        elif result.get("orchestration_successful") is False:
+                            status = "failed"
+                    
+                    event_data = {
+                        "type": "agent_completed",
+                        "agent_id": "supervisor", 
+                        "user_id": context.user_id,
+                        "timestamp": context.created_at.isoformat(),
+                        "details": {
+                            "agent_name": "Supervisor Agent",
+                            "status": status,
+                            "run_id": context.run_id,
+                            "thread_id": context.thread_id,
+                            "has_results": bool(result)
+                        }
+                    }
+                    
+                    await websocket_manager.send_to_user(context.user_id, event_data)
+                    logger.info(f"📤 Sent agent_completed event for user {context.user_id} (status: {status})")
+                else:
+                    logger.warning(f"⚠️ WebSocket manager not available for agent_completed event (user {context.user_id})")
+            else:
+                logger.warning(f"⚠️ WebSocket bridge not available for agent_completed event (user {context.user_id})")
+        except Exception as e:
+            logger.error(f"❌ Failed to emit agent_completed event for user {context.user_id}: {e}")
+            # Don't fail the entire operation due to WebSocket event failure
