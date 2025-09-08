@@ -44,17 +44,204 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+class TestContextReuseRegressionPrevention(SSotBaseTestCase):
+    """
+    CRITICAL: Context Reuse Regression Prevention Test - SSOT Compliant
+    
+    This is the main test class that prevents regression of the critical bug
+    where context reuse fails across messages in the same conversation thread.
+    """
+
+    def setup_method(self, method=None):
+        """Setup for each test method following SSOT patterns."""
+        super().setup_method(method)
+        
+        # Reset the session store for clean test state
+        if hasattr(UnifiedIdGenerator, '_user_sessions'):
+            UnifiedIdGenerator._user_sessions = {}
+        if hasattr(UnifiedIdGenerator, '_active_sessions'):
+            UnifiedIdGenerator._active_sessions.clear()
+        UnifiedIdGenerator.reset_global_counter()
+        
+        # Record test setup metrics
+        self.record_metric("test_setup_time", time.time())
+
+    def teardown_method(self, method=None):
+        """Teardown following SSOT patterns."""
+        # Clear session state to prevent test interference
+        if hasattr(UnifiedIdGenerator, '_user_sessions'):
+            UnifiedIdGenerator._user_sessions = {}
+        if hasattr(UnifiedIdGenerator, '_active_sessions'):
+            UnifiedIdGenerator._active_sessions.clear()
+        
+        super().teardown_method(method)
+
+    @pytest.mark.unit
+    @pytest.mark.context_management
+    @pytest.mark.regression_prevention
+    def test_context_reuse_in_conversation(self):
+        """
+        CRITICAL TEST: Test that same thread_id returns same context instance across multiple messages.
+        
+        This is the exact test pattern specified in the requirements and validates
+        the core regression prevention requirement.
+        """
+        user_id = "test_user"
+        thread_id = "conversation_123"
+        
+        # First message
+        context1 = get_user_execution_context(user_id=user_id, thread_id=thread_id)
+        original_run_id = context1.run_id
+        
+        # Record first message metrics
+        self.record_metric("first_message_context_created", time.time())
+        
+        # Second message (same thread)
+        context2 = get_user_execution_context(user_id=user_id, thread_id=thread_id)
+        
+        # Record second message metrics
+        self.record_metric("second_message_context_retrieved", time.time())
+        
+        # CRITICAL: Must be same context instance for conversation continuity
+        assert context1.user_id == context2.user_id, "User ID must be consistent"
+        assert context1.thread_id == context2.thread_id, "Thread ID must be consistent"
+        assert context2.run_id == original_run_id, (
+            f"REGRESSION DETECTED: Run ID changed from {original_run_id} to {context2.run_id}. "
+            "This breaks conversation continuity!"
+        )
+        
+        # Validate session continuity
+        assert context1.thread_id == thread_id, "Thread ID must match requested thread"
+        assert context2.thread_id == thread_id, "Thread ID must match requested thread"
+        
+        # Record success metrics
+        self.record_metric("context_reuse_successful", True)
+        self.record_metric("conversation_continuity_maintained", context1.run_id == context2.run_id)
+
+    @pytest.mark.unit
+    @pytest.mark.context_management
+    @pytest.mark.regression_prevention
+    def test_new_context_for_new_thread(self):
+        """
+        Test: New Context for New Thread
+        
+        Validates that different thread_id creates different contexts
+        while maintaining proper isolation.
+        """
+        user_id = "test_user"
+        thread1 = "conversation_123"  
+        thread2 = "conversation_456"
+        
+        context1 = get_user_execution_context(user_id=user_id, thread_id=thread1)
+        context2 = get_user_execution_context(user_id=user_id, thread_id=thread2)
+        
+        # CRITICAL: Different contexts for different threads
+        assert context1.thread_id != context2.thread_id, "Different threads must have different thread IDs"
+        assert context1.run_id != context2.run_id, "Different threads must have different run IDs"
+        
+        # But same user
+        assert context1.user_id == context2.user_id == user_id, "User ID must be consistent"
+        
+        # Validate proper isolation
+        assert context1.thread_id == thread1, "Thread 1 context must have correct thread ID"
+        assert context2.thread_id == thread2, "Thread 2 context must have correct thread ID"
+        
+        self.record_metric("thread_isolation_validated", True)
+
+    @pytest.mark.unit
+    @pytest.mark.context_management
+    @pytest.mark.integration
+    def test_websocket_handler_pattern_simulation(self):
+        """
+        Test WebSocket handler pattern simulation with REAL services behavior.
+        
+        This simulates the exact pattern used in WebSocket agent handlers
+        to validate context reuse in real scenarios.
+        """
+        user_id = "websocket_user_001"
+        
+        # Simulate first WebSocket message - no thread_id provided
+        context1 = get_user_execution_context(
+            user_id=user_id,
+            thread_id=None  # No thread_id - should generate new one
+        )
+        generated_thread_id = context1.thread_id
+        original_run_id = context1.run_id
+        
+        # Record WebSocket simulation metrics
+        self.record_metric("websocket_first_message", time.time())
+        
+        # Simulate second WebSocket message - with thread_id from first message
+        context2 = get_user_execution_context(
+            user_id=user_id,
+            thread_id=generated_thread_id  # Use thread_id from first message
+        )
+        
+        self.record_metric("websocket_second_message", time.time())
+        
+        # CRITICAL: WebSocket conversation continuity must be maintained
+        assert context2.thread_id == generated_thread_id, "Thread ID must be preserved"
+        assert context2.run_id == original_run_id, "Run ID must be preserved for session continuity"
+        assert context1.user_id == context2.user_id, "User ID must be consistent"
+        
+        self.record_metric("websocket_pattern_validated", True)
+
+    @pytest.mark.unit
+    @pytest.mark.context_management
+    @pytest.mark.performance
+    def test_context_memory_efficiency(self):
+        """
+        Test context creation memory efficiency and lifecycle management.
+        
+        Validates that the system doesn't create memory leaks through
+        unbounded context creation.
+        """
+        user_id = "memory_test_user"
+        base_thread_id = "memory_test_thread"
+        
+        start_time = time.time()
+        
+        # Create contexts for multiple threads
+        contexts = []
+        for i in range(5):
+            thread_id = f"{base_thread_id}_{i}"
+            context = get_user_execution_context(user_id=user_id, thread_id=thread_id)
+            contexts.append(context)
+        
+        creation_time = time.time() - start_time
+        
+        # Validate all contexts are unique for different threads
+        thread_ids = [ctx.thread_id for ctx in contexts]
+        run_ids = [ctx.run_id for ctx in contexts]
+        
+        assert len(set(thread_ids)) == 5, "All thread IDs should be unique"
+        assert len(set(run_ids)) == 5, "All run IDs should be unique"
+        
+        # Validate performance
+        assert creation_time < 1.0, f"Context creation took {creation_time}s, should be fast"
+        
+        # Record metrics
+        self.record_metric("memory_test_creation_time", creation_time)
+        self.record_metric("memory_efficiency_validated", True)
+
+
 class TestContextCreationVsGetterRegression:
-    """Unit tests to prevent context creation vs getter pattern regression."""
+    """Legacy unit tests to prevent context creation vs getter pattern regression."""
     
     def setup_method(self):
         """Reset state for test isolation."""
-        UnifiedIdGenerator._active_sessions.clear()
+        if hasattr(UnifiedIdGenerator, '_user_sessions'):
+            UnifiedIdGenerator._user_sessions = {}
+        if hasattr(UnifiedIdGenerator, '_active_sessions'):
+            UnifiedIdGenerator._active_sessions.clear()
         UnifiedIdGenerator.reset_global_counter()
     
     def teardown_method(self):
         """Clean up after tests."""
-        UnifiedIdGenerator._active_sessions.clear()
+        if hasattr(UnifiedIdGenerator, '_user_sessions'):
+            UnifiedIdGenerator._user_sessions = {}
+        if hasattr(UnifiedIdGenerator, '_active_sessions'):
+            UnifiedIdGenerator._active_sessions.clear()
     
     def test_get_user_execution_context_uses_session_manager(self):
         """Test that get_user_execution_context uses session manager for continuity."""
