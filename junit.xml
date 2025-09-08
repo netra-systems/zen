@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="6.227" timestamp="2025-09-08T09:21:00.707649-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_auth_database_operations_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_auth_database_operations_comprehensive.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="7.222" timestamp="2025-09-08T10:04:24.065210-07:00" hostname="Anthony"><testcase classname="" name="tests.integration.test_oauth_provider_integration_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\integration\test_oauth_provider_integration_comprehensive.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\tests\integration\test_auth_database_operations_comprehensive.py:33: in &lt;module&gt;
-    from auth_service.auth_core.database.connection import get_database_session
-E   ImportError: cannot import name 'get_database_session' from 'auth_service.auth_core.database.connection' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\database\connection.py)</error></testcase></testsuite></testsuites>
+auth_service\tests\integration\test_oauth_provider_integration_comprehensive.py:29: in &lt;module&gt;
+    from auth_service.auth_core.oauth.oauth_manager import OAuthManager
+E   ModuleNotFoundError: No module named 'auth_service.auth_core.oauth.oauth_manager'</error></testcase></testsuite></testsuites>
