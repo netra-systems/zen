@@ -28,7 +28,7 @@ async def send_agent_started_notification(
         )
     
     # Create isolated manager for this user
-    manager = create_websocket_manager(user_context)
+    manager = await create_websocket_manager(user_context)
     
     await manager.send_message(user_id, {
         "type": "agent_started",
@@ -97,7 +97,7 @@ async def execute_and_persist(
         )
         
         # Create WebSocket manager for this user context
-        websocket_manager = create_websocket_manager(temp_context)
+        websocket_manager = await create_websocket_manager(temp_context)
         
         # CRITICAL FIX: Set the WebSocket manager on the bridge
         # This fixes the issue where all bridge events fail due to missing _websocket_manager
@@ -217,7 +217,7 @@ async def send_response_safely(user_id: str, response: Any, user_context: UserEx
     response_data = MessageHandlerBase.convert_response_to_dict(response)
     
     # Create isolated manager for this user
-    manager = create_websocket_manager(user_context)
+    manager = await create_websocket_manager(user_context)
     
     try:
         await manager.send_message(
@@ -246,7 +246,7 @@ def is_connection_error(error: RuntimeError) -> bool:
 async def send_error_safely(user_id: str, error: Exception, user_context: UserExecutionContext) -> None:
     """Send error message to user safely"""
     # Create isolated manager for this user
-    manager = create_websocket_manager(user_context)
+    manager = await create_websocket_manager(user_context)
     
     try:
         await manager.send_error(user_id, f"Internal server error: {str(error)}")

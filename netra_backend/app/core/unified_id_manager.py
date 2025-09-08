@@ -453,16 +453,32 @@ def is_valid_id_format(id_value: str) -> bool:
         # Extract the UUID part (last 8 characters should be hex)
         uuid_part = parts[-1]
         if len(uuid_part) == 8 and all(c in '0123456789abcdefABCDEF' for c in uuid_part):
-            # Check if counter part is numeric
+            # Check if counter part is numeric (can be one or two parts back)
             counter_part = parts[-2]
             if counter_part.isdigit():
-                # Validate ID type part
-                id_type_part = parts[-3] if len(parts) >= 4 else parts[0]
+                # For complex IDs, check if we have known prefixes or patterns
+                has_known_prefix = False
+                
+                # Check for known prefixes
+                if parts[0] in {'req', 'run', 'thread'}:
+                    has_known_prefix = True
+                
+                # Check for valid ID types anywhere in the parts
                 valid_id_types = {id_type.value for id_type in IDType}
-                if id_type_part in valid_id_types:
-                    return True
-                # Also allow some common patterns like 'run', 'req'
-                if id_type_part in {'run', 'req', 'thread'}:
+                for part in parts[:-2]:  # Exclude counter and uuid parts
+                    if part in valid_id_types:
+                        has_known_prefix = True
+                        break
+                
+                # Also allow compound patterns like 'websocket_factory'
+                compound_patterns = ['websocket_factory', 'websocket_manager', 'agent_executor']
+                id_without_counters = '_'.join(parts[:-2])
+                for pattern in compound_patterns:
+                    if pattern in id_without_counters:
+                        has_known_prefix = True
+                        break
+                
+                if has_known_prefix:
                     return True
     
     return False

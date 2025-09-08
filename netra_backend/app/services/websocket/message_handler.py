@@ -77,7 +77,7 @@ class StartAgentHandler(BaseMessageHandler):
             if not thread:
                 # Use session-based context for error handling
                 context = get_user_execution_context(user_id=user_id)
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
             return await self._create_message_and_run(uow, thread, user_request, user_id)
@@ -133,7 +133,7 @@ class StartAgentHandler(BaseMessageHandler):
         """Send agent completion message to user"""
         # Use session-based context to maintain conversation continuity
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
@@ -144,7 +144,7 @@ class StartAgentHandler(BaseMessageHandler):
         logger.error(f"Error handling start_agent for user {user_id}: {error}")
         # Use session-based context for error handling
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_error(user_id, f"Failed to start agent: {str(error)}")
 
 class UserMessageHandler(BaseMessageHandler):
@@ -191,7 +191,7 @@ class UserMessageHandler(BaseMessageHandler):
             if not thread:
                 # Use session-based context for error handling
                 context = get_user_execution_context(user_id=user_id)
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
             return await self._create_user_message_and_run(uow, thread, text, references)
@@ -242,7 +242,7 @@ class UserMessageHandler(BaseMessageHandler):
         """Send user message completion to user"""
         # Use session-based context to maintain conversation continuity
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "agent_completed",
             "payload": response
@@ -253,7 +253,7 @@ class UserMessageHandler(BaseMessageHandler):
         logger.error(f"Error processing user message: {error}")
         # Use session-based context for error handling
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "error", "payload": {"error": str(error)}
         })
@@ -276,7 +276,7 @@ class ThreadHistoryHandler(BaseMessageHandler):
             logger.error(f"Error retrieving thread history: {e}")
             # Use session-based context for error handling
             context = get_user_execution_context(user_id=user_id)
-            manager = create_websocket_manager(context)
+            manager = await create_websocket_manager(context)
             await manager.send_error(user_id, "Failed to retrieve thread history")
 
     async def _process_thread_history_request(self, uow, user_id: str, payload: Dict[str, Any]) -> None:
@@ -285,7 +285,7 @@ class ThreadHistoryHandler(BaseMessageHandler):
         if not thread:
             # Use session-based context for error handling
             context = get_user_execution_context(user_id=user_id)
-            manager = create_websocket_manager(context)
+            manager = await create_websocket_manager(context)
             await manager.send_error(user_id, "Failed to retrieve thread")
             return
         messages = await self._get_thread_messages(uow, thread.id, payload)
@@ -317,7 +317,7 @@ class ThreadHistoryHandler(BaseMessageHandler):
         """Send formatted thread history response."""
         # Use session-based context with existing thread_id to maintain continuity
         context = get_user_execution_context(user_id=user_id, thread_id=thread_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_to_user(user_id, {
             "type": "thread_history",
             "payload": {"thread_id": thread_id, "messages": history}
@@ -338,7 +338,7 @@ class StopAgentHandler(BaseMessageHandler):
         
         # Use session-based context to maintain conversation continuity
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_to_user(
             user_id,
             {
@@ -402,7 +402,7 @@ class MessageHandlerService:
         """Validate incoming message format"""
         # Use session-based context for validation
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         if not manager.validate_message(message):
             await manager.send_error(user_id, "Invalid message format")
             return False
@@ -413,7 +413,7 @@ class MessageHandlerService:
         message_type = message.get("type")
         # Use session-based context for message type validation
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         if not message_type:
             await manager.send_error(user_id, "Message type not specified")
             return None
@@ -426,7 +426,7 @@ class MessageHandlerService:
         """Sanitize message and add to processing queue"""
         # Use session-based context for message sanitization and queuing
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         sanitized_message = manager.sanitize_message(message)
         priority = self._determine_priority(message_type)
         queued_message = self._create_queued_message(user_id, sanitized_message, message_type, priority)
@@ -448,7 +448,7 @@ class MessageHandlerService:
         logger.error(f"Error handling message: {error}")
         # Use session-based context for error handling
         context = get_user_execution_context(user_id=user_id)
-        manager = create_websocket_manager(context)
+        manager = await create_websocket_manager(context)
         await manager.send_error(user_id, "Internal server error")
     
     def _determine_priority(self, message_type: str) -> MessagePriority:

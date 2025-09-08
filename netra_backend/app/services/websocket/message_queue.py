@@ -576,7 +576,7 @@ class MessageQueue:
             
             # Use session-based context to maintain conversation continuity
             user_context = get_user_execution_context(user_id=message.user_id)
-            manager = create_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({
                 "type": "error",
                 "message": f"Message processing failed: {message.error}"

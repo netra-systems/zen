@@ -61,7 +61,7 @@ class QualityAlertHandler(BaseMessageHandler):
             thread_id=None,  # Let session manager handle missing IDs
             run_id=None      # Let session manager handle missing IDs
         )
-        manager = create_websocket_manager(user_context)
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     async def _handle_unsubscribe_action(self, user_id: str) -> None:
@@ -75,7 +75,7 @@ class QualityAlertHandler(BaseMessageHandler):
             thread_id=None,  # Let session manager handle missing IDs
             run_id=None      # Let session manager handle missing IDs
         )
-        manager = create_websocket_manager(user_context)
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     async def _handle_invalid_action(self, user_id: str, action: str) -> None:
@@ -88,7 +88,7 @@ class QualityAlertHandler(BaseMessageHandler):
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = create_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send action error to user {user_id}: {e}")
@@ -112,7 +112,7 @@ class QualityAlertHandler(BaseMessageHandler):
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = create_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send subscription error to user {user_id}: {e}")

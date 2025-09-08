@@ -308,7 +308,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # CRITICAL FIX: Create isolated WebSocket manager with enhanced error handling
         # This prevents FactoryInitializationError from causing 1011 WebSocket errors
         try:
-            ws_manager = create_websocket_manager(user_context)
+            ws_manager = await create_websocket_manager(user_context)
             logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
         except Exception as factory_error:
             # CRITICAL FIX: Handle factory initialization errors gracefully
@@ -396,7 +396,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Emergency fallback: Try to create manager one more time with relaxed validation
                     # This time we'll catch any validation errors and create a stub if needed
                     from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                    ws_manager = create_websocket_manager(user_context)
+                    ws_manager = await create_websocket_manager(user_context)
                     logger.info("[OK] EMERGENCY SUCCESS: Created minimal WebSocket manager on second attempt")
                 except Exception as emergency_retry_error:
                     logger.warning(f"🔄 EMERGENCY RETRY FAILED: {emergency_retry_error}")
@@ -822,7 +822,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     if 'ws_manager' not in locals():
                         # Create context for cleanup - we have user_id available from earlier
                         if 'user_context' in locals():
-                            ws_manager = create_websocket_manager(user_context)
+                            ws_manager = await create_websocket_manager(user_context)
                         else:
                             # If no user context available, create minimal test context for cleanup
                             logger.warning(f"Creating minimal context for WebSocket cleanup (user_id: {user_id[:8]}...)")
@@ -839,7 +839,7 @@ async def websocket_endpoint(websocket: WebSocket):
                                 thread_id=thread_id,
                                 run_id=run_id
                             )
-                            ws_manager = create_websocket_manager(cleanup_context)
+                            ws_manager = await create_websocket_manager(cleanup_context)
                     await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
                 
                 # Clean up shared services (these are still singleton)

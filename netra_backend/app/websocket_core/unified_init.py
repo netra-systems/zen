@@ -93,7 +93,7 @@ def get_manager():
         "\n\nSee User Context Architecture documentation for secure patterns."
     )
 
-def create_websocket_emitter(user_id: str, context=None):
+async def create_websocket_emitter(user_id: str, context=None):
     """Legacy compatibility function for creating emitters.
     
     SECURITY FIX: Now uses secure factory pattern with proper user isolation.
@@ -117,10 +117,10 @@ def create_websocket_emitter(user_id: str, context=None):
         )
     
     # Create isolated manager for this user
-    isolated_manager = create_websocket_manager(user_context)
+    isolated_manager = await create_websocket_manager(user_context)
     return WebSocketEmitterFactory.create_emitter(isolated_manager, user_id, context)
 
-def create_isolated_emitter(user_id: str, context=None):
+async def create_isolated_emitter(user_id: str, context=None):
     """Legacy compatibility function for isolated emitters.
     
     SECURITY FIX: Now creates truly isolated emitters with per-user manager instances.
@@ -144,7 +144,7 @@ def create_isolated_emitter(user_id: str, context=None):
         )
     
     # Create truly isolated manager for this specific user context
-    isolated_manager = create_websocket_manager(user_context)
+    isolated_manager = await create_websocket_manager(user_context)
     return WebSocketEmitterFactory.create_emitter(isolated_manager, user_id, context)
 
 # SECURITY FIX: Removed singleton emitter pool - caused cross-user data leakage

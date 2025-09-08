@@ -98,7 +98,7 @@ class AgentMessageHandler(BaseMessageHandler):
                 thread_id=thread_id,  # None if not provided - maintains session continuity
                 run_id=run_id  # None if not provided - allows session reuse
             )
-            ws_manager = create_websocket_manager(context)
+            ws_manager = await create_websocket_manager(context)
             connection_id = None
             
             if thread_id and ws_manager:
@@ -192,7 +192,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_id=thread_id,  # None if not provided - maintains session continuity
                     run_id=run_id  # None if not provided - allows session reuse
                 )
-                ws_manager = create_websocket_manager(context)
+                ws_manager = await create_websocket_manager(context)
                 if ws_manager:
                     # Get connection ID from the WebSocket instance
                     connection_id = ws_manager.get_connection_id_by_websocket(websocket)
@@ -399,7 +399,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_id=websocket_context.thread_id,  # Use existing thread_id from context
                     run_id=websocket_context.run_id  # Use existing run_id from context
                 )
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(
                     websocket_context.user_id, 
                     f"Failed to process {message.type}. Please try again."
@@ -462,7 +462,7 @@ class AgentMessageHandler(BaseMessageHandler):
             try:
                 # FIX: user_context is already available, use it directly instead of calling non-existent get_context
                 context = user_context
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(
                     user_context.user_id, 
                     f"Failed to process {message.type}. Please try again."
@@ -510,7 +510,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_id=thread_id,  # None if not provided - maintains session continuity
                     run_id=run_id  # None if not provided - allows session reuse
                 )
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to start agent. Please try again.")
             except:
                 pass  # Best effort to notify user
@@ -560,7 +560,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_id=thread_id,  # None if not provided - maintains session continuity
                     run_id=run_id  # None if not provided - allows session reuse
                 )
-                manager = create_websocket_manager(context)
+                manager = await create_websocket_manager(context)
                 await manager.send_error(user_id, "Failed to process message. Please try again.")
             except:
                 pass  # Best effort to notify user

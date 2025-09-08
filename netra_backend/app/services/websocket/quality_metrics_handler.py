@@ -68,7 +68,7 @@ class QualityMetricsHandler(BaseMessageHandler):
             thread_id=None,  # Let session manager handle missing IDs
             run_id=None      # Let session manager handle missing IDs
         )
-        manager = create_websocket_manager(user_context)
+        manager = await create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
     def _build_metrics_message(self, report: Dict[str, Any]) -> Dict[str, Any]:
@@ -86,7 +86,7 @@ class QualityMetricsHandler(BaseMessageHandler):
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = create_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send metrics error to user {user_id}: {e}")

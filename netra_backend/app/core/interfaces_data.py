@@ -289,7 +289,7 @@ class CoreClickHouseOperations:
                 return
                 
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            manager = create_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             
             if event_type == "created":
                 payload = {

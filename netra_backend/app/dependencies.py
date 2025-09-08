@@ -178,10 +178,57 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     # SSOT COMPLIANCE FIX: Generate unique request ID using UnifiedIdGenerator
     from shared.id_generation import UnifiedIdGenerator
     request_id = UnifiedIdGenerator.generate_base_id("req")
-    # Use placeholder user ID - will be overridden by actual user context when available
+    correlation_id = UnifiedIdGenerator.generate_base_id("corr")  # For tracing across services
+    
+    # ENHANCED DEBUGGING: Log the exact moment and values at function start
+    logger.info(
+        f"📍 FUNCTION_START: get_request_scoped_db_session called | "
+        f"Generated IDs: request_id='{request_id}', correlation_id='{correlation_id}' | "
+        f"Hardcoded user_id='{user_id}' (THIS IS WHERE 'system' COMES FROM!) | "
+        f"Function: netra_backend.app.dependencies.get_request_scoped_db_session:182"
+    )
+    # ENHANCED DEBUG: Use placeholder user ID - will be overridden by actual user context when available
     user_id = "system"  # This gets overridden in practice by request context
     
-    logger.debug(f"Creating new request-scoped database session {request_id}")
+    # CRITICAL DEBUG CONTEXT: This is where the 'system' user_id originates!
+    session_init_context = {
+        "user_id": user_id,
+        "request_id": request_id,
+        "correlation_id": correlation_id,  # For cross-service tracing
+        "source": "get_request_scoped_db_session",
+        "auth_note": "user_id='system' is a placeholder - will be overridden by actual auth context",
+        "function_location": "netra_backend.app.dependencies:182",
+        "potential_auth_failure_point": "If this 'system' user_id causes auth errors, check if request context override is failing",
+        "trace_info": {
+            "session_factory_call": "about_to_call_factory.get_request_scoped_session",
+            "auth_middleware_status": "unknown_at_this_point",
+            "user_context_override_status": "not_yet_attempted"
+        }
+    }
+    
+    logger.info(
+        f"🚀 INITIALIZING: Request-scoped database session {request_id} with placeholder user_id='{user_id}'. "
+        f"IMPORTANT: This 'system' user_id should be overridden by actual authenticated user context. "
+        f"If you see auth errors with user_id='system', the context override may be failing. "
+        f"Context: {session_init_context}"
+    )
+    
+    # INITIALIZATION CONTEXT DUMP - trace the start of session creation
+    try:
+        from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+        log_authentication_context_dump(
+            user_id=user_id,
+            request_id=request_id,
+            operation="initialize_request_scoped_db_session",
+            correlation_id=correlation_id,
+            function_location="netra_backend.app.dependencies.get_request_scoped_db_session:182",
+            user_id_source="hardcoded_system_placeholder",
+            auth_stage="pre_session_creation",
+            expected_behavior="user_id_should_be_overridden_by_auth_context",
+            warning="if_system_user_causes_403_check_context_override_failure"
+        )
+    except Exception:
+        pass  # Don't fail initialization due to logging issues
     
     try:
         # Get the factory and use its method directly (which is decorated with @asynccontextmanager)
@@ -190,11 +237,136 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
         # we use it with async with
         async with factory.get_request_scoped_session(user_id, request_id) as session:
             _validate_session_type(session)
-            logger.debug(f"Created database session: {id(session)} for request {request_id}")
+            
+            # ENHANCED SUCCESS LOGGING with authentication context
+            session_success_context = {
+                "session_id": id(session),
+                "user_id": user_id,
+                "request_id": request_id,
+                "session_type": type(session).__name__,
+                "factory_source": "RequestScopedSessionFactory",
+                "auth_warning": "SUCCESS with user_id='system' means either: 1) This is a service-to-service call, or 2) Auth context override worked properly"
+            }
+            
+            logger.info(
+                f"✅ SUCCESS: Database session {id(session)} created for request {request_id} with user_id='{user_id}'. "
+                f"Context: {session_success_context}"
+            )
+            
+            # Special logging for system user - this helps debug authentication issues
+            if user_id == "system":
+                logger.info(
+                    f"🔧 SYSTEM USER SESSION: Created session for user_id='system'. "
+                    f"This could indicate: 1) Service-to-service authentication, 2) Default fallback user, or 3) Missing auth context override. "
+                    f"If this causes 403 errors, check authentication middleware and request context setup. "
+                    f"Session: {id(session)}, Request: {request_id}"
+                )
+            
             yield session
-            logger.debug(f"Request-scoped session {id(session)} completed")
+            
+            logger.info(
+                f"✅ COMPLETED: Request-scoped session {id(session)} completed successfully for user_id='{user_id}', request_id='{request_id}'"
+            )
     except Exception as e:
-        logger.error(f"Failed to create request-scoped database session {request_id}: {e}")
+        # ENHANCED ERROR LOGGING with 10x more authentication context
+        error_context = {
+            "request_id": request_id,
+            "user_id": user_id,
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "function_location": "netra_backend.app.dependencies.get_request_scoped_db_session",
+            "auth_analysis": {
+                "using_system_user": user_id == "system",
+                "likely_auth_failure": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
+                "potential_causes": [
+                    "Authentication middleware failed to validate user_id='system'",
+                    "Service-to-service authentication not properly configured",
+                    "JWT token validation failed for system requests",
+                    "Database connection auth failed",
+                    "Request context override mechanism failed"
+                ],
+                "debugging_steps": [
+                    "Check if SERVICE_SECRET is properly configured",
+                    "Verify JWT_SECRET configuration",
+                    "Check authentication middleware logs",
+                    "Verify database connection credentials",
+                    "Check if request context override is working",
+                    "Look for authentication dependency injection issues"
+                ]
+            }
+        }
+        
+        logger.error(
+            f"❌ CRITICAL ERROR: Failed to create request-scoped database session {request_id} for user_id='{user_id}'. "
+            f"Error: {e}. This may be an authentication failure! Full context: {error_context}"
+        )
+        
+        # COMPREHENSIVE CONTEXT DUMP with all IDs and authentication info
+        try:
+            from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+            log_authentication_context_dump(
+                user_id=user_id,
+                request_id=request_id,
+                operation="create_request_scoped_db_session",
+                error=e,
+                correlation_id=correlation_id,
+                function_location="netra_backend.app.dependencies.get_request_scoped_db_session",
+                session_factory_call="factory.get_request_scoped_session",
+                user_id_source="hardcoded_system_placeholder",
+                auth_middleware_status="unknown_at_session_creation_time",
+                database_connection_status="failed",
+                session_creation_stage="database_session_factory",
+                potential_root_cause="authentication_middleware_rejection"
+            )
+        except ImportError:
+            logger.error(
+                f"🚨 FALLBACK_DEBUG: Auth trace logger not available. "
+                f"user_id='{user_id}', request_id='{request_id}', correlation_id='{correlation_id}', error='{e}'"
+            )
+        except Exception as trace_error:
+            logger.error(
+                f"🚨 TRACE_ERROR: Failed to log comprehensive context: {trace_error}. "
+                f"Original error: {e}, user_id='{user_id}', request_id='{request_id}'"
+            )
+        
+        # Extra debugging for authentication-related errors with comprehensive dump
+        if "403" in str(e) or "Not authenticated" in str(e):
+            logger.error(
+                f"🔴 AUTHENTICATION FAILURE DETECTED: The error '{e}' suggests an authentication problem. "
+                f"Since user_id='{user_id}', this could be a service-to-service auth issue or missing auth context. "
+                f"Check: 1) SERVICE_SECRET config, 2) JWT validation, 3) Auth middleware setup, 4) Request context override mechanism. "
+                f"Request ID: {request_id}"
+            )
+            
+            # CRITICAL 403 ERROR COMPREHENSIVE DUMP
+            try:
+                from netra_backend.app.logging.auth_trace_logger import log_authentication_context_dump
+                log_authentication_context_dump(
+                    user_id=user_id,
+                    request_id=request_id,
+                    operation="CRITICAL_403_NOT_AUTHENTICATED_ERROR",
+                    error=e,
+                    correlation_id=correlation_id,
+                    error_type="403_not_authenticated",
+                    function_location="netra_backend.app.dependencies.get_request_scoped_db_session",
+                    auth_failure_stage="session_factory_call",
+                    user_id_type="system" if user_id == "system" else "regular",
+                    likely_cause="authentication_middleware_blocked_system_user",
+                    debugging_priority="CRITICAL",
+                    next_steps=[
+                        "Check authentication middleware logs",
+                        "Verify SERVICE_SECRET configuration", 
+                        "Check JWT_SECRET consistency",
+                        "Validate system user authentication bypass",
+                        "Review authentication dependency injection"
+                    ]
+                )
+            except Exception as critical_trace_error:
+                logger.error(
+                    f"🚨 CRITICAL_TRACE_FAILED: Could not dump 403 error context: {critical_trace_error}. "
+                    f"This 403 'Not authenticated' error is the main issue you're debugging!"
+                )
+        
         raise
     finally:
         logger.debug(f"Request-scoped database session {request_id} lifecycle completed")
@@ -1024,7 +1196,7 @@ async def get_request_scoped_message_handler(
         
         # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling
         try:
-            websocket_manager = create_websocket_manager(user_context)
+            websocket_manager = await create_websocket_manager(user_context)
             if not websocket_manager:
                 logger.warning(f"WebSocket manager creation returned None for user {context.user_id}")
                 websocket_manager = None

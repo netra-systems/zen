@@ -2361,7 +2361,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             validated_context = validate_user_context(user_context)
             
             # Create isolated WebSocket manager for this user context
-            isolated_manager = create_websocket_manager(validated_context)
+            isolated_manager = await create_websocket_manager(validated_context)
             
             # Create isolated emitter using the factory pattern
             emitter = WebSocketEmitterFactory.create_scoped_emitter(isolated_manager, validated_context)
@@ -2441,7 +2441,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         from netra_backend.app.websocket_core import create_websocket_manager
         
         # Create scoped emitter using the factory pattern for user isolation
-        manager = create_websocket_manager(user_context)
+        manager = await create_websocket_manager(user_context)
         emitter = UnifiedWebSocketEmitter.create_scoped_emitter(manager, user_context)
         try:
             yield emitter

@@ -21,7 +21,7 @@ class ReconnectionContext:
 # Global reconnection handler instance
 _reconnection_handler = None
 
-def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
+async def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
     """Get the reconnection handler with proper user context.
     
     SECURITY FIX: Now requires user_id for proper isolation.
@@ -34,7 +34,7 @@ def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
             thread_id=f"reconnection_{user_id}",
             run_id=f"reconnection_run_{user_id}"
         )
-        return create_websocket_manager(context)
+        return await create_websocket_manager(context)
     else:
         # BACKWARD COMPATIBILITY: Default context for legacy callers
         # TODO: All callers should provide user_id for security

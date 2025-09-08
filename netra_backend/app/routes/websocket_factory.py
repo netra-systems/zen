@@ -143,7 +143,7 @@ async def websocket_factory_endpoint(
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         
         # Create isolated WebSocket manager for this authenticated user
-        websocket_manager = create_websocket_manager(user_context)
+        websocket_manager = await create_websocket_manager(user_context)
         logger.info(f"✅ Created isolated WebSocket manager for authenticated user {user_id[:8]}...")
         
         # Get factory adapter from app state

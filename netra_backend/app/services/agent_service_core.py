@@ -191,7 +191,7 @@ class AgentService(IAgentService):
                 if status["dependencies"]["websocket_manager_available"]:
                     # Use session-based context to maintain conversation continuity  
                     user_context = await get_user_session_context(user_id=user_id)
-                    websocket_manager = create_websocket_manager(user_context)
+                    websocket_manager = await create_websocket_manager(user_context)
                     await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
@@ -199,7 +199,7 @@ class AgentService(IAgentService):
             # Use SSOT for fallback context creation
             # Use session-based context for fallback scenario
             fallback_context = await get_user_session_context(user_id=user_id)
-            websocket_manager = create_websocket_manager(fallback_context)
+            websocket_manager = await create_websocket_manager(fallback_context)
             await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
             return True
         except Exception as e:
@@ -366,7 +366,7 @@ class AgentService(IAgentService):
             # Extract thread_id from payload if available
             thread_id = payload.get("thread_id") if payload else None
             error_context = await get_user_session_context(user_id=user_id, thread_id=thread_id)
-            websocket_manager = create_websocket_manager(error_context)
+            websocket_manager = await create_websocket_manager(error_context)
             await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
         except Exception as e:
             logger.error(f"Failed to send unknown message type error to {user_id}: {e}")
@@ -404,7 +404,7 @@ class AgentService(IAgentService):
             else:
                 # Fallback to session-based context for JSON error handling
                 json_error_context = await get_user_session_context(user_id=user_id)
-            websocket_manager = create_websocket_manager(json_error_context)
+            websocket_manager = await create_websocket_manager(json_error_context)
             await websocket_manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
@@ -439,7 +439,7 @@ class AgentService(IAgentService):
             else:
                 # Fallback to session-based context for exception handling
                 exception_context = await get_user_session_context(user_id=user_id)
-            websocket_manager = create_websocket_manager(exception_context)
+            websocket_manager = await create_websocket_manager(exception_context)
             await websocket_manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")

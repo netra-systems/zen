@@ -149,15 +149,13 @@ class UserExecutionContext:
                     f"got: {value!r}"
                 )
             
-            # Validate UUID format for request_id (only if not auto-generated)
+            # Validate ID format for request_id (supports UUID and UnifiedIDManager formats)
             if field_name == 'request_id':
-                try:
-                    uuid.UUID(value)
-                except ValueError:
-                    # Allow non-UUID values for testing, but log a warning
+                from netra_backend.app.core.unified_id_manager import is_valid_id_format
+                if not is_valid_id_format(value):
                     logger.warning(
-                        f"request_id '{value}' is not a valid UUID. "
-                        "Consider using proper UUID format for production."
+                        f"request_id '{value}' has invalid format. "
+                        "Expected UUID or UnifiedIDManager structured format."
                     )
     
     def _validate_no_placeholder_values(self) -> None:

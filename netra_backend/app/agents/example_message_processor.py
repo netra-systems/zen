@@ -43,7 +43,7 @@ class ExampleMessageProcessor(BaseAgent):
             'advanced': self._process_advanced_optimization
         }
     
-    def _get_websocket_manager(self, user_context=None):
+    async def _get_websocket_manager(self, user_context=None):
         """Get WebSocket manager using factory pattern for security.
         
         Args:
@@ -55,7 +55,7 @@ class ExampleMessageProcessor(BaseAgent):
         if user_context:
             try:
                 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                return create_websocket_manager(user_context)
+                return await create_websocket_manager(user_context)
             except Exception as e:
                 logger.error(f"Failed to create WebSocket manager: {e}")
                 return None
@@ -668,7 +668,7 @@ class ExampleMessageProcessor(BaseAgent):
         }
         
         try:
-            ws_manager = self._get_websocket_manager(user_context)
+            ws_manager = await self._get_websocket_manager(user_context)
             if ws_manager:
                 await ws_manager.send_message_to_user(self.user_id, message)
             else:

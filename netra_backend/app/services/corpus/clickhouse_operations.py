@@ -48,26 +48,11 @@ class CorpusClickHouseOperations:
         """
         self.user_context = user_context
         self._websocket_manager = None
+        self._websocket_manager_created = False
         
-        # Initialize isolated WebSocket manager if user context is provided
-        if self.user_context:
-            try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                self._websocket_manager = create_websocket_manager(self.user_context)
-                central_logger.info(
-                    f"Initialized CorpusClickHouseOperations with WebSocket support for user {user_context.user_id[:8]}..."
-                )
-            except Exception as e:
-                central_logger.warning(
-                    f"Failed to initialize WebSocket manager for corpus operations: {e}. "
-                    "Notifications will be logged only."
-                )
-                self._websocket_manager = None
-        else:
-            central_logger.debug(
-                "CorpusClickHouseOperations initialized without user context. "
-                "WebSocket notifications disabled."
-            )
+        central_logger.info(
+            f"Initialized CorpusClickHouseOperations {'with' if self.user_context else 'without'} user context"
+        )
     
     def _get_table_columns(self) -> str:
         """Get table column definitions"""
@@ -94,6 +79,29 @@ class CorpusClickHouseOperations:
             f"CREATE TABLE IF NOT EXISTS {table_name} ({columns}) "
             f"{engine_config}"
         )
+
+    async def _get_websocket_manager(self):
+        """Get WebSocket manager with lazy initialization"""
+        if not self.user_context:
+            return None
+            
+        if not self._websocket_manager_created:
+            try:
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                self._websocket_manager = await create_websocket_manager(self.user_context)
+                self._websocket_manager_created = True
+                central_logger.info(
+                    f"Created WebSocket manager for user {self.user_context.user_id[:8]}..."
+                )
+            except Exception as e:
+                central_logger.warning(
+                    f"Failed to create WebSocket manager for corpus operations: {e}. "
+                    "Notifications will be logged only."
+                )
+                self._websocket_manager = None
+                self._websocket_manager_created = True
+        
+        return self._websocket_manager
 
     async def _execute_table_creation(self, table_name: str, query: str):
         """Execute table creation in ClickHouse"""
@@ -123,9 +131,10 @@ class CorpusClickHouseOperations:
         """Send WebSocket notification for successful corpus creation"""
         payload = self._build_success_payload(corpus_id, table_name)
         
-        if self._websocket_manager:
+        websocket_manager = await self._get_websocket_manager()
+        if websocket_manager:
             try:
-                await self._websocket_manager.emit_critical_event(
+                await websocket_manager.emit_critical_event(
                     event_type="corpus:created",
                     data=payload["payload"]
                 )
@@ -162,9 +171,10 @@ class CorpusClickHouseOperations:
         """Send WebSocket notification for corpus creation error"""
         payload = self._build_error_payload(corpus_id, error)
         
-        if self._websocket_manager:
+        websocket_manager = await self._get_websocket_manager()
+        if websocket_manager:
             try:
-                await self._websocket_manager.emit_critical_event(
+                await websocket_manager.emit_critical_event(
                     event_type="corpus:error",
                     data=payload["payload"]
                 )

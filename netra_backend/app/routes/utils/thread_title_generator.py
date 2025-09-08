@@ -85,7 +85,7 @@ async def send_thread_rename_notification(user_id: str, thread_id: str, title: s
     if user_context:
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            websocket_manager = create_websocket_manager(user_context)
+            websocket_manager = await create_websocket_manager(user_context)
             await websocket_manager.send_to_user(str(user_id), event)
         except Exception as e:
             logger.error(f"Failed to send thread rename notification: {e}")

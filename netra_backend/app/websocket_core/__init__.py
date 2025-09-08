@@ -32,7 +32,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 )
 
 # Backward compatibility function using factory pattern
-def get_websocket_manager(user_context=None):
+async def get_websocket_manager(user_context=None):
     """
     SECURITY MIGRATION: Compatibility wrapper for get_websocket_manager.
     
@@ -61,7 +61,7 @@ def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
     
-    return create_websocket_manager(user_context)
+    return await create_websocket_manager(user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     WebSocketManagerAdapter,

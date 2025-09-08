@@ -1650,7 +1650,7 @@ def get_websocket_manager_factory() -> WebSocketManagerFactory:
         return _factory_instance
 
 
-def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+async def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
     """
     Create an isolated WebSocket manager for a user context.
     
@@ -1678,7 +1678,7 @@ def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebS
         _validate_ssot_user_context_staging_safe(user_context)
         
         factory = get_websocket_manager_factory()
-        return factory.create_manager(user_context)
+        return await factory.create_manager(user_context)
         
     except ValueError as validation_error:
         # CRITICAL FIX: Handle SSOT validation failures gracefully
