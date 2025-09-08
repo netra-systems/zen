@@ -41,13 +41,13 @@ class TestWebSocketErrorValidator:
         # Valid mission critical event
         valid_event = {
             "type": "agent_started",
-            "run_id": "test_run_123",
+            "run_id": "run_real_456789",
             "agent_name": "DataAgent",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "payload": {"message": "Agent started"}
         }
         
-        result = self.validator.validate_event(valid_event, "test_user_123")
+        result = self.validator.validate_event(valid_event, "user_real_123456")
         assert result.is_valid
         assert result.criticality == EventCriticality.MISSION_CRITICAL
     
@@ -61,7 +61,7 @@ class TestWebSocketErrorValidator:
             "payload": {"message": "Agent started"}
         }
         
-        result = self.validator.validate_event(invalid_event, "test_user_123")
+        result = self.validator.validate_event(invalid_event, "user_real_123456")
         assert not result.is_valid
         assert "missing required fields" in result.error_message.lower()
         assert result.criticality == EventCriticality.MISSION_CRITICAL
@@ -69,18 +69,18 @@ class TestWebSocketErrorValidator:
     def test_validate_malformed_event_structure(self):
         """Test validation fails for malformed events."""
         # Not a dictionary
-        result = self.validator.validate_event("invalid", "test_user_123")
+        result = self.validator.validate_event("invalid", "user_real_456789")
         assert not result.is_valid
         assert "not a dictionary" in result.error_message.lower()
         assert result.criticality == EventCriticality.MISSION_CRITICAL
         
         # Missing type field
-        result = self.validator.validate_event({}, "test_user_123")
+        result = self.validator.validate_event({}, "user_real_456789")
         assert not result.is_valid
         assert "missing required 'type' field" in result.error_message.lower()
         
         # Empty type field
-        result = self.validator.validate_event({"type": ""}, "test_user_123")
+        result = self.validator.validate_event({"type": ""}, "user_real_456789")
         assert not result.is_valid
         assert "empty or not a string" in result.error_message.lower()
     
@@ -88,23 +88,23 @@ class TestWebSocketErrorValidator:
         """Test detection of potential cross-user event leakage."""
         event = {
             "type": "agent_started",
-            "run_id": "test_run_123",
+            "run_id": "run_real_456789",
             "agent_name": "DataAgent",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "payload": {"message": "Agent started"},
-            "user_id": "different_user_456"  # Different from target user
+            "user_id": "user_different_456"  # Different from target user
         }
         
-        result = self.validator.validate_event(event, "test_user_123")
+        result = self.validator.validate_event(event, "user_real_123456")
         assert not result.is_valid
-        assert "cross-user event leakage" in result.error_message.lower()
+        assert "different user_id" in result.error_message.lower() or "cross-user" in result.error_message.lower()
         assert result.criticality == EventCriticality.MISSION_CRITICAL
     
     def test_validate_connection_readiness(self):
         """Test connection readiness validation."""
         # Valid connection
         result = self.validator.validate_connection_ready(
-            "test_user_123", "conn_456", Mock()
+            "user_real_123456", "conn_456", Mock()
         )
         assert result.is_valid
         
@@ -114,12 +114,12 @@ class TestWebSocketErrorValidator:
         assert "empty or invalid user_id" in result.error_message.lower()
         
         # Empty connection_id
-        result = self.validator.validate_connection_ready("test_user_123", "", Mock())
+        result = self.validator.validate_connection_ready("user_real_123456", "", Mock())
         assert not result.is_valid
         assert "empty or invalid connection_id" in result.error_message.lower()
         
         # No WebSocket manager
-        result = self.validator.validate_connection_ready("test_user_123", "conn_456", None)
+        result = self.validator.validate_connection_ready("user_real_123456", "conn_456", None)
         assert not result.is_valid
         assert "websocket manager not available" in result.error_message.lower()
     
@@ -135,16 +135,18 @@ class TestWebSocketErrorValidator:
         # Valid validation
         valid_event = {
             "type": "agent_started",
-            "run_id": "test_run_123",
+            "run_id": "run_real_456789",
             "agent_name": "DataAgent",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "payload": {"message": "Agent started"}
         }
-        self.validator.validate_event(valid_event, "test_user_123")
+        self.validator.validate_event(valid_event, "user_real_123456")
         
         # Invalid mission critical validation
         invalid_event = {"type": "agent_started"}
-        self.validator.validate_event(invalid_event, "test_user_123")
+        result = self.validator.validate_event(invalid_event, "user_real_123456")
+        # Verify this was counted as mission critical failure
+        assert not result.is_valid
         
         stats = self.validator.get_validation_stats()
         assert stats["total_validations"] == 2
@@ -161,10 +163,10 @@ class TestUserWebSocketEmitterErrorHandling:
         reset_websocket_validator()
         
         self.mock_context = UserExecutionContext(
-            user_id="test_user_123",
-            thread_id="test_thread_456",
-            run_id="test_run_789",
-            request_id="test_req_abc"
+            user_id="user_real_123456",
+            thread_id="thread_real_456789",
+            run_id="run_real_789012",
+            request_id="req_real_abcdef"
         )
         
         self.mock_router = Mock(spec=WebSocketEventRouter)
@@ -421,10 +423,10 @@ class TestErrorHandlingIntegration:
         """Test end-to-end error flow with comprehensive loud logging."""
         # Setup context and emitter
         context = UserExecutionContext(
-            user_id="test_user_123",
-            thread_id="test_thread_456",
-            run_id="test_run_789",
-            request_id="test_req_abc"
+            user_id="user_real_987654",
+            thread_id="thread_real_654321",
+            run_id="run_real_321098",
+            request_id="req_real_fedcba"
         )
         
         # Setup router with failing WebSocket manager

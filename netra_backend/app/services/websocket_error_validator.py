@@ -88,6 +88,7 @@ class WebSocketEventValidator:
             result = self._validate_basic_structure(event)
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
+                self.validation_stats["failed_validations"] += 1
                 return result
             
             # Event type specific validation
@@ -95,6 +96,7 @@ class WebSocketEventValidator:
             result = self._validate_event_type(event, event_type)
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
+                self.validation_stats["failed_validations"] += 1
                 return result
             
             # Mission critical event validation
@@ -102,6 +104,7 @@ class WebSocketEventValidator:
                 result = self._validate_mission_critical_event(event, event_type)
                 if not result.is_valid:
                     self.validation_stats["mission_critical_failures"] += 1
+                    self.validation_stats["failed_validations"] += 1
                     self._log_mission_critical_failure(result, event, user_id, connection_id)
                     return result
             
@@ -109,6 +112,7 @@ class WebSocketEventValidator:
             result = self._validate_user_context(event, user_id)
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
+                self.validation_stats["failed_validations"] += 1
                 return result
             
             # Success case
@@ -228,7 +232,7 @@ class WebSocketEventValidator:
     
     # Private validation methods
     
-    def _validate_basic_structure(self, event: Dict[str, Any]) -> ValidationResult:
+    def _validate_basic_structure(self, event: Any) -> ValidationResult:
         """Validate basic event structure."""
         if not isinstance(event, dict):
             return ValidationResult(
@@ -338,12 +342,17 @@ class WebSocketEventValidator:
         else:
             return EventCriticality.OPERATIONAL
     
-    def _log_validation_failure(self, result: ValidationResult, event: Dict[str, Any], 
+    def _log_validation_failure(self, result: ValidationResult, event: Any, 
                                user_id: str, connection_id: Optional[str]):
         """Log validation failure with appropriate severity."""
-        self.validation_stats["failed_validations"] += 1
+        # Don't increment here - already incremented in calling method
         
-        event_type = event.get("type", "unknown")
+        event_type = "unknown"
+        if isinstance(event, dict):
+            event_type = event.get("type", "unknown")
+        elif event is not None:
+            event_type = f"malformed({type(event).__name__})"
+        
         log_level = logger.critical if result.criticality == EventCriticality.MISSION_CRITICAL else logger.error
         
         log_level(f"🚨 EVENT VALIDATION FAILURE: {result.error_message}")
@@ -353,10 +362,14 @@ class WebSocketEventValidator:
         if result.business_impact:
             log_level(f"🚨 BUSINESS IMPACT: {result.business_impact}")
     
-    def _log_mission_critical_failure(self, result: ValidationResult, event: Dict[str, Any], 
+    def _log_mission_critical_failure(self, result: ValidationResult, event: Any, 
                                      user_id: str, connection_id: Optional[str]):
         """Log mission critical event failure with maximum visibility."""
-        event_type = event.get("type", "unknown")
+        event_type = "unknown"
+        if isinstance(event, dict):
+            event_type = event.get("type", "unknown")
+        elif event is not None:
+            event_type = f"malformed({type(event).__name__})"
         
         logger.critical(f"🚨 MISSION CRITICAL EVENT VALIDATION FAILURE")
         logger.critical(f"🚨 Event Type: {event_type}")
