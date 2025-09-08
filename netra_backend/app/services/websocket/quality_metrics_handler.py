@@ -5,8 +5,10 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Any, Dict
+import uuid
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import create_user_execution_context
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
@@ -56,7 +58,11 @@ class QualityMetricsHandler(BaseMessageHandler):
     async def _send_metrics_response(self, user_id: str, report: Dict[str, Any]) -> None:
         """Send quality metrics response to user."""
         message = self._build_metrics_message(report)
-        user_context = UserExecutionContext.get_context(user_id)
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
@@ -69,7 +75,11 @@ class QualityMetricsHandler(BaseMessageHandler):
         logger.error(f"Error getting quality metrics: {str(error)}")
         error_message = f"Failed to get quality metrics: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:

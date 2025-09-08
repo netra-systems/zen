@@ -1,8 +1,10 @@
 """Quality Message Handler - Main coordinator for quality-enhanced WebSocket message handling"""
 
 from typing import Any, Dict
+import uuid
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.dependencies import create_user_execution_context
 from netra_backend.app.quality_enhanced_start_handler import (
     QualityEnhancedStartAgentHandler,
 )
@@ -87,7 +89,11 @@ class QualityMessageHandler:
         """Handle unknown message type."""
         logger.warning(f"Unknown message type: {message_type}")
         try:
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
         except Exception as e:
@@ -103,7 +109,11 @@ class QualityMessageHandler:
         """Send quality update to a subscriber."""
         try:
             message = self._build_update_message(update)
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user(message)
         except Exception as e:
@@ -123,7 +133,11 @@ class QualityMessageHandler:
         """Send quality alert to a single subscriber."""
         try:
             alert_message = self._build_alert_message(alert)
-            user_context = UserExecutionContext.get_context(user_id)
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user(alert_message)
         except Exception as e:

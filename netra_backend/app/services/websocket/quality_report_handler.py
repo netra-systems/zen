@@ -13,6 +13,7 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import create_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
@@ -98,7 +99,12 @@ class QualityReportHandler(BaseMessageHandler):
         """Send formatted report response to user."""
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
-        user_context = UserExecutionContext.get_context(user_id)
+        import uuid
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=f"report_{uuid.uuid4().hex[:8]}",
+            run_id=f"run_{uuid.uuid4().hex[:8]}"
+        )
         manager = create_websocket_manager(user_context)
         await manager.send_to_user(message)
 
@@ -115,7 +121,12 @@ class QualityReportHandler(BaseMessageHandler):
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
         try:
-            user_context = UserExecutionContext.get_context(user_id)
+            import uuid
+            user_context = create_user_execution_context(
+                user_id=user_id,
+                thread_id=f"report_error_{uuid.uuid4().hex[:8]}",
+                run_id=f"run_{uuid.uuid4().hex[:8]}"
+            )
             manager = create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
