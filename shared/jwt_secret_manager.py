@@ -69,19 +69,46 @@ class JWTSecretManager:
             env = self._get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
             
-            # 1. Try environment-specific secret first (highest priority)
+            # CRITICAL FIX: Unified secret resolution with staging override
+            if environment == "staging":
+                # STAGING: Use explicit staging secret hierarchy with proper validation
+                staging_secrets = [
+                    "JWT_SECRET_STAGING",
+                    "JWT_SECRET_KEY", 
+                    "JWT_SECRET"
+                ]
+                
+                for secret_key in staging_secrets:
+                    jwt_secret = env.get(secret_key)
+                    if jwt_secret and len(jwt_secret.strip()) >= 32:
+                        logger.info(f"STAGING JWT SECRET: Using {secret_key} (length: {len(jwt_secret.strip())})")
+                        self._cached_secret = jwt_secret.strip()
+                        return self._cached_secret
+                
+                # STAGING FALLBACK: Use unified secret from secrets manager if available
+                try:
+                    from deployment.secrets_config import get_staging_secret
+                    staging_secret = get_staging_secret("JWT_SECRET")
+                    if staging_secret and len(staging_secret) >= 32:
+                        logger.info("STAGING JWT SECRET: Using deployment secrets manager")
+                        self._cached_secret = staging_secret
+                        return self._cached_secret
+                except ImportError:
+                    logger.warning("Deployment secrets manager not available for staging")
+            
+            # 1. Try environment-specific secret first (non-staging environments)
             env_specific_key = f"JWT_SECRET_{environment.upper()}"
             jwt_secret = env.get(env_specific_key)
             
-            if jwt_secret:
-                logger.info(f"Using environment-specific JWT secret: {env_specific_key}")
+            if jwt_secret and len(jwt_secret.strip()) >= 32:
+                logger.info(f"Using environment-specific JWT secret: {env_specific_key} (length: {len(jwt_secret.strip())})")
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
             # 2. Try generic JWT_SECRET_KEY (second priority)
             jwt_secret = env.get("JWT_SECRET_KEY")
-            if jwt_secret:
-                logger.info("Using generic JWT_SECRET_KEY")
+            if jwt_secret and len(jwt_secret.strip()) >= 32:
+                logger.info(f"Using generic JWT_SECRET_KEY (length: {len(jwt_secret.strip())})")
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
