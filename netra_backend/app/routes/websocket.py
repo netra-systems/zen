@@ -667,12 +667,32 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_id = await ws_manager.connect_user(user_id, websocket)
                 logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
-            # CRITICAL FIX: Enhanced delay to ensure connection is fully propagated in Cloud Run
-            # This addresses GCP WebSocket timing issues where messages sent too early are lost
+            # CRITICAL FIX: Enhanced delay and handshake validation for Cloud Run environments
+            # This addresses the race condition where message handling starts before complete handshake
             if environment in ["staging", "production"]:
-                await asyncio.sleep(0.1)  # Increased to 100ms delay for Cloud Run stability
+                # Step 1: Progressive delay for network propagation
+                await asyncio.sleep(0.1)  # Initial 100ms delay for Cloud Run stability
                 
-                # Additional connection validation for Cloud Run
+                # Step 2: Validate handshake completion before proceeding
+                from netra_backend.app.websocket_core.utils import validate_websocket_handshake_completion
+                
+                handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=2.0)
+                if not handshake_valid:
+                    logger.warning("WebSocket handshake validation failed - implementing progressive retry")
+                    
+                    # Progressive retry with increasing delays for Cloud Run
+                    for retry_attempt in range(3):
+                        await asyncio.sleep(0.05 * (retry_attempt + 1))  # 50ms, 100ms, 150ms
+                        handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
+                        if handshake_valid:
+                            logger.info(f"WebSocket handshake validated on retry attempt {retry_attempt + 1}")
+                            break
+                    
+                    if not handshake_valid:
+                        logger.error("WebSocket handshake validation failed after all retries - potential race condition")
+                        # Continue but log the issue for monitoring
+                
+                # Step 3: Additional connection state validation
                 if websocket.client_state != WebSocketState.CONNECTED:
                     logger.warning(f"WebSocket not in CONNECTED state after registration: {_safe_websocket_state_for_logging(websocket.client_state)}")
                     await asyncio.sleep(0.05)  # Additional 50ms if not connected
@@ -720,19 +740,34 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, welcome_msg.model_dump())
             
-            # CRITICAL FIX: Additional delay after connection confirmation in Cloud Run
+            # CRITICAL FIX: Final handshake confirmation delay for Cloud Run
             # This ensures the client has time to process the connection_established message
+            # and the WebSocket is fully ready for bidirectional communication
             if environment in ["staging", "production"]:
                 await asyncio.sleep(0.05)  # 50ms after welcome message
+                
+                # Final verification that handshake is still valid before starting message loop
+                from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
+                if not is_websocket_connected_and_ready(websocket):
+                    logger.warning("WebSocket not ready after final confirmation - potential race condition detected")
+                    # Add one more small delay and check
+                    await asyncio.sleep(0.1)
+                    if not is_websocket_connected_and_ready(websocket):
+                        logger.error("WebSocket still not ready - proceeding with caution")
             
             # CRITICAL FIX: Log successful connection establishment for debugging
             security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
             logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
             
-            # CRITICAL FIX: Verify WebSocket is still connected after setup
-            if not is_websocket_connected(websocket):
-                logger.error(f"WebSocket connection lost during setup for user {user_id}")
-                raise WebSocketDisconnect(code=1006, reason="Connection lost during setup")
+            # CRITICAL FIX: Verify WebSocket is ready for message handling after complete setup
+            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
+            if not is_websocket_connected_and_ready(websocket):
+                logger.error(f"WebSocket connection not ready for message handling for user {user_id}")
+                # Try one final validation before giving up
+                final_validation = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
+                if not final_validation:
+                    logger.error(f"WebSocket handshake final validation failed - race condition detected")
+                    raise WebSocketDisconnect(code=1006, reason="Handshake validation failed - race condition")
             
             logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
             
@@ -899,9 +934,12 @@ async def _handle_websocket_messages(
     
     try:
         first_check = True
-        while is_websocket_connected(websocket):
+        # CRITICAL FIX: Use enhanced connection validation to prevent race conditions
+        from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
+        
+        while is_websocket_connected_and_ready(websocket):
             if first_check:
-                logger.debug(f"First loop iteration for {connection_id}, WebSocket is_connected returned True")
+                logger.debug(f"First loop iteration for {connection_id}, WebSocket readiness validation passed")
                 first_check = False
             try:
                 # Track loop iteration with detailed state
