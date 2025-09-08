@@ -470,8 +470,4 @@ __all__ = [
     'service_config',
     'service_health_check',
     'service_lifecycle_manager',
-    
-    # Legacy helpers
-    '_ConfigManagerHelper',
-    'create_test_app'
 ]
