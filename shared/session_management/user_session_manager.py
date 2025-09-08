@@ -36,6 +36,7 @@ from contextlib import asynccontextmanager
 
 # SSOT imports
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from shared.metrics.session_metrics import SystemSessionMetrics, SessionMetrics, create_system_session_metrics
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     InvalidContextError
@@ -45,28 +46,8 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-@dataclass
-class SessionMetrics:
-    """Metrics for session management monitoring."""
-    total_sessions: int = 0
-    active_sessions: int = 0
-    expired_sessions_cleaned: int = 0
-    sessions_created_today: int = 0
-    sessions_reused_today: int = 0
-    average_session_duration_minutes: float = 0.0
-    memory_usage_mb: float = 0.0
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert metrics to dictionary for logging/monitoring."""
-        return {
-            'total_sessions': self.total_sessions,
-            'active_sessions': self.active_sessions,
-            'expired_sessions_cleaned': self.expired_sessions_cleaned,
-            'sessions_created_today': self.sessions_created_today,
-            'sessions_reused_today': self.sessions_reused_today,
-            'average_session_duration_minutes': self.average_session_duration_minutes,
-            'memory_usage_mb': self.memory_usage_mb
-        }
+# SessionMetrics now imported from shared.metrics.session_metrics
+# This eliminates SSOT violation and uses SystemSessionMetrics
 
 
 @dataclass
@@ -152,7 +133,7 @@ class UserSessionManager:
         self._cleanup_interval_minutes = cleanup_interval_minutes
         self._max_session_age_hours = max_session_age_hours
         self._max_inactive_minutes = max_inactive_minutes
-        self._metrics = SessionMetrics()
+        self._metrics = create_system_session_metrics()
         self._daily_reset_time = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
         
         logger.info(f"Initialized UserSessionManager with cleanup_interval={cleanup_interval_minutes}min, "
@@ -272,7 +253,7 @@ class UserSessionManager:
                         )
                     
                     # Update metrics
-                    self._metrics.sessions_reused_today += 1
+                    self._metrics.record_session_reuse()
                     
                     logger.debug(f"Reused existing session for user {user_id}, thread {thread_id}")
                     return existing_session.execution_context
@@ -317,9 +298,8 @@ class UserSessionManager:
                 self._sessions[session_key] = user_session
                 
                 # Update metrics
-                self._metrics.total_sessions += 1
-                self._metrics.active_sessions += 1
-                self._metrics.sessions_created_today += 1
+                self._metrics.increment_total_sessions()
+                self._metrics.increment_active_sessions()
                 
                 logger.info(f"Created new session for user {user_id}, thread {thread_id}: {execution_context.get_correlation_id()}")
                 return execution_context
@@ -408,7 +388,8 @@ class UserSessionManager:
                     del self._sessions[key]
                 
                 # Update metrics
-                self._metrics.active_sessions -= len(keys_to_remove)
+                for _ in keys_to_remove:
+                    self._metrics.decrement_active_sessions()
                 
                 logger.info(f"Invalidated {len(keys_to_remove)} sessions for user {user_id}")
                 return len(keys_to_remove)
@@ -448,8 +429,9 @@ class UserSessionManager:
                     del self._sessions[key]
                 
                 # Update metrics
-                self._metrics.active_sessions -= len(expired_keys)
-                self._metrics.expired_sessions_cleaned += len(expired_keys)
+                for _ in expired_keys:
+                    self._metrics.decrement_active_sessions()
+                self._metrics.record_session_cleanup(len(expired_keys))
             
             # Also clean up UnifiedIdGenerator sessions
             unified_cleaned = UnifiedIdGenerator.cleanup_expired_sessions(self._max_session_age_hours)
@@ -465,11 +447,11 @@ class UserSessionManager:
             logger.error(f"Failed to cleanup expired sessions: {e}", exc_info=True)
             return 0
     
-    def get_session_metrics(self) -> SessionMetrics:
+    def get_session_metrics(self) -> SystemSessionMetrics:
         """Get current session management metrics.
         
         Returns:
-            SessionMetrics object with current statistics
+            SystemSessionMetrics object with current statistics
         """
         try:
             with self._session_lock:
@@ -479,21 +461,22 @@ class UserSessionManager:
                 # Calculate average session duration
                 if self._sessions:
                     total_duration = sum(session.get_age_minutes() for session in self._sessions.values())
-                    self._metrics.average_session_duration_minutes = total_duration / len(self._sessions)
+                    duration_minutes = total_duration / len(self._sessions)
+                    self._metrics.update_average_duration(duration_minutes)
                 else:
-                    self._metrics.average_session_duration_minutes = 0.0
+                    self._metrics.update_average_duration(0.0)
                 
                 # Estimate memory usage (rough calculation)
                 session_count = len(self._sessions)
                 estimated_mb = session_count * 0.01  # Rough estimate: 10KB per session
-                self._metrics.memory_usage_mb = estimated_mb
+                self._metrics.update_memory_usage(estimated_mb)
             
             logger.debug(f"Session metrics: {self._metrics.to_dict()}")
             return self._metrics
             
         except Exception as e:
             logger.error(f"Failed to get session metrics: {e}", exc_info=True)
-            return SessionMetrics()
+            return create_system_session_metrics()
     
     def get_active_sessions(self) -> List[Dict[str, Any]]:
         """Get list of active sessions for monitoring.
@@ -651,11 +634,11 @@ async def get_user_session(user_id: str, thread_id: str,
     )
 
 
-async def get_session_metrics() -> SessionMetrics:
+async def get_session_metrics() -> SystemSessionMetrics:
     """Convenience function to get session metrics.
     
     Returns:
-        SessionMetrics: Current session metrics
+        SystemSessionMetrics: Current session metrics
     """
     session_manager = get_session_manager()
     return session_manager.get_session_metrics()
@@ -665,7 +648,7 @@ async def get_session_metrics() -> SessionMetrics:
 __all__ = [
     'UserSessionManager',
     'UserSession', 
-    'SessionMetrics',
+    'SystemSessionMetrics',
     'SessionManagerError',
     'get_session_manager',
     'initialize_session_manager',
