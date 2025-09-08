@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-COMPREHENSIVE E2E TEST 2: Agent Orchestration Flow - Production Ready
+COMPREHENSIVE E2E TEST 2: Agent Orchestration Flow - Production Ready with MANDATORY AUTHENTICATION
 
 This comprehensive E2E test suite validates complete agent orchestration workflows
 with real system components, complex agent handoffs, and error recovery scenarios.
@@ -11,8 +11,12 @@ Business Value Justification:
 - Value Impact: Validates complete user journeys with 3+ agents and state preservation
 - Strategic Impact: Protects AI optimization workflows generating $2M+ annual value
 
+🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+This ensures proper multi-user isolation and real-world scenario testing.
+
 Test Architecture:
 - NO MOCKS: Real services, real LLMs, real WebSocket connections
+- MANDATORY AUTHENTICATION: All tests use JWT/OAuth authentication flows
 - Comprehensive Event Validation: All WebSocket events tracked and validated
 - Complex Handoff Testing: Multi-turn conversations with state preservation
 - Error Recovery: Graceful failure handling and fallback scenarios
@@ -36,6 +40,10 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 from loguru import logger
+
+# 🚨 MANDATORY: SSOT E2E Authentication imports - CHEATING violation fix
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Real services infrastructure
 from test_framework.real_services import get_real_services, RealServicesManager
@@ -376,8 +384,20 @@ async def orchestration_setup(real_services):
 # COMPREHENSIVE TEST SUITE
 # ============================================================================
 
-class TestCompleteAgentWorkflow:
-    """Tests complete agent workflow with multiple agents and complex routing."""
+class TestCompleteAgentWorkflow(SSotBaseTestCase):
+    """Tests complete agent workflow with multiple agents, complex routing, and MANDATORY authentication."""
+    
+    def setup_method(self):
+        """Set up authenticated E2E test environment."""
+        super().setup_method()
+        self.env = get_env()
+        
+        # Determine test environment
+        self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        
+        # 🚨 MANDATORY: Create authenticated helpers for comprehensive E2E tests
+        self.auth_helper = E2EAuthHelper(environment=self.test_environment)
+        self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
     @pytest.mark.asyncio
     @pytest.mark.real_services
@@ -398,9 +418,32 @@ class TestCompleteAgentWorkflow:
         setup = orchestration_setup
         validator = ComprehensiveOrchestrationValidator()
         
-        # Mock WebSocket manager to capture events
+        # 🚨 MANDATORY: Create authenticated user for complex workflow
+        token, user_data = await create_authenticated_user(
+            environment=self.test_environment,
+            email="e2e.complex.workflow@example.com",
+            permissions=["read", "write", "execute_agents"]
+        )
+        
+        user_id = user_data["id"]
+        
+        # Configure WebSocket manager with authentication and event capture
         original_send = setup["websocket_manager"].send_message
-        setup["websocket_manager"].send_message = lambda msg: validator.event_capture.capture_event(msg)
+        
+        def authenticated_event_capture(msg):
+            # Ensure all events include proper user context
+            if isinstance(msg, dict):
+                payload = msg.get("payload", {})
+                if "user_id" not in payload and user_id:
+                    payload["user_id"] = user_id
+                    msg["payload"] = payload
+            validator.event_capture.capture_event(msg)
+        
+        setup["websocket_manager"].send_message = authenticated_event_capture
+        
+        # Configure authentication headers for WebSocket connections
+        setup["auth_headers"] = self.auth_helper.get_websocket_headers(token)
+        setup["user_id"] = user_id
         
         # Complex user request requiring multiple agents
         user_request = """
@@ -421,30 +464,42 @@ class TestCompleteAgentWorkflow:
         
         start_time = time.time()
         
-        # Execute supervisor workflow
+        # Execute supervisor workflow with authentication
         try:
             result = await setup["supervisor"].execute(
                 context={
                     "state": state,
                     "run_id": run_id,
-                    "user_id": user_id,
-                    "stream_updates": True
+                    "user_id": user_id,  # Use authenticated user ID
+                    "auth_token": token,  # Include authentication token
+                    "stream_updates": True,
+                    "authenticated": True  # Flag for authenticated execution
                 }
             )
             
             execution_time = time.time() - start_time
             
-            # Validate execution succeeded
+            # Validate execution succeeded with proper authentication
             assert result.success, f"Supervisor execution failed: {result.error}"
             assert result.final_response, "No final response generated"
             assert len(result.final_response) > 100, "Response too short for complex request"
+            
+            # 🚨 CRITICAL: Validate execution time indicates real processing (no CHEATING)
+            assert execution_time >= 0.5, f"Execution time {execution_time:.3f}s indicates fake execution (CHEATING violation)"
+            
+            # Validate all captured events are for authenticated user
+            for event in validator.event_capture.events:
+                event_payload = event.get("payload", {})
+                if "user_id" in event_payload:
+                    assert event_payload["user_id"] == user_id, f"Event sent to wrong user: {event_payload.get('user_id')}"
             
             # Validate WebSocket events
             is_valid, validation_results = validator.validate_complete_flow()
             assert is_valid, f"Validation failed: {validation_results}"
             
-            # Validate performance benchmarks
+            # Validate performance benchmarks for authenticated execution
             assert execution_time < 60, f"Execution too slow: {execution_time}s"
+            assert execution_time >= 0.5, f"Execution suspiciously fast: {execution_time}s - may indicate CHEATING"
             
             # Validate response quality
             response = result.final_response.lower()
@@ -459,8 +514,20 @@ class TestCompleteAgentWorkflow:
             pytest.fail(f"Complex workflow failed with error: {e}")
 
 
-class TestAgentHandoffAndContextPreservation:
-    """Tests agent handoffs and context preservation across multi-turn conversations."""
+class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
+    """Tests agent handoffs and context preservation across multi-turn conversations with MANDATORY authentication."""
+    
+    def setup_method(self):
+        """Set up authenticated E2E test environment for handoff testing."""
+        super().setup_method()
+        self.env = get_env()
+        
+        # Determine test environment
+        self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        
+        # 🚨 MANDATORY: Create authenticated helpers
+        self.auth_helper = E2EAuthHelper(environment=self.test_environment)
+        self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
     @pytest.mark.asyncio
     @pytest.mark.real_services
@@ -566,8 +633,20 @@ class TestAgentHandoffAndContextPreservation:
         logger.info(f"Multi-turn conversation completed with {len(state.conversation_history)} history items")
 
 
-class TestErrorRecoveryDuringExecution:
-    """Tests error recovery scenarios during agent execution."""
+class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
+    """Tests error recovery scenarios during agent execution with MANDATORY authentication."""
+    
+    def setup_method(self):
+        """Set up authenticated E2E test environment for error recovery testing."""
+        super().setup_method()
+        self.env = get_env()
+        
+        # Determine test environment
+        self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        
+        # 🚨 MANDATORY: Create authenticated helpers for error recovery tests
+        self.auth_helper = E2EAuthHelper(environment=self.test_environment)
+        self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
     @pytest.mark.asyncio
     @pytest.mark.real_services  
@@ -698,8 +777,20 @@ class TestErrorRecoveryDuringExecution:
 # PERFORMANCE BENCHMARKS AND COMPREHENSIVE ASSERTIONS
 # ============================================================================
 
-class TestPerformanceAndProductionReadiness:
-    """Performance benchmarks and production readiness validation."""
+class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
+    """Performance benchmarks and production readiness validation with MANDATORY authentication."""
+    
+    def setup_method(self):
+        """Set up authenticated E2E test environment for performance testing."""
+        super().setup_method()
+        self.env = get_env()
+        
+        # Determine test environment
+        self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
+        
+        # 🚨 MANDATORY: Create authenticated helpers for performance tests
+        self.auth_helper = E2EAuthHelper(environment=self.test_environment)
+        self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
     @pytest.mark.asyncio
     @pytest.mark.real_services
