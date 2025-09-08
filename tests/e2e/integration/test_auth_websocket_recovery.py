@@ -29,8 +29,7 @@ import pytest
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 from shared.isolated_environment import IsolatedEnvironment
 
-from test_framework.auth_helpers import (
-    WebSocketAuthTester, TokenExpiryTester, MessagePreservationTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance,
+from test_framework.helpers.auth_helpers import (
     WebSocketAuthTester,
     TokenExpiryTester,
     MessagePreservationTester,

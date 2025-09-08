@@ -24,7 +24,7 @@ from typing import Dict, Any
 from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.service_dependencies import requires_services
-from test_framework.auth_helpers import (
+from test_framework.helpers.auth_helpers import (
     WebSocketAuthTester,
     TokenExpiryTester,
     AuthTestConfig,
