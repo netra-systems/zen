@@ -70,6 +70,7 @@ class TestCriticalWebSocket:
                 async with websockets.connect(
                     config.websocket_url,
                     additional_headers=ws_headers,
+                    subprotocols=["jwt-auth"],
                     close_timeout=10
                 ) as ws:
                     # If we get here, connection was established
@@ -144,7 +145,10 @@ class TestCriticalWebSocket:
         # TESTS MUST RAISE ERRORS - but here we catch expected authentication errors
         # First test: Try to connect without auth - should fail with 403
         try:
-            async with websockets.connect(config.websocket_url) as ws:
+            async with websockets.connect(
+                config.websocket_url,
+                subprotocols=["jwt-auth"]
+            ) as ws:
                 # Should not reach here
                 await ws.send(json.dumps({
                     "type": "message",
@@ -273,7 +277,10 @@ class TestCriticalWebSocket:
             else:
                 print("No authentication available, testing auth enforcement...")
                 # Fall back to testing auth enforcement
-                async with websockets.connect(config.websocket_url) as ws:
+                async with websockets.connect(
+                    config.websocket_url,
+                    subprotocols=["jwt-auth"]
+                ) as ws:
                     test_message = {
                         "type": "chat_message", 
                         "content": "Test message without auth",
@@ -312,7 +319,10 @@ class TestCriticalWebSocket:
                 print("WARNING: WebSocket library parameter error - falling back to unauthenticated test")
                 # Fall back to testing without headers
                 try:
-                    async with websockets.connect(config.websocket_url) as ws:
+                    async with websockets.connect(
+                        config.websocket_url,
+                        subprotocols=["jwt-auth"]
+                    ) as ws:
                         test_message = {
                             "type": "chat_message", 
                             "content": "Test message fallback",
@@ -367,7 +377,8 @@ class TestCriticalWebSocket:
             """Test a single WebSocket connection"""
             try:
                 async with websockets.connect(
-                    config.websocket_url
+                    config.websocket_url,
+                    subprotocols=["jwt-auth"]
                 ) as ws:
                         await ws.send(json.dumps({
                             "type": "ping",
