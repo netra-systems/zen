@@ -267,14 +267,34 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
     try:
         env = get_env()
         current_env = env.get("ENVIRONMENT", "unknown").lower()
-        is_cloud_run = bool(env.get("K_SERVICE"))  # GCP Cloud Run indicator
+        
+        # Enhanced GCP Cloud Run detection with comprehensive environment indicators
+        is_cloud_run = bool(
+            env.get("K_SERVICE") or        # Standard GCP Cloud Run service indicator
+            env.get("K_REVISION") or       # Cloud Run revision indicator
+            env.get("K_CONFIGURATION") or  # Cloud Run configuration indicator
+            env.get("GOOGLE_CLOUD_PROJECT") or  # GCP project indicator
+            env.get("GAE_SERVICE") or      # Google App Engine service indicator
+            env.get("CLOUD_RUN_INSTANCE_ID") or  # Additional Cloud Run indicator
+            (env.get("PORT") and current_env in ["staging", "production"])  # Port-based detection for cloud deployment
+        )
+        
         is_staging = current_env == "staging"
         is_e2e_testing = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
             env.get("STAGING_E2E_TEST", "0") == "1" or
-            env.get("E2E_TEST_ENV") == "staging"
+            env.get("E2E_TEST_ENV") == "staging" or
+            env.get("TESTING", "0") == "1"
         )
+        
+        # ENHANCED LOGGING: Log detailed environment detection for debugging
+        logger.info(
+            f"ENVIRONMENT DETECTION: env={current_env}, cloud_run={is_cloud_run}, "
+            f"staging={is_staging}, e2e={is_e2e_testing}, k_service={bool(env.get('K_SERVICE'))}, "
+            f"port={env.get('PORT', 'none')}, gcp_project={bool(env.get('GOOGLE_CLOUD_PROJECT'))}"
+        )
+        
     except Exception as env_error:
         logger.error(f"Environment detection failed: {env_error}")
         current_env = "unknown"
@@ -284,22 +304,50 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
     
     # Use enhanced validation for staging or Cloud Run environments
     if is_staging or is_cloud_run or is_e2e_testing:
-        logger.info(f"ENHANCED STAGING: Using comprehensive staging validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})")
+        logger.info(
+            f"ENHANCED STAGING: Using comprehensive staging validation "
+            f"(env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})"
+        )
         
         try:
+            # ENHANCED DEBUG LOGGING: Log UserExecutionContext details for debugging
+            context_type = type(user_context).__name__
+            context_module = getattr(type(user_context), '__module__', 'unknown')
+            user_id_value = getattr(user_context, 'user_id', '<MISSING>') if hasattr(user_context, 'user_id') else '<NO_ATTR>'
+            
+            logger.debug(
+                f"STAGING VALIDATION: Examining context - type={context_type}, "
+                f"module={context_module}, user_id={repr(user_id_value)}"
+            )
+            
             # Critical validation #1: Must be correct type
             if not isinstance(user_context, UserExecutionContext):
-                raise ValueError(f"STAGING CRITICAL: Expected UserExecutionContext, got {type(user_context).__name__}")
+                logger.error(
+                    f"STAGING TYPE MISMATCH: Expected UserExecutionContext from netra_backend.app.services.user_execution_context, "
+                    f"got {context_type} from {context_module}"
+                )
+                raise ValueError(f"STAGING CRITICAL: Expected UserExecutionContext, got {context_type}")
             
             # Critical validation #2: Must have user_id
-            if not hasattr(user_context, 'user_id') or not user_context.user_id:
-                raise ValueError(f"STAGING CRITICAL: Missing user_id in UserExecutionContext")
+            if not hasattr(user_context, 'user_id'):
+                logger.error("STAGING MISSING ATTRIBUTE: UserExecutionContext missing user_id attribute")
+                raise ValueError(f"STAGING CRITICAL: Missing user_id attribute in UserExecutionContext")
+            
+            user_id_raw = getattr(user_context, 'user_id')
+            if not user_id_raw:
+                logger.error(f"STAGING EMPTY USER_ID: user_id is empty or None: {repr(user_id_raw)}")
+                raise ValueError(f"STAGING CRITICAL: Missing user_id value in UserExecutionContext")
                 
             # Critical validation #3: user_id must be valid string
-            if not isinstance(user_context.user_id, str) or not user_context.user_id.strip():
-                raise ValueError(f"STAGING CRITICAL: Invalid user_id format: {repr(user_context.user_id)}")
+            if not isinstance(user_id_raw, str):
+                logger.error(f"STAGING USER_ID TYPE ERROR: user_id must be string, got {type(user_id_raw).__name__}: {repr(user_id_raw)}")
+                raise ValueError(f"STAGING CRITICAL: user_id must be string, got {type(user_id_raw).__name__}: {repr(user_id_raw)}")
             
-            # ENHANCED: Staging ID pattern recognition for GCP Cloud Run
+            if not user_id_raw.strip():
+                logger.error(f"STAGING EMPTY USER_ID STRING: user_id is empty string or whitespace: {repr(user_id_raw)}")
+                raise ValueError(f"STAGING CRITICAL: user_id cannot be empty string: {repr(user_id_raw)}")
+            
+            # ENHANCED: Staging ID pattern recognition for GCP Cloud Run with comprehensive patterns
             staging_id_patterns = [
                 r"ws_thread_\d+_[a-f0-9]{8}",          # UUID fallback thread pattern
                 r"ws_run_\d+_[a-f0-9]{8}",             # UUID fallback run pattern  
@@ -307,36 +355,69 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
                 r"staging-e2e-user-\d+",               # E2E testing user pattern
                 r"test-user-[a-f0-9-]+",               # Test user pattern
                 r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", # Standard UUID pattern
+                r"ws_client_[a-f0-9]{8}_\d+_[a-f0-9]{8}", # WebSocket client ID pattern
+                r"[a-zA-Z0-9_-]{8,64}",               # Generic alphanumeric ID pattern (flexible for GCP)
+                r"gcp_[a-zA-Z0-9_-]+",                 # GCP-specific pattern
+                r"cloud_run_[a-zA-Z0-9_-]+",           # Cloud Run specific pattern
             ]
             
-            # Validate other fields with staging pattern accommodation
+            # Validate other fields with staging pattern accommodation and detailed logging
             for attr in ['thread_id', 'run_id', 'request_id', 'websocket_client_id']:
                 if hasattr(user_context, attr):
                     value = getattr(user_context, attr)
+                    logger.debug(f"STAGING FIELD CHECK: {attr} = {repr(value)} (type: {type(value).__name__})")
+                    
                     if value and isinstance(value, str):
                         # Accept staging UUID fallback patterns
                         is_staging_pattern = any(re.match(pattern, value) for pattern in staging_id_patterns)
                         if is_staging_pattern:
-                            logger.debug(f"STAGING PATTERN ACCEPTED: {attr}={value}")
+                            logger.debug(f"STAGING PATTERN ACCEPTED: {attr}={value} (matched pattern)")
                             continue
-                        # Also accept standard patterns (non-empty strings)
+                        # Also accept standard patterns (non-empty strings) - very permissive for staging
                         elif value.strip():
-                            logger.debug(f"STAGING STANDARD ACCEPTED: {attr}={value}")
+                            logger.debug(f"STAGING STANDARD ACCEPTED: {attr}={value} (non-empty string)")
                             continue
                         else:
-                            logger.warning(f"STAGING WARNING: Empty {attr} in UserExecutionContext")
+                            logger.warning(f"STAGING WARNING: Empty {attr} in UserExecutionContext: {repr(value)}")
                     elif value is None and attr == 'websocket_client_id':
                         # websocket_client_id can be None
-                        logger.debug(f"STAGING ACCEPTED: {attr} is None (allowed)")
+                        logger.debug(f"STAGING ACCEPTED: {attr} is None (allowed for websocket_client_id)")
+                        continue
+                    elif value is None:
+                        # Other fields can be None in staging environments due to timing
+                        logger.debug(f"STAGING ACCOMMODATED: {attr} is None (allowed in staging/cloud environments)")
                         continue
                     else:
-                        logger.warning(f"STAGING WARNING: Invalid {attr} type: {type(value).__name__}")
+                        logger.warning(f"STAGING WARNING: {attr} has unexpected type: {type(value).__name__}, value: {repr(value)}")
+                else:
+                    logger.debug(f"STAGING FIELD MISSING: {attr} attribute not found on UserExecutionContext")
             
-            logger.info(f"ENHANCED STAGING SUCCESS: UserExecutionContext validation passed for user {user_context.user_id[:8]}...")
+            logger.info(
+                f"ENHANCED STAGING SUCCESS: UserExecutionContext validation passed for user {user_context.user_id[:8]}... "
+                f"(env={current_env}, cloud_run={is_cloud_run})"
+            )
             return
             
         except Exception as critical_error:
-            logger.error(f"ENHANCED STAGING CRITICAL VALIDATION FAILED: {critical_error}")
+            # ENHANCED ERROR LOGGING: Provide detailed context about validation failure
+            logger.error(
+                f"ENHANCED STAGING CRITICAL VALIDATION FAILED: {critical_error} "
+                f"(env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})"
+            )
+            
+            # Add additional context for debugging
+            try:
+                context_debug = {
+                    "type": type(user_context).__name__,
+                    "module": getattr(type(user_context), '__module__', 'unknown'),
+                    "attributes": list(dir(user_context)) if hasattr(user_context, '__dict__') else "<no attributes>",
+                    "user_id_present": hasattr(user_context, 'user_id'),
+                    "user_id_value": repr(getattr(user_context, 'user_id', '<MISSING>')) if hasattr(user_context, 'user_id') else '<NO_ATTR>'
+                }
+                logger.error(f"VALIDATION CONTEXT DEBUG: {context_debug}")
+            except Exception as debug_error:
+                logger.error(f"Could not generate validation debug context: {debug_error}")
+            
             raise
     
     else:

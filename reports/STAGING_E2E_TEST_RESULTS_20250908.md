@@ -1,17 +1,37 @@
 # Staging E2E Test Results - 2025-09-08
 
-**Test Session**: Priority 1 Critical Tests  
-**Test File**: `tests/e2e/staging/test_priority1_critical.py`  
-**Environment**: Staging GCP  
-**Time**: 2025-09-08 13:21:01  
+**UPDATED TEST SESSION**: Core Staging Tests (Latest)  
+**Test Files**: `test_10_critical_path_staging.py`, `test_1_websocket_events_staging.py`  
+**Environment**: Staging GCP (netra-backend-staging-00215-dhj)  
+**Time**: 2025-09-08 13:58:26 - 13:59:14  
 **Business Impact**: $120K+ MRR at Risk  
 
-## Summary
+## Executive Summary
 
-**CRITICAL FAILURES DETECTED**: Multiple P1 critical tests failing due to:
-1. **WebSocket message format mismatch**
-2. **Test timeout issues (120s)**
-3. **Authentication flow inconsistencies**
+| Metric | Value | Status |
+|--------|-------|--------|
+| **Total Tests** | 11 | ⚠️ **MIXED** |
+| **Passed** | 7 (63.6%) | ✅ |
+| **Failed** | 4 (36.4%) | ❌ **CRITICAL** |
+| **Business Impact** | **$120K+ MRR at Risk** | 🚨 **HIGH** |
+
+## Critical Issues Identified
+
+### 1. HTTP 307 Redirects (2 failures)
+- **Files**: `test_10_critical_path_staging.py`, `test_1_websocket_events_staging.py`
+- **Issue**: Health check endpoints returning 307 instead of expected 200
+- **Root Cause**: HTTPS redirect configuration issue
+
+### 2. HTTP 500 Internal Server Error (1 failure)
+- **File**: `test_1_websocket_events_staging.py::test_api_endpoints_for_agents`
+- **Issue**: Service discovery API returning 500
+- **Impact**: Agent discovery functionality completely broken
+
+### 3. WebSocket Factory SSOT Validation Failure (1 failure)
+- **File**: `test_1_websocket_events_staging.py::test_concurrent_websocket_real`
+- **Error**: `Factory SSOT validation failed` - Connection closed with 1011
+- **Impact**: Multi-user WebSocket connections failing
+- **Business Impact**: **CRITICAL** - Core chat functionality broken
 
 ## Test Results
 
