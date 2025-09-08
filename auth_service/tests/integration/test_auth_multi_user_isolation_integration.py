@@ -27,7 +27,7 @@ from auth_service.auth_core.config import AuthConfig
 from auth_service.services.user_service import UserService
 from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
-from auth_service.services.session_service import SessionService
+# Session functionality is managed through Redis and JWT services
 from auth_service.database import get_database
 
 
@@ -49,7 +49,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
         
         self.jwt_service = JWTService(self.auth_config)
         self.user_service = UserService(self.auth_config, get_database())
-        self.session_service = SessionService(self.auth_config, self.redis_service, self.jwt_service)
+        # Session functionality is handled by Redis and JWT services directly
         
         # Create isolated test users
         self.test_users = [
