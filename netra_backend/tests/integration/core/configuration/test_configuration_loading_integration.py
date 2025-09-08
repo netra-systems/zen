@@ -42,17 +42,21 @@ class TestConfigurationLoadingIntegration:
     @pytest.fixture
     def clean_config_cache(self):
         """Clean configuration cache before and after tests."""
-        # Clear caches
+        # Clear caches properly
         get_settings.cache_clear()
-        if hasattr(config_manager, 'clear_cache'):
-            config_manager.clear_cache()
+        # Clear the UnifiedConfigManager cache by resetting its internal state
+        config_manager._config_cache = None
+        config_manager._environment = None
+        # Clear the @lru_cache on get_config method
+        config_manager.get_config.cache_clear()
         
         yield
         
         # Clear caches after test
         get_settings.cache_clear()
-        if hasattr(config_manager, 'clear_cache'):
-            config_manager.clear_cache()
+        config_manager._config_cache = None
+        config_manager._environment = None
+        config_manager.get_config.cache_clear()
     
     @pytest.fixture
     def temp_config_file(self):
@@ -60,8 +64,8 @@ class TestConfigurationLoadingIntegration:
         config_content = """
         DATABASE_URL=postgresql://test:test@localhost:5434/integration_test
         REDIS_URL=redis://localhost:6381/0
-        JWT_SECRET_KEY=integration_test_secret_key_12345
-        SERVICE_SECRET=integration_test_service_secret
+        JWT_SECRET_KEY=integration_test_secret_key_32_chars_minimum_length_requirement
+        SERVICE_SECRET=integration_test_service_secret_32_chars_minimum_length_requirement
         ENVIRONMENT=testing
         TESTING=1
         """
@@ -84,8 +88,8 @@ class TestConfigurationLoadingIntegration:
         test_env_vars = {
             "DATABASE_URL": "postgresql://envtest:envtest@localhost:5434/env_test_db",
             "REDIS_URL": "redis://localhost:6381/1",
-            "JWT_SECRET_KEY": "env_jwt_secret_key_testing",
-            "SERVICE_SECRET": "env_service_secret_testing",
+            "JWT_SECRET_KEY": "env_jwt_secret_key_testing_32_chars_minimum_length_requirement",
+            "SERVICE_SECRET": "env_service_secret_testing_32_chars_minimum_length_requirement",
             "ENVIRONMENT": "testing",
             "TESTING": "1"
         }
@@ -94,7 +98,9 @@ class TestConfigurationLoadingIntegration:
             config = get_unified_config()
             
             assert isinstance(config, AppConfig)
-            assert config.database_url == test_env_vars["DATABASE_URL"]
+            # Database URL should be normalized to async format by DatabaseURLBuilder
+            expected_db_url = test_env_vars["DATABASE_URL"].replace("postgresql://", "postgresql+asyncpg://", 1)
+            assert config.database_url == expected_db_url
             assert config.redis_url == test_env_vars["REDIS_URL"]
             assert config.jwt_secret_key == test_env_vars["JWT_SECRET_KEY"]
             assert config.service_secret == test_env_vars["SERVICE_SECRET"]
@@ -104,7 +110,7 @@ class TestConfigurationLoadingIntegration:
         # Set environment variables
         env_vars = {
             "DATABASE_URL": "postgresql://env:env@localhost:5432/env_db",
-            "JWT_SECRET_KEY": "env_jwt_secret"
+            "JWT_SECRET_KEY": "env_jwt_secret_32_chars_minimum_length_requirement"
         }
         
         # Load from file (should override environment)
@@ -115,7 +121,7 @@ class TestConfigurationLoadingIntegration:
                 
                 # File values should take precedence
                 assert "integration_test" in config.database_url
-                assert "integration_test_secret_key" in config.jwt_secret_key
+                assert "integration_test_secret_key_32_chars_minimum_length_requirement" == config.jwt_secret_key
     
     async def test_configuration_validation_success(self, clean_config_cache):
         """Test successful configuration validation."""
