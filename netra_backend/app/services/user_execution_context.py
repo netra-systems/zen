@@ -34,6 +34,7 @@ from contextlib import asynccontextmanager
 
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -161,6 +162,10 @@ class UserExecutionContext:
     
     def _validate_no_placeholder_values(self) -> None:
         """Validate that no IDs contain dangerous placeholder or template values."""
+        # Get environment instance for test detection
+        env = IsolatedEnvironment()
+        is_test_environment = env.is_test()
+        
         # Forbidden exact values (case-insensitive)
         forbidden_exact_values = {
             'registry', 'placeholder', 'default', 'temp', 'none', 'null', 
@@ -170,9 +175,18 @@ class UserExecutionContext:
         
         # Forbidden prefix patterns for short values (< 20 chars)
         forbidden_patterns = [
-            'placeholder_', 'registry_', 'default_', 'temp_', 'test_',
+            'placeholder_', 'registry_', 'default_', 'temp_',
             'example_', 'demo_', 'sample_', 'template_', 'mock_', 'fake_'
         ]
+        
+        # Only add 'test_' pattern restriction for non-test environments
+        if not is_test_environment:
+            forbidden_patterns.append('test_')
+        else:
+            logger.debug(
+                f"Test environment detected - allowing test_ patterns for context creation. "
+                f"user_id: {self.user_id[:12]}..., environment: {env.get_environment_name()}"
+            )
         
         id_fields = ['user_id', 'thread_id', 'run_id', 'request_id']
         

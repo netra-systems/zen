@@ -185,6 +185,33 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         return self._websocket_manager
     
+    @websocket_manager.setter
+    def websocket_manager(self, manager):
+        """Set websocket manager (primarily for testing scenarios).
+        
+        CRITICAL: This setter is primarily for test scenarios to inject mock managers.
+        Production code should use factory methods (create_user_emitter, create_scoped_emitter)
+        for proper user isolation and per-request instantiation patterns.
+        
+        Args:
+            manager: WebSocket manager instance or None. Must implement send_to_thread method
+                    if not None.
+                    
+        Raises:
+            ValueError: If manager doesn't implement required interface
+        """
+        if manager is not None and not hasattr(manager, 'send_to_thread'):
+            raise ValueError(
+                "Invalid websocket manager - must implement send_to_thread method. "
+                "For production use, prefer factory methods for proper user isolation."
+            )
+        
+        self._websocket_manager = manager
+        logger.debug(
+            f"WebSocket manager {'set' if manager else 'cleared'} "
+            f"(type: {type(manager).__name__ if manager else 'None'})"
+        )
+    
     def _initialize_health_monitoring(self) -> None:
         """Initialize health monitoring and metrics."""
         self.metrics = IntegrationMetrics()
