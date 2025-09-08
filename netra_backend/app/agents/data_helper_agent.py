@@ -295,63 +295,6 @@ class DataHelperAgent(BaseAgent):
             f"for analyzing your request: {user_request[:100]}..."
         )
     
-    def _extract_previous_results(self, state: DeepAgentState) -> list:
-        """Extract results from previous agents in the workflow.
-        
-        Args:
-            state: Current agent state
-            
-        Returns:
-            List of previous agent results
-        """
-        previous_results = []
-        
-        # Check for agent results in context_tracking
-        if state.context_tracking:
-            for agent_name, output in state.context_tracking.items():
-                if agent_name != 'data_helper' and agent_name != 'data_helper_result':  # Don't include self
-                    previous_results.append({
-                        'agent_name': agent_name,
-                        'result': output
-                    })
-        
-        # Also check for specific result attributes on the state
-        result_attributes = [
-            'triage_result',
-            'data_result',
-            'optimizations_result',
-            'action_plan_result'
-        ]
-        
-        for attr in result_attributes:
-            if hasattr(state, attr):
-                value = getattr(state, attr)
-                if value:  # Don't include None values
-                    previous_results.append({
-                        'agent_name': attr.replace('_result', ''),
-                        'result': value
-                    })
-        
-        return previous_results
-    
-    def _get_fallback_message(self, user_request: str) -> str:
-        """Generate a fallback message if data request generation fails.
-        
-        Args:
-            user_request: The original user request
-            
-        Returns:
-            Fallback message string
-        """
-        return f"""To provide optimization recommendations for your request, we need additional information:
-        
-        1. Current system metrics and usage patterns
-        2. Performance requirements and constraints  
-        3. Budget and resource limitations
-        4. Technical specifications
-        
-        Please provide this information to enable targeted optimization strategies."""
-    
     async def process_message(
         self,
         message: str,

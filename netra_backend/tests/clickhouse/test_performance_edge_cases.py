@@ -29,6 +29,9 @@ from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 
 from netra_backend.app.services.corpus_service import CorpusService
 
+# Import SSOT test database fixture
+from test_framework.fixtures.database_fixtures import test_db_session
+
 class TestLargeDatasetPerformance:
     """Test query performance with large datasets"""
     @pytest.mark.asyncio
@@ -147,7 +150,7 @@ class TestLargeDatasetPerformance:
 class TestEdgeCaseHandling:
     """Test edge cases in query handling"""
     @pytest.mark.asyncio
-    async def test_empty_corpus_handling(self):
+    async def test_empty_corpus_handling(self, test_db_session):
         """Test 5: Verify handling of empty corpus tables"""
         service = CorpusService()
         
@@ -158,13 +161,21 @@ class TestEdgeCaseHandling:
             mock_client.return_value.__aenter__.return_value = mock_instance
             mock_instance.execute.return_value = []
             
-            # Mock: Generic component isolation for controlled unit testing
-            db = MagicMock()  # TODO: Use real service instance
-            # Mock: Generic component isolation for controlled unit testing
-            corpus = MagicMock()  # TODO: Use real service instance
-            corpus.status = "available"
-            corpus.table_name = "empty_corpus"
-            db.query().filter().first.return_value = corpus
+            # Use real database session with proper async support
+            db = test_db_session
+            
+            # Create a test corpus in the database
+            from netra_backend.app.db import models_postgres as models
+            test_corpus = models.Corpus(
+                id="test_id",
+                name="empty_corpus", 
+                description="Test corpus for empty handling",
+                status="available",
+                table_name="empty_corpus",
+                created_by_id="test_user"
+            )
+            db.add(test_corpus)
+            await db.commit()
             
             result = await service.get_corpus_content(db, "test_id")
             
