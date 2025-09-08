@@ -16,7 +16,7 @@ from testcontainers.redis import RedisContainer
 logger = logging.getLogger(__name__)
 
 
-class TestcontainerHelper:
+class ContainerHelper:
     """Helper class for managing testcontainers in L3 integration tests."""
     
     __test__ = False  # Tell pytest this is not a test class
@@ -222,14 +222,14 @@ class TestcontainerHelper:
         return False
 
 
-def create_test_database_containers() -> TestcontainerHelper:
+def create_test_database_containers() -> ContainerHelper:
     """
     Factory function to create and start database containers for testing.
     
     Returns:
-        Configured TestcontainerHelper with active containers
+        Configured ContainerHelper with active containers
     """
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     
     # Start PostgreSQL container
     helper.start_postgres_container()
@@ -247,7 +247,7 @@ def get_test_postgres_url() -> str:
     This function can be used when you need a quick PostgreSQL URL
     without managing the container lifecycle yourself.
     """
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     _, url = helper.start_postgres_container()
     return url
 
@@ -259,6 +259,6 @@ def get_test_redis_url() -> str:
     This function can be used when you need a quick Redis URL
     without managing the container lifecycle yourself.
     """
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     _, url = helper.start_redis_container()
     return url
