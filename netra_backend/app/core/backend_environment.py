@@ -187,7 +187,12 @@ class BackendEnvironment:
         port_str = builder.redis_port
         
         try:
-            return int(port_str)
+            port = int(port_str)
+            # Treat port 0 as invalid since it's not a valid Redis port
+            if port <= 0 or port > 65535:
+                logger.warning(f"Invalid REDIS_PORT: {port_str}, using default 6379")
+                return 6379
+            return port
         except (ValueError, TypeError):
             logger.warning(f"Invalid REDIS_PORT: {port_str}, using default 6379")
             return 6379
