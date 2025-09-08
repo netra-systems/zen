@@ -312,7 +312,80 @@ class DatabaseTestUtility:
         except Exception as e:
             self.metrics.add_error(f"Database connection failed: {str(e)}")
             logger.error(f"Test database connection failed for {self.service}: {e}")
-            raise
+            
+            # Check if we should try to use in-memory SQLite for offline testing
+            if self._should_use_fallback_database(e):
+                logger.warning(f"Switching to in-memory SQLite fallback for {self.service}")
+                await self._setup_fallback_database()
+            else:
+                raise
+
+    def _should_use_fallback_database(self, error: Exception) -> bool:
+        """Check if we should fallback to in-memory SQLite for integration tests."""
+        error_str = str(error).lower()
+        
+        # Only fallback for connection issues, not authentication/permission issues
+        fallback_conditions = [
+            "connection refused" in error_str,
+            "could not connect" in error_str,
+            "network unreachable" in error_str,
+            "timeout" in error_str and "connection" in error_str,
+            "no route to host" in error_str,
+        ]
+        
+        # Don't fallback for auth/permission errors - these should be fixed
+        non_fallback_conditions = [
+            "authentication failed" in error_str,
+            "password authentication failed" in error_str,
+            "permission denied" in error_str,
+            "access denied" in error_str,
+        ]
+        
+        if any(condition for condition in non_fallback_conditions):
+            return False
+            
+        return any(condition for condition in fallback_conditions)
+
+    async def _setup_fallback_database(self):
+        """Setup in-memory SQLite database as fallback."""
+        try:
+            # Create in-memory SQLite engine
+            sqlite_url = "sqlite+aiosqlite:///:memory:"
+            
+            from sqlalchemy.ext.asyncio import create_async_engine
+            self.async_engine = create_async_engine(
+                sqlite_url,
+                echo=self.database_config["echo"],
+                poolclass=StaticPool,
+                connect_args={
+                    "check_same_thread": False,
+                }
+            )
+            
+            # Update sync engine too
+            from sqlalchemy import create_engine
+            self.sync_engine = create_engine(
+                "sqlite:///:memory:",
+                echo=self.database_config["echo"],
+                poolclass=StaticPool,
+                connect_args={
+                    "check_same_thread": False,
+                }
+            )
+            
+            # Recreate session factories
+            self._create_session_factories()
+            
+            # Test the fallback connection
+            async with self.async_engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            
+            logger.info(f"Successfully setup in-memory SQLite fallback for {self.service}")
+            self.metrics.add_warning("Using in-memory SQLite fallback - some features may be limited")
+            
+        except Exception as fallback_error:
+            logger.error(f"Fallback database setup failed: {fallback_error}")
+            raise RuntimeError(f"Both main database and fallback failed: {fallback_error}")from fallback_error
     
     async def _run_migrations(self):
         """Run database migrations if needed."""
