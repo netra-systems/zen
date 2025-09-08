@@ -428,15 +428,15 @@ class TestUserContextFactoryIntegration(SSotBaseTestCase):
             UserContextFactory.create_context(
                 user_id="",  # Empty user ID should fail
                 thread_id=self.test_threads["conversation_1"],
-                run_id="test_run_001"
+                run_id="run_validation_001"
             )
         
         # Test invalid thread ID patterns
         with pytest.raises(InvalidContextError):
             UserContextFactory.create_context(
-                user_id=self.test_users[0],
+                user_id="usr_validation_user_001234",  # Valid user ID
                 thread_id="placeholder",  # Placeholder values should fail
-                run_id="test_run_001"
+                run_id="run_validation_002"
             )
         
         # Test context validation
@@ -448,12 +448,12 @@ class TestUserContextFactoryIntegration(SSotBaseTestCase):
         # Validation should pass for valid context
         assert valid_context.verify_isolation() is True, "Valid context should pass isolation verification"
         
-        # Test child context depth limits
-        current_context = valid_context
-        for i in range(9):  # Create nested contexts up to limit
+        # Test child context depth limits (max_depth = 10)
+        current_context = valid_context  # starts at depth 0
+        for i in range(10):  # Create nested contexts up to depth 10
             current_context = current_context.create_child_context(f"operation_{i}")
         
-        # Should fail at maximum depth
+        # At depth 10, next creation should fail (>= 10)
         with pytest.raises(InvalidContextError):
             current_context.create_child_context("operation_too_deep")
     

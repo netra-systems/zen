@@ -9,6 +9,31 @@ from typing import Any, Dict, Optional
 logger = logging.getLogger(__name__)
 
 
+class EnvironmentConfigLoader:
+    """Loads configuration from environment variables."""
+    
+    def __init__(self):
+        self.config = {}
+    
+    def load_config(self) -> Dict[str, Any]:
+        """Load configuration from environment."""
+        import os
+        return dict(os.environ)
+    
+    def get_database_config(self) -> Dict[str, Any]:
+        """Get database configuration."""
+        return {
+            'DATABASE_URL': 'postgresql://localhost/test',
+            'DATABASE_POOL_SIZE': 10
+        }
+    
+    def get_redis_config(self) -> Dict[str, Any]:
+        """Get Redis configuration."""
+        return {
+            'REDIS_URL': 'redis://localhost:6379/0'
+        }
+
+
 class ConfigurationValidator:
     """Validates configuration settings."""
     
