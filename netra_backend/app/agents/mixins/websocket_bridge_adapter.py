@@ -9,6 +9,7 @@ BVJ: Platform/Internal | Stability | Single source of truth for agent-websocket 
 
 from typing import TYPE_CHECKING, Optional, Any, Dict
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket_error_validator import get_websocket_validator
 
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
@@ -84,13 +85,33 @@ class WebSocketBridgeAdapter:
         
         try:
             context = {"message": message} if message else {}
+            
+            # Pre-validate the event will succeed
+            validator = get_websocket_validator()
+            mock_event = {
+                "type": "agent_started",
+                "run_id": self._run_id,
+                "agent_name": self._agent_name,
+                "timestamp": "validation",
+                "payload": context
+            }
+            
+            validation_result = validator.validate_event(mock_event, "validation_user")
+            if not validation_result.is_valid:
+                logger.critical(f"🚨 CRITICAL: agent_started event would fail validation: {validation_result.error_message}")
+                logger.critical(f"🚨 BUSINESS VALUE FAILURE: Event structure invalid")
+            
             await self._bridge.notify_agent_started(
                 self._run_id, 
                 self._agent_name,
                 context=context
             )
         except Exception as e:
-            logger.debug(f"Failed to emit agent_started: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to emit agent_started for {self._agent_name}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see agent starting")
+            # Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
     
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None) -> None:
         """Emit agent thinking event for real-time reasoning visibility."""
@@ -118,7 +139,12 @@ class WebSocketBridgeAdapter:
                 step_number=step_number
             )
         except Exception as e:
-            logger.debug(f"Failed to emit thinking: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to emit agent_thinking for {self._agent_name}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see real-time reasoning")
+            logger.critical(f"🚨 Impact: User cannot follow AI's problem-solving approach")
+            # Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
     
     async def emit_tool_executing(self, tool_name: str, 
                                  parameters: Optional[Dict[str, Any]] = None) -> None:
@@ -147,7 +173,12 @@ class WebSocketBridgeAdapter:
                 parameters=parameters
             )
         except Exception as e:
-            logger.debug(f"Failed to emit tool_executing: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to emit tool_executing for {self._agent_name}, tool {tool_name}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see tool usage transparency")
+            logger.critical(f"🚨 Impact: User cannot see which tools AI is using to solve their problem")
+            # Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
     
     async def emit_tool_completed(self, tool_name: str, 
                                  result: Optional[Dict[str, Any]] = None) -> None:
@@ -176,7 +207,12 @@ class WebSocketBridgeAdapter:
                 result=result
             )
         except Exception as e:
-            logger.debug(f"Failed to emit tool_completed: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to emit tool_completed for {self._agent_name}, tool {tool_name}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see tool results")
+            logger.critical(f"🚨 Impact: User cannot see the results AI obtained from tools")
+            # Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
     
     async def emit_agent_completed(self, result: Optional[Dict[str, Any]] = None) -> None:
         """Emit agent completed event."""
@@ -203,7 +239,12 @@ class WebSocketBridgeAdapter:
                 result=result
             )
         except Exception as e:
-            logger.debug(f"Failed to emit agent_completed: {e}")
+            logger.critical(f"🚨 CRITICAL: Failed to emit agent_completed for {self._agent_name}: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not know when valuable response is ready")
+            logger.critical(f"🚨 Impact: User may wait indefinitely for response completion")
+            # Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
     
     async def emit_progress(self, content: str, is_complete: bool = False) -> None:
         """Emit progress update."""

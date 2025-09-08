@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -43,14 +44,10 @@ if TYPE_CHECKING:
 logger = central_logger.get_logger(__name__)
 
 
-class ExecutionStatus(Enum):
-    """Status of execution context lifecycle."""
-    INITIALIZING = "initializing"
-    ACTIVE = "active" 
-    EXECUTING = "executing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CLEANED = "cleaned"
+# SSOT COMPLIANCE: ExecutionStatus imported from core_enums
+# Mapping for execution_factory specific states:
+# - ACTIVE -> EXECUTING (agent is actively working)  
+# - CLEANED -> COMPLETED (execution finished and resources cleaned up)
 
 
 @dataclass
@@ -90,7 +87,7 @@ class UserExecutionContext:
             'context_created_at': self.created_at.isoformat(),
             'last_activity_at': self.created_at.isoformat()
         })
-        self.status = ExecutionStatus.ACTIVE
+        self.status = ExecutionStatus.EXECUTING  # SSOT: ACTIVE -> EXECUTING
         logger.debug(f"UserExecutionContext created: user_id={self.user_id}, request_id={self.request_id}")
     
     def update_activity(self) -> None:
@@ -156,7 +153,7 @@ class UserExecutionContext:
             return
             
         logger.info(f"🧹 Cleaning up UserExecutionContext for user {self.user_id}")
-        self.status = ExecutionStatus.CLEANED
+        self.status = ExecutionStatus.COMPLETED  # SSOT: CLEANED -> COMPLETED
         
         try:
             # Run cleanup callbacks in reverse order (LIFO)

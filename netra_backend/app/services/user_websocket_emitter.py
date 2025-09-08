@@ -20,6 +20,7 @@ from typing import Dict, Any, Optional, List
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
+from netra_backend.app.services.websocket_error_validator import get_websocket_validator, EventCriticality
 
 logger = central_logger.get_logger(__name__)
 
@@ -320,6 +321,39 @@ class UserWebSocketEmitter:
             bool: True if sent successfully
         """
         try:
+            # VALIDATION STEP 1: Validate event structure and content
+            validator = get_websocket_validator()
+            validation_result = validator.validate_event(event, self.user_id, self.connection_id)
+            
+            if not validation_result.is_valid:
+                self.events_failed += 1
+                
+                # Log based on criticality
+                if validation_result.criticality == EventCriticality.MISSION_CRITICAL:
+                    logger.critical(f"🚨 CRITICAL: Event validation failed for {event_type}")
+                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: {validation_result.business_impact}")
+                    logger.critical(f"🚨 Error: {validation_result.error_message}")
+                    logger.critical(f"🚨 User: {self.user_id[:8]}..., Run: {self.run_id}")
+                else:
+                    logger.error(f"🚨 ERROR: Event validation failed for {event_type}: {validation_result.error_message}")
+                    logger.error(f"🚨 Impact: {validation_result.business_impact}")
+                
+                return False
+            
+            # VALIDATION STEP 2: Validate connection readiness
+            connection_validation = validator.validate_connection_ready(
+                self.user_id, 
+                self.connection_id or "broadcast", 
+                self.router.websocket_manager
+            )
+            
+            if not connection_validation.is_valid:
+                self.events_failed += 1
+                logger.critical(f"🚨 CRITICAL: Connection validation failed for {event_type}")
+                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {connection_validation.business_impact}")
+                logger.critical(f"🚨 Error: {connection_validation.error_message}")
+                return False
+            
             # Add request_id for complete traceability
             event["request_id"] = self.request_id
             
@@ -336,13 +370,34 @@ class UserWebSocketEmitter:
                 logger.debug(f"Sent {event_type} event to user {self.user_id[:8]}... (run_id: {self.run_id})")
             else:
                 self.events_failed += 1
-                logger.warning(f"Failed to send {event_type} event to user {self.user_id[:8]}... (run_id: {self.run_id})")
+                
+                # Enhanced error logging based on event criticality
+                criticality = validation_result.criticality if validation_result else EventCriticality.BUSINESS_VALUE
+                
+                if criticality == EventCriticality.MISSION_CRITICAL:
+                    logger.critical(f"🚨 CRITICAL: MISSION CRITICAL EVENT FAILED: {event_type}")
+                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see AI working")
+                    logger.critical(f"🚨 Impact: Chat functionality degraded - user experience compromised")
+                    logger.critical(f"🚨 Event details: type={event_type}, thread_id={self.thread_id}, connection_id={self.connection_id}")
+                    logger.critical(f"🚨 This is a CRITICAL SYSTEM FAILURE requiring immediate attention")
+                else:
+                    logger.error(f"🚨 ERROR: Failed to send {event_type} event to user {self.user_id[:8]}... (run_id: {self.run_id})")
+                    logger.error(f"🚨 BUSINESS VALUE IMPACT: Real-time experience degraded")
+                    logger.error(f"🚨 Event details: type={event_type}, thread_id={self.thread_id}, connection_id={self.connection_id}")
             
             return success
             
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"Error sending {event_type} event to user {self.user_id[:8]}...: {e}")
+            logger.critical(f"🚨 CRITICAL: EXCEPTION in event transmission for {event_type}")
+            logger.critical(f"🚨 Exception: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Real-time event transmission failed")
+            logger.critical(f"🚨 Impact: User will not see AI working on their problem")
+            logger.critical(f"🚨 Context: user={self.user_id[:8]}..., run_id={self.run_id}, thread_id={self.thread_id}")
+            logger.critical(f"🚨 This indicates a SYSTEM FAILURE in the event transmission infrastructure")
+            # LOUD ERROR: Log stack trace for debugging
+            import traceback
+            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
             return False
     
     def _sanitize_tool_input(self, tool_input: Dict[str, Any]) -> Dict[str, Any]:
