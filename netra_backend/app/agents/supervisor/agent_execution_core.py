@@ -211,6 +211,7 @@ class AgentExecutionCore:
                 
                 return AgentExecutionResult(
                     success=False,
+                    agent_name=context.agent_name,
                     error=f"Agent execution failed: {str(e)}"
                 )
     
@@ -254,6 +255,7 @@ class AgentExecutionCore:
                     # Agent didn't return proper result format
                     return AgentExecutionResult(
                         success=True,
+                        agent_name=context.agent_name,
                         duration=duration,
                         metrics=self._calculate_performance_metrics(start_time, heartbeat)
                     )
@@ -263,6 +265,7 @@ class AgentExecutionCore:
             logger.error(f"Agent {context.agent_name} timed out after {timeout_seconds}s")
             return AgentExecutionResult(
                 success=False,
+                agent_name=context.agent_name,
                 error=f"Agent execution timeout after {timeout_seconds}s",
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
@@ -273,6 +276,7 @@ class AgentExecutionCore:
             logger.error(f"Agent {context.agent_name} failed with error: {e}")
             return AgentExecutionResult(
                 success=False,
+                agent_name=context.agent_name,
                 error=str(e),
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
@@ -403,6 +407,7 @@ class AgentExecutionCore:
         if not agent:
             return AgentExecutionResult(
                 success=False,
+                agent_name=agent_name,
                 error=f"Agent {agent_name} not found"
             )
         return agent

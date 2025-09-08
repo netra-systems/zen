@@ -67,6 +67,7 @@ class AgentExecutionContext:
 class AgentExecutionResult:
     """Result of agent execution"""
     success: bool
+    agent_name: Optional[str] = None  # The name of the agent that was executed
     user_context: Optional['UserExecutionContext'] = None
     error: Optional[str] = None
     duration: float = 0.0

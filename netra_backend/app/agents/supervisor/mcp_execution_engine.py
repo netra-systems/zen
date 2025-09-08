@@ -257,9 +257,9 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
         """Execute MCP tool directly."""
         try:
             result = await self._perform_mcp_tool_execution(mcp_context, user_context, execution_plan)
-            return self._create_mcp_success_result(user_context, result)
+            return self._create_mcp_success_result(mcp_context, user_context, result)
         except Exception as e:
-            return self._handle_mcp_tool_error(user_context, e)
+            return self._handle_mcp_tool_error(mcp_context, user_context, e)
 
     async def _perform_mcp_tool_execution(self, mcp_context: MCPExecutionContext, 
                                          user_context: Optional['UserExecutionContext'], execution_plan: Dict[str, Any]) -> Dict[str, Any]:
@@ -296,33 +296,35 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
             "arguments": self._extract_tool_arguments(user_context)
         }
     
-    def _handle_mcp_tool_error(self, user_context: Optional['UserExecutionContext'], error: Exception) -> AgentExecutionResult:
+    def _handle_mcp_tool_error(self, mcp_context: MCPExecutionContext, user_context: Optional['UserExecutionContext'], error: Exception) -> AgentExecutionResult:
         """Handle MCP tool execution error."""
         logger.error(f"MCP tool execution failed: {error}")
-        return self._create_mcp_error_result(user_context, error)
+        return self._create_mcp_error_result(mcp_context, user_context, error)
     
     def _extract_tool_arguments(self, user_context: Optional['UserExecutionContext']) -> Dict[str, Any]:
         """Extract tool arguments from state."""
         return user_context.metadata.get('tool_arguments', {}) if user_context else {}
     
-    def _create_mcp_success_result(self, user_context: Optional['UserExecutionContext'], 
+    def _create_mcp_success_result(self, mcp_context: MCPExecutionContext,
+                                  user_context: Optional['UserExecutionContext'], 
                                   mcp_result: Dict[str, Any]) -> AgentExecutionResult:
         """Create successful MCP execution result."""
         if user_context:
             user_context.metadata["mcp_tool_result"] = mcp_result
         metadata = self._build_success_metadata(mcp_result)
-        return AgentExecutionResult(success=True, user_context=user_context, metadata=metadata)
+        return AgentExecutionResult(success=True, agent_name=mcp_context.base_context.agent_name, user_context=user_context, metadata=metadata)
 
     def _build_success_metadata(self, mcp_result: Dict[str, Any]) -> Dict[str, Any]:
         """Build metadata for successful MCP result."""
         return {"execution_type": "mcp", "mcp_result": mcp_result}
     
-    def _create_mcp_error_result(self, user_context: Optional['UserExecutionContext'], 
+    def _create_mcp_error_result(self, mcp_context: MCPExecutionContext,
+                                user_context: Optional['UserExecutionContext'], 
                                 error: Exception) -> AgentExecutionResult:
         """Create error result for MCP execution."""
         error_message = f"MCP execution failed: {str(error)}"
         metadata = {"execution_type": "mcp_failed"}
-        return AgentExecutionResult(success=False, user_context=user_context, error=error_message, metadata=metadata)
+        return AgentExecutionResult(success=False, agent_name=mcp_context.base_context.agent_name, user_context=user_context, error=error_message, metadata=metadata)
     
     async def _fallback_to_standard_execution(self, context: AgentExecutionContext,
                                              user_context: Optional['UserExecutionContext']) -> AgentExecutionResult:

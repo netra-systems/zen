@@ -193,10 +193,11 @@ class BaseAgent(ABC):
         self.max_retries = 3   # Default retry count
         
         # Initialize circuit breaker for agent-specific reliability
+        # CRITICAL FIX: Reduced timeout from 60s to 10s to prevent WebSocket blocking
         self.circuit_breaker = AgentCircuitBreaker(
             agent_name=name,
             failure_threshold=5,
-            recovery_timeout_seconds=60,
+            recovery_timeout_seconds=10,  # WEBSOCKET OPTIMIZATION: Reduced from 60s for <5s responsiveness
             half_open_max_calls=2
         )
         # Store the original name for test compatibility
@@ -209,9 +210,10 @@ class BaseAgent(ABC):
         # Initialize reliability manager with simple parameters - enabled by default
         self._reliability_manager_instance = None
         if enable_reliability:
+            # CRITICAL FIX: Reduced recovery timeout to prevent WebSocket blocking
             self._reliability_manager_instance = ReliabilityManager(
                 failure_threshold=5,
-                recovery_timeout=60,
+                recovery_timeout=10,  # WEBSOCKET OPTIMIZATION: Reduced from 60s for <5s responsiveness
                 half_open_max_calls=2
             )
             
