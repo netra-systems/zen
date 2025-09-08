@@ -99,32 +99,51 @@ class TestAgentExecutionCoreIntegration:
         return registry
 
     @pytest.fixture
-    def mock_websocket_bridge(self):
-        """Mock WebSocket bridge that tracks calls."""
-        bridge = AsyncMock()
-        bridge.call_log = []
+    async def real_websocket_bridge(self):
+        """Real WebSocket bridge for integration testing."""
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
         
-        async def track_calls(method_name):
-            async def wrapper(*args, **kwargs):
-                bridge.call_log.append({
-                    'method': method_name,
-                    'args': args,
-                    'kwargs': kwargs
-                })
-                return True
-            return wrapper
+        # Create real WebSocket manager (without external connections for testing)
+        websocket_manager = UnifiedWebSocketManager()
         
-        bridge.notify_agent_started = track_calls('notify_agent_started')
-        bridge.notify_agent_completed = track_calls('notify_agent_completed') 
-        bridge.notify_agent_error = track_calls('notify_agent_error')
-        bridge.notify_agent_thinking = track_calls('notify_agent_thinking')
+        # Create real bridge with tracking capabilities
+        bridge = AgentWebSocketBridge(websocket_manager)
+        bridge.call_log = []  # Add tracking for test validation
+        
+        # Wrap methods to track calls while maintaining real behavior
+        original_started = bridge.notify_agent_started
+        original_completed = bridge.notify_agent_completed
+        original_error = bridge.notify_agent_error
+        original_thinking = bridge.notify_agent_thinking
+        
+        async def track_started(*args, **kwargs):
+            bridge.call_log.append({'method': 'notify_agent_started', 'args': args, 'kwargs': kwargs})
+            return await original_started(*args, **kwargs)
+        
+        async def track_completed(*args, **kwargs):
+            bridge.call_log.append({'method': 'notify_agent_completed', 'args': args, 'kwargs': kwargs})
+            return await original_completed(*args, **kwargs)
+        
+        async def track_error(*args, **kwargs):
+            bridge.call_log.append({'method': 'notify_agent_error', 'args': args, 'kwargs': kwargs})
+            return await original_error(*args, **kwargs)
+        
+        async def track_thinking(*args, **kwargs):
+            bridge.call_log.append({'method': 'notify_agent_thinking', 'args': args, 'kwargs': kwargs})
+            return await original_thinking(*args, **kwargs)
+        
+        bridge.notify_agent_started = track_started
+        bridge.notify_agent_completed = track_completed
+        bridge.notify_agent_error = track_error
+        bridge.notify_agent_thinking = track_thinking
         
         return bridge
 
     @pytest.fixture
-    def integration_core(self, real_registry, mock_websocket_bridge):
+    def integration_core(self, real_registry, real_websocket_bridge):
         """AgentExecutionCore with real components."""
-        return AgentExecutionCore(real_registry, mock_websocket_bridge)
+        return AgentExecutionCore(real_registry, real_websocket_bridge)
 
     @pytest.fixture
     def sample_context(self, auth_helper):
