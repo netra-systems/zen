@@ -279,9 +279,21 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
       // Wait for connection
       await connectionPromise;
       
-      // Get the most recent WebSocket instance
-      const mockWs = global.mockWebSocketInstances?.[global.mockWebSocketInstances.length - 1];
+      // Debug global instances
+      console.log('DEBUG: global.mockWebSocketInstances:', global.mockWebSocketInstances);
+      console.log('DEBUG: global.mockWebSocketInstances length:', global.mockWebSocketInstances?.length);
+      
+      // Get the most recent WebSocket instance (which should be 'ws' itself)
+      let mockWs = global.mockWebSocketInstances?.[global.mockWebSocketInstances.length - 1];
+      
+      // If not found in global array, the 'ws' object itself should be the mock
+      if (!mockWs && ws && typeof (ws as any).simulateMessage === 'function') {
+        console.log('DEBUG: Using WebSocket instance directly as mock');
+        mockWs = ws as any;
+      }
+      
       console.log('DEBUG: Found mock instance:', !!mockWs, 'readyState:', mockWs?.readyState);
+      console.log('DEBUG: Has simulateMessage method:', typeof mockWs?.simulateMessage);
       
       if (mockWs && mockWs.simulateMessage) {
         console.log('DEBUG: Starting agent event simulation');
