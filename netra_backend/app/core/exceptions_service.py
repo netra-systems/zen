@@ -7,11 +7,11 @@ from netra_backend.app.core.exceptions_base import NetraException
 class ServiceError(NetraException):
     """Base class for service-related exceptions."""
     
-    def __init__(self, message: str = None, **kwargs):
+    def __init__(self, message: str = None, code=None, severity=None, **kwargs):
         super().__init__(
             message=message or "Service error occurred",
-            code=ErrorCode.SERVICE_UNAVAILABLE,
-            severity=ErrorSeverity.HIGH,
+            code=code or ErrorCode.SERVICE_UNAVAILABLE,
+            severity=severity or ErrorSeverity.HIGH,
             **kwargs
         )
 
@@ -22,8 +22,6 @@ class ServiceUnavailableError(ServiceError):
     def __init__(self, message: str = None, **kwargs):
         super().__init__(
             message=message or "Service is currently unavailable",
-            code=ErrorCode.SERVICE_UNAVAILABLE,
-            severity=ErrorSeverity.HIGH,
             user_message="The service is temporarily unavailable. Please try again later",
             **kwargs
         )
@@ -36,7 +34,6 @@ class ServiceTimeoutError(ServiceError):
         super().__init__(
             message=message or "Service request timed out",
             code=ErrorCode.SERVICE_TIMEOUT,
-            severity=ErrorSeverity.HIGH,
             user_message="The request took too long to complete. Please try again",
             **kwargs
         )
@@ -49,7 +46,6 @@ class ExternalServiceError(ServiceError):
         super().__init__(
             message=message or "External service error",
             code=ErrorCode.EXTERNAL_SERVICE_ERROR,
-            severity=ErrorSeverity.HIGH,
             **kwargs
         )
 

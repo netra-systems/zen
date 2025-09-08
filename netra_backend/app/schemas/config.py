@@ -175,9 +175,9 @@ class AppConfig(BaseModel):
     app_name: str = "netra"  # Application name for identification
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
-    clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
-    clickhouse_http: ClickHouseHTTPConfig = ClickHouseHTTPConfig()
-    clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
+    clickhouse_native: ClickHouseNativeConfig = Field(default_factory=ClickHouseNativeConfig)
+    clickhouse_http: ClickHouseHTTPConfig = Field(default_factory=ClickHouseHTTPConfig)
+    clickhouse_https: ClickHouseHTTPSConfig = Field(default_factory=ClickHouseHTTPSConfig)
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
     ws_config: WebSocketConfig = Field(default_factory=WebSocketConfig)
@@ -1183,6 +1183,7 @@ class NetraTestingConfig(AppConfig):
     service_secret: str = "mock-service-auth-key-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
     jwt_secret_key: str = "mock_jwt_auth_key_for_checking_32_chars_minimum_required_length"  # Test-safe JWT secret
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
+    secret_key: str = "mock-fastapi-session-secret-key-for-testing-32-chars-minimum-required"  # Test-safe SECRET_KEY (32+ chars)
     
     def __init__(self, **data):
         """Initialize test configuration using DatabaseURLBuilder."""
@@ -1236,7 +1237,7 @@ class NetraTestingConfig(AppConfig):
             if api_key:
                 data[field_name] = api_key
         
-        # Load security keys from environment (override defaults)
+        # Load security keys from environment (override defaults if they meet validation criteria)
         security_key_mappings = {
             'SECRET_KEY': 'secret_key',  # CRITICAL FIX: Load SECRET_KEY for FastAPI sessions
             'JWT_SECRET_KEY': 'jwt_secret_key',
@@ -1247,6 +1248,14 @@ class NetraTestingConfig(AppConfig):
         for env_var, field_name in security_key_mappings.items():
             key_value = get_env_value(env_var)
             if key_value:
+                # CRITICAL FIX: For SECRET_KEY, only override if it meets length requirements
+                # This prevents validation failures that cause fallback to basic AppConfig
+                if field_name == 'secret_key' and len(key_value) < 32:
+                    # Keep the class default (32+ chars) instead of environment value
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Ignoring environment {env_var} (length: {len(key_value)}) - using test-safe default instead")
+                    continue
                 data[field_name] = key_value
         
         # Load OAuth credentials from environment (test environment uses TEST suffix)
@@ -1278,11 +1287,29 @@ class NetraTestingConfig(AppConfig):
         clickhouse_password = get_env_value('CLICKHOUSE_PASSWORD')
         clickhouse_database = get_env_value('CLICKHOUSE_DATABASE') or get_env_value('CLICKHOUSE_DB')
         
+        # CRITICAL FIX: Provide test-safe ClickHouse defaults for validation compliance
+        # This ensures tests work with --no-docker flag without breaking SSOT validation
+        if 'clickhouse_native' not in data:
+            data['clickhouse_native'] = {}
+        if 'clickhouse_https' not in data:
+            data['clickhouse_https'] = {}
+            
+        # Set defaults first (test-safe values that pass validation)
+        test_clickhouse_defaults = {
+            'host': 'localhost',  # Valid non-empty host for validation
+            'port': 8126,         # Docker test port or safe default
+            'user': 'test',       # Test user
+            'password': 'test',   # Test password
+            'database': 'test_analytics'  # Test database
+        }
+        
+        # Apply defaults to both native and https configs
+        for config_key in ['clickhouse_native', 'clickhouse_https']:
+            for field, default_value in test_clickhouse_defaults.items():
+                data[config_key][field] = default_value
+        
+        # Override with environment variables if present (SSOT principle)
         if clickhouse_host or clickhouse_port or clickhouse_user or clickhouse_password or clickhouse_database:
-            if 'clickhouse_native' not in data:
-                data['clickhouse_native'] = {}
-            if 'clickhouse_https' not in data:
-                data['clickhouse_https'] = {}
             if clickhouse_host:
                 data['clickhouse_native']['host'] = clickhouse_host
                 data['clickhouse_https']['host'] = clickhouse_host
