@@ -526,6 +526,51 @@ async def setup_database_connections(app: FastAPI) -> None:
     
     logger.info(f"Database setup for {environment} environment - init timeout: {initialization_timeout}s, table timeout: {table_setup_timeout}s")
     
+    # CRITICAL FIX: Ensure DatabaseManager is initialized early in startup sequence
+    # This prevents "DatabaseManager not initialized" errors in staging environment
+    try:
+        logger.debug("Ensuring DatabaseManager initialization...")
+        from netra_backend.app.db.database_manager import get_database_manager
+        
+        # Get the database manager - it will auto-initialize but let's ensure it explicitly
+        manager = get_database_manager()
+        if not manager._initialized:
+            logger.info("Explicitly initializing DatabaseManager during startup")
+            await asyncio.wait_for(
+                manager.initialize(),
+                timeout=initialization_timeout
+            )
+            logger.info("✅ DatabaseManager initialized successfully during startup")
+        else:
+            logger.debug("✅ DatabaseManager already initialized")
+            
+        # Verify database connectivity with the manager
+        health_result = await asyncio.wait_for(
+            manager.health_check(),
+            timeout=5.0  # Quick health check timeout
+        )
+        
+        if health_result['status'] == 'healthy':
+            logger.info("✅ DatabaseManager health check passed")
+        else:
+            logger.warning(f"⚠️ DatabaseManager health check warning: {health_result}")
+            if not graceful_startup:
+                raise RuntimeError(f"DatabaseManager health check failed: {health_result}")
+            
+    except asyncio.TimeoutError:
+        error_msg = f"DatabaseManager initialization timed out after {initialization_timeout}s"
+        logger.error(error_msg)
+        if not graceful_startup:
+            raise RuntimeError(error_msg)
+        else:
+            logger.warning("DatabaseManager timeout - continuing in graceful mode")
+    except Exception as db_init_error:
+        logger.error(f"DatabaseManager initialization failed: {db_init_error}")
+        if not graceful_startup:
+            raise RuntimeError(f"DatabaseManager initialization failed: {db_init_error}") from db_init_error
+        else:
+            logger.warning(f"DatabaseManager initialization failed but continuing in graceful mode: {db_init_error}")
+    
     try:
         logger.debug(f"Calling initialize_postgres() with {initialization_timeout}s timeout...")
         async_session_factory = await asyncio.wait_for(
