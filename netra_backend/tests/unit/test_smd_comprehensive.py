@@ -428,7 +428,7 @@ class TestDeterministicFailureScenarios(BaseTestCase):
     
     def test_key_manager_failure_is_fatal(self):
         """Test that key manager initialization failure causes fatal startup failure."""
-        with patch('netra_backend.app.smd.KeyManager') as mock_key_manager_class:
+        with patch('netra_backend.app.services.key_manager.KeyManager') as mock_key_manager_class:
             mock_key_manager_class.load_from_settings.return_value = None
             
             # Key manager failure should be fatal
