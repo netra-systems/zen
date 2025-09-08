@@ -81,7 +81,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
     @pytest.fixture
     async def test_database(self):
         """Provide isolated test database session."""
-        async with DatabaseTestUtility("auth_service").get_test_session() as db_session:
+        async with DatabaseTestUtility("auth_service").transaction_scope() as db_session:
             yield db_session
     
     # === ULTRA-CRITICAL P0 TESTS ===
