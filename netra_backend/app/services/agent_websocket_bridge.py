@@ -175,6 +175,16 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._health_check_task = None
         logger.debug("Dependency references initialized")
     
+    @property
+    def websocket_manager(self):
+        """Get the WebSocket manager for this bridge.
+        
+        CRITICAL: This property exposes the _websocket_manager for supervisor
+        and tool dispatcher integration. The manager is set per-request to
+        ensure proper user isolation.
+        """
+        return self._websocket_manager
+    
     def _initialize_health_monitoring(self) -> None:
         """Initialize health monitoring and metrics."""
         self.metrics = IntegrationMetrics()

@@ -374,7 +374,8 @@ def _is_mock_database_url(database_url: str) -> bool:
         "postgresql+asyncpg://mock:mock@",
         "/mock?",  # database name is "mock"
         "/mock$",  # database name is "mock" at end
-        "@localhost:5432/mock"  # specific mock pattern used by dev launcher
+        "@localhost:5432/mock",  # specific mock pattern used by dev launcher
+        "?mock"  # query parameter indicating mock mode
     ]
     
     return any(pattern in database_url for pattern in mock_patterns)

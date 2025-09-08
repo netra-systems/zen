@@ -15,7 +15,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -41,7 +41,7 @@ class WorkflowOrchestrator:
                 
             # Create UserExecutionContext from ExecutionContext if available
             if hasattr(context, 'user_id') and hasattr(context, 'thread_id') and hasattr(context, 'run_id'):
-                from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 
                 user_context = UserExecutionContext(

@@ -103,6 +103,9 @@ class ExecutionEngineFactory:
         self._engine_timeout_seconds = 300  # 5 minutes max engine lifetime
         self._cleanup_interval = 60  # Cleanup check every minute
         
+        # Tool dispatcher factory for integration
+        self._tool_dispatcher_factory = None
+        
         # Factory metrics
         self._factory_metrics = {
             'total_engines_created': 0,
@@ -119,6 +122,15 @@ class ExecutionEngineFactory:
         self._shutdown_event = asyncio.Event()
         
         logger.info("ExecutionEngineFactory initialized")
+    
+    def set_tool_dispatcher_factory(self, tool_dispatcher_factory):
+        """Set the tool dispatcher factory for integration.
+        
+        Args:
+            tool_dispatcher_factory: Factory for creating tool dispatchers
+        """
+        self._tool_dispatcher_factory = tool_dispatcher_factory
+        logger.info(f"Tool dispatcher factory set for ExecutionEngineFactory: {type(tool_dispatcher_factory).__name__}")
     
     async def create_for_user(self, context: UserExecutionContext) -> UserExecutionEngine:
         """Create UserExecutionEngine for specific user.
@@ -471,6 +483,69 @@ class ExecutionEngineFactory:
             'engines': engines_summary,
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
+    
+    async def create_execution_engine(self, user_context: UserExecutionContext) -> 'UserExecutionEngine':
+        """Create execution engine for user - alias for create_for_user for compatibility.
+        
+        Args:
+            user_context: User execution context
+            
+        Returns:
+            UserExecutionEngine: Isolated execution engine
+        """
+        return await self.create_for_user(user_context)
+    
+    def get_active_contexts(self) -> Dict[str, str]:
+        """Get active user contexts for monitoring.
+        
+        Returns:
+            Dictionary mapping user IDs to their active context count
+        """
+        user_contexts = {}
+        try:
+            for engine in self._active_engines.values():
+                user_id = engine.get_user_context().user_id
+                if user_id in user_contexts:
+                    user_contexts[user_id] += 1
+                else:
+                    user_contexts[user_id] = 1
+        except Exception as e:
+            logger.error(f"Error getting active contexts: {e}")
+        
+        return user_contexts
+    
+    async def cleanup_user_context(self, user_id: str) -> bool:
+        """Cleanup all engines for a specific user.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            True if cleanup successful
+        """
+        try:
+            engines_to_cleanup = []
+            
+            # Find engines for this user
+            async with self._engine_lock:
+                for engine in self._active_engines.values():
+                    if engine.get_user_context().user_id == user_id:
+                        engines_to_cleanup.append(engine)
+            
+            # Cleanup engines for this user
+            for engine in engines_to_cleanup:
+                await self.cleanup_engine(engine)
+            
+            logger.info(f"Cleaned up {len(engines_to_cleanup)} engines for user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error cleaning up user context {user_id}: {e}")
+            return False
+    
+    async def cleanup_all_contexts(self) -> None:
+        """Cleanup all active contexts - alias for shutdown for compatibility."""
+        await self.shutdown()
     
     async def shutdown(self) -> None:
         """Shutdown factory and clean up all resources."""

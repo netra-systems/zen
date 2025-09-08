@@ -199,39 +199,10 @@ async def websocket_endpoint(websocket: WebSocket):
         else:
             logger.info("❌ E2E testing NOT detected - full JWT validation required")
         
-        if environment in ["staging", "production"] and not is_testing and not is_e2e_testing:
-            from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
-            
-            logger.info(f"WebSocket pre-connection auth validation in {environment} environment")
-            logger.info(f"WebSocket headers available: {list(websocket.headers.keys())}")
-            
-            # Create extractor to validate JWT from headers
-            extractor = UserContextExtractor()
-            jwt_token = extractor.extract_jwt_from_websocket(websocket)
-            
-            if not jwt_token:
-                logger.error(f"WebSocket connection rejected in {environment}: No JWT token provided")
-                logger.error(f"Available headers: {dict(websocket.headers)}")
-                # Reject connection by closing with authentication error
-                # WebSocket close codes: 1008 = Policy Violation, 1011 = Server Error  
-                await websocket.close(code=1008, reason="Authentication required")
-                return
-            else:
-                logger.info(f"JWT token found for WebSocket connection: {jwt_token[:20]}...")
-            
-            # Validate JWT token with proper error handling
-            try:
-                jwt_payload = await extractor.validate_and_decode_jwt(jwt_token)
-                if not jwt_payload:
-                    logger.warning(f"WebSocket connection rejected in {environment}: Invalid JWT token")
-                    await websocket.close(code=1008, reason="Invalid authentication")
-                    return
-            except Exception as jwt_error:
-                logger.error(f"JWT validation error in {environment}: {jwt_error}", exc_info=True)
-                await websocket.close(code=1008, reason="Authentication error")
-                return
-                
-            logger.info(f"Pre-connection JWT validation successful in {environment} for user: {jwt_payload.get('sub', 'unknown')[:8]}...")
+        # 🚨 SSOT ENFORCEMENT: Pre-connection authentication ELIMINATED
+        # This violates SSOT by duplicating authentication logic
+        # All authentication is now handled by the unified authentication service after WebSocket acceptance
+        logger.info(f"🔒 SSOT COMPLIANCE: Skipping pre-connection auth validation in {environment} (handled by unified service)")
         
         # Prepare subprotocol handling
         subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
@@ -249,54 +220,46 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
         
-        # CRITICAL SECURITY FIX: Use factory pattern instead of singleton
-        # This eliminates the security vulnerabilities in the singleton pattern
-        from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
+        # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
+        # This replaces ALL previous authentication paths:
+        # ❌ user_context_extractor.py - 4 duplicate JWT validation methods
+        # ❌ websocket_core/auth.py - WebSocketAuthenticator
+        # ❌ Pre-connection validation logic above
+        from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
         
-        # Extract user context from WebSocket connection (JWT authentication)
-        # CRITICAL SECURITY FIX: No fallbacks allowed in staging/production
-        try:
-            user_context, extracted_auth_info = await extract_websocket_user_context(websocket)
-            logger.info(f"Extracted user context for WebSocket: {user_context}")
-            # Store auth_info for later use in factory pattern
-            auth_info = extracted_auth_info
-            # Create isolated WebSocket manager for this user context
-            ws_manager = create_websocket_manager(user_context)
-            logger.info(f"Created isolated WebSocket manager for user {user_context.user_id[:8]}... (manager_id: {id(ws_manager)})")
-        except Exception as e:
-            logger.error(f"AUTHENTICATION FAILED: Failed to extract user context from WebSocket: {e}", exc_info=True)
+        logger.info("🔒 SSOT AUTHENTICATION: Starting WebSocket authentication using unified service")
+        
+        # SSOT WebSocket Authentication - eliminates all authentication chaos
+        auth_result = await authenticate_websocket_ssot(websocket)
+        
+        if not auth_result.success:
+            logger.error(f"🔒 SSOT AUTHENTICATION FAILED: {auth_result.error_code} - {auth_result.error_message}")
             
-            # CRITICAL SECURITY FIX: Check environment to determine if fallback is allowed
-            # Only allow insecure fallbacks in development/testing - NEVER in staging/production
-            if environment in ["staging", "production"]:
-                logger.critical(f"❌ Authentication failed in {environment} - REJECTING CONNECTION (no fallbacks allowed)")
-                
-                # Send authentication error and close connection immediately
-                auth_error = create_error_message(
-                    "AUTH_REQUIRED",
-                    "Authentication failed: Valid JWT token required for WebSocket connection",
-                    {"environment": environment, "error": str(e)}
-                )
-                await safe_websocket_send(websocket, auth_error.model_dump())
-                await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
-                await safe_websocket_close(websocket, code=1008, reason="Authentication failed")
-                return
-                
-            else:
-                # Development/testing only: Create test user context for fallback
-                logger.warning(f"DEVELOPMENT ONLY: Creating test user context fallback in {environment}")
-                from netra_backend.app.services.user_execution_context import UserExecutionContext
-                import uuid
-                
-                # Create a test user context for development/testing
-                test_user_context = UserExecutionContext(
-                    user_id=f"dev-user-{uuid.uuid4().hex[:8]}",
-                    thread_id=f"dev-thread-{uuid.uuid4().hex[:8]}",
-                    run_id=f"dev-run-{uuid.uuid4().hex[:8]}"
-                )
-                ws_manager = create_websocket_manager(test_user_context)
-                logger.warning(f"Created test WebSocket manager for development (user_id: {test_user_context.user_id})")
+            # SSOT error handling - no environment-specific branching
+            auth_error = create_error_message(
+                auth_result.error_code or "AUTH_FAILED",
+                auth_result.error_message or "WebSocket authentication failed",
+                {
+                    "environment": environment,
+                    "ssot_authentication": True,
+                    "error_code": auth_result.error_code
+                }
+            )
+            await safe_websocket_send(websocket, auth_error.model_dump())
+            await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
+            await safe_websocket_close(websocket, code=1008, reason="SSOT Auth failed")
+            return
+        
+        # SSOT Authentication SUCCESS
+        user_context = auth_result.user_context
+        auth_info = auth_result.auth_result.to_dict()
+        
+        logger.info(f"✅ SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
+        
+        # Create isolated WebSocket manager using authenticated user context
+        ws_manager = create_websocket_manager(user_context)
+        logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
         
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
@@ -702,11 +665,17 @@ async def websocket_endpoint(websocket: WebSocket):
                             # If no user context available, create minimal test context for cleanup
                             logger.warning(f"Creating minimal context for WebSocket cleanup (user_id: {user_id[:8]}...)")
                             from netra_backend.app.services.user_execution_context import UserExecutionContext
-                            import uuid
+                            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+                            
+                            # SSOT COMPLIANCE: Use UnifiedIdGenerator for cleanup context creation
+                            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+                                user_id=user_id if user_id else "cleanup-user", 
+                                operation="cleanup"
+                            )
                             cleanup_context = UserExecutionContext(
-                                user_id=user_id if user_id else f"cleanup-user-{uuid.uuid4().hex[:8]}",
-                                thread_id=f"cleanup-thread-{uuid.uuid4().hex[:8]}",
-                                run_id=f"cleanup-run-{uuid.uuid4().hex[:8]}"
+                                user_id=user_id if user_id else f"cleanup-user-{UnifiedIdGenerator.generate_base_id('fallback', random_length=8)}",
+                                thread_id=thread_id,
+                                run_id=run_id
                             )
                             ws_manager = create_websocket_manager(cleanup_context)
                     await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")

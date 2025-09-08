@@ -1,5 +1,7 @@
 # Shim module for backward compatibility
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core import create_websocket_manager
 WebSocketRecoveryManager = UnifiedWebSocketManager
 from netra_backend.app.core.websocket_recovery_types import ConnectionState, ReconnectionReason
 
@@ -19,10 +21,25 @@ class ReconnectionContext:
 # Global reconnection handler instance
 _reconnection_handler = None
 
-def get_reconnection_handler() -> WebSocketRecoveryManager:
-    """Get the global reconnection handler."""
-    from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-    return get_websocket_manager()
+def get_reconnection_handler(user_id: str = None) -> WebSocketRecoveryManager:
+    """Get the reconnection handler with proper user context.
+    
+    SECURITY FIX: Now requires user_id for proper isolation.
+    If no user_id provided, creates a default context for backward compatibility.
+    """
+    if user_id:
+        # SECURITY: Create proper user context for isolated WebSocket manager
+        context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=f"reconnection_{user_id}",
+            run_id=f"reconnection_run_{user_id}"
+        )
+        return create_websocket_manager(context=context)
+    else:
+        # BACKWARD COMPATIBILITY: Default context for legacy callers
+        # TODO: All callers should provide user_id for security
+        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+        return get_websocket_manager()
 
 # Export for backward compatibility
 __all__ = [

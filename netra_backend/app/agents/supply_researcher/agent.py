@@ -17,7 +17,7 @@ from netra_backend.app.agents.base.executor import (
     LambdaExecutionPhase, AgentMethodExecutionPhase
 )
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.supply_researcher.data_extractor import (
     SupplyDataExtractor,
@@ -439,12 +439,19 @@ class SupplyResearcherAgent(BaseAgent):
         research_session.citations = json.dumps(research_result.get("citations", []))
     
     def _create_scheduled_context(self, research_type: ResearchType, provider: str) -> UserExecutionContext:
-        """Create context for scheduled research"""
-        import uuid
+        """Create context for scheduled research using SSOT"""
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        # SSOT COMPLIANCE: Use UnifiedIdGenerator for scheduled context creation
+        thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_id="scheduler", 
+            operation=f"scheduled_{research_type.value}_{provider}"
+        )
+        
         return UserExecutionContext(
             user_id="scheduler",
-            thread_id=f"scheduled_{research_type.value}",
-            run_id=f"scheduled_{provider}_{uuid.uuid4().hex[:8]}",
+            thread_id=thread_id,
+            run_id=run_id,
             metadata={"user_request": f"Update {research_type.value} for {provider}"}
         )
     

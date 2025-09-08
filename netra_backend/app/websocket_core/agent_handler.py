@@ -24,7 +24,7 @@ from netra_backend.app.dependencies import (
     get_request_scoped_supervisor
 )
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import BaseMessageHandler
@@ -101,8 +101,9 @@ class AgentMessageHandler(BaseMessageHandler):
                     ws_manager.update_connection_thread(connection_id, thread_id)
                     logger.debug(f"Updated thread association: connection {connection_id} → thread {thread_id}")
                 else:
-                    # Generate connection ID if not found
-                    connection_id = f"ws_{user_id}_{int(uuid.uuid4().hex[:8], 16)}"
+                    # Generate connection ID if not found using SSOT
+                    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+                    connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
                     logger.warning(f"Generated fallback connection ID: {connection_id}")
 
             # Create clean WebSocketContext (no mock objects!)

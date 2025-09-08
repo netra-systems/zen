@@ -199,7 +199,7 @@ class FactoryAdapter:
         
     async def _get_factory_execution_engine(self, request_context: Dict[str, Any]) -> 'IsolatedExecutionEngine':
         """Get execution engine using factory pattern."""
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         start_time = time.time()
         
@@ -392,7 +392,7 @@ class FactoryAdapter:
             # CRITICAL FIX: Always create new instances instead of using singleton
             # Import here to avoid circular imports
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             import uuid
             
             # Create a user context for the factory method

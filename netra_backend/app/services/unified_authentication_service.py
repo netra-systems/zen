@@ -21,6 +21,7 @@ will be automatically rejected during code review.
 """
 
 import asyncio
+import json
 import logging
 import time
 from datetime import datetime, timezone
@@ -149,47 +150,100 @@ class UnifiedAuthenticationService:
         self._method_counts[method.value] += 1
         self._context_counts[context.value] += 1
         
-        # Log authentication attempt with context
+        # Enhanced logging with 10x more debug information
+        token_prefix = token[:12] if len(token) > 12 else "[SHORT_TOKEN]"
+        token_suffix = token[-8:] if len(token) > 20 else "[SUFFIX_UNAVAILABLE]"
+        token_length = len(token)
+        
         logger.info(f"UNIFIED AUTH: {method.value} authentication attempt in {context.value} context")
+        logger.debug(f"UNIFIED AUTH DEBUG: token_length={token_length}, prefix={token_prefix}..., suffix=...{token_suffix}")
         
         try:
-            # Validate token format first
+            # Validate token format first with enhanced debugging
             if not validate_jwt_format(token):
+                # Enhanced debugging for token format issues
+                token_analysis = {
+                    "length": len(token),
+                    "starts_with_bearer": token.lower().startswith('bearer '),
+                    "has_dots": token.count('.'),
+                    "first_10_chars": token[:10] if len(token) >= 10 else token,
+                    "last_10_chars": token[-10:] if len(token) >= 20 else "[TOO_SHORT]",
+                    "contains_spaces": ' ' in token,
+                    "contains_newlines": '\n' in token or '\r' in token,
+                    "environment_context": context.value
+                }
+                
                 logger.warning(f"UNIFIED AUTH: Invalid token format in {context.value}")
+                logger.error(f"🔧 TOKEN FORMAT DEBUG: {json.dumps(token_analysis, indent=2)}")
                 self._auth_failures += 1
                 return AuthResult(
                     success=False,
-                    error="Invalid token format",
+                    error=f"Invalid token format: {token_analysis['length']} chars, {token_analysis['has_dots']} dots",
                     error_code="INVALID_FORMAT",
-                    metadata={"context": context.value, "method": method.value}
+                    metadata={"context": context.value, "method": method.value, "token_debug": token_analysis}
                 )
             
             # Use SSOT auth client for validation
             validation_result = await self._auth_client.validate_token(token)
             
             if not validation_result or not validation_result.get("valid", False):
-                # Authentication failed
+                # Authentication failed - Enhanced debugging for VALIDATION_FAILED
                 error_msg = validation_result.get("error", "Token validation failed") if validation_result else "No validation result"
+                
+                # Create comprehensive failure debug information
+                failure_debug = {
+                    "validation_result_exists": validation_result is not None,
+                    "validation_result_keys": list(validation_result.keys()) if validation_result else [],
+                    "error_from_auth_service": validation_result.get("error") if validation_result else None,
+                    "details_from_auth_service": validation_result.get("details") if validation_result else None,
+                    "token_characteristics": {
+                        "length": len(token),
+                        "prefix": token[:12] if len(token) > 12 else token,
+                        "suffix": token[-8:] if len(token) > 20 else "[SUFFIX_UNAVAILABLE]",
+                        "dot_count": token.count('.'),
+                        "has_bearer_prefix": token.lower().startswith('bearer ')
+                    },
+                    "context": context.value,
+                    "method": method.value,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "auth_service_response_status": "present" if validation_result else "missing"
+                }
+                
                 logger.warning(f"UNIFIED AUTH: Token validation failed in {context.value}: {error_msg}")
+                logger.error(f"🔧 VALIDATION_FAILED DEBUG: {json.dumps(failure_debug, indent=2)}")
                 self._auth_failures += 1
                 
                 return AuthResult(
                     success=False,
-                    error=error_msg,
+                    error=f"{error_msg} | Debug: {len(token)} chars, {token.count('.')} dots",
                     error_code="VALIDATION_FAILED",
                     metadata={
                         "context": context.value,
                         "method": method.value,
-                        "details": validation_result.get("details") if validation_result else None
+                        "details": validation_result.get("details") if validation_result else None,
+                        "failure_debug": failure_debug
                     }
                 )
             
-            # Authentication successful
+            # Authentication successful - Enhanced success logging
             user_id = validation_result.get("user_id")
             email = validation_result.get("email", "")
             permissions = validation_result.get("permissions", [])
             
-            logger.info(f"UNIFIED AUTH: Successfully authenticated user {user_id[:8]}... in {context.value}")
+            # Success debug information
+            success_debug = {
+                "user_id_prefix": user_id[:8] if user_id and len(user_id) >= 8 else user_id,
+                "email_domain": email.split('@')[1] if email and '@' in email else "[NO_EMAIL]",
+                "permissions_count": len(permissions),
+                "token_iat": validation_result.get("iat"),
+                "token_exp": validation_result.get("exp"),
+                "context": context.value,
+                "method": method.value,
+                "validation_timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            logger.info(f"UNIFIED AUTH: Successfully authenticated user {user_id[:8] if user_id else '[NO_USER_ID]'}... in {context.value}")
+            logger.debug(f"🎉 AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._auth_successes += 1
             
             return AuthResult(
@@ -206,25 +260,53 @@ class UnifiedAuthenticationService:
             )
             
         except AuthServiceError as e:
+            # Enhanced debugging for AuthServiceError
+            service_error_debug = {
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "context": context.value,
+                "method": method.value,
+                "token_length": len(token),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "circuit_breaker_status": getattr(self._auth_client, 'circuit_breaker_status', 'unknown') if hasattr(self._auth_client, 'circuit_breaker_status') else 'no_circuit_breaker'
+            }
+            
             logger.error(f"UNIFIED AUTH: Auth service error in {context.value}: {e}")
+            logger.error(f"🔧 AUTH_SERVICE_ERROR DEBUG: {json.dumps(service_error_debug, indent=2)}")
             self._auth_failures += 1
             
             return AuthResult(
                 success=False,
                 error=f"Authentication service error: {str(e)}",
                 error_code="AUTH_SERVICE_ERROR",
-                metadata={"context": context.value, "method": method.value}
+                metadata={"context": context.value, "method": method.value, "service_error_debug": service_error_debug}
             )
             
         except Exception as e:
+            # Enhanced debugging for unexpected errors
+            unexpected_error_debug = {
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "context": context.value,
+                "method": method.value,
+                "token_characteristics": {
+                    "length": len(token),
+                    "prefix": token[:10] if len(token) >= 10 else token,
+                    "suffix": token[-8:] if len(token) >= 16 else "[TOO_SHORT]"
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "auth_client_available": self._auth_client is not None
+            }
+            
             logger.error(f"UNIFIED AUTH: Unexpected error in {context.value}: {e}", exc_info=True)
+            logger.error(f"🔧 UNEXPECTED_ERROR DEBUG: {json.dumps(unexpected_error_debug, indent=2)}")
             self._auth_failures += 1
             
             return AuthResult(
                 success=False,
                 error=f"Authentication error: {str(e)}",
                 error_code="UNEXPECTED_ERROR", 
-                metadata={"context": context.value, "method": method.value}
+                metadata={"context": context.value, "method": method.value, "unexpected_error_debug": unexpected_error_debug}
             )
     
     async def authenticate_websocket(self, websocket: WebSocket) -> Tuple[AuthResult, Optional[UserExecutionContext]]:

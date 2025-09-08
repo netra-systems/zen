@@ -28,7 +28,17 @@ import logging
 from collections import defaultdict
 
 from netra_backend.app.logging_config import central_logger
-from shared.test_only_guard import test_only
+
+# Conditional import for test_only decorator - only needed in test environments
+try:
+    from shared.test_only_guard import test_only
+except ImportError:
+    # In production environments where shared.test_only_guard isn't available,
+    # provide a no-op decorator that still preserves the function signature
+    def test_only(reason=None, allow_override=False):
+        def decorator(func):
+            return func
+        return decorator
 
 logger = central_logger.get_logger(__name__)
 

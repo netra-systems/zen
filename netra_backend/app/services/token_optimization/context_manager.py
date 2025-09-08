@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional
 from dataclasses import replace
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.billing.token_counter import TokenCounter, TokenCount
 from netra_backend.app.logging_config import central_logger
 

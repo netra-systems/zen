@@ -33,7 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.factory_performance_config import (
     FactoryPerformanceConfig, 
     get_factory_performance_config
@@ -575,8 +575,8 @@ class AgentInstanceFactory:
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
-            # Create user execution context using the proper immutable class
-            context = UserExecutionContext.from_request(
+            # Create user execution context using the supervisor-compatible method
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
@@ -1206,6 +1206,56 @@ class AgentInstanceFactory:
             logger.info(f"Cleaned up {cleanup_count} inactive contexts (max age: {max_age_seconds}s)")
         
         return cleanup_count
+    
+    def reset_for_testing(self) -> None:
+        """
+        Reset factory state for testing purposes.
+        
+        This method clears all internal state to ensure clean test isolation.
+        It should only be called during test setup/teardown.
+        
+        CRITICAL: This method is for testing only and should never be called
+        in production code as it will cause resource leaks and context loss.
+        """
+        logger.debug("Resetting AgentInstanceFactory state for testing")
+        
+        # Clear active contexts tracking
+        self._active_contexts.clear()
+        
+        # Clear user semaphores
+        self._user_semaphores.clear()
+        
+        # Clear WebSocket emitters if they exist
+        if hasattr(self, '_websocket_emitters'):
+            self._websocket_emitters.clear()
+        
+        # Clear agent instances if they exist
+        if hasattr(self, '_agent_instances'):
+            self._agent_instances.clear()
+        
+        # Reset factory metrics to initial state
+        self._factory_metrics = {
+            'total_instances_created': 0,
+            'active_contexts': 0,
+            'total_contexts_cleaned': 0,
+            'creation_errors': 0,
+            'cleanup_errors': 0,
+            'average_context_lifetime_seconds': 0.0
+        }
+        
+        # Clear performance statistics if enabled
+        if self._performance_config.enable_metrics and hasattr(self, '_perf_stats'):
+            for metric_name in self._perf_stats:
+                self._perf_stats[metric_name].clear()
+        
+        # Clear agent class cache if enabled
+        if self._performance_config.enable_class_caching and hasattr(self, '_agent_class_cache'):
+            self._agent_class_cache.clear()
+            # Reset the LRU cache
+            if hasattr(self, '_get_cached_agent_class'):
+                self._get_cached_agent_class.cache_clear()
+        
+        logger.debug("AgentInstanceFactory state reset completed")
 
 
 # Singleton factory instance for application use

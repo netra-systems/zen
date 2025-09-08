@@ -20,7 +20,7 @@ from netra_backend.app.services.websocket.message_queue import (
     message_queue,
 )
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 

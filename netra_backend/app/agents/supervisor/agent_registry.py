@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
     from netra_backend.app.websocket_core.manager import WebSocketManager
-    from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
 else:
     # Import at runtime to avoid circular imports
@@ -78,7 +78,7 @@ class UserAgentSession:
                          If not provided, creates a minimal context.
         """
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         self._websocket_manager = manager
         
@@ -291,6 +291,32 @@ class AgentRegistry(UniversalAgentRegistry):
         logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
         logger.info("🚨 User isolation and memory leak prevention enabled")
     
+    def set_tool_dispatcher_factory(self, factory):
+        """Set the tool dispatcher factory for agent creation.
+        
+        Args:
+            factory: Tool dispatcher factory for creating user-isolated dispatchers
+        """
+        self.tool_dispatcher_factory = factory
+        logger.info(f"Tool dispatcher factory set for AgentRegistry: {type(factory).__name__}")
+    
+    async def initialize(self):
+        """Initialize the agent registry (compatibility method)."""
+        # The registry is already initialized in __init__, this is for test compatibility
+        logger.debug("AgentRegistry initialization complete")
+    
+    async def cleanup(self):
+        """Clean up all user sessions and resources."""
+        async with self._session_lock:
+            # Clean up all user sessions
+            for user_id in list(self._user_sessions.keys()):
+                await self.cleanup_user_session(user_id)
+            
+            # Clear legacy state
+            self._legacy_dispatcher = None
+            
+        logger.info("✅ AgentRegistry cleanup complete")
+    
     # ===================== USER ISOLATION HARDENING FEATURES =====================
     
     async def get_user_session(self, user_id: str) -> UserAgentSession:
@@ -314,7 +340,7 @@ class AgentRegistry(UniversalAgentRegistry):
                 # If we have a WebSocket manager at the registry level, set it on the new session
                 if hasattr(self, 'websocket_manager') and self.websocket_manager is not None:
                     try:
-                        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+                        from netra_backend.app.services.user_execution_context import UserExecutionContext
                         user_context = UserExecutionContext(
                             user_id=user_id,
                             request_id=f"session_init_{user_id}_{id(self)}",
@@ -555,7 +581,7 @@ class AgentRegistry(UniversalAgentRegistry):
             manager: WebSocket manager instance for agent events
         """
         from netra_backend.app.websocket_core.manager import WebSocketManager
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
@@ -615,7 +641,7 @@ class AgentRegistry(UniversalAgentRegistry):
             manager: WebSocket manager instance for agent events
         """
         from netra_backend.app.websocket_core.manager import WebSocketManager
-        from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
@@ -869,7 +895,7 @@ class AgentRegistry(UniversalAgentRegistry):
             # Import agents lazily to avoid circular dependencies
             from netra_backend.app.agents.data.unified_data_agent import UnifiedDataAgent
             from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # MIGRATED: Updated agent factories to use CanonicalToolDispatcher
             async def create_triage_agent(context: UserExecutionContext, websocket_bridge=None):
@@ -914,7 +940,7 @@ class AgentRegistry(UniversalAgentRegistry):
         try:
             from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
             from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_optimization_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create optimization agent with isolated CanonicalToolDispatcher."""
@@ -965,7 +991,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register reporting agent with CanonicalToolDispatcher."""
         try:
             from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_reporting_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create reporting agent with isolated CanonicalToolDispatcher."""
@@ -988,7 +1014,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register goals triage agent with CanonicalToolDispatcher."""
         try:
             from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_goals_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create goals triage agent with isolated CanonicalToolDispatcher."""
@@ -1011,7 +1037,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register synthetic data agent with CanonicalToolDispatcher."""
         try:
             from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_synthetic_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create synthetic data agent with isolated CanonicalToolDispatcher."""
@@ -1034,7 +1060,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register data helper agent with CanonicalToolDispatcher."""
         try:
             from netra_backend.app.agents.data_helper_agent import DataHelperAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_helper_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create data helper agent with isolated CanonicalToolDispatcher."""
@@ -1057,7 +1083,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """Register corpus admin agent with CanonicalToolDispatcher."""
         try:
             from netra_backend.app.admin.corpus import CorpusAdminSubAgent
-            from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             async def create_corpus_agent(context: UserExecutionContext, websocket_bridge=None):
                 """Create corpus admin agent with isolated CanonicalToolDispatcher and admin tools."""

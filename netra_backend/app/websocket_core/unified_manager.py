@@ -599,13 +599,15 @@ class UnifiedWebSocketManager:
         # Check for invalid job_id patterns (object representations)
         if "<" in job_id or "object at" in job_id or "WebSocket" in job_id:
             logger.warning(f"Invalid job_id detected: {job_id}, generating new one")
-            job_id = f"job_{uuid.uuid4().hex[:8]}"
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            job_id = UnifiedIdGenerator.generate_base_id("job", random_length=8)
         
         # Create a user_id based on job_id and websocket
         user_id = f"job_{job_id}_{id(websocket)}"
         
-        # Create connection
-        connection_id = str(uuid.uuid4())
+        # Create connection using SSOT
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         connection = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,

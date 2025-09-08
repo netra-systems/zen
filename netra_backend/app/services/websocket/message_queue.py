@@ -570,12 +570,21 @@ class MessageQueue:
     
     async def _send_failure_message(self, message: QueuedMessage) -> None:
         """Send failure message to user."""
-        from netra_backend.app.websocket_core import get_websocket_manager
-        manager = get_websocket_manager()
-        await manager.send_error(
-            message.user_id,
-            f"Message processing failed: {message.error}"
-        )
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            user_context = UserExecutionContext.get_context(message.user_id)
+            manager = create_websocket_manager(user_context)
+            await manager.send_to_user({
+                "type": "error",
+                "message": f"Message processing failed: {message.error}"
+            })
+        except Exception as e:
+            # Import at top level to avoid circular import during initialization
+            from netra_backend.app.logging_config import central_logger
+            logger = central_logger.get_logger(__name__)
+            logger.error(f"Failed to send failure message to user {message.user_id}: {e}")
     
     def _get_queue_key(self, priority: MessagePriority) -> str:
         """Get Redis key for a priority queue"""

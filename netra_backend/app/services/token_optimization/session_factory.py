@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional, Protocol, List
 from datetime import datetime, timezone
 
 from netra_backend.app.core.registry.universal_registry import UniversalRegistry
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 from netra_backend.app.logging_config import central_logger

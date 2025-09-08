@@ -186,6 +186,34 @@ class CorpusService:
         document_manager = self._modular_service.crud_service.document_manager
         await document_manager.copy_corpus_content(source_table, dest_table, corpus_id, db)
     
+    def _validate_records(self, records: List[Dict]) -> Dict:
+        """Validate corpus records for required fields and length limits
+        
+        Returns:
+            Dict with 'valid' boolean and 'errors' list
+        """
+        errors = []
+        max_length = 100000  # Maximum length for prompt/response fields
+        required_fields = ['prompt', 'response', 'workload_type']
+        
+        for i, record in enumerate(records):
+            # Check required fields
+            for field in required_fields:
+                if field not in record:
+                    errors.append(f"Record {i}: missing '{field}'")
+            
+            # Check length limits for prompt and response
+            if 'prompt' in record and len(record['prompt']) > max_length:
+                errors.append(f"Record {i}: prompt exceeds maximum length ({max_length})")
+            
+            if 'response' in record and len(record['response']) > max_length:
+                errors.append(f"Record {i}: response exceeds maximum length ({max_length})")
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors
+        }
+    
     async def search_corpus_content(self, db: AsyncSession, corpus_id: str, search_params: Dict):
         """Search corpus content"""
         return await self._modular_service.search_corpus_content(
