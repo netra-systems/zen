@@ -12,7 +12,11 @@ For each test suite, the creation the process is:
 2) Spawn a new sub agent to audit and review the test. Fix issues.
 3) Run the test
 4) If needed, fix the system under test based on the failure
-5) Save work in progress to report log. git commit.
+5) PROVE THAT YOUR CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
+do not introduce new problems.
+6) Save work in progress to report log
+7) git commit.
 
 You must update and save your work
 reports/coverage/UNIT_TEST_COVERAGE_100_PERCENT_MISSION.md
