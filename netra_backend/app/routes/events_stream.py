@@ -74,12 +74,13 @@ async def stream_events(
             logger.info(f"Starting event stream for user {user_id}, connection {connection_id}")
             
             # Send initial connection event
-            yield f"data: {json.dumps({
+            connection_data = {
                 'event': 'stream_connected',
                 'connection_id': connection_id,
                 'user_id': user_id,
                 'timestamp': datetime.now(timezone.utc).isoformat()
-            })}\n\n"
+            }
+            yield f"data: {json.dumps(connection_data)}\n\n"
             
             # Parse event filter if provided
             filter_config = None
