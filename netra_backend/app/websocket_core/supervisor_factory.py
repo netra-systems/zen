@@ -93,7 +93,7 @@ async def get_websocket_scoped_supervisor(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
                 run_id=context.run_id,
-                websocket_connection_id=context.connection_id,
+                websocket_client_id=context.connection_id,
                 db_session=db_session
             )
             
@@ -111,7 +111,7 @@ async def get_websocket_scoped_supervisor(
             thread_id=context.thread_id,
             run_id=context.run_id,
             db_session=db_session,
-            websocket_connection_id=context.connection_id,
+            websocket_client_id=context.connection_id,
             llm_client=components["llm_client"],
             websocket_bridge=components["websocket_bridge"],
             tool_dispatcher=tool_dispatcher,  # Now properly created or legacy

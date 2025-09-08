@@ -40,7 +40,7 @@ async def create_supervisor_core(
     thread_id: str,
     run_id: str,
     db_session: AsyncSession,
-    websocket_connection_id: Optional[str] = None,
+    websocket_client_id: Optional[str] = None,
     llm_client: Optional["ResilientLLMClient"] = None,
     websocket_bridge = None,
     tool_dispatcher = None,
@@ -60,7 +60,7 @@ async def create_supervisor_core(
         thread_id: Thread identifier for conversation routing
         run_id: Run identifier for this session
         db_session: Request/connection-scoped database session
-        websocket_connection_id: Optional WebSocket connection identifier
+        websocket_client_id: Optional WebSocket connection identifier
         llm_client: Optional LLM client (will get default if not provided)
         websocket_bridge: Optional WebSocket bridge (required for WebSocket functionality)
         tool_dispatcher: Optional tool dispatcher (required for agent operations)
@@ -94,7 +94,7 @@ async def create_supervisor_core(
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,  # This session will be closed by calling code
-            websocket_connection_id=websocket_connection_id
+            websocket_client_id=websocket_client_id
         )
         
         # Get or validate LLM client
