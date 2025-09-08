@@ -91,9 +91,20 @@ class UserAgentSession:
             )
         
         # Use factory to create properly isolated bridge
-        bridge = create_agent_websocket_bridge(user_context)
+        # Check if websocket manager has a custom bridge factory (for testing)
+        if hasattr(manager, 'create_bridge') and callable(manager.create_bridge):
+            # Use custom bridge factory (e.g., mock for testing)
+            logger.debug(f"Using custom bridge factory from websocket manager for user {self.user_id}")
+            if asyncio.iscoroutinefunction(manager.create_bridge):
+                bridge = await manager.create_bridge(user_context)
+            else:
+                bridge = manager.create_bridge(user_context)
+        else:
+            # Use standard factory for real bridges
+            bridge = create_agent_websocket_bridge(user_context)
+        
         self._websocket_bridge = bridge
-        logger.debug(f"Factory-created WebSocket bridge set for user {self.user_id}")
+        logger.debug(f"WebSocket bridge set for user {self.user_id}: {type(bridge).__name__}")
         
     async def create_agent_execution_context(self, agent_type: str, 
                                            user_context: 'UserExecutionContext') -> 'UserExecutionContext':
