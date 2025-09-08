@@ -1,8 +1,9 @@
-"""
-Shared modules for the Netra system.
+"""Shared utilities and libraries for Netra services.
 
-This package provides unified components that eliminate duplicate patterns
-across all services and applications.
-"""
+This package contains shared utilities that can be imported by any service
+without violating service independence principles. These are pure utilities
+with no business logic - think of them as internal pip packages.
 
-__version__ = "1.0.0"
+See docs/shared_library_pattern.md for the "pip package test" to determine
+what belongs in this shared package.
+"""
