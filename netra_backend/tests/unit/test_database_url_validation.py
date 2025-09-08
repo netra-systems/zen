@@ -72,14 +72,24 @@ class TestDatabaseURLValidation:
             'POSTGRES_PORT': '5432',
             'POSTGRES_USER': 'staging_user',
             'POSTGRES_PASSWORD': 'staging_pass',
-            'POSTGRES_DB': 'staging_db'
+            'POSTGRES_DB': 'staging_db',
+            # Required secret keys for StagingConfig
+            'SECRET_KEY': 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+            'FERNET_KEY': 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEF=',
+            'JWT_SECRET_KEY': '9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef',
+            'SERVICE_ID': 'staging-svc-id',
+            'SERVICE_SECRET': 'fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321'
         }
         
-        mock_env = MagicMock()  # TODO: Use real service instance
+        mock_env = MagicMock()
         mock_env.as_dict.return_value = mock_env_dict
+        # Mock get method to return specific values
+        def mock_get(key, default=None):
+            return mock_env_dict.get(key, default)
+        mock_env.get = mock_get
         
-        mock_builder = MagicMock()  # TODO: Use real service instance
-        mock_staging = MagicMock()  # TODO: Use real service instance
+        mock_builder = MagicMock()
+        mock_staging = MagicMock()
         mock_staging.auto_url = 'postgresql://staging_user:staging_pass@staging-db.example.com:5432/staging_db'
         mock_builder.staging = mock_staging
         
@@ -121,14 +131,24 @@ class TestDatabaseURLValidation:
             'POSTGRES_PORT': '5432',
             'POSTGRES_USER': 'prod_user',
             'POSTGRES_PASSWORD': 'prod_pass',
-            'POSTGRES_DB': 'prod_db'
+            'POSTGRES_DB': 'prod_db',
+            # Required secret keys for ProductionConfig
+            'SECRET_KEY': '1234567890fedcba1234567890fedcba1234567890fedcba1234567890fedcba',
+            'FERNET_KEY': 'FEDCBA9876543210fedcba9876543210FEDCBA=',
+            'JWT_SECRET_KEY': 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789',
+            'SERVICE_ID': 'production-svc-id',
+            'SERVICE_SECRET': '0987654321abcdef0987654321abcdef0987654321abcdef0987654321abcdef'
         }
         
-        mock_env = MagicMock()  # TODO: Use real service instance
+        mock_env = MagicMock()
         mock_env.as_dict.return_value = mock_env_dict
+        # Mock get method to return specific values
+        def mock_get(key, default=None):
+            return mock_env_dict.get(key, default)
+        mock_env.get = mock_get
         
-        mock_builder = MagicMock()  # TODO: Use real service instance
-        mock_production = MagicMock()  # TODO: Use real service instance
+        mock_builder = MagicMock()
+        mock_production = MagicMock()
         mock_production.auto_url = 'postgresql://prod_user:prod_pass@prod-db.example.com:5432/prod_db'
         mock_builder.production = mock_production
         
