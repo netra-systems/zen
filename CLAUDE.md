@@ -20,6 +20,56 @@ Review this log, any time you see repetition on a similar issue you must do ADDI
 SELF REFLECTION AND PROVE WITH EVIDENCE THAT YOUR APPRAOCH NOW IS NEW AND NOT REPEATING 
 THE PRIOR MISTAKES LOGGED.
 
+## USE SUB AGENTS (TASKS) EVERY POSSIBLE TIME
+
+IT IS ULTRA CRITICAL TO USE SUB AGENTS (TASKS) AND
+MANAGE THEIR CONTEXT:
+Here are the top strategies to prevent YOURSELF AND YOUR TASK AGENTS 
+agents from getting stuck:
+
+  1. Context Rotation & Fresh Perspectives
+
+  - Agent Spawning: Create new sub-agents with clean contexts for specific tasks
+  - Context Switching: Periodically summarize progress and start with fresh context
+  - Multi-Agent Validation: Have different agents review/validate each other's work
+
+  2. Systematic Timeout & Circuit Breakers
+
+  - Time-based limits: Hard timeouts on operations (30s for simple tasks, 5min for complex)
+  - Progress detection: Reset with DIFFERENT NEW APPROACH IF NO PROGRESS
+
+  3. Random Exploration Techniques
+
+  # Example: Random search order
+  import random
+  search_strategies = ['grep', 'find', 'ast_parse', 'fuzzy_match']
+  random.shuffle(search_strategies)
+
+  4. Constraint Injection
+
+  - Scope limiting: Force agents to work on smaller, atomic pieces
+  - Tool restrictions: Limit available tools to prevent analysis paralysis
+  - Format constraints: Require specific output formats to maintain focus
+
+  5. Progressive Disclosure
+
+  - Start with minimal context
+  - Add information only when needed
+  - Use "information diets" to prevent overthinking
+
+  6. Fallback Hierarchies
+
+  Approach 1 (precise) → Approach 2 (broader) → Approach 3 (manual) → Human escalation
+
+  7. Meta-Cognitive Monitoring
+
+  - Track "confusion signals" (repeated questions, circular logic)
+  - Detect when agent is rehashing same information
+  - Auto-trigger context reset when stuck patterns detected
+
+  The most effective is agent spawning with focused scopes - it's like giving the AI a "fresh brain" for each
+  subtask.
+
 ## VITAL: NETRA IS YOUR MASTERPIECE.
 
 **Core Directives:**
