@@ -12,6 +12,7 @@ from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger
 
+# Import the protocol after it's defined to avoid circular imports
 logger = central_logger.get_logger(__name__)
 
 
@@ -154,6 +155,7 @@ class WebSocketConnection:
     websocket: Any
     connected_at: datetime
     metadata: Dict[str, Any] = None
+    thread_id: Optional[str] = None
 
 
 class RegistryCompat:
@@ -188,6 +190,13 @@ class RegistryCompat:
 
 class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
+    
+    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
+    as WebSocketManagerProtocol to ensure consistency with IsolatedWebSocketManager.
+    
+    While this class predates the protocol, it provides all required methods to
+    maintain interface compatibility and prevent the root cause identified in
+    Five Whys analysis: "lack of formal interface contracts."
     
     ENHANCED: Eliminates race conditions by providing connection-level isolation:
     - Per-user connection locks prevent race conditions during concurrent operations
@@ -1828,6 +1837,65 @@ class UnifiedWebSocketManager:
             )
             
         return restart_status
+    
+    # ===========================================================================
+    # FIVE WHYS ROOT CAUSE PREVENTION METHODS
+    # ===========================================================================
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
+        """
+        FIVE WHYS CRITICAL METHOD: Get connection ID for a given WebSocket instance.
+        
+        This method was identified as missing in the Five Whys analysis and is
+        essential for WebSocket manager interface compatibility.
+        
+        Args:
+            websocket: WebSocket instance to search for
+            
+        Returns:
+            Connection ID if found, None otherwise
+        """
+        for conn_id, connection in self._connections.items():
+            if connection.websocket == websocket:
+                logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
+                return conn_id
+        
+        logger.debug(f"No connection found for WebSocket {id(websocket)}")
+        return None
+    
+    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+        """
+        FIVE WHYS CRITICAL METHOD: Update thread association for a connection.
+        
+        This method works with get_connection_id_by_websocket to manage thread
+        associations, as identified in the Five Whys analysis.
+        
+        Args:
+            connection_id: Connection ID to update
+            thread_id: New thread ID to associate
+            
+        Returns:
+            True if update successful, False if connection not found
+        """
+        connection = self._connections.get(connection_id)
+        if connection:
+            # Update the thread_id on the connection object
+            if hasattr(connection, 'thread_id'):
+                old_thread_id = getattr(connection, 'thread_id', None)
+                connection.thread_id = thread_id
+                logger.info(
+                    f"Updated thread association for connection {connection_id}: "
+                    f"{old_thread_id} → {thread_id}"
+                )
+                return True
+            else:
+                # Add thread_id attribute if it doesn't exist
+                setattr(connection, 'thread_id', thread_id)
+                logger.info(f"Added thread association for connection {connection_id}: {thread_id}")
+                return True
+        else:
+            logger.warning(f"Connection {connection_id} not found for thread update")
+            return False
 
 
 # SECURITY FIX: Replace singleton with factory pattern
