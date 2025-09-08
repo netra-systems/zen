@@ -13,7 +13,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import get_env
 
 # Import target classes
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent import UnifiedTriageAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, InvalidContextError
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -39,9 +39,9 @@ class TestTriageInitValidation(BaseTestCase):
         ).with_db_session(AsyncMock())
     
     def test_triage_agent_initialization(self):
-        """Test TriageSubAgent initializes correctly."""
+        """Test UnifiedTriageAgent initializes correctly."""
         # Test successful initialization
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Verify basic initialization
         self.assertIsNotNone(triage_agent)
@@ -53,10 +53,10 @@ class TestTriageInitValidation(BaseTestCase):
         self.track_resource(triage_agent)
     
     def test_triage_agent_initialization_without_llm(self):
-        """Test TriageSubAgent initialization without LLM manager."""
+        """Test UnifiedTriageAgent initialization without LLM manager."""
         # Should raise error without LLM manager
         with self.assertRaises(TypeError):
-            TriageSubAgent()
+            UnifiedTriageAgent()
     
     def test_triage_agent_initialization_with_invalid_llm(self):
         """Test TriageSubAgent initialization with invalid LLM manager."""
@@ -69,7 +69,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_context_validation_valid_context(self):
         """Test context validation with valid context."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Should not raise error with valid context
         result = await triage_agent.execute(self.test_context)
@@ -79,7 +79,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_context_validation_invalid_context(self):
         """Test context validation with invalid context."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Test with None context
         with self.assertRaises((TypeError, AttributeError)):
@@ -99,7 +99,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_context_validation_missing_metadata(self):
         """Test context validation with missing metadata."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Context without user_request in metadata
         context_no_request = UserExecutionContext(
@@ -122,7 +122,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_llm_response_validation(self):
         """Test LLM response validation and parsing."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Test with valid JSON response
         valid_response = '{"intent": {"primary_intent": "analysis"}, "data_sufficiency": "sufficient"}'
@@ -136,7 +136,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_llm_invalid_response_handling(self):
         """Test handling of invalid LLM responses."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Test with invalid JSON
         self.llm_manager.ask_llm.return_value = "invalid json response"
@@ -154,7 +154,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_llm_failure_handling(self):
         """Test handling of LLM failures."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Mock LLM failure
         self.llm_manager.ask_llm.side_effect = Exception("LLM service unavailable")
@@ -172,7 +172,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     def test_triage_agent_attributes(self):
         """Test triage agent has expected attributes."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Verify expected attributes exist
         self.assertTrue(hasattr(triage_agent, 'name'))
@@ -186,7 +186,7 @@ class TestTriageInitValidation(BaseTestCase):
     
     async def test_context_database_session_validation(self):
         """Test context database session validation."""
-        triage_agent = TriageSubAgent(llm_manager=self.llm_manager)
+        triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         
         # Context without database session
         context_no_db = UserExecutionContext(

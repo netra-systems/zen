@@ -336,7 +336,14 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_user_execution_context_success(self):
         """Test 12: Create user execution context successfully."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -348,25 +355,32 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         )
         
         # Verify context properties
-        self.assertIsInstance(context, UserExecutionContext)
-        self.assertEqual(context.user_id, self.test_user_id)
-        self.assertEqual(context.thread_id, self.test_thread_id)
-        self.assertEqual(context.run_id, self.test_run_id)
-        self.assertIs(context.db_session, self.mock_db_session)
-        self.assertEqual(context.websocket_connection_id, self.test_websocket_id)
-        self.assertEqual(context.metadata["test"], "data")
-        self.assertIsInstance(context.created_at, datetime)
+        assert isinstance(context, UserExecutionContext)
+        assert context.user_id == self.test_user_id
+        assert context.thread_id == self.test_thread_id
+        assert context.run_id == self.test_run_id
+        assert context.db_session is self.mock_db_session
+        assert context.websocket_connection_id == self.test_websocket_id
+        assert context.metadata["test"] == "data"
+        assert isinstance(context.created_at, datetime)
         
         # Verify factory tracking
-        self.assertEqual(len(factory._active_contexts), 1)
-        self.assertEqual(factory._factory_metrics['total_instances_created'], 1)
-        self.assertEqual(factory._factory_metrics['active_contexts'], 1)
+        assert len(factory._active_contexts) == 1
+        assert factory._factory_metrics['total_instances_created'] == 1
+        assert factory._factory_metrics['active_contexts'] == 1
         
     @pytest.mark.asyncio
     async def test_create_user_execution_context_missing_required_params(self):
         """Test 13: Creating context with missing required params raises error."""
         factory = AgentInstanceFactory()
-        factory.configure(websocket_bridge=self.mock_websocket_bridge)
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         # Test missing user_id
         with pytest.raises(ValueError) as ctx:
@@ -378,22 +392,22 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         assert "user_id, thread_id, and run_id are required" in str(ctx.value)
         
         # Test missing thread_id
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_user_execution_context(
                 user_id=self.test_user_id,
                 thread_id="",
                 run_id=self.test_run_id
             )
-        self.assertIn("user_id, thread_id, and run_id are required", str(ctx.exception))
+        assert "user_id, thread_id, and run_id are required" in str(ctx.value)
             
         # Test missing run_id
-        with self.assertRaises(ValueError) as ctx:
+        with pytest.raises(ValueError) as ctx:
             await factory.create_user_execution_context(
                 user_id=self.test_user_id,
                 thread_id=self.test_thread_id,
                 run_id=""
             )
-        self.assertIn("user_id, thread_id, and run_id are required", str(ctx.exception))
+        assert "user_id, thread_id, and run_id are required" in str(ctx.value)
             
     @pytest.mark.asyncio
     async def test_create_user_execution_context_unconfigured_factory(self):

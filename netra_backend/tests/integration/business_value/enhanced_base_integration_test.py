@@ -828,21 +828,24 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
             "confidence_score": 0.85
         }
         
-        # Agent-specific business outcomes
-        if "triage" in agent_name.lower():
+        # Agent-specific business outcomes  
+        agent_lower = agent_name.lower()
+        if "triage" in agent_lower:
             base_outcomes.update({
                 "user_intent_identified": True,
                 "category_assigned": "cost_optimization",
                 "next_steps_recommended": True
             })
-        elif "optimization" in agent_name.lower():
+        elif "resource" in agent_lower:  # Check resource first before optimization
             base_outcomes.update({
-                "cost_savings_identified": True,
-                "potential_monthly_savings": 2500.00,
-                "actionable_recommendations": 3,
-                "implementation_complexity": "medium"
+                "utilization_analysis": True,
+                "resource_waste_identified": True,
+                "cost_reduction_estimate": "$3,200/month",
+                "optimization_plan": "3-phase implementation",
+                "efficiency_improvements": 4,
+                "actionable_recommendations": 3
             })
-        elif "performance" in agent_name.lower():
+        elif "performance" in agent_lower:
             base_outcomes.update({
                 "bottlenecks_identified": True,
                 "performance_metrics_analyzed": True,
@@ -851,27 +854,31 @@ class EnhancedBaseIntegrationTest(BaseIntegrationTest):
                 "optimization_recommendations": 2,
                 "performance_recommendations": ["Optimize database queries", "Implement caching layer", "Scale API endpoints"]
             })
-        elif "resource" in agent_name.lower():
+        elif "optimization" in agent_lower:
             base_outcomes.update({
-                "utilization_analysis": True,
-                "resource_waste_identified": True,
-                "cost_reduction_estimate": "$3,200/month",
-                "optimization_plan": "3-phase implementation",
-                "efficiency_improvements": 4
+                "cost_savings_identified": True,
+                "potential_monthly_savings": 2500.00,
+                "actionable_recommendations": 3,
+                "implementation_complexity": "medium"
             })
-        elif "risk" in agent_name.lower():
+        elif "risk" in agent_lower:
             base_outcomes.update({
                 "risk_categories_identified": True,
                 "impact_assessment": "medium-high",
                 "mitigation_strategies": 5,
-                "compliance_gaps": 2,
-                "business_continuity_plan": True
+                "compliance_gaps": ["Missing data encryption", "Audit trail gaps"],  # Make this a list
+                "business_continuity_plan": {
+                    "recovery_procedures": ["Data backup restoration", "Service failover protocols"],
+                    "backup_systems": "Multi-region redundancy implemented",
+                    "recovery_time_objective": "4 hours",
+                    "business_impact_priority": "high"
+                }
             })
-        elif "compliance" in agent_name.lower():
+        elif "compliance" in agent_lower:
             base_outcomes.update({
                 "report_generated": True,
                 "executive_summary": True,
-                "compliance_metrics": 12,
+                "compliance_metrics": {"soc2_score": 85, "gdpr_compliance": 92, "total_controls": 12},  # Make this a dict
                 "audit_trail": True,
                 "board_presentation_ready": True
             })

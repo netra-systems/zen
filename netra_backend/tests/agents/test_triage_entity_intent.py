@@ -13,7 +13,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import get_env
 
 # Import target classes
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent import UnifiedTriageAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -38,8 +38,8 @@ class TestTriageEntityIntent(BaseTestCase):
             metadata={"user_request": "test entity intent recognition"}
         ).with_db_session(AsyncMock())
         
-        # Create TriageSubAgent for testing
-        self.triage_agent = TriageSubAgent(
+        # Create UnifiedTriageAgent for testing  
+        self.triage_agent = UnifiedTriageAgent(
             llm_manager=self.llm_manager
         )
         

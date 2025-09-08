@@ -75,10 +75,20 @@ class ExecutionEngineFactoryTestManager:
                 
             logger.info("✓ AgentWebSocketBridge created for tests")
             
-            # Step 2: Configure ExecutionEngineFactory singleton
+            # Step 2: Create infrastructure managers for tests
+            logger.info("Creating infrastructure managers for tests...")
+            from netra_backend.app.database.session_manager import DatabaseSessionManager
+            from netra_backend.app.redis_manager import RedisManager
+            
+            database_session_manager = DatabaseSessionManager()
+            redis_manager = RedisManager()
+            
+            # Step 3: Configure ExecutionEngineFactory singleton
             logger.info("Configuring ExecutionEngineFactory singleton for tests...")
             self.factory_instance = await configure_execution_engine_factory(
-                websocket_bridge=self.websocket_bridge
+                websocket_bridge=self.websocket_bridge,
+                database_session_manager=database_session_manager,
+                redis_manager=redis_manager
             )
             
             if not self.factory_instance:
@@ -86,7 +96,7 @@ class ExecutionEngineFactoryTestManager:
                 
             logger.info("✓ ExecutionEngineFactory configured with WebSocket bridge")
             
-            # Step 3: Configure AgentInstanceFactory (may be needed by some tests)
+            # Step 4: Configure AgentInstanceFactory (may be needed by some tests)
             try:
                 await configure_agent_instance_factory(
                     websocket_bridge=self.websocket_bridge,
@@ -99,7 +109,7 @@ class ExecutionEngineFactoryTestManager:
                 # Non-critical for basic factory functionality
                 logger.warning(f"AgentInstanceFactory configuration skipped: {e}")
             
-            # Step 4: Verify factory functionality
+            # Step 5: Verify factory functionality
             await self._verify_factory_functionality()
             
             logger.info("✅ ExecutionEngineFactory fully initialized for tests")
