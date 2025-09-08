@@ -52,7 +52,7 @@ from netra_backend.app.schemas.llm_types import (
 from netra_backend.app.schemas.config import LLMConfig
 
 
-class TestStructuredModel(BaseModel):
+class StructuredTestModel(BaseModel):
     """Test Pydantic model for structured response testing."""
     content: str
     confidence: float = 0.8
@@ -60,7 +60,7 @@ class TestStructuredModel(BaseModel):
     metadata: Dict[str, Any] = {}
 
 
-class TestBusinessScenarioModel(BaseModel):
+class BusinessScenarioTestModel(BaseModel):
     """Test model for business optimization scenarios."""
     optimization_type: str
     potential_savings: float = 0.0
@@ -706,9 +706,9 @@ class TestLLMManager(BaseIntegrationTest):
         })
         
         with patch.object(manager, 'ask_llm', return_value=json_response):
-            response = await manager.ask_llm_structured(prompt, TestStructuredModel)
+            response = await manager.ask_llm_structured(prompt, StructuredTestModel)
             
-            assert isinstance(response, TestStructuredModel)
+            assert isinstance(response, StructuredTestModel)
             assert response.content == "Optimization analysis complete"
             assert response.confidence == 0.92
             assert response.category == "high_priority"
@@ -728,9 +728,9 @@ class TestLLMManager(BaseIntegrationTest):
         text_response = "Plain text business analysis results"
         
         with patch.object(manager, 'ask_llm', return_value=text_response):
-            response = await manager.ask_llm_structured(prompt, TestStructuredModel)
+            response = await manager.ask_llm_structured(prompt, StructuredTestModel)
             
-            assert isinstance(response, TestStructuredModel)
+            assert isinstance(response, StructuredTestModel)
             assert response.content == text_response
             assert response.confidence == 0.8  # Default value
             assert response.category == "test"  # Default value
@@ -749,8 +749,8 @@ class TestLLMManager(BaseIntegrationTest):
         invalid_json = '{"invalid": json, malformed}'
         
         with patch.object(manager, 'ask_llm', return_value=invalid_json):
-            with pytest.raises(ValueError, match="Cannot create TestStructuredModel"):
-                await manager.ask_llm_structured(prompt, TestStructuredModel)
+            with pytest.raises(ValueError, match="Cannot create StructuredTestModel"):
+                await manager.ask_llm_structured(prompt, StructuredTestModel)
                 
     @pytest.mark.unit
     async def test_ask_llm_structured_business_optimization_scenario(self):
@@ -775,9 +775,9 @@ class TestLLMManager(BaseIntegrationTest):
         })
         
         with patch.object(manager, 'ask_llm', return_value=optimization_response):
-            response = await manager.ask_llm_structured(prompt, TestBusinessScenarioModel)
+            response = await manager.ask_llm_structured(prompt, BusinessScenarioTestModel)
             
-            assert isinstance(response, TestBusinessScenarioModel)
+            assert isinstance(response, BusinessScenarioTestModel)
             assert response.optimization_type == "infrastructure"
             assert response.potential_savings == 75000.50
             assert response.confidence_score == 0.89
@@ -798,10 +798,10 @@ class TestLLMManager(BaseIntegrationTest):
         
         with patch.object(manager, 'ask_llm', return_value='{"content": "cached analysis"}') as mock_ask:
             # First call
-            response1 = await manager.ask_llm_structured(prompt, TestStructuredModel)
+            response1 = await manager.ask_llm_structured(prompt, StructuredTestModel)
             
             # Second call should use underlying ask_llm caching
-            response2 = await manager.ask_llm_structured(prompt, TestStructuredModel, use_cache=True)
+            response2 = await manager.ask_llm_structured(prompt, StructuredTestModel, use_cache=True)
             
             assert mock_ask.call_count == 2  # ask_llm called twice (handles caching internally)
             assert response1.content == response2.content
@@ -1345,7 +1345,7 @@ class TestLLMManager(BaseIntegrationTest):
             # Test structured response for agent decision-making
             analysis = await manager.ask_llm_structured(
                 analysis_prompt, 
-                TestBusinessScenarioModel,
+                BusinessScenarioTestModel,
                 llm_config_name="optimizations_core"
             )
             
@@ -1471,10 +1471,10 @@ class TestLLMManager(BaseIntegrationTest):
                 try:
                     response = await manager.ask_llm_structured(
                         f"Test {description}", 
-                        TestStructuredModel
+                        StructuredTestModel
                     )
                     # Some cases should succeed with fallback
-                    assert isinstance(response, TestStructuredModel)
+                    assert isinstance(response, StructuredTestModel)
                 except ValueError:
                     # Some cases legitimately fail - this is expected
                     pass
@@ -1728,7 +1728,7 @@ class TestLLMManager(BaseIntegrationTest):
         with patch.object(decision_manager, 'ask_llm', return_value=decision_json):
             decision = await decision_manager.ask_llm_structured(
                 "Critical optimization analysis",
-                TestBusinessScenarioModel
+                BusinessScenarioTestModel
             )
             
         # Agent can make data-driven decisions

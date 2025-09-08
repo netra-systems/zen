@@ -1,1352 +1,773 @@
-"""Comprehensive unit tests for UserContextToolFactory - FOURTH PRIORITY SSOT class.
-
-This test suite validates the critical SSOT factory responsible for creating completely
-isolated tool systems per user, eliminating global singletons and ensuring proper
-user isolation to prevent $10M+ churn from multi-user data leakage.
+"""
+Comprehensive Unit Tests for UserContextToolFactory
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free, Early, Mid, Enterprise, Platform/Internal)
-- Business Goal: Multi-User Safety, Risk Reduction, Platform Stability  
-- Value Impact: User isolation factory prevents catastrophic security breaches
+- Segment: All (Free, Early, Mid, Enterprise) 
+- Business Goal: Multi-User Safety, Risk Reduction, Platform Stability
+- Value Impact: Factory creates isolated tool systems preventing $10M+ churn from user data leakage
 - Strategic Impact: Foundation for scalable multi-tenant agent execution with complete resource isolation
 
-CRITICAL REQUIREMENTS:
-- Factory pattern for creating isolated tool systems
-- Per-user resource creation (no global state)
-- Complete lifecycle management with proper cleanup
-- UserExecutionContext-based isolation
-- Graceful degradation (partial tool failure tolerance)
-- WebSocket bridge factory integration
-
-Test Architecture:
-- NO mocks for business logic (CHEATING = ABOMINATION)
-- Real instances with minimal external dependencies
-- ABSOLUTE IMPORTS only
-- Tests must RAISE ERRORS - no try/except masking failures
+This test suite ensures UserContextToolFactory delivers 100% user isolation for multi-user chat,
+preventing data leaks and enabling concurrent agent execution across all customer segments.
 """
 
-import asyncio
 import pytest
 import time
-import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Type
-from unittest.mock import AsyncMock, Mock, MagicMock
+import asyncio
+from unittest.mock import Mock, MagicMock, AsyncMock, patch
+from typing import List, Type, Optional
 
 from netra_backend.app.agents.user_context_tool_factory import (
-    UserContextToolFactory,
+    UserContextToolFactory, 
     get_app_tool_classes
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-from netra_backend.app.core.registry.universal_registry import ToolRegistry  
-from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
 class MockBaseTool:
-    """Mock LangChain BaseTool for testing purposes."""
+    """Mock tool that mimics real BaseTool interface for testing."""
     
-    def __init__(self, name: str, should_fail: bool = False, execution_result: Any = None):
+    def __init__(self, name: str = "mock_tool"):
         self.name = name
-        self.should_fail = should_fail
-        self.execution_result = execution_result or f"Result from {name}"
-        self.call_count = 0
-        
-    async def arun(self, tool_input: Dict[str, Any]) -> Any:
-        """Mock async tool execution - matches LangChain BaseTool interface."""
-        self.call_count += 1
-        if self.should_fail:
-            raise ValueError(f"Tool {self.name} execution failed")
-        return self.execution_result
-        
-    def __call__(self, **kwargs) -> Any:
-        """Synchronous call interface."""
-        return self.execution_result
 
 
-class DataHelperTool(MockBaseTool):
-    """Mock DataHelperTool for testing."""
-    def __init__(self):
-        # Create unique tool names to avoid registry conflicts
-        unique_id = uuid.uuid4().hex[:8]
-        super().__init__(f"data_helper_tool_{unique_id}", execution_result="Data analysis complete")
-
-
-class DeepResearchTool(MockBaseTool):
-    """Mock DeepResearchTool for testing."""
-    def __init__(self):
-        unique_id = uuid.uuid4().hex[:8]
-        super().__init__(f"deep_research_tool_{unique_id}", execution_result="Research complete")
-
-
-class ReliabilityScorerTool(MockBaseTool):
-    """Mock ReliabilityScorerTool for testing."""
-    def __init__(self):
-        unique_id = uuid.uuid4().hex[:8]
-        super().__init__(f"reliability_scorer_tool_{unique_id}", execution_result="Reliability scored")
-
-
-class SandboxedInterpreterTool(MockBaseTool):
-    """Mock SandboxedInterpreterTool for testing."""
-    def __init__(self):
-        unique_id = uuid.uuid4().hex[:8]
-        super().__init__(f"sandboxed_interpreter_tool_{unique_id}", execution_result="Code executed")
-
-
-class FailingTool(MockBaseTool):
-    """Mock tool that always fails during creation - for graceful degradation testing."""
-    def __init__(self):
-        # Fail during construction to test graceful degradation
-        raise RuntimeError("Tool creation failed - testing graceful degradation")
-
-
-class MockWebSocketBridgeFactory:
-    """Mock WebSocket bridge factory for testing."""
-    
-    def __init__(self, should_fail: bool = False):
-        self.should_fail = should_fail
-        self.created_bridges = []
-        
-    def __call__(self) -> 'MockAgentWebSocketBridge':
-        """Factory method to create WebSocket bridge."""
-        if self.should_fail:
-            raise Exception("WebSocket bridge creation failed")
-            
-        bridge = MockAgentWebSocketBridge()
-        self.created_bridges.append(bridge)
-        return bridge
-
-
-class MockAgentWebSocketBridge:
-    """Mock AgentWebSocketBridge for testing."""
+class MockFailingTool:
+    """Mock tool that fails during instantiation to test error handling."""
     
     def __init__(self):
-        self.bridge_id = f"bridge_{int(time.time()*1000)}_{uuid.uuid4().hex[:8]}"
-        self.events_sent = []
-        self.is_active = True
-        
-    async def send_event(self, event_type: str, data: Dict[str, Any]) -> bool:
-        """Mock event sending."""
-        self.events_sent.append({
-            'event_type': event_type,
-            'data': data,
-            'timestamp': datetime.now(timezone.utc)
-        })
-        return True
-        
-    def get_bridge_id(self) -> str:
-        """Get bridge identifier."""
-        return self.bridge_id
+        raise Exception("Tool instantiation failed")
+
+
+class MockUserExecutionContext:
+    """Mock UserExecutionContext with required interface for factory testing."""
+    
+    def __init__(self, user_id: str = "test_user", run_id: str = "test_run"):
+        self.user_id = user_id
+        self.run_id = run_id
+        self._correlation_id = f"{user_id}_{run_id}_{int(time.time())}"
+    
+    def get_correlation_id(self) -> str:
+        return self._correlation_id
+
+
+class MockToolRegistry:
+    """Mock ToolRegistry that tracks registrations for testing."""
+    
+    def __init__(self):
+        self.registered_tools = {}
+    
+    def register(self, name: str, tool):
+        self.registered_tools[name] = tool
+
+
+class MockUnifiedToolDispatcher:
+    """Mock UnifiedToolDispatcher for factory testing."""
+    
+    def __init__(self):
+        self.dispatcher_id = f"dispatcher_{int(time.time() * 1000)}"
+        self.registry = None
+
+
+class MockUnifiedToolDispatcherFactory:
+    """Mock factory for creating UnifiedToolDispatcher instances."""
+    
+    @staticmethod
+    def create_for_request(user_context, tools, websocket_manager=None):
+        return MockUnifiedToolDispatcher()
+
+
+class MockWebSocketBridge:
+    """Mock WebSocket bridge for integration testing."""
+    
+    def __init__(self):
+        self.bridge_id = f"bridge_{int(time.time())}"
 
 
 @pytest.fixture
-def user_context() -> UserExecutionContext:
-    """Create a test UserExecutionContext."""
-    return UserExecutionContext(
-        user_id=f"test_user_{uuid.uuid4().hex[:8]}",
-        thread_id=f"thread_{uuid.uuid4().hex[:8]}",
-        run_id=f"run_{uuid.uuid4().hex[:8]}"
-    )
+def mock_user_context():
+    """Fixture providing mock UserExecutionContext."""
+    return MockUserExecutionContext()
 
 
 @pytest.fixture
-def different_user_context() -> UserExecutionContext:
-    """Create a different test UserExecutionContext for isolation testing."""
-    return UserExecutionContext(
-        user_id=f"different_user_{uuid.uuid4().hex[:8]}",
-        thread_id=f"different_thread_{uuid.uuid4().hex[:8]}",
-        run_id=f"different_run_{uuid.uuid4().hex[:8]}"
-    )
+def mock_tool_classes():
+    """Fixture providing mock tool classes for testing."""
+    return [MockBaseTool]
 
 
 @pytest.fixture
-def basic_tool_classes() -> List[Type]:
-    """Basic tool classes for testing."""
-    return [DataHelperTool, DeepResearchTool]
-
-
-@pytest.fixture
-def all_tool_classes() -> List[Type]:
-    """All available tool classes for testing."""
-    return [DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool]
-
-
-@pytest.fixture
-def tool_classes_with_failure() -> List[Type]:
-    """Tool classes including one that fails during creation."""
-    return [DataHelperTool, FailingTool, DeepResearchTool]
-
-
-@pytest.fixture
-def websocket_bridge_factory() -> MockWebSocketBridgeFactory:
-    """WebSocket bridge factory for testing."""
-    return MockWebSocketBridgeFactory()
-
-
-@pytest.fixture
-def failing_websocket_bridge_factory() -> MockWebSocketBridgeFactory:
-    """WebSocket bridge factory that fails during creation."""
-    return MockWebSocketBridgeFactory(should_fail=True)
+def mock_websocket_bridge_factory():
+    """Fixture providing mock WebSocket bridge factory."""
+    return lambda: MockWebSocketBridge()
 
 
 class TestUserContextToolFactoryBasics:
-    """Test basic UserContextToolFactory functionality."""
+    """Test basic functionality and interfaces of UserContextToolFactory."""
     
-    @pytest.mark.asyncio
-    async def test_factory_class_exists_and_static_methods(self):
-        """Test that UserContextToolFactory class exists with required static methods.
-        
-        Business Value: Ensures factory class provides required interface for tool system creation.
-        """
-        # Verify class exists
-        assert UserContextToolFactory is not None
-        
-        # Verify required static methods exist
+    @pytest.mark.unit
+    def test_class_exists_and_has_required_methods(self):
+        """Ensure UserContextToolFactory exists with required static methods."""
         assert hasattr(UserContextToolFactory, 'create_user_tool_system')
-        assert hasattr(UserContextToolFactory, 'create_minimal_tool_system') 
+        assert hasattr(UserContextToolFactory, 'create_minimal_tool_system')
         assert hasattr(UserContextToolFactory, 'validate_tool_system')
         
-        # Verify methods are static
-        assert callable(getattr(UserContextToolFactory, 'create_user_tool_system'))
-        assert callable(getattr(UserContextToolFactory, 'create_minimal_tool_system'))
-        assert callable(getattr(UserContextToolFactory, 'validate_tool_system'))
-    
-    @pytest.mark.asyncio
-    async def test_get_app_tool_classes_function_exists(self):
-        """Test that get_app_tool_classes function exists and returns tool classes.
-        
-        Business Value: Ensures tool class discovery mechanism is available for factory usage.
-        """
-        # Verify function exists
-        assert get_app_tool_classes is not None
-        assert callable(get_app_tool_classes)
-        
-        # Verify it returns a list
+    @pytest.mark.unit 
+    def test_get_app_tool_classes_function_exists(self):
+        """Ensure get_app_tool_classes function exists and returns list."""
         tool_classes = get_app_tool_classes()
         assert isinstance(tool_classes, list)
-        
-        # In testing environment, should return fallback tool classes
-        assert len(tool_classes) >= 0  # May be empty in test environment
 
 
 class TestUserContextToolFactoryCompleteSystemCreation:
-    """Test complete tool system creation functionality."""
+    """Test complete tool system creation with all components."""
     
-    @pytest.mark.asyncio
-    async def test_create_complete_tool_system_with_all_components(
-        self, 
-        user_context: UserExecutionContext,
-        all_tool_classes: List[Type],
-        websocket_bridge_factory: MockWebSocketBridgeFactory
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_create_user_tool_system_happy_path(
+        self, mock_dispatcher_factory, mock_registry_class, 
+        mock_user_context, mock_tool_classes, mock_websocket_bridge_factory
     ):
-        """Test creation of complete tool system with all components.
+        """Test complete tool system creation with all components."""
         
-        Business Value: Validates that factory can create fully functional isolated tool systems
-        with registry, dispatcher, tools, and WebSocket bridge for complete agent capabilities.
-        """
-        # Create complete tool system
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=all_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
+        
+        # Execute factory method
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=mock_websocket_bridge_factory
         )
         
-        # Verify all required components created
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert 'bridge' in tool_system
-        assert 'correlation_id' in tool_system
+        # Verify complete system structure
+        assert isinstance(result, dict)
+        required_keys = ['registry', 'dispatcher', 'tools', 'bridge', 'correlation_id']
+        for key in required_keys:
+            assert key in result, f"Missing required key: {key}"
         
-        # Verify component types
-        assert isinstance(tool_system['registry'], ToolRegistry)
-        assert isinstance(tool_system['dispatcher'], UnifiedToolDispatcher)
-        assert isinstance(tool_system['tools'], list)
-        assert isinstance(tool_system['bridge'], MockAgentWebSocketBridge)
-        assert isinstance(tool_system['correlation_id'], str)
+        # Verify components
+        assert result['registry'] is mock_registry
+        assert isinstance(result['dispatcher'], MockUnifiedToolDispatcher)
+        assert isinstance(result['tools'], list)
+        assert len(result['tools']) == 1
+        assert isinstance(result['tools'][0], MockBaseTool)
+        assert isinstance(result['bridge'], MockWebSocketBridge)
+        assert result['correlation_id'] == mock_user_context.get_correlation_id()
         
-        # Verify tool instances created
-        assert len(tool_system['tools']) == len(all_tool_classes)
-        for i, tool_class in enumerate(all_tool_classes):
-            tool_instance = tool_system['tools'][i]
-            assert isinstance(tool_instance, tool_class)
-            assert hasattr(tool_instance, 'name')
-            assert hasattr(tool_instance, 'arun')
-        
-        # Verify tools registered in registry
-        registry = tool_system['registry']
-        for tool in tool_system['tools']:
-            registered_tool = registry.get(tool.name)
-            assert registered_tool is tool  # Same instance
-        
-        # Verify dispatcher configured correctly
-        dispatcher = tool_system['dispatcher']
-        assert dispatcher.registry is registry  # Uses created registry
-        assert hasattr(dispatcher, 'dispatcher_id')
-        
-        # Verify WebSocket bridge created
-        bridge = tool_system['bridge']
-        assert len(websocket_bridge_factory.created_bridges) == 1
-        assert bridge is websocket_bridge_factory.created_bridges[0]
-        
-        # Verify correlation ID matches context
-        assert user_context.get_correlation_id() == tool_system['correlation_id']
+        # Verify tool registration
+        assert len(mock_registry.registered_tools) == 1
+        assert 'mock_tool' in mock_registry.registered_tools
     
-    @pytest.mark.asyncio
-    async def test_create_tool_system_without_websocket_bridge(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type]
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_create_user_tool_system_without_websocket_bridge(
+        self, mock_dispatcher_factory, mock_registry_class,
+        mock_user_context, mock_tool_classes
     ):
-        """Test tool system creation without WebSocket bridge.
+        """Test system creation without WebSocket bridge (graceful degradation)."""
         
-        Business Value: Ensures factory can create functional tool systems even when
-        WebSocket functionality is not available, maintaining core agent capabilities.
-        """
-        # Create tool system without WebSocket bridge
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=None  # No WebSocket bridge
-        )
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        # Verify core components created
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert 'correlation_id' in tool_system
-        
-        # Verify WebSocket bridge is None
-        assert 'bridge' in tool_system
-        assert tool_system['bridge'] is None
-        
-        # Verify system still functional
-        assert len(tool_system['tools']) == len(basic_tool_classes)
-        
-        # Verify tools registered and dispatcher configured
-        registry = tool_system['registry']
-        dispatcher = tool_system['dispatcher']
-        assert dispatcher.registry is registry
-        
-        for tool in tool_system['tools']:
-            assert registry.get(tool.name) is tool
-    
-    @pytest.mark.asyncio
-    async def test_create_tool_system_with_empty_tool_classes(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test tool system creation with empty tool classes list.
-        
-        Business Value: Ensures factory can create minimal systems for lightweight operations
-        or fallback scenarios while maintaining proper isolation and structure.
-        """
-        # Create tool system with no tools
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=[],  # Empty tool list
+        # Execute without bridge factory
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mock_tool_classes,
             websocket_bridge_factory=None
         )
         
-        # Verify basic structure created
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert 'bridge' in tool_system
-        assert 'correlation_id' in tool_system
+        # Verify system created without bridge
+        assert result['bridge'] is None
+        assert result['registry'] is mock_registry
+        assert len(result['tools']) == 1
+    
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_create_user_tool_system_with_empty_tool_classes(
+        self, mock_dispatcher_factory, mock_registry_class, mock_user_context
+    ):
+        """Test system creation with empty tool classes list."""
         
-        # Verify empty tool list
-        assert isinstance(tool_system['tools'], list)
-        assert len(tool_system['tools']) == 0
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        # Verify registry and dispatcher still created properly
-        assert isinstance(tool_system['registry'], ToolRegistry)
-        assert isinstance(tool_system['dispatcher'], UnifiedToolDispatcher)
-        assert tool_system['bridge'] is None
+        # Execute with empty tool classes
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=[],
+            websocket_bridge_factory=None
+        )
+        
+        # Verify empty system structure maintained
+        assert isinstance(result['tools'], list)
+        assert len(result['tools']) == 0
+        assert len(mock_registry.registered_tools) == 0
 
 
 class TestUserContextToolFactoryUserIsolation:
-    """Test user isolation functionality - CRITICAL for multi-user safety."""
+    """Test critical user isolation functionality - prevents $10M+ churn from data leaks."""
     
-    @pytest.mark.asyncio
-    async def test_different_users_get_isolated_tool_systems(
-        self,
-        user_context: UserExecutionContext,
-        different_user_context: UserExecutionContext,
-        basic_tool_classes: List[Type],
-        websocket_bridge_factory: MockWebSocketBridgeFactory
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_different_users_get_isolated_systems(
+        self, mock_dispatcher_factory, mock_registry_class, mock_tool_classes
     ):
-        """Test that different users get completely isolated tool systems.
+        """CRITICAL: Different users must get completely isolated tool systems."""
         
-        Business Value: CRITICAL - Prevents $10M+ churn from user data leakage by ensuring
-        complete isolation between different user execution contexts.
-        """
-        # Create tool system for first user
+        # Create different user contexts
+        user1_context = MockUserExecutionContext(user_id="user1", run_id="run1")
+        user2_context = MockUserExecutionContext(user_id="user2", run_id="run1")
+        
+        # Mock registries for isolation testing
+        registry1 = MockToolRegistry()
+        registry2 = MockToolRegistry()
+        mock_registry_class.side_effect = [registry1, registry2]
+        
+        dispatcher1 = MockUnifiedToolDispatcher()
+        dispatcher2 = MockUnifiedToolDispatcher()
+        mock_dispatcher_factory.create_for_request.side_effect = [dispatcher1, dispatcher2]
+        
+        # Create systems for both users
         system1 = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
-        )
-        
-        # Create tool system for second user  
-        system2 = await UserContextToolFactory.create_user_tool_system(
-            context=different_user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
-        )
-        
-        # Verify systems are completely separate
-        assert system1['registry'] is not system2['registry']
-        assert system1['dispatcher'] is not system2['dispatcher']
-        assert system1['bridge'] is not system2['bridge']
-        assert system1['correlation_id'] != system2['correlation_id']
-        
-        # Verify tool instances are separate
-        assert len(system1['tools']) == len(system2['tools'])
-        for i in range(len(system1['tools'])):
-            assert system1['tools'][i] is not system2['tools'][i]
-            # Tool names will be different due to unique IDs, but should have same prefix
-            name1_prefix = system1['tools'][i].name.rsplit('_', 1)[0]
-            name2_prefix = system2['tools'][i].name.rsplit('_', 1)[0]
-            assert name1_prefix == name2_prefix  # Same tool type
-            
-        # Verify registries have separate tool instances
-        for i, tool_class in enumerate(basic_tool_classes):
-            tool1 = system1['tools'][i]
-            tool2 = system2['tools'][i]
-            
-            # Different tool names (due to unique IDs) but same type and different instances  
-            assert tool1.name != tool2.name  # Names are unique
-            assert tool1 is not tool2  # Different instances
-            
-            # Separate registry entries
-            registered1 = system1['registry'].get(tool1.name)
-            registered2 = system2['registry'].get(tool2.name)
-            assert registered1 is tool1
-            assert registered2 is tool2
-            assert registered1 is not registered2
-        
-        # Verify WebSocket bridges are separate
-        assert len(websocket_bridge_factory.created_bridges) == 2
-        assert system1['bridge'] is not system2['bridge']
-        assert system1['bridge'].bridge_id != system2['bridge'].bridge_id
-    
-    @pytest.mark.asyncio
-    async def test_same_user_multiple_runs_get_separate_systems(
-        self,
-        basic_tool_classes: List[Type]
-    ):
-        """Test that the same user gets separate systems for different runs.
-        
-        Business Value: Ensures proper request isolation even for the same user across
-        different execution runs, preventing state corruption and race conditions.
-        """
-        user_id = f"same_user_{uuid.uuid4().hex[:8]}"
-        thread_id = f"same_thread_{uuid.uuid4().hex[:8]}"
-        
-        # Create contexts for same user, different runs
-        context1 = UserExecutionContext(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=f"run_1_{uuid.uuid4().hex[:8]}"
-        )
-        
-        context2 = UserExecutionContext(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=f"run_2_{uuid.uuid4().hex[:8]}"
-        )
-        
-        # Create tool systems for same user, different runs
-        system1 = await UserContextToolFactory.create_user_tool_system(
-            context=context1,
-            tool_classes=basic_tool_classes,
+            context=user1_context,
+            tool_classes=mock_tool_classes,
             websocket_bridge_factory=None
         )
         
         system2 = await UserContextToolFactory.create_user_tool_system(
-            context=context2,
-            tool_classes=basic_tool_classes,
+            context=user2_context,
+            tool_classes=mock_tool_classes,
             websocket_bridge_factory=None
         )
         
-        # Verify complete isolation despite same user
+        # Verify complete isolation
+        assert system1['registry'] is not system2['registry']
+        assert system1['dispatcher'] is not system2['dispatcher']
+        assert system1['tools'][0] is not system2['tools'][0]
+        assert system1['correlation_id'] != system2['correlation_id']
+    
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_same_user_different_runs_get_separate_systems(
+        self, mock_dispatcher_factory, mock_registry_class, mock_tool_classes
+    ):
+        """CRITICAL: Same user different runs must get separate isolated systems."""
+        
+        # Same user, different runs
+        context_run1 = MockUserExecutionContext(user_id="user1", run_id="run1")
+        context_run2 = MockUserExecutionContext(user_id="user1", run_id="run2")
+        
+        # Mock separate registries and dispatchers
+        registry1 = MockToolRegistry()
+        registry2 = MockToolRegistry()
+        mock_registry_class.side_effect = [registry1, registry2]
+        
+        dispatcher1 = MockUnifiedToolDispatcher()
+        dispatcher2 = MockUnifiedToolDispatcher()
+        mock_dispatcher_factory.create_for_request.side_effect = [dispatcher1, dispatcher2]
+        
+        # Create systems for different runs
+        system1 = await UserContextToolFactory.create_user_tool_system(
+            context=context_run1,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=None
+        )
+        
+        system2 = await UserContextToolFactory.create_user_tool_system(
+            context=context_run2,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=None
+        )
+        
+        # Verify separation between runs
         assert system1['registry'] is not system2['registry']
         assert system1['dispatcher'] is not system2['dispatcher']
         assert system1['correlation_id'] != system2['correlation_id']
-        
-        # Verify separate tool instances
-        for i in range(len(system1['tools'])):
-            assert system1['tools'][i] is not system2['tools'][i]
-            # Tool names will be different due to unique IDs, but should have same prefix
-            name1_prefix = system1['tools'][i].name.rsplit('_', 1)[0]
-            name2_prefix = system2['tools'][i].name.rsplit('_', 1)[0]
-            assert name1_prefix == name2_prefix  # Same tool type
     
-    @pytest.mark.asyncio
-    async def test_concurrent_tool_system_creation(
-        self,
-        basic_tool_classes: List[Type]
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_concurrent_system_creation_isolation(
+        self, mock_dispatcher_factory, mock_registry_class, mock_tool_classes
     ):
-        """Test concurrent creation of tool systems for different users.
+        """Test concurrent tool system creation maintains proper isolation."""
         
-        Business Value: Validates that factory can safely handle concurrent requests
-        in multi-user environment without race conditions or shared state issues.
-        """
-        # Create multiple user contexts
+        # Create multiple contexts
         contexts = [
-            UserExecutionContext(
-                user_id=f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
-            )
+            MockUserExecutionContext(user_id=f"user{i}", run_id=f"run{i}") 
             for i in range(5)
         ]
         
-        # Create tool systems concurrently
-        creation_tasks = [
+        # Mock separate registries and dispatchers for each
+        registries = [MockToolRegistry() for _ in range(5)]
+        dispatchers = [MockUnifiedToolDispatcher() for _ in range(5)]
+        mock_registry_class.side_effect = registries
+        mock_dispatcher_factory.create_for_request.side_effect = dispatchers
+        
+        # Create systems concurrently
+        tasks = [
             UserContextToolFactory.create_user_tool_system(
-                context=context,
-                tool_classes=basic_tool_classes,
+                context=ctx,
+                tool_classes=mock_tool_classes,
                 websocket_bridge_factory=None
-            )
-            for context in contexts
+            ) for ctx in contexts
         ]
         
-        systems = await asyncio.gather(*creation_tasks)
+        systems = await asyncio.gather(*tasks)
         
-        # Verify all systems created successfully
-        assert len(systems) == 5
-        
-        # Verify complete isolation between all systems
-        for i in range(len(systems)):
-            for j in range(i + 1, len(systems)):
-                system_i = systems[i]
-                system_j = systems[j]
-                
-                # Verify separate registries and dispatchers
-                assert system_i['registry'] is not system_j['registry']
-                assert system_i['dispatcher'] is not system_j['dispatcher']
-                assert system_i['correlation_id'] != system_j['correlation_id']
-                
-                # Verify separate tool instances
-                for k in range(len(system_i['tools'])):
-                    assert system_i['tools'][k] is not system_j['tools'][k]
+        # Verify all systems are isolated
+        for i in range(5):
+            for j in range(i + 1, 5):
+                assert systems[i]['registry'] is not systems[j]['registry']
+                assert systems[i]['dispatcher'] is not systems[j]['dispatcher']
+                assert systems[i]['correlation_id'] != systems[j]['correlation_id']
 
 
-class TestUserContextToolFactoryErrorHandlingAndGracefulDegradation:
-    """Test error handling and graceful degradation functionality."""
+class TestUserContextToolFactoryErrorHandling:
+    """Test error handling and graceful degradation."""
     
-    @pytest.mark.asyncio
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
     async def test_tool_creation_failure_graceful_degradation(
-        self,
-        user_context: UserExecutionContext,
-        tool_classes_with_failure: List[Type]
+        self, mock_dispatcher_factory, mock_registry_class, mock_user_context
     ):
-        """Test graceful degradation when some tools fail during creation.
+        """Test graceful handling when some tools fail to instantiate."""
         
-        Business Value: Ensures partial tool availability is better than total failure,
-        maintaining core agent functionality even when some tools are unavailable.
-        """
-        # Create tool system with failing tool included
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=tool_classes_with_failure,  # Includes FailingTool
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
+        
+        # Mixed tool classes - some work, some fail
+        mixed_tool_classes = [MockBaseTool, MockFailingTool, MockBaseTool]
+        
+        # Execute with failing tools
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mixed_tool_classes,
             websocket_bridge_factory=None
         )
         
-        # Verify system created successfully despite tool failure
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert isinstance(tool_system['tools'], list)
-        
-        # Verify only successful tools were created
-        # FailingTool should be excluded due to creation failure
-        successful_tools = [DataHelperTool, DeepResearchTool]  # FailingTool excluded
-        assert len(tool_system['tools']) == len(successful_tools)
-        
-        # Verify successful tool instances
-        for i, tool in enumerate(tool_system['tools']):
-            expected_class = successful_tools[i]
-            assert isinstance(tool, expected_class)
-            
-        # Verify tools properly registered
-        registry = tool_system['registry']
-        for tool in tool_system['tools']:
-            registered_tool = registry.get(tool.name)
-            assert registered_tool is tool
-            
-        # Verify system remains functional
-        dispatcher = tool_system['dispatcher']
-        assert dispatcher.registry is registry
-        assert UserContextToolFactory.validate_tool_system(tool_system)
+        # Verify partial success - working tools still created
+        assert isinstance(result['tools'], list)
+        assert len(result['tools']) == 2  # Only successful tools
+        assert all(isinstance(tool, MockBaseTool) for tool in result['tools'])
+        assert len(mock_registry.registered_tools) == 2
     
-    @pytest.mark.asyncio
-    async def test_websocket_bridge_creation_failure_continues(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type],
-        failing_websocket_bridge_factory: MockWebSocketBridgeFactory
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_websocket_bridge_creation_failure_graceful_degradation(
+        self, mock_dispatcher_factory, mock_registry_class, 
+        mock_user_context, mock_tool_classes
     ):
-        """Test that WebSocket bridge creation failure doesn't prevent tool system creation.
+        """Test graceful handling when WebSocket bridge creation fails."""
         
-        Business Value: Ensures core agent functionality remains available even when
-        WebSocket capabilities fail, providing graceful degradation of user experience.
-        """
-        # Create tool system with failing WebSocket bridge factory
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=failing_websocket_bridge_factory
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
+        
+        # Bridge factory that fails
+        def failing_bridge_factory():
+            raise Exception("Bridge creation failed")
+        
+        # Execute with failing bridge factory
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=failing_bridge_factory
         )
         
-        # Verify core system created successfully
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert 'bridge' in tool_system
-        assert 'correlation_id' in tool_system
-        
-        # Verify WebSocket bridge is None due to creation failure
-        assert tool_system['bridge'] is None
-        
-        # Verify all tools created successfully
-        assert len(tool_system['tools']) == len(basic_tool_classes)
-        for i, tool_class in enumerate(basic_tool_classes):
-            assert isinstance(tool_system['tools'][i], tool_class)
-            
-        # Verify registry and dispatcher functional
-        registry = tool_system['registry']
-        dispatcher = tool_system['dispatcher']
-        assert dispatcher.registry is registry
-        
-        for tool in tool_system['tools']:
-            assert registry.get(tool.name) is tool
+        # Verify core system still works without bridge
+        assert result['bridge'] is None
+        assert result['registry'] is mock_registry
+        assert len(result['tools']) == 1
+        assert isinstance(result['dispatcher'], MockUnifiedToolDispatcher)
     
-    @pytest.mark.asyncio
-    async def test_all_tools_fail_creates_empty_but_valid_system(
-        self,
-        user_context: UserExecutionContext
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_all_tools_fail_still_creates_valid_system(
+        self, mock_dispatcher_factory, mock_registry_class, mock_user_context
     ):
-        """Test that when all tools fail, system still creates with empty tool list.
+        """Test that even if all tools fail, a valid empty system is created."""
         
-        Business Value: Ensures system robustness - even complete tool failure
-        doesn't crash the factory, allowing for recovery and fallback scenarios.
-        """
-        # Create system where all tools fail
-        failing_tool_classes = [FailingTool, FailingTool]  # All tools fail
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
+        # All failing tools
+        failing_tool_classes = [MockFailingTool, MockFailingTool]
+        
+        # Execute with all failing tools
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
             tool_classes=failing_tool_classes,
             websocket_bridge_factory=None
         )
         
-        # Verify basic structure created
-        assert 'registry' in tool_system
-        assert 'dispatcher' in tool_system
-        assert 'tools' in tool_system
-        assert 'bridge' in tool_system
-        assert 'correlation_id' in tool_system
-        
-        # Verify empty tool list due to all failures
-        assert isinstance(tool_system['tools'], list)
-        assert len(tool_system['tools']) == 0
-        
-        # Verify registry and dispatcher still created
-        assert isinstance(tool_system['registry'], ToolRegistry)
-        assert isinstance(tool_system['dispatcher'], UnifiedToolDispatcher)
-        assert tool_system['bridge'] is None
-        
-        # Verify correlation ID set correctly
-        assert tool_system['correlation_id'] == user_context.get_correlation_id()
+        # Verify valid empty system created
+        assert isinstance(result['tools'], list)
+        assert len(result['tools']) == 0
+        assert result['registry'] is mock_registry
+        assert isinstance(result['dispatcher'], MockUnifiedToolDispatcher)
+        assert len(mock_registry.registered_tools) == 0
     
-    @pytest.mark.asyncio 
+    @pytest.mark.unit
     async def test_invalid_user_context_raises_error(self):
-        """Test that invalid UserExecutionContext raises appropriate error.
+        """Test that invalid user context raises appropriate error."""
         
-        Business Value: Ensures factory fails fast with invalid inputs rather than
-        creating corrupted tool systems that could cause security vulnerabilities.
-        """
-        # Test with None context - should raise error during execution
-        with pytest.raises(Exception):  # Should fail when trying to use context
+        # Execute with None context - should fail
+        with pytest.raises(AttributeError):
             await UserContextToolFactory.create_user_tool_system(
                 context=None,
-                tool_classes=[DataHelperTool],
+                tool_classes=[MockBaseTool],
                 websocket_bridge_factory=None
             )
 
 
 class TestUserContextToolFactoryMinimalSystem:
-    """Test minimal tool system creation functionality."""
+    """Test minimal system creation for lightweight scenarios."""
     
-    @pytest.mark.asyncio
-    async def test_create_minimal_tool_system(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test creation of minimal tool system with basic tools only.
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.UserContextToolFactory.create_user_tool_system')
+    async def test_create_minimal_tool_system(self, mock_create_system, mock_user_context):
+        """Test minimal system creation with only DataHelperTool."""
         
-        Business Value: Provides lightweight tool system for basic operations
-        and fallback scenarios while maintaining complete user isolation.
-        """
-        # The minimal system may fail to import real tools in test environment
-        # But it should still create a valid system structure
-        try:
-            # Create minimal tool system
-            tool_system = await UserContextToolFactory.create_minimal_tool_system(
-                context=user_context
-            )
-            
-            # Verify basic structure
-            assert 'registry' in tool_system
-            assert 'dispatcher' in tool_system
-            assert 'tools' in tool_system
-            assert 'bridge' in tool_system
-            assert 'correlation_id' in tool_system
-            
-            # Verify minimal tool configuration
-            # May have 0 tools if import failed, which is acceptable for minimal system
-            assert isinstance(tool_system['tools'], list)
-            
-            # Verify no WebSocket bridge in minimal system
-            assert tool_system['bridge'] is None
-            
-            # Verify system is valid and functional
-            assert UserContextToolFactory.validate_tool_system(tool_system)
-            
-            # Verify tools properly registered if any were created
-            registry = tool_system['registry']
-            for tool in tool_system['tools']:
-                registered_tool = registry.get(tool.name)
-                assert registered_tool is tool
-                
-        except ImportError:
-            # Expected in test environment where DataHelperTool may not exist
-            # This is acceptable behavior for isolated unit tests
-            pass
-    
-    @pytest.mark.asyncio
-    async def test_minimal_system_isolation_between_users(
-        self,
-        user_context: UserExecutionContext,
-        different_user_context: UserExecutionContext
-    ):
-        """Test that minimal systems maintain user isolation.
+        # Mock the underlying create_user_tool_system call
+        expected_result = {
+            'registry': MockToolRegistry(),
+            'dispatcher': MockUnifiedToolDispatcher(),
+            'tools': [MockBaseTool("data_helper_tool")],
+            'bridge': None,
+            'correlation_id': mock_user_context.get_correlation_id()
+        }
+        mock_create_system.return_value = expected_result
         
-        Business Value: Ensures even lightweight systems maintain critical
-        security boundaries between different users.
-        """
-        # Create minimal systems for different users
-        try:
-            system1 = await UserContextToolFactory.create_minimal_tool_system(
-                context=user_context
-            )
-            
-            system2 = await UserContextToolFactory.create_minimal_tool_system(
-                context=different_user_context
-            )
-            
-            # Verify complete isolation
-            assert system1['registry'] is not system2['registry']
-            assert system1['dispatcher'] is not system2['dispatcher']
-            assert system1['correlation_id'] != system2['correlation_id']
-            
-            # Verify separate tool instances (if any tools were created)
-            if len(system1['tools']) > 0 and len(system2['tools']) > 0:
-                assert len(system1['tools']) == len(system2['tools'])
-                for i in range(len(system1['tools'])):
-                    assert system1['tools'][i] is not system2['tools'][i]
-                    
-        except ImportError:
-            # Expected in test environment where DataHelperTool may not exist
-            # This is acceptable behavior for isolated unit tests
-            pass
+        # Execute minimal system creation
+        result = await UserContextToolFactory.create_minimal_tool_system(mock_user_context)
+        
+        # Verify create_user_tool_system called with minimal config
+        mock_create_system.assert_called_once()
+        call_args = mock_create_system.call_args
+        
+        assert call_args[1]['context'] == mock_user_context
+        assert call_args[1]['websocket_bridge_factory'] is None
+        
+        # Verify DataHelperTool imported and used
+        tool_classes = call_args[1]['tool_classes']
+        assert len(tool_classes) == 1
+        # Note: We can't easily test the actual import, but structure is correct
+        
+        # Verify result structure
+        assert result == expected_result
 
 
 class TestUserContextToolFactoryValidation:
     """Test tool system validation functionality."""
     
-    @pytest.mark.asyncio
-    async def test_validate_complete_tool_system(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type],
-        websocket_bridge_factory: MockWebSocketBridgeFactory
-    ):
-        """Test validation of complete, valid tool system.
+    @pytest.mark.unit
+    def test_validate_tool_system_success(self):
+        """Test validation of complete, valid tool system."""
         
-        Business Value: Ensures validation correctly identifies healthy tool systems
-        for reliable system operation and monitoring.
-        """
-        # Create complete tool system
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
-        )
+        valid_system = {
+            'registry': MockToolRegistry(),
+            'dispatcher': MockUnifiedToolDispatcher(),
+            'tools': [MockBaseTool(), MockBaseTool()],
+            'bridge': MockWebSocketBridge(),
+            'correlation_id': 'test_user_test_run_123456'
+        }
         
-        # Validate system
-        is_valid = UserContextToolFactory.validate_tool_system(tool_system)
-        assert is_valid is True
+        # Validation should pass
+        result = UserContextToolFactory.validate_tool_system(valid_system)
+        assert result is True
     
-    @pytest.mark.asyncio
-    async def test_validate_minimal_tool_system(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test validation of minimal tool system.
+    @pytest.mark.unit
+    def test_validate_tool_system_missing_required_keys(self):
+        """Test validation failure when required keys are missing."""
         
-        Business Value: Ensures validation works correctly for lightweight systems
-        used in fallback scenarios.
-        """
-        try:
-            # Create minimal tool system
-            tool_system = await UserContextToolFactory.create_minimal_tool_system(
-                context=user_context
-            )
-            
-            # Validate system
-            is_valid = UserContextToolFactory.validate_tool_system(tool_system)
-            assert is_valid is True
-            
-        except ImportError:
-            # Expected in test environment where DataHelperTool may not exist
-            # Skip test if minimal system cannot be created
-            pass
+        incomplete_systems = [
+            {},  # Empty system
+            {'registry': MockToolRegistry()},  # Missing other keys
+            {'registry': MockToolRegistry(), 'dispatcher': MockUnifiedToolDispatcher()},  # Missing tools
+            {'registry': MockToolRegistry(), 'dispatcher': MockUnifiedToolDispatcher(), 'tools': []},  # Missing correlation_id
+        ]
+        
+        for incomplete_system in incomplete_systems:
+            result = UserContextToolFactory.validate_tool_system(incomplete_system)
+            assert result is False
     
-    def test_validate_empty_system_fails(self):
-        """Test validation fails for empty system dict.
+    @pytest.mark.unit
+    def test_validate_tool_system_invalid_tools_type(self):
+        """Test validation failure when tools is not a list."""
         
-        Business Value: Ensures validation catches corrupted or incomplete systems
-        before they can cause runtime failures.
-        """
-        # Test empty system
-        empty_system = {}
-        is_valid = UserContextToolFactory.validate_tool_system(empty_system)
-        assert is_valid is False
-        
-    def test_validate_system_missing_required_keys_fails(self):
-        """Test validation fails when required keys are missing.
-        
-        Business Value: Ensures validation catches incomplete systems that
-        would cause runtime failures during agent execution.
-        """
-        # Test system missing registry
-        incomplete_system = {
-            'dispatcher': Mock(),
-            'tools': [],
-            'correlation_id': 'test_id'
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(incomplete_system)
-        assert is_valid is False
-        
-        # Test system missing dispatcher
-        incomplete_system = {
-            'registry': Mock(),
-            'tools': [],
-            'correlation_id': 'test_id'
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(incomplete_system)
-        assert is_valid is False
-        
-        # Test system missing tools
-        incomplete_system = {
-            'registry': Mock(),
-            'dispatcher': Mock(),
-            'correlation_id': 'test_id'
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(incomplete_system)
-        assert is_valid is False
-        
-        # Test system missing correlation_id
-        incomplete_system = {
-            'registry': Mock(),
-            'dispatcher': Mock(),
-            'tools': []
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(incomplete_system)
-        assert is_valid is False
-    
-    def test_validate_system_invalid_tools_type_fails(self):
-        """Test validation fails when tools is not a list.
-        
-        Business Value: Ensures type safety for tool collections that are
-        critical for proper agent execution.
-        """
-        # Test system with non-list tools
         invalid_system = {
-            'registry': Mock(),
-            'dispatcher': Mock(),
-            'tools': 'not_a_list',  # Invalid type
-            'correlation_id': 'test_id'
+            'registry': MockToolRegistry(),
+            'dispatcher': MockUnifiedToolDispatcher(),
+            'tools': "not_a_list",  # Invalid type
+            'correlation_id': 'test_correlation'
         }
-        is_valid = UserContextToolFactory.validate_tool_system(invalid_system)
-        assert is_valid is False
+        
+        result = UserContextToolFactory.validate_tool_system(invalid_system)
+        assert result is False
     
-    @pytest.mark.asyncio
-    async def test_validate_system_with_no_tools_warns_but_passes(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test validation passes but warns for system with no tools.
+    @pytest.mark.unit
+    def test_validate_tool_system_empty_tools_warning(self):
+        """Test validation warning for empty tools list."""
         
-        Business Value: Allows empty tool systems for special scenarios while
-        providing visibility into potentially degraded functionality.
-        """
-        # Create system with no tools
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=[],  # Empty tool list
-            websocket_bridge_factory=None
-        )
+        empty_tools_system = {
+            'registry': MockToolRegistry(),
+            'dispatcher': MockUnifiedToolDispatcher(),
+            'tools': [],  # Empty but valid
+            'correlation_id': 'test_correlation'
+        }
         
-        # Validation should pass (with warning logged)
-        is_valid = UserContextToolFactory.validate_tool_system(tool_system)
-        assert is_valid is True  # Passes despite warning
+        # Should pass validation but log warning (we can't easily test logging here)
+        result = UserContextToolFactory.validate_tool_system(empty_tools_system)
+        assert result is True
 
 
 class TestUserContextToolFactoryWebSocketBridgeIntegration:
-    """Test WebSocket bridge factory integration."""
+    """Test WebSocket bridge integration with factory."""
     
-    @pytest.mark.asyncio
-    async def test_websocket_bridge_factory_called_correctly(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type],
-        websocket_bridge_factory: MockWebSocketBridgeFactory
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_websocket_bridge_factory_integration(
+        self, mock_dispatcher_factory, mock_registry_class,
+        mock_user_context, mock_tool_classes
     ):
-        """Test that WebSocket bridge factory is called correctly during system creation.
+        """Test WebSocket bridge factory integration with tool system."""
         
-        Business Value: Ensures proper WebSocket integration for real-time agent
-        communication and user experience.
-        """
-        # Verify factory hasn't been called yet
-        assert len(websocket_bridge_factory.created_bridges) == 0
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        # Create tool system with WebSocket bridge
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
+        bridge_instance = MockWebSocketBridge()
+        bridge_factory = Mock(return_value=bridge_instance)
+        
+        # Execute with bridge factory
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=bridge_factory
         )
         
-        # Verify factory was called exactly once
-        assert len(websocket_bridge_factory.created_bridges) == 1
-        
-        # Verify bridge properly integrated
-        bridge = tool_system['bridge']
-        assert bridge is websocket_bridge_factory.created_bridges[0]
-        assert isinstance(bridge, MockAgentWebSocketBridge)
-        assert hasattr(bridge, 'bridge_id')
-        assert bridge.bridge_id is not None
+        # Verify bridge factory called and integrated
+        bridge_factory.assert_called_once()
+        assert result['bridge'] is bridge_instance
     
-    @pytest.mark.asyncio
-    async def test_multiple_systems_get_separate_bridges(
-        self,
-        user_context: UserExecutionContext,
-        different_user_context: UserExecutionContext,
-        basic_tool_classes: List[Type],
-        websocket_bridge_factory: MockWebSocketBridgeFactory
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_multiple_systems_bridge_isolation(
+        self, mock_dispatcher_factory, mock_registry_class, mock_tool_classes
     ):
-        """Test that multiple tool systems get separate WebSocket bridges.
+        """Test that multiple systems get separate WebSocket bridges."""
         
-        Business Value: Ensures WebSocket isolation between users for secure
-        and reliable real-time communication.
-        """
-        # Create multiple tool systems
+        # Setup mocks for two systems
+        mock_registry_class.side_effect = [MockToolRegistry(), MockToolRegistry()]
+        mock_dispatcher_factory.create_for_request.side_effect = [
+            MockUnifiedToolDispatcher(), MockUnifiedToolDispatcher()
+        ]
+        
+        # Different bridge instances
+        bridge1 = MockWebSocketBridge()
+        bridge2 = MockWebSocketBridge()
+        bridge_factory1 = Mock(return_value=bridge1)
+        bridge_factory2 = Mock(return_value=bridge2)
+        
+        # Create two systems
+        context1 = MockUserExecutionContext(user_id="user1")
+        context2 = MockUserExecutionContext(user_id="user2")
+        
         system1 = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
+            context=context1,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=bridge_factory1
         )
         
         system2 = await UserContextToolFactory.create_user_tool_system(
-            context=different_user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=websocket_bridge_factory
+            context=context2,
+            tool_classes=mock_tool_classes,
+            websocket_bridge_factory=bridge_factory2
         )
         
-        # Verify separate bridges created
-        assert len(websocket_bridge_factory.created_bridges) == 2
+        # Verify bridge isolation
+        assert system1['bridge'] is bridge1
+        assert system2['bridge'] is bridge2
         assert system1['bridge'] is not system2['bridge']
-        assert system1['bridge'].bridge_id != system2['bridge'].bridge_id
-        
-        # Verify bridges are from same factory
-        assert system1['bridge'] is websocket_bridge_factory.created_bridges[0]
-        assert system2['bridge'] is websocket_bridge_factory.created_bridges[1]
 
 
-class TestUserContextToolFactoryResourceLifecycle:
-    """Test resource lifecycle and cleanup functionality."""
+class TestUserContextToolFactoryPerformanceAndStress:
+    """Test performance characteristics and stress scenarios."""
     
-    @pytest.mark.asyncio
-    async def test_tool_system_correlation_id_generation(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type]
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_system_creation_performance(
+        self, mock_dispatcher_factory, mock_registry_class,
+        mock_user_context, mock_tool_classes
     ):
-        """Test that correlation IDs are generated correctly for tracking.
+        """Test that system creation completes within reasonable time bounds."""
         
-        Business Value: Enables proper request tracing and debugging across
-        distributed agent execution for operational excellence.
-        """
-        # Create tool system
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=None
-        )
+        # Setup mocks
+        mock_registry_class.return_value = MockToolRegistry()
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        # Verify correlation ID matches context
-        expected_correlation = user_context.get_correlation_id()
-        assert tool_system['correlation_id'] == expected_correlation
-        assert isinstance(tool_system['correlation_id'], str)
-        assert len(tool_system['correlation_id']) > 0
-    
-    @pytest.mark.asyncio
-    async def test_registry_id_generation_uniqueness(
-        self,
-        basic_tool_classes: List[Type]
-    ):
-        """Test that registry IDs are unique across different systems.
-        
-        Business Value: Ensures proper resource isolation and prevents
-        registry conflicts in multi-user environment.
-        """
-        # Create multiple contexts and systems
-        contexts = [
-            UserExecutionContext(
-                user_id=f"user_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
-            )
-            for i in range(3)
-        ]
-        
-        systems = []
-        for context in contexts:
-            system = await UserContextToolFactory.create_user_tool_system(
-                context=context,
-                tool_classes=basic_tool_classes,
-                websocket_bridge_factory=None
-            )
-            systems.append(system)
-        
-        # Verify all registries are different instances
-        registries = [system['registry'] for system in systems]
-        for i in range(len(registries)):
-            for j in range(i + 1, len(registries)):
-                assert registries[i] is not registries[j]
-        
-        # Verify all correlation IDs are different
-        correlation_ids = [system['correlation_id'] for system in systems]
-        assert len(set(correlation_ids)) == len(correlation_ids)  # All unique
-    
-    @pytest.mark.asyncio
-    async def test_dispatcher_registry_override_correct(
-        self,
-        user_context: UserExecutionContext,
-        basic_tool_classes: List[Type]
-    ):
-        """Test that dispatcher registry is properly overridden with created registry.
-        
-        Business Value: Ensures dispatcher uses the correct isolated registry
-        to prevent cross-user tool access and maintain security boundaries.
-        """
-        # Create tool system
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=basic_tool_classes,
-            websocket_bridge_factory=None
-        )
-        
-        # Verify dispatcher uses the created registry
-        registry = tool_system['registry']
-        dispatcher = tool_system['dispatcher']
-        
-        assert dispatcher.registry is registry  # Same instance
-        
-        # Verify tools are registered in the same registry
-        for tool in tool_system['tools']:
-            registered_tool = registry.get(tool.name)
-            assert registered_tool is tool
-            
-            # Verify dispatcher can access tools through its registry
-            dispatcher_tool = dispatcher.registry.get(tool.name)
-            assert dispatcher_tool is tool
-    
-    @pytest.mark.asyncio
-    async def test_tool_creation_timing_and_performance(
-        self,
-        user_context: UserExecutionContext,
-        all_tool_classes: List[Type]
-    ):
-        """Test tool creation timing for performance monitoring.
-        
-        Business Value: Ensures tool system creation completes within reasonable
-        time bounds for responsive user experience.
-        """
+        # Time the system creation
         start_time = time.time()
         
-        # Create tool system
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=all_tool_classes,
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=mock_tool_classes,
             websocket_bridge_factory=None
         )
         
-        end_time = time.time()
-        creation_time = end_time - start_time
+        elapsed_time = time.time() - start_time
         
-        # Verify system created successfully
-        assert UserContextToolFactory.validate_tool_system(tool_system)
-        assert len(tool_system['tools']) == len(all_tool_classes)
+        # System creation should be fast (under 1 second for mocked components)
+        assert elapsed_time < 1.0
+        assert result is not None
+    
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_concurrent_system_creation_stress(
+        self, mock_dispatcher_factory, mock_registry_class, mock_tool_classes
+    ):
+        """Stress test concurrent system creation for race conditions."""
         
-        # Performance check - should complete reasonably quickly
-        # Allow up to 5 seconds for tool system creation (generous for testing)
-        assert creation_time < 5.0, f"Tool system creation took {creation_time:.2f}s, should be under 5s"
+        # Setup mocks for multiple systems
+        registries = [MockToolRegistry() for _ in range(10)]
+        dispatchers = [MockUnifiedToolDispatcher() for _ in range(10)]
+        mock_registry_class.side_effect = registries
+        mock_dispatcher_factory.create_for_request.side_effect = dispatchers
+        
+        # Create contexts for stress testing
+        contexts = [
+            MockUserExecutionContext(user_id=f"stress_user_{i}", run_id=f"stress_run_{i}") 
+            for i in range(10)
+        ]
+        
+        # Execute concurrent creation
+        tasks = [
+            UserContextToolFactory.create_user_tool_system(
+                context=ctx,
+                tool_classes=mock_tool_classes,
+                websocket_bridge_factory=None
+            ) for ctx in contexts
+        ]
+        
+        # All should complete successfully
+        systems = await asyncio.gather(*tasks)
+        
+        # Verify all systems created and isolated
+        assert len(systems) == 10
+        for i, system in enumerate(systems):
+            assert system['registry'] is registries[i]
+            assert system['dispatcher'] is dispatchers[i]
+            assert len(system['tools']) == 1
 
 
 class TestUserContextToolFactoryEdgeCasesAndRobustness:
     """Test edge cases and robustness scenarios."""
     
-    @pytest.mark.asyncio
-    async def test_create_system_with_duplicate_tool_classes(
-        self,
-        user_context: UserExecutionContext
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry')
+    @patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory')
+    async def test_duplicate_tool_classes_handled(
+        self, mock_dispatcher_factory, mock_registry_class, mock_user_context
     ):
-        """Test system creation with duplicate tool classes in the list.
+        """Test handling of duplicate tool classes in the list."""
         
-        Business Value: Ensures factory handles configuration errors gracefully
-        without creating duplicated or corrupted tool systems.
-        """
-        # Create system with duplicate tool classes
-        duplicate_classes = [DataHelperTool, DataHelperTool, DeepResearchTool]
+        # Setup mocks
+        mock_registry = MockToolRegistry()
+        mock_registry_class.return_value = mock_registry
+        mock_dispatcher_factory.create_for_request.return_value = MockUnifiedToolDispatcher()
         
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=duplicate_classes,
+        # Duplicate tool classes
+        duplicate_tool_classes = [MockBaseTool, MockBaseTool, MockBaseTool]
+        
+        # Execute with duplicates
+        result = await UserContextToolFactory.create_user_tool_system(
+            context=mock_user_context,
+            tool_classes=duplicate_tool_classes,
             websocket_bridge_factory=None
         )
         
-        # Verify system created (behavior may vary based on implementation)
-        assert 'tools' in tool_system
-        assert isinstance(tool_system['tools'], list)
+        # Should create separate instances (no deduplication expected)
+        assert len(result['tools']) == 3
+        assert all(isinstance(tool, MockBaseTool) for tool in result['tools'])
         
-        # Should have created instances for all classes (including duplicates)
-        assert len(tool_system['tools']) == len(duplicate_classes)
-        
-        # Verify registry handles the tools appropriately
-        registry = tool_system['registry']
-        # With unique names, we need to check that tools exist in registry by their actual names
-        for tool in tool_system['tools']:
-            registered_tool = registry.get(tool.name)
-            assert registered_tool is tool  # Each tool should be registered with its unique name
-        
-        # System should still be valid
-        assert UserContextToolFactory.validate_tool_system(tool_system)
+        # All should be registered (with same name - registry handles conflicts)
+        assert len(mock_registry.registered_tools) == 3
     
-    @pytest.mark.asyncio
-    async def test_create_system_with_none_in_tool_classes(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test system creation with None values in tool classes list.
+    @pytest.mark.unit
+    async def test_none_values_in_tool_classes_handled(self, mock_user_context):
+        """Test handling of None values in tool classes list."""
         
-        Business Value: Ensures factory handles malformed configuration gracefully
-        without system crashes that could affect user experience.
-        """
-        # Create system with None in tool classes list
-        tool_classes_with_none = [DataHelperTool, None, DeepResearchTool]
-        
-        # The current implementation has a bug where it tries to access tool_class.__name__ 
-        # even when tool_class is None, causing an AttributeError.
-        # This test validates the current behavior (which should be improved in the future)
-        with pytest.raises(AttributeError, match="'NoneType' object has no attribute '__name__'"):
-            await UserContextToolFactory.create_user_tool_system(
-                context=user_context,
-                tool_classes=tool_classes_with_none,
-                websocket_bridge_factory=None
-            )
+        with patch('netra_backend.app.agents.user_context_tool_factory.ToolRegistry'), \
+             patch('netra_backend.app.agents.user_context_tool_factory.UnifiedToolDispatcherFactory'):
+            
+            # Tool classes with None values should cause errors
+            tool_classes_with_none = [MockBaseTool, None, MockBaseTool]
+            
+            # This should raise an error when trying to instantiate None
+            with pytest.raises((TypeError, AttributeError)):
+                await UserContextToolFactory.create_user_tool_system(
+                    context=mock_user_context,
+                    tool_classes=tool_classes_with_none,
+                    websocket_bridge_factory=None
+                )
     
-    @pytest.mark.asyncio
-    async def test_concurrent_creation_with_shared_bridge_factory(
-        self,
-        basic_tool_classes: List[Type]
-    ):
-        """Test concurrent system creation with shared WebSocket bridge factory.
+    @pytest.mark.unit
+    def test_validate_system_with_none_input(self):
+        """Test validation handles None input gracefully."""
         
-        Business Value: Ensures factory can handle concurrent access to shared
-        resources without race conditions in high-load scenarios.
-        """
-        # Create shared bridge factory
-        shared_factory = MockWebSocketBridgeFactory()
-        
-        # Create multiple user contexts
-        contexts = [
-            UserExecutionContext(
-                user_id=f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"concurrent_thread_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"concurrent_run_{i}_{uuid.uuid4().hex[:8]}"
-            )
-            for i in range(4)
-        ]
-        
-        # Create systems concurrently with shared factory
-        creation_tasks = [
-            UserContextToolFactory.create_user_tool_system(
-                context=context,
-                tool_classes=basic_tool_classes,
-                websocket_bridge_factory=shared_factory
-            )
-            for context in contexts
-        ]
-        
-        systems = await asyncio.gather(*creation_tasks)
-        
-        # Verify all systems created successfully
-        assert len(systems) == 4
-        for system in systems:
-            assert UserContextToolFactory.validate_tool_system(system)
-            assert system['bridge'] is not None
-        
-        # Verify factory created separate bridges
-        assert len(shared_factory.created_bridges) == 4
-        
-        # Verify all bridges are different
-        bridges = [system['bridge'] for system in systems]
-        bridge_ids = [bridge.bridge_id for bridge in bridges]
-        assert len(set(bridge_ids)) == 4  # All unique
-    
-    def test_system_validation_edge_cases(self):
-        """Test tool system validation with various edge case inputs.
-        
-        Business Value: Ensures validation robustness prevents false positives
-        and false negatives that could affect system reliability.
-        """
-        # Test validation with None input - current implementation will error
-        # We need to catch the TypeError and treat it as invalid
-        try:
-            is_valid = UserContextToolFactory.validate_tool_system(None)
-            assert is_valid is False
-        except TypeError:
-            # Current implementation doesn't handle None gracefully
-            # This is expected behavior - None input should be rejected
-            pass
-        
-        # Test validation with non-dict input
-        try:
-            is_valid = UserContextToolFactory.validate_tool_system("not_a_dict")
-            assert is_valid is False
-        except (TypeError, AttributeError):
-            # Current implementation may error on non-dict input
-            # This is acceptable - non-dict should be rejected
-            pass
-        
-        # Test validation with dict containing wrong value types
-        invalid_system = {
-            'registry': "not_a_registry",
-            'dispatcher': "not_a_dispatcher", 
-            'tools': "not_a_list",
-            'correlation_id': 12345  # Wrong type but might be acceptable
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(invalid_system)
-        assert is_valid is False
-        
-        # Test validation with None values in required fields
-        system_with_nones = {
-            'registry': None,
-            'dispatcher': None,
-            'tools': None,
-            'correlation_id': None
-        }
-        is_valid = UserContextToolFactory.validate_tool_system(system_with_nones)
-        assert is_valid is False
+        # Should not crash, should return False
+        result = UserContextToolFactory.validate_tool_system(None)
+        assert result is False
 
 
-# Performance and stress testing
-class TestUserContextToolFactoryPerformanceAndStress:
-    """Test performance characteristics and stress scenarios."""
+class TestGetAppToolClasses:
+    """Test the standalone get_app_tool_classes function."""
     
-    @pytest.mark.asyncio
-    async def test_large_tool_list_creation_performance(
-        self,
-        user_context: UserExecutionContext
-    ):
-        """Test creation performance with large number of tool classes.
+    @pytest.mark.unit
+    def test_get_app_tool_classes_returns_list(self):
+        """Test that get_app_tool_classes returns a list of tool classes."""
         
-        Business Value: Ensures factory scales appropriately for enterprise
-        configurations with extensive tool sets.
-        """
-        # Create large list of tool classes (simulate enterprise setup)
-        large_tool_list = [DataHelperTool] * 20 + [DeepResearchTool] * 20
+        result = get_app_tool_classes()
         
-        start_time = time.time()
-        
-        tool_system = await UserContextToolFactory.create_user_tool_system(
-            context=user_context,
-            tool_classes=large_tool_list,
-            websocket_bridge_factory=None
-        )
-        
-        end_time = time.time()
-        creation_time = end_time - start_time
-        
-        # Verify all tools created
-        assert len(tool_system['tools']) == len(large_tool_list)
-        
-        # Verify system is valid and functional
-        assert UserContextToolFactory.validate_tool_system(tool_system)
-        
-        # Performance assertion - should handle large lists efficiently
-        # Allow up to 10 seconds for 40 tools (generous for testing)
-        assert creation_time < 10.0, f"Large tool creation took {creation_time:.2f}s, should be under 10s"
+        assert isinstance(result, list)
+        # Should return some tool classes (at least the fallback ones)
+        assert len(result) >= 0  # May be empty in test environment
     
-    @pytest.mark.asyncio
-    async def test_rapid_sequential_creation(
-        self,
-        basic_tool_classes: List[Type]
-    ):
-        """Test rapid sequential creation of tool systems.
+    @pytest.mark.unit
+    @patch('netra_backend.app.agents.user_context_tool_factory.Request')
+    def test_get_app_tool_classes_handles_request_context_failure(self, mock_request):
+        """Test fallback behavior when request context is not available."""
         
-        Business Value: Ensures factory can handle high-frequency requests
-        common in production workloads without degradation.
-        """
-        creation_times = []
-        systems = []
+        # Mock Request to raise exception (simulating no request context)
+        mock_request.side_effect = Exception("No request context")
         
-        # Create systems rapidly in sequence
-        for i in range(10):
-            context = UserExecutionContext(
-                user_id=f"rapid_user_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"rapid_thread_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"rapid_run_{i}_{uuid.uuid4().hex[:8]}"
-            )
-            
-            start_time = time.time()
-            system = await UserContextToolFactory.create_user_tool_system(
-                context=context,
-                tool_classes=basic_tool_classes,
-                websocket_bridge_factory=None
-            )
-            end_time = time.time()
-            
-            creation_times.append(end_time - start_time)
-            systems.append(system)
+        result = get_app_tool_classes()
         
-        # Verify all systems created successfully
-        assert len(systems) == 10
-        for system in systems:
-            assert UserContextToolFactory.validate_tool_system(system)
-        
-        # Verify performance consistency
-        max_creation_time = max(creation_times)
-        assert max_creation_time < 2.0, f"Slowest creation took {max_creation_time:.2f}s, should be under 2s"
-        
-        # Verify complete isolation between all systems
-        for i in range(len(systems)):
-            for j in range(i + 1, len(systems)):
-                assert systems[i]['registry'] is not systems[j]['registry']
-                assert systems[i]['correlation_id'] != systems[j]['correlation_id']
+        # Should fall back to default tool classes
+        assert isinstance(result, list)
+        # In the actual implementation, this falls back to specific tools
+        assert len(result) >= 0

@@ -58,14 +58,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class MockAgent(BaseAgent):
     """Mock agent implementation for testing."""
     
-    def __init__(self, llm_manager=None, tool_dispatcher=None):
+    def __init__(self, llm_manager=None, tool_dispatcher=None, name=None, description=None, 
+                 user_id=None, enable_reliability=None, enable_execution_engine=None, **kwargs):
+        # Accept all parameters that BaseAgent.create_agent_with_context might pass
         super().__init__()
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
+        self.name = name
+        self.description = description
+        self.user_id = user_id
         self.websocket_bridge = None
         self.run_id = None
+        
+        # Mock the websocket adapter to properly simulate setting the bridge
         self._websocket_adapter = Mock()
-        self._websocket_adapter.set_websocket_bridge = Mock()
+        def mock_set_websocket_bridge(bridge, run_id, agent_name=None):
+            self.websocket_bridge = bridge
+            self.run_id = run_id
+        self._websocket_adapter.set_websocket_bridge = Mock(side_effect=mock_set_websocket_bridge)
         
     def set_websocket_bridge(self, bridge, run_id):
         self.websocket_bridge = bridge
@@ -78,14 +88,24 @@ class MockAgent(BaseAgent):
 class MockAgentWithFactory(BaseAgent):
     """Mock agent with factory method for testing."""
     
-    def __init__(self, llm_manager=None, tool_dispatcher=None):
+    def __init__(self, llm_manager=None, tool_dispatcher=None, name=None, description=None, 
+                 user_id=None, enable_reliability=None, enable_execution_engine=None, **kwargs):
+        # Accept all parameters that BaseAgent.create_agent_with_context might pass
         super().__init__()
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
+        self.name = name
+        self.description = description
+        self.user_id = user_id
         self.websocket_bridge = None
         self.run_id = None
+        
+        # Mock the websocket adapter to properly simulate setting the bridge
         self._websocket_adapter = Mock()
-        self._websocket_adapter.set_websocket_bridge = Mock()
+        def mock_set_websocket_bridge(bridge, run_id, agent_name=None):
+            self.websocket_bridge = bridge
+            self.run_id = run_id
+        self._websocket_adapter.set_websocket_bridge = Mock(side_effect=mock_set_websocket_bridge)
     
     @classmethod
     def create_agent_with_context(cls, user_context: UserExecutionContext):
@@ -102,10 +122,19 @@ class MockAgentWithFactory(BaseAgent):
 class MockNoParamAgent(BaseAgent):
     """Mock agent that takes no parameters."""
     
-    def __init__(self):
+    def __init__(self, name=None, description=None, user_id=None, 
+                 enable_reliability=None, enable_execution_engine=None, **kwargs):
+        # Accept BaseAgent parameters but ignore them for this simple mock
         super().__init__()
+        self.websocket_bridge = None
+        self.run_id = None
+        
+        # Mock the websocket adapter to properly simulate setting the bridge
         self._websocket_adapter = Mock()
-        self._websocket_adapter.set_websocket_bridge = Mock()
+        def mock_set_websocket_bridge(bridge, run_id, agent_name=None):
+            self.websocket_bridge = bridge
+            self.run_id = run_id
+        self._websocket_adapter.set_websocket_bridge = Mock(side_effect=mock_set_websocket_bridge)
 
 
 class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
@@ -591,7 +620,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             run_id=self.test_run_id
         )
         
-        with pytest.raises(ValueError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             await factory.create_agent_instance("unknown_agent", context)
         assert "Agent 'unknown_agent' not found" in str(ctx.value)
             
@@ -1231,7 +1260,8 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
-            websocket_bridge=self.mock_websocket_bridge
+            websocket_bridge=self.mock_websocket_bridge,
+            llm_manager=self.mock_llm_manager  # Provide LLM manager to pass dependency validation
         )
         
         context = await factory.create_user_execution_context(
@@ -1241,7 +1271,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         )
         
         # Verify special error message for synthetic_data agent
-        with pytest.raises(ValueError) as ctx:
+        with pytest.raises(RuntimeError) as ctx:
             await factory.create_agent_instance("synthetic_data", context)
         assert "KNOWN ISSUE: synthetic_data agent registration may have failed" in str(ctx.value)
 

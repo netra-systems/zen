@@ -389,16 +389,16 @@ class TestEdgeCasesAndErrorConditions:
         user_context = create_user_context()
         dispatcher = await UnifiedToolDispatcher.create_for_user(user_context)
         
-        # Test registering tool with same name twice
+        # Test registering tool with same name twice - should raise error
         tool1 = MockBaseTool("duplicate_name")
         tool2 = MockBaseTool("duplicate_name")
         
         dispatcher.register_tool(tool1)
-        dispatcher.register_tool(tool2)  # Should overwrite
         
-        # Verify second tool is registered
-        available_tools = dispatcher.tools
-        assert available_tools["duplicate_name"] is tool2
+        # Attempting to register tool with same name should raise ValueError
+        with pytest.raises(ValueError) as exc_info:
+            dispatcher.register_tool(tool2)
+        assert "already registered" in str(exc_info.value)
         
         # Test registering tool with special characters in name
         special_tool = MockBaseTool("tool-with_special.chars")
@@ -604,15 +604,12 @@ class TestPermissionAndSecurity:
         
     @pytest.mark.asyncio 
     async def test_permission_service_fallback(self):
-        """Test permission service as fallback for admin checking."""
+        """Test permission service as fallback when user has no is_admin attribute."""
         # Create user context without admin roles in metadata
         user_context = create_user_context(metadata={})  # No admin roles
         
-        # Create user with explicit is_admin = False
-        class MockUser:
-            is_admin = False
-        
-        mock_user = MockUser()
+        # Create user WITHOUT is_admin attribute (so permission service is checked)
+        mock_user = Mock(spec=[])  # Empty spec means no attributes including is_admin
         
         mock_permission_service = Mock()
         mock_permission_service.has_admin_permission.return_value = True  # Admin via service
@@ -624,7 +621,7 @@ class TestPermissionAndSecurity:
             permission_service=mock_permission_service
         )
         
-        # Should use permission service as fallback
+        # Should use permission service as fallback when is_admin attribute is missing
         result = dispatcher._check_admin_permission()
         assert result is True
         mock_permission_service.has_admin_permission.assert_called_once_with(mock_user)
