@@ -262,9 +262,14 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
         _validate_ssot_user_context(user_context)
         
     except ValueError as validation_error:
-        # Get current environment
-        env = get_env()
-        current_env = env.get("ENVIRONMENT", "unknown").lower()
+        # Get current environment with comprehensive error handling
+        try:
+            env = get_env()
+            current_env = env.get("ENVIRONMENT", "unknown").lower()
+            logger.info(f"STAGING DEBUG: Environment detected as: {current_env}")
+        except Exception as env_error:
+            logger.error(f"STAGING ERROR: Failed to get environment: {env_error}")
+            current_env = "unknown"
         
         # In staging environment, provide accommodation for defensive validation
         if current_env == "staging":
@@ -275,20 +280,25 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
             
             # Perform minimal critical validation that MUST pass even in staging
             try:
+                logger.info("STAGING DEBUG: Starting critical validation checks")
+                
                 # Critical validation #1: Must be correct type
                 if not isinstance(user_context, UserExecutionContext):
                     logger.error(f"STAGING CRITICAL FAILURE: Wrong type even in staging: {type(user_context)}")
                     raise validation_error
+                logger.info("STAGING DEBUG: Type validation passed")
                 
                 # Critical validation #2: Must have user_id
                 if not hasattr(user_context, 'user_id') or not user_context.user_id:
                     logger.error(f"STAGING CRITICAL FAILURE: Missing user_id even in staging")
                     raise validation_error
+                logger.info("STAGING DEBUG: user_id presence validation passed")
                 
                 # Critical validation #3: user_id must be valid string
                 if not isinstance(user_context.user_id, str) or not user_context.user_id.strip():
                     logger.error(f"STAGING CRITICAL FAILURE: Invalid user_id even in staging: {repr(user_context.user_id)}")
                     raise validation_error
+                logger.info("STAGING DEBUG: user_id format validation passed")
                 
                 # Log successful staging accommodation
                 logger.info(
