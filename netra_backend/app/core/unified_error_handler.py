@@ -20,6 +20,9 @@ Business Value Justification:
 import asyncio
 import time
 import traceback
+import linecache
+import inspect
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -45,6 +48,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.schemas.shared_types import ErrorContext
+from shared.isolated_environment import get_environment_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -276,6 +280,9 @@ class UnifiedErrorHandler:
         # Determine if recoverable
         is_recoverable = self._is_recoverable_error(error)
         
+        # Extract debug information for non-production environments
+        debug_info = self._extract_debug_info(error)
+        
         return {
             'error_id': str(uuid4()),
             'error': error,
@@ -286,8 +293,175 @@ class UnifiedErrorHandler:
             'is_recoverable': is_recoverable,
             'message': str(error),
             'technical_details': traceback.format_exc(),
+            'debug_info': debug_info,
             'timestamp': datetime.now(timezone.utc)
         }
+    
+    def _extract_debug_info(self, error: Exception) -> Dict[str, Any]:
+        """
+        Extract debug information from exception for non-production environments.
+        
+        SECURITY: Only extracts debug info in development/test environments.
+        Production environments get minimal information to prevent information disclosure.
+        """
+        env_manager = get_environment_manager()
+        
+        # Security check: Only extract debug info in non-production environments
+        if env_manager.is_production():
+            return {}
+        
+        debug_info = {}
+        
+        try:
+            # Get current traceback
+            tb = error.__traceback__
+            if tb is None:
+                # If no traceback attached, get current one
+                tb = traceback.extract_tb(error.__traceback__)
+                if not tb:
+                    tb = traceback.extract_stack()
+            
+            # Extract stack frames
+            stack_frames = []
+            line_number = None
+            source_file = None
+            
+            if tb:
+                # Get traceback information
+                if hasattr(tb, '__iter__'):
+                    # tb is already a StackSummary or list
+                    for frame in tb:
+                        if hasattr(frame, 'filename'):
+                            stack_frames.append({
+                                'file': self._sanitize_file_path(frame.filename),
+                                'line': frame.lineno,
+                                'function': frame.name,
+                                'code': frame.line
+                            })
+                        else:
+                            # Handle tuple format
+                            stack_frames.append({
+                                'file': self._sanitize_file_path(frame[0]),
+                                'line': frame[1],
+                                'function': frame[2],
+                                'code': frame[3]
+                            })
+                    
+                    # Get the last frame for primary error location
+                    if stack_frames:
+                        last_frame = stack_frames[-1]
+                        source_file = last_frame['file']
+                        line_number = last_frame['line']
+                else:
+                    # tb is a traceback object - extract manually
+                    current_tb = tb
+                    while current_tb:
+                        frame = current_tb.tb_frame
+                        filename = frame.f_code.co_filename
+                        line_no = current_tb.tb_lineno
+                        func_name = frame.f_code.co_name
+                        
+                        # Get the source line
+                        line_code = linecache.getline(filename, line_no).strip()
+                        
+                        stack_frames.append({
+                            'file': self._sanitize_file_path(filename),
+                            'line': line_no,
+                            'function': func_name,
+                            'code': line_code
+                        })
+                        
+                        # Store the deepest frame info as primary location
+                        source_file = self._sanitize_file_path(filename)
+                        line_number = line_no
+                        
+                        current_tb = current_tb.tb_next
+            
+            # Build debug info
+            debug_info.update({
+                'line_number': line_number,
+                'source_file': source_file,
+                'stack_trace': [f"{frame['file']}:{frame['line']} in {frame['function']}" for frame in stack_frames],
+                'stack_frames': stack_frames if not env_manager.is_staging() else stack_frames[-3:],  # Limit frames in staging
+                'error_type': type(error).__name__,
+                'error_module': type(error).__module__,
+            })
+            
+            # Add additional context if available
+            if hasattr(error, '__cause__') and error.__cause__:
+                debug_info['caused_by'] = {
+                    'type': type(error.__cause__).__name__,
+                    'message': str(error.__cause__)
+                }
+            
+            if hasattr(error, '__context__') and error.__context__:
+                debug_info['context_error'] = {
+                    'type': type(error.__context__).__name__,
+                    'message': str(error.__context__)
+                }
+            
+            # Add locals from the error frame (development only)
+            if env_manager.is_development() and stack_frames:
+                try:
+                    # Get the frame where error occurred
+                    current_tb = error.__traceback__
+                    if current_tb:
+                        while current_tb.tb_next:
+                            current_tb = current_tb.tb_next
+                        
+                        frame_locals = current_tb.tb_frame.f_locals
+                        # Filter out sensitive information and large objects
+                        safe_locals = {}
+                        for key, value in frame_locals.items():
+                            if not key.startswith('_') and len(str(value)) < 200:
+                                try:
+                                    # Try to convert to string safely
+                                    safe_locals[key] = str(value)
+                                except:
+                                    safe_locals[key] = f"<{type(value).__name__}>"
+                        debug_info['local_variables'] = safe_locals
+                except Exception:
+                    # Don't fail debug extraction due to local variable inspection
+                    pass
+        
+        except Exception as debug_error:
+            # Don't let debug extraction fail the error handling
+            logger.warning(f"Failed to extract debug info: {debug_error}")
+            debug_info = {
+                'debug_extraction_error': str(debug_error),
+                'error_type': type(error).__name__
+            }
+        
+        return debug_info
+    
+    def _sanitize_file_path(self, file_path: str) -> str:
+        """
+        Sanitize file paths for security.
+        
+        Removes absolute paths and sensitive directory information.
+        """
+        try:
+            # Convert to relative path from project root
+            if os.path.isabs(file_path):
+                # Try to make relative to current working directory
+                try:
+                    cwd = os.getcwd()
+                    if file_path.startswith(cwd):
+                        return os.path.relpath(file_path, cwd)
+                except:
+                    pass
+                
+                # Fallback: just show filename and parent directory
+                path_parts = file_path.split(os.sep)
+                if len(path_parts) > 1:
+                    return f"{path_parts[-2]}/{path_parts[-1]}"
+                else:
+                    return path_parts[-1]
+            
+            return file_path
+        except Exception:
+            # Fallback to just the filename
+            return os.path.basename(file_path) if file_path else "unknown"
     
     def _categorize_error(self, error: Exception) -> ErrorCategory:
         """Categorize error based on type and characteristics."""
@@ -429,6 +603,8 @@ class UnifiedErrorHandler:
     
     def _handle_netra_exception(self, error: NetraException, context: ErrorContext) -> ErrorResponse:
         """Handle custom Netra exceptions."""
+        debug_info = self._extract_debug_info(error)
+        
         return ErrorResponse(
             error_code=error.error_details.code.value if hasattr(error.error_details.code, 'value') else str(error.error_details.code),
             message=error.error_details.message,
@@ -436,7 +612,11 @@ class UnifiedErrorHandler:
             details=error.error_details.details,
             trace_id=context.trace_id,
             request_id=context.request_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            line_number=debug_info.get('line_number'),
+            source_file=debug_info.get('source_file'),
+            stack_trace=debug_info.get('stack_trace'),
+            debug_info=debug_info
         )
     
     def _handle_validation_error(self, error: ValidationError, context: ErrorContext) -> ErrorResponse:
@@ -451,6 +631,8 @@ class UnifiedErrorHandler:
                     "type": err.get("type", "value_error")
                 })
         
+        debug_info = self._extract_debug_info(error)
+        
         return ErrorResponse(
             error_code=ErrorCode.VALIDATION_ERROR.value,
             message="Validation failed",
@@ -458,7 +640,11 @@ class UnifiedErrorHandler:
             details={"validation_errors": validation_errors},
             trace_id=context.trace_id,
             request_id=context.request_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            line_number=debug_info.get('line_number'),
+            source_file=debug_info.get('source_file'),
+            stack_trace=debug_info.get('stack_trace'),
+            debug_info=debug_info
         )
     
     def _handle_database_error(self, error: SQLAlchemyError, context: ErrorContext) -> ErrorResponse:
@@ -472,6 +658,8 @@ class UnifiedErrorHandler:
             message = "Database operation failed"
             user_message = "A database error occurred. Please try again"
         
+        debug_info = self._extract_debug_info(error)
+        
         return ErrorResponse(
             error_code=error_code.value,
             message=message,
@@ -479,12 +667,17 @@ class UnifiedErrorHandler:
             details={"error_type": type(error).__name__, "error": str(error)},
             trace_id=context.trace_id,
             request_id=context.request_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            line_number=debug_info.get('line_number'),
+            source_file=debug_info.get('source_file'),
+            stack_trace=debug_info.get('stack_trace'),
+            debug_info=debug_info
         )
     
     def _handle_http_exception(self, error: HTTPException, context: ErrorContext) -> ErrorResponse:
         """Handle HTTP exceptions."""
         error_code = self._map_http_status_to_error_code(error.status_code)
+        debug_info = self._extract_debug_info(error)
         
         return ErrorResponse(
             error_code=error_code.value,
@@ -493,11 +686,17 @@ class UnifiedErrorHandler:
             details={"status_code": error.status_code},
             trace_id=context.trace_id,
             request_id=context.request_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            line_number=debug_info.get('line_number'),
+            source_file=debug_info.get('source_file'),
+            stack_trace=debug_info.get('stack_trace'),
+            debug_info=debug_info
         )
     
     def _handle_generic_error(self, error: Exception, context: ErrorContext) -> ErrorResponse:
         """Handle generic/unknown errors."""
+        debug_info = self._extract_debug_info(error)
+        
         return ErrorResponse(
             error_code=ErrorCode.INTERNAL_ERROR.value,
             message="An internal server error occurred",
@@ -509,7 +708,11 @@ class UnifiedErrorHandler:
             },
             trace_id=context.trace_id,
             request_id=context.request_id,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            line_number=debug_info.get('line_number'),
+            source_file=debug_info.get('source_file'),
+            stack_trace=debug_info.get('stack_trace'),
+            debug_info=debug_info
         )
     
     def _map_http_status_to_error_code(self, status_code: int) -> ErrorCode:
