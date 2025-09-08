@@ -50,12 +50,14 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             "health_check_timeout": 5.0,       # Fast test health checks
         },
         "staging": {
-            # CRITICAL: Staging uses Cloud SQL which requires more time
-            "initialization_timeout": 60.0,    # Cloud SQL socket establishment
-            "table_setup_timeout": 30.0,       # Cloud SQL table operations
-            "connection_timeout": 45.0,        # Unix socket + SSL negotiation
-            "pool_timeout": 50.0,              # Connection pool with Cloud SQL
-            "health_check_timeout": 20.0,      # Cloud SQL health checks
+            # CRITICAL FIX: Ultra-fast timeouts to prevent 179s WebSocket blocking
+            # Previous config: 60s init + 30s table = 90s blocking WebSocket connections
+            # New config: Max 15s total to restore <5s WebSocket performance
+            "initialization_timeout": 8.0,     # Fast-fail for Cloud SQL
+            "table_setup_timeout": 5.0,        # Minimal table verification
+            "connection_timeout": 3.0,         # Quick connection check
+            "pool_timeout": 5.0,               # Fast pool operations
+            "health_check_timeout": 3.0,       # Quick health validation
         },
         "production": {
             # CRITICAL: Production needs maximum reliability

@@ -46,9 +46,15 @@ def get_engine():
     global _engine
     if _engine is None:
         database_url = get_database_url()
+        # WEBSOCKET OPTIMIZATION: Use proper connection pooling for better performance
+        from sqlalchemy.pool import QueuePool
         _engine = create_async_engine(
             database_url,
-            poolclass=NullPool,  # Use NullPool for now to avoid connection issues
+            poolclass=QueuePool,  # CRITICAL FIX: Use QueuePool instead of NullPool for connection reuse
+            pool_size=5,          # Small pool size for efficient connection reuse
+            max_overflow=10,      # Allow burst connections
+            pool_timeout=5,       # Fast timeout to prevent WebSocket blocking
+            pool_recycle=300,     # Recycle connections every 5 minutes
             echo=False,
             future=True
         )

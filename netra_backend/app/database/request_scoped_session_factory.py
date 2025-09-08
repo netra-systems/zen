@@ -44,6 +44,9 @@ from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.metrics.session_metrics import DatabaseSessionMetrics, SessionState, create_database_session_metrics
 
+# Backward compatibility alias for tests
+SessionMetrics = DatabaseSessionMetrics
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -102,7 +105,7 @@ class RequestScopedSessionFactory:
         self._lock = asyncio.Lock()
         self._cleanup_task: Optional[asyncio.Task] = None
         self._leak_detection_enabled = True
-        self._max_session_lifetime_ms = 300000  # 5 minutes
+        self._max_session_lifetime_ms = 30000   # WEBSOCKET OPTIMIZATION: Reduced from 5min to 30s for faster turnover
         self._leak_detection_interval = 60  # 1 minute
         
         # Start background cleanup task
