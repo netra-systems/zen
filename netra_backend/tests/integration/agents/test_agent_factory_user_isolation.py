@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
     get_execution_engine_factory,
     ExecutionEngineFactory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
@@ -95,7 +95,15 @@ class TestAgentFactoryUserIsolation(SSotAsyncTestCase):
     @pytest.fixture
     def websocket_utility(self):
         """WebSocket test utility for real WebSocket testing."""
-        return WebSocketTestUtility()
+        # Force mock mode for integration tests without Docker
+        import os
+        os.environ['WEBSOCKET_MOCK_MODE'] = 'true'
+        os.environ['DOCKER_AVAILABLE'] = 'false'
+        
+        utility = WebSocketTestUtility()
+        # Explicitly set mock mode
+        utility._mock_mode = True
+        return utility
     
     @pytest.fixture
     async def llm_manager(self):

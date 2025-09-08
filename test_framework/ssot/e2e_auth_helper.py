@@ -51,7 +51,7 @@ class E2EAuthConfig:
             websocket_url=staging_config.urls.websocket_url,
             test_user_email=staging_config.test_user_email,
             test_user_password="staging_test_password_123",
-            jwt_secret="staging-jwt-secret-key",  # Will be overridden from env
+            jwt_secret="7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A",  # Staging JWT secret - matches auth service
             timeout=staging_config.timeout
         )
     
@@ -417,11 +417,11 @@ class E2EAuthHelper:
         Returns:
             Staging-compatible JWT token
         """
-        # Use staging JWT secret if available
+        # Use staging JWT secret if available - CRITICAL FIX: Use actual staging secret
         staging_jwt_secret = (
             self.env.get("JWT_SECRET_STAGING") or 
             self.env.get("JWT_SECRET_KEY") or 
-            self.config.jwt_secret
+            "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"  # Actual staging secret
         )
         
         # Create staging-specific user ID

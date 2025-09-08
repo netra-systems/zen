@@ -73,6 +73,13 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 class TestAgentRegistryInitialization(SSotAsyncTestCase):
     """Test AgentRegistry initialization and basic configuration."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     async def test_init_creates_registry_with_required_components(self):
         """Test that AgentRegistry initializes with all required components.
         
@@ -168,6 +175,13 @@ class TestAgentRegistryInitialization(SSotAsyncTestCase):
 
 class TestUserAgentSessionManagement(SSotAsyncTestCase):
     """Test UserAgentSession lifecycle management and isolation features."""
+    
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
     
     async def test_user_agent_session_initialization(self):
         """Test that UserAgentSession initializes correctly.
@@ -347,6 +361,13 @@ class TestUserAgentSessionManagement(SSotAsyncTestCase):
 class TestUserAgentSessionBehavior(SSotAsyncTestCase):
     """Test UserAgentSession behavior and lifecycle management."""
     
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+    
     async def test_register_and_get_agent(self):
         """Test registering and retrieving agents from user session.
         
@@ -476,7 +497,14 @@ class TestUserAgentSessionBehavior(SSotAsyncTestCase):
 
 class TestWebSocketManagerIntegration(SSotAsyncTestCase):
     """Test WebSocket manager integration and propagation."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_set_websocket_manager_stores_manager(self):
         """Test that set_websocket_manager properly stores the manager.
         
@@ -562,7 +590,14 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
 
 class TestAgentCreationAndManagement(SSotAsyncTestCase):
     """Test agent creation, registration, and management."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_create_agent_for_user_validates_parameters(self):
         """Test that create_agent_for_user validates required parameters.
         
@@ -725,6 +760,13 @@ class TestAgentCreationAndManagement(SSotAsyncTestCase):
 
 class TestToolDispatcherIntegration(SSotAsyncTestCase):
     """Test tool dispatcher creation and enhancement."""
+    
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
     
     @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
     async def test_create_tool_dispatcher_for_user_creates_isolated_dispatcher(self, mock_unified_dispatcher):
@@ -987,7 +1029,14 @@ class TestAgentFactoryRegistration(SSotAsyncTestCase):
 
 class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
     """Test registry health monitoring and diagnostic methods."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_get_registry_health_returns_complete_status(self):
         """Test that get_registry_health returns comprehensive health information.
         
@@ -1116,7 +1165,14 @@ class TestRegistryHealthAndDiagnostics(SSotAsyncTestCase):
 
 class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
     """Test concurrent access and thread safety."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_concurrent_user_session_creation(self):
         """Test that concurrent user session creation is thread-safe.
         
@@ -1197,7 +1253,14 @@ class TestConcurrencyAndThreadSafety(SSotAsyncTestCase):
 
 class TestMemoryLeakPrevention(SSotAsyncTestCase):
     """Test memory leak prevention features."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_monitor_all_users_detects_memory_issues(self):
         """Test that monitor_all_users detects potential memory issues.
         
@@ -1434,7 +1497,14 @@ class TestModuleExports(SSotAsyncTestCase):
 
 class TestEdgeCasesAndErrorHandling(SSotAsyncTestCase):
     """Test edge cases and error handling scenarios."""
-    
+        
+    def setup_method(self, method=None):
+        """Setup method to initialize test infrastructure."""
+        # Initialize metrics if not present (SSotAsyncTestCase setup may not be called properly)
+        if not hasattr(self, '_metrics'):
+            from test_framework.ssot.base_test_case import SsotTestMetrics
+            self._metrics = SsotTestMetrics()
+
     async def test_user_session_with_websocket_manager_none(self):
         """Test user session behavior when WebSocket manager is None.
         

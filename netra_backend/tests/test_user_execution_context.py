@@ -9,7 +9,7 @@ to prevent data leakage and ensure proper request isolation.
 """
 
 import pytest
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
 

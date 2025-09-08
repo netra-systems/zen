@@ -30,14 +30,12 @@ class TestSupplyResearcherAgentCore:
     """Test suite for SupplyResearcherAgent core functionality"""
 
     @pytest.fixture
-    def real_db():
-        """Use real service instance."""
-        # TODO: Initialize real service
+    def real_db(self):
         """Create mock database session"""
         # Mock: Generic component isolation for controlled unit testing
         db = DatabaseTestManager().get_session()
         # Mock: Generic component isolation for controlled unit testing
-        db.query = query_instance  # Initialize appropriate service
+        db.query = Mock()  # Initialize appropriate service
         # Mock: Generic component isolation for controlled unit testing
         db.add = AsyncMock()  # TODO: Use real service instance
         # Mock: Generic component isolation for controlled unit testing

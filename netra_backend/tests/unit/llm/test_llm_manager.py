@@ -43,7 +43,7 @@ from netra_backend.app.llm.llm_manager import (
     create_llm_manager, 
     get_llm_manager
 )
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.llm_types import (
     LLMResponse,
     LLMProvider,

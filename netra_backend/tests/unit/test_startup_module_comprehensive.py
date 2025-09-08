@@ -161,6 +161,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_engine')
     @patch('netra_backend.app.startup_module._import_all_models')
+    @pytest.mark.asyncio
     async def test_ensure_database_tables_exist_creates_missing_tables(self, mock_import, mock_get_engine):
         """Test database table creation when tables are missing."""
         # Setup mocks
@@ -198,6 +199,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
             mock_engine.dispose.assert_called_once()
 
     @patch('netra_backend.app.startup_module.get_engine')
+    @pytest.mark.asyncio
     async def test_ensure_database_tables_exist_handles_engine_failure(self, mock_get_engine):
         """Test graceful handling when database engine is not available."""
         # Mock engine failure
@@ -210,6 +212,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.mock_logger.warning.assert_called()
 
     @patch('netra_backend.app.startup_module.get_engine')
+    @pytest.mark.asyncio
     async def test_ensure_database_tables_exist_handles_connection_error(self, mock_get_engine):
         """Test handling of database connection errors."""
         mock_engine = AsyncMock()
@@ -223,6 +226,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.mock_logger.warning.assert_called()
 
     @patch('netra_backend.app.startup_module.get_engine')
+    @pytest.mark.asyncio
     async def test_ensure_database_tables_exist_handles_duplicate_table_errors(self, mock_get_engine):
         """Test handling of duplicate table creation errors."""
         mock_engine = AsyncMock()
@@ -258,6 +262,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.performance_manager')
     @patch('netra_backend.app.startup_module.index_manager')
+    @pytest.mark.asyncio
     async def test_initialize_performance_optimizations_success(self, mock_index_manager, mock_performance_manager):
         """Test successful performance optimization initialization."""
         mock_performance_manager.initialize = AsyncMock()
@@ -272,6 +277,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.assertEqual(self.mock_app.state.index_manager, mock_index_manager)
 
     @patch('netra_backend.app.startup_module.performance_manager')
+    @pytest.mark.asyncio
     async def test_initialize_performance_optimizations_handles_failure(self, mock_performance_manager):
         """Test graceful handling of performance optimization failures."""
         mock_performance_manager.initialize.side_effect = Exception("Performance init failed")
@@ -284,6 +290,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_env')
     @patch('netra_backend.app.startup_module.index_manager')
+    @pytest.mark.asyncio
     async def test_schedule_background_optimizations_disabled_for_testing(self, mock_index_manager, mock_get_env):
         """Test that background optimizations are disabled in testing environment."""
         # Mock environment to disable background tasks
@@ -299,6 +306,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.mock_app.state.background_task_manager.create_task.assert_not_called()
 
     @patch('netra_backend.app.startup_module.get_env')
+    @pytest.mark.asyncio
     async def test_schedule_background_optimizations_creates_task(self, mock_get_env):
         """Test background optimization task creation."""
         # Mock environment to enable background tasks
@@ -317,6 +325,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_task_manager.create_task.assert_called_once()
 
     @patch('netra_backend.app.startup_module.index_manager')
+    @pytest.mark.asyncio
     async def test_run_index_optimization_background_success(self, mock_index_manager):
         """Test successful background index optimization."""
         mock_index_manager.optimize_all_databases = AsyncMock(return_value={'optimized': 5})
@@ -329,6 +338,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_index_manager.optimize_all_databases.assert_called()
 
     @patch('netra_backend.app.startup_module.index_manager')
+    @pytest.mark.asyncio
     async def test_run_index_optimization_background_timeout_with_retry(self, mock_index_manager):
         """Test background optimization timeout handling with retry logic."""
         # First call times out, second call succeeds
@@ -548,6 +558,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module.get_env')
     @patch('netra_backend.app.startup_module.sys')
+    @pytest.mark.asyncio
     async def test_initialize_clickhouse_skipped_in_test_mode(self, mock_sys, mock_get_env, mock_get_config):
         """Test ClickHouse initialization is skipped in test mode."""
         mock_sys.modules = {'pytest': Mock()}
@@ -570,6 +581,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module.get_env')
     @patch('netra_backend.app.startup_module.sys')
+    @pytest.mark.asyncio
     async def test_initialize_clickhouse_required_in_production(self, mock_sys, mock_get_env, mock_get_config):
         """Test ClickHouse is required in production environment."""
         mock_sys.modules = {}
@@ -599,6 +611,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module.get_env')
     @patch('netra_backend.app.startup_module.sys')
+    @pytest.mark.asyncio
     async def test_initialize_clickhouse_handles_connection_failure(self, mock_sys, mock_get_env, mock_get_config):
         """Test ClickHouse connection failure handling."""
         mock_sys.modules = {}
@@ -626,6 +639,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module.ensure_clickhouse_tables')
     @patch('netra_backend.app.startup_module.initialize_clickhouse_tables')
+    @pytest.mark.asyncio
     async def test_setup_clickhouse_tables_uses_new_initializer(self, mock_init_tables, mock_ensure_tables, mock_get_config, mock_get_env):
         """Test ClickHouse table setup uses new table initializer."""
         mock_env = Mock()
@@ -835,6 +849,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_websocket_manager_factory')
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_initialize_websocket_components_success(self, mock_get_config, mock_factory):
         """Test successful WebSocket components initialization."""
         mock_config = Mock()
@@ -850,6 +865,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_websocket_manager_factory')
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_initialize_websocket_components_handles_failure(self, mock_get_config, mock_factory):
         """Test WebSocket components initialization failure handling."""
         mock_config = Mock()
@@ -866,6 +882,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.run_startup_checks')
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_startup_health_checks_success(self, mock_get_config, mock_run_checks):
         """Test successful startup health checks."""
         mock_config = Mock()
@@ -883,6 +900,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.run_startup_checks')
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_startup_health_checks_timeout_handling(self, mock_get_config, mock_run_checks):
         """Test startup health checks timeout handling."""
         mock_config = Mock()
@@ -901,6 +919,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.mock_logger.error.assert_called()
 
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_startup_health_checks_skipped_in_fast_mode(self, mock_get_config):
         """Test health checks are skipped in fast startup mode."""
         mock_config = Mock()
@@ -917,6 +936,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     @patch('netra_backend.app.startup_module._initialize_performance_optimizations')
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module.sys')
+    @pytest.mark.asyncio
     async def test_start_monitoring_not_in_pytest(self, mock_sys, mock_get_config, mock_perf_init, mock_monitoring_task):
         """Test monitoring starts when not in pytest."""
         mock_sys.modules = {}  # Not in pytest
@@ -938,6 +958,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     # =============================================================================
 
     @patch('netra_backend.app.startup_module.run_deterministic_startup')
+    @pytest.mark.asyncio
     async def test_run_complete_startup_uses_deterministic_mode(self, mock_run_deterministic):
         """Test complete startup uses deterministic startup mode."""
         mock_run_deterministic.return_value = (time.time(), self.mock_logger)
@@ -965,6 +986,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.chat_event_monitor')
     @patch('netra_backend.app.startup_module.backend_health_checker')
+    @pytest.mark.asyncio
     async def test_initialize_monitoring_integration_success(self, mock_health_checker, mock_chat_monitor):
         """Test successful monitoring integration initialization."""
         mock_chat_monitor.start_monitoring = AsyncMock()
@@ -978,6 +1000,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_chat_monitor.start_monitoring.assert_called_once()
 
     @patch('netra_backend.app.startup_module.chat_event_monitor')
+    @pytest.mark.asyncio
     async def test_initialize_monitoring_integration_handles_failure(self, mock_chat_monitor):
         """Test monitoring integration handles initialization failures."""
         mock_chat_monitor.start_monitoring.side_effect = Exception("Monitoring failed")
@@ -993,6 +1016,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     # =============================================================================
 
     @patch('netra_backend.app.startup_module.initialize_postgres')
+    @pytest.mark.asyncio
     async def test_async_initialize_postgres_handles_exception(self, mock_initialize):
         """Test async PostgreSQL initialization handles exceptions gracefully."""
         mock_initialize.side_effect = Exception("Database connection failed")
@@ -1005,6 +1029,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_config')
     @patch('netra_backend.app.startup_module._async_initialize_postgres')
+    @pytest.mark.asyncio
     async def test_setup_database_connections_timeout_graceful_mode(self, mock_async_init, mock_get_config):
         """Test database connection setup handles timeout in graceful mode."""
         mock_config = Mock()
@@ -1027,6 +1052,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         self.assertTrue(self.mock_app.state.database_mock_mode)
 
     @patch('netra_backend.app.startup_module.redis_manager')
+    @pytest.mark.asyncio
     async def test_emergency_cleanup_handles_redis_shutdown(self, mock_redis_manager):
         """Test emergency cleanup properly shuts down Redis connections."""
         mock_redis_manager.shutdown = AsyncMock()
@@ -1037,6 +1063,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_redis_manager.shutdown.assert_called_once()
 
     @patch('netra_backend.app.startup_module._emergency_cleanup')
+    @pytest.mark.asyncio
     async def test_handle_startup_failure_performs_cleanup(self, mock_cleanup):
         """Test startup failure handling performs proper cleanup."""
         test_error = Exception("Startup failed")
@@ -1067,6 +1094,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
                        f"Basic startup operations took too long: {elapsed_time:.3f}s")
 
     @patch('netra_backend.app.startup_module.asyncio.sleep', AsyncMock())
+    @pytest.mark.asyncio
     async def test_background_optimization_timing_performance(self):
         """Test background optimization timing meets performance requirements."""
         start_time = time.time()
@@ -1104,6 +1132,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
 
     @patch('netra_backend.app.startup_module.get_env')
     @patch('netra_backend.app.startup_module.get_config')
+    @pytest.mark.asyncio
     async def test_clickhouse_initialization_by_environment(self, mock_get_config, mock_get_env):
         """Test ClickHouse initialization behavior varies by environment."""
         test_environments = [
@@ -1144,6 +1173,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     # =============================================================================
 
     @patch('netra_backend.app.startup_module.central_logger')
+    @pytest.mark.asyncio
     async def test_emergency_cleanup_handles_logger_shutdown(self, mock_central_logger):
         """Test emergency cleanup properly shuts down central logger."""
         mock_central_logger.shutdown = AsyncMock()
@@ -1154,6 +1184,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         mock_central_logger.shutdown.assert_called_once()
 
     @patch('netra_backend.app.startup_module.cleanup_multiprocessing')
+    @pytest.mark.asyncio
     async def test_emergency_cleanup_handles_multiprocessing_cleanup(self, mock_cleanup_mp):
         """Test emergency cleanup handles multiprocessing cleanup."""
         await startup_module._emergency_cleanup(self.mock_logger)
@@ -1161,6 +1192,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
         # Verify multiprocessing cleanup was called
         mock_cleanup_mp.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_cleanup_connections_handles_redis_errors(self):
         """Test connection cleanup handles Redis connection errors gracefully."""
         with patch('netra_backend.app.startup_module.redis_manager') as mock_redis:
@@ -1177,6 +1209,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     # =============================================================================
 
     @patch('netra_backend.app.startup_module.get_engine')
+    @pytest.mark.asyncio
     async def test_concurrent_database_table_creation(self, mock_get_engine):
         """Test concurrent database table creation handles race conditions."""
         mock_engine = AsyncMock()
@@ -1207,6 +1240,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
             mock_engine.dispose.assert_called_once()
 
     @patch('netra_backend.app.startup_module.performance_manager')
+    @pytest.mark.asyncio
     async def test_concurrent_performance_optimization_initialization(self, mock_performance_manager):
         """Test concurrent performance optimization initialization is handled safely."""
         # Simulate multiple concurrent calls
@@ -1289,6 +1323,7 @@ class TestStartupModuleComprehensive(BaseTestCase):
     # FINAL INTEGRATION AND EDGE CASE TESTS
     # =============================================================================
 
+    @pytest.mark.asyncio
     async def test_startup_module_handles_all_documented_exceptions(self):
         """Test startup module handles all documented exception types properly."""
         exception_types = [

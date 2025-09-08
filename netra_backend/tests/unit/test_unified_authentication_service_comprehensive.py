@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 
+# SSOT Import Management - Absolute imports only per CLAUDE.md
 from netra_backend.app.services.unified_authentication_service import (
     UnifiedAuthenticationService,
     AuthResult,
@@ -57,28 +58,43 @@ class TestUnifiedAuthenticationServiceComprehensive(SSotAsyncTestCase):
     """
 
     def setup_method(self, method=None):
-        """Setup test environment with proper isolation."""
+        """Setup test environment with proper isolation per CLAUDE.md."""
         super().setup_method(method)
+        
+        # Set up isolated test environment using SSOT patterns
+        self.set_env_var("ENVIRONMENT", "test")
+        self.set_env_var("AUTH_SERVICE_URL", "http://localhost:8081")
+        self.set_env_var("SERVICE_ID", "netra-backend")
+        self.set_env_var("SERVICE_SECRET", "test-service-secret-32-characters-long")
+        self.set_env_var("JWT_SECRET_KEY", "test-jwt-secret-32-chars-long")
         
         # Initialize authentication service for testing
         self.auth_service = UnifiedAuthenticationService()
         
-        # Test tokens for validation
-        self.valid_jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdF91c2VyXzEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInBlcm1pc3Npb25zIjpbInJlYWQiLCJ3cml0ZSJdLCJpYXQiOjE2OTgzNDE0MDAsImV4cCI6MTY5ODM0NTAwMH0.test_signature"
+        # Test tokens for validation - using more realistic test data
+        self.valid_jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzNDUiLCJlbWFpbCI6InRlc3RAZXHHWY1cGxlLmNvbSIsInBlcm1pc3Npb25zIjpbInJlYWQiLCJ3cml0ZSJdLCJpYXQiOjE2OTgzNDE0MDAsImV4cCI6MTk5ODM0NTAwMH0.test_signature_placeholder"
         self.invalid_jwt_token = "invalid.token.format"
         self.short_token = "short"
-        self.service_token = "service_token_abc123def456"
+        self.service_token = "service_token_abc123def456ghi789jkl012"
         
         # Mock WebSocket for testing
         self.mock_websocket = self._create_mock_websocket()
         
-        # Track metrics
+        # Track business metrics per CLAUDE.md
         self.record_metric("test_start_time", time.time())
+        self.record_metric("auth_service_initializations", 1)
 
     def teardown_method(self, method=None):
-        """Cleanup after test."""
-        # Record test completion metrics
+        """Cleanup after test with enhanced metrics per CLAUDE.md."""
+        # Record test completion metrics with business value tracking
         self.record_metric("test_end_time", time.time())
+        test_duration = self.get_metric("test_end_time") - self.get_metric("test_start_time")
+        self.record_metric("test_duration_seconds", test_duration)
+        
+        # Validate test provided business value (non-zero duration indicates real execution)
+        if test_duration < 0.001:  # Less than 1ms indicates mock-only test
+            self.record_metric("business_value_warning", "Test completed too quickly - may lack real validation")
+        
         super().teardown_method(method)
 
     def _create_mock_websocket(self) -> Mock:
@@ -223,19 +239,20 @@ class TestUnifiedAuthenticationServiceComprehensive(SSotAsyncTestCase):
                 assert result.user_id is None
                 assert result.email is None
 
-                # Verify comprehensive debugging information
-                assert "failure_debug" in result.metadata
+                # Verify comprehensive debugging information for business troubleshooting
+                assert "failure_debug" in result.metadata, "Missing debugging metadata for business support"
                 failure_debug = result.metadata["failure_debug"]
-                assert "validation_result_exists" in failure_debug
-                assert "token_characteristics" in failure_debug
-                assert "timestamp" in failure_debug
+                assert "validation_result_exists" in failure_debug, "Missing validation result debug info"
+                assert "token_characteristics" in failure_debug, "Missing token analysis for security audit"
+                assert "timestamp" in failure_debug, "Missing timestamp for incident correlation"
 
                 if validation_response:
                     assert failure_debug["validation_result_exists"] is True
                     if "error" in validation_response:
-                        assert validation_response["error"] in result.error
+                        assert validation_response["error"] in result.error, f"Error message not preserved: {validation_response['error']}"
                 else:
                     assert failure_debug["validation_result_exists"] is False
+                    assert "no response" in result.error.lower() or "empty" in result.error.lower(), "Error should indicate no/empty response"
 
         # Verify failure tracking
         stats = self.auth_service.get_authentication_stats()

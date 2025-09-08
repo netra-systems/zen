@@ -19,7 +19,7 @@ except ImportError as e:
     print(f"❌ Import error: {e}")
 
 try:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     print("✅ UserExecutionContext import working")
 except ImportError as e:
     print(f"❌ UserExecutionContext import failed: {e}")

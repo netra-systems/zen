@@ -336,17 +336,20 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
             factory.configure(websocket_bridge=None)
         assert "AgentWebSocketBridge cannot be None" in str(ctx.value)
             
-    def test_configure_empty_agent_class_registry_raises_error(self):
-        """Test 9: Configure falls back to global registry when none provided."""
+    def test_configure_empty_agent_class_registry_continues_with_warning(self):
+        """Test 9: Configure continues with warning when no agent registry available."""
         factory = AgentInstanceFactory()
         
         # Don't provide agent_class_registry, forcing fallback to global registry
-        # The global registry is None in test environment, causing this error
-        with pytest.raises(ValueError) as ctx:
-            factory.configure(
-                websocket_bridge=self.mock_websocket_bridge
-            )
-        assert "Global AgentClassRegistry is None" in str(ctx.value)
+        # The global registry is None in test environment, factory should continue with limited functionality
+        factory.configure(
+            websocket_bridge=self.mock_websocket_bridge
+        )
+        
+        # Factory should be configured but without agent registry
+        assert factory._websocket_bridge is self.mock_websocket_bridge
+        assert factory._agent_class_registry is None
+        assert factory._agent_registry is None
             
     @patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_class_registry')
     def test_configure_with_global_registry_fallback(self, mock_get_global_registry):

@@ -24,6 +24,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
+# SSOT Import Management - Absolute imports only per CLAUDE.md
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
@@ -53,49 +54,62 @@ logger = logging.getLogger(__name__)
 
 
 class MockWebSocket:
-    """Mock WebSocket for testing WebSocket authentication flows."""
+    """SSOT Mock WebSocket for testing WebSocket authentication flows.
+    
+    BUSINESS VALUE: Enables testing of $120K+ MRR chat functionality
+    without requiring full WebSocket infrastructure in integration tests.
+    """
     
     def __init__(self, headers: Dict[str, str] = None, query_params: Dict[str, str] = None):
         self.headers = headers or {}
         self.query_params = query_params or {}
-        self.client = MockClient()
+        self.client = self.MockClient()
         self.client_state = "CONNECTED"
+        
+        # Add realistic WebSocket attributes for better testing
+        self.url = "ws://localhost:8000/ws"
+        self.protocol = "chat"
+        self.extensions = []
     
     class MockClient:
         def __init__(self):
             self.host = "127.0.0.1"
             self.port = 12345
+            self.family = 2  # AF_INET
+            self.type = 1    # SOCK_STREAM
 
 
 class TestUnifiedAuthenticationServiceIntegration(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedAuthenticationService with real services."""
     
     def setup_method(self):
-        """Set up test environment with proper configuration for real services."""
+        """Set up test environment with proper configuration for real services per CLAUDE.md."""
         super().setup_method()
         
-        # Set up isolated test environment
-        env = get_env()
-        env.enable_isolation()
-        env.set("ENVIRONMENT", "test", "test_setup")
-        env.set("AUTH_SERVICE_ENABLED", "true", "test_setup")
-        env.set("AUTH_SERVICE_URL", "http://localhost:8081", "test_setup")
-        env.set("SERVICE_ID", "netra-backend", "test_setup")
-        env.set("SERVICE_SECRET", "test-service-secret-32-characters-long-for-testing", "test_setup")
-        env.set("JWT_SECRET_KEY", "test-jwt-secret-key-32-characters-long-for-testing-only", "test_setup")
-        env.set("DATABASE_URL", "postgresql://netra:netra123@localhost:5434/netra_test", "test_setup")
-        env.set("REDIS_URL", "redis://localhost:6381/0", "test_setup")
+        # Set up isolated test environment using SSOT patterns
+        self.set_env_var("ENVIRONMENT", "test")
+        self.set_env_var("AUTH_SERVICE_ENABLED", "true")
+        self.set_env_var("AUTH_SERVICE_URL", "http://localhost:8081")
+        self.set_env_var("SERVICE_ID", "netra-backend")
+        self.set_env_var("SERVICE_SECRET", "test-service-secret-32-characters-long-for-testing")
+        self.set_env_var("JWT_SECRET_KEY", "test-jwt-secret-key-32-characters-long-for-testing-only")
+        self.set_env_var("DATABASE_URL", "postgresql://netra:netra123@localhost:5434/netra_test")
+        self.set_env_var("REDIS_URL", "redis://localhost:6381/0")
         
         # Initialize the SSOT service
         self.unified_auth = UnifiedAuthenticationService()
         
-        # Test credentials
+        # Test credentials with enhanced validation
         self.valid_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzNDUiLCJlbWFpbCI6InRlc3RAZXHHWY1cGxlLmNvbSIsImlhdCI6MTYzMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.test_signature_placeholder"
         self.invalid_jwt = "invalid.jwt.token"
         self.test_user_id = "test-user-12345"
         self.test_email = "test@example.com"
         
-        logger.info("UnifiedAuthenticationService integration test setup complete")
+        # Record business metrics for integration test tracking
+        self.record_metric("integration_test_setup_time", time.time())
+        self.record_metric("real_services_required", True)
+        
+        logger.info("UnifiedAuthenticationService integration test setup complete with real services")
 
     @pytest.mark.integration
     @pytest.mark.real_services

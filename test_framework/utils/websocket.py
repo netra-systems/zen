@@ -20,12 +20,15 @@ def create_test_message(
     metadata: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Create a test WebSocket message."""
+    # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
+    from shared.id_generation import UnifiedIdGenerator
+    
     return {
-        "id": str(uuid.uuid4()),
+        "id": UnifiedIdGenerator.generate_message_id(message_type, user_id or "test_user"),
         "type": message_type,
         "content": content,
-        "thread_id": thread_id or str(uuid.uuid4()),
-        "user_id": user_id or str(uuid.uuid4()),
+        "thread_id": thread_id or UnifiedIdGenerator.generate_base_id("thread"),
+        "user_id": user_id or UnifiedIdGenerator.generate_base_id("user"),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "metadata": metadata or {}
     }
@@ -33,8 +36,11 @@ def create_test_message(
 
 def create_websocket_mock(user_id: Optional[str] = None) -> MagicMock:
     """Create a mock WebSocket connection."""
+    # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
+    from shared.id_generation import UnifiedIdGenerator
+    
     mock = MagicMock()
-    mock.user_id = user_id or str(uuid.uuid4())
+    mock.user_id = user_id or UnifiedIdGenerator.generate_base_id("user")
     mock.connected = True
     mock.send_json = AsyncMock()
     mock.receive_json = AsyncMock()
