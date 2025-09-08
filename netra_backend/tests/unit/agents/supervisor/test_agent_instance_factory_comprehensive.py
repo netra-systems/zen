@@ -461,6 +461,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
         # Configure mock registry to return length
         self.mock_agent_class_registry.__len__ = Mock(return_value=5)
         self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
+        self.mock_agent_class_registry.list_agent_names.return_value = ["test_agent", "other_agent"]
         
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
@@ -496,13 +497,15 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_with_factory_method(self):
         """Test 17: Create agent using factory method when available."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = MockAgentWithFactory
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge
         )
-        
-        # Mock registry to return agent with factory method
-        self.mock_agent_class_registry.get_agent_class.return_value = MockAgentWithFactory
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -521,12 +524,15 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_no_param_agent(self):
         """Test 18: Create agent that takes no parameters."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = MockNoParamAgent
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge
         )
-        
-        self.mock_agent_class_registry.get_agent_class.return_value = MockNoParamAgent
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -568,14 +574,16 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_unknown_agent_raises_error(self):
         """Test 20: Creating unknown agent raises detailed error."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = None
+        self.mock_agent_class_registry.list_agent_names.return_value = ["agent1", "agent2", "agent3"]
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge
         )
-        
-        # Mock registry to return None (agent not found)
-        self.mock_agent_class_registry.get_agent_class.return_value = None
-        self.mock_agent_class_registry.list_agent_names.return_value = ["agent1", "agent2", "agent3"]
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -930,13 +938,16 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_concurrent_agent_creation(self):
         """Test 34: Concurrent agent creation works without conflicts."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge,
             llm_manager=self.mock_llm_manager
         )
-        
-        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
         
         async def create_agent_for_user(user_num):
             context = await factory.create_user_execution_context(
@@ -1101,10 +1112,9 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_create_agent_instance_instantiation_failure(self):
         """Test 39: Agent instantiation failure is handled correctly."""
         factory = AgentInstanceFactory()
-        factory.configure(
-            agent_class_registry=self.mock_agent_class_registry,
-            websocket_bridge=self.mock_websocket_bridge
-        )
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
         
         # Mock class that raises error on instantiation
         class FaultyAgent:
@@ -1112,6 +1122,11 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
                 raise RuntimeError("Instantiation failed")
         
         self.mock_agent_class_registry.get_agent_class.return_value = FaultyAgent
+        
+        factory.configure(
+            agent_class_registry=self.mock_agent_class_registry,
+            websocket_bridge=self.mock_websocket_bridge
+        )
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,
@@ -1164,14 +1179,17 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_end_to_end_agent_creation_with_context(self):
         """Test 41: Complete end-to-end agent creation with real context flow."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge,
             llm_manager=self.mock_llm_manager,
             tool_dispatcher=self.mock_tool_dispatcher
         )
-        
-        self.mock_agent_class_registry.get_agent_class.return_value = MockAgent
         
         # Use context manager for full lifecycle
         async with factory.user_execution_scope(
@@ -1205,14 +1223,16 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
     async def test_synthetic_data_agent_special_handling(self):
         """Test 42: Special error handling for synthetic_data agent registration issues."""
         factory = AgentInstanceFactory()
+        
+        # Configure mock registry to return length
+        self.mock_agent_class_registry.__len__ = Mock(return_value=5)
+        self.mock_agent_class_registry.get_agent_class.return_value = None
+        self.mock_agent_class_registry.list_agent_names.return_value = ["other_agent"]
+        
         factory.configure(
             agent_class_registry=self.mock_agent_class_registry,
             websocket_bridge=self.mock_websocket_bridge
         )
-        
-        # Mock registry to return None for synthetic_data agent
-        self.mock_agent_class_registry.get_agent_class.return_value = None
-        self.mock_agent_class_registry.list_agent_names.return_value = ["other_agent"]
         
         context = await factory.create_user_execution_context(
             user_id=self.test_user_id,

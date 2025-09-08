@@ -361,7 +361,10 @@ class TestStartupModuleComprehensive(BaseTestCase):
         
         # Verify return types
         self.assertIsInstance(start_time, float)
-        self.assertIsInstance(logger, logging.Logger)
+        # FIXED: System uses loguru logger, not standard logging.Logger
+        self.assertTrue(hasattr(logger, 'info'), "Logger should have logging methods")
+        self.assertTrue(hasattr(logger, 'error'), "Logger should have error method")
+        self.assertTrue(hasattr(logger, 'debug'), "Logger should have debug method")
         
         # Verify timing is recent (within last 5 seconds)
         current_time = time.time()
@@ -664,127 +667,153 @@ class TestStartupModuleComprehensive(BaseTestCase):
         # Verify dispatcher was set on app
         self.assertEqual(self.mock_app.state.tool_dispatcher, mock_dispatcher)
 
-    @patch('netra_backend.app.startup_module.ToolRegistry')
-    def test_create_tool_registry_returns_instance(self, mock_registry_class):
+    def test_create_tool_registry_returns_instance(self):
         """Test tool registry creation returns proper instance."""
-        mock_instance = Mock()
-        mock_registry_class.return_value = mock_instance
-        
-        result = startup_module._create_tool_registry(self.mock_app)
-        
-        self.assertEqual(result, mock_instance)
+        # FIXED: Patch the actual import location in startup_module
+        with patch('netra_backend.app.core.registry.universal_registry.ToolRegistry') as mock_registry_class:
+            mock_instance = Mock()
+            mock_registry_class.return_value = mock_instance
+            
+            result = startup_module._create_tool_registry(self.mock_app)
+            
+            self.assertEqual(result, mock_instance)
+            mock_registry_class.assert_called_once()
 
-    @patch('netra_backend.app.startup_module.ToolDispatcher')
-    @patch('netra_backend.app.startup_module.warnings')
-    def test_create_tool_dispatcher_emits_deprecation_warning(self, mock_warnings, mock_dispatcher_class):
+    def test_create_tool_dispatcher_emits_deprecation_warning(self):
         """Test deprecated tool dispatcher creation emits proper warnings."""
-        mock_registry = Mock()
-        mock_registry.get_tools.return_value = []
-        
-        startup_module._create_tool_dispatcher(mock_registry)
-        
-        # Verify deprecation warning was emitted
-        mock_warnings.warn.assert_called_once()
-        warning_message = mock_warnings.warn.call_args[0][0]
-        self.assertIn("DEPRECATED", warning_message.upper())
+        # FIXED: Patch the actual import locations
+        with patch('netra_backend.app.agents.tool_dispatcher.ToolDispatcher') as mock_dispatcher_class, \
+             patch('warnings') as mock_warnings:
+            
+            mock_registry = Mock()
+            mock_registry.get_tools.return_value = []
+            mock_dispatcher_instance = Mock()
+            mock_dispatcher_class.return_value = mock_dispatcher_instance
+            
+            result = startup_module._create_tool_dispatcher(mock_registry)
+            
+            # Verify deprecation warning was emitted
+            mock_warnings.warn.assert_called_once()
+            warning_message = mock_warnings.warn.call_args[0][0]
+            self.assertIn("DEPRECATED", warning_message.upper())
+            
+            # Verify dispatcher was created
+            self.assertEqual(result, mock_dispatcher_instance)
 
-    @patch('netra_backend.app.startup_module._build_supervisor_agent')
-    @patch('netra_backend.app.startup_module._setup_agent_state')
-    @patch('netra_backend.app.startup_module.get_websocket_manager_factory')
-    @patch('netra_backend.app.startup_module.get_env')
-    def test_create_agent_supervisor_success(self, mock_get_env, mock_factory, mock_setup_state, mock_build_supervisor):
+    def test_create_agent_supervisor_success(self):
         """Test successful agent supervisor creation."""
-        mock_env = Mock()
-        mock_env.get.return_value = "development"
-        mock_get_env.return_value = mock_env
-        
-        # Mock supervisor with required attributes
-        mock_supervisor = Mock()
-        mock_supervisor.websocket_bridge = Mock()
-        mock_supervisor.websocket_bridge.emit_agent_event = Mock()
-        mock_build_supervisor.return_value = mock_supervisor
-        
-        # Mock WebSocket factory
-        mock_factory.return_value = Mock()
-        
-        # Set required app state
-        self.mock_app.state.db_session_factory = Mock()
-        self.mock_app.state.llm_manager = Mock()
-        self.mock_app.state.tool_dispatcher = Mock()
-        
-        startup_module._create_agent_supervisor(self.mock_app)
-        
-        # Verify supervisor was built and state was set up
-        mock_build_supervisor.assert_called_once()
-        mock_setup_state.assert_called_once()
+        # FIXED: Use proper patching for all dependencies
+        with patch('netra_backend.app.startup_module._build_supervisor_agent') as mock_build_supervisor, \
+             patch('netra_backend.app.startup_module._setup_agent_state') as mock_setup_state, \
+             patch('netra_backend.app.websocket_core.get_websocket_manager_factory') as mock_factory, \
+             patch('shared.isolated_environment.get_env') as mock_get_env:
+            
+            mock_env = Mock()
+            mock_env.get.return_value = "development"
+            mock_get_env.return_value = mock_env
+            
+            # Mock supervisor with required attributes
+            mock_supervisor = Mock()
+            mock_supervisor.websocket_bridge = Mock()
+            mock_supervisor.websocket_bridge.emit_agent_event = Mock()
+            mock_build_supervisor.return_value = mock_supervisor
+            
+            # Mock WebSocket factory
+            mock_factory.return_value = Mock()
+            
+            # Set required app state
+            self.mock_app.state.db_session_factory = Mock()
+            self.mock_app.state.llm_manager = Mock()
+            self.mock_app.state.tool_dispatcher = Mock()
+            
+            startup_module._create_agent_supervisor(self.mock_app)
+            
+            # Verify supervisor was built and state was set up
+            mock_build_supervisor.assert_called_once()
+            mock_setup_state.assert_called_once()
 
-    @patch('netra_backend.app.startup_module.get_env')
-    def test_create_agent_supervisor_fails_in_production_without_websocket(self, mock_get_env):
+    def test_create_agent_supervisor_fails_in_production_without_websocket(self):
         """Test agent supervisor creation fails in production without WebSocket bridge."""
-        mock_env = Mock()
-        mock_env.get.return_value = "production"
-        mock_get_env.return_value = mock_env
-        
-        # Set required app state
-        self.mock_app.state.db_session_factory = Mock()
-        self.mock_app.state.llm_manager = Mock()
-        self.mock_app.state.tool_dispatcher = Mock()
-        
-        # Mock supervisor without WebSocket bridge
-        with patch('netra_backend.app.startup_module._build_supervisor_agent') as mock_build:
+        # FIXED: Use proper patching
+        with patch('shared.isolated_environment.get_env') as mock_get_env, \
+             patch('netra_backend.app.startup_module._build_supervisor_agent') as mock_build, \
+             patch('netra_backend.app.websocket_core.get_websocket_manager_factory') as mock_factory:
+            
+            mock_env = Mock()
+            mock_env.get.return_value = "production"
+            mock_get_env.return_value = mock_env
+            
+            # Mock WebSocket factory
+            mock_factory.return_value = Mock()
+            
+            # Set required app state
+            self.mock_app.state.db_session_factory = Mock()
+            self.mock_app.state.llm_manager = Mock()
+            self.mock_app.state.tool_dispatcher = Mock()
+            
+            # Mock supervisor without WebSocket bridge
             mock_supervisor = Mock()
             mock_supervisor.websocket_bridge = None
             mock_build.return_value = mock_supervisor
             
             # Should raise in production
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(RuntimeError) as cm:
                 startup_module._create_agent_supervisor(self.mock_app)
+            
+            self.assertIn("WebSocket bridge", str(cm.exception))
 
-    @patch('netra_backend.app.startup_module.SupervisorAgent')
-    @patch('netra_backend.app.startup_module.AgentWebSocketBridge')
-    def test_build_supervisor_agent_creates_proper_instance(self, mock_bridge_class, mock_supervisor_class):
+    def test_build_supervisor_agent_creates_proper_instance(self):
         """Test supervisor agent building creates proper instance."""
-        # Set required app state
-        self.mock_app.state.db_session_factory = Mock()
-        self.mock_app.state.llm_manager = Mock()
-        self.mock_app.state.tool_dispatcher = Mock()
-        
-        mock_bridge = Mock()
-        mock_bridge_class.return_value = mock_bridge
-        
-        mock_supervisor = Mock()
-        mock_supervisor_class.return_value = mock_supervisor
-        
-        result = startup_module._build_supervisor_agent(self.mock_app)
-        
-        # Verify supervisor was created with proper dependencies
-        mock_supervisor_class.assert_called_once_with(
-            self.mock_app.state.llm_manager,
-            mock_bridge
-        )
-        self.assertEqual(result, mock_supervisor)
+        # FIXED: Patch the actual import locations
+        with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent') as mock_supervisor_class, \
+             patch('netra_backend.app.services.agent_websocket_bridge.AgentWebSocketBridge') as mock_bridge_class:
+            
+            # Set required app state
+            self.mock_app.state.db_session_factory = Mock()
+            self.mock_app.state.llm_manager = Mock()
+            self.mock_app.state.tool_dispatcher = Mock()
+            
+            mock_bridge = Mock()
+            mock_bridge_class.return_value = mock_bridge
+            
+            mock_supervisor = Mock()
+            mock_supervisor_class.return_value = mock_supervisor
+            
+            result = startup_module._build_supervisor_agent(self.mock_app)
+            
+            # Verify bridge was created
+            mock_bridge_class.assert_called_once()
+            
+            # Verify supervisor was created with proper dependencies
+            mock_supervisor_class.assert_called_once_with(
+                self.mock_app.state.llm_manager,
+                mock_bridge
+            )
+            self.assertEqual(result, mock_supervisor)
 
-    @patch('netra_backend.app.startup_module.AgentService')
-    @patch('netra_backend.app.startup_module.ThreadService')
-    @patch('netra_backend.app.startup_module.CorpusService')
-    def test_setup_agent_state_configures_services(self, mock_corpus_class, mock_thread_class, mock_agent_class):
+    def test_setup_agent_state_configures_services(self):
         """Test agent state setup configures all required services."""
-        mock_supervisor = Mock()
-        mock_agent_service = Mock()
-        mock_thread_service = Mock()
-        mock_corpus_service = Mock()
-        
-        mock_agent_class.return_value = mock_agent_service
-        mock_thread_class.return_value = mock_thread_service
-        mock_corpus_class.return_value = mock_corpus_service
-        
-        startup_module._setup_agent_state(self.mock_app, mock_supervisor)
-        
-        # Verify all services were set on app state
-        self.assertEqual(self.mock_app.state.agent_supervisor, mock_supervisor)
-        self.assertEqual(self.mock_app.state.agent_service, mock_agent_service)
-        self.assertEqual(self.mock_app.state.thread_service, mock_thread_service)
-        self.assertEqual(self.mock_app.state.corpus_service, mock_corpus_service)
+        # FIXED: Patch the actual import locations
+        with patch('netra_backend.app.services.agent_service.AgentService') as mock_agent_class, \
+             patch('netra_backend.app.services.thread_service.ThreadService') as mock_thread_class, \
+             patch('netra_backend.app.services.corpus_service.CorpusService') as mock_corpus_class:
+            
+            mock_supervisor = Mock()
+            mock_agent_service = Mock()
+            mock_thread_service = Mock()
+            mock_corpus_service = Mock()
+            
+            mock_agent_class.return_value = mock_agent_service
+            mock_thread_class.return_value = mock_thread_service
+            mock_corpus_class.return_value = mock_corpus_service
+            
+            startup_module._setup_agent_state(self.mock_app, mock_supervisor)
+            
+            # Verify all services were set on app state
+            self.assertEqual(self.mock_app.state.agent_supervisor, mock_supervisor)
+            self.assertEqual(self.mock_app.state.agent_service, mock_agent_service)
+            self.assertEqual(self.mock_app.state.thread_service, mock_thread_service)
+            self.assertEqual(self.mock_app.state.corpus_service, mock_corpus_service)
 
     # =============================================================================
     # SECTION 9: HEALTH CHECKS AND MONITORING TESTS

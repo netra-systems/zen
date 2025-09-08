@@ -1103,6 +1103,193 @@ class TestAgentRegistry:
         )
         
         assert result_agent == agent
+    
+    def test_tool_dispatcher_property_lazy_creation(self):
+        """Test tool_dispatcher property creates mock dispatcher lazily."""
+        registry = AgentRegistry()
+        
+        # Initially no tool dispatcher
+        assert registry._tool_dispatcher is None
+        
+        # Accessing property should create mock
+        dispatcher = registry.tool_dispatcher
+        
+        assert dispatcher is not None
+        assert registry._tool_dispatcher is dispatcher
+        assert hasattr(dispatcher, '_websocket_enhanced')
+        assert hasattr(dispatcher, 'registry')
+        assert dispatcher.registry == registry
+        assert dispatcher._websocket_enhanced is False
+        assert dispatcher.executor is None
+    
+    def test_tool_dispatcher_property_returns_same_instance(self):
+        """Test tool_dispatcher property returns same instance on multiple calls."""
+        registry = AgentRegistry()
+        
+        dispatcher1 = registry.tool_dispatcher
+        dispatcher2 = registry.tool_dispatcher
+        
+        assert dispatcher1 is dispatcher2
+    
+    def test_tool_dispatcher_auto_enhance_with_websocket_manager(self):
+        """Test tool_dispatcher gets enhanced when websocket_manager is set."""
+        registry = AgentRegistry()
+        
+        # Set websocket manager first
+        mock_manager = Mock()
+        registry.set_websocket_manager(mock_manager)
+        
+        # Access tool_dispatcher - should be auto-enhanced
+        dispatcher = registry.tool_dispatcher
+        
+        assert dispatcher._websocket_enhanced is True
+    
+    def test_set_tool_dispatcher_method(self):
+        """Test set_tool_dispatcher method."""
+        registry = AgentRegistry()
+        
+        # Create custom mock dispatcher
+        custom_dispatcher = Mock()
+        custom_dispatcher._websocket_enhanced = False
+        
+        # Set dispatcher
+        registry.set_tool_dispatcher(custom_dispatcher)
+        
+        assert registry._tool_dispatcher == custom_dispatcher
+        assert registry.tool_dispatcher == custom_dispatcher
+    
+    def test_set_tool_dispatcher_with_websocket_manager(self):
+        """Test set_tool_dispatcher auto-enhances with existing websocket_manager."""
+        registry = AgentRegistry()
+        
+        # Set websocket manager first
+        mock_manager = Mock()
+        registry.set_websocket_manager(mock_manager)
+        
+        # Create and set custom dispatcher
+        custom_dispatcher = Mock()
+        custom_dispatcher._websocket_enhanced = False
+        
+        registry.set_tool_dispatcher(custom_dispatcher)
+        
+        # Should have been auto-enhanced
+        assert custom_dispatcher._websocket_enhanced is True
+    
+    def test_websocket_manager_enhances_existing_tool_dispatcher(self):
+        """Test setting websocket_manager enhances existing tool_dispatcher."""
+        registry = AgentRegistry()
+        
+        # Access tool_dispatcher first (creates mock)
+        dispatcher = registry.tool_dispatcher
+        assert dispatcher._websocket_enhanced is False
+        
+        # Set websocket manager - should enhance existing dispatcher
+        mock_manager = Mock()
+        registry.set_websocket_manager(mock_manager)
+        
+        assert dispatcher._websocket_enhanced is True
+    
+    def test_mock_tool_dispatcher_enhance_method(self):
+        """Test MockToolDispatcher enhance_with_websockets method."""
+        registry = AgentRegistry()
+        
+        dispatcher = registry.tool_dispatcher
+        
+        # Mock bridge
+        mock_bridge = Mock()
+        
+        # Call enhance method directly
+        assert dispatcher._websocket_enhanced is False
+        dispatcher.enhance_with_websockets(mock_bridge)
+        assert dispatcher._websocket_enhanced is True
+    
+    def test_enhance_tool_dispatcher_with_real_dispatcher_import_error(self):
+        """Test WebSocket enhancement handles import errors gracefully."""
+        registry = AgentRegistry()
+        
+        # Create real-looking dispatcher without _websocket_enhanced attribute
+        real_dispatcher = Mock(spec=[])  # No attributes
+        registry.set_tool_dispatcher(real_dispatcher)
+        
+        # Mock the import to fail
+        import sys
+        original_modules = sys.modules.copy()
+        
+        # Remove the module if it exists
+        if 'netra_backend.app.agents.unified_tool_execution' in sys.modules:
+            del sys.modules['netra_backend.app.agents.unified_tool_execution']
+        
+        # Add a mock module that raises ImportError
+        class FailingModule:
+            def __getattr__(self, name):
+                raise ImportError("Module not found")
+        
+        sys.modules['netra_backend.app.agents.unified_tool_execution'] = FailingModule()
+        
+        try:
+            # Set websocket manager - should handle import error gracefully
+            mock_manager = Mock()
+            registry.set_websocket_manager(mock_manager)
+            
+            # Should not crash, but log error
+            assert registry.websocket_manager == mock_manager
+            
+        finally:
+            # Restore original modules
+            sys.modules.clear()
+            sys.modules.update(original_modules)
+    
+    def test_enhance_tool_dispatcher_no_dispatcher(self):
+        """Test WebSocket enhancement when no tool_dispatcher exists."""
+        registry = AgentRegistry()
+        
+        # Call enhancement directly without tool_dispatcher
+        registry._enhance_tool_dispatcher_with_websockets()
+        
+        # Should not crash and should still be None
+        assert registry._tool_dispatcher is None
+    
+    def test_agent_validation_with_class_type(self):
+        """Test agent validation with class types instead of instances."""
+        registry = AgentRegistry()
+        
+        # Mock a class that inherits from BaseAgent
+        class MockAgentClass:
+            pass
+        
+        # Test with class validation - should pass through validation
+        registry.register("agent-class", MockAgentClass)
+        assert "agent-class" in registry
+    
+    def test_enhance_tool_dispatcher_with_real_dispatcher_success(self):
+        """Test successful WebSocket enhancement with real dispatcher."""
+        registry = AgentRegistry()
+        
+        # Create a real-looking dispatcher without _websocket_enhanced attribute
+        real_dispatcher = Mock(spec=[])  # No attributes initially
+        registry.set_tool_dispatcher(real_dispatcher)
+        
+        # Mock successful import and enhancement
+        import sys
+        from unittest.mock import patch, MagicMock
+        
+        mock_enhance_func = MagicMock()
+        
+        with patch.dict(sys.modules, {
+            'netra_backend.app.agents.unified_tool_execution': MagicMock(
+                enhance_tool_dispatcher_with_notifications=mock_enhance_func
+            )
+        }):
+            # Set websocket manager - should call real enhancement
+            mock_manager = Mock()
+            registry.set_websocket_manager(mock_manager)
+            
+            # Verify the real enhancement function was called
+            mock_enhance_func.assert_called_once_with(
+                real_dispatcher,
+                websocket_manager=mock_manager,
+                enable_notifications=True
+            )
 
 
 # ===================== OTHER SPECIALIZED REGISTRY TESTS =====================
