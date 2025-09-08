@@ -13,9 +13,8 @@ do not introduce new problems.
 
 ** ULTRA ULTRA CRITICAL **
 CHEATING SSOT = ABOMINATION
-CHEATING CLAUDE.MD = ABOMINATION
-IGNORING CLAUDE.MD = ABOMINATION
-TRICKING  CLAUDE.MD = ABOMINATION
+CHEATING CLAUDE.MD = ABOMINATION. IGNORING CLAUDE.MD = ABOMINATION. TRICKING  CLAUDE.MD = ABOMINATION
+BREAKING EXISTING BUSINESS VALUE = ABOMINATION
 ATTEMPTS TO OUT-SMART OR BYPASS CLAUDE.MD RULES = ABOMINATION
 CREATION OF "SIMPLE" OR "STANDALONE" ETC. TYPE FILES IS STRICTLY FORBIDDEN.
 CLAUDE.MD (THIS FILE) KNOWS BEST! NEVER ATTEMPT TO "OVERRIDE". NO EXCEPTIONS.
@@ -399,12 +398,20 @@ This index is the SSOT for all platform-specific constants, paths, and identifie
 
   * **Index File:** `SPEC/generated/string_literals.json`
   * **Query Tool:** `scripts/query_string_literals.py`
+  * **📚 Complete Documentation:** [`docs/string_literals_index.md`](docs/string_literals_index.md)
+  * **📖 Usage Guide:** [`docs/STRING_LITERALS_USAGE_GUIDE.md`](docs/STRING_LITERALS_USAGE_GUIDE.md)
+
+**🚨 CRITICAL PROTECTION: 11 mission-critical environment variables + 12 domain configurations cause CASCADE FAILURES if modified incorrectly!**
 
 **Usage Requirements:**
 
-1.  **ALWAYS Validate** literals before use, using either grep or: `python scripts/query_string_literals.py validate "your_string"` or if appropriate reading the document directly.
-2.  **NEVER Guess** config keys or paths; query the index first.
-3.  **UPDATE Index** after adding new constants: `python scripts/scan_string_literals.py`
+1.  **ALWAYS Validate** literals before use: `python scripts/query_string_literals.py validate "your_string"`
+2.  **NEVER Guess** config keys or paths; query the index first with search: `python scripts/query_string_literals.py search "keyword"`
+3.  **CHECK Environment Health:** `python scripts/query_string_literals.py check-env staging` (or production)
+4.  **SHOW Critical Configs:** `python scripts/query_string_literals.py show-critical` 
+5.  **UPDATE Index** after adding new constants: `python scripts/scan_string_literals.py`
+
+**Cross-Reference with Step 6 in Execution Checklist below ⬇️**
 
 -----
 
@@ -611,7 +618,11 @@ YOU ARE VERY SMART AND PRACTICAL.
     - **See:** [Type Drift Audit Report](./reports/type_safety/TYPE_DRIFT_AUDIT_REPORT.md) for complete remediation guide
 4.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 5.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
-6.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
+6.  **Verify Strings:** **MANDATORY STRING LITERAL VALIDATION** - See [`docs/STRING_LITERALS_USAGE_GUIDE.md`](docs/STRING_LITERALS_USAGE_GUIDE.md):
+    - **NEVER guess string literals** - Always validate: `python scripts/query_string_literals.py validate "your_string"`
+    - **Search for existing:** `python scripts/query_string_literals.py search "keyword" --category critical_config`
+    - **Check environment health:** `python scripts/query_string_literals.py check-env staging`
+    - **🚨 CRITICAL CONFIGS:** 11 env vars + 12 domains cause CASCADE FAILURES - use `show-critical`
 7.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
 8.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
 9.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
