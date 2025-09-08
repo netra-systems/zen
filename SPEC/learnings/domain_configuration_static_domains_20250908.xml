@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <meta>
+        <timestamp>2025-01-23T00:00:00Z</timestamp>
+        <priority>CRITICAL</priority>
+        <category>domain_configuration_infrastructure</category>
+        <regression_risk>HIGH</regression_risk>
+    </meta>
+    
+    <context>
+        <situation>During ultimate-test-deploy-loop, incorrectly attempted to replace static staging domains with literal GCP backend URLs</situation>
+        <correction_needed>User intervention: "no make a note to keep static domains as is and cross link stop adding literal backends"</correction_needed>
+        <business_impact>Static domain configuration maintains proper infrastructure abstraction and DNS management</business_impact>
+    </context>
+    
+    <root_cause>
+        <primary>Misunderstanding of domain architecture - static domains should be cross-linked to backends, not replaced</primary>
+        <architectural_principle>Static domains provide abstraction layer for proper DNS/load balancer configuration</architectural_principle>
+    </root_cause>
+    
+    <solution>
+        <principle>KEEP STATIC DOMAINS AS CONFIGURED</principle>
+        <approach>Cross-link static domains to GCP backends through proper DNS/infrastructure configuration</approach>
+        <never_do>Never replace api.staging.netrasystems.ai with literal GCP Cloud Run URLs in configuration</never_do>
+        <always_do>Maintain static domain structure and ensure proper DNS routing to backends</always_do>
+    </solution>
+    
+    <domain_architecture>
+        <staging_domains>
+            <backend>https://api.staging.netrasystems.ai → (DNS routes to) → GCP Cloud Run backend</backend>
+            <auth>https://auth.staging.netrasystems.ai → (DNS routes to) → GCP Cloud Run auth service</auth>
+            <frontend>https://app.staging.netrasystems.ai → (DNS routes to) → GCP Cloud Run frontend</frontend>
+        </staging_domains>
+        <infrastructure_layer>
+            <dns>DNS management handles routing from static domains to dynamic GCP URLs</dns>
+            <load_balancer>Load balancers may sit between domains and backends</load_balancer>
+            <ssl_termination>SSL certificates attached to static domains, not backend URLs</ssl_termination>
+        </infrastructure_layer>
+    </domain_architecture>
+    
+    <correct_issue_resolution>
+        <root_cause>If staging environment appears unavailable, fix DNS routing or infrastructure</root_cause>
+        <not_the_solution>Do NOT replace static domains with literal backend URLs</not_the_solution>
+        <proper_solution>Ensure DNS properly routes api.staging.netrasystems.ai to deployed backends</proper_solution>
+    </correct_issue_resolution>
+    
+    <prevention_measures>
+        <rule_1>Always preserve static domain configuration in test configs</rule_1>
+        <rule_2>Fix infrastructure/DNS issues at infrastructure layer, not config layer</rule_2>
+        <rule_3>Static domains provide proper abstraction for environment management</rule_3>
+        <rule_4>Literal backend URLs should only appear in deployment scripts, never user-facing configs</rule_4>
+    </prevention_measures>
+    
+    <dependencies>
+        <critical_files>
+            <file>tests/e2e/staging_test_config.py - maintain static domains</file>
+            <file>DNS configuration - ensure proper routing</file>
+            <file>Load balancer/ingress configuration</file>
+        </critical_files>
+        <infrastructure_components>DNS, Load Balancers, SSL Certificates</infrastructure_components>
+    </dependencies>
+    
+    <validation>
+        <test>Static domains remain in all configuration files</test>
+        <test>DNS properly routes to deployed backends</test>
+        <test>Infrastructure layer handles domain-to-backend mapping</test>
+    </validation>
+</learning>
