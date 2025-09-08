@@ -397,7 +397,7 @@ class TestAgentHandler(BaseMessageHandler):
                 thread_id=f"broadcast_{broadcast_id}",
                 run_id=f"broadcast_run_{user_id}_{broadcast_id}"
             )
-            ws_manager = create_websocket_manager(context=context)
+            ws_manager = create_websocket_manager(context)
             
             # Create broadcast message
             broadcast_data = {
