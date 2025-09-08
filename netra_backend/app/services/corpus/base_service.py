@@ -71,7 +71,7 @@ class CorpusManager:
         new_corpus = models.Corpus(
             name=new_name,
             description=f"Clone of {source_corpus.name}",
-            user_id=user_id,
+            created_by_id=user_id,
             status="creating"
         )
         db.add(new_corpus)
