@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-09-05T09:42:05.631465",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-09-08T10:55:52.284049",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 30
   },
   "literals": {
@@ -26,8 +26,8 @@
       "value": "Disabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1531",
-        "scripts/deploy_to_gcp.py:1327"
+        "netra_backend/app/smd.py:1530",
+        "scripts/deploy_to_gcp.py:1573"
       ]
     },
     "Disconnected": {
@@ -41,8 +41,10 @@
       "value": "Enabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1531",
-        "scripts/deploy_to_gcp.py:1327"
+        "netra_backend/app/smd.py:1530",
+        "scripts/deploy_to_gcp.py:1573",
+        "scripts/deploy_to_gcp.py:1575",
+        "scripts/deploy_to_gcp.py:1576"
       ]
     },
     "Error": {
@@ -56,7 +58,7 @@
         "netra_backend/app/routes/utils/thread_error_handling.py:98",
         "netra_backend/app/routes/utils/thread_error_handling.py:100",
         "netra_backend/app/services/factory_status/metrics_collectors.py:100",
-        "netra_backend/app/websocket_core/__init__.py:78",
+        "netra_backend/app/websocket_core/__init__.py:123",
         "frontend/components/chat/AgentStatusIndicator.tsx:314",
         "scripts/check_docker_services.py:73"
       ]
@@ -80,10 +82,12 @@
         "netra_backend/app/db/postgres_table_checker.py:34",
         "netra_backend/app/middleware/api_gateway_coordinator.py:142",
         "netra_backend/app/routes/discovery.py:182",
+        "netra_backend/app/schemas/config.py:802",
+        "netra_backend/app/schemas/config.py:980",
         "auth_service/auth_core/core/jwt_handler.py:790",
         "scripts/e2e_continuous_runner.py:50",
-        "scripts/validate_websocket_compliance.py:48",
-        "shared/isolated_environment.py:791"
+        "scripts/validate_database_connections.py:98",
+        "scripts/validate_websocket_compliance.py:48"
       ]
     },
     "Pending": {
@@ -97,7 +101,9 @@
       "value": "Ready",
       "category": "states",
       "locations": [
-        "frontend/components/chat/ChatHeader.tsx:128"
+        "frontend/components/chat/ChatHeader.tsx:128",
+        "scripts/fix_staging_database_connection.py:90",
+        "scripts/gcp_continuous_audit.py:65"
       ]
     },
     "Success": {
@@ -105,7 +111,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/metrics/csv_exporter.py:58",
-        "netra_backend/app/services/unified_tool_registry/execution_engine.py:98",
+        "netra_backend/app/services/unified_tool_registry/execution_engine.py:104",
         "scripts/run_docker_stability_tests.py:668"
       ]
     },
@@ -123,16 +129,16 @@
       "value": "active",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/base_agent.py:1257",
-        "netra_backend/app/agents/supervisor/execution_factory.py:49",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_sub_agent_old.py:260",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_sub_agent_old.py:261",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_sub_agent_old.py:262",
+        "netra_backend/app/agents/base_agent.py:1202",
         "netra_backend/app/agents/validation_sub_agent.py:301",
         "netra_backend/app/agents/validation_sub_agent.py:302",
-        "netra_backend/app/core/managers/unified_state_manager.py:72",
-        "netra_backend/app/core/telemetry.py:38",
-        "netra_backend/app/database/request_scoped_session_factory.py:51",
-        "netra_backend/app/db/health_checks.py:98",
-        "netra_backend/app/db/health_checks.py:106",
-        "netra_backend/app/db/models_agent_state.py:39"
+        "netra_backend/app/api/health_checks.py:127",
+        "netra_backend/app/business/subscription_manager.py:26",
+        "netra_backend/app/core/async_connection_pool.py:592",
+        "netra_backend/app/core/managers/unified_state_manager.py:72"
       ]
     },
     "busy": {
@@ -148,15 +154,15 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/base/reliability_manager.py:18",
-        "netra_backend/app/agents/base_agent.py:1335",
-        "netra_backend/app/agents/base_agent.py:1336",
+        "netra_backend/app/agents/base_agent.py:1280",
+        "netra_backend/app/agents/base_agent.py:1281",
         "netra_backend/app/agents/security/circuit_breaker.py:27",
+        "netra_backend/app/clients/circuit_breaker.py:31",
+        "netra_backend/app/core/async_connection_pool.py:588",
         "netra_backend/app/core/circuit_breaker_types.py:17",
         "netra_backend/app/core/clickhouse_connection_manager.py:92",
         "netra_backend/app/core/clickhouse_connection_manager.py:97",
-        "netra_backend/app/core/clickhouse_connection_manager.py:114",
-        "netra_backend/app/core/network_handler.py:590",
-        "netra_backend/app/core/resilience/domain_circuit_breakers.py:28"
+        "netra_backend/app/core/clickhouse_connection_manager.py:114"
       ]
     },
     "connected": {
@@ -182,13 +188,13 @@
         "netra_backend/app/agents/quality_supervisor.py:98",
         "netra_backend/app/agents/tool_executor_factory.py:144",
         "netra_backend/app/agents/tool_executor_factory.py:205",
-        "netra_backend/app/clients/auth_client_core.py:1431",
+        "netra_backend/app/clients/auth_client_core.py:1646",
+        "netra_backend/app/core/auth_startup_validator.py:493",
         "netra_backend/app/core/degradation_strategies.py:257",
-        "netra_backend/app/core/health_checkers.py:375",
-        "netra_backend/app/core/health_checkers.py:384",
-        "netra_backend/app/core/health_checkers.py:518",
-        "netra_backend/app/core/health_checkers.py:524",
-        "netra_backend/app/core/health_configuration.py:47"
+        "netra_backend/app/core/health_checkers.py:364",
+        "netra_backend/app/core/health_checkers.py:373",
+        "netra_backend/app/core/health_checkers.py:507",
+        "netra_backend/app/core/health_checkers.py:513"
       ]
     },
     "disconnected": {
@@ -199,11 +205,11 @@
         "netra_backend/app/core/interfaces_websocket.py:124",
         "netra_backend/app/core/network_handler.py:53",
         "netra_backend/app/core/websocket_recovery_types.py:17",
-        "netra_backend/app/db/clickhouse.py:485",
-        "netra_backend/app/db/clickhouse.py:900",
+        "netra_backend/app/db/clickhouse.py:509",
+        "netra_backend/app/db/clickhouse.py:925",
         "netra_backend/app/db/clickhouse_init.py:145",
         "netra_backend/app/mcp_client/models.py:29",
-        "netra_backend/app/routes/websocket_factory.py:413",
+        "netra_backend/app/routes/websocket_factory.py:501",
         "netra_backend/app/schemas/core_enums.py:132"
       ]
     },
@@ -231,8 +237,8 @@
         "netra_backend/app/agents/agent_communication.py:67",
         "netra_backend/app/agents/agent_lifecycle.py:48",
         "netra_backend/app/agents/base/execution_context.py:24",
-        "netra_backend/app/agents/base/executor.py:471",
-        "netra_backend/app/agents/base_agent.py:1215",
+        "netra_backend/app/agents/base/executor.py:469",
+        "netra_backend/app/agents/base_agent.py:1160",
         "netra_backend/app/agents/chat_orchestrator_main.py:181",
         "netra_backend/app/agents/corpus_admin/operations_execution.py:39",
         "netra_backend/app/agents/corpus_admin/operations_handler.py:52",
@@ -246,20 +252,20 @@
         "netra_backend/app/agents/models.py:139",
         "netra_backend/app/agents/supervisor/websocket_notifier.py:190",
         "netra_backend/app/db/health_checks.py:98",
+        "netra_backend/app/routes/staging_health.py:546",
+        "netra_backend/app/routes/staging_health.py:547",
+        "netra_backend/app/routes/staging_health.py:548",
         "netra_backend/app/schemas/core_enums.py:33",
         "netra_backend/app/schemas/shared_types.py:25",
         "netra_backend/app/websocket_core/reconnection_manager.py:32",
-        "netra_backend/app/websocket_core/types.py:37",
-        "frontend/components/chat/ExampleMessageFlow.tsx:74",
-        "frontend/components/chat/ExampleMessageFlow.tsx:352",
-        "frontend/components/chat/ExampleMessageFlow.tsx:353"
+        "netra_backend/app/websocket_core/types.py:37"
       ]
     },
     "inactive": {
       "value": "inactive",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/supervisor/execution_engine_factory.py:357",
+        "netra_backend/app/agents/supervisor/execution_engine_factory.py:399",
         "netra_backend/app/agents/validation_sub_agent.py:302",
         "netra_backend/app/core/managers/unified_state_manager.py:73",
         "netra_backend/app/routes/quality_validation_utils.py:136",
@@ -280,11 +286,11 @@
         "netra_backend/app/core/health_types.py:49",
         "netra_backend/app/core/shared_health_types.py:46",
         "netra_backend/app/core/telemetry.py:24",
+        "netra_backend/app/core/telemetry.py:312",
         "netra_backend/app/core/type_validation_errors.py:10",
         "netra_backend/app/core/type_validation_errors.py:93",
         "netra_backend/app/core/unified_logging.py:182",
-        "netra_backend/app/database/request_scoped_session_factory.py:299",
-        "netra_backend/app/database/request_scoped_session_factory.py:358"
+        "netra_backend/app/database/request_scoped_session_factory.py:299"
       ]
     },
     "loaded": {
@@ -307,13 +313,14 @@
       "value": "loading",
       "category": "states",
       "locations": [
-        "frontend/components/AuthGuard.tsx:101",
+        "frontend/components/AuthGuard.tsx:178",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:64",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:82",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:102",
         "frontend/components/chat/ThreadSidebar.tsx:81",
         "frontend/providers/GTMProvider.tsx:357",
-        "scripts/scan_string_literals.py:205"
+        "scripts/scan_string_literals.py:205",
+        "shared/configuration/central_config_validator.py:614"
       ]
     },
     "open": {
@@ -321,15 +328,15 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/base/reliability_manager.py:19",
-        "netra_backend/app/agents/base_agent.py:1362",
+        "netra_backend/app/agents/base_agent.py:1307",
         "netra_backend/app/agents/security/circuit_breaker.py:28",
         "netra_backend/app/agents/synthetic_data_sub_agent_validation.py:54",
+        "netra_backend/app/clients/circuit_breaker.py:32",
         "netra_backend/app/core/agent_health_monitor.py:128",
         "netra_backend/app/core/circuit_breaker_types.py:18",
         "netra_backend/app/core/clickhouse_connection_manager.py:99",
         "netra_backend/app/core/clickhouse_connection_manager.py:127",
-        "netra_backend/app/core/clickhouse_connection_manager.py:130",
-        "netra_backend/app/core/resilience/domain_circuit_breakers.py:29"
+        "netra_backend/app/core/clickhouse_connection_manager.py:130"
       ]
     },
     "pending": {
@@ -359,9 +366,9 @@
         "netra_backend/app/core/health/unified_health_checker.py:220",
         "netra_backend/app/core/health/unified_health_checker.py:227",
         "netra_backend/app/core/health/unified_health_checker.py:313",
-        "netra_backend/app/core/health_checks.py:373",
-        "netra_backend/app/core/health_checks.py:378",
-        "netra_backend/app/core/managers/unified_lifecycle_manager.py:394"
+        "netra_backend/app/core/health_checks.py:398",
+        "netra_backend/app/core/health_checks.py:403",
+        "netra_backend/app/core/managers/unified_lifecycle_manager.py:397"
       ]
     },
     "success": {
@@ -376,8 +383,8 @@
         "netra_backend/app/admin/corpus/compatibility.py:175",
         "netra_backend/app/admin/corpus/compatibility.py:179",
         "netra_backend/app/admin/tools/unified_admin_dispatcher.py:589",
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:124",
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:275"
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_sub_agent_old.py:153",
+        "netra_backend/app/agents/_legacy_backup/data_sub_agent_backup_20250904/data_sub_agent_old.py:158"
       ]
     },
     "warning": {
@@ -391,9 +398,9 @@
         "netra_backend/app/agents/security/resource_guard.py:354",
         "netra_backend/app/agents/security/resource_guard.py:362",
         "netra_backend/app/agents/security/resource_guard.py:370",
-        "netra_backend/app/agents/supervisor/agent_registry.py:192",
-        "netra_backend/app/agents/supervisor/agent_registry.py:862",
-        "netra_backend/app/agents/supervisor/execution_engine.py:1217"
+        "netra_backend/app/agents/supervisor/agent_registry.py:218",
+        "netra_backend/app/agents/supervisor/agent_registry.py:1174",
+        "netra_backend/app/agents/supervisor/execution_engine.py:1224"
       ]
     }
   }
