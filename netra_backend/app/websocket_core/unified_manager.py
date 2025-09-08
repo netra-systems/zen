@@ -4,6 +4,8 @@ This module is the single source of truth for WebSocket connection management.
 """
 
 import asyncio
+import json
+from enum import Enum
 from typing import Dict, Optional, Set, Any, List
 from dataclasses import dataclass
 from datetime import datetime
@@ -11,6 +13,82 @@ from datetime import datetime
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+def _serialize_message_safely(message: Any) -> Dict[str, Any]:
+    """
+    Safely serialize message data for WebSocket transmission with comprehensive fallback strategies.
+    
+    CRITICAL FIX: Handles all serialization edge cases including:
+    - Enum objects (WebSocketState, etc.) → converted to string values
+    - Pydantic models → model_dump(mode='json') for datetime handling  
+    - Complex objects with to_dict() method
+    - Datetime objects → ISO string format
+    - Dataclasses → converted to dict
+    - Fallback to string representation for unhandled types
+    
+    Args:
+        message: Any message object that needs JSON serialization
+        
+    Returns:
+        JSON-serializable dictionary
+        
+    Raises:
+        TypeError: Only if all fallback strategies fail (should be extremely rare)
+    """
+    # Quick path for already serializable dicts
+    if isinstance(message, dict):
+        try:
+            # Test if it's already JSON serializable
+            json.dumps(message)
+            return message
+        except (TypeError, ValueError):
+            # Dict contains non-serializable objects, need to process recursively
+            return {k: _serialize_message_safely(v) for k, v in message.items()}
+    
+    # Handle enum objects (CRITICAL FIX for WebSocketState)
+    if isinstance(message, Enum):
+        return message.value if hasattr(message, 'value') else str(message)
+    
+    # Handle Pydantic models with proper datetime serialization
+    if hasattr(message, 'model_dump'):
+        try:
+            return message.model_dump(mode='json')
+        except Exception as e:
+            logger.warning(f"Pydantic model_dump failed: {e}, falling back to dict")
+            return message.model_dump()
+    
+    # Handle objects with to_dict method (DeepAgentState, etc.)
+    if hasattr(message, 'to_dict'):
+        return message.to_dict()
+    
+    # Handle dataclasses
+    if hasattr(message, '__dataclass_fields__'):
+        from dataclasses import asdict
+        return asdict(message)
+    
+    # Handle datetime objects
+    if hasattr(message, 'isoformat'):
+        return message.isoformat()
+    
+    # Handle lists and tuples recursively
+    if isinstance(message, (list, tuple)):
+        return [_serialize_message_safely(item) for item in message]
+    
+    # Handle sets (convert to list)
+    if isinstance(message, set):
+        return [_serialize_message_safely(item) for item in message]
+    
+    # Test direct JSON serialization for basic types
+    try:
+        json.dumps(message)
+        return message
+    except (TypeError, ValueError):
+        pass
+    
+    # Final fallback - convert to string (prevents total failure)
+    logger.warning(f"Using string fallback for object of type {type(message)}: {message}")
+    return str(message)
 
 
 @dataclass
@@ -266,7 +344,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(message)
+                        # CRITICAL FIX: Use safe serialization to handle enums, Pydantic models, etc.
+                        safe_message = _serialize_message_safely(message)
+                        await connection.websocket.send_json(safe_message)
                         logger.debug(f"Sent message to connection {conn_id} (thread-safe)")
                         successful_sends += 1
                     except Exception as e:
@@ -443,9 +523,11 @@ class UnifiedWebSocketManager:
     
     async def broadcast(self, message: Dict[str, Any]) -> None:
         """Broadcast a message to all connections."""
+        # CRITICAL FIX: Use safe serialization for broadcast messages
+        safe_message = _serialize_message_safely(message)
         for connection in list(self._connections.values()):
             try:
-                await connection.websocket.send_json(message)
+                await connection.websocket.send_json(safe_message)
             except Exception as e:
                 logger.error(f"Failed to broadcast to {connection.connection_id}: {e}")
                 await self.remove_connection(connection.connection_id)
@@ -741,7 +823,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(error_message)
+                        # CRITICAL FIX: Use safe serialization for error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
                         logger.info(f"Sent connection error notification to user {user_id}")
                         return
                     except Exception:
@@ -780,7 +864,9 @@ class UnifiedWebSocketManager:
                 connection = self.get_connection(conn_id)
                 if connection and connection.websocket:
                     try:
-                        await connection.websocket.send_json(error_message)
+                        # CRITICAL FIX: Use safe serialization for system error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
                         logger.info(f"Sent system error notification to user {user_id}")
                         return
                     except Exception:
