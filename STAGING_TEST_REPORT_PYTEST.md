@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-07 17:09:59
+**Generated:** 2025-09-07 17:15:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Total Tests:** 12
+- **Passed:** 10 (83.3%)
+- **Failed:** 2 (16.7%)
 - **Skipped:** 0
-- **Duration:** 6.44 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 22.80 seconds
+- **Pass Rate:** 83.3%
 
 ## Test Results by Priority
 
@@ -19,36 +19,74 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_health_check | FAIL failed | 0.645s | test_1_websocket_events_staging.py |
+| test_real_agent_discovery | PASS passed | 0.837s | test_3_agent_pipeline_staging.py |
+| test_real_agent_configuration | PASS passed | 0.635s | test_3_agent_pipeline_staging.py |
+| test_real_agent_pipeline_execution | FAIL failed | 1.980s | test_3_agent_pipeline_staging.py |
+| test_real_agent_lifecycle_monitoring | PASS passed | 1.347s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_error_handling | FAIL failed | 1.348s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_metrics | PASS passed | 4.573s | test_3_agent_pipeline_staging.py |
+| test_basic_functionality | PASS passed | 0.526s | test_4_agent_orchestration_staging.py |
+| test_agent_discovery_and_listing | PASS passed | 0.676s | test_4_agent_orchestration_staging.py |
+| test_orchestration_workflow_states | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
+| test_agent_communication_patterns | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
+| test_orchestration_error_scenarios | PASS passed | 0.001s | test_4_agent_orchestration_staging.py |
+| test_multi_agent_coordination_metrics | PASS passed | 0.001s | test_4_agent_orchestration_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_health_check
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.645s
+### FAILED: test_real_agent_pipeline_execution
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_3_agent_pipeline_staging.py
+- **Duration:** 1.980s
 - **Error:** tests\e2e\staging_test_base.py:308: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
-    await self.verify_api_health()
-tests\e2e\staging_test_base.py:258: in verify_api_health
-    assert response.status_code == 200
+tests\e2e\staging\test_3_agent_pipeline_staging.py:234: in test_real_agent_pipeline_execution
+    response = await asyncio.wait_for(ws.recv(), timeout=3)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\tasks.py:520: in wait_for
+    return await fut
+           ^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages...
+
+### FAILED: test_real_pipeline_error_handling
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_3_agent_pipeline_staging.py
+- **Duration:** 1.348s
+- **Error:** tests\e2e\staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   AssertionError...
+tests\e2e\staging\test_3_agent_pipeline_staging.py:466: in test_real_pipeline_error_handling
+    response = await asyncio.wait_for(ws.recv(), timeout=2)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\tasks.py:520: in wait_for
+    return await fut
+           ^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\...
 
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_health_check FAILED
+test_3_agent_pipeline_staging.py::test_real_agent_discovery PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_configuration PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_pipeline_execution FAILED
+test_3_agent_pipeline_staging.py::test_real_agent_lifecycle_monitoring PASSED
+test_3_agent_pipeline_staging.py::test_real_pipeline_error_handling FAILED
+test_3_agent_pipeline_staging.py::test_real_pipeline_metrics PASSED
+test_4_agent_orchestration_staging.py::test_basic_functionality PASSED
+test_4_agent_orchestration_staging.py::test_agent_discovery_and_listing PASSED
+test_4_agent_orchestration_staging.py::test_orchestration_workflow_states PASSED
+test_4_agent_orchestration_staging.py::test_agent_communication_patterns PASSED
+test_4_agent_orchestration_staging.py::test_orchestration_error_scenarios PASSED
+test_4_agent_orchestration_staging.py::test_multi_agent_coordination_metrics PASSED
 
 ==================================================
-0 passed, 1 failed in 6.44s
+10 passed, 2 failed in 22.80s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
+| Agent | 7 | 6 | 1 | 85.7% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
