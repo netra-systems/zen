@@ -1210,9 +1210,9 @@ class AgentRegistry(UniversalAgentRegistry):
             
             diagnosis['user_details'][user_id] = user_diagnosis
         
-        # Global WebSocket checks
-        if self.websocket_bridge is None:
-            diagnosis["critical_issues"].append("No global WebSocket bridge configured")
+        # Global WebSocket checks - in per-user architecture, we don't need a global bridge
+        # REMOVED: Global WebSocket bridge check - using per-user bridges now
+        # The critical check is that users have individual bridges when they need them
         
         if self.websocket_manager is None:
             diagnosis["critical_issues"].append("No global WebSocket manager configured")

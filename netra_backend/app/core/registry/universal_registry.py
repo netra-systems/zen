@@ -28,6 +28,7 @@ import logging
 from collections import defaultdict
 
 from netra_backend.app.logging_config import central_logger
+from shared.test_only_guard import test_only
 
 logger = central_logger.get_logger(__name__)
 
@@ -574,6 +575,7 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
         
         return self._tool_dispatcher
     
+    @test_only("Mock tool dispatcher should only be created during testing to prevent production usage of test doubles")
     def _create_mock_tool_dispatcher(self):
         """Create a mock tool dispatcher for testing purposes."""
         # Create a simple mock that can be enhanced

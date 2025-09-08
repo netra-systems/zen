@@ -26,7 +26,7 @@ from netra_backend.app.services.streaming_service import (
     get_streaming_service,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core import create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -187,12 +187,25 @@ class AgentService(IAgentService):
             if await self._ensure_bridge_ready():
                 status = await self._bridge.get_status()
                 if status["dependencies"]["websocket_manager_available"]:
-                    websocket_manager = get_websocket_manager()
+                    # Create user context for WebSocket operations
+                    import uuid
+                    user_context = UserExecutionContext(
+                        user_id=user_id,
+                        thread_id=f"stop-thread-{uuid.uuid4().hex[:8]}",
+                        run_id=f"stop-run-{uuid.uuid4().hex[:8]}"
+                    )
+                    websocket_manager = create_websocket_manager(user_context)
                     await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                     return True
             
             # Fallback to direct manager access (preserve existing behavior)
-            websocket_manager = get_websocket_manager()
+            import uuid
+            fallback_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=f"fallback-thread-{uuid.uuid4().hex[:8]}",
+                run_id=f"fallback-run-{uuid.uuid4().hex[:8]}"
+            )
+            websocket_manager = create_websocket_manager(fallback_context)
             await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
             return True
         except Exception as e:
@@ -340,7 +353,13 @@ class AgentService(IAgentService):
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         # Send error to user for unknown message type (through bridge-managed WebSocket)
         try:
-            websocket_manager = get_websocket_manager()
+            import uuid
+            error_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=f"error-thread-{uuid.uuid4().hex[:8]}",
+                run_id=f"error-run-{uuid.uuid4().hex[:8]}"
+            )
+            websocket_manager = create_websocket_manager(error_context)
             await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
         except Exception as e:
             logger.error(f"Failed to send unknown message type error to {user_id}: {e}")
@@ -367,7 +386,13 @@ class AgentService(IAgentService):
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
             # Use bridge-managed WebSocket communication (preserve boundary)
-            websocket_manager = get_websocket_manager()
+            import uuid
+            json_error_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=f"json-error-thread-{uuid.uuid4().hex[:8]}",
+                run_id=f"json-error-run-{uuid.uuid4().hex[:8]}"
+            )
+            websocket_manager = create_websocket_manager(json_error_context)
             await websocket_manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
@@ -391,7 +416,13 @@ class AgentService(IAgentService):
             
         # WebSocket concern: Send error through WebSocket channel
         try:
-            websocket_manager = get_websocket_manager()
+            import uuid
+            exception_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=f"exception-thread-{uuid.uuid4().hex[:8]}",
+                run_id=f"exception-run-{uuid.uuid4().hex[:8]}"
+            )
+            websocket_manager = create_websocket_manager(exception_context)
             await websocket_manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
