@@ -203,6 +203,15 @@ def _should_disable_clickhouse_for_tests() -> bool:
     if _is_real_database_test():
         return False  # Allow real ClickHouse for @pytest.mark.real_database tests
     
+    # CRITICAL FIX: Check if we're running in a ClickHouse-specific test directory
+    # ClickHouse tests in netra_backend/tests/clickhouse/ should have their own conftest override
+    import sys
+    current_test = get_env().get("PYTEST_CURRENT_TEST", "")
+    if "tests/clickhouse/" in current_test or "clickhouse" in current_test.lower():
+        # ClickHouse-specific tests should use their own conftest configuration
+        # Only disable if explicitly set by the conftest for these specific tests
+        return get_env().get("CLICKHOUSE_TEST_DISABLE", "").lower() == "true"
+    
     # Check test framework ClickHouse disable settings for regular tests
     clickhouse_disabled_by_framework = (
         get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
