@@ -25,6 +25,7 @@ from typing import Any, Dict, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
+from httpx import ASGITransport
 import redis.asyncio as redis
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -459,7 +460,7 @@ class TestRealHTTPEndpoints:
     async def test_refresh_endpoint_real_flow(self, isolated_test_env):
         """Test refresh endpoint with real async client."""
         # Create real async client
-        async with httpx.AsyncClient(app=app, base_url="http://test") as client:
+        async with httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # First, we need to create a user and get tokens
             # Since we can't easily do this through endpoints without OAuth setup,
             # we'll test the endpoint structure

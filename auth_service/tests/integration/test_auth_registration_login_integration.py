@@ -30,7 +30,7 @@ from auth_service.services.redis_service import RedisService
 from auth_service.services.jwt_service import JWTService
 from auth_service.services.password_service import PasswordService
 from auth_service.database import get_database
-from auth_service.models import User
+from auth_service.auth_core.database.models import AuthUser as User
 
 
 class TestRegistrationLoginIntegration(BaseIntegrationTest):

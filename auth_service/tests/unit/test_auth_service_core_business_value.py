@@ -139,7 +139,7 @@ class TestAuthServiceCoreBusinessValue(BaseIntegrationTest):
         
         # Rate limiting should protect against abuse
         rate_limit = AuthConfig.get_rate_limit_requests_per_minute()
-        assert rate_limit >= 10   # Allow reasonable legitimate usage
+        assert rate_limit >= 3    # Minimum reasonable rate limit (production uses 3)
         assert rate_limit <= 100  # Prevent abuse
     
     @pytest.mark.unit

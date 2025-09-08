@@ -109,9 +109,9 @@ def test_client(analytics_app):
 @pytest.fixture
 async def async_test_client(analytics_app):
     """Async FastAPI test client for analytics service"""
-    from httpx import AsyncClient
+    from httpx import AsyncClient, ASGITransport
     
-    async with AsyncClient(app=analytics_app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=analytics_app), base_url="http://test") as client:
         yield client
 
 # =============================================================================

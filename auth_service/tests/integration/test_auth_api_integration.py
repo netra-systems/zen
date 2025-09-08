@@ -7,7 +7,7 @@ import uuid
 from typing import Dict, Optional
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from fastapi.testclient import TestClient
 from auth_service.main import app
 from auth_service.auth_core.core.jwt_handler import JWTHandler
@@ -22,7 +22,7 @@ class TestAuthAPIIntegration:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self):
         """Setup for each test"""
-        self.client = AsyncClient(app=app, base_url="http://test")
+        self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
         self.jwt_handler = JWTHandler()
         self.auth_service = AuthService()
         self.repository = AuthRepository()
@@ -284,7 +284,7 @@ class TestAuthAPIPermissions:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self):
         """Setup for each test"""
-        self.client = AsyncClient(app=app, base_url="http://test")
+        self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
         self.auth_service = AuthService()
         
         # Create users with different roles
@@ -334,7 +334,7 @@ class TestAuthAPIRateLimiting:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self):
         """Setup for each test"""
-        self.client = AsyncClient(app=app, base_url="http://test")
+        self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
         self.email = f"ratelimit_{uuid.uuid4()}@example.com"
         self.password = "RateLimit123!"
     
@@ -388,7 +388,7 @@ class TestAuthAPIOAuth:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self):
         """Setup for each test"""
-        self.client = AsyncClient(app=app, base_url="http://test")
+        self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
     
     @pytest.mark.asyncio
     async def test_oauth_login_redirect(self):
@@ -432,7 +432,7 @@ class TestAuthAPIHealthCheck:
     @pytest_asyncio.fixture(autouse=True)
     async def setup_method(self):
         """Setup for each test"""
-        self.client = AsyncClient(app=app, base_url="http://test")
+        self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
     
     @pytest.mark.asyncio
     async def test_health_endpoint(self):

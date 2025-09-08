@@ -1,11 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="9.321" timestamp="2025-09-07T17:43:40.860807-07:00" hostname="Anthony"><testcase classname="tests.e2e.test_auth_service_business_flows" name="TestAuthServiceBusinessFlows" time="0.000"><error message="collection failure">C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:344: in from_call
-    result: TResult | None = func()
-                             ^^^^^^
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py:389: in collect
-    return list(collector.collect())
-                ^^^^^^^^^^^^^^^^^^^
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:752: in collect
-    self.warn(
-C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\nodes.py:271: in warn
-    warnings.warn_explicit(
-E   pytest.PytestCollectionWarning: cannot collect test class 'TestAuthServiceBusinessFlows' because it has a __init__ constructor (from: tests/e2e/test_auth_service_business_flows.py)</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="7.790" timestamp="2025-09-07T18:11:02.375502-07:00" hostname="Anthony"><testcase classname="tests.unit.test_auth_service_core_business_value.TestAuthServiceCoreBusinessValue" name="test_security_configuration_protects_business_assets" time="0.492" /></testsuite></testsuites>

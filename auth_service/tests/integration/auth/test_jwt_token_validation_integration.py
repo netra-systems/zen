@@ -17,13 +17,14 @@ CRITICAL REQUIREMENTS:
 import asyncio
 import pytest
 import jwt
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional
 
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
-from auth_service.auth_core.jwt_handler import JWTHandler
-from auth_service.auth_core.models import User, UserSession
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.database.models import AuthUser as User, AuthSession as UserSession
 
 
 class TestJWTTokenValidationIntegration(BaseIntegrationTest):
@@ -36,7 +37,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
         
         # Use real JWT secrets - CRITICAL for business security
         self.jwt_secret = self.env.get("JWT_SECRET_KEY") or "test-jwt-secret-key-unified-testing-32chars"
-        self.jwt_handler = JWTHandler(secret_key=self.jwt_secret)
+        self.jwt_handler = JWTHandler()
         
         # Test user data for consistent validation
         self.test_user_data = {
@@ -63,22 +64,23 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
             "subscription_tier": self.test_user_data["subscription_tier"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
-            "iss": "netra-auth-service"
+            "token_type": "access",
+            "iss": "netra-auth-service",
+            "jti": "test-token-" + str(uuid.uuid4())
         }
         
         # Use real JWT library to create token
         token = jwt.encode(token_payload, self.jwt_secret, algorithm="HS256")
         
         # Validate token with real JWT verification
-        decoded = self.jwt_handler.verify_token(token)
+        decoded = self.jwt_handler.validate_token(token)
         
         # Assert business-critical claims are preserved
         assert decoded["sub"] == self.test_user_data["user_id"]
         assert decoded["email"] == self.test_user_data["email"]
         assert decoded["permissions"] == self.test_user_data["permissions"]
         assert decoded["subscription_tier"] == self.test_user_data["subscription_tier"]
-        assert decoded["type"] == "access"
+        assert decoded["token_type"] == "access"
         assert decoded["iss"] == "netra-auth-service"
         
         self.logger.info(f"JWT token validation successful for user {decoded['email']}")
@@ -99,7 +101,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
             "permissions": self.test_user_data["permissions"],
             "iat": datetime.now(timezone.utc) - timedelta(minutes=60),
             "exp": datetime.now(timezone.utc) - timedelta(minutes=30),  # Expired 30 mins ago
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
@@ -133,7 +135,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
             "subscription_tier": "free",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
@@ -180,14 +182,14 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
                 "subscription_tier": tier,
                 "iat": datetime.now(timezone.utc),
                 "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-                "type": "access",
+                "token_type": "access",
                 "iss": "netra-auth-service"
             }
             
             token = jwt.encode(tier_payload, self.jwt_secret, algorithm="HS256")
             
             # Validate token preserves subscription tier information
-            decoded = self.jwt_handler.verify_token(token)
+            decoded = self.jwt_handler.validate_token(token)
             assert decoded["subscription_tier"] == tier
             assert decoded["permissions"] == expected_permissions
             
@@ -218,7 +220,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
             "user_context_id": "ctx-user-1",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
@@ -230,7 +232,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
             "user_context_id": "ctx-user-2",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
@@ -238,8 +240,8 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
         user2_token = jwt.encode(user2_payload, self.jwt_secret, algorithm="HS256")
         
         # Validate each token maintains user isolation
-        user1_decoded = self.jwt_handler.verify_token(user1_token)
-        user2_decoded = self.jwt_handler.verify_token(user2_token)
+        user1_decoded = self.jwt_handler.validate_token(user1_token)
+        user2_decoded = self.jwt_handler.validate_token(user2_token)
         
         # Assert user isolation - users must have different contexts
         assert user1_decoded["sub"] != user2_decoded["sub"]
@@ -286,15 +288,15 @@ class TestJWTSecretSynchronizationIntegration(BaseIntegrationTest):
             "service_origin": "auth_service",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
         auth_token = jwt.encode(auth_payload, self.primary_secret, algorithm="HS256")
         
         # Validate token can be decoded by other services using same secret
-        backend_handler = JWTHandler(secret_key=self.primary_secret)
-        decoded_in_backend = backend_handler.verify_token(auth_token)
+        backend_handler = JWTHandler()
+        decoded_in_backend = backend_handler.validate_token(auth_token)
         
         assert decoded_in_backend["sub"] == "cross-service-user"
         assert decoded_in_backend["service_origin"] == "auth_service"
@@ -319,7 +321,7 @@ class TestJWTSecretSynchronizationIntegration(BaseIntegrationTest):
             "rotation_test": True,
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
+            "token_type": "access",
             "iss": "netra-auth-service"
         }
         
@@ -327,22 +329,22 @@ class TestJWTSecretSynchronizationIntegration(BaseIntegrationTest):
         new_token = jwt.encode(old_payload, self.secondary_secret, algorithm="HS256")
         
         # Validate old handler rejects new secret tokens
-        old_handler = JWTHandler(secret_key=self.primary_secret)
-        new_handler = JWTHandler(secret_key=self.secondary_secret)
+        old_handler = JWTHandler()
+        new_handler = JWTHandler()
         
         # Old handler should validate old tokens
-        old_decoded = old_handler.verify_token(old_token)
+        old_decoded = old_handler.validate_token(old_token)
         assert old_decoded["rotation_test"] is True
         
         # New handler should validate new tokens  
-        new_decoded = new_handler.verify_token(new_token)
+        new_decoded = new_handler.validate_token(new_token)
         assert new_decoded["rotation_test"] is True
         
         # Cross-validation should fail (proper security)
         with pytest.raises(jwt.InvalidSignatureError):
-            old_handler.verify_token(new_token)
+            old_handler.validate_token(new_token)
             
         with pytest.raises(jwt.InvalidSignatureError):
-            new_handler.verify_token(old_token)
+            new_handler.validate_token(old_token)
         
         self.logger.info("JWT secret rotation compatibility validation successful")

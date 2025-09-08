@@ -47,8 +47,9 @@ logger = logging.getLogger(__name__)
 class TestCrossServiceAuthentication(BaseE2ETest):
     """Test cross-service authentication with real services."""
     
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Set up method called before each test method."""
+        super().setup_method()
         self.docker_manager = None
         self.auth_service_url = None
         self.backend_service_url = None
