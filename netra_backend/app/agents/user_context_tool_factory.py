@@ -15,7 +15,7 @@ import time
 from typing import List, Type, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.core.registry.universal_registry import ToolRegistry

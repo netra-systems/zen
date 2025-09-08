@@ -24,7 +24,7 @@ from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.data_contexts.user_data_context import (
         UserClickHouseContext, 
         UserRedisContext
@@ -36,7 +36,7 @@ from netra_backend.app.factories.data_access_factory import (
     get_user_clickhouse_context,
     get_user_redis_context
 )
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 

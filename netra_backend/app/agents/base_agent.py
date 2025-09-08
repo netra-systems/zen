@@ -90,7 +90,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.database.session_manager import DatabaseSessionManager
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class BaseAgent(ABC):
@@ -522,7 +522,7 @@ class BaseAgent(ABC):
             SessionManagerError: If context is invalid or lacks session
         """
         # Import dynamically to avoid circular dependency
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         from netra_backend.app.database.session_manager import DatabaseSessionManager
         
         if not isinstance(context, UserExecutionContext):
@@ -550,7 +550,7 @@ class BaseAgent(ABC):
             NotImplementedError: If neither execute_with_context nor execute_core_logic is implemented
         """
         # Import dynamically to avoid circular dependency
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Validate context type
         if not isinstance(context, UserExecutionContext):
@@ -1499,7 +1499,7 @@ class BaseAgent(ABC):
             ValueError: If context is invalid or agent doesn't support pattern
         """
         # Import dynamically to avoid circular dependency
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if not isinstance(context, UserExecutionContext):
             raise ValueError(f"Expected UserExecutionContext, got {type(context)}")
@@ -1732,7 +1732,7 @@ class BaseAgent(ABC):
             BaseAgent instance configured with the provided context
             
         Example:
-            >>> from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+            >>> from netra_backend.app.services.user_execution_context import UserExecutionContext
             >>> context = UserExecutionContext(
             ...     user_id="user123",
             ...     thread_id="thread456", 

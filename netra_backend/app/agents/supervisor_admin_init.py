@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # )
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger

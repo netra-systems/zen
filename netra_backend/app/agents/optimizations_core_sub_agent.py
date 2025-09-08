@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.prompts import optimizations_core_prompt_template
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.utils import extract_json_from_response
 # DatabaseSessionManager removed - use SSOT database module get_db() instead

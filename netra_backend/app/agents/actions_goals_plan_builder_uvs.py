@@ -29,7 +29,7 @@ from dataclasses import dataclass
 
 from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
 from netra_backend.app.agents.state import ActionPlanResult, PlanStep
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger as logger
 
 

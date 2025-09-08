@@ -7,7 +7,7 @@ Business Value: Ensures comprehensive data collection for accurate optimization 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext

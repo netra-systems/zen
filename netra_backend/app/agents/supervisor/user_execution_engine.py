@@ -35,7 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )

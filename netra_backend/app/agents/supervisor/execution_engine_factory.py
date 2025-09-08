@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context,
     InvalidContextError

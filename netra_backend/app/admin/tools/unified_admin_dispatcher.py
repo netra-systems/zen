@@ -24,7 +24,7 @@ from enum import Enum
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from netra_backend.app.db.models_postgres import User
-    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from pydantic import BaseModel, Field
 
