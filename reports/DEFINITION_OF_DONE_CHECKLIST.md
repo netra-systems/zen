@@ -27,6 +27,26 @@
 - [ ] Validate all string literals: `python scripts/query_string_literals.py validate "your_string"`
 - [ ] Update index after changes: `python scripts/scan_string_literals.py`
 
+### 3. 🚨 ARCHITECTURAL MIGRATION REQUIREMENTS (NEW - WHY #4 Fix)
+**Required for ALL changes involving:**
+- Singleton → Factory pattern changes
+- Dependency injection updates  
+- Cross-service integration changes
+- WebSocket/Event system modifications
+- Agent execution pattern updates
+
+**Pre-Migration Checklist:**
+- [ ] **Dependency Analysis:** Run `python scripts/analyze_component_dependencies.py --component "YourComponent"`
+- [ ] **Migration Risk Assessment:** Assess risk level using `/docs/architectural_migration_playbook.md`
+- [ ] **Contract Definition:** Define component contracts for validation
+- [ ] **Consumer Impact Analysis:** Document all consumers and required changes
+- [ ] **Integration Test Plan:** Plan tests covering complete startup → bridge → supervisor → agent flow
+
+**During Migration Validation:**
+- [ ] **App State Contracts:** `python -c "from netra_backend.app.core.app_state_contracts import validate_app_state_contracts; print(validate_app_state_contracts(app.state))"`
+- [ ] **Startup Phase Validation:** `python -c "from netra_backend.app.core.startup_phase_validation import validate_complete_startup_sequence; print(validate_complete_startup_sequence(app.state))"`
+- [ ] **WebSocket Bridge Integration:** `python tests/integration/test_websocket_bridge_startup_integration.py`
+
 ---
 
 ## Module-Specific Checklists
