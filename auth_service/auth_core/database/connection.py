@@ -156,8 +156,10 @@ class AuthDatabaseConnection:
             return "unknown"
     
     async def _get_database_url_async(self, AuthConfig) -> str:
-        """Get database URL asynchronously."""
-        return AuthConfig.get_database_url()
+        """Get database URL asynchronously - SSOT compliance via AuthDatabaseManager."""
+        # SSOT FIX: Use AuthDatabaseManager as the single source of truth for database URL
+        # This ensures AUTH_FAST_TEST_MODE is properly respected for in-memory SQLite
+        return AuthDatabaseManager.get_database_url()
     
     async def _create_async_engine_with_timeout(self, database_url: str):
         """Create async engine with timeout-optimized settings."""
