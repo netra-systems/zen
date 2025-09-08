@@ -257,67 +257,54 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
     Raises:
         ValueError: If critical validation fails (even in staging)
     """
+    # Get current environment first
     try:
-        # Always attempt standard validation first
-        _validate_ssot_user_context(user_context)
+        env = get_env()
+        current_env = env.get("ENVIRONMENT", "unknown").lower()
+    except Exception as env_error:
+        logger.error(f"STAGING ERROR: Failed to get environment: {env_error}")
+        current_env = "unknown"
+    
+    # In staging environment, use accommodated validation
+    if current_env == "staging":
+        logger.info(f"STAGING ACCOMMODATION: Using staging-safe validation for environment: {current_env}")
         
-    except ValueError as validation_error:
-        # Get current environment with comprehensive error handling
+        # Perform direct critical validation for staging
         try:
-            env = get_env()
-            current_env = env.get("ENVIRONMENT", "unknown").lower()
-            logger.info(f"STAGING DEBUG: Environment detected as: {current_env}")
-        except Exception as env_error:
-            logger.error(f"STAGING ERROR: Failed to get environment: {env_error}")
-            current_env = "unknown"
-        
-        # In staging environment, provide accommodation for defensive validation
-        if current_env == "staging":
-            logger.warning(
-                f"STAGING VALIDATION ACCOMMODATION: Standard SSOT validation failed: {validation_error}. "
-                f"Performing minimal critical validation for staging environment."
-            )
+            # Critical validation #1: Must be correct type
+            if not isinstance(user_context, UserExecutionContext):
+                error_msg = f"STAGING CRITICAL: Expected UserExecutionContext, got {type(user_context).__name__}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
             
-            # Perform minimal critical validation that MUST pass even in staging
-            try:
-                logger.info("STAGING DEBUG: Starting critical validation checks")
+            # Critical validation #2: Must have user_id
+            if not hasattr(user_context, 'user_id') or not user_context.user_id:
+                error_msg = f"STAGING CRITICAL: Missing user_id in UserExecutionContext"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
                 
-                # Critical validation #1: Must be correct type
-                if not isinstance(user_context, UserExecutionContext):
-                    logger.error(f"STAGING CRITICAL FAILURE: Wrong type even in staging: {type(user_context)}")
-                    raise validation_error
-                logger.info("STAGING DEBUG: Type validation passed")
-                
-                # Critical validation #2: Must have user_id
-                if not hasattr(user_context, 'user_id') or not user_context.user_id:
-                    logger.error(f"STAGING CRITICAL FAILURE: Missing user_id even in staging")
-                    raise validation_error
-                logger.info("STAGING DEBUG: user_id presence validation passed")
-                
-                # Critical validation #3: user_id must be valid string
-                if not isinstance(user_context.user_id, str) or not user_context.user_id.strip():
-                    logger.error(f"STAGING CRITICAL FAILURE: Invalid user_id even in staging: {repr(user_context.user_id)}")
-                    raise validation_error
-                logger.info("STAGING DEBUG: user_id format validation passed")
-                
-                # Log successful staging accommodation
-                logger.info(
-                    f"STAGING ACCOMMODATION SUCCESS: UserExecutionContext for user {user_context.user_id[:8]}... "
-                    f"passed critical validation despite defensive validation failure. "
-                    f"Original error: {str(validation_error)[:100]}..."
-                )
-                
-                # Allow context to proceed in staging
-                return
-                
-            except Exception as critical_error:
-                logger.error(f"STAGING CRITICAL VALIDATION FAILED: {critical_error}")
-                raise critical_error
-        
-        else:
-            # Non-staging environment: strict validation always applies
-            logger.error(f"NON-STAGING STRICT VALIDATION: {validation_error}")
+            # Critical validation #3: user_id must be valid string
+            if not isinstance(user_context.user_id, str) or not user_context.user_id.strip():
+                error_msg = f"STAGING CRITICAL: Invalid user_id format: {repr(user_context.user_id)}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+            
+            # STAGING ACCOMMODATION: Allow other validation failures (thread_id, run_id, etc.)
+            # These may fail in staging due to ID generation timing issues but are not critical
+            logger.info(
+                f"STAGING ACCOMMODATION SUCCESS: UserExecutionContext for user {user_context.user_id[:8]}... "
+                f"passed critical validation. Non-critical validations (ID formats) accommodated for staging."
+            )
+            return
+            
+        except Exception as critical_error:
+            logger.error(f"STAGING CRITICAL VALIDATION FAILED: {critical_error}")
             raise
+    
+    else:
+        # Non-staging environment: use strict validation
+        logger.debug(f"NON-STAGING: Using strict validation for environment: {current_env}")
+        _validate_ssot_user_context(user_context)
 
 
 @dataclass
