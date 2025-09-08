@@ -40,6 +40,7 @@ from netra_backend.app.schemas.tool import (
     ToolResult,
     ToolStatus,
 )
+from netra_backend.app.services.unified_tool_registry.models import ToolExecutionResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -466,7 +467,7 @@ class UnifiedToolDispatcher:
         tool_name: str,
         parameters: Dict[str, Any] = None,
         require_permission_check: bool = True
-    ) -> ToolDispatchResponse:
+    ) -> 'ToolExecutionResult':
         """Execute a tool with WebSocket notifications and security validation.
         
         CRITICAL: This method ensures WebSocket events are sent for ALL tool executions.
@@ -539,13 +540,13 @@ class UnifiedToolDispatcher:
             # Extract actual result from ToolResult wrapper
             actual_result = result.payload.result if hasattr(result, 'payload') and hasattr(result.payload, 'result') else result
             
-            return ToolDispatchResponse(
+            return ToolExecutionResult(
                 success=True,
                 result=actual_result,
-                metadata={
-                    'execution_time_ms': execution_time,
-                    'dispatcher_id': self.dispatcher_id
-                }
+                tool_name=tool_name,
+                user_id=self.user_context.user_id,
+                status="success",
+                execution_time_ms=int(execution_time)
             )
             
         except Exception as e:
@@ -559,13 +560,14 @@ class UnifiedToolDispatcher:
             
             logger.error(f"Tool {tool_name} failed in dispatcher {self.dispatcher_id}: {e}")
             
-            return ToolDispatchResponse(
+            return ToolExecutionResult(
                 success=False,
                 error=str(e),
-                metadata={
-                    'execution_time_ms': execution_time,
-                    'dispatcher_id': self.dispatcher_id
-                }
+                error_message=str(e),
+                tool_name=tool_name,
+                user_id=self.user_context.user_id,
+                status="error",
+                execution_time_ms=int(execution_time)
             )
     
     # Compatibility methods for existing code
@@ -929,7 +931,7 @@ class UnifiedToolDispatcherFactory:
         )
         
         # Create minimal user context for legacy compatibility
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         legacy_context = UserExecutionContext(
             user_id="legacy_global",

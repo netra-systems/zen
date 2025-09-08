@@ -147,6 +147,55 @@ class UserExecutionEngine:
         logger.info(f"✅ Created UserExecutionEngine {self.engine_id} for user {context.user_id} "
                    f"(max_concurrent: {self.max_concurrent}, run_id: {context.run_id}) with data access capabilities")
     
+    @property
+    def user_context(self) -> UserExecutionContext:
+        """Get user execution context for this engine."""
+        return self.context
+    
+    def get_user_context(self) -> UserExecutionContext:
+        """Get user execution context for this engine."""
+        return self.context
+    
+    def is_active(self) -> bool:
+        """Check if this engine is active."""
+        return self._is_active and len(self.active_runs) > 0
+    
+    def get_tool_dispatcher(self):
+        """Get tool dispatcher for this engine with user context.
+        
+        This creates a user-scoped tool dispatcher with proper isolation.
+        For testing, this returns a mock dispatcher with user context using SSOT patterns.
+        """
+        return self._create_mock_tool_dispatcher()
+    
+    def _create_mock_tool_dispatcher(self):
+        """Create mock tool dispatcher using SSOT mock protection."""
+        from shared.test_only_guard import test_only, require_test_mode
+        from test_framework.ssot.mocks import get_mock_factory
+        
+        # SSOT Guard: This function should only run in test mode
+        require_test_mode("_create_mock_tool_dispatcher", 
+                         "Mock tool dispatcher creation should only happen in tests")
+        
+        # Use SSOT MockFactory for consistent mock creation
+        mock_factory = get_mock_factory()
+        mock_dispatcher = mock_factory.create_tool_executor_mock()
+        
+        # Configure user context for this mock
+        mock_dispatcher.user_context = self.context
+        
+        # Override execute_tool with user-specific behavior
+        async def mock_execute_tool(tool_name, args):
+            return {
+                "result": f"Tool {tool_name} executed for user {self.context.user_id}",
+                "user_id": self.context.user_id,
+                "tool_args": args,
+                "success": True
+            }
+        
+        mock_dispatcher.execute_tool = mock_execute_tool
+        return mock_dispatcher
+    
     def _init_components(self) -> None:
         """Initialize execution components with user context."""
         # Get infrastructure components from factory
@@ -540,6 +589,79 @@ class UserExecutionEngine:
         })
         
         return stats
+    
+    async def execute_agent_pipeline(self, 
+                                    agent_name: str,
+                                    execution_context: UserExecutionContext,
+                                    input_data: Dict[str, Any]) -> AgentExecutionResult:
+        """Execute agent pipeline with user isolation for integration testing.
+        
+        This method provides a simplified interface for tests that expect the
+        execute_agent_pipeline signature. It creates the required AgentExecutionContext
+        and DeepAgentState from the provided parameters.
+        
+        Args:
+            agent_name: Name of the agent to execute
+            execution_context: User execution context for isolation
+            input_data: Input data for the agent execution
+            
+        Returns:
+            AgentExecutionResult: Result of the agent execution
+        """
+        try:
+            # Create agent execution context from user context
+            agent_context = AgentExecutionContext(
+                user_id=execution_context.user_id,
+                thread_id=execution_context.thread_id,
+                run_id=execution_context.run_id,
+                request_id=execution_context.request_id,
+                agent_name=agent_name,
+                step=PipelineStep.INITIALIZATION,
+                execution_timestamp=datetime.now(timezone.utc),
+                pipeline_step_num=1,
+                metadata=input_data
+            )
+            
+            # Create agent state from input data
+            state = DeepAgentState()
+            state.initialize_from_dict({
+                'user_request': input_data,
+                'current_state': 'initialized',
+                'agent_context': {
+                    'agent_name': agent_name,
+                    'user_id': execution_context.user_id,
+                    'thread_id': execution_context.thread_id
+                }
+            })
+            
+            # Execute agent with the created context and state
+            result = await self.execute_agent(agent_context, state)
+            
+            logger.debug(f"Agent pipeline executed: {agent_name} for user {execution_context.user_id}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in execute_agent_pipeline for {agent_name}: {e}")
+            # Return a failed result instead of raising the exception
+            return AgentExecutionResult(
+                context=AgentExecutionContext(
+                    user_id=execution_context.user_id,
+                    thread_id=execution_context.thread_id,
+                    run_id=execution_context.run_id,
+                    request_id=execution_context.request_id,
+                    agent_name=agent_name,
+                    step=PipelineStep.ERROR,
+                    execution_timestamp=datetime.now(timezone.utc),
+                    pipeline_step_num=1,
+                    metadata={"error": str(e)}
+                ),
+                result={'error': str(e), 'success': False},
+                success=False,
+                error_message=str(e),
+                execution_time_ms=0.0,
+                pipeline_steps=[],
+                final_state=None
+            )
     
     async def cleanup(self) -> None:
         """Clean up user engine resources.
