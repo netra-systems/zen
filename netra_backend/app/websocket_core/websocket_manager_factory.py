@@ -268,68 +268,18 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
         env = get_env()
         current_env = env.get("ENVIRONMENT", "unknown").lower()
         
-        # CRITICAL FIX: Enhanced GCP environment detection with ULTRA DEFENSIVE patterns
-        # This addresses the root cause where GCP staging environments fail environment detection
-        is_gcp_cloud_run = bool(
-            env.get("K_SERVICE") or        # Standard GCP Cloud Run service indicator
-            env.get("K_REVISION") or       # Cloud Run revision indicator
-            env.get("K_CONFIGURATION") or  # Cloud Run configuration indicator
-            env.get("GAE_SERVICE") or      # Google App Engine service indicator
-            env.get("CLOUD_RUN_INSTANCE_ID")  # Additional Cloud Run indicator
-        )
+        # SIMPLE FIX: Basic GCP staging environment detection 
+        # Focus on the minimal fix needed for Factory SSOT validation
+        is_cloud_run = bool(env.get("K_SERVICE"))  # GCP Cloud Run indicator
+        is_staging = current_env == "staging" or bool(env.get("GOOGLE_CLOUD_PROJECT") and "staging" in env.get("GOOGLE_CLOUD_PROJECT", "").lower())
         
-        is_gcp_project = bool(env.get("GOOGLE_CLOUD_PROJECT"))
-        
-        # Enhanced staging detection with multiple patterns
-        is_staging_explicit = current_env == "staging"
-        is_staging_by_project = bool(env.get("GOOGLE_CLOUD_PROJECT") and "staging" in env.get("GOOGLE_CLOUD_PROJECT", "").lower())
-        is_staging_by_service = bool(env.get("K_SERVICE") and "staging" in env.get("K_SERVICE", "").lower())
-        
-        # ULTRA DEFENSIVE: Consider it staging if it's GCP and has staging indicators OR if it's cloud deployment
-        is_staging = is_staging_explicit or is_staging_by_project or is_staging_by_service
-        
-        # Cloud Run detection includes ANY GCP indicator
-        is_cloud_run = is_gcp_cloud_run or is_gcp_project or (env.get("PORT") and current_env in ["staging", "production"])
-        
-        # Enhanced E2E testing detection with more patterns
+        # Simple E2E testing detection
         is_e2e_testing = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
             env.get("STAGING_E2E_TEST", "0") == "1" or
-            env.get("E2E_TEST_ENV") == "staging" or
-            env.get("TESTING", "0") == "1" or
-            env.get("TESTING", "").lower() == "true"  # Handle "true" string values
+            env.get("E2E_TEST_ENV") == "staging"
         )
-        
-        # ULTRA DEFENSIVE: If we detect ANY cloud/staging/testing indicators, use staging-safe validation
-        # This prevents the "Factory SSOT validation failed" errors in legitimate environments
-        ultra_defensive_staging = (
-            is_staging or 
-            is_cloud_run or 
-            is_e2e_testing or
-            is_gcp_project or  # ANY GCP project indicator
-            current_env in ["staging", "test", "testing", "dev", "development"] or  # Known safe environments
-            env.get("PORT") is not None  # Any service with PORT (likely deployed)
-        )
-        
-        # CRITICAL LOGGING: Enhanced logging for debugging deployment issues
-        logger.info(
-            f"ULTRA DEFENSIVE STAGING DETECTION: "
-            f"env={current_env}, gcp_cloud_run={is_gcp_cloud_run}, gcp_project={is_gcp_project}, "
-            f"staging_explicit={is_staging_explicit}, staging_by_project={is_staging_by_project}, "
-            f"staging_by_service={is_staging_by_service}, is_staging={is_staging}, "
-            f"is_cloud_run={is_cloud_run}, is_e2e_testing={is_e2e_testing}, "
-            f"ultra_defensive_staging={ultra_defensive_staging}"
-        )
-        
-        # Log specific environment variables for GCP staging debugging
-        gcp_debug_vars = {
-            "K_SERVICE": env.get("K_SERVICE"),
-            "GOOGLE_CLOUD_PROJECT": env.get("GOOGLE_CLOUD_PROJECT"),
-            "PORT": env.get("PORT"),
-            "ENVIRONMENT": env.get("ENVIRONMENT")
-        }
-        logger.debug(f"GCP_DEBUG_VARS: {gcp_debug_vars}")
         
     except Exception as env_error:
         logger.error(f"Environment detection failed: {env_error}")
@@ -337,15 +287,10 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
         is_cloud_run = False
         is_staging = False
         is_e2e_testing = False
-        ultra_defensive_staging = False  # Default to False if detection fails
     
-    # CRITICAL FIX: Use ultra-defensive staging detection to prevent 1011 errors
-    # This ensures that ANY legitimate deployment environment uses staging-safe validation
-    if ultra_defensive_staging:
-        logger.info(
-            f"ULTRA DEFENSIVE STAGING: Using comprehensive staging validation "
-            f"(env={current_env}, ultra_defensive={ultra_defensive_staging})"
-        )
+    # Use staging-safe validation for staging or cloud run environments  
+    if is_staging or is_cloud_run or is_e2e_testing:
+        logger.info(f"ENHANCED STAGING: Using staging-safe validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})")
         
         try:
             # ENHANCED DEBUG LOGGING: Log UserExecutionContext details for debugging
