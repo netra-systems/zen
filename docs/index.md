@@ -5,7 +5,7 @@
 ### 🏗️ Core Architecture (Start Here)
 
 - **[SSOT Index](../reports/ssot-compliance/SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
-- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams
+- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams including child context hierarchies
 - **[UVS Triage Architecture Transition](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** 🆕 - **NEW**: Unified Validation System with intelligent data sufficiency states and 2-agent model
 - **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** 🎯 - **ESSENTIAL**: Clarifies agent workflow architecture, relationships between components, and common confusion points
 - [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Complete agent execution pipeline documentation
@@ -22,7 +22,7 @@
 ### 📚 System Components
 
 #### Execution & Isolation
-- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution engines
+- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns, execution engines, and child context hierarchies
 - [3-Tier Persistence Architecture](./3tier_persistence_architecture.md) - Database layer design
 - [Agent Golden Pattern Guide](./agent_golden_pattern_guide.md) - Best practices for agent development
 - [Critical Bug Fix Documentation](../reports/bug-fixes/) - Documented fixes and audit reports
@@ -145,13 +145,17 @@ The system uses factory patterns extensively:
 
 ## 📖 Essential Reading Order
 
-1. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview
+1. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview including child context patterns
 2. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
 3. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
 4. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
 5. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
 6. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
 7. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
+
+## 📚 Documentation Archive
+
+- **[Documentation Archive 2025-09-08](../docs_archive_20250908/MASTER_INDEX_BY_IMPORTANCE.md)** 📁 - **COMPREHENSIVE ARCHIVE**: ~400+ documentation files organized by business importance and technical category
 
 ## 🛠️ Development Guidelines
 

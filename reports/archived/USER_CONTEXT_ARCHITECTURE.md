@@ -121,33 +121,40 @@ graph LR
 classDiagram
     class UserExecutionContext {
         +String user_id
-        +String request_id
+        +String request_id  
         +String thread_id
+        +String run_id
         +String session_id
         +DateTime created_at
-        +ExecutionStatus status
+        +Dict metadata
+        +Optional~AsyncSession~ db_session
+        +Optional~String~ websocket_client_id
         
-        +Dict active_runs
-        +List run_history
-        +Dict execution_metrics
-        +List cleanup_callbacks
-        
-        +update_activity()
-        +record_run_start()
-        +record_run_success()
-        +record_run_failure()
-        +cleanup()
-        +get_status_summary()
+        +create_child_context(operation_name)
+        +create_child_context(child_suffix)
+        +with_db_session(db_session)
+        +with_websocket_connection(connection_id)
+        +verify_isolation()
+        +to_dict()
+        +get_correlation_id()
+        +_validate_required_ids()
+        +_validate_no_placeholder_values()
+        +_validate_metadata()
     }
     
-    class ExecutionStatus {
-        <<enumeration>>
-        INITIALIZING
-        ACTIVE
-        EXECUTING
-        COMPLETED
-        FAILED
-        CLEANED
+    class ChildExecutionContext {
+        +String parent_request_id
+        +String operation_name
+        +Int operation_depth
+        +Dict inherited_metadata
+        
+        +get_parent_context()
+        +get_operation_hierarchy()
+    }
+    
+    class InvalidContextError {
+        <<exception>>
+        +String message
     }
     
     class IsolatedExecutionEngine {
@@ -177,10 +184,97 @@ classDiagram
         +cleanup()
     }
     
-    UserExecutionContext --> ExecutionStatus
+    UserExecutionContext --> ChildExecutionContext : creates
+    UserExecutionContext ..> InvalidContextError : throws
+    ChildExecutionContext --> UserExecutionContext : inherits from
     IsolatedExecutionEngine --> UserExecutionContext
     IsolatedExecutionEngine --> UserWebSocketEmitter
     UserWebSocketEmitter --> UserWebSocketContext
+```
+
+## Context Hierarchy and Child Context Flow
+
+```mermaid
+graph TB
+    subgraph "Parent Context Lifecycle"
+        PC[Parent UserExecutionContext<br/>user_id: user123<br/>run_id: run456<br/>request_id: req789]
+        
+        subgraph "Child Context Creation"
+            CC1[Child Context 1<br/>operation: data_analysis<br/>request_id: req789_data_analysis<br/>parent_request_id: req789]
+            CC2[Child Context 2<br/>operation: optimization<br/>request_id: req789_optimization<br/>parent_request_id: req789]
+            CC3[Child Context 3<br/>operation: reporting<br/>request_id: req789_reporting<br/>parent_request_id: req789]
+        end
+        
+        subgraph "Grand-Child Contexts"
+            GCC1[Grand-Child<br/>operation: data_validation<br/>request_id: req789_data_analysis_validation<br/>parent: req789_data_analysis<br/>depth: 2]
+            GCC2[Grand-Child<br/>operation: cost_analysis<br/>request_id: req789_optimization_cost<br/>parent: req789_optimization<br/>depth: 2]
+        end
+        
+        subgraph "Metadata Inheritance"
+            META[Inherited Metadata<br/>• parent_request_id<br/>• operation_name<br/>• operation_depth<br/>• custom metadata]
+        end
+    end
+    
+    PC --> CC1
+    PC --> CC2
+    PC --> CC3
+    
+    CC1 --> GCC1
+    CC2 --> GCC2
+    
+    CC1 -.-> META
+    CC2 -.-> META
+    CC3 -.-> META
+    GCC1 -.-> META
+    GCC2 -.-> META
+    
+    style PC fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+    style CC1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style CC2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style CC3 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style GCC1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style GCC2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style META fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+```
+
+## Child Context Creation Flow
+
+```mermaid
+sequenceDiagram
+    participant PE as Parent Execution
+    participant PC as Parent Context
+    participant CF as Context Factory
+    participant CC as Child Context
+    participant CE as Child Execution
+    participant WS as WebSocket
+    
+    Note over PE,CE: Child Context Creation Process
+    
+    PE->>PC: create_child_context("data_analysis")
+    PC->>CF: validate operation_name
+    CF->>CF: generate new request_id
+    CF->>CF: inherit parent metadata
+    CF->>CF: increment operation_depth
+    CF-->>PC: validated parameters
+    
+    PC->>CC: new UserExecutionContext
+    Note right of CC: run_id: parent.run_id<br/>request_id: parent.request_id_data_analysis<br/>metadata: enhanced with parent info
+    
+    CC->>CC: validate_required_ids()
+    CC->>CC: validate_no_placeholder_values()
+    CC->>CC: validate_metadata()
+    
+    PC-->>PE: Child Context Ready
+    
+    PE->>CE: execute with child context
+    CE->>WS: notify with child request_id
+    WS-->>Client: event with operation context
+    
+    CE->>CE: perform operation
+    CE-->>PE: operation results
+    
+    PE->>PC: cleanup child context
+    Note over PC: Child cleanup handled automatically<br/>Parent context remains active
 ```
 
 ## Request Flow with User Isolation
@@ -195,6 +289,7 @@ sequenceDiagram
     participant IEE as IsolatedExecutionEngine
     participant UWE as UserWebSocketEmitter
     participant Agent
+    participant SubAgent as Child Agent
     participant DB
     
     Client->>API: POST /agent/execute
@@ -204,7 +299,7 @@ sequenceDiagram
     rect rgb(200, 255, 200)
         Note over API,EEF: Context Creation Phase
         API->>API: Create UserExecutionContext
-        Note right of API: user_id, request_id,<br/>thread_id, session_id
+        Note right of API: user_id, request_id,<br/>thread_id, session_id, run_id
     end
     
     rect rgb(255, 230, 200)
@@ -224,13 +319,25 @@ sequenceDiagram
     rect rgb(200, 200, 255)
         Note over IEE,Agent: Execution Phase
         API->>IEE: execute_agent_pipeline()
-        IEE->>IEE: Store in user_context.active_runs
         IEE->>UWE: notify_agent_started()
         UWE->>Client: WebSocket: agent_started
         
         IEE->>Agent: Execute with user context
         Agent->>DB: Query with user isolation
         DB-->>Agent: User-specific data
+
+        Note over Agent,SubAgent: Child Context Creation
+        Agent->>Agent: create_child_context("sub_operation")
+        Agent->>SubAgent: Execute with child context
+        SubAgent->>UWE: notify_agent_started(child_request_id)
+        UWE->>Client: WebSocket: child agent_started
+        
+        SubAgent->>DB: Query with child context isolation
+        DB-->>SubAgent: Child-specific data
+        SubAgent->>UWE: notify_agent_completed(child_request_id)
+        UWE->>Client: WebSocket: child agent_completed
+        SubAgent-->>Agent: Child results
+
         Agent-->>IEE: Result
         
         IEE->>UWE: notify_agent_completed()
@@ -241,7 +348,7 @@ sequenceDiagram
     rect rgb(255, 200, 200)
         Note over API,UWE: Cleanup Phase
         API->>IEE: cleanup()
-        IEE->>IEE: Clear active_runs
+        IEE->>IEE: Clear active_runs (including child contexts)
         IEE->>UWE: cleanup()
         UWE->>UWE: Clear event_queue
         IEE->>EEF: cleanup_context(request_id)
@@ -464,6 +571,9 @@ graph TB
 6. **Scalable**: Supports 10+ concurrent users reliably
 7. **Secure**: Multiple isolation boundaries and permission checks
 8. **Maintainable**: Single source of truth, clear separation of concerns
+9. **Hierarchical Context Management**: Child contexts enable sub-agent isolation while maintaining traceability
+10. **Operation Traceability**: Full parent-child relationship tracking with metadata inheritance
+11. **Flexible Agent Orchestration**: Supports complex multi-level agent workflows with proper isolation
 
 ## Migration from Singleton Pattern
 
