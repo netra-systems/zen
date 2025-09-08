@@ -458,15 +458,18 @@ class StartupOrchestrator:
                 registry = supervisor.registry
             
             if registry and bridge:
-                # Set the bridge on agent registry - only latest method supported
-                if hasattr(registry, 'set_websocket_bridge'):
-                    registry.set_websocket_bridge(bridge)
-                    self.logger.info("    - AgentWebSocketBridge set on agent registry")
+                # Set the WebSocket manager on agent registry - only latest method supported
+                if hasattr(registry, 'set_websocket_manager'):
+                    # Use the bridge's websocket_manager property to get the underlying WebSocket manager
+                    # If bridge.websocket_manager is None, pass the bridge itself as fallback
+                    websocket_manager = bridge.websocket_manager if hasattr(bridge, 'websocket_manager') else bridge
+                    registry.set_websocket_manager(websocket_manager or bridge)
+                    self.logger.info("    - WebSocket manager set on agent registry for multi-user isolation")
                 else:
-                    # Registry must support the bridge pattern
+                    # Registry must support the WebSocket manager pattern
                     raise DeterministicStartupError(
-                        "Agent registry does not support set_websocket_bridge() - "
-                        "registry must be updated to support AgentWebSocketBridge pattern"
+                        "Agent registry does not support set_websocket_manager() - "
+                        "registry must be updated to support WebSocket manager pattern"
                     )
     
     async def _phase5_critical_services(self) -> None:
