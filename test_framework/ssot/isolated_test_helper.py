@@ -3,15 +3,22 @@ Test Environment Isolation Helper
 
 Provides utilities for proper test environment isolation using IsolatedEnvironment.
 This replaces direct os.environ patches to prevent test pollution.
+
+Business Value: Platform/Internal - Test Stability & Environment Isolation
+Prevents test pollution and configuration leakage between test runs that can cause
+cascade failures and flaky tests.
 """
 
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, List
 from contextlib import contextmanager
 import unittest
 import uuid
+import logging
 from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.models.user_execution_context import UserExecutionContext
+
+logger = logging.getLogger(__name__)
 
 
 class IsolatedTestCase(unittest.TestCase):
@@ -161,8 +168,77 @@ def create_isolated_user_context(
 #    context = create_isolated_user_context(user_id="test_user")
 
 
+class IsolatedTestHelper:
+    """
+    Advanced helper for managing isolated test environments with context management.
+    
+    This class provides comprehensive environment isolation for complex integration tests
+    where multiple isolated contexts may be needed.
+    """
+    
+    def __init__(self):
+        self._active_contexts: List['IsolatedContext'] = []
+    
+    @contextmanager
+    def create_isolated_context(self, context_name: str = None):
+        """
+        Create an isolated environment context for testing.
+        
+        Args:
+            context_name: Optional name for the context (for debugging)
+            
+        Returns:
+            IsolatedContext: Context manager with isolated environment
+        """
+        context_name = context_name or f"test_context_{uuid.uuid4().hex[:8]}"
+        context = IsolatedContext(context_name)
+        self._active_contexts.append(context)
+        
+        try:
+            yield context
+        finally:
+            if context in self._active_contexts:
+                self._active_contexts.remove(context)
+            context.cleanup()
+    
+    def cleanup_all(self):
+        """Clean up all active contexts."""
+        for context in self._active_contexts[:]:  # Copy list to avoid modification during iteration
+            context.cleanup()
+            if context in self._active_contexts:
+                self._active_contexts.remove(context)
+
+
+class IsolatedContext:
+    """
+    Represents a single isolated environment context for testing.
+    """
+    
+    def __init__(self, name: str):
+        self.name = name
+        self.env = IsolatedEnvironment()
+        self.env.enable_isolation_mode()
+        logger.debug(f"Created isolated context: {name}")
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cleanup()
+    
+    def cleanup(self):
+        """Clean up the isolated environment."""
+        try:
+            self.env.reset()
+            logger.debug(f"Cleaned up isolated context: {self.name}")
+        except Exception as e:
+            logger.warning(f"Error cleaning up isolated context {self.name}: {e}")
+
+
 __all__ = [
     "IsolatedTestCase",
+    "IsolatedTestHelper", 
+    "IsolatedContext",
     "isolated_env", 
     "patch_env",
     "create_isolated_user_context"

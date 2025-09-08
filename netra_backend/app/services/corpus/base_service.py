@@ -2,7 +2,7 @@
 Base corpus service class - core orchestrator initialization
 """
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -131,9 +131,36 @@ class DocumentManager:
 class ValidationManager:
     """Minimal validation manager - stub implementation"""
     
-    def validate_corpus_data(self, data: Dict) -> bool:
-        """Basic validation stub"""
-        return True
+    def validate_corpus_data(self, data: Dict) -> Dict[str, Any]:
+        """Basic validation that returns dict format expected by corpus_creation.py"""
+        # Basic validation - can be enhanced later with specific rules
+        errors = []
+        
+        # Check if data is provided
+        if not data:
+            errors.append("Corpus data cannot be empty")
+        
+        # Check for required name field (basic validation)
+        if hasattr(data, 'name') and not data.name:
+            errors.append("Corpus name is required")
+        elif isinstance(data, dict) and not data.get('name'):
+            errors.append("Corpus name is required")
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors
+        }
+    
+    def sanitize_table_name(self, corpus_id: str) -> str:
+        """Sanitize table name for ClickHouse"""
+        # Replace any non-alphanumeric characters with underscores
+        # ClickHouse table names should be alphanumeric with underscores
+        import re
+        sanitized = re.sub(r'[^a-zA-Z0-9_]', '_', corpus_id)
+        # Ensure it starts with letter or underscore
+        if sanitized and not sanitized[0].isalpha() and sanitized[0] != '_':
+            sanitized = f"corpus_{sanitized}"
+        return f"corpus_{sanitized}" if sanitized else "corpus_default"
 
 
 class BaseCorpusService:

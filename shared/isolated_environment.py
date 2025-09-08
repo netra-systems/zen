@@ -847,6 +847,47 @@ class IsolatedEnvironment:
         with self._lock:
             if callback in self._change_callbacks:
                 self._change_callbacks.remove(callback)
+
+    def get_change_history(self, key: str) -> List[Dict[str, Any]]:
+        """
+        Get change history for a specific environment variable.
+        
+        Args:
+            key: Environment variable name
+            
+        Returns:
+            List of change records with timestamps and sources
+        """
+        # For now, return a simplified history based on current state
+        history = []
+        current_value = self.get(key)
+        current_source = self.get_variable_source(key)
+        
+        if current_value is not None:
+            history.append({
+                "value": current_value,
+                "source": current_source or "unknown",
+                "timestamp": "current"
+            })
+        
+        return history
+
+    def get_sources(self) -> Dict[str, List[str]]:
+        """
+        Get all environment variables organized by source.
+        
+        Returns:
+            Dictionary mapping source names to lists of variable names
+        """
+        sources = {}
+        
+        with self._lock:
+            for var_name, source in self._variable_sources.items():
+                if source not in sources:
+                    sources[source] = []
+                sources[source].append(var_name)
+        
+        return sources
     
     def load_from_file(self, filepath: Union[str, Path], source: Optional[str] = None, override_existing: bool = True) -> Tuple[int, List[str]]:
         """
@@ -1309,6 +1350,19 @@ class SecretLoader:
         """Set a secret value."""
         return self.env_manager.set(key, value, source)
 
+    def get_masked_value(self, key: str) -> str:
+        """
+        Get a masked version of a value for logging purposes.
+        
+        Args:
+            key: Environment variable name
+            
+        Returns:
+            Masked value safe for logging
+        """
+        value = self.env_manager.get(key, "")
+        return _mask_sensitive_value(key, value)
+
 
 # Legacy compatibility function  
 def get_environment_manager(isolation_mode: Optional[bool] = None):
@@ -1332,11 +1386,6 @@ def get_environment_manager(isolation_mode: Optional[bool] = None):
 class EnvironmentValidator:
     """Backwards compatibility wrapper for environment validation functionality."""
     
-    def __init__(self, enable_fallbacks: bool = True, development_mode: bool = True):
-        """Initialize environment validator (compatibility layer)."""
-        self.enable_fallbacks = enable_fallbacks
-        self.development_mode = development_mode
-        self.env = get_env()
     
     def validate_all(self) -> ValidationResult:
         """Validate all environment variables."""
@@ -1384,6 +1433,212 @@ class EnvironmentValidator:
             suggestions.append("Check your .env file for missing or incorrect values")
         
         return suggestions
+
+    def __init__(self, env: Optional['IsolatedEnvironment'] = None):
+        """
+        Initialize environment validator with specific environment instance.
+        
+        Args:
+            env: IsolatedEnvironment instance to validate (uses global if None)
+        """
+        self.env = env or get_env()
+
+    def validate_critical_service_variables(self, service_name: str) -> ValidationResult:
+        """
+        Validate critical service variables that prevent cascade failures.
+        
+        Args:
+            service_name: Name of service to validate (backend, auth, frontend)
+            
+        Returns:
+            ValidationResult with validation status and errors
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        if service_name == "backend":
+            # Critical backend variables from MISSION_CRITICAL_NAMED_VALUES_INDEX.xml
+            required_vars = ["SERVICE_SECRET", "SERVICE_ID", "DATABASE_URL", "JWT_SECRET_KEY"]
+            for var in required_vars:
+                value = self.env.get(var)
+                if not value:
+                    errors.append(f"CRITICAL: Missing {var} - this will cause {self._get_cascade_impact(var)}")
+                elif var == "SERVICE_SECRET" and len(value) < 8:
+                    errors.append(f"SERVICE_SECRET too short - must be at least 8 characters to prevent auth failures")
+        
+        elif service_name == "auth":
+            required_vars = ["JWT_SECRET_KEY", "SERVICE_SECRET", "DATABASE_URL"]
+            for var in required_vars:
+                if not self.env.get(var):
+                    errors.append(f"CRITICAL: Missing {var} for auth service")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def validate_service_id_stability(self) -> ValidationResult:
+        """
+        Validate SERVICE_ID stability requirement to prevent auth failures.
+        
+        Returns:
+            ValidationResult indicating if SERVICE_ID is stable
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        service_id = self.env.get("SERVICE_ID", "")
+        
+        if not service_id:
+            errors.append("SERVICE_ID is missing")
+        elif "-" in service_id and service_id.count("-") > 1:
+            # Check for timestamp patterns (common issue)
+            parts = service_id.split("-")
+            if len(parts) >= 3 and parts[-1].isdigit() and len(parts[-1]) >= 8:
+                errors.append(f"SERVICE_ID '{service_id}' appears to have timestamp suffix - must be stable value 'netra-backend'")
+        elif service_id != "netra-backend":
+            warnings.append(f"SERVICE_ID is '{service_id}' - verify this matches expected stable value")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def validate_frontend_critical_variables(self) -> ValidationResult:
+        """
+        Validate critical frontend environment variables.
+        
+        Returns:
+            ValidationResult for frontend configuration
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        critical_vars = [
+            "NEXT_PUBLIC_API_URL",
+            "NEXT_PUBLIC_WS_URL",
+            "NEXT_PUBLIC_AUTH_URL", 
+            "NEXT_PUBLIC_ENVIRONMENT"
+        ]
+        
+        for var in critical_vars:
+            value = self.env.get(var)
+            if not value:
+                errors.append(f"CRITICAL: Missing {var} - {self._get_frontend_cascade_impact(var)}")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def validate_staging_domain_configuration(self) -> ValidationResult:
+        """
+        Validate staging domain configuration to prevent API connection failures.
+        
+        Returns:
+            ValidationResult for staging domain validation
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        environment = self.env.get("ENVIRONMENT", "").lower()
+        if environment != "staging":
+            return ValidationResult(True, [], [], [])  # Skip if not staging
+        
+        api_url = self.env.get("NEXT_PUBLIC_API_URL", "")
+        ws_url = self.env.get("NEXT_PUBLIC_WS_URL", "")
+        auth_url = self.env.get("NEXT_PUBLIC_AUTH_URL", "")
+        
+        # Check for incorrect staging patterns
+        incorrect_patterns = [
+            ("localhost", "Localhost URLs not allowed in staging"),
+            ("staging.netrasystems.ai", "Should use api.staging.netrasystems.ai subdomain"),
+            ("http://", "Should use HTTPS in staging")
+        ]
+        
+        for url, url_name in [(api_url, "API"), (ws_url, "WebSocket"), (auth_url, "Auth")]:
+            if url:
+                for pattern, message in incorrect_patterns:
+                    if pattern in url:
+                        errors.append(f"{url_name} URL contains '{pattern}': {message}")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def validate_discovery_endpoint_configuration(self, discovery_data: Dict[str, Any]) -> ValidationResult:
+        """
+        Validate discovery endpoint configuration.
+        
+        Args:
+            discovery_data: Dictionary containing discovery endpoint data
+            
+        Returns:
+            ValidationResult for discovery configuration
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        environment = self.env.get("ENVIRONMENT", "").lower()
+        
+        if environment in ["staging", "production"]:
+            # Check for localhost URLs in non-local environments
+            for key, url in discovery_data.items():
+                if isinstance(url, str) and "localhost" in url:
+                    errors.append(f"Discovery endpoint '{key}' contains localhost URL in {environment}: {url}")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def validate_environment_specific_behavior(self, env_name: str) -> ValidationResult:
+        """
+        Validate environment-specific behavior requirements.
+        
+        Args:
+            env_name: Environment name (development, staging, production)
+            
+        Returns:
+            ValidationResult for environment-specific validation
+        """
+        errors = []
+        warnings = []
+        missing_optional = []
+        
+        debug_value = self.env.get("DEBUG", "").lower()
+        api_url = self.env.get("NEXT_PUBLIC_API_URL", "")
+        
+        if env_name == "development":
+            if debug_value != "true":
+                warnings.append("DEBUG should be 'true' in development")
+            if api_url and "localhost" not in api_url:
+                warnings.append("Development should typically use localhost URLs")
+                
+        elif env_name in ["staging", "production"]:
+            if debug_value == "true":
+                errors.append(f"DEBUG should be 'false' in {env_name}, not 'true'")
+            if api_url and "localhost" in api_url:
+                errors.append(f"Should not use localhost URLs in {env_name}")
+        
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, missing_optional)
+
+    def _get_cascade_impact(self, var_name: str) -> str:
+        """Get cascade impact description for a variable."""
+        impacts = {
+            "SERVICE_SECRET": "complete authentication failure and circuit breaker permanent open",
+            "SERVICE_ID": "authentication mismatches and service communication failures", 
+            "DATABASE_URL": "complete backend failure with no data access",
+            "JWT_SECRET_KEY": "token validation failures and authentication breakdown"
+        }
+        return impacts.get(var_name, "service functionality degradation")
+
+    def _get_frontend_cascade_impact(self, var_name: str) -> str:
+        """Get cascade impact description for frontend variables."""
+        impacts = {
+            "NEXT_PUBLIC_API_URL": "No API calls work, no agents run, no data fetched",
+            "NEXT_PUBLIC_WS_URL": "No real-time updates, no agent thinking messages, chat appears frozen",
+            "NEXT_PUBLIC_AUTH_URL": "No login, no authentication, users cannot access system",
+            "NEXT_PUBLIC_ENVIRONMENT": "Wrong URLs used, staging/production confusion, data corruption"
+        }
+        return impacts.get(var_name, "frontend functionality failure")
 
 
 # Backwards compatibility aliases
