@@ -940,9 +940,59 @@ async def managed_user_context(
                 logger.warning(f"Error closing database session: {e}")
 
 
+# ============================================================================
+# FACTORY CLASS FOR INTEGRATION TEST COMPATIBILITY
+# ============================================================================
+
+class UserContextFactory:
+    """Factory class for creating UserExecutionContext instances.
+    
+    This factory provides a convenient interface for integration tests
+    and other components that need to create UserExecutionContext instances
+    with consistent patterns.
+    """
+    
+    @staticmethod
+    def create_context(
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        request_id: Optional[str] = None,
+        websocket_client_id: Optional[str] = None
+    ) -> UserExecutionContext:
+        """Create a basic UserExecutionContext for testing."""
+        return UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+    
+    @staticmethod
+    def create_with_session(
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        db_session: 'AsyncSession',
+        request_id: Optional[str] = None,
+        websocket_client_id: Optional[str] = None
+    ) -> UserExecutionContext:
+        """Create a UserExecutionContext with database session."""
+        context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+        return context.with_db_session(db_session)
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
+    'UserContextFactory',
     'InvalidContextError', 
     'ContextIsolationError',
     'validate_user_context',
