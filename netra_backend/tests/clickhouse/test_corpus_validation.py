@@ -84,12 +84,15 @@ class TestCorpusCloning:
             mock_client.return_value.__aenter__.return_value = mock_instance
 
             # Mock: Generic component isolation for controlled unit testing
-            db = MagicMock()  # TODO: Use real service instance
+            db = AsyncMock()  # Fixed: Use AsyncMock for async database operations
 
             # Mock source corpus
             source = _create_source_corpus()
 
-            db.query().filter().first.return_value = source
+            # Setup async mock for database execute calls
+            mock_result = AsyncMock()
+            mock_result.scalar_one_or_none.return_value = source
+            db.execute.return_value = mock_result
 
             # Clone corpus
             result = await service.clone_corpus(
