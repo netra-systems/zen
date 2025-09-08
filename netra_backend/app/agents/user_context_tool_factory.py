@@ -126,9 +126,13 @@ class UserContextToolFactory:
         
         Used for lightweight operations or fallback scenarios.
         """
-        from netra_backend.app.agents.tools.data_helper_tool import DataHelperTool
-        
-        basic_tools = [DataHelperTool]
+        # Use production tool as minimal fallback since specific tools don't exist yet
+        try:
+            from netra_backend.app.agents.production_tool import ProductionTool
+            basic_tools = [ProductionTool]
+        except ImportError:
+            # If no tools available, create empty system
+            basic_tools = []
         
         return await UserContextToolFactory.create_user_tool_system(
             context=context,
@@ -146,6 +150,11 @@ class UserContextToolFactory:
         Returns:
             bool: True if valid, False otherwise
         """
+        # Handle None input gracefully
+        if tool_system is None:
+            logger.error("❌ Tool system is None")
+            return False
+            
         required_keys = ['registry', 'dispatcher', 'tools', 'correlation_id']
         
         for key in required_keys:
@@ -178,10 +187,10 @@ def get_app_tool_classes():
         # For startup/testing, this might not be available
         return []  # Fallback - implement request context lookup if needed
     except Exception:
-        # Fallback to default tool classes
-        from netra_backend.app.agents.tools.data_helper_tool import DataHelperTool
-        from netra_backend.app.agents.tools.deep_research_tool import DeepResearchTool
-        from netra_backend.app.agents.tools.reliability_scorer_tool import ReliabilityScorerTool
-        from netra_backend.app.agents.tools.sandboxed_interpreter_tool import SandboxedInterpreterTool
-        
-        return [DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool]
+        # Fallback to production tool since specific tools don't exist yet
+        try:
+            from netra_backend.app.agents.production_tool import ProductionTool
+            return [ProductionTool]
+        except ImportError:
+            # If no tools available, return empty list
+            return []
