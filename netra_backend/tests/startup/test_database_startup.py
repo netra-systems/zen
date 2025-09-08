@@ -15,6 +15,7 @@ This test validates database startup requirements:
 """
 import pytest
 from typing import Dict, List
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from test_framework.database.test_database_manager import DatabaseTestManager
 from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
@@ -99,7 +100,7 @@ async def test_database_connection_validation_with_mocks():
         mock_session_class.return_value = mock_session
         
         # Mock successful Redis connection
-        mock_redis_instance = MagicNone  # TODO: Use real service instance
+        mock_redis_instance = MagicMock()  # TODO: Use real service instance
         mock_redis_instance.ping = MagicMock(return_value=True)
         mock_redis.return_value = mock_redis_instance
         

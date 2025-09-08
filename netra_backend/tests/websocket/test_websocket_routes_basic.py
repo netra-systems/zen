@@ -10,11 +10,10 @@ import pytest
 import json
 from datetime import datetime
 from typing import Dict, Any
+from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
-
-import pytest
 
 
 class TestWebSocketRoutesBasic:
@@ -128,7 +127,7 @@ class TestWebSocketRoutesBasic:
             
             # Mock the websocket manager
             with patch('netra_backend.app.routes.websocket.get_websocket_manager') as mock_get_ws_manager:
-                mock_ws_manager = MagicNone  # TODO: Use real service instance
+                mock_ws_manager = MagicMock()  # TODO: Use real service instance
                 mock_ws_manager.get_stats.return_value = {
                     "active_connections": 0,
                     "uptime_seconds": 100,
@@ -179,7 +178,7 @@ class TestWebSocketRoutesBasic:
                  patch('netra_backend.app.routes.websocket.get_connection_monitor') as mock_get_monitor:
                 
                 # Set up WebSocket manager mock
-                mock_ws_manager = MagicNone  # TODO: Use real service instance
+                mock_ws_manager = MagicMock()  # TODO: Use real service instance
                 mock_ws_manager.get_stats.return_value = {
                     "active_connections": 2,
                     "total_connections": 10,
@@ -190,7 +189,7 @@ class TestWebSocketRoutesBasic:
                 mock_get_ws_manager.return_value = mock_ws_manager
                 
                 # Set up authenticator mock
-                mock_auth = MagicNone  # TODO: Use real service instance
+                mock_auth = MagicMock()  # TODO: Use real service instance
                 mock_auth.get_auth_stats.return_value = {
                     "success_rate": 0.95,
                     "rate_limited": 2
@@ -198,7 +197,7 @@ class TestWebSocketRoutesBasic:
                 mock_get_auth.return_value = mock_auth
                 
                 # Set up monitor mock
-                mock_monitor = MagicNone  # TODO: Use real service instance
+                mock_monitor = MagicMock()  # TODO: Use real service instance
                 mock_monitor.get_global_stats.return_value = {
                     "total_connections": 2,
                     "health_summary": {
@@ -272,7 +271,7 @@ class TestWebSocketRoutesBasic:
             assert error_msg is not None
             
             # Test is_websocket_connected with mock
-            mock_websocket = MagicNone  # TODO: Use real service instance
+            mock_websocket = MagicMock()  # TODO: Use real service instance
             mock_websocket.application_state = "CONNECTED"
             
             # This might work differently depending on implementation

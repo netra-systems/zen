@@ -22,6 +22,7 @@ import os
 import subprocess
 import time
 import redis
+import inspect
 from typing import Dict, Any, Optional
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -125,10 +126,10 @@ class TestRedisConfigurationIntegration:
         assert backend_env.get_redis_host() == "dev-redis"
         assert backend_env.get_redis_port() == 6379  # Internal port, not external
         
-        # The URL should use internal Docker service name and port
+        # The URL should use the configured Redis host and port (SSOT principle)
         redis_url = backend_env.get_redis_url()
-        # Since get_redis_url() uses REDIS_URL env var directly, we need to test the components
-        assert "redis://localhost:6379/0" == redis_url  # Default since REDIS_URL not set
+        # RedisConfigurationBuilder should construct URL from individual components
+        assert redis_url == "redis://dev-redis:6379/0"  # Built from REDIS_HOST and REDIS_PORT
     
     def test_docker_compose_redis_configuration_test_environment(self):
         """Test Redis config matches Docker Compose test environment."""
@@ -349,17 +350,26 @@ class TestRedisConfigurationIntegration:
     
     def test_redis_configuration_with_isolated_environment_sync(self):
         """Test Redis configuration with IsolatedEnvironment sync behavior."""
-        # Test that changes in os.environ are reflected in isolated environment
-        test_redis_url = "redis://sync-test:6379/2"
+        # Test that changes in isolated environment are reflected (SSOT component-based approach)
+        test_redis_host = "sync-test"
+        test_redis_port = "6379" 
+        test_redis_db = "2"
+        test_redis_url = f"redis://{test_redis_host}:{test_redis_port}/{test_redis_db}"
         
-        # Set in isolated environment
-        self.env.set("REDIS_URL", test_redis_url, "isolation_sync_test")
+        # Set individual Redis components in isolated environment (SSOT pattern)
+        self.env.set("REDIS_HOST", test_redis_host, "isolation_sync_test")
+        self.env.set("REDIS_PORT", test_redis_port, "isolation_sync_test")
+        self.env.set("REDIS_DB", test_redis_db, "isolation_sync_test")
         
         backend_env = BackendEnvironment()
         assert backend_env.get_redis_url() == test_redis_url
         
-        # Test isolation behavior - changes should be isolated
-        with patch.dict(os.environ, {"REDIS_URL": "redis://external:6379/0"}):
+        # Test isolation behavior - changes should be isolated from os.environ
+        with patch.dict(os.environ, {
+            "REDIS_HOST": "external", 
+            "REDIS_PORT": "6379",
+            "REDIS_DB": "0"
+        }):
             # In isolation mode, isolated vars take precedence
             assert backend_env.get_redis_url() == test_redis_url
             
@@ -367,14 +377,14 @@ class TestRedisConfigurationIntegration:
             if self.env._is_test_context():
                 self.env._sync_with_os_environ()
                 new_backend_env = BackendEnvironment()
-                # After sync, should use os.environ value
+                # After sync, should use os.environ values
                 assert new_backend_env.get_redis_url() == "redis://external:6379/0"
     
     def test_environment_fallback_behavior(self):
         """Test environment fallback behavior for Redis configuration."""
-        # Test with minimal environment (like in container startup)
-        minimal_env = {
-            "ENVIRONMENT": "production",
+        # Test development environment allows fallbacks
+        dev_minimal_env = {
+            "ENVIRONMENT": "development",
             # Intentionally missing REDIS_* variables
         }
         
@@ -382,20 +392,46 @@ class TestRedisConfigurationIntegration:
         self.env.reset()
         self.env.enable_isolation()
         
-        # Set minimal environment
-        for key, value in minimal_env.items():
-            self.env.set(key, value, "minimal_test")
+        # Set minimal development environment
+        for key, value in dev_minimal_env.items():
+            self.env.set(key, value, "minimal_dev_test")
         
         backend_env = BackendEnvironment()
         
-        # Should use fallback values
+        # Development should use fallback values (per SSOT security principle)
         assert backend_env.get_redis_host() == "localhost"
         assert backend_env.get_redis_port() == 6379
         assert backend_env.get_redis_url() == "redis://localhost:6379/0"
+        assert backend_env.is_development() is True
         
-        # Environment detection should still work
-        assert backend_env.get_environment() == "production"
-        assert backend_env.is_production() is True
+        # Test production environment SHOULD NOT allow fallbacks (security requirement)
+        self.env.reset()
+        self.env.enable_isolation()
+        
+        prod_minimal_env = {
+            "ENVIRONMENT": "production",
+            # Intentionally missing REDIS_* variables - this should fail
+        }
+        
+        for key, value in prod_minimal_env.items():
+            self.env.set(key, value, "minimal_prod_test")
+        
+        backend_env_prod = BackendEnvironment()
+        assert backend_env_prod.is_production() is True
+        
+        # Production should REQUIRE explicit Redis configuration (SSOT security principle)
+        try:
+            redis_host = backend_env_prod.get_redis_host()
+            pytest.fail(f"Production environment should require explicit REDIS_HOST, got: {redis_host}")
+        except ValueError as e:
+            assert "REDIS_HOST required" in str(e)
+            
+        # Redis URL should also fail in production without explicit config
+        try:
+            redis_url = backend_env_prod.get_redis_url()
+            pytest.fail(f"Production environment should require explicit Redis config, got: {redis_url}")
+        except ValueError as e:
+            assert "Redis configuration required" in str(e)
     
     def test_configuration_validation_integration(self):
         """Test integrated configuration validation catches Redis issues."""
@@ -461,8 +497,6 @@ class TestConfigurationPatternCompliance:
         # This is a pattern compliance test
         # We verify the BackendEnvironment class follows SSOT principles
         
-        import inspect
-        
         # Get BackendEnvironment source code
         backend_env_source = inspect.getsource(BackendEnvironment)
         
@@ -483,18 +517,20 @@ class TestConfigurationPatternCompliance:
         backend_env = BackendEnvironment()
         
         # Test Redis variables follow consistent naming
+        # NOTE: get_redis_url() uses RedisConfigurationBuilder SSOT pattern, 
+        # so it references "RedisConfigurationBuilder" rather than REDIS_URL directly
         redis_methods = [
             ('get_redis_host', 'REDIS_HOST'),
             ('get_redis_port', 'REDIS_PORT'), 
-            ('get_redis_url', 'REDIS_URL')
+            ('get_redis_url', 'RedisConfigurationBuilder')  # SSOT pattern - builds from components
         ]
         
-        for method_name, expected_env_var in redis_methods:
+        for method_name, expected_reference in redis_methods:
             method = getattr(backend_env, method_name)
             
-            # The method should be documented or its implementation should reference the env var
+            # The method should be documented or its implementation should reference the expected pattern
             method_source = inspect.getsource(method)
-            assert expected_env_var in method_source, f"{method_name} should reference {expected_env_var}"
+            assert expected_reference in method_source, f"{method_name} should reference {expected_reference}"
         
         # Test Postgres variables follow consistent naming  
         postgres_methods = [
