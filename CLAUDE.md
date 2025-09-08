@@ -5,6 +5,8 @@ THE VERY FIST STEP YOU MUST TAKE BEFORE DOING ANYTHING IS ALWAYS TO
 PICK ONE IMPORTANT SECTION OF THIS DOCUMENT AND MAKE IT THE "SLIGHT EMPHASIS" OF YOUR WORKING MOMENT,
 LITERALLY WRITING AND OUTPUTING YOUR CHOICE BEFORE PROCEEDING.
 
+SUPER IMPORTANT: COMPLETE FEATURE FREEZE. ZERO NEW FEATURES. ONLY MAKE EXISTING FEATURES WORK.
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -130,6 +132,7 @@ Use the test decorator when a function has to be in system code.
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- **[Migration Paths Consolidated](./docs/MIGRATION_PATHS_CONSOLIDATED.md)** - Master guide for all migration tracks with dependencies and validation
 - **[Agent Architecture Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
 - **[Manager Renaming Plan](./reports/architecture/MANAGER_RENAMING_PLAN_20250908.md)** - Business-focused naming to replace confusing "Manager" terminology
 - **[Manager Renaming Implementation](./reports/architecture/MANAGER_RENAMING_IMPLEMENTATION_PLAN.md)** - Detailed implementation plan with risk mitigation
