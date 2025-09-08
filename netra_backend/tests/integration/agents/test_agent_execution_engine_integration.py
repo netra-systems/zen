@@ -459,7 +459,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
             # Create execution context
             exec_ctx = UserExecutionContext(
                 user_id=ctx.user_id,
-                session_id=ctx.session_id,
+                run_id=ctx.session_id,  # Use session_id as run_id
                 thread_id=ctx.thread_id
             )
             ctx.execution_context = exec_ctx

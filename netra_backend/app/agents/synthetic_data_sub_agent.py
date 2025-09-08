@@ -14,7 +14,7 @@ from typing import List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-# DatabaseSessionManager removed - use SSOT database module get_db() instead
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # Import modular components
