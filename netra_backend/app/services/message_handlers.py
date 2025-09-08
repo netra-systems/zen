@@ -67,7 +67,7 @@ from netra_backend.app.services.message_processing import (
 )
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 

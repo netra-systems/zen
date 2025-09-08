@@ -85,7 +85,7 @@ class SyntheticDataGenerator:
     ) -> List[Dict[str, Any]]:
         """Generate data in batches with progress tracking"""
         # Create a UserExecutionContext from the parameters for batch processing
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         context = UserExecutionContext(
             user_id=user_id or "unknown",
             thread_id=thread_id or "unknown", 

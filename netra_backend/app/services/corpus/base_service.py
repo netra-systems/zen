@@ -12,7 +12,7 @@ from netra_backend.app.services.corpus.clickhouse_operations import (
 from netra_backend.app.services.corpus.search_operations import SearchOperations
 from netra_backend.app.db import models_postgres as models
 from netra_backend.app import schemas
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class CorpusManager:

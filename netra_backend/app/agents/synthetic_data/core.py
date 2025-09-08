@@ -14,7 +14,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     ApprovalFlowOrchestrator,

@@ -21,7 +21,7 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     SyntheticDataApprovalHandler,

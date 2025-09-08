@@ -21,7 +21,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.agent_error_types import AgentValidationError
 from netra_backend.app.core.exceptions_agent import AgentError
 from netra_backend.app.agents.input_validation import validate_agent_input
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.utils import extract_json_from_response, extract_thread_id
 from netra_backend.app.llm.observability import (

@@ -71,14 +71,14 @@ class CoreClickHouseOperations:
     
     # Complex corpus operations
     
-    async def create_corpus_table(self, corpus_id: str, table_name: str, db: Session):
+    async def create_corpus_table(self, corpus_id: str, table_name: str, db: Session, user_context=None):
         """Create ClickHouse table for corpus content with status management."""
         try:
             query = self._build_corpus_table_query(table_name)
             await self._execute_table_creation(table_name, query)
-            await self._handle_corpus_creation_success(corpus_id, table_name, db)
+            await self._handle_corpus_creation_success(corpus_id, table_name, db, user_context)
         except Exception as e:
-            await self._handle_corpus_creation_error(corpus_id, e, db)
+            await self._handle_corpus_creation_error(corpus_id, e, db, user_context)
     
     async def delete_corpus_table(self, table_name: str):
         """Delete ClickHouse table for corpus."""
@@ -249,16 +249,16 @@ class CoreClickHouseOperations:
     
     # Status management methods
     
-    async def _handle_corpus_creation_success(self, corpus_id: str, table_name: str, db: Session):
+    async def _handle_corpus_creation_success(self, corpus_id: str, table_name: str, db: Session, user_context=None):
         """Handle successful corpus table creation."""
         self._update_corpus_status(corpus_id, CorpusStatus.AVAILABLE, db)
-        await self._send_corpus_notification(corpus_id, table_name, "created")
+        await self._send_corpus_notification(corpus_id, table_name, "created", user_context=user_context)
         logger.info(f"Created ClickHouse table {table_name} for corpus {corpus_id}")
     
-    async def _handle_corpus_creation_error(self, corpus_id: str, error: Exception, db: Session):
+    async def _handle_corpus_creation_error(self, corpus_id: str, error: Exception, db: Session, user_context=None):
         """Handle corpus table creation error."""
         self._update_corpus_status(corpus_id, CorpusStatus.FAILED, db)
-        await self._send_corpus_notification(corpus_id, None, "error", str(error))
+        await self._send_corpus_notification(corpus_id, None, "error", str(error), user_context=user_context)
         logger.error(f"Failed to create ClickHouse table for corpus {corpus_id}: {str(error)}")
         raise ClickHouseOperationError(f"Failed to create table: {str(error)}")
     
@@ -272,11 +272,24 @@ class CoreClickHouseOperations:
         db.commit()
     
     async def _send_corpus_notification(self, corpus_id: str, table_name: Optional[str], 
-                                       event_type: str, error: Optional[str] = None):
-        """Send WebSocket notification for corpus events."""
+                                       event_type: str, error: Optional[str] = None, 
+                                       user_context=None):
+        """Send WebSocket notification for corpus events.
+        
+        Args:
+            corpus_id: Corpus identifier
+            table_name: Optional table name
+            event_type: Type of event ('created' or 'error')
+            error: Optional error message
+            user_context: Optional user execution context for WebSocket notifications
+        """
         try:
-            from netra_backend.app.websocket_core import get_websocket_manager
-            manager = get_websocket_manager()
+            if not user_context:
+                logger.debug(f"Corpus notification not sent - no user context provided for {corpus_id}")
+                return
+                
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            manager = create_websocket_manager(user_context)
             
             if event_type == "created":
                 payload = {
@@ -293,7 +306,8 @@ class CoreClickHouseOperations:
                     "payload": {"corpus_id": corpus_id, "error": error}
                 }
             
-            await manager.broadcasting.broadcast_to_all(payload)
+            # Send to specific user instead of broadcast
+            await manager.send_to_user(user_context.user_id, payload)
         except Exception as e:
             logger.error(f"Failed to send corpus notification: {e}")
 

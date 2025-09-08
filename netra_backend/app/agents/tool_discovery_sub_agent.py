@@ -23,7 +23,7 @@ from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntities, ToolRecommendation
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 logger = central_logger.get_logger(__name__)

@@ -48,11 +48,11 @@ class WebSocketEventRouter:
     infrastructure and does not emit events itself.
     """
     
-    def __init__(self, websocket_manager: WebSocketManager):
+    def __init__(self, websocket_manager: Optional[WebSocketManager]):
         """Initialize router with WebSocket manager dependency.
         
         Args:
-            websocket_manager: WebSocket manager instance for actual connection management
+            websocket_manager: Optional WebSocket manager instance for actual connection management
         """
         self.websocket_manager = websocket_manager
         
@@ -296,9 +296,10 @@ class WebSocketEventRouter:
     async def _send_to_connection(self, connection_id: str, event: Dict[str, Any]) -> bool:
         """Send event to specific connection via WebSocket manager."""
         try:
-            # For now, delegate to the WebSocket manager
-            # This would need to be implemented based on the manager's API
-            # Placeholder implementation
+            # Check if WebSocket manager is available
+            if not self.websocket_manager:
+                logger.warning(f"Cannot send event to connection {connection_id}: WebSocket manager not initialized")
+                return False
             
             # Extract thread_id from event or connection info if needed
             thread_id = event.get('thread_id')
@@ -330,18 +331,29 @@ class WebSocketEventRouter:
 _router_instance: Optional[WebSocketEventRouter] = None
 
 
-def get_websocket_router() -> WebSocketEventRouter:
+def get_websocket_router(websocket_manager=None) -> WebSocketEventRouter:
     """Get the WebSocket event router instance.
     
+    Args:
+        websocket_manager: Optional WebSocket manager instance for dependency injection
+        
     Returns:
         WebSocketEventRouter: Router instance
     """
     global _router_instance
     
     if _router_instance is None:
-        from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-        websocket_manager = get_websocket_manager()
-        _router_instance = WebSocketEventRouter(websocket_manager)
+        if websocket_manager is None:
+            # SECURITY FIX: This should only be called with proper context
+            # Log warning when fallback is used
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("WebSocketEventRouter: No WebSocket manager provided, using factory pattern")
+            
+            # Create router without manager - it will need to be initialized later
+            _router_instance = WebSocketEventRouter(None)
+        else:
+            _router_instance = WebSocketEventRouter(websocket_manager)
     
     return _router_instance
 

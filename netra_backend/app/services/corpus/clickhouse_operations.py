@@ -32,7 +32,7 @@ from netra_backend.app.services.corpus.clickhouse_helpers import (
     process_table_exists_result,
     process_table_size_result,
 )
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class CorpusClickHouseOperations:

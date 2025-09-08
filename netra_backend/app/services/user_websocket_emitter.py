@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 
 logger = central_logger.get_logger(__name__)

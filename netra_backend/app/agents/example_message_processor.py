@@ -20,7 +20,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
-from netra_backend.app.websocket_core import get_websocket_manager as get_manager
+# WebSocket manager accessed via factory pattern for security
 
 logger = central_logger.get_logger(__name__)
 
@@ -43,11 +43,25 @@ class ExampleMessageProcessor(BaseAgent):
             'advanced': self._process_advanced_optimization
         }
     
-    def _get_websocket_manager(self):
-        """Lazy initialization of WebSocket manager to avoid import-time creation."""
-        if self.ws_manager is None:
-            self.ws_manager = get_manager()
-        return self.ws_manager
+    def _get_websocket_manager(self, user_context=None):
+        """Get WebSocket manager using factory pattern for security.
+        
+        Args:
+            user_context: User execution context for WebSocket manager creation
+            
+        Returns:
+            WebSocket manager instance or None if no context provided
+        """
+        if user_context:
+            try:
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                return create_websocket_manager(user_context)
+            except Exception as e:
+                logger.error(f"Failed to create WebSocket manager: {e}")
+                return None
+        else:
+            logger.debug("WebSocket manager not created - no user context provided")
+            return None
         
     async def execute(self, state: AgentStateProtocol, run_id: str, stream_updates: bool = False) -> TypedAgentResult:
         """Execute the example message processor with agent state interface."""
@@ -89,7 +103,8 @@ class ExampleMessageProcessor(BaseAgent):
         user_id: str,
         message_content: str,
         message_metadata: Dict[str, Any],
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
+        user_context=None
     ) -> Dict[str, Any]:
         """Main processing method for example messages"""
         
@@ -112,7 +127,7 @@ class ExampleMessageProcessor(BaseAgent):
                 'agent_name': self.name,
                 'message': f'Starting {category} analysis...',
                 'example_message_id': message_id
-            })
+            }, user_context)
             
             # Select processing strategy based on category
             strategy = self.processing_strategies.get(
@@ -125,7 +140,8 @@ class ExampleMessageProcessor(BaseAgent):
                 message_content,
                 message_metadata,
                 message_id,
-                progress_callback
+                progress_callback,
+                user_context
             )
             
             # Calculate processing time
@@ -139,7 +155,7 @@ class ExampleMessageProcessor(BaseAgent):
                 'example_message_id': message_id,
                 'result': result,
                 'processing_time_ms': processing_time
-            })
+            }, user_context)
             
             self.state = SubAgentLifecycle.COMPLETED
             return result
@@ -152,7 +168,7 @@ class ExampleMessageProcessor(BaseAgent):
                 'agent_name': self.name,
                 'example_message_id': message_id,
                 'error': str(e)
-            })
+            }, user_context)
             
             self.state = SubAgentLifecycle.FAILED
             raise
@@ -162,16 +178,18 @@ class ExampleMessageProcessor(BaseAgent):
         content: str,
         metadata: Dict[str, Any],
         message_id: str,
-        callback: Optional[Callable] = None
+        callback: Optional[Callable] = None,
+        user_context=None
     ) -> Dict[str, Any]:
         """Process cost optimization requests"""
         
         # Phase 1: Analysis
+        # Note: user_context could be passed to all _send_update calls for consistency
         await self._send_update('tool_executing', {
             'tool_name': 'cost_analyzer',
             'message': 'Analyzing current cost structure and usage patterns...',
             'example_message_id': message_id
-        })
+        }, user_context)
         await asyncio.sleep(0.8)  # Simulate processing time
         
         # Phase 2: Optimization Discovery
@@ -607,14 +625,15 @@ class ExampleMessageProcessor(BaseAgent):
         content: str,
         metadata: Dict[str, Any],
         message_id: str,
-        callback: Optional[Callable] = None
+        callback: Optional[Callable] = None,
+        user_context=None
     ) -> Dict[str, Any]:
         """General optimization processing for uncategorized requests"""
         
         await self._send_update('agent_thinking', {
             'message': 'Analyzing optimization request and determining best approach...',
             'example_message_id': message_id
-        })
+        }, user_context)
         await asyncio.sleep(1.0)
         
         result = {
@@ -633,7 +652,7 @@ class ExampleMessageProcessor(BaseAgent):
         
         return result
         
-    async def _send_update(self, update_type: str, content: Dict[str, Any]) -> None:
+    async def _send_update(self, update_type: str, content: Dict[str, Any], user_context=None) -> None:
         """Send real-time updates via WebSocket"""
         
         if not self.user_id:
@@ -649,8 +668,11 @@ class ExampleMessageProcessor(BaseAgent):
         }
         
         try:
-            ws_manager = self._get_websocket_manager()
-            await ws_manager.send_message_to_user(self.user_id, message)
+            ws_manager = self._get_websocket_manager(user_context)
+            if ws_manager:
+                await ws_manager.send_message_to_user(self.user_id, message)
+            else:
+                logger.debug(f"WebSocket update not sent - no manager available: {update_type}")
         except Exception as e:
             logger.error(f"Failed to send WebSocket update: {e}")
 

@@ -20,7 +20,7 @@ from netra_backend.app.dependencies import (
     create_user_execution_context,
     get_request_scoped_user_context
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.routes.agent_route_processors import (
     execute_message_processing,

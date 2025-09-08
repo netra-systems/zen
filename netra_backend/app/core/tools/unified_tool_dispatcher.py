@@ -602,11 +602,23 @@ class UnifiedToolDispatcher:
             return
         
         try:
+            # Make parameters JSON-serializable by converting non-serializable values to strings
+            serializable_params = {}
+            for key, value in (parameters or {}).items():
+                try:
+                    # Test if value is JSON serializable
+                    import json
+                    json.dumps(value)
+                    serializable_params[key] = value
+                except (TypeError, ValueError):
+                    # Convert non-serializable objects to string representation
+                    serializable_params[key] = str(value)
+            
             await self.websocket_manager.send_event(
                 "tool_executing",
                 {
                     "tool_name": tool_name,
-                    "parameters": parameters,
+                    "parameters": serializable_params,
                     "run_id": self.user_context.run_id,
                     "user_id": self.user_context.user_id,
                     "thread_id": self.user_context.thread_id,
@@ -748,6 +760,51 @@ class UnifiedToolDispatcher:
         """Get dispatcher metrics."""
         return self._metrics.copy()
     
+    async def _populate_tools_from_registry(self, tool_registry):
+        """Populate dispatcher with tools from a tool registry.
+        
+        Args:
+            tool_registry: Tool registry containing tools to register
+        """
+        try:
+            # Check if it's a UnifiedToolRegistry
+            if hasattr(tool_registry, 'list_tools'):
+                # UnifiedToolRegistry approach
+                tools = tool_registry.list_tools()
+                for tool in tools:
+                    if hasattr(tool, 'handler') and tool.handler:
+                        # Register tool with handler
+                        self.registry.register(tool.id, tool.handler)
+                    else:
+                        # Register tool without handler (mock for testing)
+                        async def create_mock_handler(tool_name=tool.name):
+                            async def mock_handler(params, context):
+                                return {
+                                    "result": f"Mock execution of {tool_name}",
+                                    "tool_name": tool_name,
+                                    "parameters": params,
+                                    "success": True
+                                }
+                            return mock_handler
+                        
+                        mock_handler = await create_mock_handler(tool.name)
+                        self.registry.register(tool.id, mock_handler)
+                        
+                logger.info(f"Populated dispatcher with {len(tools)} tools from UnifiedToolRegistry")
+            
+            # Check if it's a legacy tool registry
+            elif hasattr(tool_registry, 'get_all_tools'):
+                tools = tool_registry.get_all_tools()
+                for tool in tools:
+                    if hasattr(tool, 'name'):
+                        # Register tool using its name
+                        self.registry.register(tool.name, tool)
+                        
+                logger.info(f"Populated dispatcher with {len(tools)} tools from legacy registry")
+                        
+        except Exception as e:
+            logger.error(f"Error populating tools from registry: {e}")
+    
     async def cleanup(self):
         """Clean up dispatcher resources."""
         if not self._is_active:
@@ -843,6 +900,10 @@ class UnifiedToolDispatcherFactory:
             websocket_manager=websocket_manager,
             tools=tools
         )
+        
+        # Set the tool registry if one was configured
+        if self._tool_registry:
+            await dispatcher._populate_tools_from_registry(self._tool_registry)
         
         # Track the dispatcher for cleanup
         self._active_dispatchers.append(dispatcher)

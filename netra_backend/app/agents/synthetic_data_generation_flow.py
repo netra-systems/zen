@@ -12,7 +12,7 @@
 import time
 from typing import Any, Callable, Dict, Optional
 
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_generator import (
     SyntheticDataGenerator,

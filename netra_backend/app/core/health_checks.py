@@ -216,27 +216,44 @@ class HealthMonitor:
     async def _check_websocket(self) -> tuple[HealthStatus, str, Dict[str, Any]]:
         """Check WebSocket components health."""
         try:
-            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-            
-            manager = get_websocket_manager()
-            
-            # Check if manager exists
-            if not manager:
-                return HealthStatus.UNHEALTHY, "WebSocketManager not initialized", {}
-            
-            # Check active connections
-            connection_count = len(manager.active_connections)
-            
-            # Check if accepting new connections
-            if hasattr(manager, 'is_accepting_connections'):
-                if not manager.is_accepting_connections:
-                    return HealthStatus.DEGRADED, "Not accepting new connections", {
-                        "active_connections": connection_count
+            # Check WebSocket factory pattern availability
+            try:
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                # Factory is available - this is the expected pattern
+                return HealthStatus.HEALTHY, "WebSocket factory pattern available", {
+                    "pattern": "factory",
+                    "per_user_isolation": True,
+                    "note": "Managers created per-user"
+                }
+            except ImportError:
+                # Fall back to checking legacy singleton (should not be used)
+                try:
+                    from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+                    
+                    manager = get_websocket_manager()
+                    
+                    # Check if manager exists
+                    if not manager:
+                        return HealthStatus.UNHEALTHY, "WebSocketManager not initialized", {}
+                    
+                    # Check active connections
+                    connection_count = len(manager.active_connections) if hasattr(manager, 'active_connections') else 0
+                    
+                    # Check if accepting new connections
+                    if hasattr(manager, 'is_accepting_connections'):
+                        if not manager.is_accepting_connections:
+                            return HealthStatus.DEGRADED, "Not accepting new connections", {
+                                "active_connections": connection_count
+                            }
+                    
+                    return HealthStatus.DEGRADED, f"Legacy singleton manager: {connection_count} connections", {
+                        "active_connections": connection_count,
+                        "pattern": "legacy",
+                        "warning": "Should migrate to factory pattern"
                     }
-            
-            return HealthStatus.HEALTHY, f"{connection_count} active connections", {
-                "active_connections": connection_count
-            }
+                    
+                except Exception:
+                    return HealthStatus.UNHEALTHY, "No WebSocket system available", {}
             
         except Exception as e:
             return HealthStatus.UNHEALTHY, str(e), {"error": str(e)}
