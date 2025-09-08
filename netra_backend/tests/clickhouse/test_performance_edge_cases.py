@@ -278,6 +278,11 @@ class TestConcurrencyAndAsync:
             for i in range(10):
                 # Mock: Generic component isolation for controlled unit testing
                 db = MagicMock()  # TODO: Use real service instance
+                db.execute = AsyncMock()  # db.execute() is async in SQLAlchemy async sessions
+                db.commit = AsyncMock()  # db.commit() is async
+                db.refresh = AsyncMock()  # db.refresh() is async
+                db.add = MagicMock()  # db.add() is sync in SQLAlchemy
+                db.rollback = AsyncMock()  # db.rollback() is async
                 # Mock: Generic component isolation for controlled unit testing
                 corpus_data = MagicMock()  # TODO: Use real service instance
                 corpus_data.name = f"corpus_{i}"
@@ -323,6 +328,11 @@ class TestConcurrencyAndAsync:
             
             # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()  # TODO: Use real service instance
+            db.execute = AsyncMock()  # db.execute() is async in SQLAlchemy async sessions
+            db.commit = AsyncMock()  # db.commit() is async
+            db.refresh = AsyncMock()  # db.refresh() is async
+            db.add = MagicMock()  # db.add() is sync in SQLAlchemy
+            db.rollback = AsyncMock()  # db.rollback() is async
             
             # Should not block main operation
             start = datetime.now()

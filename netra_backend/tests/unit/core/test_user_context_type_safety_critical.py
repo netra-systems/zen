@@ -630,5 +630,6 @@ class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
 
 
 # Mark these as critical tests that must be run
-pytest.mark.critical_type_safety = pytest.mark.mark
-pytest.mark.user_context_violations = pytest.mark.mark
+# Custom markers for this test file
+critical_type_safety = pytest.mark.critical_type_safety
+user_context_violations = pytest.mark.user_context_violations

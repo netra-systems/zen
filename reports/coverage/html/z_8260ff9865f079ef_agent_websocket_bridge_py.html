@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_b638313c089ae8cd___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 13:10 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -2443,7 +2443,7 @@
     <p class="mis show_mis"><span class="n"><a id="t2361" href="#t2361">2361</a></span><span class="t">            <span class="nam">validated_context</span> <span class="op">=</span> <span class="nam">validate_user_context</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2362" href="#t2362">2362</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2363" href="#t2363">2363</a></span><span class="t">            <span class="com"># Create isolated WebSocket manager for this user context</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t2364" href="#t2364">2364</a></span><span class="t">            <span class="nam">isolated_manager</span> <span class="op">=</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">validated_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t2364" href="#t2364">2364</a></span><span class="t">            <span class="nam">isolated_manager</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">validated_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2365" href="#t2365">2365</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2366" href="#t2366">2366</a></span><span class="t">            <span class="com"># Create isolated emitter using the factory pattern</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t2367" href="#t2367">2367</a></span><span class="t">            <span class="nam">emitter</span> <span class="op">=</span> <span class="nam">WebSocketEmitterFactory</span><span class="op">.</span><span class="nam">create_scoped_emitter</span><span class="op">(</span><span class="nam">isolated_manager</span><span class="op">,</span> <span class="nam">validated_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -2523,7 +2523,7 @@
     <p class="mis show_mis"><span class="n"><a id="t2441" href="#t2441">2441</a></span><span class="t">        <span class="key">from</span> <span class="nam">netra_backend</span><span class="op">.</span><span class="nam">app</span><span class="op">.</span><span class="nam">websocket_core</span> <span class="key">import</span> <span class="nam">create_websocket_manager</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2442" href="#t2442">2442</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2443" href="#t2443">2443</a></span><span class="t">        <span class="com"># Create scoped emitter using the factory pattern for user isolation</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t2444" href="#t2444">2444</a></span><span class="t">        <span class="nam">manager</span> <span class="op">=</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t2444" href="#t2444">2444</a></span><span class="t">        <span class="nam">manager</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t2445" href="#t2445">2445</a></span><span class="t">        <span class="nam">emitter</span> <span class="op">=</span> <span class="nam">UnifiedWebSocketEmitter</span><span class="op">.</span><span class="nam">create_scoped_emitter</span><span class="op">(</span><span class="nam">manager</span><span class="op">,</span> <span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t2446" href="#t2446">2446</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t2447" href="#t2447">2447</a></span><span class="t">            <span class="key">yield</span> <span class="nam">emitter</span>&nbsp;</span><span class="r"></span></p>
@@ -2583,7 +2583,7 @@
             <a class="nav" href="z_b638313c089ae8cd___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 13:10 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
     </div>
 </footer>

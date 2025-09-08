@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_973a9bb671237f01_quality_validation_handler_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -192,7 +192,7 @@
     <p class="mis mis2 show_mis"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">            <span class="nam">thread_id</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>  <span class="com"># Let session manager handle missing IDs</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">            <span class="nam">run_id</span><span class="op">=</span><span class="key">None</span>      <span class="com"># Let session manager handle missing IDs</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">        <span class="nam">manager</span> <span class="op">=</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">        <span class="nam">manager</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="key">await</span> <span class="nam">manager</span><span class="op">.</span><span class="nam">send_to_user</span><span class="op">(</span><span class="nam">message</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">    <span class="key">def</span> <span class="nam">_build_report_payload</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">markdown_report</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">report_data</span><span class="op">:</span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -214,7 +214,7 @@
     <p class="mis mis2 show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">                <span class="nam">thread_id</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>  <span class="com"># Let session manager handle missing IDs</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">                <span class="nam">run_id</span><span class="op">=</span><span class="key">None</span>      <span class="com"># Let session manager handle missing IDs</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">            <span class="nam">manager</span> <span class="op">=</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">            <span class="nam">manager</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">            <span class="key">await</span> <span class="nam">manager</span><span class="op">.</span><span class="nam">send_to_user</span><span class="op">(</span><span class="op">{</span><span class="str">"type"</span><span class="op">:</span> <span class="str">"error"</span><span class="op">,</span> <span class="str">"message"</span><span class="op">:</span> <span class="nam">error_message</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">error</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Failed to send report error to user </span><span class="op">{</span><span class="nam">user_id</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">e</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -280,7 +280,7 @@
             <a class="nav" href="z_973a9bb671237f01_quality_validation_handler_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
     </div>
 </footer>

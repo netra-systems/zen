@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_973a9bb671237f01_quality_alert_handler_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -658,7 +658,7 @@
     <p class="pln"><span class="n"><a id="t576" href="#t576">576</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t577" href="#t577">577</a></span><span class="t">            <span class="com"># Use session-based context to maintain conversation continuity</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t578" href="#t578">578</a></span><span class="t">            <span class="nam">user_context</span> <span class="op">=</span> <span class="nam">get_user_execution_context</span><span class="op">(</span><span class="nam">user_id</span><span class="op">=</span><span class="nam">message</span><span class="op">.</span><span class="nam">user_id</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t579" href="#t579">579</a></span><span class="t">            <span class="nam">manager</span> <span class="op">=</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t579" href="#t579">579</a></span><span class="t">            <span class="nam">manager</span> <span class="op">=</span> <span class="key">await</span> <span class="nam">create_websocket_manager</span><span class="op">(</span><span class="nam">user_context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t580" href="#t580">580</a></span><span class="t">            <span class="key">await</span> <span class="nam">manager</span><span class="op">.</span><span class="nam">send_to_user</span><span class="op">(</span><span class="op">{</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t581" href="#t581">581</a></span><span class="t">                <span class="str">"type"</span><span class="op">:</span> <span class="str">"error"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t582" href="#t582">582</a></span><span class="t">                <span class="str">"message"</span><span class="op">:</span> <span class="fst">f"</span><span class="fst">Message processing failed: </span><span class="op">{</span><span class="nam">message</span><span class="op">.</span><span class="nam">error</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
@@ -985,7 +985,7 @@
             <a class="nav" href="z_973a9bb671237f01_quality_alert_handler_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 10:41 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
     </div>
 </footer>

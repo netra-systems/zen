@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">123 statements &nbsp;</span>
+            <span class="text">124 statements &nbsp;</span>
             <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">0<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">123<span class="text"> missing</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">124<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_e872adca3de3b2b7_health_extended_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 11:56 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -485,11 +485,12 @@
     <p class="pln"><span class="n"><a id="t403" href="#t403">403</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t404" href="#t404">404</a></span><span class="t"><span class="com"># Legacy compatibility endpoints</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t405" href="#t405">405</a></span><span class="t"><span class="op">@</span><span class="nam">router</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"/"</span><span class="op">,</span> <span class="nam">response_model</span><span class="op">=</span><span class="nam">HealthStatus</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t406" href="#t406">406</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">health_root</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t407" href="#t407">407</a></span><span class="t">    <span class="nam">user</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">Dict</span><span class="op">]</span> <span class="op">=</span> <span class="nam">Depends</span><span class="op">(</span><span class="nam">get_current_user_optional</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t408" href="#t408">408</a></span><span class="t"><span class="op">)</span> <span class="op">-></span> <span class="nam">HealthStatus</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t409" href="#t409">409</a></span><span class="t">    <span class="str">"""Root health endpoint - redirects to readiness probe."""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t410" href="#t410">410</a></span><span class="t">    <span class="key">return</span> <span class="key">await</span> <span class="nam">readiness_probe</span><span class="op">(</span><span class="nam">user</span><span class="op">=</span><span class="nam">user</span><span class="op">,</span> <span class="nam">force</span><span class="op">=</span><span class="key">False</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t406" href="#t406">406</a></span><span class="t"><span class="op">@</span><span class="nam">router</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">""</span><span class="op">,</span> <span class="nam">response_model</span><span class="op">=</span><span class="nam">HealthStatus</span><span class="op">)</span>  <span class="com"># Handle without trailing slash</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t407" href="#t407">407</a></span><span class="t"><span class="key">async</span> <span class="key">def</span> <span class="nam">health_root</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t408" href="#t408">408</a></span><span class="t">    <span class="nam">user</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">Dict</span><span class="op">]</span> <span class="op">=</span> <span class="nam">Depends</span><span class="op">(</span><span class="nam">get_current_user_optional</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t409" href="#t409">409</a></span><span class="t"><span class="op">)</span> <span class="op">-></span> <span class="nam">HealthStatus</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t410" href="#t410">410</a></span><span class="t">    <span class="str">"""Root health endpoint - redirects to readiness probe."""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t411" href="#t411">411</a></span><span class="t">    <span class="key">return</span> <span class="key">await</span> <span class="nam">readiness_probe</span><span class="op">(</span><span class="nam">user</span><span class="op">=</span><span class="nam">user</span><span class="op">,</span> <span class="nam">force</span><span class="op">=</span><span class="key">False</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -499,7 +500,7 @@
             <a class="nav" href="z_e872adca3de3b2b7_health_extended_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 11:56 -0700
+            created at 2025-09-08 14:52 -0700
         </p>
     </div>
 </footer>

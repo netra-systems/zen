@@ -36,21 +36,18 @@ class AdminUserManagementTester:
         start_time = time.time()
         steps = {}
         
-        try:
-            await self.admin_operations.setup_admin_environment()
-            
-            steps["admin_login"] = await self.admin_operations.perform_admin_login()
-            steps["view_all_users"] = await self.admin_operations.view_all_users()
-            steps["suspend_user"] = await self.admin_operations.suspend_user()
-            steps["verify_suspend"] = await self.admin_operations.verify_user_suspension()
-            steps["reactivate_user"] = await self.admin_operations.reactivate_user()
-            steps["verify_reactivate"] = await self.admin_operations.verify_user_reactivation()
-            
-            execution_time = time.time() - start_time
-            return self._build_success_result(steps, execution_time)
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return self._build_error_result(str(e), steps, execution_time)
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        await self.admin_operations.setup_admin_environment()
+        
+        steps["admin_login"] = await self.admin_operations.perform_admin_login()
+        steps["view_all_users"] = await self.admin_operations.view_all_users()
+        steps["suspend_user"] = await self.admin_operations.suspend_user()
+        steps["verify_suspend"] = await self.admin_operations.verify_user_suspension()
+        steps["reactivate_user"] = await self.admin_operations.reactivate_user()
+        steps["verify_reactivate"] = await self.admin_operations.verify_user_reactivation()
+        
+        execution_time = time.time() - start_time
+        return self._build_success_result(steps, execution_time)
     
     async def execute_rbac_security_validation(self) -> Dict[str, Any]:
         """Execute RBAC security validation tests."""
@@ -77,34 +74,31 @@ class AdminUserManagementTester:
         """Execute bulk operations validation."""
         start_time = time.time()
         
-        try:
-            await self.admin_operations.setup_admin_environment()
-            await self.admin_operations.perform_admin_login()
-            
-            # Create multiple test users
-            test_users = await self.admin_operations.create_multiple_test_users(3)
-            
-            # Perform bulk operations
-            bulk_suspend = await self.admin_operations.perform_bulk_suspend(test_users)
-            bulk_reactivate = await self.admin_operations.perform_bulk_reactivate(test_users)
-            
-            # Validate audit trail
-            audit_entries = self.admin_operations.get_audit_entries()
-            bulk_audit = {"audit_entries_count": len(audit_entries)}
-            
-            execution_time = time.time() - start_time
-            return {
-                "success": True,
-                "execution_time": execution_time,
-                "bulk_operations": {
-                    "bulk_suspend": bulk_suspend,
-                    "bulk_reactivate": bulk_reactivate,
-                    "bulk_audit": bulk_audit
-                }
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        await self.admin_operations.setup_admin_environment()
+        await self.admin_operations.perform_admin_login()
+        
+        # Create multiple test users
+        test_users = await self.admin_operations.create_multiple_test_users(3)
+        
+        # Perform bulk operations
+        bulk_suspend = await self.admin_operations.perform_bulk_suspend(test_users)
+        bulk_reactivate = await self.admin_operations.perform_bulk_reactivate(test_users)
+        
+        # Validate audit trail
+        audit_entries = self.admin_operations.get_audit_entries()
+        bulk_audit = {"audit_entries_count": len(audit_entries)}
+        
+        execution_time = time.time() - start_time
+        return {
+            "success": True,
+            "execution_time": execution_time,
+            "bulk_operations": {
+                "bulk_suspend": bulk_suspend,
+                "bulk_reactivate": bulk_reactivate,
+                "bulk_audit": bulk_audit
             }
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return {"success": False, "error": str(e), "execution_time": execution_time}
+        }
     
     async def execute_rbac_performance_validation(self) -> Dict[str, Any]:
         """Execute RBAC performance validation."""

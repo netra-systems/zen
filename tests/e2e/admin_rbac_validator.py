@@ -32,26 +32,23 @@ class AdminRBACValidator:
         """Execute comprehensive RBAC security validation."""
         start_time = time.time()
         
-        try:
-            # Setup admin environment
-            await self.admin_operations.setup_admin_environment()
-            await self.admin_operations.perform_admin_login()
-            
-            # Execute RBAC tests
-            rbac_tests = {}
-            rbac_tests["non_admin_blocked"] = await self._test_non_admin_access_blocked()
-            rbac_tests["admin_access_granted"] = await self._test_admin_access_granted()
-            rbac_tests["permission_validation"] = await self._test_permission_validation()
-            
-            execution_time = time.time() - start_time
-            return {
-                "success": True,
-                "execution_time": execution_time,
-                "rbac_tests": rbac_tests
-            }
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return {"success": False, "error": str(e), "execution_time": execution_time}
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        # Setup admin environment
+        await self.admin_operations.setup_admin_environment()
+        await self.admin_operations.perform_admin_login()
+        
+        # Execute RBAC tests
+        rbac_tests = {}
+        rbac_tests["non_admin_blocked"] = await self._test_non_admin_access_blocked()
+        rbac_tests["admin_access_granted"] = await self._test_admin_access_granted()
+        rbac_tests["permission_validation"] = await self._test_permission_validation()
+        
+        execution_time = time.time() - start_time
+        return {
+            "success": True,
+            "execution_time": execution_time,
+            "rbac_tests": rbac_tests
+        }
     
     async def _test_non_admin_access_blocked(self) -> Dict[str, Any]:
         """Test that non-admin users are blocked from admin operations."""
@@ -101,19 +98,23 @@ class AdminRBACValidator:
     
     async def _test_operation_blocked(self, method: str, endpoint: str, headers: Dict) -> bool:
         """Test that operation is blocked for non-admin user."""
+        # FIXED: Use proper exception handling instead of generic catch-all
         try:
             await self.auth_tester.api_client.call_api(method, endpoint, None, headers)
             return False  # Should have been blocked
-        except Exception:
-            return True  # Correctly blocked
+        except (PermissionError, ValueError, Exception) as e:
+            # Only catch expected authorization/permission errors
+            if "unauthorized" in str(e).lower() or "forbidden" in str(e).lower() or "permission" in str(e).lower():
+                return True  # Correctly blocked
+            else:
+                # Unexpected error - let it bubble up
+                raise AssertionError(f"Unexpected error testing blocked operation: {e}") from e
     
     async def _test_operation_granted(self, method: str, endpoint: str, headers: Dict) -> bool:
         """Test that operation is granted for admin user."""
-        try:
-            await self.auth_tester.api_client.call_api(method, endpoint, None, headers)
-            return True  # Correctly granted
-        except Exception:
-            return False  # Should have been granted
+        # FIXED: Let failures bubble up instead of hiding them
+        await self.auth_tester.api_client.call_api(method, endpoint, None, headers)
+        return True  # If we get here, operation was correctly granted
     
     async def _validate_admin_permissions(self) -> bool:
         """Validate admin permissions are correctly assigned."""
@@ -129,41 +130,35 @@ class AdminRBACValidator:
         """Execute RBAC performance validation."""
         start_time = time.time()
         
-        try:
-            # Setup if not already done
-            await self.admin_operations.setup_admin_environment()
-            await self.admin_operations.perform_admin_login()
-            
-            # Quick RBAC validation tests
-            await self._test_non_admin_access_blocked()
-            await self._test_admin_access_granted()
-            
-            execution_time = time.time() - start_time
-            return {"success": True, "execution_time": execution_time}
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return {"success": False, "error": str(e), "execution_time": execution_time}
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        # Setup if not already done
+        await self.admin_operations.setup_admin_environment()
+        await self.admin_operations.perform_admin_login()
+        
+        # Quick RBAC validation tests
+        await self._test_non_admin_access_blocked()
+        await self._test_admin_access_granted()
+        
+        execution_time = time.time() - start_time
+        return {"success": True, "execution_time": execution_time}
     
     async def test_permission_boundaries(self) -> Dict[str, Any]:
         """Test permission boundaries and edge cases."""
         start_time = time.time()
         
-        try:
-            # Test various permission boundary scenarios
-            boundary_tests = {}
-            boundary_tests["invalid_token"] = await self._test_invalid_token_access()
-            boundary_tests["expired_token"] = await self._test_expired_token_access()
-            boundary_tests["malformed_token"] = await self._test_malformed_token_access()
-            
-            execution_time = time.time() - start_time
-            return {
-                "success": True,
-                "execution_time": execution_time,
-                "boundary_tests": boundary_tests
-            }
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return {"success": False, "error": str(e), "execution_time": execution_time}
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        # Test various permission boundary scenarios
+        boundary_tests = {}
+        boundary_tests["invalid_token"] = await self._test_invalid_token_access()
+        boundary_tests["expired_token"] = await self._test_expired_token_access()
+        boundary_tests["malformed_token"] = await self._test_malformed_token_access()
+        
+        execution_time = time.time() - start_time
+        return {
+            "success": True,
+            "execution_time": execution_time,
+            "boundary_tests": boundary_tests
+        }
     
     async def _test_invalid_token_access(self) -> Dict[str, Any]:
         """Test access with invalid token."""
@@ -188,21 +183,18 @@ class AdminRBACValidator:
         """Validate role hierarchy and inheritance."""
         start_time = time.time()
         
-        try:
-            # Test role hierarchy scenarios
-            hierarchy_tests = {}
-            hierarchy_tests["admin_inherits_user"] = await self._test_admin_inherits_user_permissions()
-            hierarchy_tests["role_escalation_blocked"] = await self._test_role_escalation_blocked()
-            
-            execution_time = time.time() - start_time
-            return {
-                "success": True,
-                "execution_time": execution_time,
-                "hierarchy_tests": hierarchy_tests
-            }
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return {"success": False, "error": str(e), "execution_time": execution_time}
+        # FIXED: No try/except - let real failures bubble up to fail the test properly
+        # Test role hierarchy scenarios
+        hierarchy_tests = {}
+        hierarchy_tests["admin_inherits_user"] = await self._test_admin_inherits_user_permissions()
+        hierarchy_tests["role_escalation_blocked"] = await self._test_role_escalation_blocked()
+        
+        execution_time = time.time() - start_time
+        return {
+            "success": True,
+            "execution_time": execution_time,
+            "hierarchy_tests": hierarchy_tests
+        }
     
     async def _test_admin_inherits_user_permissions(self) -> Dict[str, Any]:
         """Test that admin inherits user permissions."""
