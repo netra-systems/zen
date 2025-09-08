@@ -20,13 +20,13 @@ from typing import Any, Dict, List
 
 from tests.e2e.admin_rbac_validator import AdminRBACValidator
 from tests.e2e.admin_user_operations import AdminUserOperations
-from tests.e2e.auth_flow_testers import AuthFlowE2ETester
+from tests.e2e.auth_flow_manager import AuthFlowTester
 
 
 class AdminUserManagementTester:
     """Comprehensive admin user management operations tester."""
     
-    def __init__(self, auth_tester: AuthFlowE2ETester):
+    def __init__(self, auth_tester: AuthFlowTester):
         self.auth_tester = auth_tester
         self.admin_operations = AdminUserOperations(auth_tester)
         self.rbac_validator = AdminRBACValidator(auth_tester)

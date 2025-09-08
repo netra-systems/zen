@@ -18,13 +18,13 @@ import time
 from typing import Any, Dict
 
 from tests.e2e.admin_user_operations import AdminUserOperations
-from tests.e2e.auth_flow_testers import AuthFlowE2ETester
+from tests.e2e.auth_flow_manager import AuthFlowTester
 
 
 class AdminRBACValidator:
     """Comprehensive RBAC validation for admin operations."""
     
-    def __init__(self, auth_tester: AuthFlowE2ETester):
+    def __init__(self, auth_tester: AuthFlowTester):
         self.auth_tester = auth_tester
         self.admin_operations = AdminUserOperations(auth_tester)
     
