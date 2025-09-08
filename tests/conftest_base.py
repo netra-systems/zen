@@ -154,7 +154,7 @@ def test_user_v2():
 
 # Try to import Phase 0 components
 try:
-    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     PHASE0_COMPONENTS_AVAILABLE = True
 except ImportError:
     # Mock Phase 0 components if not available

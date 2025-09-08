@@ -208,16 +208,14 @@ class TestAgentPipelineStaging(StagingTestBase):
         ) as ws:
             print("[INFO] WebSocket connected for agent pipeline test")
             
-            # Try to execute an agent pipeline
+            # Try to execute an agent pipeline using correct message type and format
             pipeline_request = {
-                "type": "execute_agent",
-                "agent": "data_analysis_agent",
-                "input": "Analyze test data for pipeline validation",
-                "thread_id": f"pipeline_test_{int(time.time())}",
-                "parameters": {
-                    "timeout": 30,
-                    "mode": "test"
+                "type": "start_agent",
+                "payload": {
+                    "query": "Analyze test data for pipeline validation",
+                    "user_id": self.test_token.split('.')[-1][:8] if self.test_token else "test-user"
                 },
+                "thread_id": f"pipeline_test_{int(time.time())}",
                 "timestamp": time.time()
             }
             

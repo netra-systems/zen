@@ -40,7 +40,7 @@ from typing import Dict, List, Set, Optional, Any
 import logging
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
     IsolatedWebSocketManager,

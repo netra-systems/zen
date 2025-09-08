@@ -72,7 +72,7 @@
                 # REMOVED_SYNTAX_ERROR: migrate_singleton_usage
                 
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.models.user_execution_context import UserExecutionContext
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
                 # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env

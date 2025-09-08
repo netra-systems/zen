@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

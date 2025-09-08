@@ -42,7 +42,7 @@ from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitt
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, WebSocketFactoryConfig
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 
 # Import SSOT authentication helpers

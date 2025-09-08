@@ -164,7 +164,7 @@ class PerformanceSuiteValidator:
         
         # Test 1: Context creation validation
         try:
-            from netra_backend.app.models.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             start_time = time.time()
             contexts = []

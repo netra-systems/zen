@@ -86,7 +86,7 @@
                 # REMOVED_SYNTAX_ERROR: configure_agent_instance_factory,
                 # REMOVED_SYNTAX_ERROR: get_agent_instance_factory
                 
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.models.user_execution_context import UserExecutionContext as ModelsUserExecutionContext
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext as ModelsUserExecutionContext
 
                 # Import supervisor UserExecutionContext
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext as SupervisorUserExecutionContext

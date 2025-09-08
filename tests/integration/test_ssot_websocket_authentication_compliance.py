@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     WebSocketAuthResult,
     authenticate_websocket_ssot
 )
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.fixtures.websocket_fixtures import create_mock_websocket
 from test_framework.ssot.integration_auth_manager import IntegrationAuthManager
 

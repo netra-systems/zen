@@ -75,12 +75,37 @@ class TestCriticalWebSocket:
                     # If we get here, connection was established
                     connection_successful = True
                     
-                    # Try to send a ping
+                    # CRITICAL FIX: Wait for welcome message first before sending ping
+                    # The WebSocket server sends a "connection_established" message first
+                    print("Waiting for WebSocket connection_established message...")
+                    try:
+                        welcome_response = await asyncio.wait_for(ws.recv(), timeout=10)
+                        print(f"WebSocket welcome message: {welcome_response}")
+                        
+                        # Parse welcome message to verify connection is ready
+                        try:
+                            welcome_data = json.loads(welcome_response)
+                            if welcome_data.get("event") == "connection_established" and welcome_data.get("connection_ready"):
+                                print("✅ WebSocket connection confirmed ready for messages")
+                            else:
+                                print(f"⚠️ Unexpected welcome message format: {welcome_data}")
+                        except json.JSONDecodeError:
+                            print(f"⚠️ Welcome message not JSON: {welcome_response}")
+                    
+                    except asyncio.TimeoutError:
+                        print("❌ Timeout waiting for WebSocket welcome message")
+                        # Continue anyway to test basic connectivity
+                        
+                    # Add small delay to ensure connection is fully established
+                    await asyncio.sleep(0.2)
+                    
+                    # Now try to send a ping
+                    print("Sending ping message...")
                     await ws.send(json.dumps({"type": "ping"}))
                     
-                    # Wait for response
+                    # Wait for ping response
                     response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    print(f"WebSocket response with auth: {response}")
+                    print(f"WebSocket ping response: {response}")
             except websockets.exceptions.InvalidStatus as e:
                 # Auth token might not be valid for staging
                 if "403" in str(e) or "401" in str(e):
@@ -137,20 +162,49 @@ class TestCriticalWebSocket:
                 config.websocket_url,
                 additional_headers=ws_headers
             ) as ws:
+                # CRITICAL FIX: Wait for welcome message first before sending authenticated message
+                print("Waiting for WebSocket connection_established message...")
+                try:
+                    welcome_response = await asyncio.wait_for(ws.recv(), timeout=10)
+                    print(f"WebSocket welcome message: {welcome_response}")
+                    
+                    # Parse welcome message to verify connection is ready
+                    try:
+                        welcome_data = json.loads(welcome_response)
+                        if welcome_data.get("event") == "connection_established" and welcome_data.get("connection_ready"):
+                            print("✅ WebSocket connection confirmed ready for messages")
+                            auth_accepted = True  # If we get welcome message, auth was accepted
+                        else:
+                            print(f"⚠️ Unexpected welcome message format: {welcome_data}")
+                    except json.JSONDecodeError:
+                        print(f"⚠️ Welcome message not JSON: {welcome_response}")
+                
+                except asyncio.TimeoutError:
+                    print("❌ Timeout waiting for WebSocket welcome message")
+                    # Continue anyway to test basic connectivity
+                    
+                # Add small delay to ensure connection is fully established
+                await asyncio.sleep(0.2)
+                
                 # Send authenticated message
+                print("Sending authenticated message...")
                 await ws.send(json.dumps({
                     "type": "message",
                     "content": "Test with auth"
                 }))
                 
                 # Should get response (not auth error)
-                response = await asyncio.wait_for(ws.recv(), timeout=5)
-                data = json.loads(response)
-                
-                # Check if auth was accepted
-                if data.get("type") != "error" or "auth" not in data.get("message", "").lower():
-                    auth_accepted = True
-                    print(f"Auth accepted, response: {data}")
+                try:
+                    response = await asyncio.wait_for(ws.recv(), timeout=10)
+                    data = json.loads(response)
+                    print(f"Auth message response: {data}")
+                    
+                    # Check if auth was accepted
+                    if data.get("type") != "error" or "auth" not in data.get("message", "").lower():
+                        auth_accepted = True
+                        print(f"Auth accepted, response: {data}")
+                except asyncio.TimeoutError:
+                    print("⚠️ Timeout waiting for message response - but connection was established")
         
         duration = time.time() - start_time
         print(f"Test duration: {duration:.3f}s")

@@ -50,7 +50,7 @@
             # REMOVED_SYNTAX_ERROR: from datetime import datetime
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.models.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager_factory import ( )
             # REMOVED_SYNTAX_ERROR: create_websocket_manager,
             # REMOVED_SYNTAX_ERROR: WebSocketManagerFactory
