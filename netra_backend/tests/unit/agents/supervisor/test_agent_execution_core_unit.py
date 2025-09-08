@@ -287,21 +287,21 @@ class TestAgentExecutionCore:
         assert metrics['execution_time_ms'] > 1400  # About 1.5s in ms
         assert metrics['start_timestamp'] == start_time
 
-    @patch('netra_backend.app.agents.supervisor.agent_execution_core.psutil')
-    def test_calculate_performance_metrics_with_psutil(self, mock_psutil, execution_core):
+    def test_calculate_performance_metrics_with_psutil(self, execution_core):
         """Test performance metrics with psutil available."""
         mock_process = Mock()
         mock_process.memory_info.return_value = Mock(rss=1024*1024*100)  # 100MB
         mock_process.cpu_percent.return_value = 15.5
-        mock_psutil.Process.return_value = mock_process
         
-        start_time = time.time() - 1.0
-        metrics = execution_core._calculate_performance_metrics(start_time)
+        # Mock psutil using patch as a context manager since it's imported in the method
+        with patch('psutil.Process', return_value=mock_process):
+            start_time = time.time() - 1.0
+            metrics = execution_core._calculate_performance_metrics(start_time)
         
-        assert 'memory_usage_mb' in metrics
-        assert 'cpu_percent' in metrics
-        assert metrics['memory_usage_mb'] == 100.0  # 100MB
-        assert metrics['cpu_percent'] == 15.5
+            assert 'memory_usage_mb' in metrics
+            assert 'cpu_percent' in metrics
+            assert metrics['memory_usage_mb'] == 100.0  # 100MB
+            assert metrics['cpu_percent'] == 15.5
 
     def test_get_agent_or_error_success(self, execution_core):
         """Test successful agent retrieval."""

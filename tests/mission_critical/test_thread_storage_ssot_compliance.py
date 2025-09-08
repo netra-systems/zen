@@ -279,56 +279,56 @@ class TestWebSocketConnection:
                                                                                         assert 'logger.error' in source
                                                                                         assert 'raise' in source  # SSOT: Raise errors, don't hide them with fallbacks'
 
-                                                                                        @pytest.mark.asyncio
-                                                                                        async def test_thread_service_uses_unit_of_work_pattern(self):
-                                                                                            """Verify ThreadService uses Unit of Work pattern correctly."""
-                                                                                            service = ThreadService()
+    @pytest.mark.asyncio
+    async def test_thread_service_uses_unit_of_work_pattern(self):
+        """Verify ThreadService uses Unit of Work pattern correctly."""
+        service = ThreadService()
 
         # Mock UoW
-                                                                                            websocket = TestWebSocketConnection()
-                                                                                            mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
-                                                                                            mock_uow.websocket = TestWebSocketConnection()
-                                                                                            mock_uow.threads.get_or_create_for_user = AsyncMock(
-                                                                                            return_value=MagicMock(id="thread_123")
-                                                                                        )
+        mock_uow = MagicMock()
+        websocket = TestWebSocketConnection()
+        mock_uow.__aenter__ = AsyncMock(return_value=mock_uow)
+        mock_uow.websocket = TestWebSocketConnection()
+        mock_uow.threads.get_or_create_for_user = AsyncMock(
+            return_value=MagicMock(id="thread_123")
+        )
 
-                    # Test thread creation
-                                                                                        thread = await service.get_or_create_thread("user123")
+        # Test thread creation
+        thread = await service.get_or_create_thread("user123")
 
-            # Verify UoW was used
-                                                                                        mock_uow.threads.get_or_create_for_user.assert_called_once()
-                                                                                        assert thread.id == "thread_123"
+        # Verify UoW was used
+        mock_uow.threads.get_or_create_for_user.assert_called_once()
+        assert thread.id == "thread_123"
 
-                                                                                        def test_ssot_compliance_checklist(self):
-                                                                                            """Comprehensive SSOT compliance verification."""
-                                                                                            pass
-                                                                                            compliance_checks = {
-                                                                                            "No legacy stub functions": not any(
-                                                                                            hasattr(thread_service, func) for func in [
-                                                                                            'get_thread_by_id', 'delete_thread', 'update_thread'
-                                                                                            ]
-                                                                                            ),
-                                                                                            "ThreadService class exists": hasattr(thread_service, 'ThreadService'),
-                                                                                            "Singleton instance exists": hasattr(thread_service, 'thread_service'),
-                                                                                            "No legacy aliases": not any(
-                                                                                            hasattr(thread_helpers, alias) for alias in [
-                                                                                            '_extract_thread_title', '_format_single_message'
-                                                                                            ]
-                                                                                            ),
-                                                                                            "Unified ID generation": 'UnifiedIDManager' in inspect.getsource(generate_thread_id),
-                                                                                            "Repository uses UnifiedIDManager": 'UnifiedIDManager' in inspect.getsource(
-                                                                                            ThreadRepository.get_or_create_for_user
-                                                                                            )
-                                                                                            }
+    def test_ssot_compliance_checklist(self):
+        """Comprehensive SSOT compliance verification."""
+        compliance_checks = {
+            "No legacy stub functions": not any(
+                hasattr(thread_service, func) for func in [
+                    'get_thread_by_id', 'delete_thread', 'update_thread'
+                ]
+            ),
+            "ThreadService class exists": hasattr(thread_service, 'ThreadService'),
+            "Singleton instance exists": hasattr(thread_service, 'thread_service'),
+            "No legacy aliases": not any(
+                hasattr(thread_helpers, alias) for alias in [
+                    '_extract_thread_title', '_format_single_message'
+                ]
+            ),
+            "Unified ID generation": 'UnifiedIDManager' in inspect.getsource(generate_thread_id),
+            "Repository uses UnifiedIDManager": 'UnifiedIDManager' in inspect.getsource(
+                ThreadRepository.get_or_create_for_user
+            )
+        }
 
-                                                                                            failed_checks = [
-                                                                                            check for check, passed in compliance_checks.items() if not passed
-                                                                                            ]
+        failed_checks = [
+            check for check, passed in compliance_checks.items() if not passed
+        ]
 
-                                                                                            assert not failed_checks, \
-                                                                                            f"SSOT compliance failed for: {', '.join(failed_checks)}"
+        assert not failed_checks, \
+            f"SSOT compliance failed for: {', '.join(failed_checks)}"
 
 
-                                                                                            if __name__ == "__main__":
+if __name__ == "__main__":
     # Run the tests
-                                                                                                pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--tb=short"])

@@ -512,7 +512,8 @@ class RealAgentHandoffFlowsTester:
                 # Individual handoff details
                 for j, handoff in enumerate(val.handoff_traces, 1):
                     status_symbol = "✓" if handoff.success else "✗"
-                    report.append(f"    {j}. {status_symbol} {handoff.from_agent} → {handoff.to_agent} ({handoff.duration:.2f}s if handoff.duration else 'N/A'})")
+                    duration_text = f"{handoff.duration:.2f}s" if handoff.duration else "N/A"
+                    report.append(f"    {j}. {status_symbol} {handoff.from_agent} → {handoff.to_agent} ({duration_text})")
                     
             # Data flow analysis
             if val.data_flow:

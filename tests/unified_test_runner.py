@@ -3188,7 +3188,7 @@ def main():
         # If user ran ONLY validation (no other test arguments), exit here
         # Check if user provided any actual test execution arguments
         test_execution_args = [
-            args.category, args.categories, args.path, args.keyword, 
+            args.category, args.categories, getattr(args, 'path', None), getattr(args, 'keyword', None), 
             getattr(args, 'show_category_stats', False),
             getattr(args, 'master_orchestration', False),
             getattr(args, 'orchestration_status', False),

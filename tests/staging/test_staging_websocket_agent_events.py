@@ -221,9 +221,9 @@ class StagingWebSocketTestRunner:
             try:
                 async with asyncio.timeout(10):
                     async with websockets.connect(ws_url, close_timeout=5) as websocket:
-                    await websocket.send('{"type": "ping"}')
-                    await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                    no_token_result = "UNEXPECTED_SUCCESS"  # Should not reach here
+                        await websocket.send('{"type": "ping"}')
+                        await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                        no_token_result = "UNEXPECTED_SUCCESS"  # Should not reach here
             except (websockets.exceptions.ConnectionClosed, websockets.exceptions.WebSocketException):
                 no_token_result = "CORRECTLY_REJECTED"
             except Exception:
@@ -234,9 +234,9 @@ class StagingWebSocketTestRunner:
             try:
                 async with asyncio.timeout(10):
                     async with websockets.connect(ws_url, extra_headers=invalid_headers, close_timeout=5) as websocket:
-                    await websocket.send('{"type": "ping"}')
-                    await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                    invalid_token_result = "UNEXPECTED_SUCCESS"
+                        await websocket.send('{"type": "ping"}')
+                        await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                        invalid_token_result = "UNEXPECTED_SUCCESS"
             except (websockets.exceptions.ConnectionClosed, websockets.exceptions.WebSocketException):
                 invalid_token_result = "CORRECTLY_REJECTED"
             except Exception:
@@ -249,9 +249,9 @@ class StagingWebSocketTestRunner:
                 try:
                     async with asyncio.timeout(10):
                         async with websockets.connect(ws_url, extra_headers=valid_headers, close_timeout=5) as websocket:
-                        await websocket.send('{"type": "ping"}')
-                        await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                        valid_token_result = "CORRECTLY_ACCEPTED"
+                            await websocket.send('{"type": "ping"}')
+                            await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                            valid_token_result = "CORRECTLY_ACCEPTED"
                 except Exception:
                     valid_token_result = "UNEXPECTED_FAILURE"
             else:

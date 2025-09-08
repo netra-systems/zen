@@ -65,8 +65,8 @@ import os
 # Create a simple settings mock for testing
 class Settings:
     def __init__(self):
-        # Load #removed-legacydynamically to ensure env vars are loaded
-        self.#removed-legacy= get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
+        # Load database URL dynamically to ensure env vars are loaded
+        self.DATABASE_URL = get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
         self.REDIS_URL = get_env().get('REDIS_URL', 'redis://localhost:6379/1')
     
     def is_postgresql(self):
