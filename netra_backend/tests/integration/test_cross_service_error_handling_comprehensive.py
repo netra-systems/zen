@@ -44,6 +44,7 @@ from sqlalchemy.exc import OperationalError, DisconnectionError
 from redis.exceptions import ConnectionError as RedisConnectionError, TimeoutError as RedisTimeoutError
 
 # SSOT imports - absolute paths required per CLAUDE.md
+from sqlalchemy import text
 from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager, get_db_session
 from netra_backend.app.redis_manager import get_redis_manager, RedisManager
 from netra_backend.app.services.agent_service_core import AgentService

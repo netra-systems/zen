@@ -29,7 +29,7 @@ from typing import Dict, Any
 from unittest.mock import MagicMock, patch, AsyncMock
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_services_fixture
+from test_framework.fixtures.real_services import real_services_fixture
 
 from netra_backend.app.agents.supervisor.user_execution_engine import (
     UserExecutionEngine, 
