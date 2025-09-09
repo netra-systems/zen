@@ -210,6 +210,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_message_sending_before_handshake_completion(self, real_services_fixture):
         """Test race condition when messages are sent before handshake completion."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="handshake_race_test@example.com",
@@ -218,10 +224,10 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Test scenarios with different timing
         race_scenarios = [
@@ -361,6 +367,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_multiple_concurrent_handshakes_same_user(self, real_services_fixture):
         """Test multiple concurrent WebSocket handshakes from the same user."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="concurrent_handshakes_test@example.com",
@@ -369,10 +381,10 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Create multiple concurrent connection attempts
         concurrent_connections = 5
@@ -514,6 +526,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_service_restart_during_active_connections(self, real_services_fixture):
         """Test WebSocket behavior during simulated service restart."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="service_restart_test@example.com",
@@ -522,10 +540,10 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Establish initial connection
         initial_connection = await WebSocketTestHelpers.create_test_websocket_connection(

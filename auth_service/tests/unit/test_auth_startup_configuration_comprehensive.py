@@ -55,35 +55,95 @@ class ServiceInitializer:
             metrics: dict = None
             startup_events: list = None
         
-        # Call dependency check methods in proper startup sequence
-        self._validate_jwt_configuration()
-        self._check_database_connection()
-        self._check_redis_connection()
-        self._initialize_oauth_providers()
-        self._setup_security_middleware()
+        start_time = time()
+        failed_components = []
+        error_messages = []
         
-        self.is_initialized = True
-        self.startup_timestamp = time()
+        # Call dependency check methods in proper startup sequence with error handling
+        # This follows the SSOT pattern from AuthServiceStartupOptimizer
+        try:
+            self._validate_jwt_configuration()
+        except Exception as e:
+            failed_components.append("jwt_configuration")
+            error_messages.append(f"JWT configuration validation failed: {str(e)}")
+        
+        try:
+            self._check_database_connection()
+        except Exception as e:
+            failed_components.append("database_connection")
+            error_messages.append(f"Database connection failed: {str(e)}")
+        
+        try:
+            self._check_redis_connection()
+        except Exception as e:
+            failed_components.append("redis_connection")
+            error_messages.append(f"Redis connection failed: {str(e)}")
+        
+        try:
+            self._initialize_oauth_providers()
+        except Exception as e:
+            failed_components.append("oauth_providers")
+            error_messages.append(f"OAuth providers initialization failed: {str(e)}")
+        
+        try:
+            self._setup_security_middleware()
+        except Exception as e:
+            failed_components.append("security_middleware")
+            error_messages.append(f"Security middleware setup failed: {str(e)}")
+        
+        startup_time = time() - start_time
+        
+        # Determine success based on whether any critical components failed
+        # Following SSOT pattern - some failures are acceptable, but database is critical
+        success = len(failed_components) == 0
+        if failed_components:
+            # Don't initialize if there are failures
+            self.is_initialized = False
+            error_message = "; ".join(error_messages)
+        else:
+            self.is_initialized = True
+            self.startup_timestamp = time()
+            error_message = ""
+        
         return StartupResult(
-            success=True, 
-            startup_time=0.1,
+            success=success, 
+            startup_time=startup_time,
+            error_message=error_message,
             metrics={
-                "total_startup_time": 0.1,
+                "total_startup_time": startup_time,
                 "dependency_check_time": 0.01,
                 "initialization_steps": 5,
                 "database_connection_time": 0.02,
                 "redis_connection_time": 0.01,
                 "jwt_validation_time": 0.005,
                 "oauth_initialization_time": 0.03,
-                "security_setup_time": 0.02
+                "security_setup_time": 0.02,
+                "failed_components": failed_components
             },
-            startup_events=["startup_begin", "dependencies_checked", "service_ready"]
+            startup_events=["startup_begin", "dependencies_checked"] + (["service_ready"] if success else ["service_failed"])
         )
     
     def initialize_service_with_retry(self, max_retries=3):
-        result = self.initialize_service()
-        result.retry_count = 2  # Mock retry scenario
-        return result
+        """Initialize service with retry logic for transient failures."""
+        retry_count = 0
+        last_result = None
+        
+        for attempt in range(max_retries):
+            result = self.initialize_service()
+            last_result = result
+            
+            if result.success:
+                result.retry_count = retry_count
+                return result
+            
+            retry_count += 1
+            # Brief delay between retries (simulate real retry behavior)
+            import time
+            time.sleep(0.01)
+        
+        # If we get here, all retries failed
+        last_result.retry_count = retry_count
+        return last_result
     
     def graceful_shutdown(self, timeout=10.0):
         from dataclasses import dataclass
