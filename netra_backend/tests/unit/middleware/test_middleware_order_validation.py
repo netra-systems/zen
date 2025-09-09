@@ -13,7 +13,8 @@ from unittest.mock import Mock, patch
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
-from netra_backend.app.core.app_factory import setup_middleware, _install_auth_context_middleware
+from netra_backend.app.core.app_factory import setup_middleware
+from netra_backend.app.core.middleware_setup import setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
 

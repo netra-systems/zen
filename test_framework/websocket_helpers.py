@@ -437,9 +437,10 @@ class WebSocketTestHelpers:
         last_error = None
         for attempt in range(max_retries):
             try:
-                # Try connection with retries - handle different websockets API versions
+                # PHASE 2 FIX: Handle different websockets API versions with better compatibility
+                # Use additional_headers as primary, extra_headers as fallback
                 try:
-                    # Try newer websockets API (>= 10.0)
+                    # Try newer websockets API (>= 10.0) with additional_headers
                     if subprotocols:
                         connection = await asyncio.wait_for(
                             websockets.connect(
@@ -457,8 +458,9 @@ class WebSocketTestHelpers:
                             ),
                             timeout=timeout
                         )
-                except TypeError:
-                    # Fallback to older API (< 10.0)
+                except (TypeError, AttributeError):
+                    # Fallback to older API (< 10.0) with extra_headers
+                    logger.debug("WEBSOCKET COMPATIBILITY: Falling back to extra_headers for older websockets library")
                     if subprotocols:
                         connection = await asyncio.wait_for(
                             websockets.connect(
@@ -872,15 +874,16 @@ class HighVolumeThroughputClient:
         headers = {"Authorization": f"Bearer {self.token}"}
         
         try:
-            # Try newer websockets API first
+            # PHASE 2 FIX: Try newer websockets API first with additional_headers
             try:
                 self.websocket = await websockets.connect(
                     self.uri, 
                     additional_headers=headers,
                     subprotocols=["jwt-auth"]
                 )
-            except TypeError:
-                # Fallback to older API
+            except (TypeError, AttributeError):
+                # Fallback to older API with extra_headers
+                logger.debug("HIGH VOLUME CLIENT: Falling back to extra_headers compatibility mode")
                 self.websocket = await websockets.connect(
                     self.uri, 
                     extra_headers=headers,
@@ -893,7 +896,8 @@ class HighVolumeThroughputClient:
                     self.uri, 
                     additional_headers=headers
                 )
-            except TypeError:
+            except (TypeError, AttributeError):
+                logger.debug("HIGH VOLUME CLIENT: Basic connection using extra_headers compatibility")
                 self.websocket = await websockets.connect(
                     self.uri, 
                     extra_headers=headers
