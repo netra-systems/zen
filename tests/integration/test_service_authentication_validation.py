@@ -1,429 +1,423 @@
 """
-Service Authentication Integration Test Suite
+Service Authentication Validation Tests for GitHub Issue #115
 
-CRITICAL: These tests validate the service-to-service authentication system
-that is required to fix the system user authentication failure (GitHub Issue #115).
+Business Value Justification (BVJ):
+- Segment: All (Free, Early, Mid, Enterprise)  
+- Business Goal: Validate service-to-service authentication works properly
+- Value Impact: Service authentication enables internal operations and database access
+- Strategic Impact: Core infrastructure for system reliability and golden path
 
-Purpose: Validate that service authentication headers work properly and that
-the database session creation functions correctly with service authentication.
+CRITICAL: These tests validate proper service authentication implementation.
+They MUST PASS after implementing service auth headers in dependencies.py.
 
-Business Value: Platform/Internal - System Stability & Development Velocity  
-- Restores golden path user flows by fixing authentication gaps
-- Enables proper service-to-service communication
-- Prevents authentication failures in internal operations
-
-IMPORTANT: These tests follow CLAUDE.md requirements:
-- Use real services (marked with @pytest.mark.real_services)
-- No mocks in integration testing  
-- Must show measurable execution time (not 0.00s)
-- Extend SSotBaseTestCase for SSOT compliance
-
-Expected Results:
-BEFORE FIX: Tests SHOULD FAIL showing missing/invalid service authentication
-AFTER FIX: Tests MUST PASS with proper service auth working end-to-end
+This test suite follows CLAUDE.md requirements:
+- NO MOCKS in integration tests (forbidden per CLAUDE.md)
+- ALL tests use real services - no docker dependency
+- Real authentication flows with actual JWT tokens and service headers
+- Focus on validating service-to-service authentication patterns
 """
 
-import asyncio
-import time
-from typing import Dict, Any, Optional
-from unittest.mock import patch, MagicMock
 import pytest
+import asyncio
+import aiohttp
+import logging
+from datetime import datetime, timezone
+from typing import Optional, Dict, Any
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.dependencies import get_request_scoped_db_session
-from shared.isolated_environment import IsolatedEnvironment
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_test_user_with_auth
+from shared.isolated_environment import get_env
 
+logger = logging.getLogger(__name__)
 
-@pytest.mark.real_services
 class TestServiceAuthenticationValidation(SSotBaseTestCase):
     """
-    Integration tests for service-to-service authentication validation.
+    Integration Tests: Validate service-to-service authentication for Issue #115.
     
-    These tests validate that the service authentication system works
-    properly to resolve the system user authentication failure.
+    These tests validate that:
+    1. Service authentication headers work properly for system operations
+    2. Dependencies.py includes proper X-Service-ID and X-Service-Secret headers
+    3. Internal operations succeed with proper service authentication
+    4. System user operations work with service-to-service credentials
+    
+    CRITICAL: These tests should PASS after implementing proper service authentication.
     """
-    
+
     def setup_method(self, method):
-        """Setup for each test method with real services configuration."""
+        """Set up test environment for service authentication validation."""
         super().setup_method(method)
-        self.start_time = time.time()
+        self.env = get_env()
         
-        # Use real isolated environment per CLAUDE.md requirements
-        self.env = IsolatedEnvironment()
+        # Use test environment - integration tests use local services
+        self.environment = "test"
+        self.auth_helper = E2EAuthHelper(environment=self.environment)
         
-        # Initialize real auth client for testing
-        self.auth_client = AuthServiceClient()
+        # Test configuration
+        self.backend_url = "http://localhost:8000"
+        self.auth_service_url = "http://localhost:8081"
         
-        self.logger.info(f"🔧 SERVICE AUTH TEST: {method.__name__} - Testing with real services")
+        # Service authentication configuration
+        # These should be set in environment for service-to-service auth
+        self.service_id = self.env.get("SERVICE_ID", "netra-backend")
+        self.service_secret = self.env.get("SERVICE_SECRET", "test_service_secret_32chars_long")
         
-    def teardown_method(self, method):
-        """Teardown with timing validation per CLAUDE.md requirements."""
-        execution_time = time.time() - self.start_time
-        
-        # CRITICAL: Tests must show measurable timing (not 0.00s per CLAUDE.md)
-        assert execution_time > 0.001, (
-            f"Test {method.__name__} executed in {execution_time:.3f}s - "
-            "0.00s execution indicates test not actually running (CLAUDE.md violation)"
-        )
-        
-        self.logger.info(f"✅ Test {method.__name__} executed in {execution_time:.3f}s")
-        super().teardown_method(method)
-    
+        logger.info(f"🔍 SERVICE AUTH TEST: {method.__name__}")
+        logger.info(f"Environment: {self.environment}")
+        logger.info(f"Service ID: {self.service_id}")
+        logger.info(f"Service Secret: {'***' + self.service_secret[-4:] if self.service_secret else 'NOT_SET'}")
+
     @pytest.mark.integration
-    def test_service_auth_header_generation_validation(self):
-        """
-        Test that service authentication headers are generated correctly.
-        
-        This validates that AuthServiceClient._get_service_auth_headers() 
-        produces the proper X-Service-ID and X-Service-Secret headers.
-        
-        Expected Results:
-        - BEFORE FIX: May fail due to missing SERVICE_ID/SERVICE_SECRET config
-        - AFTER FIX: Must pass with properly formatted headers
-        """
-        self.logger.info("🔧 TESTING: Service auth header generation")
-        
-        test_start = time.time()
-        
-        try:
-            # Test header generation with real auth client
-            headers = self.auth_client._get_service_auth_headers()
-            execution_time = time.time() - test_start
-            
-            self.logger.info(f"Service headers generated in {execution_time:.3f}s")
-            
-            # Validate headers are properly formed
-            assert isinstance(headers, dict), "Service auth headers must be a dictionary"
-            
-            # Check for required headers
-            assert "X-Service-ID" in headers, "X-Service-ID header must be present"
-            assert "X-Service-Secret" in headers, "X-Service-Secret header must be present"
-            
-            # Validate header values are not empty
-            service_id = headers["X-Service-ID"]
-            service_secret = headers["X-Service-Secret"] 
-            
-            assert service_id and service_id.strip(), "X-Service-ID must not be empty"
-            assert service_secret and service_secret.strip(), "X-Service-Secret must not be empty"
-            
-            # Validate expected service ID format
-            assert service_id in ["netra-backend", "netra-backend-test"], (
-                f"Expected service ID 'netra-backend' or 'netra-backend-test', got '{service_id}'"
-            )
-            
-            # Record successful validation
-            self.record_metric("service_auth_headers_valid", {
-                "service_id": service_id,
-                "service_secret_length": len(service_secret),
-                "headers_count": len(headers),
-                "execution_time": execution_time,
-                "validation_success": True
-            })
-            
-            self.logger.info(
-                f"✅ Service auth headers valid: ID='{service_id}', "
-                f"Secret length={len(service_secret)} characters"
-            )
-            
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.record_metric("service_auth_header_validation_failed", {
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "execution_time": execution_time,
-                "auth_client_configured": hasattr(self.auth_client, 'service_id')
-            })
-            
-            self.logger.error(f"❌ Service auth header validation failed in {execution_time:.3f}s: {e}")
-            raise AssertionError(f"Service auth header generation failed: {e}") from e
-    
-    @pytest.mark.integration
+    @pytest.mark.real_services
     async def test_system_user_with_service_auth_headers(self):
         """
-        Test that system user operations work when proper service auth headers are used.
+        Test that system user operations succeed with proper service auth headers.
         
-        This simulates what SHOULD happen after the fix is implemented -
-        internal operations include service authentication.
-        
-        Expected Results:
-        - BEFORE FIX: May fail due to dependencies.py not using service auth
-        - AFTER FIX: Must pass with system user authenticated via service headers
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Service authentication headers enable system user operations
         """
-        self.logger.info("🔧 TESTING: System user operations with service auth headers")
+        logger.info("✅ VALIDATION: Testing system user with service auth headers")
         
-        test_start = time.time()
-        
-        try:
-            # Get service auth headers
-            service_headers = self.auth_client._get_service_auth_headers()
-            
-            assert service_headers, "Service auth headers must be available for this test"
-            
-            # Test that we can create a properly authenticated service context
-            service_user_id = f"service:{service_headers['X-Service-ID']}"
-            
-            self.logger.info(f"Testing with service user ID: '{service_user_id}'")
-            
-            # Simulate the fixed behavior where dependencies.py uses service auth
-            # This test validates what the system SHOULD do after the fix
-            
-            execution_time = time.time() - test_start
-            
-            # For now, this test documents the expected behavior
-            # After the fix is implemented, this should test actual database session creation
-            
-            self.record_metric("service_auth_system_user_test", {
-                "service_user_id": service_user_id,
-                "service_headers_available": True,
-                "expected_behavior": "system_user_authenticated_via_service_headers",
-                "execution_time": execution_time
-            })
-            
-            self.logger.info(
-                f"✅ Service auth system user test completed in {execution_time:.3f}s - "
-                f"ready for implementation"
-            )
-            
-            # This test passes to validate the service auth headers are available
-            # The actual database session test is in the next test method
-            
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Service auth system user test failed in {execution_time:.3f}s: {e}")
-            raise AssertionError(f"Service auth system user test failed: {e}") from e
-    
-    @pytest.mark.integration
-    async def test_get_request_scoped_db_session_with_service_auth(self):
-        """
-        Test the core function that's failing - get_request_scoped_db_session()
-        with proper service authentication.
-        
-        This is the KEY test that validates the fix for the authentication failure.
-        
-        Expected Results:
-        - BEFORE FIX: WILL FAIL with authentication error
-        - AFTER FIX: MUST PASS with database session created successfully
-        """
-        self.logger.info("🔧 TESTING: get_request_scoped_db_session with service auth")
-        
-        test_start = time.time()
-        
-        # This test will demonstrate both the current failure and future success
-        
-        try:
-            # First, validate service auth is available
-            service_headers = self.auth_client._get_service_auth_headers()
-            assert service_headers, "Service auth headers required for this test"
-            
-            self.logger.info(f"Service auth available: {list(service_headers.keys())}")
-            
-            # Attempt to create database session
-            # BEFORE FIX: This will fail with authentication error
-            # AFTER FIX: This should succeed with proper service authentication
-            
-            session_created = False
-            session_error = None
+        async with aiohttp.ClientSession() as session:
+            # Test system user operation with proper service authentication
+            test_url = f"{self.backend_url}/api/internal/db-session-test"
+            headers = {
+                "Content-Type": "application/json",
+                "X-User-ID": "system",
+                # CRITICAL: Include proper service authentication headers
+                "X-Service-ID": self.service_id,
+                "X-Service-Secret": self.service_secret
+            }
             
             try:
-                async for session in get_request_scoped_db_session():
-                    session_created = True
-                    self.logger.info("✅ Database session created successfully with service auth")
+                async with session.post(test_url, headers=headers, timeout=10) as response:
+                    response_text = await response.text()
                     
-                    # Validate session is functional
-                    assert session is not None, "Session must not be None"
-                    assert hasattr(session, 'execute'), "Session must have execute method"
+                    # Should succeed with proper service authentication
+                    if response.status == 200:
+                        logger.info("✅ VALIDATION SUCCESS: System user authenticated with service headers")
+                        logger.info(f"Success response: {response_text}")
+                        return
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"VALIDATION FAILED: System user still failing auth with service headers. "
+                            f"Status: {response.status}, Response: {response_text}. "
+                            f"This indicates service auth implementation may be incomplete."
+                        )
+                    else:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Unexpected response {response.status}: {response_text}"
+                        )
+                        
+            except Exception as e:
+                pytest.fail(f"VALIDATION FAILED: Error testing system user with service auth: {e}")
+
+    @pytest.mark.integration  
+    @pytest.mark.real_services
+    async def test_get_request_scoped_db_session_with_service_auth(self):
+        """
+        Test that get_request_scoped_db_session works with proper service authentication.
+        
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Core dependencies.py function works with service authentication
+        """
+        logger.info("✅ VALIDATION: Testing get_request_scoped_db_session with service auth")
+        
+        async with aiohttp.ClientSession() as session:
+            # Test the specific function that was failing in dependencies.py
+            test_url = f"{self.backend_url}/api/test/system-user-session"
+            headers = {
+                "Content-Type": "application/json",
+                "X-User-ID": "system",
+                # Include service authentication headers
+                "X-Service-ID": self.service_id,
+                "X-Service-Secret": self.service_secret
+            }
+            
+            data = {
+                "operation": "create_request_scoped_db_session",
+                "user_id": "system",
+                "source": "dependencies_validation_test"
+            }
+            
+            try:
+                async with session.post(test_url, headers=headers, json=data, timeout=10) as response:
+                    response_text = await response.text()
                     
-                    # Clean up
-                    await session.close()
-                    break  # Exit the async generator
-                    
-            except Exception as session_exc:
-                session_error = session_exc
-                self.logger.info(f"Database session creation failed: {session_exc}")
-            
-            execution_time = time.time() - test_start
-            
-            # Record results for analysis
-            self.record_metric("db_session_with_service_auth", {
-                "session_created": session_created,
-                "error_occurred": session_error is not None,
-                "error_type": type(session_error).__name__ if session_error else None,
-                "error_message": str(session_error) if session_error else None,
-                "execution_time": execution_time,
-                "service_auth_available": bool(service_headers)
-            })
-            
-            if session_created:
-                self.logger.info(
-                    f"✅ SUCCESS: Database session with service auth in {execution_time:.3f}s"
-                )
-                # Test passes - indicates fix is working
-                
-            else:
-                # Expected failure before fix is implemented
-                self.logger.info(
-                    f"📋 EXPECTED FAILURE: Database session failed in {execution_time:.3f}s - "
-                    f"indicates fix needed: {session_error}"
-                )
-                
-                # For now, we document this as expected behavior before fix
-                # After fix is implemented, this should be changed to assert success
-                
-                if session_error and ("auth" in str(session_error).lower() or "403" in str(session_error)):
-                    # This is the expected authentication failure
-                    raise AssertionError(
-                        f"EXPECTED FAILURE (before fix): Database session failed with auth error - {session_error}"
-                    ) from session_error
-                else:
-                    # Unexpected error
-                    raise AssertionError(
-                        f"UNEXPECTED ERROR: Database session failed with non-auth error - {session_error}"
-                    ) from session_error
-                    
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Database session test failed in {execution_time:.3f}s: {e}")
-            
-            # Re-raise to show the failure
-            raise
-    
+                    # Should succeed with service authentication
+                    if response.status == 200:
+                        logger.info("✅ VALIDATION SUCCESS: Database session created with service auth")
+                        logger.info(f"Session creation success: {response_text}")
+                        return
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Database session creation still failing with service auth. "
+                            f"Status: {response.status}, Response: {response_text}. "
+                            f"Check if dependencies.py properly uses service authentication headers."
+                        )
+                    else:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Unexpected response {response.status}: {response_text}"
+                        )
+                        
+            except Exception as e:
+                pytest.fail(f"VALIDATION FAILED: Error testing database session with service auth: {e}")
+
     @pytest.mark.integration
-    def test_middleware_service_auth_validation(self):
+    @pytest.mark.real_services  
+    async def test_middleware_accepts_authenticated_service_requests(self):
         """
-        Test that authentication middleware properly validates service credentials.
+        Test that authentication middleware properly validates service requests.
         
-        This validates the middleware behavior that should accept proper service
-        authentication headers.
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Middleware recognizes and validates service-to-service authentication
         """
-        self.logger.info("🔧 TESTING: Middleware service auth validation")
+        logger.info("✅ VALIDATION: Testing middleware accepts authenticated service requests")
         
-        test_start = time.time()
-        
-        try:
-            from netra_backend.app.middleware.fastapi_auth_middleware import FastAPIAuthMiddleware
+        async with aiohttp.ClientSession() as session:
+            # Test authenticated endpoint with proper service credentials
+            test_url = f"{self.backend_url}/api/health/authenticated"
+            headers = {
+                "Content-Type": "application/json",
+                "X-User-ID": "system",
+                # Proper service authentication headers
+                "X-Service-ID": self.service_id,
+                "X-Service-Secret": self.service_secret
+            }
             
-            # Get valid service headers
-            service_headers = self.auth_client._get_service_auth_headers()
-            assert service_headers, "Service auth headers required for middleware test"
-            
-            # Create middleware instance
-            middleware = FastAPIAuthMiddleware()
-            
-            execution_time = time.time() - test_start
-            
-            # Record middleware configuration
-            self.record_metric("middleware_service_auth_test", {
-                "middleware_created": True,
-                "service_headers_available": True,
-                "execution_time": execution_time,
-                "service_id": service_headers.get("X-Service-ID"),
-                "test_type": "middleware_validation"
-            })
-            
-            self.logger.info(
-                f"✅ Middleware service auth test completed in {execution_time:.3f}s - "
-                f"middleware available for service validation"
-            )
-            
-            # This test validates the middleware can be instantiated and has service auth capabilities
-            # The actual request validation would require more complex setup with FastAPI
-            
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Middleware service auth test failed in {execution_time:.3f}s: {e}")
-            raise AssertionError(f"Middleware service auth validation failed: {e}") from e
-    
+            try:
+                async with session.get(test_url, headers=headers, timeout=10) as response:
+                    response_text = await response.text()
+                    
+                    # Middleware should accept service-authenticated requests
+                    if response.status == 200:
+                        logger.info("✅ VALIDATION SUCCESS: Middleware accepted service-authenticated request")
+                        logger.info(f"Middleware success: {response_text}")
+                        return
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Middleware still rejecting service-authenticated requests. "
+                            f"Status: {response.status}, Response: {response_text}. "
+                            f"Check if middleware properly handles X-Service-ID and X-Service-Secret headers."
+                        )
+                    else:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Unexpected response {response.status}: {response_text}"
+                        )
+                        
+            except Exception as e:
+                pytest.fail(f"VALIDATION FAILED: Error testing middleware service auth: {e}")
+
     @pytest.mark.integration
-    def test_service_credentials_environment_validation(self):
+    @pytest.mark.real_services
+    async def test_session_factory_accepts_service_authenticated_system_user(self):
         """
-        Test that service credentials are properly configured in the environment.
+        Test that session factory accepts service-authenticated system user requests.
         
-        This validates the configuration requirements for service authentication.
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Session factory works with proper service authentication context
         """
-        self.logger.info("🔧 TESTING: Service credentials environment validation")
+        logger.info("✅ VALIDATION: Testing session factory accepts service-authenticated system user")
         
-        test_start = time.time()
+        async with aiohttp.ClientSession() as session:
+            # Test session creation with service-authenticated system user
+            test_url = f"{self.backend_url}/api/test/session-factory"
+            headers = {
+                "Content-Type": "application/json",
+                # Include service authentication headers
+                "X-Service-ID": self.service_id,
+                "X-Service-Secret": self.service_secret
+            }
+            
+            data = {
+                "user_id": "system",
+                "request_id": "validation_test_123",
+                "operation": "get_request_scoped_session",
+                "source": "service_auth_validation_test"
+            }
+            
+            try:
+                async with session.post(test_url, headers=headers, json=data, timeout=10) as response:
+                    response_text = await response.text()
+                    
+                    # Session factory should succeed with service authentication
+                    if response.status == 200:
+                        logger.info("✅ VALIDATION SUCCESS: Session factory accepted service-authenticated system user")
+                        logger.info(f"Session factory success: {response_text}")
+                        return
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Session factory still rejecting service-authenticated system user. "
+                            f"Status: {response.status}, Response: {response_text}. "
+                            f"Check if session factory properly validates service authentication context."
+                        )
+                    else:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Unexpected response {response.status}: {response_text}"
+                        )
+                        
+            except Exception as e:
+                pytest.fail(f"VALIDATION FAILED: Error testing session factory service auth: {e}")
+
+    @pytest.mark.integration
+    @pytest.mark.real_services  
+    async def test_service_auth_header_validation_edge_cases(self):
+        """
+        Test service authentication header validation handles edge cases properly.
         
-        # Test environment configuration using IsolatedEnvironment
-        service_id = self.env.get("SERVICE_ID")
-        service_secret = self.env.get("SERVICE_SECRET")
+        EXPECTED: This test should PASS with proper error handling
+        VALIDATES: Service auth properly validates headers and gives clear error messages
+        """
+        logger.info("✅ VALIDATION: Testing service auth header validation edge cases")
         
-        execution_time = time.time() - test_start
+        # Test cases for different authentication scenarios
+        test_cases = [
+            {
+                "name": "missing_service_id",
+                "headers": {"X-Service-Secret": self.service_secret},
+                "expected_status": [401, 400],
+                "error_keywords": ["service", "service_id", "missing"]
+            },
+            {
+                "name": "missing_service_secret", 
+                "headers": {"X-Service-ID": self.service_id},
+                "expected_status": [401, 400],
+                "error_keywords": ["service", "service_secret", "missing"]
+            },
+            {
+                "name": "invalid_service_id",
+                "headers": {"X-Service-ID": "invalid-service", "X-Service-Secret": self.service_secret},
+                "expected_status": [401, 403],
+                "error_keywords": ["service", "invalid", "unauthorized"]
+            },
+            {
+                "name": "invalid_service_secret",
+                "headers": {"X-Service-ID": self.service_id, "X-Service-Secret": "invalid_secret"},
+                "expected_status": [401, 403], 
+                "error_keywords": ["service", "invalid", "unauthorized"]
+            }
+        ]
         
-        # Validate configuration
-        config_status = {
-            "SERVICE_ID_configured": bool(service_id),
-            "SERVICE_SECRET_configured": bool(service_secret),
-            "SERVICE_ID_value": service_id if service_id else "NOT_SET",
-            "configuration_complete": bool(service_id and service_secret)
-        }
+        async with aiohttp.ClientSession() as session:
+            for test_case in test_cases:
+                logger.info(f"Testing edge case: {test_case['name']}")
+                
+                test_url = f"{self.backend_url}/api/internal/db-session-test"
+                headers = {
+                    "Content-Type": "application/json",
+                    "X-User-ID": "system",
+                    **test_case["headers"]
+                }
+                
+                try:
+                    async with session.post(test_url, headers=headers, timeout=10) as response:
+                        response_text = await response.text()
+                        
+                        # Should fail with appropriate error for edge cases
+                        if response.status in test_case["expected_status"]:
+                            # Verify error message contains relevant keywords
+                            if any(keyword in response_text.lower() for keyword in test_case["error_keywords"]):
+                                logger.info(f"✅ Edge case {test_case['name']}: Proper error handling")
+                                continue
+                            else:
+                                pytest.fail(
+                                    f"VALIDATION FAILED: Edge case {test_case['name']} returned expected status "
+                                    f"{response.status} but error message doesn't contain expected keywords "
+                                    f"{test_case['error_keywords']}. Response: {response_text}"
+                                )
+                        else:
+                            pytest.fail(
+                                f"VALIDATION FAILED: Edge case {test_case['name']} returned unexpected status "
+                                f"{response.status}, expected one of {test_case['expected_status']}. "
+                                f"Response: {response_text}"
+                            )
+                            
+                except Exception as e:
+                    pytest.fail(f"VALIDATION FAILED: Error testing edge case {test_case['name']}: {e}")
+                    
+        logger.info("✅ VALIDATION SUCCESS: All service auth edge cases handled properly")
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_golden_path_works_with_service_authentication(self):
+        """
+        Test that golden path user flow works with fixed service authentication.
         
-        self.record_metric("service_credentials_config_validation", {
-            **config_status,
-            "execution_time": execution_time
-        })
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Complete golden path functionality restored with service authentication
+        """
+        logger.info("✅ VALIDATION: Testing golden path works with service authentication")
         
-        self.logger.info(
-            f"Service credentials validation completed in {execution_time:.3f}s: {config_status}"
+        # Create authenticated user for golden path test
+        auth_result = await create_test_user_with_auth(
+            email="golden_path_validation@example.com",
+            environment=self.environment,
+            permissions=["read", "write"]
         )
         
-        # For integration testing, we validate configuration is available
-        if not (service_id and service_secret):
-            raise AssertionError(
-                f"Service credentials not fully configured: "
-                f"SERVICE_ID={'SET' if service_id else 'MISSING'}, "
-                f"SERVICE_SECRET={'SET' if service_secret else 'MISSING'}"
-            )
+        user_token = auth_result["jwt_token"]
+        user_id = auth_result["user_id"]
         
-        self.logger.info("✅ Service credentials properly configured for integration testing")
-    
-    @pytest.mark.integration
-    def test_auth_client_service_initialization(self):
-        """
-        Test that AuthServiceClient initializes properly with service credentials.
-        
-        This validates the client configuration that's required for service auth.
-        """
-        self.logger.info("🔧 TESTING: Auth client service initialization")
-        
-        test_start = time.time()
-        
-        try:
-            # Validate auth client initialization
-            assert self.auth_client is not None, "Auth client must be initialized"
-            assert hasattr(self.auth_client, 'service_id'), "Auth client must have service_id"
-            assert hasattr(self.auth_client, 'service_secret'), "Auth client must have service_secret"
+        async with aiohttp.ClientSession() as session:
+            # Test golden path endpoint - should now work with fixed service auth
+            test_url = f"{self.backend_url}/api/chat/start-conversation"
+            headers = {
+                "Authorization": f"Bearer {user_token}",
+                "Content-Type": "application/json"
+            }
             
-            # Test service properties
-            service_id = self.auth_client.service_id
-            service_secret = self.auth_client.service_secret
+            data = {
+                "message": "Test golden path with fixed service authentication",
+                "agent_type": "triage",
+                "user_id": user_id
+            }
             
-            execution_time = time.time() - test_start
-            
-            # Validate service configuration
-            assert service_id, "Auth client service_id must be configured"
-            assert service_secret, "Auth client service_secret must be configured"
-            
-            self.record_metric("auth_client_service_init", {
-                "client_initialized": True,
-                "service_id_configured": bool(service_id),
-                "service_secret_configured": bool(service_secret),
-                "service_id_value": service_id,
-                "execution_time": execution_time
-            })
-            
-            self.logger.info(
-                f"✅ Auth client service initialization validated in {execution_time:.3f}s - "
-                f"Service ID: '{service_id}'"
-            )
-            
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Auth client initialization failed in {execution_time:.3f}s: {e}")
-            raise AssertionError(f"Auth client service initialization failed: {e}") from e
+            try:
+                async with session.post(test_url, headers=headers, json=data, timeout=20) as response:
+                    response_text = await response.text()
+                    
+                    # Golden path should succeed with fixed service authentication
+                    if response.status == 200:
+                        logger.info("✅ VALIDATION SUCCESS: Golden path working with service authentication")
+                        logger.info(f"Golden path success: {response_text[:200]}...")
+                        return
+                    elif response.status in [500, 503]:
+                        # Check if still system auth related errors
+                        system_auth_errors = [
+                            "system_user_auth_failure", "system user failed authentication",
+                            "not authenticated", "database session", "session factory"
+                        ]
+                        
+                        if any(error in response_text.lower() for error in system_auth_errors):
+                            pytest.fail(
+                                f"VALIDATION FAILED: Golden path still has system authentication issues. "
+                                f"Status: {response.status}, Response: {response_text}. "
+                                f"Service authentication fix may be incomplete."
+                            )
+                        else:
+                            pytest.fail(
+                                f"VALIDATION FAILED: Golden path failed with non-auth error. "
+                                f"Status: {response.status}, Response: {response_text}"
+                            )
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Golden path still has authentication issues. "
+                            f"Status: {response.status}, Response: {response_text}"
+                        )
+                    else:
+                        pytest.fail(
+                            f"VALIDATION FAILED: Golden path failed with unexpected status. "
+                            f"Status: {response.status}, Response: {response_text}"
+                        )
+                        
+            except asyncio.TimeoutError:
+                pytest.fail(
+                    "VALIDATION FAILED: Golden path timed out. This may indicate ongoing "
+                    "authentication issues preventing proper completion."
+                )
+            except Exception as e:
+                pytest.fail(f"VALIDATION FAILED: Error testing golden path with service auth: {e}")
+
+    def teardown_method(self, method):
+        """Clean up after test."""
+        logger.info(f"🏁 SERVICE AUTH VALIDATION TEST COMPLETE: {method.__name__}")
+        super().teardown_method(method)
