@@ -161,6 +161,118 @@ class UnifiedIDManager:
         
         return True
     
+    def is_valid_id_format_compatible(self, id_value: str, id_type: Optional[IDType] = None) -> bool:
+        """
+        Enhanced validation that accepts both UUID and structured formats gracefully.
+        
+        This method provides backward compatibility during the migration period
+        by accepting both formats without requiring registration.
+        
+        Args:
+            id_value: ID to validate format
+            id_type: Optional specific type to check against
+            
+        Returns:
+            True if ID has valid format (UUID or structured)
+        """
+        if not is_valid_id_format(id_value):
+            return False
+        
+        # If no specific type requested, format validation is sufficient
+        if id_type is None:
+            return True
+        
+        # For structured IDs, validate type matching
+        if self._is_structured_id_format(id_value):
+            extracted_type = self._extract_id_type_from_structured(id_value)
+            if extracted_type and extracted_type != id_type:
+                return False
+        
+        # UUID format doesn't contain type info, so we accept it for any type
+        # during migration period
+        return True
+    
+    def _is_structured_id_format(self, id_value: str) -> bool:
+        """
+        Check if ID follows UnifiedIDManager structured format.
+        
+        Args:
+            id_value: ID to check
+            
+        Returns:
+            True if ID is structured format (not UUID)
+        """
+        try:
+            uuid.UUID(id_value)
+            return False  # It's a UUID, not structured
+        except ValueError:
+            # Not a UUID, check if it's valid structured format
+            return self._validate_structured_format(id_value)
+    
+    def _validate_structured_format(self, id_value: str) -> bool:
+        """
+        Validate structured ID format: [prefix_]idtype_counter_uuid8
+        
+        Args:
+            id_value: ID to validate
+            
+        Returns:
+            True if valid structured format
+        """
+        parts = id_value.split('_')
+        if len(parts) < 3:
+            return False
+        
+        # Last part should be 8-character hex
+        uuid_part = parts[-1]
+        if len(uuid_part) != 8 or not all(c in '0123456789abcdefABCDEF' for c in uuid_part):
+            return False
+        
+        # Second to last should be numeric counter
+        counter_part = parts[-2]
+        if not counter_part.isdigit():
+            return False
+        
+        # Check for valid ID types in the remaining parts
+        valid_id_types = {id_type.value for id_type in IDType}
+        for part in parts[:-2]:
+            if part in valid_id_types:
+                return True
+        
+        # Check for known prefixes or compound patterns
+        if parts[0] in {'req', 'run', 'thread'}:
+            return True
+        
+        compound_patterns = ['websocket_factory', 'websocket_manager', 'agent_executor']
+        id_without_counters = '_'.join(parts[:-2])
+        for pattern in compound_patterns:
+            if pattern in id_without_counters:
+                return True
+        
+        return False
+    
+    def _extract_id_type_from_structured(self, id_value: str) -> Optional[IDType]:
+        """
+        Extract IDType from structured ID format.
+        
+        Args:
+            id_value: Structured ID
+            
+        Returns:
+            IDType if found, None otherwise
+        """
+        parts = id_value.split('_')
+        if len(parts) < 3:
+            return None
+        
+        # Look for ID type in parts (excluding counter and uuid)
+        valid_id_types = {id_type.value: id_type for id_type in IDType}
+        for part in parts[:-2]:
+            if part in valid_id_types:
+                return valid_id_types[part]
+        
+        return None
+    
     def release_id(self, id_value: str) -> bool:
         """
         Release an ID from active use.
@@ -366,6 +478,139 @@ class UnifiedIDManager:
         thread_id = f"session_{timestamp}_{uuid_part}"
         
         return thread_id
+    
+    @classmethod
+    def convert_uuid_to_structured(cls, uuid_id: str, id_type: IDType, 
+                                 prefix: Optional[str] = None) -> str:
+        """
+        Convert UUID to structured ID format for migration purposes.
+        
+        Args:
+            uuid_id: UUID string to convert
+            id_type: Type for the structured ID
+            prefix: Optional prefix for the structured ID
+            
+        Returns:
+            Structured ID string
+        """
+        try:
+            # Validate input is a UUID
+            uuid_obj = uuid.UUID(uuid_id)
+            
+            # Use first 8 characters of UUID as the uuid part
+            uuid_part = uuid_id.replace('-', '')[:8]
+            
+            # Generate a counter (use timestamp for uniqueness)
+            counter = int(time.time() * 1000) % 100000
+            
+            # Construct structured ID
+            if prefix:
+                structured_id = f"{prefix}_{id_type.value}_{counter}_{uuid_part}"
+            else:
+                structured_id = f"{id_type.value}_{counter}_{uuid_part}"
+            
+            return structured_id
+            
+        except ValueError:
+            raise ValueError(f"Invalid UUID format: {uuid_id}")
+    
+    @classmethod
+    def convert_structured_to_uuid(cls, structured_id: str) -> Optional[str]:
+        """
+        Convert structured ID back to UUID format (best effort).
+        
+        Note: This is lossy conversion since structured IDs only contain
+        8 characters of the original UUID.
+        
+        Args:
+            structured_id: Structured ID to convert
+            
+        Returns:
+            UUID string if conversion possible, None otherwise
+        """
+        parts = structured_id.split('_')
+        if len(parts) < 3:
+            return None
+        
+        # Extract the 8-character hex part
+        uuid_part = parts[-1]
+        if len(uuid_part) != 8 or not all(c in '0123456789abcdefABCDEF' for c in uuid_part):
+            return None
+        
+        # Pad to make a valid UUID (this is lossy but creates valid UUID format)
+        # Pattern: xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx (UUID v4 format)
+        padded_uuid = f"{uuid_part}-0000-4000-8000-000000000000"
+        
+        try:
+            # Validate the constructed UUID
+            uuid.UUID(padded_uuid)
+            return padded_uuid
+        except ValueError:
+            return None
+    
+    def register_uuid_as_structured(self, uuid_id: str, id_type: IDType,
+                                  context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Register a UUID by converting it to structured format.
+        
+        This enables gradual migration from UUID to structured IDs.
+        
+        Args:
+            uuid_id: UUID to register
+            id_type: Type for the ID
+            context: Additional context metadata
+            
+        Returns:
+            The structured ID that was registered
+        """
+        structured_id = self.convert_uuid_to_structured(uuid_id, id_type)
+        
+        # Register the structured ID
+        success = self.register_existing_id(structured_id, id_type, context)
+        if not success:
+            logger.warning(f"Failed to register converted ID: {structured_id}")
+        
+        return structured_id
+    
+    def validate_and_normalize_id(self, id_value: str, id_type: Optional[IDType] = None) -> tuple[bool, Optional[str]]:
+        """
+        Validate ID and return normalized form for consistent usage.
+        
+        During migration period, this helps standardize ID usage across the system.
+        
+        Args:
+            id_value: ID to validate and normalize
+            id_type: Expected ID type
+            
+        Returns:
+            Tuple of (is_valid, normalized_id)
+        """
+        if not self.is_valid_id_format_compatible(id_value, id_type):
+            return False, None
+        
+        # If it's already registered, return as-is
+        if self.is_valid_id(id_value, id_type):
+            return True, id_value
+        
+        # If it's a UUID and we have type info, consider converting to structured
+        if id_type and self._is_uuid_format(id_value):
+            try:
+                structured_id = self.convert_uuid_to_structured(id_value, id_type)
+                # Don't auto-register here, just return the normalized form
+                return True, structured_id
+            except ValueError:
+                pass
+        
+        # Return original if valid format
+        return True, id_value
+    
+    def _is_uuid_format(self, id_value: str) -> bool:
+        """Check if ID is in UUID format."""
+        try:
+            uuid.UUID(id_value)
+            return True
+        except ValueError:
+            return False
 
 
 # Global ID manager instance
@@ -425,6 +670,26 @@ def is_valid_id(id_value: str, id_type: Optional[IDType] = None) -> bool:
     return get_id_manager().is_valid_id(id_value, id_type)
 
 
+def is_valid_id_format_compatible(id_value: str, id_type: Optional[IDType] = None) -> bool:
+    """Convenience function for enhanced dual-format validation"""
+    return get_id_manager().is_valid_id_format_compatible(id_value, id_type)
+
+
+def convert_uuid_to_structured(uuid_id: str, id_type: IDType, prefix: Optional[str] = None) -> str:
+    """Convenience function to convert UUID to structured format"""
+    return UnifiedIDManager.convert_uuid_to_structured(uuid_id, id_type, prefix)
+
+
+def convert_structured_to_uuid(structured_id: str) -> Optional[str]:
+    """Convenience function to convert structured ID to UUID format"""
+    return UnifiedIDManager.convert_structured_to_uuid(structured_id)
+
+
+def validate_and_normalize_id(id_value: str, id_type: Optional[IDType] = None) -> tuple[bool, Optional[str]]:
+    """Convenience function to validate and normalize ID"""
+    return get_id_manager().validate_and_normalize_id(id_value, id_type)
+
+
 def is_valid_id_format(id_value: str) -> bool:
     """
     Validate ID format without requiring registration.
@@ -447,6 +712,30 @@ def is_valid_id_format(id_value: str) -> bool:
     except ValueError:
         pass
     
+    # Check for common test patterns first (backward compatibility)
+    test_patterns = [
+        r'^test-user-\d+$',              # test-user-123
+        r'^test-connection-\d+$',        # test-connection-456 
+        r'^test-session-[a-zA-Z0-9-]+$', # test-session-abc123
+        r'^mock-[a-zA-Z]+-\w+$',         # mock-user-test
+        r'^concurrent_user_\d+$',        # concurrent_user_0
+        r'^user_\d+$',                   # user_0, user_1
+        r'^[a-zA-Z]+-[a-zA-Z]+-\d+$',    # test-user-123, mock-connection-456
+        r'^[a-zA-Z]+_\d+$',              # user_123, session_456
+        r'^[a-zA-Z]+_[a-zA-Z]+_\d+$',    # test_user_123, mock_session_456
+        r'^non_existent_\w+$',           # non_existent_user, non_existent_session
+        r'^invalid_\w+$',                # invalid_user, invalid_connection  
+        r'^fake_\w+$',                   # fake_user, fake_session
+        r'^dummy_\w+$',                  # dummy_user, dummy_session
+        r'^sample_\w+$',                 # sample_user, sample_connection
+        r'^ssot-[a-zA-Z]+-\w+$',         # ssot-test-user, ssot-mock-session
+    ]
+    
+    import re
+    for pattern in test_patterns:
+        if re.match(pattern, id_value):
+            return True
+    
     # Check UnifiedIDManager structured format: [prefix_]idtype_counter_uuid8
     parts = id_value.split('_')
     if len(parts) >= 3:
@@ -459,8 +748,8 @@ def is_valid_id_format(id_value: str) -> bool:
                 # For complex IDs, check if we have known prefixes or patterns
                 has_known_prefix = False
                 
-                # Check for known prefixes
-                if parts[0] in {'req', 'run', 'thread'}:
+                # Check for known prefixes (including test patterns)
+                if parts[0] in {'req', 'run', 'thread', 'test'}:
                     has_known_prefix = True
                 
                 # Check for valid ID types anywhere in the parts

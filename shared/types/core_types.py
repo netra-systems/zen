@@ -320,45 +320,174 @@ class DatabaseConnectionInfo:
 # =============================================================================
 
 def ensure_user_id(value: Any) -> UserID:
-    """Convert string to UserID with validation."""
-    # NewType objects are just strings at runtime, so check if already a valid string
-    if isinstance(value, str) and value.strip():
-        return UserID(value.strip())
-    raise ValueError(f"Invalid user_id: {value}")
+    """Convert string to UserID with validation using enhanced dual format support."""
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible, IDType
+    
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid user_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Use enhanced validation that supports both UUID and structured formats
+    if is_valid_id_format_compatible(cleaned_value, IDType.USER):
+        return UserID(cleaned_value)
+    
+    raise ValueError(f"Invalid user_id format: {value}")
 
 
 def ensure_thread_id(value: Any) -> ThreadID:
-    """Convert string to ThreadID with validation."""
-    # NewType objects are just strings at runtime, so check if already a valid string
-    if isinstance(value, str) and value.strip():
-        return ThreadID(value.strip())
-    raise ValueError(f"Invalid thread_id: {value}")
+    """Convert string to ThreadID with validation using enhanced dual format support."""
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible, IDType
+    
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid thread_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Use enhanced validation that supports both UUID and structured formats
+    if is_valid_id_format_compatible(cleaned_value, IDType.THREAD):
+        return ThreadID(cleaned_value)
+    
+    raise ValueError(f"Invalid thread_id format: {value}")
 
 
 def ensure_run_id(value: Any) -> RunID:
-    """Convert string to RunID with validation."""
-    # NewType objects are just strings at runtime, so check if already a valid string
-    if isinstance(value, str) and value.strip():
-        return RunID(value.strip())
-    raise ValueError(f"Invalid run_id: {value}")
+    """Convert string to RunID with validation using enhanced dual format support."""
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible
+    
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid run_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Run IDs have special validation since they can contain thread IDs
+    # Use the general format validation for now
+    if is_valid_id_format_compatible(cleaned_value):
+        return RunID(cleaned_value)
+    
+    raise ValueError(f"Invalid run_id format: {value}")
 
 
 def ensure_request_id(value: Any) -> RequestID:
-    """Convert string to RequestID with validation."""
-    # NewType objects are just strings at runtime, so check if already a valid string
-    if isinstance(value, str) and value.strip():
-        return RequestID(value.strip())
-    raise ValueError(f"Invalid request_id: {value}")
+    """Convert string to RequestID with validation using enhanced dual format support."""
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible, IDType
+    
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid request_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Use enhanced validation that supports both UUID and structured formats
+    if is_valid_id_format_compatible(cleaned_value, IDType.REQUEST):
+        return RequestID(cleaned_value)
+    
+    raise ValueError(f"Invalid request_id format: {value}")
 
 
 def ensure_websocket_id(value: Any) -> Optional[WebSocketID]:
-    """Convert string to WebSocketID with validation."""
+    """Convert string to WebSocketID with validation using enhanced dual format support."""
     if value is None:
         return None
-    # NewType objects are just strings at runtime, so check if already a valid string
-    if isinstance(value, str) and value.strip():
-        return WebSocketID(value.strip())
-    raise ValueError(f"Invalid websocket_id: {value}")
+    
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible, IDType
+    
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid websocket_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Use enhanced validation that supports both UUID and structured formats
+    if is_valid_id_format_compatible(cleaned_value, IDType.WEBSOCKET):
+        return WebSocketID(cleaned_value)
+    
+    raise ValueError(f"Invalid websocket_id format: {value}")
+
+
+# =============================================================================
+# Enhanced Dual Format Utilities for Migration
+# =============================================================================
+
+def normalize_to_structured_id(id_value: str, id_type_enum) -> str:
+    """
+    Normalize any ID format to structured format during migration.
+    
+    Args:
+        id_value: ID in any valid format
+        id_type_enum: IDType enum value from UnifiedIDManager
+        
+    Returns:
+        ID in structured format
+    """
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import (
+        validate_and_normalize_id, 
+        is_valid_id_format_compatible
+    )
+    
+    if not is_valid_id_format_compatible(id_value, id_type_enum):
+        raise ValueError(f"Invalid ID format for normalization: {id_value}")
+    
+    is_valid, normalized = validate_and_normalize_id(id_value, id_type_enum)
+    if not is_valid or normalized is None:
+        raise ValueError(f"Could not normalize ID: {id_value}")
+    
+    return normalized
+
+
+def create_strongly_typed_execution_context(
+    execution_id: str,
+    agent_id: str, 
+    user_id: str,
+    thread_id: str,
+    run_id: str,
+    request_id: str,
+    websocket_id: Optional[str] = None,
+    normalize_ids: bool = False
+) -> 'AgentExecutionContext':
+    """
+    Create strongly typed execution context with dual format support.
+    
+    Args:
+        execution_id: Execution identifier
+        agent_id: Agent identifier  
+        user_id: User identifier
+        thread_id: Thread identifier
+        run_id: Run identifier
+        request_id: Request identifier
+        websocket_id: Optional WebSocket identifier
+        normalize_ids: Whether to normalize UUIDs to structured format
+        
+    Returns:
+        AgentExecutionContext with validated IDs
+    """
+    if normalize_ids:
+        # Import here to avoid circular imports
+        from netra_backend.app.core.unified_id_manager import IDType
+        
+        # Normalize all IDs to structured format
+        execution_id = normalize_to_structured_id(execution_id, IDType.EXECUTION)
+        agent_id = normalize_to_structured_id(agent_id, IDType.AGENT) 
+        user_id = normalize_to_structured_id(user_id, IDType.USER)
+        thread_id = normalize_to_structured_id(thread_id, IDType.THREAD)
+        request_id = normalize_to_structured_id(request_id, IDType.REQUEST)
+        if websocket_id:
+            websocket_id = normalize_to_structured_id(websocket_id, IDType.WEBSOCKET)
+    
+    # Create the context with type validation
+    return AgentExecutionContext(
+        execution_id=execution_id,
+        agent_id=agent_id,
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=request_id,
+        websocket_id=websocket_id
+    )
 
 
 # =============================================================================

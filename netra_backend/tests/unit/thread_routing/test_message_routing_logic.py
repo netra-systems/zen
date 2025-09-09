@@ -175,10 +175,8 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         text, references = handler._extract_message_data(payload)
         
-        self.assertEqual(text, "Hello, I need help with cost optimization",
-            "Should extract text from payload")
-        self.assertEqual(references, ["ref1", "ref2"],
-            "Should extract references from payload")
+        assert text == "Hello, I need help with cost optimization", "Should extract text from payload"
+        assert references == ["ref1", "ref2"], "Should extract references from payload"
     
     def test_thread_history_limit_extraction(self):
         """Test thread history limit extraction."""
@@ -203,8 +201,9 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
     async def test_message_validation_routing(self, mock_create_manager, mock_get_context):
         """Test message validation routing logic."""
         # BUSINESS VALUE: Ensures invalid messages are rejected before processing
-        mock_manager = AsyncMock()
-        mock_manager.validate_message.return_value = False
+        mock_manager = Mock()
+        mock_manager.validate_message.return_value = False  # Synchronous method returns False
+        mock_manager.send_error = AsyncMock()  # Async method
         mock_create_manager.return_value = mock_manager
         mock_get_context.return_value = Mock()
         
@@ -377,10 +376,8 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         }
         
         for message_type, expected_class in expected_handlers.items():
-            with self.subTest(message_type=message_type):
-                handler = self.message_service.handlers.get(message_type)
-                self.assertIsInstance(handler, expected_class,
-                    f"{message_type} should have {expected_class.__name__} handler")
+            handler = self.message_service.handlers.get(message_type)
+            assert isinstance(handler, expected_class), f"{message_type} should have {expected_class.__name__} handler"
     
     # Integration Tests with Message Queue
     
@@ -390,8 +387,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         # BUSINESS VALUE: Ensures messages are properly queued for processing
         mock_queue.enqueue = AsyncMock(return_value=True)
         
-        handler = BaseMessageHandler()
-        # Since BaseMessageHandler is abstract, we need to test with concrete handler
+        # Since BaseMessageHandler is abstract, we test with concrete handler
         test_handler = StartAgentHandler(self.mock_supervisor, self.mock_db_session_factory)
         
         assert test_handler.get_message_type() == "start_agent", "Handler should return correct message type"
