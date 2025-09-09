@@ -476,7 +476,7 @@ class TestExecutionEngineOrchestration(SSotBaseTestCase):
             request_id=RequestID(str(uuid4())),
             thread_id=ThreadID("orchestration-test-123"),
             run_id=RunID(str(uuid4())),
-            metadata={
+            agent_context={
                 "user_prompt": "Test orchestration request",
                 "orchestration_test": True
             }
