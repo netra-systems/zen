@@ -1062,13 +1062,14 @@ class AgentWebSocketBridge(MonitorableComponent):
         logger.info(f"Creating per-request orchestrator for user {user_id}, agent {agent_type}")
         
         # Import here to avoid circular imports
-        from netra_backend.app.services.user_execution_context import get_user_execution_context
+        from netra_backend.app.dependencies import get_user_execution_context
         
         # Create user execution context for this request
-        user_context = await get_user_execution_context(
-            user_id=user_id,
-            metadata={"agent_type": agent_type, "orchestrator_created": True}
+        user_context = get_user_execution_context(
+            user_id=user_id
         )
+        # Add metadata after creation
+        user_context.metadata.update({"agent_type": agent_type, "orchestrator_created": True})
         
         # Create user-scoped emitter for WebSocket events
         emitter = await self.create_user_emitter(user_context)
