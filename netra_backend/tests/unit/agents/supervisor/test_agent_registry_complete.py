@@ -1794,14 +1794,14 @@ class TestMemoryLeakPreventionAndResourceManagement(SSotBaseTestCase):
         """Test that lifecycle manager uses weak references properly."""
         manager = AgentLifecycleManager()
         
-        # Create a session and add weak reference
+        # Create a session and add weak reference to cleanup refs (actual manager attribute)
         mock_session = Mock()
         session_ref = weakref.ref(mock_session)
-        manager._user_sessions["test_user"] = session_ref
+        manager._cleanup_refs["test_user"] = session_ref
         
         # Verify reference exists
-        assert "test_user" in manager._user_sessions
-        assert manager._user_sessions["test_user"]() is mock_session
+        assert "test_user" in manager._cleanup_refs
+        assert manager._cleanup_refs["test_user"]() is mock_session
         
         # Delete the session and force garbage collection
         del mock_session

@@ -528,12 +528,17 @@ class TestDatabaseIDPersistencePerformance:
 
 # Mark as critical database integration tests
 @pytest.mark.critical
-@pytest.mark.database_integration
-@pytest.mark.id_persistence
+@pytest.mark.database
+@pytest.mark.id_system
 class TestCriticalDatabaseIDFailures:
     """
     Most critical tests that prove database ID failures break business operations.
     """
+    
+    def setup_method(self):
+        """Setup for each test method."""
+        self.id_manager = UnifiedIDManager()
+        self.id_manager.clear_all()
     
     def test_database_id_failures_break_user_data_integrity(self):
         """
