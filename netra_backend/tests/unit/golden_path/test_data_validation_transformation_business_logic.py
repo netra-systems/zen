@@ -563,6 +563,10 @@ class TestDataSanitizationBusinessSecurity:
                 
     def _validate_api_response_structure(self, response: Dict) -> bool:
         """Helper to validate API response structure for business requirements."""
+        # Business Rule: API responses must have explicit status for business integration
+        if not isinstance(response, dict) or len(response) == 0:
+            return False
+            
         # Success responses must have status and data
         if response.get("status") == "success":
             return "data" in response
@@ -571,8 +575,9 @@ class TestDataSanitizationBusinessSecurity:
         if response.get("status") == "error":
             return "error" in response and isinstance(response["error"], dict)
             
-        # Other responses are valid if they have some recognizable structure
-        return len(response) > 0 and isinstance(response, dict)
+        # Business Rule: Responses without explicit status are invalid for business systems
+        # This enforces consistent API structure for business integration
+        return False
 
     def test_business_rule_enforcement_data_validation(self):
         """Test business rule enforcement in data validation."""
