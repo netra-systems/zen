@@ -47,7 +47,7 @@ from auth_service.services.session_service import SessionService
 from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 from auth_service.services.user_service import UserService
-from auth_service.auth_core.database import DatabaseManager
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 
 class TestSessionLifecycleComprehensive(SSotBaseTestCase):
@@ -76,8 +76,8 @@ class TestSessionLifecycleComprehensive(SSotBaseTestCase):
         await self.redis_service.connect()
         
         self.jwt_service = JWTService(self.auth_config)
-        self.database_manager = DatabaseManager(self.auth_config)
-        self.user_service = UserService(self.auth_config, self.database_manager.get_database())
+        # AuthDatabaseManager provides static methods for database operations
+        self.user_service = UserService(self.auth_config)
         self.session_service = SessionService(self.auth_config, self.redis_service, self.jwt_service)
         
         # Auth helper for testing

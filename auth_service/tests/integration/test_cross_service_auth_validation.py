@@ -50,7 +50,7 @@ from auth_service.auth_core.config import AuthConfig
 from auth_service.services.jwt_service import JWTService
 from auth_service.services.user_service import UserService
 from auth_service.services.redis_service import RedisService
-from auth_service.auth_core.database import DatabaseManager
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 
 class TestCrossServiceAuthValidation(SSotBaseTestCase):
@@ -80,8 +80,8 @@ class TestCrossServiceAuthValidation(SSotBaseTestCase):
         self.redis_service = RedisService(self.auth_config)
         await self.redis_service.connect()
         
-        self.database_manager = DatabaseManager(self.auth_config)
-        self.user_service = UserService(self.auth_config, self.database_manager.get_database())
+        # AuthDatabaseManager provides static methods for database operations
+        self.user_service = UserService(self.auth_config)
         
         # Auth helper for E2E token creation  
         self.auth_helper = E2EAuthHelper(environment="test")
