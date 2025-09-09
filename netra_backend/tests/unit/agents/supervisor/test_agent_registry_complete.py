@@ -151,6 +151,30 @@ def mock_agent_with_cleanup():
     return mock_agent
 
 
+@pytest.fixture
+def mock_user_sessions_dict_class():
+    """Create a proper dict-like mock class that properly handles deletion"""
+    class MockUserSessionsDict(dict):
+        """Mock dict that properly supports all dict operations including deletion"""
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+        
+        def get(self, key, default=None):
+            return super().get(key, default)
+        
+        def __contains__(self, key):
+            return super().__contains__(key)
+        
+        def __getitem__(self, key):
+            return super().__getitem__(key)
+        
+        def __delitem__(self, key):
+            # This properly removes the item from the dict
+            super().__delitem__(key)
+    
+    return MockUserSessionsDict
+
+
 # ============================================================================
 # TEST: UserAgentSession Complete Coverage
 # ============================================================================
@@ -564,15 +588,15 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         assert 'Monitoring failed' in str(result['error'])
     
     @pytest.mark.asyncio
-    async def test_trigger_cleanup_success(self, test_user_id):
+    async def test_trigger_cleanup_success(self, test_user_id, mock_user_sessions_dict_class):
         """Test successful cleanup trigger."""
         # FIXED: Create a mock registry and set it on the manager
         mock_registry = Mock()
         mock_user_session = Mock()
         mock_user_session.cleanup_all_agents = AsyncMock()
         
-        # Create dict-like object that supports both get() and deletion
-        user_sessions_dict = {test_user_id: mock_user_session}
+        # Create the mock dict with the user session using the fixture
+        user_sessions_dict = mock_user_sessions_dict_class({test_user_id: mock_user_session})
         mock_registry._user_sessions = user_sessions_dict
         
         manager = AgentLifecycleManager(registry=mock_registry)
@@ -584,15 +608,15 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         assert test_user_id not in mock_registry._user_sessions
     
     @pytest.mark.asyncio
-    async def test_trigger_cleanup_handles_exceptions(self, test_user_id):
+    async def test_trigger_cleanup_handles_exceptions(self, test_user_id, mock_user_sessions_dict_class):
         """Test cleanup trigger handles exceptions gracefully."""
         # FIXED: Create a mock registry that will raise exception during cleanup
         mock_registry = Mock()
         mock_user_session = Mock()
         mock_user_session.cleanup_all_agents = AsyncMock(side_effect=Exception("Cleanup failed"))
         
-        # Create dict-like object that supports both get() and deletion
-        user_sessions_dict = {test_user_id: mock_user_session}
+        # Create the mock dict with the user session using the fixture
+        user_sessions_dict = mock_user_sessions_dict_class({test_user_id: mock_user_session})
         mock_registry._user_sessions = user_sessions_dict
         
         manager = AgentLifecycleManager(registry=mock_registry)
@@ -600,7 +624,7 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         # Should not raise exception
         await manager.trigger_cleanup(test_user_id)
         
-        # Session should still be removed from registry despite the exception
+        # Session should still be removed from registry despite the exception during cleanup_all_agents
         assert test_user_id not in mock_registry._user_sessions
 
 
@@ -704,7 +728,7 @@ class TestAgentRegistryComplete(SSotBaseTestCase):
         assert cleanup_metrics['user_id'] == test_user_id
         assert cleanup_metrics['status'] == 'cleaned'
         assert 'cleaned_agents' in cleanup_metrics
-        assert cleanup_metrics['agent_count'] >= 0
+        assert cleanup_metrics['cleaned_agents'] >= 0
     
     @pytest.mark.asyncio
     async def test_cleanup_nonexistent_session(self, mock_llm_manager):
@@ -927,7 +951,7 @@ class TestToolDispatcherIntegration(SSotBaseTestCase):
         """Test creating tool dispatcher for specific user."""
         registry = AgentRegistry(mock_llm_manager)
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher') as mock_dispatcher_class:
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_dispatcher_class:
             mock_dispatcher = Mock()
             mock_dispatcher_class.create_for_user = AsyncMock(return_value=mock_dispatcher)
             
@@ -949,7 +973,7 @@ class TestToolDispatcherIntegration(SSotBaseTestCase):
         """Test creating tool dispatcher with admin tools enabled."""
         registry = AgentRegistry(mock_llm_manager)
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher') as mock_dispatcher_class:
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_dispatcher_class:
             mock_dispatcher = Mock()
             mock_websocket_bridge = Mock()
             mock_dispatcher_class.create_for_user = AsyncMock(return_value=mock_dispatcher)
@@ -972,7 +996,7 @@ class TestToolDispatcherIntegration(SSotBaseTestCase):
         """Test default tool dispatcher factory."""
         registry = AgentRegistry(mock_llm_manager)
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher') as mock_dispatcher_class:
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_dispatcher_class:
             mock_dispatcher = Mock()
             mock_dispatcher_class.create_for_user = AsyncMock(return_value=mock_dispatcher)
             

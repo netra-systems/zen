@@ -232,6 +232,7 @@ class AgentLifecycleManager:
     
     async def trigger_cleanup(self, user_id: str) -> None:
         """Trigger emergency cleanup for user."""
+        cleanup_success = False
         try:
             # FIXED: Access user sessions from the registry directly
             if not self._registry:
@@ -241,13 +242,21 @@ class AgentLifecycleManager:
             user_session = self._registry._user_sessions.get(user_id)
             if user_session:
                 await user_session.cleanup_all_agents()
-                # Remove from registry
-                if user_id in self._registry._user_sessions:
-                    del self._registry._user_sessions[user_id]
+                cleanup_success = True
                 
-            logger.info(f"✅ Emergency cleanup completed for user {user_id}")
         except Exception as e:
             logger.error(f"Emergency cleanup failed for user {user_id}: {e}")
+        finally:
+            # CRITICAL: Always remove session from registry to prevent memory leaks,
+            # even if cleanup_all_agents() failed
+            if self._registry and user_id in self._registry._user_sessions:
+                del self._registry._user_sessions[user_id]
+                logger.debug(f"Removed user session {user_id} from registry")
+                
+            if cleanup_success:
+                logger.info(f"✅ Emergency cleanup completed for user {user_id}")
+            else:
+                logger.warning(f"⚠️ Emergency cleanup completed with errors for user {user_id}, but session was removed from registry")
 
 
 class AgentRegistry(UniversalAgentRegistry):
@@ -873,12 +882,11 @@ class AgentRegistry(UniversalAgentRegistry):
         WARNING: This returns None to prevent usage of non-isolated dispatchers.
         New code should use create_tool_dispatcher_for_user() for proper isolation.
         """
-        if self._legacy_dispatcher is None:
-            logger.warning(
-                "⚠️ DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
-                "Use create_tool_dispatcher_for_user(user_context) for proper user isolation."
-            )
-        return self._legacy_dispatcher
+        logger.warning(
+            "⚠️ DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
+            "Use create_tool_dispatcher_for_user(user_context) for proper user isolation."
+        )
+        return None
     
     @tool_dispatcher.setter  
     def tool_dispatcher(self, value):

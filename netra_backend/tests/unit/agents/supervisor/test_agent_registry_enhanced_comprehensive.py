@@ -476,7 +476,7 @@ class TestAdvancedAgentFactoryAndCreation(BaseTestCase):
 class TestAdvancedToolDispatcherIntegration(BaseTestCase):
     """Test advanced tool dispatcher integration and customization."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
+    @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
     async def test_create_tool_dispatcher_with_custom_factory(self, mock_unified_dispatcher, mock_llm_manager, test_user_context):
         """Test tool dispatcher creation with custom factory function."""
         # Arrange
@@ -507,7 +507,7 @@ class TestAdvancedToolDispatcherIntegration(BaseTestCase):
             enable_admin_tools=True
         )
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
+    @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
     async def test_default_dispatcher_factory_error_handling(self, mock_unified_dispatcher, mock_llm_manager, test_user_context):
         """Test default dispatcher factory handles errors gracefully."""
         # Arrange
