@@ -134,8 +134,8 @@ class TestAuthenticationBusinessLogic:
         
         # Business Rule: Strongly typed user ID should work
         strongly_typed_id = auth_user.get_strongly_typed_user_id()
-        assert isinstance(strongly_typed_id, UserID), "Should return strongly typed UserID"
-        assert str(strongly_typed_id) == user_id, "Strongly typed ID must match original"
+        assert isinstance(strongly_typed_id, str), "Should return strongly typed UserID (which is a string NewType)"
+        assert strongly_typed_id == user_id, "Strongly typed ID must match original"
 
     def test_password_security_business_requirements(self):
         """Test password hashing meets business security requirements."""
@@ -308,8 +308,8 @@ class TestAuthenticationBusinessLogic:
         
         # Test ensure_user_id function
         typed_user_id = ensure_user_id(raw_user_id)
-        assert isinstance(typed_user_id, UserID), "Should return UserID type"
-        assert str(typed_user_id) == raw_user_id, "Content should be preserved"
+        assert isinstance(typed_user_id, str), "Should return UserID type (which is a string NewType)"
+        assert typed_user_id == raw_user_id, "Content should be preserved"
         
         # Business Rule: Strongly typed IDs should work with auth system
         auth_helper = E2EAuthHelper()
@@ -321,7 +321,7 @@ class TestAuthenticationBusinessLogic:
         
         # Verify it can be made strongly typed
         strongly_typed = ensure_user_id(extracted_id)
-        assert isinstance(strongly_typed, UserID), "Extracted ID should be typeable"
+        assert isinstance(strongly_typed, str), "Extracted ID should be typeable (as string NewType)"
 
 
 @pytest.mark.unit
