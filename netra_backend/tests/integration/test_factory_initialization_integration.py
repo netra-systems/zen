@@ -41,6 +41,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import AsyncMock, patch
 from contextlib import asynccontextmanager
+from sqlalchemy import text
 
 # SSOT imports following TEST_CREATION_GUIDE.md
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -182,7 +183,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 # Verify database session is functional
                 try:
                     # Simple database query to verify connection
-                    result = await user_context.db_session.execute("SELECT 1 as test_value")
+                    result = await user_context.db_session.execute(text("SELECT 1 as test_value"))
                     test_row = result.fetchone()
                     assert test_row is not None, "Database session should be functional"
                     assert test_row[0] == 1, "Query should return expected value"
@@ -265,7 +266,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 await self.redis_manager.set(
                     test_session_key, 
                     json.dumps(test_session_data),
-                    expire_seconds=300
+                    ex=300
                 )
                 
                 # Retrieve session data from Redis
@@ -358,7 +359,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 await self.redis_manager.set(
                     connection_key,
                     json.dumps(connection_data),
-                    expire_seconds=300
+                    ex=300
                 )
                 
                 # Verify connection data storage
