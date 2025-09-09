@@ -1032,10 +1032,29 @@ def validate_user_context(context: Any) -> UserExecutionContext:
         TypeError: If context is not a UserExecutionContext
         InvalidContextError: If context validation fails
     """
+    # Accept both UserExecutionContext and StronglyTypedUserExecutionContext for SSOT compatibility
     if not isinstance(context, UserExecutionContext):
-        raise TypeError(
-            f"Expected UserExecutionContext, got: {type(context)}"
-        )
+        # Check if it's a StronglyTypedUserExecutionContext from the SSOT auth helper
+        try:
+            from shared.types.execution_types import StronglyTypedUserExecutionContext
+            if isinstance(context, StronglyTypedUserExecutionContext):
+                # Convert to UserExecutionContext for compatibility
+                converted_context = UserExecutionContext(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    request_id=context.request_id
+                )
+                logger.debug(f"Converted StronglyTypedUserExecutionContext to UserExecutionContext for user {context.user_id}")
+                context = converted_context
+            else:
+                raise TypeError(
+                    f"Expected UserExecutionContext or StronglyTypedUserExecutionContext, got: {type(context)}"
+                )
+        except ImportError:
+            raise TypeError(
+                f"Expected UserExecutionContext, got: {type(context)}"
+            )
     
     # Verify isolation on each validation
     context.verify_isolation()
