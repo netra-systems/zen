@@ -684,7 +684,7 @@ class TestUserContextReportIsolation(BaseIntegrationTest):
                 "sensitive_outputs": {
                     "algorithm_recommendations": f"Enhance {dataset['company_name']} algorithm",
                     "client_expansion": f"Grow {dataset['company_name']} client base",
-                    "financial_targets": f"Achieve {dataset['confidential_metrics'][f'revenue_{dataset[\"company_name\"].lower()}']} target"
+                    "financial_targets": f"Achieve {dataset['confidential_metrics']['revenue_' + dataset['company_name'].lower()]} target"
                 },
                 "contamination_check": {
                     "input_isolation_verified": True,
