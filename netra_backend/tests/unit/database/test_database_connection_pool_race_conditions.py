@@ -912,8 +912,13 @@ class TestDatabaseConnectionPoolRaceConditions(BaseIntegrationTest):
                 async with self._lock:
                     transaction = self._transactions[transaction_id]
                     if not transaction["committed"] and not transaction["rolled_back"]:
-                        # Apply changes to global state
-                        self._global_state.update(transaction["state_snapshot"])
+                        # Apply incremental changes to global state
+                        # Count the INCREMENT operations and apply them
+                        increment_count = sum(
+                            1 for op in transaction["operations"] 
+                            if op["operation"] == "INCREMENT"
+                        )
+                        self._global_state["counter"] += increment_count
                         transaction["committed"] = True
                         
             async def rollback_transaction(self, transaction_id: str):
