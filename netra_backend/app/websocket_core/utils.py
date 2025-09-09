@@ -292,18 +292,26 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                     # Application is ready - connection is fully operational
                     logger.debug(f"Connection {connection_id} fully operational - transport and application ready")
                 else:
-                    # CRITICAL FIX: No state machine = connection not properly initialized
-                    logger.warning(f"No state machine found for connection {connection_id} - application setup incomplete")
-                    # In production environments, this should be considered not ready
+                    # REGRESSION FIX: Allow staging connections to proceed without state machine during initialization
+                    # The state machine is created asynchronously and may not exist yet for valid connections
+                    logger.debug(f"No state machine found for connection {connection_id} - allowing connection to proceed")
+                    # In production environments, we still need to be conservative but not block valid connections
                     from shared.isolated_environment import get_env
                     env = get_env()
                     environment = env.get("ENVIRONMENT", "development").lower()
                     
                     if environment in ["staging", "production"]:
-                        logger.debug(f"Cloud environment {environment}: missing state machine indicates incomplete setup")
-                        return False
+                        # CRITICAL REGRESSION FIX: Don't block connections that are legitimately establishing
+                        # State machines are created asynchronously, so missing state machine doesn't mean invalid connection
+                        logger.debug(f"Cloud environment {environment}: proceeding without state machine - will be created asynchronously")
+                        # Still proceed but log for monitoring
+                        log_race_condition_pattern(
+                            "missing_state_machine_during_connection_validation",
+                            "info",  # Reduced from warning since this is expected during setup
+                            {"connection_id": connection_id, "environment": environment}
+                        )
                     else:
-                        # Development - be more permissive but log the issue
+                        # Development - be more permissive and log the issue
                         logger.debug(f"Development environment: proceeding despite missing state machine for {connection_id}")
                         
             except ImportError:
@@ -321,16 +329,22 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                     logger.debug(f"Cloud environment {environment}: state machine error indicates not ready")
                     return False
         else:
-            # CRITICAL FIX: No connection_id means we can't validate application state
-            logger.debug("No connection_id provided - cannot validate application readiness")
-            # In production environments, require connection_id for proper state validation
+            # REGRESSION FIX: No connection_id means we fall back to transport-only validation
+            # This is common during initial connection establishment before connection_id assignment
+            logger.debug("No connection_id provided - using transport-only validation")
+            # In production environments, log but don't block connections during legitimate setup
             from shared.isolated_environment import get_env
             env = get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
             
             if environment in ["staging", "production"]:
-                logger.debug(f"Cloud environment {environment}: connection_id required for application state validation")
-                return False
+                logger.debug(f"Cloud environment {environment}: proceeding with transport validation - connection_id not yet assigned")
+                # Log pattern for monitoring but allow connection to proceed
+                log_race_condition_pattern(
+                    "connection_validation_without_id",
+                    "info", 
+                    {"environment": environment, "reason": "connection_setup_phase"}
+                )
         
         # PHASE 3: WebSocket Transport Readiness Validation
         # Additional validation: Check if websocket is in a state ready for messaging
