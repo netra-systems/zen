@@ -212,6 +212,31 @@ class MockWebSocketManager:
                 "run_id": parsed_message.get("run_id", "mock_run")
             }
             
+            # Simulate thread creation in mock database
+            if "database_manager" in self.mock_state.__dict__ or hasattr(self, 'database_manager'):
+                # Create thread record
+                thread_record = {
+                    "id": user_context["thread_id"],
+                    "user_id": user_context["user_id"],
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "title": "AI Cost Optimization Thread"
+                }
+                if "threads" not in self.mock_state.database_records:
+                    self.mock_state.database_records["threads"] = []
+                self.mock_state.database_records["threads"].append(thread_record)
+                
+                # Create user message record
+                user_message_record = {
+                    "id": str(uuid.uuid4()),
+                    "thread_id": user_context["thread_id"],
+                    "type": "user",
+                    "content": parsed_message["content"],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                if "messages" not in self.mock_state.database_records:
+                    self.mock_state.database_records["messages"] = []
+                self.mock_state.database_records["messages"].append(user_message_record)
+            
             # Execute agent pipeline asynchronously and queue the events
             asyncio.create_task(self._execute_and_queue_events(user_context, parsed_message["content"]))
     
@@ -231,6 +256,19 @@ class MockWebSocketManager:
             }
             
             self.message_queue.append(json.dumps(assistant_message))
+            
+            # Also save assistant message to mock database
+            assistant_message_record = {
+                "id": str(uuid.uuid4()),
+                "thread_id": user_context.get("thread_id"),
+                "type": "assistant",
+                "content": assistant_message["content"],
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            if "messages" not in self.mock_state.database_records:
+                self.mock_state.database_records["messages"] = []
+            self.mock_state.database_records["messages"].append(assistant_message_record)
+            
             logger.info(f"[MOCK WebSocket] Agent execution completed, events queued")
             
         except Exception as e:
