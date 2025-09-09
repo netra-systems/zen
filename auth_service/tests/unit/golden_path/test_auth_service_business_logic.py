@@ -111,17 +111,19 @@ class TestAuthServiceBusinessLogic:
             updated_at=datetime.now(UTC)
         )
         
-        # Mock the repository instance and its methods
+        # Mock the repository instance and its methods (make them async)
+        import asyncio
+        from unittest.mock import AsyncMock
+        
         mock_repo_instance = mock_user_repository.return_value
-        mock_repo_instance.get_by_email.return_value = mock_db_user
-        mock_repo_instance.check_account_locked.return_value = False
-        mock_repo_instance.increment_failed_attempts.return_value = None
-        mock_repo_instance.reset_failed_attempts.return_value = None
-        mock_repo_instance.update_login_time.return_value = None
+        mock_repo_instance.get_by_email = AsyncMock(return_value=mock_db_user)
+        mock_repo_instance.check_account_locked = AsyncMock(return_value=False)
+        mock_repo_instance.increment_failed_attempts = AsyncMock(return_value=None)
+        mock_repo_instance.reset_failed_attempts = AsyncMock(return_value=None)
+        mock_repo_instance.update_login_time = AsyncMock(return_value=None)
         
         # Business Rule: Test login validation by calling the repository directly
         # This validates that the business logic properly uses the repository
-        import asyncio
         
         auth_service = AuthService()
         login_request = UserLogin(
