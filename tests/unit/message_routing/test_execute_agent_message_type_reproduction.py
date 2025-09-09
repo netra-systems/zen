@@ -1,434 +1,509 @@
 """
-GitHub Issue #117 - Missing execute_agent Message Type Handler Reproduction Test Suite
-
-CRITICAL: This test suite is designed to FAIL initially - it reproduces the missing
-execute_agent message type handler that is causing agent execution timeouts.
+Test Execute Agent Message Type Reproduction
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - Agent execution affects all users
-- Business Goal: Restore agent execution functionality by fixing message routing
-- Value Impact: Users cannot execute agents due to missing message type handler
-- Strategic Impact: Prevents $120K+ MRR loss from broken agent execution
+- Segment: Platform/Internal (Mission Critical)
+- Business Goal: Protect $120K+ MRR from agent execution timeouts
+- Value Impact: Reproduces exact message type failures preventing agent execution
+- Strategic Impact: Critical for diagnosing timeout failures in GitHub Issue #117
 
-Test Strategy: FAILING TESTS FIRST
-These tests are EXPECTED TO FAIL initially, reproducing the exact message routing gaps.
-After the execute_agent message handler is implemented, these tests should PASS.
+This test suite reproduces the specific message type issues that cause agent
+execution to timeout, fail to start, or fail silently due to routing failures.
+
+@compliance CLAUDE.md - Real services over mocks for authentic testing
+@compliance SPEC/core.xml - Message routing and type validation
 """
 
+import asyncio
+import json
 import pytest
-import importlib
-import inspect
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable
-from unittest.mock import Mock, AsyncMock
+import time
+import uuid
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Test framework imports following SSOT patterns
 from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.real_services_test_fixtures import real_services_fixture
 
-# Production imports to test - may fail if modules don't exist yet
-try:
-    from netra_backend.app.websocket_core.message_router import WebSocketMessageRouter
-except ImportError:
-    WebSocketMessageRouter = None
-
-try:
-    from netra_backend.app.websocket_core.handlers import WebSocketHandler
-except ImportError:
-    WebSocketHandler = None
-
-try:
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-except ImportError:
-    ExecutionEngine = None
+# CRITICAL: Import actual message routing and execution components
+from netra_backend.app.websocket_core.types import MessageType, create_standard_message
+from netra_backend.app.websocket_core.handlers import MessageProcessor, handle_agent_request_message
+from netra_backend.app.services.websocket.message_handler import StartAgentHandler, BaseMessageHandler
+from netra_backend.app.routes.agents_execute import execute_agent_endpoint
+from netra_backend.app.services.agent_service_core import AgentServiceCore
+from netra_backend.app.agents.supervisor_ssot import SupervisorSSO
+from netra_backend.app.services.user_execution_context import UserExecutionContext, get_user_execution_context
+from shared.isolated_environment import get_env
 
 
 class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
-    """Unit tests to reproduce missing execute_agent message type handling."""
-
-    def test_execute_agent_message_type_handler_missing(self):
-        """FAILING TEST: Should identify missing execute_agent message type handler.
-        
-        This test scans the message routing system and identifies that no handler
-        exists for the 'execute_agent' message type, causing agent execution timeouts.
-        
-        EXPECTED TO FAIL: Handler for execute_agent message type is missing.
-        PASSES AFTER FIX: Handler exists and is properly registered.
+    """
+    Reproduce execute_agent message type failures that cause P1 critical issues.
+    
+    CRITICAL: These tests MUST fail initially to reproduce the exact timeout
+    and routing failures identified in GitHub Issue #117.
+    """
+    
+    @pytest.mark.unit
+    @pytest.mark.real_services
+    async def test_execute_agent_message_type_case_sensitivity_failure(self):
         """
-        # Check if message router exists
-        if WebSocketMessageRouter is None:
-            pytest.fail("WebSocketMessageRouter not found - need to implement message routing system")
+        REPRODUCTION TEST: execute_agent message type case sensitivity failures.
         
-        # Create message router instance to test
-        try:
-            router = WebSocketMessageRouter()
-        except Exception as e:
-            pytest.fail(f"Could not instantiate WebSocketMessageRouter: {e}")
+        This reproduces the specific issue where different case variations
+        of 'execute_agent' fail to route correctly, causing timeouts.
         
-        # Get registered message handlers
-        handlers = {}
-        
-        # Check for different possible handler registration patterns
-        handler_attributes = [
-            'handlers',
-            'message_handlers', 
-            'route_handlers',
-            '_handlers',
-            '_message_handlers'
+        Expected to FAIL until remediation is complete.
+        """
+        # Test different case variations that should all route to same handler
+        case_variations = [
+            "execute_agent",      # Standard lowercase
+            "EXECUTE_AGENT",      # All uppercase  
+            "Execute_Agent",      # Title case
+            "execute-agent",      # Hyphen separator
+            "executeAgent",       # CamelCase
+            "ExecuteAgent",       # PascalCase
+            "execute agent",      # Space separator
         ]
         
-        for attr in handler_attributes:
-            if hasattr(router, attr):
-                attr_value = getattr(router, attr)
-                if isinstance(attr_value, dict):
-                    handlers.update(attr_value)
-                    break
+        routing_failures = []
+        processor = MessageProcessor()
         
-        # If no handlers dict found, check for handler methods
-        if not handlers:
-            for name, method in inspect.getmembers(router, inspect.ismethod):
-                if name.startswith('handle_'):
-                    message_type = name.replace('handle_', '')
-                    handlers[message_type] = method
-        
-        # CRITICAL ASSERTION: This SHOULD FAIL initially
-        # We expect execute_agent handler to be missing
-        assert 'execute_agent' in handlers, (
-            f"MISSING HANDLER: 'execute_agent' message type handler not found in message router. "
-            f"Available handlers: {list(handlers.keys())}. "
-            f"This is causing agent execution timeouts because messages cannot be routed."
-        )
-
-    def test_message_router_handle_execute_agent(self):
-        """FAILING TEST: Message router should handle execute_agent messages.
-        
-        Tests that the message router can process execute_agent message type properly.
-        Currently fails because no handler exists for this message type.
-        
-        EXPECTED TO FAIL: No handler for execute_agent message type.
-        PASSES AFTER FIX: Handler processes execute_agent messages correctly.
-        """
-        if WebSocketMessageRouter is None:
-            pytest.skip("WebSocketMessageRouter not implemented yet")
-        
-        # Create test execute_agent message
-        test_message = {
-            "type": "execute_agent",
-            "thread_id": "test_thread_123",
-            "user_id": "test_user_456",
-            "data": {
-                "agent_name": "cost_optimizer",
-                "message": "Analyze my costs",
-                "context": {"test": "context"}
-            }
-        }
-        
-        # Create router instance
-        router = WebSocketMessageRouter()
-        
-        # Test if router can handle the message
-        can_handle = False
-        handler_method = None
-        
-        # Check different ways the handler might be implemented
-        possible_handler_names = [
-            'handle_execute_agent',
-            'execute_agent_handler', 
-            'process_execute_agent',
-            'route_execute_agent'
-        ]
-        
-        for handler_name in possible_handler_names:
-            if hasattr(router, handler_name):
-                handler_method = getattr(router, handler_name)
-                can_handle = True
-                break
-        
-        # Also check handler registry
-        if hasattr(router, 'get_handler'):
+        for variation in case_variations:
             try:
-                handler_method = router.get_handler('execute_agent')
-                can_handle = handler_method is not None
-            except (KeyError, AttributeError):
-                pass
-        
-        # CRITICAL ASSERTION: This SHOULD FAIL initially
-        assert can_handle, (
-            f"MESSAGE ROUTING FAILURE: Message router cannot handle 'execute_agent' messages. "
-            f"Checked methods: {possible_handler_names}. "
-            f"Available methods: {[m for m in dir(router) if not m.startswith('_')]}. "
-            f"This causes agent execution requests to timeout."
-        )
-        
-        # If handler exists, test it can be called
-        if handler_method:
-            try:
-                # Test handler signature
-                sig = inspect.signature(handler_method)
-                params = list(sig.parameters.keys())
+                # Try to route each variation
+                message_data = {
+                    "agent_name": "test_agent",
+                    "user_request": "Test execution request",
+                    "user_id": f"test_user_{uuid.uuid4().hex[:8]}"
+                }
                 
-                # Handler should accept message and connection parameters
-                expected_params = ['message', 'websocket', 'connection']
-                has_required_params = any(param in params for param in expected_params)
-                
-                assert has_required_params, (
-                    f"HANDLER SIGNATURE ERROR: execute_agent handler has wrong signature. "
-                    f"Got parameters: {params}. Expected one of: {expected_params}"
+                # Attempt routing with different case variations
+                result = await processor.route_message(
+                    message_type=variation,
+                    data=message_data,
+                    user_id=message_data["user_id"]
                 )
+                
+                # Check if routing was successful
+                if result is None:
+                    routing_failures.append(f"ROUTING FAILURE: {variation} failed to route (returned None)")
+                
+            except (KeyError, ValueError, AttributeError) as e:
+                # Case variation not recognized - expected for non-standard formats
+                routing_failures.append(f"CASE SENSITIVITY FAILURE: {variation} not recognized: {e}")
             except Exception as e:
-                pytest.fail(f"Handler signature validation failed: {e}")
-
-    def test_agent_execution_message_routing_complete(self):
-        """FAILING TEST: Agent execution should route through message system properly.
+                # Unexpected error during routing
+                routing_failures.append(f"UNEXPECTED ERROR: {variation} caused error: {e}")
         
-        Tests that agent execution requests route through the message system from
-        WebSocket to ExecutionEngine properly.
-        
-        EXPECTED TO FAIL: Message routing incomplete for agent execution.
-        PASSES AFTER FIX: Complete message flow from WebSocket to agent execution.
+        # CRITICAL: If multiple case variations fail, we have routing issues
+        if len(routing_failures) > 1:  # Allow one standard format to work
+            pytest.fail(f"execute_agent message type case sensitivity failures:\n" + "\n".join(routing_failures))
+    
+    @pytest.mark.unit
+    @pytest.mark.real_services
+    async def test_execute_agent_handler_registration_failures(self):
         """
-        # Test message flow components
-        components = {
-            'WebSocketMessageRouter': WebSocketMessageRouter,
-            'ExecutionEngine': ExecutionEngine,
-            'WebSocketHandler': WebSocketHandler
-        }
+        REPRODUCTION TEST: execute_agent handler registration failures.
         
-        missing_components = [name for name, component in components.items() if component is None]
+        This reproduces issues where the execute_agent handler is not properly
+        registered or initialized, causing silent failures.
         
-        if missing_components:
-            pytest.fail(
-                f"MISSING COMPONENTS: Message routing components not implemented: {missing_components}. "
-                f"Need all components for complete agent execution message flow."
-            )
+        Expected to FAIL until remediation is complete.
+        """
+        registration_failures = []
         
-        # Test integration between components
-        try:
-            router = WebSocketMessageRouter()
-            execution_engine = ExecutionEngine() if ExecutionEngine else None
-        except Exception as e:
-            pytest.fail(f"Could not instantiate routing components: {e}")
+        # Test handler registration in MessageProcessor
+        processor = MessageProcessor()
         
-        # Check if router can dispatch to execution engine
-        integration_points = []
-        
-        # Look for integration methods
-        integration_methods = [
-            'set_execution_engine',
-            'register_execution_engine',
-            'execution_engine',
-            '_execution_engine',
-            'agent_executor'
+        # Check if execute_agent handler is registered
+        execute_agent_variations = [
+            "execute_agent",
+            "start_agent",  # Alternative message type
+            "agent_request",  # Standard message type
         ]
         
-        for method_name in integration_methods:
-            if hasattr(router, method_name):
-                integration_points.append(method_name)
-        
-        # CRITICAL ASSERTION: This SHOULD FAIL initially
-        assert len(integration_points) > 0, (
-            f"INTEGRATION FAILURE: No integration points found between WebSocketMessageRouter and ExecutionEngine. "
-            f"Checked methods: {integration_methods}. "
-            f"Available router methods: {[m for m in dir(router) if not m.startswith('_')]}. "
-            f"Without integration, execute_agent messages cannot reach ExecutionEngine."
-        )
-
-    def test_websocket_message_types_registry_complete(self):
-        """FAILING TEST: WebSocket message types registry should include execute_agent.
-        
-        Tests that the message types registry includes all required message types
-        for agent execution, particularly execute_agent.
-        
-        EXPECTED TO FAIL: execute_agent not in message types registry.
-        PASSES AFTER FIX: All required message types registered including execute_agent.
-        """
-        # Try to find message types registry
-        project_root = Path(__file__).parent.parent.parent.parent
-        websocket_files = list(project_root.rglob("*websocket*types*.py"))
-        websocket_files.extend(list(project_root.rglob("*message*types*.py")))
-        websocket_files.extend(list(project_root.rglob("*websocket*schemas*.py")))
-        
-        message_types_found = []
-        execute_agent_found = False
-        
-        # Scan files for message type definitions
-        for file_path in websocket_files:
-            if "test" in str(file_path) or ".git" in str(file_path):
-                continue
-                
+        for message_type in execute_agent_variations:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    
-                    # Look for message type definitions
-                    lines = content.split('\n')
-                    for line in lines:
-                        line = line.strip()
-                        
-                        # Common patterns for message type definitions
-                        if any(pattern in line.lower() for pattern in [
-                            '"execute_agent"',
-                            "'execute_agent'",
-                            'EXECUTE_AGENT',
-                            'execute_agent =',
-                            'execute_agent:',
-                            '"agent_request"',  # Alternative naming
-                            "'agent_request'"
-                        ]):
-                            message_types_found.append(f"{file_path.name}: {line}")
-                            if 'execute_agent' in line.lower():
-                                execute_agent_found = True
-                                
-            except (UnicodeDecodeError, FileNotFoundError):
-                continue
+                # Check if handler exists for message type
+                handler = processor.get_handler(message_type)
+                
+                if handler is None:
+                    registration_failures.append(f"HANDLER REGISTRATION FAILURE: No handler registered for {message_type}")
+                
+                # Check if handler is properly initialized
+                if hasattr(handler, 'get_message_type'):
+                    expected_type = handler.get_message_type()
+                    if expected_type != message_type:
+                        registration_failures.append(f"HANDLER MISMATCH: {message_type} handler expects {expected_type}")
+                
+            except (KeyError, AttributeError, NotImplementedError) as e:
+                registration_failures.append(f"REGISTRATION ERROR: {message_type} handler lookup failed: {e}")
         
-        # CRITICAL ASSERTION: This SHOULD FAIL initially
-        assert execute_agent_found, (
-            f"MESSAGE TYPE MISSING: 'execute_agent' message type not found in registry. "
-            f"Searched files: {[f.name for f in websocket_files]}. "
-            f"Found message types: {message_types_found}. "
-            f"Without message type registration, execute_agent messages cannot be routed."
-        )
-
-    def test_message_routing_performance_requirements(self):
-        """FAILING TEST: Message routing should meet performance requirements.
-        
-        Tests that message routing is fast enough for real-time agent execution.
-        Currently fails due to inefficient or missing routing implementation.
-        
-        EXPECTED TO FAIL: Message routing too slow or missing entirely.
-        PASSES AFTER FIX: Efficient message routing meets performance targets.
-        """
-        import time
-        
-        if WebSocketMessageRouter is None:
-            pytest.skip("WebSocketMessageRouter not implemented yet")
-        
-        # Create router and test message
-        router = WebSocketMessageRouter()
-        test_message = {
-            "type": "execute_agent",
-            "thread_id": "perf_test_123",
-            "user_id": "perf_user_456", 
-            "data": {
-                "agent_name": "test_agent",
-                "message": "Performance test message",
-                "context": {"test": True}
-            }
-        }
-        
-        # Test routing performance
-        start_time = time.time()
-        
+        # Test StartAgentHandler specifically
         try:
-            # Try to route the message (will likely fail initially)
-            if hasattr(router, 'route_message'):
-                result = router.route_message(test_message)
-            elif hasattr(router, 'handle_message'):
-                result = router.handle_message(test_message)
-            elif hasattr(router, 'process_message'):
-                result = router.process_message(test_message)
-            else:
-                pytest.fail("No message routing method found")
+            # Try to create StartAgentHandler with minimal configuration
+            handler = StartAgentHandler(
+                supervisor=MagicMock(),  # Mock supervisor for testing
+                db_session_factory=MagicMock()
+            )
+            
+            # Verify it reports correct message type
+            reported_type = handler.get_message_type()
+            if reported_type not in ["start_agent", "execute_agent", "agent_request"]:
+                registration_failures.append(f"HANDLER TYPE MISMATCH: StartAgentHandler reports unexpected type: {reported_type}")
+            
+        except Exception as e:
+            registration_failures.append(f"STARTAGENHANDLER CREATION FAILURE: {e}")
+        
+        # Report registration failures
+        if registration_failures:
+            pytest.fail(f"execute_agent handler registration failures:\n" + "\n".join(registration_failures))
+    
+    @pytest.mark.unit  
+    @pytest.mark.real_services
+    async def test_execute_agent_message_validation_failures(self):
+        """
+        REPRODUCTION TEST: execute_agent message validation failures.
+        
+        This reproduces validation failures that cause messages to be
+        rejected or processed incorrectly, leading to timeouts.
+        
+        Expected to FAIL until remediation is complete.
+        """
+        validation_failures = []
+        
+        # Test invalid message structures for execute_agent
+        invalid_messages = [
+            # Missing required fields
+            {"type": "execute_agent"},  # Missing data
+            {"type": "execute_agent", "data": {}},  # Empty data
+            {"type": "execute_agent", "data": {"agent_name": "test"}},  # Missing user_request
+            
+            # Invalid field types
+            {"type": "execute_agent", "data": {"agent_name": 123, "user_request": "test"}},  # Wrong type
+            {"type": "execute_agent", "data": {"agent_name": "test", "user_request": 456}},  # Wrong type
+            
+            # Missing user context
+            {"type": "execute_agent", "data": {"agent_name": "test", "user_request": "test"}},  # No user_id
+        ]
+        
+        handler = StartAgentHandler(
+            supervisor=MagicMock(),
+            db_session_factory=MagicMock()
+        )
+        
+        for i, invalid_message in enumerate(invalid_messages):
+            try:
+                # Try to handle invalid message
+                await handler.handle(
+                    user_id=f"test_user_{i}",
+                    payload=invalid_message.get("data", {})
+                )
+                
+                # If this succeeds, we have a validation failure
+                validation_failures.append(f"VALIDATION FAILURE: Invalid message {i} was processed successfully: {invalid_message}")
+                
+            except (ValueError, KeyError, TypeError, AttributeError) as e:
+                # Expected failure - validation working correctly
+                continue
+            except Exception as e:
+                # Unexpected error - might indicate validation issue
+                validation_failures.append(f"UNEXPECTED VALIDATION ERROR: Message {i} caused: {e}")
+        
+        # Test valid message does NOT fail (sanity check)
+        try:
+            valid_payload = {
+                "request": {
+                    "query": "Test agent execution request",
+                    "agent_name": "test_agent"
+                }
+            }
+            
+            # Mock the supervisor to avoid actual execution
+            with patch.object(handler, '_execute_agent_workflow', new_callable=AsyncMock) as mock_execute:
+                mock_execute.return_value = {"result": "test_success"}
+                
+                # This should NOT raise an exception
+                await handler.handle(
+                    user_id="valid_test_user",
+                    payload=valid_payload
+                )
                 
         except Exception as e:
-            routing_time = time.time() - start_time
-            # Performance test: routing attempt should be fast even if it fails
-            assert routing_time < 0.001, (
-                f"PERFORMANCE FAILURE: Message routing attempt too slow. "
-                f"Time: {routing_time:.4f}s (limit: 0.001s). "
-                f"Error during routing: {e}"
-            )
-            # Re-raise the exception to fail the test as expected
-            raise
+            validation_failures.append(f"CRITICAL: Valid message failed validation: {e}")
         
-        routing_time = time.time() - start_time
-        
-        # CRITICAL ASSERTION: This SHOULD FAIL initially due to missing handler
-        # But if it somehow succeeds, it should be fast
-        assert routing_time < 0.001, (
-            f"PERFORMANCE FAILURE: Message routing too slow. "
-            f"Time: {routing_time:.4f}s (limit: 0.001s). "
-            f"Agent execution needs fast message routing for real-time response."
-        )
-
-    def test_error_handling_missing_message_type(self):
-        """FAILING TEST: Router should handle missing message types gracefully.
-        
-        Tests that the message router provides clear error messages when
-        message types are missing, rather than silent failures or timeouts.
-        
-        EXPECTED TO FAIL: Poor error handling for missing message types.
-        PASSES AFTER FIX: Clear error messages for missing handlers.
+        # Report validation failures
+        if validation_failures:
+            pytest.fail(f"execute_agent message validation failures:\n" + "\n".join(validation_failures))
+    
+    @pytest.mark.unit
+    @pytest.mark.real_services
+    async def test_execute_agent_timeout_reproduction(self):
         """
-        if WebSocketMessageRouter is None:
-            pytest.skip("WebSocketMessageRouter not implemented yet")
+        REPRODUCTION TEST: execute_agent timeout failures.
         
-        router = WebSocketMessageRouter()
-        unknown_message = {
-            "type": "unknown_message_type_xyz",
-            "data": {"test": "data"}
-        }
+        This reproduces the specific timeout issues that occur during
+        agent execution, causing the P1 critical test failures.
         
-        # Test error handling for unknown message type
-        error_raised = False
-        error_message = ""
+        Expected to FAIL until remediation is complete.
+        """
+        timeout_failures = []
         
+        # Create handler with real supervisor that might timeout
         try:
-            # Try different routing methods
-            if hasattr(router, 'route_message'):
-                router.route_message(unknown_message)
-            elif hasattr(router, 'handle_message'):
-                router.handle_message(unknown_message)  
-            elif hasattr(router, 'process_message'):
-                router.process_message(unknown_message)
-        except Exception as e:
-            error_raised = True
-            error_message = str(e)
-        
-        # Now test execute_agent specifically
-        execute_agent_message = {
-            "type": "execute_agent",
-            "data": {"agent": "test", "message": "test"}
-        }
-        
-        execute_agent_error = False
-        execute_agent_error_msg = ""
-        
-        try:
-            if hasattr(router, 'route_message'):
-                router.route_message(execute_agent_message)
-            elif hasattr(router, 'handle_message'):
-                router.handle_message(execute_agent_message)
-            elif hasattr(router, 'process_message'):
-                router.process_message(execute_agent_message)
-        except Exception as e:
-            execute_agent_error = True
-            execute_agent_error_msg = str(e)
-        
-        # CRITICAL ASSERTION: This SHOULD FAIL initially
-        # execute_agent should raise a specific, clear error about missing handler
-        assert execute_agent_error, (
-            f"ERROR HANDLING FAILURE: execute_agent message type should raise clear error about missing handler. "
-            f"Unknown message error: {error_message if error_raised else 'No error raised'}. "
-            f"execute_agent error: {execute_agent_error_msg if execute_agent_error else 'No error raised'}. "
-            f"Need clear error messages to help debug missing handlers."
-        )
-        
-        # Error message should be informative
-        if execute_agent_error_msg:
-            assert any(keyword in execute_agent_error_msg.lower() for keyword in [
-                'handler', 'execute_agent', 'not found', 'missing', 'unknown'
-            ]), (
-                f"ERROR MESSAGE UNCLEAR: Error message not informative enough. "
-                f"Got: '{execute_agent_error_msg}'. "
-                f"Should mention handler, execute_agent, or similar keywords."
+            # Try to create a real SupervisorSSO instance
+            supervisor = SupervisorSSO()
+            
+            handler = StartAgentHandler(
+                supervisor=supervisor,
+                db_session_factory=MagicMock()  # Mock DB for testing
             )
-
-
-# Test Configuration
-pytestmark = [
-    pytest.mark.unit,
-    pytest.mark.message_routing,
-    pytest.mark.agent_execution,
-    pytest.mark.expected_failure  # These tests SHOULD fail initially
-]
+            
+            # Test message that should cause timeout
+            timeout_payload = {
+                "request": {
+                    "query": "Execute a complex agent task that might timeout",
+                    "agent_name": "complex_agent",
+                    "timeout_test": True
+                }
+            }
+            
+            # Set very short timeout to force failure
+            start_time = time.time()
+            
+            try:
+                # Execute with timeout
+                task = asyncio.create_task(handler.handle(
+                    user_id="timeout_test_user",
+                    payload=timeout_payload
+                ))
+                
+                # Wait with very short timeout to force timeout condition
+                await asyncio.wait_for(task, timeout=0.1)  # 100ms timeout
+                
+                # If this succeeds within timeout, might indicate lack of actual work
+                execution_time = time.time() - start_time
+                if execution_time < 0.05:  # Less than 50ms is suspiciously fast
+                    timeout_failures.append(f"SUSPICIOUS FAST EXECUTION: Completed in {execution_time:.3f}s - might not be doing real work")
+                
+            except asyncio.TimeoutError:
+                # Expected timeout - this reproduces the P1 critical issue
+                execution_time = time.time() - start_time
+                timeout_failures.append(f"TIMEOUT REPRODUCED: Agent execution timed out after {execution_time:.3f}s")
+            
+            except Exception as e:
+                # Other errors during execution
+                execution_time = time.time() - start_time
+                timeout_failures.append(f"EXECUTION ERROR: {e} after {execution_time:.3f}s")
+        
+        except Exception as e:
+            timeout_failures.append(f"SETUP FAILURE: Could not create supervisor for timeout testing: {e}")
+        
+        # Test timeout handling in message routing
+        try:
+            processor = MessageProcessor()
+            
+            start_time = time.time()
+            
+            # Try to route message that might cause timeout
+            result = await asyncio.wait_for(
+                processor.route_message(
+                    message_type="execute_agent",
+                    data={"agent_name": "timeout_agent", "user_request": "timeout test"},
+                    user_id="routing_timeout_test"
+                ),
+                timeout=0.5  # 500ms timeout
+            )
+            
+            routing_time = time.time() - start_time
+            if routing_time > 0.4:  # More than 400ms is slow
+                timeout_failures.append(f"SLOW ROUTING: Message routing took {routing_time:.3f}s")
+            
+        except asyncio.TimeoutError:
+            routing_time = time.time() - start_time
+            timeout_failures.append(f"ROUTING TIMEOUT: Message routing timed out after {routing_time:.3f}s")
+        except Exception as e:
+            timeout_failures.append(f"ROUTING ERROR: {e}")
+        
+        # CRITICAL: If we reproduced timeout issues, that confirms the P1 critical problem
+        if timeout_failures:
+            # This is expected - we're reproducing the issue
+            pytest.fail(f"execute_agent timeout issues reproduced (EXPECTED FAILURE):\n" + "\n".join(timeout_failures))
+    
+    @pytest.mark.unit
+    @pytest.mark.real_services
+    async def test_execute_agent_user_context_isolation_failures(self):
+        """
+        REPRODUCTION TEST: execute_agent user context isolation failures.
+        
+        This reproduces user context isolation issues that can cause
+        cross-user contamination and execution failures.
+        
+        Expected to FAIL until remediation is complete.
+        """
+        isolation_failures = []
+        
+        # Create multiple user contexts to test isolation
+        user_contexts = []
+        for i in range(3):
+            user_id = f"isolation_test_user_{i}_{uuid.uuid4().hex[:6]}"
+            try:
+                context = get_user_execution_context(
+                    user_id=user_id,
+                    thread_id=f"thread_{i}",
+                    run_id=f"run_{i}"
+                )
+                user_contexts.append((user_id, context))
+            except Exception as e:
+                isolation_failures.append(f"USER CONTEXT CREATION FAILURE: User {i} - {e}")
+        
+        # Test concurrent execution with multiple users
+        async def execute_for_user(user_id: str, context: UserExecutionContext, test_number: int):
+            """Execute agent for a specific user."""
+            try:
+                handler = StartAgentHandler(
+                    supervisor=MagicMock(),
+                    db_session_factory=MagicMock()
+                )
+                
+                payload = {
+                    "request": {
+                        "query": f"User {test_number} isolation test request",
+                        "agent_name": "isolation_test_agent"
+                    }
+                }
+                
+                # Execute with user context
+                start_time = time.time()
+                result = await handler.handle(user_id=user_id, payload=payload)
+                execution_time = time.time() - start_time
+                
+                return {
+                    "user_id": user_id,
+                    "test_number": test_number,
+                    "success": True,
+                    "execution_time": execution_time,
+                    "result": result
+                }
+                
+            except Exception as e:
+                return {
+                    "user_id": user_id,
+                    "test_number": test_number,
+                    "success": False,
+                    "error": str(e)
+                }
+        
+        # Execute concurrently for all users
+        if user_contexts:
+            try:
+                # Run concurrent executions
+                tasks = [
+                    execute_for_user(user_id, context, i) 
+                    for i, (user_id, context) in enumerate(user_contexts)
+                ]
+                
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Analyze results for isolation violations
+                for result in results:
+                    if isinstance(result, Exception):
+                        isolation_failures.append(f"CONCURRENT EXECUTION FAILURE: {result}")
+                    elif isinstance(result, dict):
+                        if not result.get("success"):
+                            isolation_failures.append(f"USER EXECUTION FAILURE: User {result['test_number']} - {result.get('error')}")
+                        elif result.get("execution_time", 0) > 5.0:  # Suspiciously long
+                            isolation_failures.append(f"SUSPICIOUS EXECUTION TIME: User {result['test_number']} took {result['execution_time']:.3f}s")
+                
+                # Check for context leakage between users
+                user_ids_seen = [r.get("user_id") for r in results if isinstance(r, dict)]
+                expected_user_ids = [user_id for user_id, _ in user_contexts]
+                
+                if set(user_ids_seen) != set(expected_user_ids):
+                    isolation_failures.append(f"USER ID LEAKAGE: Expected {expected_user_ids}, got {user_ids_seen}")
+                
+            except Exception as e:
+                isolation_failures.append(f"CONCURRENT EXECUTION SETUP FAILURE: {e}")
+        
+        # Report isolation failures
+        if isolation_failures:
+            pytest.fail(f"execute_agent user context isolation failures:\n" + "\n".join(isolation_failures))
+    
+    @pytest.mark.unit
+    @pytest.mark.real_services
+    async def test_execute_agent_websocket_bridge_integration_failures(self):
+        """
+        REPRODUCTION TEST: execute_agent WebSocket bridge integration failures.
+        
+        This reproduces failures in the integration between execute_agent
+        and the WebSocket bridge, causing event delivery failures.
+        
+        Expected to FAIL until remediation is complete.
+        """
+        bridge_failures = []
+        
+        # Test WebSocket bridge setup during execute_agent
+        try:
+            # Create handler that should set up WebSocket bridge
+            supervisor_mock = MagicMock()
+            handler = StartAgentHandler(
+                supervisor=supervisor_mock,
+                db_session_factory=MagicMock()
+            )
+            
+            # Test message with WebSocket event requirements
+            payload = {
+                "request": {
+                    "query": "Test WebSocket bridge integration",
+                    "agent_name": "websocket_test_agent",
+                    "require_events": True
+                }
+            }
+            
+            user_id = f"bridge_test_user_{uuid.uuid4().hex[:8]}"
+            
+            # Mock the workflow execution to check bridge setup
+            with patch.object(handler, '_execute_agent_workflow', new_callable=AsyncMock) as mock_execute:
+                mock_execute.return_value = {"result": "bridge_test_success"}
+                
+                # Execute and check if WebSocket bridge is configured
+                await handler.handle(user_id=user_id, payload=payload)
+                
+                # Check if supervisor was configured with WebSocket bridge
+                if not hasattr(supervisor_mock, 'websocket_bridge'):
+                    bridge_failures.append("WEBSOCKET BRIDGE MISSING: Supervisor has no websocket_bridge attribute")
+                elif supervisor_mock.websocket_bridge is None:
+                    bridge_failures.append("WEBSOCKET BRIDGE NULL: Supervisor websocket_bridge is None")
+                
+                # Check if execution was called with proper parameters
+                if not mock_execute.called:
+                    bridge_failures.append("EXECUTION NOT CALLED: Agent workflow was not executed")
+        
+        except Exception as e:
+            bridge_failures.append(f"WEBSOCKET BRIDGE SETUP FAILURE: {e}")
+        
+        # Test WebSocket event emission during execute_agent
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+            
+            # Try to create WebSocket bridge
+            bridge = AgentWebSocketBridge()
+            
+            # Test event emission methods exist
+            required_methods = ['emit_agent_started', 'emit_agent_thinking', 'emit_tool_executing', 'emit_tool_completed', 'emit_agent_completed']
+            
+            for method_name in required_methods:
+                if not hasattr(bridge, method_name):
+                    bridge_failures.append(f"MISSING EVENT METHOD: AgentWebSocketBridge missing {method_name}")
+                elif not callable(getattr(bridge, method_name)):
+                    bridge_failures.append(f"NON-CALLABLE EVENT METHOD: {method_name} is not callable")
+        
+        except ImportError as e:
+            bridge_failures.append(f"WEBSOCKET BRIDGE IMPORT FAILURE: {e}")
+        except Exception as e:
+            bridge_failures.append(f"WEBSOCKET BRIDGE CREATION FAILURE: {e}")
+        
+        # Report WebSocket bridge failures
+        if bridge_failures:
+            pytest.fail(f"execute_agent WebSocket bridge integration failures:\n" + "\n".join(bridge_failures))

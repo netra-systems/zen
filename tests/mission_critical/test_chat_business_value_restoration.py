@@ -142,7 +142,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
     @classmethod
     def setup_class(cls):
         """Set up class-level fixtures."""
-        super().setup_class()
+        # Initialize class attributes first
         cls.staging_config = StagingTestConfig()
         cls.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging")
         
