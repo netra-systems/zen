@@ -75,6 +75,12 @@ from netra_backend.app.websocket_core.user_context_extractor import (
     extract_websocket_user_context
 )
 
+# CRITICAL FIX: Import WebSocket context classes for proper request handling
+from netra_backend.app.websocket_core.context import (
+    WebSocketContext,
+    WebSocketRequestContext,
+)
+
 # Backward compatibility aliases
 WebSocketManager = UnifiedWebSocketManager
 # SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
@@ -223,6 +229,10 @@ __all__ = [
     "UserContextExtractor",
     "get_user_context_extractor", 
     "extract_websocket_user_context",
+    
+    # CRITICAL FIX: WebSocket context classes for proper request handling
+    "WebSocketContext",
+    "WebSocketRequestContext",
     
     # Backward compatibility
     "WebSocketManager",
