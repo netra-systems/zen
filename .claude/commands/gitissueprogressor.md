@@ -20,10 +20,11 @@ PROCESS INSTRUCTIONS START:
 
 1) STATUS UPDATE : SNST : AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
 1.1) Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
+OUTPUT the comment ID here:
 
 2) STATUS DECISION : SNST : (Pass context from 1): 
 IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
-2.1) Make or UPDATE a comment on the ISSUE with your learnings.
+2.1) UPDATE the existing comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md  .
 
 OPTIONAL STEPS IF ISSUE IS OPEN:
 
@@ -32,14 +33,14 @@ PLAN ONLY the update, align, or creation of: the required unit, integration (non
 on reproducing the item in question (failing tests). following reports\testing\TEST_CREATION_GUIDE.md
 and all of the latest testing best practices as per claude.md
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
-3.1) Make or UPDATE a comment on the ISSUE with the TEST PLAN.
+3.1) UPDATE a comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
 
 4) EXECUTE THE TEST PLAN : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. 
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 
 Decision (one of): Fix the TEST if fixable OR
 if very bad mark and report as such and go back to 3) with the new added info.
-4.1) Make or UPDATE a comment on the ISSUE with the test results and decision.
+4.1) UPDATE a comment on the ISSUE with the test results and decision.
 
 5) PLAN REMEDIATION ITEM SPECIFIC PLAN : SNST : 
 PLAN ONLY THE REMEDIATION TO THE SYSTEM UNDER TEST.
