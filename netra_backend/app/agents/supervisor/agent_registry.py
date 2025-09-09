@@ -56,7 +56,7 @@ class UserAgentSession:
     """
     
     def __init__(self, user_id: str):
-        if not user_id or not isinstance(user_id, str):
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
             raise ValueError("user_id must be a non-empty string")
             
         self.user_id = user_id
@@ -81,6 +81,12 @@ class UserAgentSession:
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         self._websocket_manager = manager
+        
+        # If manager is None, don't create a bridge
+        if manager is None:
+            self._websocket_bridge = None
+            logger.debug(f"WebSocket manager set to None for user {self.user_id} - no bridge created")
+            return
         
         # Create user context if not provided
         if user_context is None:

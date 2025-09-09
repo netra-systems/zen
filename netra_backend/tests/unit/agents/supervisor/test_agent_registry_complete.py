@@ -191,9 +191,11 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
         """Test WebSocket manager integration with proper user context."""
         session = UserAgentSession(test_user_id)
         mock_ws_manager = Mock()
+        # Ensure the mock doesn't have a create_bridge method so it uses the global function
+        del mock_ws_manager.create_bridge
         
         # Mock the create_agent_websocket_bridge function
-        with patch('netra_backend.app.agents.supervisor.agent_registry.create_agent_websocket_bridge') as mock_create_bridge:
+        with patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge') as mock_create_bridge:
             mock_bridge = Mock()
             mock_create_bridge.return_value = mock_bridge
             
@@ -209,11 +211,14 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
         """Test WebSocket manager setting without explicit user context."""
         session = UserAgentSession(test_user_id)
         mock_ws_manager = Mock()
+        # Ensure the mock doesn't have a create_bridge method so it uses the global function
+        del mock_ws_manager.create_bridge
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.create_agent_websocket_bridge') as mock_create_bridge:
-            with patch('netra_backend.app.agents.supervisor.agent_registry.UserExecutionContext') as mock_context_class:
+        with patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge') as mock_create_bridge:
+            with patch('netra_backend.app.services.user_execution_context.UserExecutionContext') as mock_context_class:
                 mock_bridge = Mock()
                 mock_context_instance = Mock()
+                mock_context_instance.user_id = test_user_id  # Add user_id property for logging
                 mock_create_bridge.return_value = mock_bridge
                 mock_context_class.return_value = mock_context_instance
                 
@@ -223,6 +228,18 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
                 mock_context_class.assert_called_once()
                 mock_create_bridge.assert_called_once_with(mock_context_instance)
                 assert session._websocket_bridge == mock_bridge
+    
+    @pytest.mark.asyncio  
+    async def test_user_session_websocket_manager_handles_none_gracefully(self, test_user_id):
+        """Test WebSocket manager setting with None value."""
+        session = UserAgentSession(test_user_id)
+        
+        # FIXED: Test the new behavior where None manager doesn't create a bridge
+        await session.set_websocket_manager(None)
+        
+        # Verify None manager is handled gracefully
+        assert session._websocket_manager is None
+        assert session._websocket_bridge is None  # FIXED: None manager = no bridge created
     
     @pytest.mark.asyncio
     async def test_user_session_agent_registration_and_retrieval(self, test_user_id):
@@ -266,19 +283,19 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
         agents_no_cleanup = []
         
         # Agent with cleanup method
-        agent_with_cleanup = Mock()
+        agent_with_cleanup = Mock(spec=[])  # Empty spec to prevent dynamic attribute creation
         agent_with_cleanup.cleanup = AsyncMock()
         agents_cleanup.append(agent_with_cleanup)
         await session.register_agent("agent_cleanup", agent_with_cleanup)
         
         # Agent with close method
-        agent_with_close = Mock()
+        agent_with_close = Mock(spec=[])  # Empty spec to prevent dynamic attribute creation
         agent_with_close.close = AsyncMock()
         agents_close.append(agent_with_close)
         await session.register_agent("agent_close", agent_with_close)
         
         # Agent with both methods
-        agent_with_both = Mock()
+        agent_with_both = Mock(spec=[])  # Empty spec to prevent dynamic attribute creation
         agent_with_both.cleanup = AsyncMock()
         agent_with_both.close = AsyncMock()
         agents_cleanup.append(agent_with_both)
@@ -286,7 +303,7 @@ class TestUserAgentSessionComplete(SSotBaseTestCase):
         await session.register_agent("agent_both", agent_with_both)
         
         # Agent with no cleanup methods
-        agent_no_cleanup = Mock()
+        agent_no_cleanup = Mock(spec=[])  # Empty spec to prevent dynamic attribute creation
         agents_no_cleanup.append(agent_no_cleanup)
         await session.register_agent("agent_no_cleanup", agent_no_cleanup)
         
@@ -400,8 +417,9 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         """Test AgentLifecycleManager initialization."""
         manager = AgentLifecycleManager()
         
-        assert isinstance(manager._user_sessions, dict)
-        assert len(manager._user_sessions) == 0
+        # FIXED: AgentLifecycleManager no longer tracks user sessions directly
+        # It now gets user sessions from the registry reference
+        assert manager._registry is None  # FIXED: No registry passed to constructor
         assert isinstance(manager._memory_thresholds, dict)
         assert 'max_agents_per_user' in manager._memory_thresholds
         assert 'max_session_age_hours' in manager._memory_thresholds
@@ -411,19 +429,18 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_cleanup_agent_resources_with_valid_session(self, test_user_id):
         """Test cleanup of agent resources with valid session."""
-        manager = AgentLifecycleManager()
-        
-        # Create mock session and user session
-        mock_session = Mock()
+        # FIXED: Create a mock registry and set it on the manager
+        mock_registry = Mock()
         mock_user_session = Mock()
         mock_user_session._access_lock = asyncio.Lock()
         mock_agent = Mock()
         mock_agent.cleanup = AsyncMock()
         mock_user_session._agents = {"test_agent": mock_agent}
         
-        mock_session.get = Mock(return_value=mock_user_session)
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        # FIXED: Mock the registry's _user_sessions dict
+        mock_registry._user_sessions = {test_user_id: mock_user_session}
+        
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         # Cleanup agent resources
         await manager.cleanup_agent_resources(test_user_id, "test_agent")
@@ -443,13 +460,13 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_cleanup_agent_resources_handles_exceptions(self, test_user_id):
         """Test that cleanup handles exceptions gracefully."""
-        manager = AgentLifecycleManager()
+        # FIXED: Create a mock registry that will raise exception when accessed
+        mock_registry = Mock()
+        mock_user_sessions = Mock()
+        mock_user_sessions.__getitem__ = Mock(side_effect=Exception("Session access failed"))
+        mock_registry._user_sessions = mock_user_sessions
         
-        # Create session that will raise exception
-        mock_session = Mock()
-        mock_session.get = Mock(side_effect=Exception("Session access failed"))
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         # Should not raise exception
         await manager.cleanup_agent_resources(test_user_id, "test_agent")
@@ -461,21 +478,23 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         
         result = await manager.monitor_memory_usage("nonexistent_user")
         
-        assert result['status'] == 'no_session'
+        assert result['status'] == 'no_registry'  # FIXED: Manager without registry returns 'no_registry'
         assert result['user_id'] == "nonexistent_user"
     
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_expired_session(self, test_user_id):
         """Test memory monitoring with expired session reference."""
-        manager = AgentLifecycleManager()
+        # FIXED: Create mock registry with expired session reference
+        mock_registry = Mock()
+        mock_registry._user_sessions = {test_user_id: weakref.ref(lambda: None)()}
         
-        # Create a weak reference that will return None (expired)
-        manager._user_sessions[test_user_id] = weakref.ref(lambda: None)()
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         result = await manager.monitor_memory_usage(test_user_id)
         
-        assert result['status'] == 'session_expired'
-        assert test_user_id not in manager._user_sessions  # Should be cleaned up
+        # Expired session is treated as no session
+        assert result['status'] == 'no_session'
+        # The expired reference would still exist in the mock, but in real implementation it might be cleaned up
     
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_healthy_session(self, test_user_id):

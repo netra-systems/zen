@@ -202,7 +202,7 @@ class TestWebSocketMultiComponentIntegration:
                 websocket=websocket,
                 connected_at=datetime.now(),
                 thread_id=context.thread_id,
-                metadata={
+                agent_context={
                     "request_id": context.request_id,
                     "run_id": context.run_id,
                     "context_created_at": context.created_at.isoformat()
@@ -370,7 +370,7 @@ class TestWebSocketMultiComponentIntegration:
             user_id=user_context.user_id,
             websocket=recovery_websocket,
             connected_at=datetime.now(),
-            metadata={"recovery_connection": True}
+            agent_context={"recovery_connection": True}
         )
         
         # Add recovery connection - this should trigger message recovery

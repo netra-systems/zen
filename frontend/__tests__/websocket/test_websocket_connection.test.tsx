@@ -24,6 +24,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { flushSync } from 'react-dom';
 import { jest } from '@jest/globals';
 
 // Import unified WebSocket mock and test helpers
@@ -91,18 +92,21 @@ const MockWebSocketConnection: React.FC<{
         return;
       }
       
-      setConnectionStatus('connected');
-      setReconnectAttempts(0);
-      
-      // Process and clear message queue when connected
-      if (messageQueue.length > 0) {
-        messageQueue.forEach(message => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(message));
-          }
-        });
-        setMessageQueue([]); // Clear the queue after sending
-      }
+      // FIXED: Wrap all state updates in flushSync to avoid act() warnings
+      flushSync(() => {
+        setConnectionStatus('connected');
+        setReconnectAttempts(0);
+        
+        // Process and clear message queue when connected
+        if (messageQueue.length > 0) {
+          messageQueue.forEach(message => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify(message));
+            }
+          });
+          setMessageQueue([]); // Clear the queue after sending
+        }
+      });
       
       onConnect?.();
     };
@@ -110,7 +114,10 @@ const MockWebSocketConnection: React.FC<{
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setReceivedEvents(prev => [...prev, data]);
+        // FIXED: Wrap state update in flushSync
+        flushSync(() => {
+          setReceivedEvents(prev => [...prev, data]);
+        });
         onMessage?.(event);
       } catch (error) {
         console.warn('Failed to parse WebSocket message:', error);
@@ -118,13 +125,18 @@ const MockWebSocketConnection: React.FC<{
     };
     
     ws.onclose = (event) => {
-      setConnectionStatus('disconnected');
+      // FIXED: Wrap state updates in flushSync
+      flushSync(() => {
+        setConnectionStatus('disconnected');
+      });
       onDisconnect?.();
       
       // Auto-reconnect logic
       if (enableRetry && reconnectAttempts < maxRetries && !event.wasClean) {
         setTimeout(() => {
-          setReconnectAttempts(prev => prev + 1);
+          flushSync(() => {
+            setReconnectAttempts(prev => prev + 1);
+          });
           connect();
         }, 1000);
       }
@@ -132,7 +144,10 @@ const MockWebSocketConnection: React.FC<{
     
     ws.onerror = (event) => {
       console.log('DEBUG: WebSocket onerror event triggered');
-      setConnectionStatus('error');
+      // FIXED: Wrap state update in flushSync
+      flushSync(() => {
+        setConnectionStatus('error');
+      });
       onError?.(event);
     };
     
@@ -155,7 +170,10 @@ const MockWebSocketConnection: React.FC<{
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {
-      setMessageQueue(prev => [...prev, message]);
+      // FIXED: Wrap state update in flushSync
+      flushSync(() => {
+        setMessageQueue(prev => [...prev, message]);
+      });
     }
   }, []);
 
@@ -204,13 +222,16 @@ const AgentEventTestComponent: React.FC<{ authToken?: string }> = ({ authToken }
       const data = JSON.parse(event.data);
       const eventType = data.type;
       
-      setAgentEvents(prev => [...prev, eventType]);
-      
-      if (eventType === 'agent_started') {
-        setIsAgentRunning(true);
-      } else if (eventType === 'agent_completed') {
-        setIsAgentRunning(false);
-      }
+      // FIXED: Wrap state updates in flushSync
+      flushSync(() => {
+        setAgentEvents(prev => [...prev, eventType]);
+        
+        if (eventType === 'agent_started') {
+          setIsAgentRunning(true);
+        } else if (eventType === 'agent_completed') {
+          setIsAgentRunning(false);
+        }
+      });
     } catch (error) {
       console.warn('Failed to parse agent message:', error);
     }
@@ -335,8 +356,7 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         />
       );
 
-      // With manual config and auto-connection disabled in this specific test,
-      // we should see the component start in connecting state since useEffect runs connect()
+      // With manual config, component auto-connects but stays in connecting state until manually triggered
       await waitFor(() => {
         const status = screen.getByTestId('connection-status').textContent;
         expect(status).toMatch(/^(disconnected|connecting)$/);
@@ -348,7 +368,23 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         await userEvent.click(connectButton);
       });
 
-      // Should show connecting, then connected
+      // Get the WebSocket instance and manually trigger connection
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
+
+      // FIXED: Manually trigger connection success for manual mode
+      await act(async () => {
+        if (activeWs && activeWs.simulateConnectionSuccess) {
+          activeWs.simulateConnectionSuccess();
+        }
+      });
+
+      // Should show connected after manual trigger
       await waitFor(() => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       }, { timeout: 3000 });
@@ -377,9 +413,14 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       }, { timeout: 5000 });
 
-      // FIXED: Use the webSocketTestHelper to send events instead of finding instances
-      const testWs = webSocketTestHelper.createMockWebSocket();
-      webSocketTestHelper.simulateOpen(testWs);
+      // FIXED: Get the actual WebSocket instance created by the component
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
 
       // Simulate complete agent workflow with all 5 critical events
       const agentEvents = [
@@ -390,17 +431,20 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         { type: 'agent_completed', data: { thread_id: threadId, result: { recommendations: ['Use reserved instances'], potential_savings: 1500 }, timestamp: Date.now() }}
       ];
 
-      // Send events using mock WebSocket helper
+      // Send events using the actual component's WebSocket instance
       for (const event of agentEvents) {
         await act(async () => {
-          webSocketTestHelper.simulateMessage(testWs, JSON.stringify(event));
+          if (activeWs && activeWs.simulateMessage) {
+            activeWs.simulateMessage(JSON.stringify(event));
+          }
         });
         await new Promise(resolve => setTimeout(resolve, 50)); // Small delay between events
       }
 
-      // The test passes if connection is established - the component would receive events
-      // through its own WebSocket instance which auto-connected
-      expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
+      // Verify events were received by checking component state
+      await waitFor(() => {
+        expect(screen.getByTestId('agent-events-received')).toHaveTextContent('5');
+      }, { timeout: 2000 });
 
       console.log('✅ All 5 critical agent events test completed successfully');
     }, 10000); // Extended timeout for this critical test
@@ -415,9 +459,14 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       }, { timeout: 5000 });
 
-      // FIXED: Use webSocketTestHelper instead of finding instances
-      const testWs = webSocketTestHelper.createMockWebSocket();
-      webSocketTestHelper.simulateOpen(testWs);
+      // FIXED: Get the actual WebSocket instance created by the component
+      let activeWs = null;
+      await waitFor(() => {
+        if (global.mockWebSocketInstances && global.mockWebSocketInstances.length > 0) {
+          activeWs = global.mockWebSocketInstances[global.mockWebSocketInstances.length - 1];
+        }
+        expect(activeWs).toBeTruthy();
+      });
 
       // Send malformed events
       const malformedEvents = [
@@ -428,7 +477,9 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
 
       for (const eventData of malformedEvents) {
         await act(async () => {
-          webSocketTestHelper.simulateMessage(testWs, eventData);
+          if (activeWs && activeWs.simulateMessage) {
+            activeWs.simulateMessage(eventData);
+          }
         });
       }
 
@@ -594,8 +645,8 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
 
       // FIXED: Use the proper method to trigger connection and message sending
       await act(async () => {
-        if (activeWs && activeWs.simulateOpen) {
-          activeWs.simulateOpen();
+        if (activeWs && activeWs.simulateConnectionSuccess) {
+          activeWs.simulateConnectionSuccess();
           // Give time for the message queue to be processed
           await new Promise(resolve => setTimeout(resolve, 100));
         }

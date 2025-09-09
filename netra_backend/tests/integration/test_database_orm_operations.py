@@ -118,7 +118,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
             user_id="db_test_user_001",
             thread_id="db_thread_001",
             run_id="db_run_001",
-            metadata={
+            agent_context={
                 "test": "database_integration",
                 "session": "user1_session"
             }
@@ -128,7 +128,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
             user_id="db_test_user_002", 
             thread_id="db_thread_002",
             run_id="db_run_002",
-            metadata={
+            agent_context={
                 "test": "database_integration",
                 "session": "user2_session"
             }
@@ -247,7 +247,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
                 user_id=self.user1_context.user_id,
                 title="Integration Test Thread",
                 created_at=datetime.now(timezone.utc),
-                metadata={"test": "thread_integration", "priority": "high"}
+                agent_context={"test": "thread_integration", "priority": "high"}
             )
             
             session.add(thread)
@@ -265,7 +265,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
                     content=f"Test message {i} for integration testing",
                     role="user" if i % 2 == 0 else "assistant",
                     created_at=datetime.now(timezone.utc),
-                    metadata={"sequence": i, "test": "message_integration"}
+                    agent_context={"sequence": i, "test": "message_integration"}
                 )
                 for i in range(1, 6)  # Create 5 messages
             ]
@@ -349,7 +349,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
                     started_at=datetime.now(timezone.utc),
                     completed_at=datetime.now(timezone.utc),
                     execution_time_ms=100 + i * 50,  # Varying execution times
-                    metadata={
+                    agent_context={
                         "business_metrics": {
                             "cost": 0.01 * i,
                             "accuracy": 0.95 - (i * 0.01),
@@ -588,7 +588,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
                     user_id=self.user1_context.user_id,
                     title=f"Performance Test Thread {i}",
                     created_at=datetime.now(timezone.utc),
-                    metadata={"batch": i // 5, "performance_test": True}
+                    agent_context={"batch": i // 5, "performance_test": True}
                 )
                 for i in range(total_threads)
             ]
@@ -608,7 +608,7 @@ class TestDatabaseORMOperations(SSotAsyncTestCase):
                         content=f"Performance test message {msg_idx} in thread {thread_idx}",
                         role="user" if msg_idx % 2 == 0 else "assistant",
                         created_at=datetime.now(timezone.utc),
-                        metadata={
+                        agent_context={
                             "thread_index": thread_idx,
                             "message_index": msg_idx,
                             "performance_test": True
