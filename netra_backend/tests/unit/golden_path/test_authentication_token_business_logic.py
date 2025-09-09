@@ -581,19 +581,19 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         # Create users for all tiers
         users = {
             UserTier.FREE: UserProfile(
-                user_id=ensure_user_id("free-user"), email="free@test.com", tier=UserTier.FREE,
+                user_id=ensure_user_id("free-user-001"), email="free@test.com", tier=UserTier.FREE,
                 permissions=set(["basic_chat", "view_usage"])
             ),
             UserTier.EARLY: UserProfile(
-                user_id=ensure_user_id("early-user"), email="early@test.com", tier=UserTier.EARLY,
+                user_id=ensure_user_id("early-user-002"), email="early@test.com", tier=UserTier.EARLY,
                 permissions=set(["basic_chat", "view_usage", "export_data"])
             ),
             UserTier.MID: UserProfile(
-                user_id=ensure_user_id("mid-user"), email="mid@test.com", tier=UserTier.MID,
+                user_id=ensure_user_id("mid-user-003"), email="mid@test.com", tier=UserTier.MID,
                 permissions=set(["basic_chat", "view_usage", "export_data", "advanced_analytics"])
             ),
             UserTier.ENTERPRISE: UserProfile(
-                user_id=ensure_user_id("ent-user"), email="enterprise@test.com", tier=UserTier.ENTERPRISE,
+                user_id=ensure_user_id("enterprise-user-004"), email="enterprise@test.com", tier=UserTier.ENTERPRISE,
                 permissions=set(["basic_chat", "view_usage", "admin_panel"])
             )
         }
@@ -670,7 +670,7 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Create user with inactive subscription
         inactive_user = UserProfile(
-            user_id=ensure_user_id("inactive-user"),
+            user_id=ensure_user_id("inactive-user-005"),
             email="inactive@test.com",
             tier=UserTier.MID,
             permissions=set(["basic_chat", "advanced_analytics"]),
@@ -689,7 +689,7 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Business Rule 3: Active subscriptions must validate successfully
         active_user = UserProfile(
-            user_id=ensure_user_id("active-user"),
+            user_id=ensure_user_id("active-user-006"),
             email="active@test.com",
             tier=UserTier.MID,
             permissions=set(["basic_chat", "advanced_analytics"]),
