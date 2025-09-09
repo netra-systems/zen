@@ -469,6 +469,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             try:
                 await asyncio.sleep(backoff_delay)
                 await self._start_health_monitoring()
+            except asyncio.CancelledError:
+                logger.debug("Health monitoring restart with backoff cancelled during service shutdown")
             except Exception as backoff_error:
                 logger.critical(f"Health monitoring restart with backoff failed: {backoff_error}")
     
@@ -778,7 +780,11 @@ class AgentWebSocketBridge(MonitorableComponent):
                     
                     if attempt > 0:
                         logger.info(f"Recovery attempt {attempt + 1}, waiting {delay}s")
-                        await asyncio.sleep(delay)
+                        try:
+                            await asyncio.sleep(delay)
+                        except asyncio.CancelledError:
+                            logger.info("Recovery cancelled during backoff delay")
+                            raise  # Re-raise to exit recovery cleanly
                     
                     # Attempt recovery through re-initialization
                     result = await self.ensure_integration(
@@ -798,6 +804,14 @@ class AgentWebSocketBridge(MonitorableComponent):
                             duration_ms=result.duration_ms
                         )
                         
+                except asyncio.CancelledError:
+                    logger.info("Recovery cancelled during attempt - exiting cleanly")
+                    return IntegrationResult(
+                        success=False,
+                        state=self.state,
+                        error="Recovery cancelled",
+                        recovery_attempted=True
+                    )
                 except Exception as e:
                     logger.warning(f"Recovery attempt {attempt + 1} failed: {e}")
                     continue

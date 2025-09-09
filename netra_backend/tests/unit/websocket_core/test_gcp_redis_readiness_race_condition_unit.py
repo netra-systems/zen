@@ -215,7 +215,7 @@ class TestGCPRedisReadinessRaceCondition:
         await asyncio.sleep(0.3)  # Wait past connection_delay but before stabilization
         
         # Validate Redis readiness - should report ready due to race condition
-        redis_ready = await validator._validate_redis_readiness()
+        redis_ready = validator._validate_redis_readiness()
         
         # RACE CONDITION: Redis reports ready but background tasks not stable
         assert redis_ready, "Race condition not reproduced - Redis should report ready"
@@ -261,7 +261,7 @@ class TestGCPRedisReadinessRaceCondition:
         
         # Test grace period behavior by measuring timing
         start_time = time.time()
-        redis_ready = await validator._validate_redis_readiness()
+        redis_ready = validator._validate_redis_readiness()
         grace_elapsed = time.time() - start_time
         
         # Grace period should have been applied (500ms)
@@ -360,7 +360,7 @@ class TestGCPRedisReadinessRaceCondition:
         app_state_no_redis.redis_manager = None
         
         validator = GCPWebSocketInitializationValidator(app_state_no_redis)
-        result = await validator._validate_redis_readiness()
+        result = validator._validate_redis_readiness()
         assert not result, "Should fail when redis_manager is None"
         
         # Test Case 2: Redis manager missing is_connected method
@@ -370,7 +370,7 @@ class TestGCPRedisReadinessRaceCondition:
         app_state_no_method.redis_manager = redis_manager_no_method
         
         validator = GCPWebSocketInitializationValidator(app_state_no_method)
-        result = await validator._validate_redis_readiness()
+        result = validator._validate_redis_readiness()
         assert result, "Should pass when is_connected method missing"
         
         # Test Case 3: is_connected raises exception
@@ -380,7 +380,7 @@ class TestGCPRedisReadinessRaceCondition:
         app_state_exception.redis_manager = redis_manager_exception
         
         validator = GCPWebSocketInitializationValidator(app_state_exception)
-        result = await validator._validate_redis_readiness()
+        result = validator._validate_redis_readiness()
         assert not result, "Should fail when is_connected raises exception"
         
         print("✅ REDIS MANAGER STATE VARIATIONS TESTED")
@@ -523,7 +523,7 @@ class TestRaceConditionPerformanceBenchmarks:
             
             # Measure validation timing
             start_time = time.time()
-            is_ready = await validator._validate_redis_readiness()
+            is_ready = validator._validate_redis_readiness()
             validation_time = time.time() - start_time
             
             results.append({

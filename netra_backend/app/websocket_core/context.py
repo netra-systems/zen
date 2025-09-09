@@ -218,3 +218,8 @@ class WebSocketContext:
             str: Unique key for isolating this user's data and operations
         """
         return f"ws_{self.user_id}_{self.thread_id}_{self.run_id}"
+
+
+# CRITICAL FIX: Alias for backward compatibility
+# Tests expect WebSocketRequestContext but the class is WebSocketContext
+WebSocketRequestContext = WebSocketContext
