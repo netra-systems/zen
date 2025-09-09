@@ -87,17 +87,18 @@ class TestCompleteGoldenPathBusinessValue(SSotAsyncTestCase):
         """Async setup for E2E test components."""
         await super().async_setup_method(method)
         
+        # Initialize auth helpers first
+        environment = self.get_env_var("TEST_ENV", "test")
+        self._auth_helper = E2EAuthHelper(environment=environment)
+        self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create authenticated user context with proper isolation
         self._user_context = await create_authenticated_user_context(
             user_email="golden_path_test@example.com",
-            environment=self.get_env_var("TEST_ENV", "test"),
+            environment=environment,
             permissions=["read", "write", "execute_agents"],
             websocket_enabled=True
         )
-        
-        # Initialize auth helpers
-        self._auth_helper = E2EAuthHelper(environment=self.get_env_var("TEST_ENV", "test"))
-        self._websocket_helper = E2EWebSocketAuthHelper(environment=self.get_env_var("TEST_ENV", "test"))
         
         self.record_metric("test_user_id", str(self._user_context.user_id))
         
@@ -140,6 +141,20 @@ class TestCompleteGoldenPathBusinessValue(SSotAsyncTestCase):
         - Execution time > 60 seconds → HARD FAIL
         """
         test_start_time = time.time()
+        
+        # Initialize test components if not already done
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+            
+        if not self._user_context:
+            self._user_context = await create_authenticated_user_context(
+                user_email="golden_path_test@example.com",
+                environment=self.get_env_var("TEST_ENV", "test"),
+                permissions=["read", "write", "execute_agents"],
+                websocket_enabled=True
+            )
         
         # === STEP 1: USER AUTHENTICATION & WEBSOCKET CONNECTION ===
         self.record_metric("step_1_auth_start", time.time())
@@ -395,13 +410,14 @@ class TestCompleteGoldenPathBusinessValue(SSotAsyncTestCase):
         start_time = time.time()
         
         # Create user-specific auth helper
-        auth_helper = E2EAuthHelper(environment=self.get_env_var("TEST_ENV", "test"))
-        websocket_helper = E2EWebSocketAuthHelper(environment=self.get_env_var("TEST_ENV", "test"))
+        environment = self.get_env_var("TEST_ENV", "test")
+        auth_helper = E2EAuthHelper(environment=environment)
+        websocket_helper = E2EWebSocketAuthHelper(environment=environment)
         
         # Authenticate
         jwt_token = auth_helper.create_test_jwt_token(
             user_id=str(user_context.user_id),
-            email=user_context.agent_context.get('user_email')
+            email=user_context.agent_context.get('user_email', f"concurrent_user_{user_index}@example.com")
         )
         
         # Connect to WebSocket

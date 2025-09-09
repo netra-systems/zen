@@ -94,17 +94,7 @@ class MessageHandlerTestRunner:
                     "SYSTEM STARTUP RACE CASCADE"
                 ]
             },
-            "background_tasks": {
-                "path": "netra_backend/tests/integration/background_tasks/test_message_handler_background_task_stability.py",
-                "description": "Background task stability tests",
-                "expected_failures": [
-                    "BACKGROUND PROCESSOR STABILITY",
-                    "REDIS RECOVERY ISSUE",
-                    "CIRCUIT BREAKER COORDINATION",
-                    "LONG-RUNNING STABILITY",
-                    "RESOURCE CLEANUP ISSUE"
-                ]
-            }
+            # Note: background_tasks test file no longer exists, removed from test suite
         }
     
     def run_comprehensive_test_suite(self) -> Dict[str, Any]:
