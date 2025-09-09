@@ -70,8 +70,8 @@ class MockWebSocketManager:
 class MockBusinessTool(BaseTool):
     """Mock business tool for testing tool execution."""
     
-    name = "business_metrics_analyzer"
-    description = "Analyzes business metrics and performance data"
+    name: str = "business_metrics_analyzer"
+    description: str = "Analyzes business metrics and performance data"
     
     def __init__(self):
         super().__init__()

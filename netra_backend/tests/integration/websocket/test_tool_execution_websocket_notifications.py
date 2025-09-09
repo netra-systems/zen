@@ -199,8 +199,8 @@ class MockWebSocketManager:
 class MockReportingTool(BaseTool):
     """Mock reporting tool that simulates long-running operations."""
     
-    name = "reporting_tool"
-    description = "Generates reports with progress updates"
+    name: str = "reporting_tool"
+    description: str = "Generates reports with progress updates"
     
     def __init__(self, report_duration_ms: int = 100, progress_steps: int = 5):
         super().__init__()

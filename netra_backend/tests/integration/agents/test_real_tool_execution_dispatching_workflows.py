@@ -44,8 +44,8 @@ from langchain_core.tools import BaseTool
 class RealBusinessAnalyticsTool(BaseTool):
     """Real business analytics tool that simulates complex business operations."""
     
-    name = "business_analytics"
-    description = "Comprehensive business analytics and KPI analysis"
+    name: str = "business_analytics"
+    description: str = "Comprehensive business analytics and KPI analysis"
     
     def __init__(self, analytics_config: Dict[str, Any] = None):
         super().__init__()
@@ -146,8 +146,8 @@ class RealBusinessAnalyticsTool(BaseTool):
 class RealDataVisualizationTool(BaseTool):
     """Real data visualization tool for creating business charts and dashboards."""
     
-    name = "data_visualization"
-    description = "Advanced data visualization and dashboard creation"
+    name: str = "data_visualization"
+    description: str = "Advanced data visualization and dashboard creation"
     
     def __init__(self, viz_config: Dict[str, Any] = None):
         super().__init__()
@@ -263,8 +263,8 @@ class RealDataVisualizationTool(BaseTool):
 class RealReportGeneratorTool(BaseTool):
     """Real report generator that creates comprehensive business reports."""
     
-    name = "report_generator"
-    description = "Comprehensive business report generation and formatting"
+    name: str = "report_generator"
+    description: str = "Comprehensive business report generation and formatting"
     
     def __init__(self, report_config: Dict[str, Any] = None):
         super().__init__()
@@ -799,8 +799,8 @@ class TestRealToolExecutionDispatchingWorkflows(SSotAsyncTestCase):
         """Test workflow resilience when individual tools fail."""
         # Create a tool that will fail
         class FailingTool(BaseTool):
-            name = "failing_tool"
-            description = "Tool that always fails"
+            name: str = "failing_tool"
+            description: str = "Tool that always fails"
             
             def _run(self, **kwargs):
                 return asyncio.run(self._arun(**kwargs))

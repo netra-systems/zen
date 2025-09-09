@@ -134,8 +134,8 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
         BVJ: Validates core platform functionality for tool execution.
         """
         class RealTestTool(BaseTool):
-            name = "real_test_tool"
-            description = "A real test tool for integration testing"
+            name: str = "real_test_tool"
+            description: str = "A real test tool for integration testing"
             
             def _run(self, test_param: str = "default") -> str:
                 return f"Real tool executed with: {test_param}"
@@ -188,8 +188,8 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
         BVJ: Ensures users get feedback when tools fail.
         """
         class FailingTestTool(BaseTool):
-            name = "failing_tool"
-            description = "A tool that fails for testing"
+            name: str = "failing_tool"
+            description: str = "A tool that fails for testing"
             
             def _run(self, **kwargs) -> str:
                 raise ValueError("Intentional test failure")
@@ -248,8 +248,8 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
         ws_manager_2.send_event.side_effect = capture_events_2
         
         class IsolationTestTool(BaseTool):
-            name = "isolation_tool"
-            description = "Tool for testing user isolation"
+            name: str = "isolation_tool"
+            description: str = "Tool for testing user isolation"
             
             def _run(self, message: str = "default") -> str:
                 return f"User message: {message}"
@@ -316,8 +316,8 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
         BVJ: Ensures system can handle multiple simultaneous tool executions.
         """
         class PerformanceTestTool(BaseTool):
-            name = "perf_tool"
-            description = "Tool for performance testing"
+            name: str = "perf_tool"
+            description: str = "Tool for performance testing"
             
             async def _arun(self, delay: float = 0.1) -> str:
                 await asyncio.sleep(delay)
@@ -368,8 +368,8 @@ class TestToolDispatcherRealIntegration(SSotBaseTestCase):
         agent_state = DeepAgentState(user_request="Test stateful execution")
         
         class StatefulTool(BaseTool):
-            name = "stateful_tool"
-            description = "Tool that uses state information"
+            name: str = "stateful_tool"
+            description: str = "Tool that uses state information"
             
             def _run(self, context_info: str = None) -> str:
                 return f"Stateful execution with context: {context_info}"
@@ -530,8 +530,8 @@ class TestToolDispatcherErrorScenarioIntegration(SSotBaseTestCase):
         failing_websocket.send_event = AsyncMock(side_effect=Exception("WebSocket connection failed"))
         
         class TestTool(BaseTool):
-            name = "websocket_test_tool"
-            description = "Tool for testing WebSocket failures"
+            name: str = "websocket_test_tool"
+            description: str = "Tool for testing WebSocket failures"
             
             def _run(self) -> str:
                 return "Tool executed successfully"

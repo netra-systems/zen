@@ -219,8 +219,8 @@ class MockIntegratedWebSocketManager:
 class ComprehensiveAnalyticsTool(BaseTool):
     """Comprehensive analytics tool for testing complete workflows."""
     
-    name = "comprehensive_analytics"
-    description = "Performs comprehensive data analytics with multiple phases"
+    name: str = "comprehensive_analytics"
+    description: str = "Performs comprehensive data analytics with multiple phases"
     
     def __init__(self, phases: int = 3, phase_duration_ms: int = 10):
         super().__init__()
@@ -260,8 +260,8 @@ class ComprehensiveAnalyticsTool(BaseTool):
 class DataVisualizationTool(BaseTool):
     """Data visualization tool for testing multi-tool workflows."""
     
-    name = "data_visualization"
-    description = "Creates visualizations from analytics data"
+    name: str = "data_visualization"
+    description: str = "Creates visualizations from analytics data"
     
     def __init__(self, chart_types: List[str] = None):
         super().__init__()

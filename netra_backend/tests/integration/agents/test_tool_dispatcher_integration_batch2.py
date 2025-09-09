@@ -50,8 +50,8 @@ class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
         from langchain_core.tools import BaseTool
         
         class TestTool(BaseTool):
-            name = "test_analyzer"
-            description = "Analyzes test data"
+            name: str = "test_analyzer"
+            description: str = "Analyzes test data"
             
             def _run(self, query: str) -> str:
                 return f"Analysis result for: {query}"
@@ -180,8 +180,8 @@ class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
         from langchain_core.tools import BaseTool
         
         class FailingTool(BaseTool):
-            name = "failing_tool"
-            description = "A tool that always fails"
+            name: str = "failing_tool"
+            description: str = "A tool that always fails"
             
             def _run(self, query: str) -> str:
                 raise RuntimeError("Simulated tool failure")

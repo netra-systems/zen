@@ -45,18 +45,25 @@ class FailingTool(BaseTool):
     
     name: str = "failing_tool"
     description: str = "Tool that fails in configurable ways"
+    failure_mode: str = "exception"
+    failure_delay_ms: int = 0
+    failure_message: str = "Simulated failure"
+    execution_count: int = 0
     
     def __init__(
         self, 
         failure_mode: str = "exception",
         failure_delay_ms: int = 0,
-        failure_message: str = "Simulated failure"
+        failure_message: str = "Simulated failure",
+        **kwargs
     ):
-        super().__init__()
-        self.failure_mode = failure_mode  # exception, timeout, memory, security
-        self.failure_delay_ms = failure_delay_ms
-        self.failure_message = failure_message
-        self.execution_count = 0
+        kwargs.update({
+            'failure_mode': failure_mode,
+            'failure_delay_ms': failure_delay_ms,
+            'failure_message': failure_message,
+            'execution_count': 0
+        })
+        super().__init__(**kwargs)
         
     def _run(self, operation: str, **kwargs) -> str:
         """Synchronous execution."""
@@ -103,12 +110,17 @@ class SlowTool(BaseTool):
     
     name: str = "slow_tool"
     description: str = "Tool that takes a long time to execute"
+    execution_time_ms: int = 1000
+    execution_count: int = 0
+    was_interrupted: bool = False
     
-    def __init__(self, execution_time_ms: int = 1000):
-        super().__init__()
-        self.execution_time_ms = execution_time_ms
-        self.execution_count = 0
-        self.was_interrupted = False
+    def __init__(self, execution_time_ms: int = 1000, **kwargs):
+        kwargs.update({
+            'execution_time_ms': execution_time_ms,
+            'execution_count': 0,
+            'was_interrupted': False
+        })
+        super().__init__(**kwargs)
         
     def _run(self, task: str, **kwargs) -> str:
         """Synchronous execution."""
@@ -131,11 +143,15 @@ class ResourceExhaustionTool(BaseTool):
     
     name: str = "resource_tool"
     description: str = "Tool that consumes system resources"
+    resource_type: str = "memory"
+    execution_count: int = 0
     
-    def __init__(self, resource_type: str = "memory"):
-        super().__init__()
-        self.resource_type = resource_type  # memory, cpu, disk
-        self.execution_count = 0
+    def __init__(self, resource_type: str = "memory", **kwargs):
+        kwargs.update({
+            'resource_type': resource_type,
+            'execution_count': 0
+        })
+        super().__init__(**kwargs)
         
     def _run(self, size: str, **kwargs) -> str:
         """Synchronous execution."""
@@ -225,9 +241,9 @@ class MockResilientWebSocketBridge:
 class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
     """Unit tests for tool execution error handling and resilience."""
     
-    def setUp(self):
-        """Set up test environment."""
-        super().setUp()
+    def setup_method(self, method):
+        """Set up test environment following SSOT patterns."""
+        super().setup_method(method)
         
         # Create test contexts
         self.user_context = UserExecutionContext(
@@ -248,20 +264,20 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
         self.websocket_bridge = MockResilientWebSocketBridge()
         
         # Create test tools
-        self.failing_tool = FailingTool("exception", 0, "Standard test failure")
-        self.timeout_tool = FailingTool("timeout", 0, "Tool timeout")
-        self.slow_tool = SlowTool(500)  # 500ms execution
-        self.memory_tool = ResourceExhaustionTool("memory")
+        self.failing_tool = FailingTool(failure_mode="exception", failure_delay_ms=0, failure_message="Standard test failure")
+        self.timeout_tool = FailingTool(failure_mode="timeout", failure_delay_ms=0, failure_message="Tool timeout")
+        self.slow_tool = SlowTool(execution_time_ms=500)  # 500ms execution
+        self.memory_tool = ResourceExhaustionTool(resource_type="memory")
         
         # Create execution engine
         self.execution_engine = UnifiedToolExecutionEngine(
             websocket_bridge=self.websocket_bridge
         )
         
-    async def tearDown(self):
-        """Clean up after tests."""
+    async def teardown_method(self, method):
+        """Clean up after tests following SSOT patterns."""
         await UnifiedToolDispatcher.cleanup_user_dispatchers(self.user_context.user_id)
-        await super().tearDown()
+        await super().teardown_method(method)
         
     # ===================== BASIC ERROR HANDLING =====================
         
@@ -296,7 +312,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
     async def test_tool_timeout_handling(self):
         """Test handling of tool timeouts."""
         # Create tool that will timeout
-        timeout_tool = SlowTool(5000)  # 5 second execution
+        timeout_tool = SlowTool(execution_time_ms=5000)  # 5 second execution
         
         tool_input = ToolInput(
             tool_name="slow_tool",
@@ -348,7 +364,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
         
     async def test_security_violation_handling(self):
         """Test handling of security violations."""
-        security_tool = FailingTool("security", 0, "Access denied")
+        security_tool = FailingTool(failure_mode="security", failure_delay_ms=0, failure_message="Access denied")
         
         tool_input = ToolInput(
             tool_name="failing_tool",
@@ -375,7 +391,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
         self.websocket_bridge.simulate_connection_failure()
         
         # Create working tool
-        working_tool = FailingTool("none", 0, "Success")
+        working_tool = FailingTool(failure_mode="none", failure_delay_ms=0, failure_message="Success")
         
         tool_input = ToolInput(
             tool_name="failing_tool",
@@ -400,10 +416,10 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
         """Test that tool failures don't affect concurrent executions."""
         # Create multiple tools with different failure modes
         tools = [
-            FailingTool("exception", 0, "Tool 1 failure"),
-            FailingTool("none", 0, "Tool 2 success"),
-            FailingTool("memory", 0, "Tool 3 memory error"),
-            FailingTool("none", 0, "Tool 4 success")
+            FailingTool(failure_mode="exception", failure_delay_ms=0, failure_message="Tool 1 failure"),
+            FailingTool(failure_mode="none", failure_delay_ms=0, failure_message="Tool 2 success"),
+            FailingTool(failure_mode="memory", failure_delay_ms=0, failure_message="Tool 3 memory error"),
+            FailingTool(failure_mode="none", failure_delay_ms=0, failure_message="Tool 4 success")
         ]
         
         # Execute tools concurrently
@@ -447,7 +463,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
     async def test_circuit_breaker_pattern(self):
         """Test circuit breaker pattern for repeatedly failing tools."""
         # Create intermittently failing tool
-        intermittent_tool = FailingTool("intermittent", 0, "Intermittent failure")
+        intermittent_tool = FailingTool(failure_mode="intermittent", failure_delay_ms=0, failure_message="Intermittent failure")
         
         results = []
         
@@ -555,7 +571,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
         self.assertEqual(failing_result.status, ToolStatus.ERROR)
         
         # Verify system can still execute successful tools
-        success_tool = FailingTool("none", 0, "Recovery success")
+        success_tool = FailingTool(failure_mode="none", failure_delay_ms=0, failure_message="Recovery success")
         
         success_result = await self.execution_engine.execute_tool_with_input(
             tool_input=ToolInput(
@@ -598,7 +614,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
     async def test_emergency_shutdown_recovery(self):
         """Test emergency shutdown and recovery capabilities."""
         # Start multiple tool executions
-        slow_tools = [SlowTool(1000) for _ in range(3)]  # 1 second each
+        slow_tools = [SlowTool(execution_time_ms=1000) for _ in range(3)]  # 1 second each
         
         tasks = []
         for i, tool in enumerate(slow_tools):

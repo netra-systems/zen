@@ -71,6 +71,17 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
             "invalidations": 0,
             "expirations": 0
         }
+        
+        # Initialize simulated database with test user data
+        # This represents the authoritative source of user permissions
+        self._simulated_user_database = {}
+        for user in self.test_users:
+            self._simulated_user_database[user["user_id"]] = {
+                "user_id": user["user_id"],
+                "email": user["email"],
+                "subscription_tier": user["subscription_tier"],
+                "permissions": user["permissions"].copy()  # Make a copy to avoid reference issues
+            }
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -412,9 +423,9 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         """Validate token with caching layer."""
         cache_key = f"token_validation:{hash(token)}"
         
-        # Check cache first
+        # Check cache first - use fast expiry check
         cached_result = self._token_cache.get(cache_key)
-        if cached_result and not self._is_cache_entry_expired(cached_result, self.cache_config["token_cache_ttl"]):
+        if cached_result and self._is_cache_entry_valid_fast(cached_result):
             self._cache_stats["hits"] += 1
             return {
                 "valid": cached_result["valid"],
@@ -447,7 +458,9 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
                 "cached_at": datetime.now(timezone.utc)
             }
         
-        # Cache the result
+        # Cache the result with optimized expiry timestamp
+        now_timestamp = datetime.now(timezone.utc).timestamp()
+        validation_result["expires_at_timestamp"] = now_timestamp + self.cache_config["token_cache_ttl"]
         self._token_cache[cache_key] = validation_result
         
         return {
@@ -459,10 +472,12 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         """Cache user data with TTL."""
         cache_key = f"user_data:{user_data['user_id']}"
         
+        now_timestamp = datetime.now(timezone.utc).timestamp()
         cached_user = {
             **user_data,
             "cached_at": datetime.now(timezone.utc),
-            "cache_ttl": self.cache_config["user_cache_ttl"]
+            "cache_ttl": self.cache_config["user_cache_ttl"],
+            "expires_at_timestamp": now_timestamp + self.cache_config["user_cache_ttl"]
         }
         
         self._user_cache[cache_key] = cached_user
@@ -478,7 +493,7 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         cache_key = f"user_data:{user_id}"
         cached_user = self._user_cache.get(cache_key)
         
-        if cached_user and not self._is_cache_entry_expired(cached_user, self.cache_config["user_cache_ttl"]):
+        if cached_user and self._is_cache_entry_valid_fast(cached_user):
             return cached_user
         
         # Clean up expired entry
@@ -492,11 +507,13 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         """Cache user permissions."""
         cache_key = f"permissions:{user_id}"
         
+        now_timestamp = datetime.now(timezone.utc).timestamp()
         cached_permissions = {
             "user_id": user_id,
             "permissions": permissions,
             "cached_at": datetime.now(timezone.utc),
-            "cache_ttl": self.cache_config["permission_cache_ttl"]
+            "cache_ttl": self.cache_config["permission_cache_ttl"],
+            "expires_at_timestamp": now_timestamp + self.cache_config["permission_cache_ttl"]
         }
         
         self._permission_cache[cache_key] = cached_permissions
@@ -512,7 +529,7 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         cache_key = f"permissions:{user_id}"
         cached_permissions = self._permission_cache.get(cache_key)
         
-        if cached_permissions and not self._is_cache_entry_expired(cached_permissions, self.cache_config["permission_cache_ttl"]):
+        if cached_permissions and self._is_cache_entry_valid_fast(cached_permissions):
             has_permission = permission in cached_permissions["permissions"]
             return {
                 "result": has_permission,
@@ -529,7 +546,9 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
     
     async def _update_user_permissions(self, user_id: str, new_permissions: List[str], invalidate_cache: bool = True) -> Dict[str, Any]:
         """Update user permissions and invalidate cache."""
-        # Update permissions (simulate database update)
+        # Update permissions in simulated database (authoritative source)
+        if user_id in self._simulated_user_database:
+            self._simulated_user_database[user_id]["permissions"] = new_permissions.copy()
         
         if invalidate_cache:
             # Invalidate permission cache
@@ -538,8 +557,9 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
                 del self._permission_cache[cache_key]
                 self._cache_stats["invalidations"] += 1
             
-            # Re-cache with new permissions
-            await self._cache_user_permissions(user_id, new_permissions)
+            # Note: Do NOT re-cache immediately - let the next permission check 
+            # miss the cache and reload from authoritative source, then cache the result.
+            # This is what the test is validating.
         
         return {
             "updated": True,
@@ -551,10 +571,12 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         """Cache session data."""
         cache_key = f"session:{session_data['session_id']}"
         
+        now_timestamp = datetime.now(timezone.utc).timestamp()
         cached_session = {
             **session_data,
             "cached_at": datetime.now(timezone.utc),
-            "cache_ttl": self.cache_config["session_cache_ttl"]
+            "cache_ttl": self.cache_config["session_cache_ttl"],
+            "expires_at_timestamp": now_timestamp + self.cache_config["session_cache_ttl"]
         }
         
         self._session_cache[cache_key] = cached_session
@@ -569,7 +591,7 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         cache_key = f"session:{session_id}"
         cached_session = self._session_cache.get(cache_key)
         
-        if cached_session and not self._is_cache_entry_expired(cached_session, self.cache_config["session_cache_ttl"]):
+        if cached_session and self._is_cache_entry_valid_fast(cached_session):
             return cached_session
         
         return None
@@ -615,7 +637,7 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
             expired_keys = []
             
             for key, cached_entry in cache_store.items():
-                if self._is_cache_entry_expired(cached_entry, ttl):
+                if not self._is_cache_entry_valid_fast(cached_entry):
                     expired_keys.append(key)
                     memory_freed += len(str(cached_entry))
             
@@ -683,8 +705,18 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
             "entries_invalidated": invalidated_count
         }
     
-    def _is_cache_entry_expired(self, cache_entry: Dict[str, Any], ttl_seconds: int) -> bool:
-        """Check if cache entry is expired."""
+    def _is_cache_entry_valid_fast(self, cache_entry: Dict[str, Any]) -> bool:
+        """Fast cache entry validity check using pre-calculated expiry timestamps."""
+        # Use pre-calculated expiry timestamp for ultra-fast comparison
+        if "expires_at_timestamp" in cache_entry:
+            current_timestamp = datetime.now(timezone.utc).timestamp()
+            return current_timestamp < cache_entry["expires_at_timestamp"]
+        
+        # Fallback to legacy method for backwards compatibility
+        return not self._is_cache_entry_expired_legacy(cache_entry, 3600)
+    
+    def _is_cache_entry_expired_legacy(self, cache_entry: Dict[str, Any], ttl_seconds: int) -> bool:
+        """Legacy cache expiry check - kept for backwards compatibility."""
         if "cached_at" not in cache_entry:
             return True
         
@@ -694,3 +726,7 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
         
         expiry_time = cached_at + timedelta(seconds=ttl_seconds)
         return datetime.now(timezone.utc) > expiry_time
+    
+    def _is_cache_entry_expired(self, cache_entry: Dict[str, Any], ttl_seconds: int) -> bool:
+        """Check if cache entry is expired - optimized version."""
+        return not self._is_cache_entry_valid_fast(cache_entry)

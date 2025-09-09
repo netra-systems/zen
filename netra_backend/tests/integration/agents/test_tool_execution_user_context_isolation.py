@@ -106,8 +106,8 @@ class UserIsolationWebSocketManager:
 class IsolatedUserTool(BaseTool):
     """Tool that tracks user-specific execution state for isolation testing."""
     
-    name = "user_state_tool"
-    description = "Tool that maintains user-specific state"
+    name: str = "user_state_tool"
+    description: str = "Tool that maintains user-specific state"
     
     def __init__(self):
         super().__init__()
@@ -369,8 +369,8 @@ class TestToolExecutionUserContextIsolation(SSotAsyncTestCase):
         """Test that errors in one user's tools don't affect other users."""
         # Create mock failing tool for one user
         class FailingTool(BaseTool):
-            name = "failing_tool"
-            description = "Tool that always fails"
+            name: str = "failing_tool"
+            description: str = "Tool that always fails"
             
             def _run(self, **kwargs):
                 return asyncio.run(self._arun(**kwargs))
