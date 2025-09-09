@@ -224,7 +224,7 @@ class MockWebSocketManager:
             # Queue the final assistant message
             assistant_message = {
                 "type": "assistant_message",
-                "content": result.get("result", "Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
+                "content": result.get("result", "Summary: Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
                 "thread_id": user_context.get("thread_id"),
                 "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -401,7 +401,7 @@ class MockAgentExecutionEngine:
             })
             
             # 2. Agent Thinking Event
-            await asyncio.sleep(0.1)  # Simulate processing time
+            await asyncio.sleep(0.01)  # Minimal processing time for mock
             await self.websocket_manager.emit_agent_event("agent_thinking", {
                 "execution_id": self.execution_id,
                 "stage": "analyzing_request"
@@ -411,7 +411,7 @@ class MockAgentExecutionEngine:
             tools_executed = await self._simulate_tool_execution()
             
             # 4. Final completion
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)  # Minimal completion time
             # Generate realistic business value response with optimization recommendations
             mock_business_response = (
                 "Based on your AI infrastructure analysis, I recommend the following cost optimization strategies:\n\n"
@@ -419,7 +419,8 @@ class MockAgentExecutionEngine:
                 "2. **Usage Pattern Analysis**: Implement caching for repeated queries, reducing API calls by 40%\n"
                 "3. **Cost Forecasting**: Your current $50K/month spend can be reduced to $32K/month\n"
                 "4. **Infrastructure Efficiency**: Batch processing can reduce costs by 25%\n\n"
-                "These optimizations provide actionable insights for immediate cost reduction while maintaining performance quality."
+                "**Summary**: These recommendations provide actionable insights for immediate cost reduction while maintaining performance quality. "
+                "The total projected savings are $18,000/month, achieving your cost optimization goals."
             )
             
             result = {
@@ -469,7 +470,7 @@ class MockAgentExecutionEngine:
             })
             
             # Simulate tool work
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)  # Minimal tool execution time
             
             # Tool completed event
             tool_result = {
