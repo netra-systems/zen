@@ -25,7 +25,7 @@ from typing import Dict, Any, Optional
 
 # SSOT imports - no relative imports
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, RequestScopedOrchestrator
-from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID
 from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 
