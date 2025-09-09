@@ -402,7 +402,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             deadlock_count = 0
             
             async def concurrent_balance_transfer(transfer_id: int) -> Dict[str, Any]:
-                \"\"\"Perform a balance transfer with proper transaction isolation.\"\"\"
+                """Perform a balance transfer with proper transaction isolation."""
                 try:
                     # Random transfer between accounts
                     from_account = random.randint(0, account_count - 1)
@@ -424,12 +424,12 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
                         
                         # Get current balances with SELECT FOR UPDATE
                         from_balance = await db.fetchval(
-                            f\"SELECT balance FROM {test_table} WHERE account_id = $1 FOR UPDATE\",
+                            f"SELECT balance FROM {test_table} WHERE account_id = $1 FOR UPDATE",
                             from_account
                         )
                         
                         to_balance = await db.fetchval(
-                            f\"SELECT balance FROM {test_table} WHERE account_id = $1 FOR UPDATE\",
+                            f"SELECT balance FROM {test_table} WHERE account_id = $1 FOR UPDATE",
                             to_account
                         )
                         
@@ -437,31 +437,31 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
                         if from_balance >= transfer_amount:
                             # Update balances
                             await db.execute(
-                                f\"UPDATE {test_table} SET balance = balance - $1, version = version + 1, updated_at = NOW() WHERE account_id = $2\",
+                                f"UPDATE {test_table} SET balance = balance - $1, version = version + 1, updated_at = NOW() WHERE account_id = $2",
                                 transfer_amount, from_account
                             )
                             
                             await db.execute(
-                                f\"UPDATE {test_table} SET balance = balance + $1, version = version + 1, updated_at = NOW() WHERE account_id = $2\",
+                                f"UPDATE {test_table} SET balance = balance + $1, version = version + 1, updated_at = NOW() WHERE account_id = $2",
                                 transfer_amount, to_account
                             )
                             
                             return {
-                                \"transfer_id\": transfer_id,
-                                \"from_account\": from_account,
-                                \"to_account\": to_account,
-                                \"amount\": transfer_amount,
-                                \"success\": True,
-                                \"error\": None
+                                "transfer_id": transfer_id,
+                                "from_account": from_account,
+                                "to_account": to_account,
+                                "amount": transfer_amount,
+                                "success": True,
+                                "error": None
                             }
                         else:
                             return {
-                                \"transfer_id\": transfer_id,
-                                \"from_account\": from_account,
-                                \"to_account\": to_account,
-                                \"amount\": transfer_amount,
-                                \"success\": False,
-                                \"error\": \"insufficient_funds\"
+                                "transfer_id": transfer_id,
+                                "from_account": from_account,
+                                "to_account": to_account,
+                                "amount": transfer_amount,
+                                "success": False,
+                                "error": "insufficient_funds"
                             }
                 
                 except Exception as e:

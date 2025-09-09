@@ -73,7 +73,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         - Operation completion: <100ms (p95)
         - Connection reuse rate: >80%
         - No pool exhaustion under 50 concurrent operations
-        \"\"\"
+        """
         db = real_services_fixture[\"db\"]
         concurrent_operations = 50
         operations_per_connection = 10
@@ -99,10 +99,10 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         async def database_operation_cycle(operation_id: int) -> Dict[str, Any]:
             """Perform a cycle of database operations."""
             cycle_result = {
-                \"operation_id\": operation_id,
-                \"operations_completed\": 0,
-                \"total_time\": 0,
-                \"errors\": []
+                "operation_id": operation_id,
+                "operations_completed": 0,
+                "total_time": 0,
+                "errors": []
             }
             
             cycle_start = time.time()

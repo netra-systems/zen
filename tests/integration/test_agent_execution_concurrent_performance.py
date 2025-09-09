@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class AgentPerformanceMetrics:
-    \"\"\"Agent execution performance metrics.\"\"\"
+    """Agent execution performance metrics."""
     agent_name: str
     total_executions: int
     successful_executions: int
