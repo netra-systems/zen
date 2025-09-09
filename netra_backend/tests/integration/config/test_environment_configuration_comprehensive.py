@@ -43,9 +43,9 @@ class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
     - Configuration drift detection
     """
     
-    def __init__(self):
-        """Initialize environment configuration test suite."""
-        super().__init__()
+    def setup_method(self):
+        """Set up test environment for each test method."""
+        super().setup_method() if hasattr(super(), 'setup_method') else None
         self.isolated_helper = IsolatedTestHelper()
         self.config_validator = ConfigurationValidator()
         

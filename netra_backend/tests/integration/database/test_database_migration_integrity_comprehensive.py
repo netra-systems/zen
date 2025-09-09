@@ -43,9 +43,9 @@ class TestDatabaseMigrationIntegrityComprehensive(SSotBaseTestCase):
     - Performance impact assessment
     """
     
-    def __init__(self):
-        """Initialize database migration test suite."""
-        super().__init__()
+    def setup_method(self):
+        """Set up test environment for each test method."""
+        super().setup_method() if hasattr(super(), 'setup_method') else None
         self.env = get_env()
         self.db_helper = DatabaseTestHelper()
         self.isolated_helper = IsolatedTestHelper()

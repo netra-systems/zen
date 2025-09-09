@@ -983,20 +983,15 @@ class ExecutionEngine:
                 "status": "completed"
             }
             
-            # Send final report
+            # Send final report (this already calls websocket_bridge.notify_agent_completed internally)
             await self.send_final_report(
                 context, 
                 report, 
                 result.duration * 1000 if result.duration else 0
             )
             
-            # Send completion notification via bridge - fix parameter mapping
-            await self.websocket_bridge.notify_agent_completed(
-                context.run_id,
-                context.agent_name,
-                result=report,
-                execution_time_ms=result.duration * 1000 if result.duration else 0
-            )
+            # FIXED: Removed duplicate notify_agent_completed call
+            # send_final_report already handles the WebSocket notification
         except Exception as e:
             logger.warning(f"Failed to send final execution report: {e}")
     

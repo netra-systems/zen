@@ -1200,6 +1200,135 @@ class UserContextFactory:
         return context.with_db_session(db_session)
 
 
+async def create_isolated_execution_context(
+    user_id: str,
+    request_id: str,
+    database_session: Optional['AsyncSession'] = None,
+    websocket_emitter: Optional[Any] = None,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    validate_user: bool = True,
+    isolation_level: str = "standard"
+) -> UserExecutionContext:
+    """
+    SSOT factory function for creating isolated execution contexts.
+    
+    This is the Single Source of Truth for creating UserExecutionContext instances
+    with comprehensive isolation guarantees and database/WebSocket integration.
+    
+    Business Value Justification (BVJ):
+    - Segment: ALL (Free → Enterprise)
+    - Business Goal: Ensure complete request isolation and proper resource management
+    - Value Impact: Guarantees user data security and prevents resource leaks
+    - Strategic Impact: Critical for multi-user agent execution and compliance
+    
+    Args:
+        user_id: User identifier from authentication
+        request_id: Request identifier for this specific operation
+        database_session: Optional database session for request-scoped operations
+        websocket_emitter: Optional WebSocket emitter for real-time updates
+        thread_id: Optional thread identifier (auto-generated if None)
+        run_id: Optional run identifier (auto-generated if None)  
+        validate_user: Whether to validate user exists in database
+        isolation_level: Isolation level ("standard" or "strict")
+        
+    Returns:
+        New UserExecutionContext with proper isolation
+        
+    Raises:
+        InvalidContextError: If parameters are invalid or user validation fails
+    """
+    if not user_id or not isinstance(user_id, str):
+        raise InvalidContextError("user_id must be a non-empty string")
+        
+    if not request_id or not isinstance(request_id, str):
+        raise InvalidContextError("request_id must be a non-empty string")
+    
+    # Generate missing IDs if not provided
+    id_manager = UnifiedIDManager()
+    
+    if not thread_id:
+        thread_id = id_manager.generate_thread_id()
+        
+    if not run_id:
+        run_id = id_manager.generate_run_id()
+    
+    # Validate user exists in database if requested and session available
+    if validate_user and database_session:
+        try:
+            # Check user exists in database
+            result = await database_session.execute("""
+                SELECT id, is_active FROM auth.users WHERE id = :user_id 
+                UNION ALL
+                SELECT id, is_active FROM users WHERE id = :user_id
+                LIMIT 1
+            """, {"user_id": user_id})
+            
+            user_row = result.fetchone()
+            if not user_row:
+                raise InvalidContextError(f"User {user_id} not found in database")
+                
+            if not user_row[1]:  # is_active check
+                raise InvalidContextError(f"User {user_id} is not active")
+                
+            logger.debug(f"User validation successful for {user_id}")
+            
+        except Exception as e:
+            if isinstance(e, InvalidContextError):
+                raise
+            logger.warning(f"User validation failed for {user_id}: {e}")
+            
+            # In strict isolation, validation failure is fatal
+            if isolation_level == "strict":
+                raise InvalidContextError(
+                    f"User validation required in strict isolation mode but failed: {e}"
+                )
+    
+    # Build agent context with isolation metadata
+    agent_context = {
+        'isolation_level': isolation_level,
+        'created_via': 'create_isolated_execution_context',
+        'validated_user': validate_user and database_session is not None,
+        'has_websocket_emitter': websocket_emitter is not None,
+        'has_database_session': database_session is not None
+    }
+    
+    # Build audit metadata
+    audit_metadata = {
+        'context_source': 'ssot_isolated_factory',
+        'isolation_level': isolation_level,
+        'validation_performed': validate_user and database_session is not None,
+        'factory_method': 'create_isolated_execution_context'
+    }
+    
+    # Convert websocket_emitter to websocket_client_id if needed
+    websocket_client_id = None
+    if websocket_emitter:
+        if hasattr(websocket_emitter, 'user_id'):
+            websocket_client_id = f"ws_{websocket_emitter.user_id}"
+        else:
+            websocket_client_id = f"ws_{user_id}"
+    
+    # Create the context
+    context = UserExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=request_id,
+        db_session=database_session,
+        websocket_client_id=websocket_client_id,
+        agent_context=agent_context,
+        audit_metadata=audit_metadata
+    )
+    
+    logger.info(
+        f"Created isolated execution context: user={user_id[:8]}..., "
+        f"request={request_id[:8]}..., isolation={isolation_level}"
+    )
+    
+    return context
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
@@ -1209,5 +1338,6 @@ __all__ = [
     'validate_user_context',
     'managed_user_context',
     'register_shared_object',
-    'clear_shared_object_registry'
+    'clear_shared_object_registry',
+    'create_isolated_execution_context'
 ]

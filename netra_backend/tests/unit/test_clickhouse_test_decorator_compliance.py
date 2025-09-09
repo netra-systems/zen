@@ -14,7 +14,7 @@ import pytest
 import sys
 from unittest.mock import patch, Mock
 from test_framework.ssot.test_context_decorator import (
-    TestContextValidationError,
+    ContextValidationError,
     TestContextValidator,
     test_decorator,
     validate_no_test_imports_in_production
@@ -56,8 +56,8 @@ class TestTestContextValidation:
             mock_test_env.return_value = False
             mock_test_file.return_value = False
             
-            # This MUST raise TestContextValidationError
-            with pytest.raises(TestContextValidationError) as exc_info:
+            # This MUST raise ContextValidationError
+            with pytest.raises(ContextValidationError) as exc_info:
                 test_only_function()
             
             assert "called from non-test context" in str(exc_info.value)
@@ -128,7 +128,7 @@ class TestClickHouseDecoratorCompliance:
             mock_test_file.return_value = False
             
             # This should fail in production context
-            with pytest.raises(TestContextValidationError):
+            with pytest.raises(ContextValidationError):
                 client = NoOpClickHouseClient()
     
     @pytest.mark.skip(reason="Will fail until decorators are properly applied - this is expected in TDD")
@@ -144,7 +144,7 @@ class TestClickHouseDecoratorCompliance:
             mock_test_file.return_value = False
             
             # This should fail in production context
-            with pytest.raises(TestContextValidationError):
+            with pytest.raises(ContextValidationError):
                 result = _is_real_database_test()
 
 
@@ -160,7 +160,7 @@ class TestProductionContaminationPrevention:
             validate_no_test_imports_in_production()
             # If no exception, no violations found
             assert True
-        except TestContextValidationError as e:
+        except ContextValidationError as e:
             # If violations found, fail with details
             pytest.fail(f"Test import violations in production code: {e}")
     
