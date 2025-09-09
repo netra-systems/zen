@@ -186,8 +186,7 @@ class TestGCPRedisReadinessRaceCondition:
         validator = GCPWebSocketInitializationValidator(app_state)
         
         # Force GCP environment detection to enable race condition logic
-        validator.is_gcp_environment = True
-        validator.environment = "staging"
+        validator.update_environment_configuration("staging", True)
         
         # Override _validate_redis_readiness to remove grace period
         original_method = validator._validate_redis_readiness
@@ -255,8 +254,7 @@ class TestGCPRedisReadinessRaceCondition:
         validator = GCPWebSocketInitializationValidator(app_state)
         
         # Force GCP environment detection
-        validator.is_gcp_environment = True
-        validator.environment = "staging"
+        validator.update_environment_configuration("staging", True)
         
         # Wait for Redis to report connected
         await asyncio.sleep(0.3)
@@ -295,9 +293,8 @@ class TestGCPRedisReadinessRaceCondition:
         app_state = MockAppStateForRaceCondition()
         validator = GCPWebSocketInitializationValidator(app_state)
         
-        # Force GCP environment to get 60s timeout
-        validator.is_gcp_environment = True
-        validator.environment = "staging"
+        # Force GCP environment to get 60s timeout using proper method
+        validator.update_environment_configuration("staging", True)
         
         # Verify Redis check has 60s timeout in GCP environment
         redis_check = validator.readiness_checks['redis']
@@ -305,9 +302,8 @@ class TestGCPRedisReadinessRaceCondition:
             f"Redis timeout should be 60s in GCP, got {redis_check.timeout_seconds}s"
         )
         
-        # Compare with non-GCP timeout
-        validator.is_gcp_environment = False
-        validator._register_critical_service_checks()
+        # Compare with non-GCP timeout using proper method
+        validator.update_environment_configuration("test", False)
         non_gcp_redis_check = validator.readiness_checks['redis']
         assert non_gcp_redis_check.timeout_seconds == 10.0, (
             f"Redis timeout should be 10s in non-GCP, got {non_gcp_redis_check.timeout_seconds}s"
