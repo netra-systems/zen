@@ -292,7 +292,7 @@ class TypingMessage(BaseModel):
 
 
 class WebSocketConfig(BaseModel):
-    """WebSocket configuration."""
+    """WebSocket configuration with environment-specific optimizations."""
     max_connections_per_user: int = 3
     max_message_rate_per_minute: int = 30
     max_message_size_bytes: int = 8192
@@ -301,6 +301,48 @@ class WebSocketConfig(BaseModel):
     cleanup_interval_seconds: int = 60
     enable_compression: bool = False
     allowed_origins: List[str] = Field(default_factory=list)
+    
+    # PHASE 1 FIX 3: Cloud Run environment timing adjustments
+    # These settings help mitigate accept() race conditions in Cloud Run environments
+    accept_completion_timeout_seconds: float = 5.0  # Max time to wait for accept() completion
+    accept_validation_interval_ms: int = 100  # Interval for checking accept() status
+    cloud_run_accept_delay_ms: int = 50  # Additional delay after accept() in Cloud Run
+    cloud_run_stabilization_delay_ms: int = 25  # Final stabilization delay
+    cloud_run_progressive_backoff_ms: List[int] = Field(default=[25, 50, 75])  # Progressive delay attempts
+    
+    @classmethod
+    def get_cloud_run_optimized_config(cls) -> 'WebSocketConfig':
+        """Get Cloud Run optimized configuration for race condition prevention."""
+        return cls(
+            heartbeat_interval_seconds=20,  # Reduced for Cloud Run
+            accept_completion_timeout_seconds=10.0,  # Longer timeout for Cloud Run
+            accept_validation_interval_ms=50,  # More frequent validation
+            cloud_run_accept_delay_ms=75,  # Increased delay for Cloud Run
+            cloud_run_stabilization_delay_ms=50,  # Increased stabilization
+            cloud_run_progressive_backoff_ms=[50, 100, 150, 200]  # More aggressive backoff
+        )
+    
+    @classmethod
+    def detect_and_configure_for_environment(cls) -> 'WebSocketConfig':
+        """Detect environment and return optimized configuration."""
+        import os
+        
+        # Detect Cloud Run environment
+        is_cloud_run = any([
+            os.getenv('K_SERVICE'),  # Cloud Run service name
+            os.getenv('K_REVISION'),  # Cloud Run revision
+            os.getenv('GOOGLE_CLOUD_PROJECT'),  # GCP project
+            'run.app' in os.getenv('GAE_APPLICATION', ''),  # Cloud Run domain
+        ])
+        
+        environment = os.getenv('ENVIRONMENT', 'development')
+        
+        if is_cloud_run or environment in ['staging', 'production']:
+            # Use Cloud Run optimized settings for production environments
+            return cls.get_cloud_run_optimized_config()
+        else:
+            # Use default configuration for development/testing
+            return cls()
 
 
 class ReconnectionConfig(BaseModel):

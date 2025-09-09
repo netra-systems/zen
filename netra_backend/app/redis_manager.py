@@ -140,15 +140,24 @@ class RedisManager:
                 redis_url = backend_env.get_redis_url()
                 
                 # For tests: Use test-specific Redis port if available
-                current_loop = None
-                try:
-                    current_loop = asyncio.get_running_loop()
-                    # In test environment, use port 6381 instead of 6379
-                    if hasattr(current_loop, '_pytest_test_loop') or 'pytest' in str(current_loop):
+                # CRITICAL FIX: Proper test environment detection using multiple indicators
+                is_test_environment = (
+                    get_env().get("PYTEST_CURRENT_TEST") is not None or
+                    get_env().get("TESTING", "").lower() == "true" or
+                    get_env().get("TEST_COLLECTION_MODE") == "1" or
+                    get_env().get("ENVIRONMENT", "").lower() in ["test", "testing"] or
+                    get_env().get("TEST_DISABLE_REDIS", "true").lower() == "false"
+                )
+                
+                if is_test_environment:
+                    # Use test Redis port 6381 instead of 6379, and database 0 instead of 15
+                    if ':6379/' in redis_url:
                         redis_url = redis_url.replace(':6379/', ':6381/')
-                        logger.debug(f"Test environment detected - using Redis URL: {redis_url}")
-                except RuntimeError:
-                    pass
+                    if '/15' in redis_url:
+                        redis_url = redis_url.replace('/15', '/0')
+                    logger.info(f"Test environment detected - using Redis URL: {redis_url}")
+                else:
+                    logger.debug(f"Production environment - using Redis URL: {redis_url}")
                 
                 # Create new client instance in current event loop
                 self._client = redis.from_url(redis_url, decode_responses=True)

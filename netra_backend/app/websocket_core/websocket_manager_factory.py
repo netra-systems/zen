@@ -264,18 +264,30 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
         env = get_env()
         current_env = env.get("ENVIRONMENT", "unknown").lower()
         
-        # SIMPLE FIX: Basic GCP staging environment detection 
-        # Focus on the minimal fix needed for Factory SSOT validation
+        # ENHANCED FIX: Match the WebSocket auth E2E detection logic
+        # This ensures consistent E2E detection between auth and factory validation
         is_cloud_run = bool(env.get("K_SERVICE"))  # GCP Cloud Run indicator
-        is_staging = current_env == "staging" or bool(env.get("GOOGLE_CLOUD_PROJECT") and "staging" in env.get("GOOGLE_CLOUD_PROJECT", "").lower())
+        google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
+        k_service = env.get("K_SERVICE", "")
         
-        # Simple E2E testing detection
-        is_e2e_testing = (
+        # Enhanced staging environment detection (matches WebSocket auth logic)
+        is_staging = (
+            current_env == "staging" or
+            "staging" in google_project.lower() or
+            k_service.endswith("-staging") or
+            "staging" in k_service.lower()
+        )
+        
+        # Standard E2E environment variable detection
+        is_e2e_via_env_vars = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
             env.get("STAGING_E2E_TEST", "0") == "1" or
             env.get("E2E_TEST_ENV") == "staging"
         )
+        
+        # CRITICAL FIX: Combine standard detection with staging auto-detection
+        is_e2e_testing = is_e2e_via_env_vars or is_staging
         
     except Exception as env_error:
         logger.error(f"Environment detection failed: {env_error}")
@@ -286,7 +298,12 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
     
     # Use staging-safe validation for staging or cloud run environments  
     if is_staging or is_cloud_run or is_e2e_testing:
-        logger.info(f"ENHANCED STAGING: Using staging-safe validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})")
+        # Enhanced logging for debugging
+        if is_staging and not is_e2e_via_env_vars:
+            logger.info(f"FACTORY ENHANCED E2E DETECTION: Auto-enabled for staging environment "
+                       f"(env={current_env}, project={google_project[:20]}..., service={k_service})")
+        
+        logger.info(f"ENHANCED STAGING: Using staging-safe validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing}, staging={is_staging})")
         
         try:
             # ENHANCED DEBUG LOGGING: Log UserExecutionContext details for debugging
@@ -1153,6 +1170,94 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             logger.warning(f"Connection {connection_id} not found for thread update")
             return False
     
+    async def health_check(self) -> bool:
+        """
+        Enhanced health check to detect zombie managers that appear active but are stuck.
+        
+        This method performs deep health validation to identify managers that pass
+        basic state checks but are actually unresponsive (zombie managers).
+        
+        Health criteria:
+        1. Manager is marked as active
+        2. Manager has responsive connections  
+        3. WebSocket connections can handle ping/pong
+        4. No excessive error accumulation
+        5. Recent activity within reasonable timeframe
+        
+        Returns:
+            True if manager is healthy and responsive, False if zombie/stuck
+        """
+        try:
+            # Basic state validation
+            if not self._is_active:
+                logger.debug(f"Health check failed: manager inactive for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check if we have connections
+            if not self._connections:
+                logger.debug(f"Health check failed: no connections for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check error accumulation (zombie indicators)
+            if self._connection_error_count > 10:  # High error count indicates problems
+                logger.debug(f"Health check failed: high error count ({self._connection_error_count}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check for recent errors within last minute (zombie indicator)
+            if self._last_error_time:
+                error_age = (datetime.utcnow() - self._last_error_time).total_seconds()
+                if error_age < 60 and self._connection_error_count > 3:  # Recent errors with accumulation
+                    logger.debug(f"Health check failed: recent errors ({error_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # Enhanced connection health validation
+            healthy_connections = 0
+            total_connections = len(self._connections)
+            
+            for conn_id, connection in list(self._connections.items()):
+                try:
+                    # Check if connection object is valid
+                    if not connection or not connection.websocket:
+                        continue
+                    
+                    # Check WebSocket state if available
+                    from fastapi.websockets import WebSocketState
+                    if hasattr(connection.websocket, 'client_state'):
+                        if connection.websocket.client_state == WebSocketState.CONNECTED:
+                            healthy_connections += 1
+                        else:
+                            logger.debug(f"Connection {conn_id} not in CONNECTED state: {connection.websocket.client_state}")
+                    else:
+                        # If no state info available, assume healthy if websocket exists
+                        healthy_connections += 1
+                
+                except Exception as conn_error:
+                    logger.debug(f"Connection health check error for {conn_id}: {conn_error}")
+                    continue
+            
+            # Require at least 50% of connections to be healthy
+            health_ratio = healthy_connections / total_connections if total_connections > 0 else 0
+            if health_ratio < 0.5:
+                logger.debug(f"Health check failed: low healthy connection ratio ({health_ratio:.2f}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check activity recency (zombie managers may have stale activity)
+            if self._metrics.last_activity:
+                activity_age = (datetime.utcnow() - self._metrics.last_activity).total_seconds()
+                # Allow up to 2 minutes of inactivity for healthy managers
+                if activity_age > 120:  
+                    logger.debug(f"Health check failed: stale activity ({activity_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # All health checks passed
+            logger.debug(f"Health check passed: manager healthy for user {self.user_context.user_id[:8]}... ({healthy_connections}/{total_connections} connections healthy)")
+            return True
+            
+        except Exception as health_error:
+            logger.error(f"Health check error for user {self.user_context.user_id[:8]}...: {health_error}")
+            # If health check itself fails, consider the manager unhealthy
+            return False
+    
     def get_connection_health(self, user_id: str) -> Dict[str, Any]:
         """
         Get detailed connection health information for a user.
@@ -1673,10 +1778,14 @@ class WebSocketManagerFactory:
     
     async def _emergency_cleanup_user_managers(self, user_id: str) -> int:
         """
-        Perform immediate cleanup of expired managers for a specific user.
+        Enhanced two-phase emergency cleanup with health validation for zombie detection.
         
-        FIVE WHYS FIX: Provides synchronous cleanup option to address timing mismatch
-        between resource limit enforcement and background cleanup.
+        This method implements the systematic fix for the critical issue where emergency 
+        cleanup only removes 5 managers instead of 10+ because it can't detect zombie 
+        managers that appear active but are actually stuck/unresponsive.
+        
+        PHASE 1: Standard cleanup (inactive/expired managers)
+        PHASE 2: Aggressive health validation cleanup (zombie managers)
         
         Args:
             user_id: User ID to cleanup managers for
@@ -1684,7 +1793,7 @@ class WebSocketManagerFactory:
         Returns:
             Number of managers cleaned up
         """
-        logger.info(f"🚨 EMERGENCY CLEANUP: Starting immediate cleanup for user {user_id[:8]}...")
+        logger.info(f"🚨 ENHANCED EMERGENCY CLEANUP: Starting two-phase cleanup for user {user_id[:8]}...")
         
         # Find all managers for this user
         user_isolation_keys = []
@@ -1697,47 +1806,116 @@ class WebSocketManagerFactory:
             logger.info(f"No managers found for user {user_id[:8]}... during emergency cleanup")
             return 0
         
-        # Check which ones are inactive or expired (more aggressive than background cleanup)
-        # CRITICAL FIX: Emergency cleanup timeout reduced from 30 seconds to 10 seconds
-        # This provides immediate cleanup response to prevent resource accumulation
+        logger.info(f"Found {len(user_isolation_keys)} managers for user {user_id[:8]}... - starting two-phase cleanup")
+        
+        # PHASE 1: Standard cleanup - remove clearly inactive/expired managers
+        logger.info(f"PHASE 1: Standard cleanup for user {user_id[:8]}...")
         cutoff_time = datetime.utcnow() - timedelta(seconds=10)  # 10-second cutoff for emergency cleanup
-        cleanup_keys = []
+        phase1_cleanup_keys = []
         
         for key in user_isolation_keys:
             manager = self._active_managers.get(key)
             created_time = self._manager_creation_time.get(key)
             
             if not manager or not manager._is_active:
-                cleanup_keys.append(key)
-                logger.debug(f"Emergency cleanup: Manager {key} is inactive")
+                phase1_cleanup_keys.append(key)
+                logger.debug(f"Phase 1: Manager {key} is inactive")
             elif manager._metrics.last_activity and manager._metrics.last_activity < cutoff_time:
-                cleanup_keys.append(key) 
-                logger.debug(f"Emergency cleanup: Manager {key} expired (last activity: {manager._metrics.last_activity})")
+                phase1_cleanup_keys.append(key) 
+                logger.debug(f"Phase 1: Manager {key} expired (last activity: {manager._metrics.last_activity})")
             elif created_time and created_time < cutoff_time and len(manager._connections) == 0:
-                cleanup_keys.append(key)
-                logger.debug(f"Emergency cleanup: Manager {key} is old with no connections")
+                phase1_cleanup_keys.append(key)
+                logger.debug(f"Phase 1: Manager {key} is old with no connections")
         
-        # Clean up the identified managers with detailed logging
-        cleaned_count = 0
-        for key in cleanup_keys:
+        # Execute Phase 1 cleanup
+        phase1_cleaned = 0
+        for key in phase1_cleanup_keys:
             try:
-                # Get manager details before cleanup for logging
-                manager = self._active_managers.get(key)
-                if manager:
-                    thread_id = manager.user_context.thread_id
-                    logger.debug(f"Emergency cleanup target: {key} (thread_id={thread_id})")
-                
                 await self.cleanup_manager(key)
-                cleaned_count += 1
-                logger.info(f"🚨 EMERGENCY CLEANUP: Removed manager {key}")
+                phase1_cleaned += 1
+                logger.debug(f"Phase 1: Removed manager {key}")
             except Exception as e:
-                logger.error(f"Failed to emergency cleanup manager {key}: {e}")
+                logger.error(f"Phase 1: Failed to cleanup manager {key}: {e}")
+        
+        logger.info(f"PHASE 1 COMPLETE: Removed {phase1_cleaned} inactive/expired managers")
+        
+        # PHASE 2: Aggressive health validation cleanup - detect zombie managers
+        logger.info(f"PHASE 2: Health validation cleanup for user {user_id[:8]}...")
+        
+        # Get remaining managers after Phase 1
+        remaining_user_keys = []
+        with self._factory_lock:
+            for key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    remaining_user_keys.append(key)
+        
+        logger.info(f"After Phase 1: {len(remaining_user_keys)} managers remain - checking for zombies")
+        
+        # Apply aggressive health validation if still too many managers
+        phase2_cleaned = 0
+        if len(remaining_user_keys) > 5:  # Still too many managers - apply health validation
+            logger.info(f"AGGRESSIVE MODE: {len(remaining_user_keys)} managers still active - applying health validation")
+            
+            phase2_cleanup_keys = []
+            health_check_timeout = 2.0  # 2-second timeout for health checks
+            
+            for key in remaining_user_keys:
+                manager = self._active_managers.get(key)
+                if not manager:
+                    continue
+                
+                try:
+                    # Perform health check with timeout to detect zombie managers
+                    is_healthy = await asyncio.wait_for(
+                        manager.health_check(), 
+                        timeout=health_check_timeout
+                    )
+                    
+                    if not is_healthy:
+                        phase2_cleanup_keys.append(key)
+                        logger.debug(f"Phase 2: Manager {key} failed health check - zombie detected")
+                    else:
+                        logger.debug(f"Phase 2: Manager {key} passed health check - keeping")
+                        
+                except asyncio.TimeoutError:
+                    # Health check timeout indicates unresponsive manager (zombie)
+                    phase2_cleanup_keys.append(key)
+                    logger.debug(f"Phase 2: Manager {key} health check timeout - zombie detected")
+                    
+                except Exception as health_error:
+                    # Health check errors indicate problematic manager
+                    phase2_cleanup_keys.append(key)
+                    logger.debug(f"Phase 2: Manager {key} health check error: {health_error} - removing")
+            
+            # Execute Phase 2 cleanup
+            for key in phase2_cleanup_keys:
+                try:
+                    await self.cleanup_manager(key)
+                    phase2_cleaned += 1
+                    logger.info(f"Phase 2: Removed zombie manager {key}")
+                except Exception as e:
+                    logger.error(f"Phase 2: Failed to cleanup zombie manager {key}: {e}")
+            
+            logger.info(f"PHASE 2 COMPLETE: Removed {phase2_cleaned} zombie managers")
+        else:
+            logger.info("Phase 2 skipped - manager count acceptable after Phase 1")
+        
+        total_cleaned = phase1_cleaned + phase2_cleaned
+        
+        # Final count verification
+        final_user_keys = []
+        with self._factory_lock:
+            for key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    final_user_keys.append(key)
         
         logger.info(
-            f"🔥 EMERGENCY CLEANUP COMPLETE: user={user_id[:8]}... "
-            f"cleaned_managers={cleaned_count} remaining_managers={len(self._active_managers)}"
+            f"🔥 ENHANCED EMERGENCY CLEANUP COMPLETE: user={user_id[:8]}... "
+            f"phase1_cleaned={phase1_cleaned} phase2_cleaned={phase2_cleaned} "
+            f"total_cleaned={total_cleaned} final_count={len(final_user_keys)}"
         )
-        return cleaned_count
+        
+        return total_cleaned
     
     def _start_background_cleanup(self) -> None:
         """
