@@ -1961,7 +1961,11 @@ class TestWebSocketManagerRaceConditions(BaseTestCase):
         
         async def update_context_field(field_name: str, value: str):
             """Update specific context field."""
-            setattr(emitter.context, field_name, value)
+            # Use dataclasses.replace to create new context with updated field
+            import dataclasses
+            current_context = emitter.context
+            new_context = dataclasses.replace(current_context, **{field_name: value})
+            emitter.set_context(new_context)
             
             async with updates_lock:
                 context_updates.append({
