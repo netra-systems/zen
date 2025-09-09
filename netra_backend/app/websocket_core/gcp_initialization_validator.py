@@ -419,7 +419,7 @@ class GCPWebSocketInitializationValidator:
             
             self.current_state = GCPReadinessState.INITIALIZING
             
-            # Phase 1: Validate Dependencies (Database, Redis, Auth)
+            # Phase 1: Validate Dependencies (Database, Redis, Auth) with GOLDEN PATH degradation
             self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")
             dependencies_ready = await self._validate_service_group([
                 'database', 'redis', 'auth_validation'
@@ -427,7 +427,25 @@ class GCPWebSocketInitializationValidator:
             
             if not dependencies_ready['success']:
                 failed_services.extend(dependencies_ready['failed'])
-                self.current_state = GCPReadinessState.FAILED
+                
+                # GOLDEN PATH GRACEFUL DEGRADATION: Allow basic functionality in staging
+                if self.is_gcp_environment and self.environment == 'staging' and 'redis' in dependencies_ready['failed']:
+                    self.logger.warning(
+                        "⚠️ GOLDEN PATH DEGRADATION: Redis startup delay in staging - allowing basic WebSocket "
+                        "functionality to enable user chat value delivery"
+                    )
+                    warnings.append("Redis connection delayed - operating in degraded mode")
+                    # Remove redis from failed_services to allow progression
+                    failed_services = [s for s in failed_services if s != 'redis']
+                    dependencies_ready['failed'] = [s for s in dependencies_ready['failed'] if s != 'redis']
+                    
+                    if not dependencies_ready['failed']:  # Only Redis was failing
+                        self.current_state = GCPReadinessState.DEPENDENCIES_READY
+                        self.logger.info("✅ Phase 1 Complete: Dependencies ready (degraded mode - Redis delayed)")
+                    else:
+                        self.current_state = GCPReadinessState.FAILED
+                else:
+                    self.current_state = GCPReadinessState.FAILED
             else:
                 self.current_state = GCPReadinessState.DEPENDENCIES_READY
                 self.logger.info("✅ Phase 1 Complete: Dependencies ready")
