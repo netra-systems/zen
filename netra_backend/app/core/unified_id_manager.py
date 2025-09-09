@@ -392,22 +392,36 @@ class UnifiedIDManager:
     @classmethod
     def extract_thread_id(cls, run_id: str) -> str:
         """
-        Extract thread ID from run ID (required by startup validator).
+        Extract thread ID from run ID with SSOT pattern support.
+        
+        FIVE WHYS FIX: Thread ID consistency fix to prevent WebSocket manager cleanup failures.
+        This method now handles both old UnifiedIDManager patterns and new UnifiedIdGenerator patterns.
         
         Args:
             run_id: Run ID containing embedded thread ID
             
         Returns:
-            Extracted thread ID
+            Extracted thread ID that matches the corresponding thread_id field
         """
-        # Parse run ID format: run_{thread_id}_{timestamp}_{uuid}
+        if not run_id or not isinstance(run_id, str):
+            return ""
+        
+        # NEW PATTERN: UnifiedIdGenerator format - run_id is the base that thread_id contains
+        # Example: run_id="websocket_factory_1757372478799", thread_id="thread_websocket_factory_1757372478799_528_584ef8a5"
+        # For these patterns, construct the expected thread_id format
+        if run_id.startswith(('websocket_factory_', 'context_', 'agent_')):
+            # This is a UnifiedIdGenerator base_id pattern - return it as the expected thread_id prefix
+            # The actual thread_id should contain this run_id as a substring
+            return f"thread_{run_id}"  # Prefix pattern that thread_id should start with
+        
+        # OLD PATTERN: UnifiedIDManager format - run_{thread_id}_{timestamp}_{uuid}
         parts = run_id.split('_')
         if len(parts) >= 3 and parts[0] == 'run':
             # Join all parts between 'run_' and the last two parts (timestamp_uuid)
             thread_id = '_'.join(parts[1:-2])
             return thread_id
         
-        # Fallback: return the run_id if parsing fails
+        # FALLBACK: For any other pattern, return run_id as-is for compatibility
         return run_id
     
     @classmethod

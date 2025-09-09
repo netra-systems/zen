@@ -1390,8 +1390,21 @@ class WebSocketManagerFactory:
                     # Clean up inactive manager
                     self._cleanup_manager_internal(isolation_key)
             
-            # Check resource limits with immediate cleanup attempt
+            # FIVE WHYS FIX: Proactive resource management - cleanup BEFORE hitting limits
             current_count = self._user_manager_count.get(user_id, 0)
+            
+            # Proactive cleanup when approaching 70% of limit (14 out of 20 managers)
+            proactive_threshold = int(self.max_managers_per_user * 0.7)
+            if current_count >= proactive_threshold:
+                logger.info(f"🔄 PROACTIVE CLEANUP: User {user_id[:8]}... approaching limit ({current_count}/{self.max_managers_per_user}) - cleaning expired managers")
+                try:
+                    cleaned_count = await self._emergency_cleanup_user_managers(user_id)
+                    current_count = self._user_manager_count.get(user_id, 0)  # Refresh count
+                    logger.info(f"✅ PROACTIVE CLEANUP: Removed {cleaned_count} managers, new count: {current_count}")
+                except Exception as proactive_error:
+                    logger.error(f"Proactive cleanup failed for user {user_id[:8]}...: {proactive_error}")
+            
+            # Hard limit enforcement - only after proactive cleanup failed
             if current_count >= self.max_managers_per_user:
                 self._factory_metrics.resource_limit_hits += 1
                 logger.warning(
@@ -1622,11 +1635,13 @@ class WebSocketManagerFactory:
             cleanup_interval = 30  # 30 seconds for test environments
             logger.info("🧪 TEST ENVIRONMENT: Using 30-second background cleanup interval")
         elif environment == "development":
-            cleanup_interval = 120  # 2 minutes for development
-            logger.info("🔧 DEV ENVIRONMENT: Using 2-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 2 minutes to 60 seconds for faster resource cleanup
+            cleanup_interval = 60  # 1 minute for development (was 2 minutes)
+            logger.info("🔧 DEV ENVIRONMENT: Using 1-minute background cleanup interval")
         else:
-            cleanup_interval = 300  # 5 minutes for staging/production
-            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 5-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 5 minutes to 2 minutes for faster production cleanup
+            cleanup_interval = 120  # 2 minutes for staging/production (was 5 minutes)
+            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 2-minute background cleanup interval")
         
         while True:
             try:
@@ -1689,7 +1704,9 @@ class WebSocketManagerFactory:
             return 0
         
         # Check which ones are inactive or expired (more aggressive than background cleanup)
-        cutoff_time = datetime.utcnow() - timedelta(minutes=5)  # 5-minute cutoff for emergency
+        # FIVE WHYS FIX: Emergency cleanup timeout reduced from 5 minutes to 30 seconds
+        # This addresses the root cause of resource leaks where managers accumulate faster than cleanup
+        cutoff_time = datetime.utcnow() - timedelta(seconds=30)  # 30-second cutoff for emergency cleanup
         cleanup_keys = []
         
         for key in user_isolation_keys:
