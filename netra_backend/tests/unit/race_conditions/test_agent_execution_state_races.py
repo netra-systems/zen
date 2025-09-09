@@ -454,7 +454,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         
         # Create 15 concurrent executions
         contexts = []
-        states = []
+        user_execution_contexts = []
         for i in range(15):
             context = AgentExecutionContext(
                 agent_name="test_agent",
@@ -466,14 +466,25 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
             )
             contexts.append(context)
             
-            state = DeepAgentState()
-            state.user_id = context.user_id
-            state.thread_id = context.thread_id
-            states.append(state)
+            user_execution_context = UserExecutionContext.from_agent_execution_context(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id,
+                agent_context={
+                    'agent_name': 'test_agent',
+                    'test_scenario': 'websocket_emission_race_test',
+                    'execution_index': i
+                },
+                audit_metadata={
+                    'test_name': 'test_websocket_event_emission_races',
+                    'created_for': 'race_condition_testing'
+                }
+            )
+            user_execution_contexts.append(user_execution_context)
         
         # Execute all concurrently
         await asyncio.gather(
-            *[execution_core.execute_agent(ctx, st) for ctx, st in zip(contexts, states)],
+            *[execution_core.execute_agent(ctx, user_ctx) for ctx, user_ctx in zip(contexts, user_execution_contexts)],
             return_exceptions=True
         )
         
