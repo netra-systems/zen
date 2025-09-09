@@ -523,7 +523,7 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_healthy_session(self, test_user_id):
         """Test memory monitoring with healthy session."""
-        # FIXED: Create a mock registry and set it on the manager
+        # FIXED: Create a mock registry with _user_sessions and pass it to AgentLifecycleManager
         mock_registry = Mock()
         mock_user_session = Mock()
         metrics = {
@@ -536,6 +536,7 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
         # FIXED: Mock the registry's _user_sessions dict with direct session (not weak ref)
         mock_registry._user_sessions = {test_user_id: mock_user_session}
         
+        # FIXED: Pass registry to AgentLifecycleManager constructor
         manager = AgentLifecycleManager(registry=mock_registry)
         
         result = await manager.monitor_memory_usage(test_user_id)

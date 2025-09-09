@@ -93,9 +93,14 @@ agents from getting stuck:
   * **Think with Nuance:** Use "wise mind" middle-ground thinking.
   CHEATING ON TESTS = ABOMINATION
 
-## 0\. Current Mission: Stabilize Core Systems
+## 0\. Current Mission: GOLDEN PATH
 
-Your primary mission is to get existing systems fully operational. **Maintain the current feature set.**
+CRITICAL: Your primary mission is get "Golden Path" as defined here working: GOLDEN_PATH_USER_FLOW_COMPLETE.md. 
+NOT all systems need to be stable at the moment. Accept lower priority issues to get Golden path working that is most important
+
+**Maintain the current feature set.**
+DO not make ANY new features unless strictly merging and refactoring existing methods into SSOT methods
+or adding clarity SSOT classes for misleading errors (e.g. "Auth" errors that should actually be another class because class is crossing it's bounds)
 
 **MUST ALWAYS THINK ABOUT:**
   * **0.1: Business Value and Systems Up:** The point is to have a working real system. Tests exists to serve the working system. The system exists to serve the business. Business > Real System > Tests.
