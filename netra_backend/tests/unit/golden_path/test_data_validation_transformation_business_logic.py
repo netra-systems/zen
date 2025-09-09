@@ -190,11 +190,11 @@ class TestDataValidationBusinessRules:
         assert str(typed_run_id) == run_id, "Run ID should be preserved"
         assert str(typed_request_id) == request_id, "Request ID should be preserved"
         
-        # Business Rule: Type safety should be enforced
-        assert isinstance(typed_user_id, UserID), "Should be UserID type"
-        assert isinstance(typed_thread_id, ThreadID), "Should be ThreadID type"
-        assert isinstance(typed_run_id, RunID), "Should be RunID type"
-        assert isinstance(typed_request_id, RequestID), "Should be RequestID type"
+        # Business Rule: Type safety should be enforced (NewType creates callable, not type)
+        assert isinstance(typed_user_id, str), "Should be UserID type (which is a string NewType)"
+        assert isinstance(typed_thread_id, str), "Should be ThreadID type (which is a string NewType)"
+        assert isinstance(typed_run_id, str), "Should be RunID type (which is a string NewType)"
+        assert isinstance(typed_request_id, str), "Should be RequestID type (which is a string NewType)"
 
 
 @pytest.mark.unit
