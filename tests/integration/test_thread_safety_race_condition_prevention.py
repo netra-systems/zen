@@ -466,19 +466,19 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
                 
                 except Exception as e:
                     error_str = str(e).lower()
-                    is_deadlock = \"deadlock\" in error_str or \"lock\" in error_str
+                    is_deadlock = "deadlock" in error_str or "lock" in error_str
                     
                     return {
-                        \"transfer_id\": transfer_id,
-                        \"from_account\": None,
-                        \"to_account\": None,
-                        \"amount\": 0,
-                        \"success\": False,
-                        \"error\": \"deadlock\" if is_deadlock else str(e)
+                        "transfer_id": transfer_id,
+                        "from_account": None,
+                        "to_account": None,
+                        "amount": 0,
+                        "success": False,
+                        "error": "deadlock" if is_deadlock else str(e)
                     }
             
             # Execute concurrent transfers
-            print(f\"💰 Testing database transaction isolation with {concurrent_transfers} concurrent transfers...\")
+            print(f"💰 Testing database transaction isolation with {concurrent_transfers} concurrent transfers...")
             transfers_start = time.time()
             
             transfer_tasks = [
