@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.config import AuthConfig
-from test_framework.mock_factory import MockFactory
+# MockFactory not available - using standard unittest.mock instead
 
 
 class TestJWTHandlerBusinessLogic:
