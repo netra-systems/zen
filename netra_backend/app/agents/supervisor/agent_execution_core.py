@@ -9,14 +9,18 @@ to prevent agent execution pipeline blocking that prevents users from receiving 
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 from uuid import UUID
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+# CRITICAL SECURITY FIX: Migrating from DeepAgentState to UserExecutionContext
+# DeepAgentState creates user isolation risks and will be removed
+import warnings
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - will be removed
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -82,13 +86,61 @@ class AgentExecutionCore:
             f"and state tracker for comprehensive monitoring"
         )
         
+    def _ensure_user_execution_context(
+        self, 
+        state: Union[DeepAgentState, UserExecutionContext],
+        context: AgentExecutionContext
+    ) -> UserExecutionContext:
+        """
+        CRITICAL SECURITY FIX: Ensure we have proper UserExecutionContext for user isolation.
+        
+        This method handles the migration from deprecated DeepAgentState to secure
+        UserExecutionContext pattern, preventing user data isolation vulnerabilities.
+        """
+        if isinstance(state, UserExecutionContext):
+            # Already using secure UserExecutionContext
+            return state
+        
+        elif isinstance(state, DeepAgentState):
+            # DEPRECATED: Issue warning and migrate to secure pattern
+            warnings.warn(
+                f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
+                f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
+                f"which may cause data leakage between users. Migrate to UserExecutionContext pattern "
+                f"immediately. See EXECUTION_PATTERN_TECHNICAL_DESIGN.md for migration guide.",
+                DeprecationWarning,
+                stacklevel=3
+            )
+            
+            # Convert to secure UserExecutionContext
+            return UserExecutionContext.from_agent_execution_context(
+                user_id=getattr(state, 'user_id', None) or 'unknown',
+                thread_id=getattr(state, 'thread_id', None) or context.thread_id or 'unknown',
+                run_id=getattr(state, 'run_id', None) or str(context.run_id),
+                agent_context={
+                    'agent_name': context.agent_name,
+                    'user_request': getattr(state, 'user_request', 'default_request'),
+                    'agent_input': getattr(state, 'agent_input', {}),
+                },
+                audit_metadata={
+                    'migration_source': 'DeepAgentState',
+                    'migration_timestamp': time.time(),
+                    'original_state_type': type(state).__name__
+                }
+            )
+        else:
+            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext or DeepAgentState.")
+    
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        state: Union[DeepAgentState, UserExecutionContext],
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
+        
+        # CRITICAL SECURITY FIX: Handle DeepAgentState deprecation and migration
+        user_execution_context = self._ensure_user_execution_context(state, context)
         
         # Get or create trace context
         parent_trace = get_unified_trace_context()
@@ -98,8 +150,8 @@ class AgentExecutionCore:
         else:
             # Create new root context
             trace_context = UnifiedTraceContext(
-                user_id=getattr(state, 'user_id', None),
-                thread_id=getattr(state, 'thread_id', None),
+                user_id=user_execution_context.user_id,
+                thread_id=user_execution_context.thread_id,
                 correlation_id=getattr(context, 'correlation_id', None)
             )
         
@@ -109,7 +161,7 @@ class AgentExecutionCore:
             attributes={
                 "agent.name": context.agent_name,
                 "agent.run_id": str(context.run_id),
-                "user.id": getattr(state, 'user_id', None)
+                "user.id": user_execution_context.user_id
             }
         )
         
@@ -117,8 +169,8 @@ class AgentExecutionCore:
         exec_id = await self.execution_tracker.register_execution(
             agent_name=context.agent_name,
             correlation_id=trace_context.correlation_id,
-            thread_id=getattr(state, 'thread_id', None),
-            user_id=getattr(state, 'user_id', None),
+            thread_id=user_execution_context.thread_id,
+            user_id=user_execution_context.user_id,
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
@@ -126,10 +178,10 @@ class AgentExecutionCore:
         state_exec_id = self.state_tracker.start_execution(
             agent_name=context.agent_name,
             run_id=str(context.run_id),
-            user_id=getattr(state, 'user_id', None) or 'unknown',
+            user_id=user_execution_context.user_id,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'thread_id': getattr(state, 'thread_id', None),
+                'thread_id': user_execution_context.thread_id,
                 'timeout': timeout or self.DEFAULT_TIMEOUT
             }
         )
@@ -387,7 +439,7 @@ class AgentExecutionCore:
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_execution_context: UserExecutionContext,
         exec_id: UUID,
         heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat, see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         timeout: Optional[float],
@@ -455,7 +507,7 @@ class AgentExecutionCore:
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_execution_context: UserExecutionContext,
         heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat
         trace_context: UnifiedTraceContext
     ) -> Any:
