@@ -9,14 +9,18 @@ to prevent agent execution pipeline blocking that prevents users from receiving 
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 from uuid import UUID
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+# CRITICAL SECURITY FIX: Migrating from DeepAgentState to UserExecutionContext
+# DeepAgentState creates user isolation risks and will be removed
+import warnings
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - will be removed
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -82,13 +86,61 @@ class AgentExecutionCore:
             f"and state tracker for comprehensive monitoring"
         )
         
+    def _ensure_user_execution_context(
+        self, 
+        state: Union[DeepAgentState, UserExecutionContext],
+        context: AgentExecutionContext
+    ) -> UserExecutionContext:
+        """
+        CRITICAL SECURITY FIX: Ensure we have proper UserExecutionContext for user isolation.
+        
+        This method handles the migration from deprecated DeepAgentState to secure
+        UserExecutionContext pattern, preventing user data isolation vulnerabilities.
+        """
+        if isinstance(state, UserExecutionContext):
+            # Already using secure UserExecutionContext
+            return state
+        
+        elif isinstance(state, DeepAgentState):
+            # DEPRECATED: Issue warning and migrate to secure pattern
+            warnings.warn(
+                f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
+                f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
+                f"which may cause data leakage between users. Migrate to UserExecutionContext pattern "
+                f"immediately. See EXECUTION_PATTERN_TECHNICAL_DESIGN.md for migration guide.",
+                DeprecationWarning,
+                stacklevel=3
+            )
+            
+            # Convert to secure UserExecutionContext
+            return UserExecutionContext.from_agent_execution_context(
+                user_id=getattr(state, 'user_id', None) or 'unknown',
+                thread_id=getattr(state, 'thread_id', None) or context.thread_id or 'unknown',
+                run_id=getattr(state, 'run_id', None) or str(context.run_id),
+                agent_context={
+                    'agent_name': context.agent_name,
+                    'user_request': getattr(state, 'user_request', 'default_request'),
+                    'agent_input': getattr(state, 'agent_input', {}),
+                },
+                audit_metadata={
+                    'migration_source': 'DeepAgentState',
+                    'migration_timestamp': time.time(),
+                    'original_state_type': type(state).__name__
+                }
+            )
+        else:
+            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext or DeepAgentState.")
+    
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        state: Union[DeepAgentState, UserExecutionContext],
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
+        
+        # CRITICAL SECURITY FIX: Handle DeepAgentState deprecation and migration
+        user_execution_context = self._ensure_user_execution_context(state, context)
         
         # Get or create trace context
         parent_trace = get_unified_trace_context()
@@ -98,8 +150,8 @@ class AgentExecutionCore:
         else:
             # Create new root context
             trace_context = UnifiedTraceContext(
-                user_id=getattr(state, 'user_id', None),
-                thread_id=getattr(state, 'thread_id', None),
+                user_id=user_execution_context.user_id,
+                thread_id=user_execution_context.thread_id,
                 correlation_id=getattr(context, 'correlation_id', None)
             )
         
@@ -109,7 +161,7 @@ class AgentExecutionCore:
             attributes={
                 "agent.name": context.agent_name,
                 "agent.run_id": str(context.run_id),
-                "user.id": getattr(state, 'user_id', None)
+                "user.id": user_execution_context.user_id
             }
         )
         
@@ -117,8 +169,8 @@ class AgentExecutionCore:
         exec_id = await self.execution_tracker.register_execution(
             agent_name=context.agent_name,
             correlation_id=trace_context.correlation_id,
-            thread_id=getattr(state, 'thread_id', None),
-            user_id=getattr(state, 'user_id', None),
+            thread_id=user_execution_context.thread_id,
+            user_id=user_execution_context.user_id,
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
@@ -126,10 +178,10 @@ class AgentExecutionCore:
         state_exec_id = self.state_tracker.start_execution(
             agent_name=context.agent_name,
             run_id=str(context.run_id),
-            user_id=getattr(state, 'user_id', None) or 'unknown',
+            user_id=user_execution_context.user_id,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'thread_id': getattr(state, 'thread_id', None),
+                'thread_id': user_execution_context.thread_id,
                 'timeout': timeout or self.DEFAULT_TIMEOUT
             }
         )
@@ -215,12 +267,12 @@ class AgentExecutionCore:
                         if heartbeat:  # This will be False since heartbeat is disabled
                             async with heartbeat:
                                 return await self._execute_with_protection(
-                                    agent, context, state, exec_id, heartbeat, timeout, trace_context
+                                    agent, context, user_execution_context, exec_id, heartbeat, timeout, trace_context
                                 )
                         else:
                             # Direct execution without heartbeat wrapper
                             return await self._execute_with_protection(
-                                agent, context, state, exec_id, None, timeout, trace_context
+                                agent, context, user_execution_context, exec_id, None, timeout, trace_context
                             )
                     
                     # CRITICAL: Execute agent with timeout manager to prevent blocking
@@ -277,8 +329,8 @@ class AgentExecutionCore:
                     )
             
                 # Collect and persist metrics
-                metrics = await self._collect_metrics(exec_id, result, state, heartbeat)
-                await self._persist_metrics(exec_id, metrics, context.agent_name, state)
+                metrics = await self._collect_metrics(exec_id, result, user_execution_context, heartbeat)
+                await self._persist_metrics(exec_id, metrics, context.agent_name, user_execution_context)
                 
                 # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
@@ -387,7 +439,7 @@ class AgentExecutionCore:
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_execution_context: UserExecutionContext,
         exec_id: UUID,
         heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat, see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         timeout: Optional[float],
@@ -404,7 +456,7 @@ class AgentExecutionCore:
                 
                 # CRITICAL ERROR BOUNDARY 2: Result validation
                 result = await self._execute_with_result_validation(
-                    agent, context, state, heartbeat, trace_context
+                    agent, context, user_execution_context, heartbeat, trace_context
                 )
                 
                 # CRITICAL: Validate result is not None (agent death signature)
@@ -455,14 +507,14 @@ class AgentExecutionCore:
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_execution_context: UserExecutionContext,
         heartbeat: Optional[Any],  # Disabled - was AgentHeartbeat
         trace_context: UnifiedTraceContext
     ) -> Any:
         """Execute agent and validate result."""
         
         # Set up websocket context on agent
-        await self._setup_agent_websocket(agent, context, state, trace_context)
+        await self._setup_agent_websocket(agent, context, user_execution_context, trace_context)
         
         # Create execution wrapper that conditionally sends heartbeats
         async def execute_with_heartbeat():
@@ -491,7 +543,7 @@ class AgentExecutionCore:
                     )
                 
                 # CRITICAL: This is where agent.execute() is called
-                result = await agent.execute(state, context.run_id, True)
+                result = await agent.execute(user_execution_context, context.run_id, True)
                 
                 # CRITICAL: Send thinking event after successful execution
                 if self.websocket_bridge and result is not None:
@@ -523,8 +575,8 @@ class AgentExecutionCore:
                 # Log the error with full context for debugging
                 logger.error(f"Agent {context.agent_name} execution failed: {e}", extra={
                     "run_id": str(context.run_id),
-                    "user_id": getattr(state, 'user_id', None),
-                    "thread_id": getattr(state, 'thread_id', None),
+                    "user_id": getattr(user_execution_context, 'user_id', None),
+                    "thread_id": getattr(user_execution_context, 'thread_id', None),
                     "retry_count": context.retry_count
                 })
                 raise
@@ -544,7 +596,7 @@ class AgentExecutionCore:
         self,
         agent: Any,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_execution_context: UserExecutionContext,
         trace_context: UnifiedTraceContext
     ) -> None:
         """Set up websocket context on agent with enhanced propagation.
@@ -554,8 +606,8 @@ class AgentExecutionCore:
         """
         
         # Set user_id on agent if available
-        if hasattr(state, 'user_id') and state.user_id:
-            agent._user_id = state.user_id
+        if user_execution_context.user_id:
+            agent._user_id = user_execution_context.user_id
         
         # Set trace context on agent if it supports it
         if hasattr(agent, 'set_trace_context'):
@@ -601,14 +653,15 @@ class AgentExecutionCore:
                     logger.info(f"✅ WebSocket bridge set on execution engine of {agent.__class__.__name__}")
             
             # Method 4: CRITICAL FIX - Ensure tool dispatcher has WebSocket manager
-            if hasattr(state, 'tool_dispatcher') and state.tool_dispatcher:
+            tool_dispatcher = user_execution_context.agent_context.get('tool_dispatcher')
+            if tool_dispatcher:
                 try:
                     # Set WebSocket manager on tool dispatcher if it supports it
-                    if hasattr(state.tool_dispatcher, 'set_websocket_manager'):
+                    if hasattr(tool_dispatcher, 'set_websocket_manager'):
                         # Get the websocket manager from the bridge
                         websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None) or getattr(self.websocket_bridge, '_websocket_manager', None)
                         if websocket_manager:
-                            state.tool_dispatcher.set_websocket_manager(websocket_manager)
+                            tool_dispatcher.set_websocket_manager(websocket_manager)
                             websocket_set = True
                             logger.info(f"✅ WebSocket manager set on tool dispatcher for agent {agent.__class__.__name__}")
                         else:
@@ -679,7 +732,7 @@ class AgentExecutionCore:
         self, 
         exec_id: UUID, 
         result: AgentExecutionResult, 
-        state: DeepAgentState, 
+        user_execution_context: UserExecutionContext, 
         heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
     ) -> dict:
         """Collect comprehensive metrics for the execution."""
@@ -692,8 +745,8 @@ class AgentExecutionCore:
         if hasattr(result, 'metrics') and result.metrics:
             metrics.update(result.metrics)
         
-        # Add state information
-        metrics['state_size'] = len(str(state.__dict__)) if state else 0
+        # Add user execution context information
+        metrics['context_size'] = len(str(user_execution_context.__dict__)) if user_execution_context else 0
         metrics['result_success'] = result.success
         
         if result.duration:
@@ -706,7 +759,7 @@ class AgentExecutionCore:
         exec_id: UUID, 
         metrics: dict, 
         agent_name: str,
-        state: DeepAgentState
+        user_execution_context: UserExecutionContext
     ):
         """Persist performance metrics to ClickHouse."""
         # Skip persistence if not configured
@@ -718,7 +771,7 @@ class AgentExecutionCore:
         metric_record = {
             'execution_id': exec_id,
             'agent_name': agent_name,
-            'user_id': getattr(state, 'user_id', None),
+            'user_id': getattr(user_execution_context, 'user_id', None),
         }
         
         # Write individual metrics with per-metric error handling

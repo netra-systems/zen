@@ -330,6 +330,41 @@ class UserExecutionContext:
         object.__setattr__(self, 'audit_metadata', audit_data)
     
     @classmethod
+    def from_agent_execution_context(
+        cls,
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        request_id: Optional[str] = None,
+        agent_context: Optional[Dict[str, Any]] = None,
+        audit_metadata: Optional[Dict[str, Any]] = None
+    ) -> 'UserExecutionContext':
+        """Factory method to create context from agent execution context parameters.
+        
+        This method provides compatibility with legacy agent execution patterns
+        during the migration from DeepAgentState to UserExecutionContext.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier  
+            run_id: Run identifier
+            request_id: Optional request identifier (auto-generated if None)
+            agent_context: Optional agent-specific context data
+            audit_metadata: Optional audit and compliance metadata
+            
+        Returns:
+            New UserExecutionContext instance
+        """
+        return cls(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id or str(uuid.uuid4()),
+            agent_context=agent_context or {},
+            audit_metadata=audit_metadata or {}
+        )
+
+    @classmethod
     def from_request(
         cls,
         user_id: str,

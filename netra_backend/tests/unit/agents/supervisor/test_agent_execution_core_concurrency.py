@@ -45,7 +45,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, 
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from netra_backend.app.agents.execution_timeout_manager import (
     TimeoutConfig,
@@ -298,15 +298,31 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
             retry_count=0
         )
 
-    def create_test_state(self, user_id: str = None, thread_id: str = None) -> Mock:
-        """Create a test state with unique IDs for concurrent testing."""
-        state = Mock(spec=DeepAgentState)
-        state.user_id = UserID(user_id or f"user-{uuid4().hex[:8]}")
-        state.thread_id = ThreadID(thread_id or f"thread-{uuid4().hex[:8]}")
-        state.tool_dispatcher = Mock()
-        state.tool_dispatcher.set_websocket_manager = Mock()
-        state.__dict__ = {"user_id": state.user_id, "thread_id": state.thread_id}
-        return state
+    def create_test_state(self, user_id: str = None, thread_id: str = None) -> UserExecutionContext:
+        """Create a test state using UserExecutionContext pattern (SSOT compliant)."""
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        # Create a real UserExecutionContext following the migration guidance
+        user_context = UserExecutionContext(
+            user_id=UserID(user_id or f"user-{uuid4().hex[:8]}"),
+            thread_id=ThreadID(thread_id or f"thread-{uuid4().hex[:8]}"),
+            run_id=RunID(f"run-{uuid4().hex[:8]}"),
+            request_id=RequestID(f"req-{uuid4().hex[:8]}")
+        )
+        
+        # Add test metadata for agent execution
+        user_context.metadata = {
+            "agent_name": "test_agent",
+            "operation_depth": 1,
+            "test_execution": True
+        }
+        
+        # Add mock tool dispatcher for testing (if needed)
+        if not hasattr(user_context, 'tool_dispatcher'):
+            user_context.tool_dispatcher = Mock()
+            user_context.tool_dispatcher.set_websocket_manager = Mock()
+        
+        return user_context
 
     @pytest.mark.unit
     async def test_concurrent_agent_execution_isolation(self):
