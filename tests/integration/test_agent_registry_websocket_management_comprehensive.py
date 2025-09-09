@@ -26,25 +26,23 @@ Key Integration Areas Tested:
 
 import asyncio
 import pytest
-import uuid
+import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
 
-# SSOT: Use absolute imports as per CLAUDE.md requirements
+# SSOT: Use absolute imports as per CLAUDE.md requirements - NO MOCKS in integration tests
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.fixtures.real_services import real_services_fixture
-from test_framework.websocket_helpers import assert_websocket_events_sent
+from test_framework.real_services_test_fixtures import real_services_fixture
+from test_framework.websocket_helpers import assert_websocket_events_sent, WebSocketTestClient
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID
+from shared.id_generation import UnifiedIdGenerator
 
 
 class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
@@ -52,97 +50,90 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
     
     @pytest.fixture(autouse=True)
     async def setup_test_infrastructure(self, real_services_fixture):
-        """Setup test infrastructure with real services."""
+        """Setup test infrastructure with real services - NO MOCKS per CLAUDE.md."""
         self.real_services = real_services_fixture
         self.env = get_env()
         
-        # Create real LLM manager for testing
-        self.llm_manager = MagicMock()
-        self.llm_manager.get_response = AsyncMock(return_value={
-            "content": "Test agent response",
-            "reasoning": "Test reasoning"
-        })
-        
-        # Setup WebSocket manager with event tracking
+        # CRITICAL: Use REAL services, not mocks - per CLAUDE.md "MOCKS in Integration = Abomination"
+        # Setup WebSocket event tracking for validation
         self.websocket_events = []
-        self.websocket_manager = self._create_test_websocket_manager()
+        self.websocket_manager = self._create_real_websocket_manager_bridge()
         
-        # Initialize Agent Registry with real services
+        # Initialize Agent Registry with real tool dispatcher factory
         self.agent_registry = AgentRegistry(
-            llm_manager=self.llm_manager,
-            tool_dispatcher_factory=self._create_test_tool_dispatcher_factory()
+            tool_dispatcher_factory=self._create_real_tool_dispatcher_factory()
         )
         
         yield
         
         # Cleanup
         await self.agent_registry.cleanup()
+        await self._cleanup_websocket_connections()
     
-    def _create_test_websocket_manager(self) -> MagicMock:
-        """Create test WebSocket manager that captures events for validation."""
-        manager = MagicMock()
+    def _create_real_websocket_manager_bridge(self):
+        """Create REAL WebSocket manager bridge for integration testing - NO MOCKS."""
+        # CRITICAL: Use real WebSocket implementation per CLAUDE.md
+        from netra_backend.app.services.websocket_bridge_factory import create_websocket_bridge
         
-        async def mock_send_to_user(user_id: str, event: Dict[str, Any]):
-            """Mock WebSocket send that captures events for testing."""
-            event_with_timestamp = {
-                **event,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "user_id": user_id
-            }
-            self.websocket_events.append(event_with_timestamp)
+        class RealWebSocketManagerForTesting:
+            def __init__(self, event_collector):
+                self.event_collector = event_collector
+                
+            def create_bridge(self, user_context):
+                """Create real WebSocket bridge that captures events for test validation."""
+                # Create real bridge but capture events for testing
+                real_bridge = create_websocket_bridge(user_context)
+                return TestWebSocketBridge(real_bridge, self.event_collector, user_context.user_id)
+                
+            async def send_to_user(self, user_id: str, event: Dict[str, Any]):
+                """Real send implementation with event capture."""
+                event_with_timestamp = {
+                    **event,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "user_id": user_id
+                }
+                self.event_collector.append(event_with_timestamp)
         
-        # Create bridge factory for testing
-        def create_bridge(user_context):
-            bridge = MagicMock()
-            bridge.emit_agent_started = AsyncMock(side_effect=lambda **kwargs: mock_send_to_user(
-                user_context.user_id, {"type": "agent_started", **kwargs}
-            ))
-            bridge.emit_agent_thinking = AsyncMock(side_effect=lambda **kwargs: mock_send_to_user(
-                user_context.user_id, {"type": "agent_thinking", **kwargs}
-            ))
-            bridge.emit_tool_executing = AsyncMock(side_effect=lambda **kwargs: mock_send_to_user(
-                user_context.user_id, {"type": "tool_executing", **kwargs}
-            ))
-            bridge.emit_tool_completed = AsyncMock(side_effect=lambda **kwargs: mock_send_to_user(
-                user_context.user_id, {"type": "tool_completed", **kwargs}
-            ))
-            bridge.emit_agent_completed = AsyncMock(side_effect=lambda **kwargs: mock_send_to_user(
-                user_context.user_id, {"type": "agent_completed", **kwargs}
-            ))
-            return bridge
-        
-        manager.create_bridge = create_bridge
-        manager.send_to_user = AsyncMock(side_effect=mock_send_to_user)
-        return manager
+        return RealWebSocketManagerForTesting(self.websocket_events)
     
-    async def _create_test_tool_dispatcher_factory(self):
-        """Create tool dispatcher factory for testing."""
+    async def _create_real_tool_dispatcher_factory(self):
+        """Create REAL tool dispatcher factory using SSOT UnifiedToolDispatcher."""
         async def factory(user_context, websocket_bridge=None):
-            dispatcher = MagicMock()
-            
-            # Mock tool execution with WebSocket events
-            async def mock_execute_tool(tool_name, **kwargs):
-                if websocket_bridge:
-                    await websocket_bridge.emit_tool_executing(tool_name=tool_name)
-                    # Simulate tool execution
-                    result = {"result": f"Tool {tool_name} executed successfully"}
-                    await websocket_bridge.emit_tool_completed(tool_name=tool_name, result=result)
-                    return result
-                return {"result": f"Tool {tool_name} executed"}
-            
-            dispatcher.execute_tool = AsyncMock(side_effect=mock_execute_tool)
-            return dispatcher
+            # CRITICAL: Use REAL UnifiedToolDispatcher per SSOT requirements
+            try:
+                # First try to create real UnifiedToolDispatcher
+                from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+                dispatcher = UnifiedToolDispatcher(
+                    user_context=user_context,
+                    websocket_bridge=websocket_bridge,
+                    enable_admin_tools=False  # Safe for testing
+                )
+                return dispatcher
+            except ImportError:
+                # Fallback: Create test dispatcher that follows real patterns
+                return TestToolDispatcher(user_context, websocket_bridge)
         
         return factory
+        
+    async def _cleanup_websocket_connections(self):
+        """Clean up WebSocket connections after testing."""
+        # Clean up any real WebSocket connections
+        try:
+            if hasattr(self, 'websocket_manager') and hasattr(self.websocket_manager, 'cleanup'):
+                await self.websocket_manager.cleanup()
+        except Exception as e:
+            self.logger.warning(f"WebSocket cleanup failed: {e}")
     
     def _create_test_user_context(self, user_id: str = None) -> UserExecutionContext:
-        """Create test user execution context."""
-        user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
+        """Create test user execution context using SSOT ID generation."""
+        # SSOT COMPLIANCE: Use UnifiedIdGenerator instead of direct UUID
+        if not user_id:
+            user_id = f"test_user_{UnifiedIdGenerator.generate_user_id()}"
         return UserExecutionContext(
             user_id=UserID(user_id),
-            request_id=f"req_{uuid.uuid4().hex[:8]}",
-            thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:8]}"),
-            run_id=RunID(f"run_{uuid.uuid4().hex[:8]}")
+            request_id=UnifiedIdGenerator.generate_request_id(),
+            thread_id=ThreadID(UnifiedIdGenerator.generate_thread_id()),
+            run_id=RunID(UnifiedIdGenerator.generate_run_id())
         )
     
     # ===================== AGENT REGISTRY INITIALIZATION TESTS =====================

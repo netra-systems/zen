@@ -1198,7 +1198,8 @@ Please provide your monthly AI usage reports and performance metrics.""",
 Please gather this information for comprehensive analysis."""
         ]
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         
         # Test each response format
         for i, response_text in enumerate(varied_responses):
@@ -1311,7 +1312,8 @@ Please gather this information for comprehensive analysis."""
 Please provide your recommendation system metrics including cost reports, 
 performance data, and usage analytics for comprehensive optimization."""
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         
         # Run multiple executions to test consistency
         num_executions = 3
@@ -1513,7 +1515,8 @@ compliance and performance requirements."""
         
         mock_llm_manager.agenerate.side_effect = verify_token_limits
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         agent = DataHelperAgent(llm_manager=mock_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):
@@ -1607,7 +1610,8 @@ Please provide system monitoring data to validate resilience improvements."""
         
         mock_llm_manager.agenerate.side_effect = mock_generate_with_retry
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         agent = DataHelperAgent(llm_manager=mock_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):
