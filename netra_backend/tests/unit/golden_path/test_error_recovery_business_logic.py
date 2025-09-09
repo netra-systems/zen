@@ -153,9 +153,12 @@ class BusinessErrorRecoveryManager:
         self.active_errors[error_id] = error
         self.recovery_metrics.total_errors += 1
         
-        # Business Rule 1: Select appropriate recovery strategy based on policy
+        # Business Rule 1: Use error-specific recovery strategies, fall back to policy defaults
         policy = self.recovery_policies.get(error.category, {})
-        available_strategies = policy.get("default_strategies", [RecoveryStrategy.USER_NOTIFICATION])
+        if error.recovery_strategies:
+            available_strategies = error.recovery_strategies
+        else:
+            available_strategies = policy.get("default_strategies", [RecoveryStrategy.USER_NOTIFICATION])
         
         # Business Rule 2: Execute recovery strategies in priority order
         recovery_result = {
