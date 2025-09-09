@@ -32,8 +32,8 @@ from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID
-from test_framework.ssot.e2e_auth_helper import create_test_jwt_token
-from test_framework.ssot.websocket_test_helper import MockWebSocketManager, create_test_websocket_connection
+from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
+from test_framework.helpers.auth_helpers import create_test_jwt_token
 
 
 class TestAgentOrchestratorAccessIntegrationIssue118:
