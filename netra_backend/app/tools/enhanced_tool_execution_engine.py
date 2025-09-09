@@ -17,24 +17,17 @@ Architecture:
 # SSOT Import - redirect to the unified implementation
 from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
+    EnhancedToolExecutionEngine,  # Already available as alias
     enhance_tool_dispatcher_with_notifications,
-    ToolExecutionError,
-    PermissionDeniedError,
-    ToolNotFoundError,
-    ToolValidationError,
-    WebSocketNotificationError
+    ToolExecutionResult,
+    NetraException  # Use base exception from the SSOT module
 )
-
-# For backward compatibility, alias UnifiedToolExecutionEngine as EnhancedToolExecutionEngine
-EnhancedToolExecutionEngine = UnifiedToolExecutionEngine
 
 # Export for backward compatibility
 __all__ = [
     'EnhancedToolExecutionEngine',
+    'UnifiedToolExecutionEngine', 
     'enhance_tool_dispatcher_with_notifications',
-    'ToolExecutionError',
-    'PermissionDeniedError', 
-    'ToolNotFoundError',
-    'ToolValidationError',
-    'WebSocketNotificationError'
+    'ToolExecutionResult',
+    'NetraException'
 ]

@@ -15,12 +15,14 @@ PROCESS INSTRUCTIONS START:
 
 0: Use gh to read the ISSUE ${1 : latest} in question.
 
-1: AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
+1: SPAWN NEW SUBAGENT TASK: AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
 1.1: Make a comment on the ISSUE with your learnings.
 
-2: IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
+2: SPAWN NEW SUBAGENT TASK (Pass context from 1): 
+IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
 
-3: 
+3: SPAWN NEW SUBAGENT TASK (Pass context from 1 and 2):
+
 
 
 END PROCESS INSTRUCTIONS
