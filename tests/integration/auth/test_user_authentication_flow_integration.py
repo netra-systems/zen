@@ -335,14 +335,14 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                 ]
                 
                 for scenario in failure_scenarios:
-                        failure_response = await client.post(
-                            f"{self.auth_service_url}/api/v1/auth/login",
-                            json=scenario["credentials"],
-                            timeout=10.0
-                        )
-                        
-                        assert failure_response.status_code in scenario["expected_status"] + [404], \
-                            f"Login failure scenario '{scenario['name']}' got unexpected status {failure_response.status_code}"
+                    failure_response = await client.post(
+                        f"{self.auth_service_url}/api/v1/auth/login",
+                        json=scenario["credentials"],
+                        timeout=10.0
+                    )
+                    
+                    assert failure_response.status_code in scenario["expected_status"] + [404], \
+                        f"Login failure scenario '{scenario['name']}' got unexpected status {failure_response.status_code}"
                 
                 elif login_response.status_code == 404:
                     self.logger.warning("Auth service login endpoint not available")
