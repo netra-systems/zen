@@ -38,8 +38,8 @@ from shared.types.core_types import (
 
 # WebSocket and thread routing components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_core.utils import generate_websocket_id
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketConnectionManager
+from netra_backend.app.websocket_core.utils import generate_connection_id
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager
@@ -95,7 +95,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         
         for user_id in user_ids:
             thread_id = user_threads[user_id]
-            websocket_id = ensure_websocket_id(generate_websocket_id())
+            websocket_id = ensure_websocket_id(generate_connection_id(user_id))
             
             # Create user execution context
             user_context = UserExecutionContext(

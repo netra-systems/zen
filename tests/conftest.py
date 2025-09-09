@@ -40,6 +40,18 @@ if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
 # Import mock fixtures (lightweight, good for most unit tests)
 from tests.conftest_mocks import *
 
+# Import real services fixtures for integration testing
+# CRITICAL: Import directly from fixtures module to ensure pytest discovers them
+try:
+    from test_framework.fixtures.real_services import (
+        real_postgres_connection,
+        with_test_database,
+        real_services_fixture
+    )
+except ImportError:
+    # Real services fixtures not available
+    pass
+
 # Import no-docker mode plugin for integration test management
 try:
     from test_framework.ssot.pytest_no_docker_plugin import *

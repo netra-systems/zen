@@ -56,7 +56,7 @@ class UserAgentSession:
     """
     
     def __init__(self, user_id: str):
-        if not user_id or not isinstance(user_id, str):
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
             raise ValueError("user_id must be a non-empty string")
             
         self.user_id = user_id
@@ -81,6 +81,12 @@ class UserAgentSession:
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         self._websocket_manager = manager
+        
+        # If manager is None, don't create a bridge
+        if manager is None:
+            self._websocket_bridge = None
+            logger.debug(f"WebSocket manager set to None for user {self.user_id} - no bridge created")
+            return
         
         # Create user context if not provided
         if user_context is None:
@@ -280,6 +286,9 @@ class AgentRegistry(UniversalAgentRegistry):
         self._lifecycle_manager = AgentLifecycleManager(registry=self)  # FIXED: Pass registry reference
         self._created_at = datetime.now(timezone.utc)
         
+        # FIXED: Track background tasks to prevent timeout issues
+        self._background_tasks: List[asyncio.Task] = []
+        
         # DEPRECATED: Legacy tool_dispatcher for backward compatibility
         # New code should use tool_dispatcher_factory for per-user isolation
         self._legacy_dispatcher = None
@@ -305,9 +314,29 @@ class AgentRegistry(UniversalAgentRegistry):
     async def cleanup(self):
         """Clean up all user sessions and resources."""
         async with self._session_lock:
-            # Clean up all user sessions
+            # FIXED: Cancel and await background tasks first to prevent timeout
+            if self._background_tasks:
+                logger.debug(f"Cancelling {len(self._background_tasks)} background tasks")
+                for task in self._background_tasks:
+                    if not task.done():
+                        task.cancel()
+                
+                # Wait for tasks to finish cancellation (with timeout)
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*self._background_tasks, return_exceptions=True),
+                        timeout=1.0  # Short timeout to prevent hanging
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("Some background tasks did not cancel within timeout")
+                except Exception as e:
+                    logger.debug(f"Expected exception during task cancellation: {e}")
+                
+                self._background_tasks.clear()
+            
+            # Clean up all user sessions (use private method to avoid deadlock)
             for user_id in list(self._user_sessions.keys()):
-                await self.cleanup_user_session(user_id)
+                await self._cleanup_user_session_unlocked(user_id)
             
             # Clear legacy state
             self._legacy_dispatcher = None
@@ -338,19 +367,53 @@ class AgentRegistry(UniversalAgentRegistry):
                 if hasattr(self, 'websocket_manager') and self.websocket_manager is not None:
                     try:
                         from netra_backend.app.services.user_execution_context import UserExecutionContext
+                        import uuid
                         user_context = UserExecutionContext(
                             user_id=user_id,
-                            request_id=f"session_init_{user_id}_{id(self)}",
-                            thread_id=f"session_thread_{user_id}"
+                            request_id=str(uuid.uuid4()),
+                            thread_id=f"session_thread_{user_id}",
+                            run_id=f"session_run_{user_id}_{uuid.uuid4().hex[:8]}"
                         )
                         await user_session.set_websocket_manager(self.websocket_manager, user_context)
                         logger.debug(f"Set WebSocket manager on new user session for {user_id}")
                     except Exception as e:
                         logger.warning(f"Failed to set WebSocket manager on new user session for {user_id}: {e}")
+                else:
+                    logger.debug(f"No WebSocket manager to set for new session. hasattr: {hasattr(self, 'websocket_manager')}, value: {getattr(self, 'websocket_manager', None)}")
                 
                 self._user_sessions[user_id] = user_session
                 logger.info(f"🔐 Created isolated session for user {user_id}")
             return self._user_sessions[user_id]
+    
+    async def _cleanup_user_session_unlocked(self, user_id: str) -> Dict[str, Any]:
+        """PRIVATE: Cleanup user session without acquiring lock (assumes lock is already held).
+        
+        This is used internally by cleanup() to avoid deadlock.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            Cleanup metrics
+        """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
+        cleanup_metrics = {'user_id': user_id, 'cleaned_agents': 0, 'status': 'no_session'}
+        
+        if user_id in self._user_sessions:
+            user_session = self._user_sessions[user_id]
+            session_metrics = user_session.get_metrics()
+            # Store the agent count before cleanup
+            cleanup_metrics['cleaned_agents'] = session_metrics.get('agent_count', 0)
+            
+            await user_session.cleanup_all_agents()
+            del self._user_sessions[user_id]
+            
+            cleanup_metrics['status'] = 'cleaned'
+            logger.info(f"🧹 Cleaned up user session for {user_id}")
+        
+        return cleanup_metrics
     
     async def cleanup_user_session(self, user_id: str) -> Dict[str, Any]:
         """Complete cleanup of user session and all associated agents.
@@ -363,23 +426,8 @@ class AgentRegistry(UniversalAgentRegistry):
         Returns:
             Cleanup metrics
         """
-        if not user_id:
-            raise ValueError("user_id is required")
-            
         async with self._session_lock:
-            cleanup_metrics = {'user_id': user_id, 'cleaned_agents': 0, 'status': 'no_session'}
-            
-            if user_id in self._user_sessions:
-                user_session = self._user_sessions[user_id]
-                cleanup_metrics.update(user_session.get_metrics())
-                
-                await user_session.cleanup_all_agents()
-                del self._user_sessions[user_id]
-                
-                cleanup_metrics['status'] = 'cleaned'
-                logger.info(f"🧹 Cleaned up user session for {user_id}")
-            
-            return cleanup_metrics
+            return await self._cleanup_user_session_unlocked(user_id)
     
     async def create_agent_for_user(self, user_id: str, agent_type: str, 
                                    user_context: 'UserExecutionContext',
@@ -553,7 +601,7 @@ class AgentRegistry(UniversalAgentRegistry):
             
             for user_id in users_to_cleanup:
                 try:
-                    user_metrics = await self.cleanup_user_session(user_id)
+                    user_metrics = await self._cleanup_user_session_unlocked(user_id)
                     cleanup_report['users_cleaned'] += 1
                     cleanup_report['agents_cleaned'] += user_metrics.get('cleaned_agents', 0)
                 except Exception as e:
@@ -617,8 +665,18 @@ class AgentRegistry(UniversalAgentRegistry):
                 # Try to get the current event loop
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
-                    # If loop is running, schedule the task
-                    asyncio.create_task(update_user_sessions())
+                    # If loop is running, schedule the task and track it
+                    task = asyncio.create_task(update_user_sessions())
+                    self._background_tasks.append(task)
+                    # Clean up completed tasks to prevent memory leak
+                    def cleanup_task(finished_task):
+                        try:
+                            if finished_task in self._background_tasks:
+                                self._background_tasks.remove(finished_task)
+                        except (ValueError, AttributeError):
+                            # Task might have been removed already during cleanup
+                            pass
+                    task.add_done_callback(cleanup_task)
                 else:
                     # If no loop is running, we can't schedule async tasks
                     logger.warning("No event loop running - user sessions will get WebSocket manager on next access")
@@ -646,6 +704,7 @@ class AgentRegistry(UniversalAgentRegistry):
         
         # Store at registry level for new user sessions
         super().set_websocket_manager(manager)  # Call parent class method
+        logger.debug(f"After super().set_websocket_manager: self.websocket_manager = {getattr(self, 'websocket_manager', 'NOT SET')}")
         
         # Propagate to all existing user sessions
         if self._user_sessions:

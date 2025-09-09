@@ -23,7 +23,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, patch
 
 from netra_backend.app.dependencies import get_user_execution_context, create_user_execution_context
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator, reset_global_counter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 class TestSessionContinuityIntegration:
@@ -33,7 +33,7 @@ class TestSessionContinuityIntegration:
         """Reset session state for test isolation."""
         # Clear session storage to ensure test isolation
         UnifiedIdGenerator._active_sessions.clear()
-        UnifiedIdGenerator.reset_global_counter()
+        reset_global_counter()
     
     def teardown_method(self):
         """Clean up after tests."""

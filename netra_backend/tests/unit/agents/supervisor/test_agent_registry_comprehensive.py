@@ -456,7 +456,7 @@ class TestToolDispatcherIntegration:
         
         # Assert
         assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher is None  # Still returns None
+        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value for backward compatibility
 
 
 @pytest.mark.asyncio

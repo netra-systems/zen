@@ -40,7 +40,7 @@ from shared.types.core_types import (
 # Full stack components for message routing
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.utils import generate_websocket_id
+from netra_backend.app.websocket_core.utils import generate_connection_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import Thread, Message, User
 
@@ -524,7 +524,7 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         
         # Setup full stack test scenario
         user_id = ensure_user_id(str(uuid.uuid4()))
-        websocket_id = ensure_websocket_id(generate_websocket_id())
+        websocket_id = ensure_websocket_id(generate_connection_id(user_id))
         
         # Create user in database
         test_user = User(
@@ -551,7 +551,7 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         websocket_thread_connections = {}
         
         for i, thread in enumerate(test_threads):
-            thread_websocket_id = ensure_websocket_id(f"thread_{i}_{generate_websocket_id()}")
+            thread_websocket_id = ensure_websocket_id(f"thread_{i}_{generate_connection_id(user_id)}")
             
             # Create user execution context for this thread
             user_context = UserExecutionContext(

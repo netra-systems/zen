@@ -34,7 +34,7 @@ from contextlib import asynccontextmanager
 
 # Test framework imports - following TEST_CREATION_GUIDE.md patterns using SSOT
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.real_services import real_services_fixture, real_postgres_connection, with_test_database
 
 # SSOT database imports - following CLAUDE.md architecture
 from netra_backend.app.db.database_manager import get_database_manager, get_db_session
@@ -69,7 +69,7 @@ async def db_manager():
 async def redis_client():
     """Provides initialized Redis manager for real services testing."""
     await redis_manager.initialize()
-    assert redis_manager.is_connected()
+    assert redis_manager.is_connected
     yield redis_manager
 
 

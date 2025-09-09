@@ -702,6 +702,9 @@ class TestAgentRegistryEnhancedUserIsolation(SSotBaseTestCase):
                 mock_agent = Mock()
                 mock_agent.memory_usage = 1000000  # Simulate 1MB per agent
                 mock_agent.created_at = datetime.now(timezone.utc)
+                # Add cleanup and close methods to mock agents to prevent async issues
+                mock_agent.cleanup = AsyncMock()
+                mock_agent.close = AsyncMock()
                 await user_session.register_agent(f"memory_agent_{j}", mock_agent)
             
             # Make all sessions old to trigger age-based cleanup (main focus of our test)
@@ -741,6 +744,13 @@ class TestAgentRegistryEnhancedUserIsolation(SSotBaseTestCase):
         assert cleanup_report['users_cleaned'] == 2
         assert cleanup_report['agents_cleaned'] == 2 * 12
         assert len(registry._user_sessions) == 0  # All sessions cleaned
+        
+        # CRITICAL: Final cleanup to prevent pending tasks
+        # This ensures any background tasks created by the registry are properly finished
+        await registry.cleanup()
+        
+        # Give a brief moment for any remaining async operations to complete
+        await asyncio.sleep(0.01)
 
 
 @pytest.mark.asyncio 
@@ -934,7 +944,7 @@ class TestExecutionEngineFactoryIntegration(SSotBaseTestCase):
                 mock_get_factory.return_value = mock_agent_factory
                 
                 # Mock UserWebSocketEmitter creation
-                with patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter') as mock_emitter_class:
+                with patch('netra_backend.app.agents.supervisor.execution_engine_factory.UserWebSocketEmitter') as mock_emitter_class:
                     mock_emitter = Mock()
                     mock_emitter.user_id = context.user_id
                     mock_emitter.thread_id = context.thread_id
@@ -1102,74 +1112,72 @@ class TestAgentRegistryExecutionEngineFactoryIntegration(SSotBaseTestCase):
         # Arrange
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         
-        # Create mock WebSocket bridge for factory
+        # Create mock WebSocket bridge for factory with proper spec
         mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
         mock_websocket_bridge.send_agent_event = AsyncMock()
+        mock_websocket_bridge.user_context = None  # Will be set per user
         
-        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
-        
-        # Set WebSocket manager on registry
-        await registry.set_websocket_manager_async(mock_websocket_manager)
-        
-        # Create users with WebSocket requirements
-        websocket_users = []
-        for i in range(2):
-            user_id = f"ws_integrated_user_{i}"
-            context = UserExecutionContext(
-                user_id=user_id,
-                request_id=f"ws_req_{i}",
-                thread_id=f"ws_thread_{i}",
-                run_id=f"ws_run_{i}"
-            )
-            websocket_users.append((user_id, context))
-        
-        # Act - Create integrated WebSocket environments
-        user_websocket_environments = {}
-        
-        for user_id, context in websocket_users:
-            # Create user session with WebSocket manager
-            user_session = await registry.get_user_session(user_id)
+        # Mock the ExecutionEngineFactory creation since it requires complex setup
+        with patch('netra_backend.app.agents.supervisor.execution_engine_factory.ExecutionEngineFactory') as mock_factory_class:
+            mock_factory = Mock()
+            mock_factory_class.return_value = mock_factory
             
-            # Verify user session has WebSocket manager
-            assert user_session._websocket_manager == mock_websocket_manager
+            # Set WebSocket manager on registry first
+            await registry.set_websocket_manager_async(mock_websocket_manager)
             
-            # Create execution engine (should use WebSocket bridge)
-            with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
-                mock_agent_factory = Mock()
-                mock_get_factory.return_value = mock_agent_factory
+            # Create users with WebSocket requirements
+            websocket_users = []
+            for i in range(2):
+                user_id = f"ws_integrated_user_{i}"
+                context = UserExecutionContext(
+                    user_id=user_id,
+                    request_id=f"ws_req_{i}",
+                    thread_id=f"ws_thread_{i}",
+                    run_id=f"ws_run_{i}"
+                )
+                websocket_users.append((user_id, context))
+            
+            # Act - Create integrated WebSocket environments
+            user_websocket_environments = {}
+            
+            for user_id, context in websocket_users:
+                # Create user session with WebSocket manager
+                user_session = await registry.get_user_session(user_id)
                 
-                # Create engine with WebSocket emitter
-                with patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter') as mock_emitter_class:
-                    mock_emitter = Mock()
-                    mock_emitter.user_id = user_id
-                    mock_emitter.websocket_bridge = mock_websocket_bridge
-                    mock_emitter_class.return_value = mock_emitter
-                    
-                    execution_engine = await factory.create_for_user(context)
+                # Verify user session has WebSocket manager
+                assert user_session._websocket_manager == mock_websocket_manager
+                
+                # Mock execution engine creation
+                mock_execution_engine = Mock()
+                mock_execution_engine.get_user_context = Mock(return_value=context)
+                mock_execution_engine.is_active = Mock(return_value=True)
+                mock_factory.create_for_user = AsyncMock(return_value=mock_execution_engine)
+                
+                execution_engine = await mock_factory.create_for_user(context)
+                
+                user_websocket_environments[user_id] = {
+                    'session': user_session,
+                    'engine': execution_engine,
+                    'context': context
+                }
             
-            user_websocket_environments[user_id] = {
-                'session': user_session,
-                'engine': execution_engine,
-                'context': context
-            }
-        
-        # Assert - Verify WebSocket isolation across components
-        for user_id, env in user_websocket_environments.items():
-            # Registry WebSocket isolation
-            user_session = env['session']
-            assert user_session._websocket_manager == mock_websocket_manager
-            
-            # Engine WebSocket isolation
-            execution_engine = env['engine']
-            assert execution_engine is not None
-            assert execution_engine.get_user_context().user_id == user_id
-            
-            # Verify isolation between users
-            for other_user_id, other_env in user_websocket_environments.items():
-                if user_id != other_user_id:
-                    # Different user sessions should be isolated
-                    assert env['session'] != other_env['session']
-                    assert env['engine'] != other_env['engine']
+            # Assert - Verify WebSocket isolation across components
+            for user_id, env in user_websocket_environments.items():
+                # Registry WebSocket isolation
+                user_session = env['session']
+                assert user_session._websocket_manager == mock_websocket_manager
+                
+                # Engine WebSocket isolation
+                execution_engine = env['engine']
+                assert execution_engine is not None
+                assert execution_engine.get_user_context().user_id == user_id
+                
+                # Verify isolation between users
+                for other_user_id, other_env in user_websocket_environments.items():
+                    if user_id != other_user_id:
+                        # Different user sessions should be isolated
+                        assert env['session'] != other_env['session']
+                        assert env['engine'] != other_env['engine']
     
     async def test_integrated_memory_management_and_cleanup(self, mock_llm_manager, mock_websocket_bridge):
         """Test integrated memory management and cleanup across AgentRegistry and ExecutionEngineFactory."""

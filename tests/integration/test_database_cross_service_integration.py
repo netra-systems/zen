@@ -33,7 +33,7 @@ from netra_backend.app.db.models_content import CorpusAuditLog, Analysis
 from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
 
 # Database managers for creating test data
-from netra_backend.app.database import get_database_url as get_backend_db_url
+from netra_backend.app.core.configuration.base import get_unified_config
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 # SSOT SQL operations
@@ -66,11 +66,72 @@ class TestDatabaseCrossServiceIntegration(SSotBaseTestCase):
         env = self.get_env()
         if env.get("USE_REAL_SERVICES", "false").lower() != "true":
             pytest.skip("Test requires --real-services flag for database integration testing")
+        
+        # For real services integration testing, ensure both backend and auth use same environment
+        # Override any test-specific environment settings to ensure consistency
+        env.set("ENVIRONMENT", "development", "integration_test_override")
+        env.set("AUTH_FAST_TEST_MODE", "false", "integration_test_override")  # Disable SQLite mode for auth
+        
+        # Also check if database services are actually available
+        self._check_database_availability()
+    
+    def _check_database_availability(self):
+        """Check if database services are available before proceeding with tests."""
+        import socket
+        from shared.database_url_builder import DatabaseURLBuilder
+        from urllib.parse import urlparse
+        
+        # Get the environment for database configuration
+        env = self.get_env()
+        
+        # Check both backend and auth database URLs
+        database_urls_to_check = []
+        
+        # Backend database URL
+        try:
+            backend_builder = DatabaseURLBuilder(env.as_dict())
+            backend_url = backend_builder.development.auto_url  # Use development for real services
+            if backend_url and "memory" not in backend_url and "sqlite" not in backend_url:
+                database_urls_to_check.append(("Backend", backend_url))
+        except Exception as e:
+            logger.warning(f"Could not get backend database URL: {e}")
+        
+        # Auth database URL - check both potential configurations
+        try:
+            # Check if auth service would use PostgreSQL in development mode
+            from auth_service.auth_core.auth_environment import get_auth_env
+            auth_env = get_auth_env()
+            auth_url = auth_env.get_database_url()
+            if auth_url and "memory" not in auth_url and "sqlite" not in auth_url:
+                database_urls_to_check.append(("Auth", auth_url))
+        except Exception as e:
+            logger.warning(f"Could not get auth database URL: {e}")
+        
+        # Test connectivity to each database service
+        for service_name, db_url in database_urls_to_check:
+            try:
+                parsed_url = urlparse(db_url)
+                if parsed_url.hostname and parsed_url.port:
+                    host = parsed_url.hostname
+                    port = parsed_url.port
+                    
+                    # Test if the database service is reachable
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(3)  # 3 second timeout
+                    try:
+                        result = sock.connect_ex((host, port))
+                        if result != 0:
+                            pytest.skip(f"{service_name} database service not available at {host}:{port}. Start database services with Docker Compose or use in-memory testing.")
+                    finally:
+                        sock.close()
+            except Exception as e:
+                logger.warning(f"Could not check {service_name} database availability: {e}")
     
     async def setup_databases(self):
         """Setup database connections to both services."""
         # Setup backend database
-        backend_url = get_backend_db_url()
+        config = get_unified_config()
+        backend_url = config.database_url
         self.backend_db = AsyncDatabase(backend_url)
         
         # Setup auth database  
@@ -125,8 +186,22 @@ class TestDatabaseCrossServiceIntegration(SSotBaseTestCase):
     
     def teardown_method(self, method):
         """Cleanup after each test method."""
-        # Run async cleanup
-        asyncio.run(self.cleanup_databases())
+        # Run async cleanup if we have an event loop
+        try:
+            # Check if we're already in an async context
+            loop = asyncio.get_running_loop()
+            # If we have a running loop, create a task for cleanup
+            task = loop.create_task(self.cleanup_databases())
+            # Don't wait for it to complete to avoid blocking
+        except RuntimeError:
+            # No running loop, safe to use asyncio.run
+            try:
+                asyncio.run(self.cleanup_databases())
+            except Exception as e:
+                # Log but don't fail teardown
+                import logging
+                logging.getLogger(__name__).warning(f"Cleanup failed: {e}")
+        
         super().teardown_method(method)
         
     async def create_test_auth_user(self, email: str, user_id: str = None) -> AuthUser:

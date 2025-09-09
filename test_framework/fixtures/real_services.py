@@ -41,7 +41,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def real_postgres_connection():
     """REAL PostgreSQL connection for integration testing.
     
@@ -95,8 +95,8 @@ async def real_postgres_connection():
         docker_manager = UnifiedDockerManager()
         
         try:
-            env_info = docker_manager.acquire_environment("test", use_alpine=True)
-            logger.info(f"Acquired test environment: {env_info}")
+            env_name, env_info = docker_manager.acquire_environment()
+            logger.info(f"Acquired test environment: {env_name} with ports: {env_info}")
         except Exception as e:
             raise RuntimeError(f"Failed to acquire Docker test environment: {e}")
         
@@ -236,16 +236,29 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     # Determine service URLs based on environment
     backend_port = env.get("BACKEND_PORT", "8000")
     auth_port = env.get("AUTH_SERVICE_PORT", "8081")
+    redis_port = env.get("REDIS_PORT", "6381")  # Test Redis port
     
     backend_url = f"http://localhost:{backend_port}"
     auth_url = f"http://localhost:{auth_port}"
+    redis_url = f"redis://localhost:{redis_port}"
     
     # Validate services are reachable (optional - don't fail if not available)
     services_available = {
         "backend": False,
         "auth": False,
-        "database": postgres_info["available"]
+        "database": postgres_info["available"],
+        "redis": False
     }
+    
+    # Test Redis connection
+    try:
+        import redis
+        redis_client = redis.Redis.from_url(redis_url, socket_timeout=2)
+        redis_client.ping()
+        services_available["redis"] = True
+        redis_client.close()
+    except Exception:
+        logger.info("Redis service not reachable - tests will use URL only")
     
     try:
         import aiohttp
@@ -270,8 +283,10 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     yield {
         "backend_url": backend_url,
         "auth_url": auth_url,
+        "redis_url": redis_url,
         "postgres": postgres_info["engine"],
         "db": db_session,
+        "redis": redis_url,  # Add redis key for compatibility
         "database_url": postgres_info["database_url"],
         "environment": postgres_info["environment"],
         "services_available": services_available,
