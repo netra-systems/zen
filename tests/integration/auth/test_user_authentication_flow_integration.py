@@ -306,6 +306,10 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                             assert profile_data.get("email") == user["email"] or \
                                    "email" not in profile_data  # Might not expose email in profile
                 
+                elif login_response.status_code == 404:
+                    self.logger.warning("Auth service login endpoint not available")
+                    pytest.skip("Login endpoint not implemented")
+                
                 # Test login failure scenarios
                 failure_scenarios = [
                     {
@@ -343,10 +347,6 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                     
                     assert failure_response.status_code in scenario["expected_status"] + [404], \
                         f"Login failure scenario '{scenario['name']}' got unexpected status {failure_response.status_code}"
-                
-                elif login_response.status_code == 404:
-                    self.logger.warning("Auth service login endpoint not available")
-                    pytest.skip("Login endpoint not implemented")
                 
         except Exception as e:
             self.logger.warning(f"Login flow test error: {e}")
