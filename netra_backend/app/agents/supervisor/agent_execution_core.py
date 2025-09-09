@@ -244,16 +244,40 @@ class AgentExecutionCore:
                 metrics = await self._collect_metrics(exec_id, result, state, heartbeat)
                 await self._persist_metrics(exec_id, metrics, context.agent_name, state)
                 
-                # Mark execution complete
+                # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
                     trace_context.add_event("agent.completed")
                     await self.execution_tracker.complete_execution(exec_id, result=result)
+                    
+                    # Transition to completion phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.COMPLETING,
+                        metadata={"success": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.COMPLETED,
+                        metadata={"result": "success"},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    self.state_tracker.complete_execution(state_exec_id, success=True)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
                     await self.execution_tracker.complete_execution(
                         exec_id, 
                         error=result.error or "Unknown error"
                     )
+                    
+                    # Transition to failed phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.FAILED,
+                        metadata={"error": result.error or "Unknown error"},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    self.state_tracker.complete_execution(state_exec_id, success=False)
                     
                     # CRITICAL: Send error notification for agent failures including death detection
                     # Business Value: Users must be notified when agent fails or dies silently
