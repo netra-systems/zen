@@ -22,7 +22,7 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # SSOT Imports - Absolute imports only
-from test_framework.ssot.database import SSotDatabaseHelper
+from test_framework.ssot.database import DatabaseTestUtility
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.db.models_postgres import Message
 from netra_backend.app.logging_config import central_logger
@@ -89,7 +89,7 @@ class SSotViolationDetector:
     """
     
     def __init__(self):
-        self.db_helper = SSotDatabaseHelper()
+        self.db_helper = DatabaseTestUtility(service="netra_backend")
         self.message_repository = MessageRepository()
         
     async def detect_message_creation_violations(

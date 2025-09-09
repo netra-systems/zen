@@ -14,12 +14,13 @@ CRITICAL: This infrastructure is designed to FAIL when session leaks exist,
 following CLAUDE.md testing principles: "Tests MUST raise errors"
 """
 
-from .session_leak_tracker import SessionLeakTracker
+from .session_leak_tracker import SessionLeakTracker, track_session_lifecycle
 from .database_session_monitor import DatabaseSessionMonitor
 from .session_leak_test_base import SessionLeakTestBase
 
 __all__ = [
     "SessionLeakTracker",
     "DatabaseSessionMonitor", 
-    "SessionLeakTestBase"
+    "SessionLeakTestBase",
+    "track_session_lifecycle"
 ]

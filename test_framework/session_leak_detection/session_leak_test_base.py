@@ -16,7 +16,7 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestContext
+from test_framework.ssot.database import DatabaseTestUtility
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
 from .session_leak_tracker import SessionLeakTracker, track_session_lifecycle
@@ -40,14 +40,12 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
     "Real Everything (LLM, Services) E2E > E2E > Integration > Unit"
     """
     
-    def __init__(self):
-        """Initialize session leak test base."""
-        super().__init__()
-        self.session_tracker: Optional[SessionLeakTracker] = None
-        self.session_monitor: Optional[DatabaseSessionMonitor] = None
-        self.test_engine: Optional[AsyncEngine] = None
-        self.db_context: Optional[DatabaseTestContext] = None
-        self.auth_helper: Optional[E2EAuthHelper] = None
+    # Class attributes for session leak testing components
+    session_tracker: Optional[SessionLeakTracker] = None
+    session_monitor: Optional[DatabaseSessionMonitor] = None
+    test_engine: Optional[AsyncEngine] = None
+    db_utility: Optional[DatabaseTestUtility] = None
+    auth_helper: Optional[E2EAuthHelper] = None
     
     async def setup_session_leak_testing(
         self,
@@ -62,9 +60,9 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
             monitoring_interval: Database pool monitoring interval
         """
         # Set up database connection for testing
-        self.db_context = DatabaseTestContext()
-        await self.db_context.setup()
-        self.test_engine = self.db_context.engine
+        self.db_utility = DatabaseTestUtility(service="netra_backend")
+        await self.db_utility.initialize()
+        self.test_engine = self.db_utility.async_engine
         
         # Initialize session leak tracker
         self.session_tracker = SessionLeakTracker(
@@ -103,9 +101,9 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
             if self.session_monitor:
                 await self.session_monitor.cleanup()
             
-            # Clean up database context
-            if self.db_context:
-                await self.db_context.cleanup()
+            # Clean up database utility
+            if self.db_utility:
+                await self.db_utility.cleanup()
                 
         except Exception as e:
             logger.error(f"Error during session leak testing cleanup: {e}")
@@ -123,14 +121,7 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
         if not self.test_engine or not self.session_tracker:
             raise RuntimeError("Session leak testing not initialized")
         
-        from sqlalchemy.ext.asyncio import async_sessionmaker
-        SessionLocal = async_sessionmaker(
-            bind=self.test_engine,
-            class_=AsyncSession,
-            expire_on_commit=False
-        )
-        
-        session = SessionLocal()
+        session = await self.db_utility.get_test_session()
         await self.session_tracker.track_session(session)
         return session
     
