@@ -16,6 +16,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 from typing import Dict, Any, List
+import uuid
 
 # SSOT Imports - Absolute imports as per CLAUDE.md requirement
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_user_id
@@ -44,7 +45,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         Expected: Valid requests pass validation with proper context creation.
         """
         # Arrange
-        user_id = "agent_test_user_12345"
+        user_id = str(uuid.uuid4())
         request_data = {
             "user_input": "Optimize my database queries for better performance",
             "agent_type": "database_optimization",
@@ -54,7 +55,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         
         execution_request = AgentExecutionRequest(
             user_id=ensure_user_id(user_id),
-            thread_id=ThreadID("thread_abc123"),
+            thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:12]}"),
             request_data=request_data,
             timestamp=datetime.now(timezone.utc),
             user_permissions=["read", "write", "agent_execution"]
@@ -69,7 +70,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         assert isinstance(validation_result, AgentValidationResult)
         assert validation_result.is_valid is True
         assert validation_result.error_message is None
-        assert validation_result.user_id == ensure_user_id(user_id)
+        assert str(validation_result.user_id) == user_id
         assert validation_result.validation_passed["request_format"] is True
         assert validation_result.validation_passed["user_permissions"] is True
         assert validation_result.validation_passed["agent_type"] is True
@@ -84,7 +85,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         Expected: Users without agent permissions cannot execute premium agents.
         """
         # Arrange
-        free_tier_user_id = "free_user_67890"
+        free_tier_user_id = str(uuid.uuid4())
         premium_request_data = {
             "user_input": "Run advanced AI optimization analysis",
             "agent_type": "premium_optimization",  # Premium-only agent
@@ -94,7 +95,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         
         execution_request = AgentExecutionRequest(
             user_id=ensure_user_id(free_tier_user_id),
-            thread_id=ThreadID("thread_free123"),
+            thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:12]}"),
             request_data=premium_request_data,
             timestamp=datetime.now(timezone.utc),
             user_permissions=["read"]  # Free tier permissions only
@@ -123,9 +124,9 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         """
         # Arrange
         users = [
-            {"user_id": "isolated_user_1", "permissions": ["read", "write"]},
-            {"user_id": "isolated_user_2", "permissions": ["read", "write", "premium"]},
-            {"user_id": "isolated_user_3", "permissions": ["read"]}
+            {"user_id": str(uuid.uuid4()), "permissions": ["read", "write"]},
+            {"user_id": str(uuid.uuid4()), "permissions": ["read", "write", "premium"]},
+            {"user_id": str(uuid.uuid4()), "permissions": ["read"]}
         ]
         
         context_manager = AgentExecutionContextManager()
@@ -135,9 +136,9 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         for user in users:
             execution_context = StronglyTypedUserExecutionContext(
                 user_id=ensure_user_id(user["user_id"]),
-                thread_id=ThreadID(f"thread_{user['user_id']}"),
-                run_id=RunID(f"run_{user['user_id']}"),
-                request_id=RequestID(f"req_{user['user_id']}"),
+                thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:12]}"),
+                run_id=RunID(f"run_{uuid.uuid4().hex[:12]}"),
+                request_id=RequestID(f"req_{uuid.uuid4().hex[:12]}"),
                 db_session=None,
                 agent_context={
                     "permissions": user["permissions"],
@@ -288,13 +289,13 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         Expected: All execution results contain required fields for user value delivery.
         """
         # Arrange
-        user_id = "result_validation_user"
+        user_id = str(uuid.uuid4())
         
         # Create mock execution result
         execution_result = AgentExecutionResult(
             user_id=ensure_user_id(user_id),
-            thread_id=ThreadID("thread_result_123"),
-            run_id=RunID("run_result_456"),
+            thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:12]}"),
+            run_id=RunID(f"run_{uuid.uuid4().hex[:12]}"),
             success=True,
             result_data={
                 "optimization_recommendations": [
@@ -384,19 +385,19 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         # Arrange
         execution_requests = [
             {
-                "user_id": "free_user_1",
+                "user_id": str(uuid.uuid4()),
                 "user_tier": "free", 
                 "permissions": ["read"],
                 "expected_priority": 1
             },
             {
-                "user_id": "enterprise_user_1",
+                "user_id": str(uuid.uuid4()),
                 "user_tier": "enterprise",
                 "permissions": ["read", "write", "premium"],
                 "expected_priority": 5
             },
             {
-                "user_id": "early_user_1", 
+                "user_id": str(uuid.uuid4()), 
                 "user_tier": "early",
                 "permissions": ["read", "write"],
                 "expected_priority": 3
@@ -536,10 +537,10 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         Expected: All executions are properly logged with required metadata.
         """
         # Arrange
-        user_id = "audit_test_user"
+        user_id = str(uuid.uuid4())
         execution_request = AgentExecutionRequest(
             user_id=ensure_user_id(user_id),
-            thread_id=ThreadID("thread_audit_123"),
+            thread_id=ThreadID(f"thread_{uuid.uuid4().hex[:12]}"),
             request_data={
                 "user_input": "Optimize database performance",
                 "agent_type": "database_optimization"

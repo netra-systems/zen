@@ -23,7 +23,7 @@ from .core_types import (
     # Authentication types
     AuthValidationResult, SessionValidationResult, TokenResponse,
     # WebSocket types
-    ConnectionState, WebSocketConnectionInfo, WebSocketEventType, WebSocketMessage,
+    ConnectionState, WebSocketConnectionInfo, WebSocketEventType, WebSocketMessage, WebSocketAuthContext,
     # Database types
     DatabaseConnectionInfo,
     # Compatibility utilities
@@ -70,7 +70,7 @@ __all__ = [
     "AuthValidationResult", "SessionValidationResult", "TokenResponse",
     
     # WebSocket types
-    "ConnectionState", "WebSocketConnectionInfo", "WebSocketEventType", "WebSocketMessage",
+    "ConnectionState", "WebSocketConnectionInfo", "WebSocketEventType", "WebSocketMessage", "WebSocketAuthContext",
     "WebSocketEventPriority", "StronglyTypedWebSocketEvent",
     
     # Database types

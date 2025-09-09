@@ -85,6 +85,12 @@ class AuthValidationResult(BaseModel):
     permissions: List[str] = Field(default_factory=list)
     error_message: Optional[str] = None
     expires_at: Optional[datetime] = None
+    auth_method: Optional[str] = None
+    
+    @property
+    def is_valid(self) -> bool:
+        """Compatibility property for legacy code that expects is_valid."""
+        return self.valid
     
     @field_validator('user_id', mode='before')
     @classmethod
@@ -211,6 +217,29 @@ class WebSocketMessage(BaseModel):
     def validate_request_id(cls, v):
         if isinstance(v, str):
             return RequestID(v)
+        return v
+
+
+class WebSocketAuthContext(BaseModel):
+    """Strongly typed WebSocket authentication context."""
+    user_id: UserID
+    websocket_client_id: WebSocketID
+    permissions: List[str]
+    auth_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    session_data: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('user_id', mode='before')
+    @classmethod
+    def validate_user_id(cls, v):
+        if isinstance(v, str):
+            return UserID(v)
+        return v
+        
+    @field_validator('websocket_client_id', mode='before') 
+    @classmethod
+    def validate_websocket_client_id(cls, v):
+        if isinstance(v, str):
+            return WebSocketID(v)
         return v
 
 
