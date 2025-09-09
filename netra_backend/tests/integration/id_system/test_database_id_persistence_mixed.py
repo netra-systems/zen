@@ -28,7 +28,7 @@ from netra_backend.app.core.unified_id_manager import (
     IDType,
     IDMetadata
 )
-from netra_backend.app.services.database.session_management import DatabaseSessionManager
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from shared.types.core_types import (
     UserID,
     ThreadID,
