@@ -97,7 +97,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         operation_times = []
         
         async def database_operation_cycle(operation_id: int) -> Dict[str, Any]:
-"""Perform a cycle of database operations."""
+            """Perform a cycle of database operations."""
             cycle_result = {
                 \"operation_id\": operation_id,
                 \"operations_completed\": 0,

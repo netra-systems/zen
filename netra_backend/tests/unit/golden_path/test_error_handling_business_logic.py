@@ -576,12 +576,13 @@ class TestErrorMonitoringBusinessOperations:
         if revenue_impact > 1000 or "payment" in error_description.lower() or "security" in error_description.lower():
             return "P1_critical"
             
-        # High priority: Core functionality affected, many users
-        if affected_users > 50 or "service" in error_description.lower() and "degraded" in error_description.lower():
+        # High priority: Core functionality affected, many users (but not minor UI issues)
+        if ("service" in error_description.lower() and "degraded" in error_description.lower()) or \
+           (affected_users > 50 and not any(ui_term in error_description.lower() for ui_term in ["ui", "tooltip", "text", "interface"])):
             return "P2_high"
             
-        # Medium priority: User experience issues
-        if affected_users > 10 or "ui" in error_description.lower() or "interface" in error_description.lower():
+        # Medium priority: User experience issues (including UI issues regardless of user count)
+        if affected_users > 10 or "ui" in error_description.lower() or "interface" in error_description.lower() or "tooltip" in error_description.lower():
             return "P3_medium"
             
         # Low priority: Minor issues with minimal business impact
