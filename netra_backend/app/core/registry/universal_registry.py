@@ -809,6 +809,18 @@ class ToolRegistry(UniversalRegistry['Tool']):
             logger.error(f"Tool interface validation error for {key}: {e}")
             return False
     
+    def get_tool(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['Tool']:
+        """Get tool by key - compatibility method for tests.
+        
+        This method provides backward compatibility for existing test code
+        that expects get_tool() method instead of get().
+        """
+        return self.get(key, context)
+    
+    def register_tool(self, key: str, tool: 'Tool', **metadata) -> None:
+        """Register tool - compatibility method for tests."""
+        return self.register(key, tool, **metadata)
+    
     def _register_default_tools(self) -> None:
         """Register default synthetic and corpus tools."""
         # This would register actual tool instances
