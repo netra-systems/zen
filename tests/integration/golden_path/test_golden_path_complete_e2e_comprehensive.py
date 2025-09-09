@@ -534,8 +534,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         message_start = time.time()
         
         if self.using_mock_services:
-            # For mock services, just log the message send
+            # For mock services, send the message to trigger agent execution
             logger.info(f"📤 [MOCK] Golden Path message prepared: {scenario['message'][:100]}...")
+            await websocket.send(json.dumps(golden_path_message))
             message_time = 0.01  # Simulate minimal send time
         else:
             await websocket.send(json.dumps(golden_path_message))
