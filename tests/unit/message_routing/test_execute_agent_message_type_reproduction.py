@@ -84,7 +84,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
                         msg_type=variation,
                         payload=message_data
                     )
-                    handler = router.get_handler(test_message.type)
+                    handler = router._find_handler(test_message.type)
                     
                     # Check if routing was successful
                     if handler is None:
@@ -130,7 +130,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         for message_type in execute_agent_variations:
             try:
                 # Check if handler exists for message type  
-                handler = router.get_handler(MessageType(message_type))
+                handler = router._find_handler(MessageType(message_type))
                 
                 if handler is None:
                     registration_failures.append(f"HANDLER REGISTRATION FAILURE: No handler registered for {message_type}")
@@ -317,7 +317,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
             )
             
             # Simple synchronous handler lookup - timing it to check for performance issues
-            handler = router.get_handler(test_message.type)
+            handler = router._find_handler(test_message.type)
             
             routing_time = time.time() - start_time
             if routing_time > 0.4:  # More than 400ms is slow
