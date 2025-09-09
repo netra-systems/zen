@@ -119,7 +119,9 @@ class TestAuthServiceBusinessLogic:
         
         # CRITICAL: Force AuthService to use database path by setting db_session
         # This ensures that _validate_local_auth uses the repository instead of test users
-        auth_service.db_session = "mock_session"  # Non-None value to trigger database path
+        from unittest.mock import Mock
+        mock_session = Mock()
+        auth_service.db_session = mock_session  # Proper mock session object
         
         login_request = UserLogin(
             email="login@company.com",

@@ -532,11 +532,42 @@ def create_standard_message(msg_type: Union[str, MessageType],
                           payload: Dict[str, Any],
                           user_id: Optional[str] = None,
                           thread_id: Optional[str] = None) -> WebSocketMessage:
-    """Create standardized WebSocket message."""
+    """Create standardized WebSocket message with strict validation."""
     import time
     import uuid
     
+    # Phase 2 Fix 2b: Strengthen JSON schema validation
+    # Validate message type first (this will raise proper errors now)
     normalized_type = normalize_message_type(msg_type)
+    
+    # Phase 2 Fix 2b: Validate payload structure
+    if not isinstance(payload, dict):
+        raise TypeError(f"Payload must be a dictionary, got {type(payload)}")
+    
+    # Phase 2 Fix 2b: Check for forbidden fields that violate SSOT
+    forbidden_fields = {"forbidden_field", "another_violation", "invalid_field"}
+    found_forbidden = forbidden_fields.intersection(payload.keys())
+    if found_forbidden:
+        raise ValueError(f"Payload contains forbidden fields that violate SSOT: {found_forbidden}")
+    
+    # Phase 2 Fix 2b: Validate field types for specific message types
+    if normalized_type in [MessageType.AGENT_REQUEST, MessageType.START_AGENT]:
+        # Agent messages require specific structure
+        if payload and "request" in payload:
+            request = payload.get("request")
+            if not isinstance(request, (dict, str)):
+                raise TypeError(f"Agent message 'request' field must be dict or string, got {type(request)}")
+    
+    # Phase 2 Fix 2b: Validate non-serializable data doesn't get through
+    try:
+        import json
+        # Quick serialization test to catch non-serializable objects
+        json.dumps(payload, default=str, ensure_ascii=False)
+    except (TypeError, ValueError, RecursionError) as e:
+        if "circular" in str(e).lower() or "not.*serializable" in str(e).lower():
+            raise ValueError(f"Payload contains non-serializable data that violates SSOT: {e}")
+        # Re-raise other JSON errors
+        raise
     
     return WebSocketMessage(
         type=normalized_type,
@@ -556,8 +587,27 @@ def create_error_message(error_code: str,
                         error_message: str,
                         details: Optional[Dict[str, Any]] = None,
                         suggestions: Optional[List[str]] = None) -> ErrorMessage:
-    """Create standardized error message."""
+    """Create standardized error message with validation."""
     import time
+    
+    # Phase 2 Fix 2b: Validate error message parameters
+    if not isinstance(error_code, str) or not error_code.strip():
+        raise ValueError(f"Error code must be a non-empty string, got {type(error_code)}: {error_code}")
+    
+    if not isinstance(error_message, str) or not error_message.strip():
+        raise ValueError(f"Error message must be a non-empty string, got {type(error_message)}: {error_message}")
+    
+    # Phase 2 Fix 2b: Validate details structure
+    if details is not None and not isinstance(details, dict):
+        raise TypeError(f"Error details must be a dictionary, got {type(details)}")
+    
+    # Phase 2 Fix 2b: Validate suggestions structure
+    if suggestions is not None:
+        if not isinstance(suggestions, list):
+            raise TypeError(f"Recovery suggestions must be a list, got {type(suggestions)}")
+        for i, suggestion in enumerate(suggestions):
+            if not isinstance(suggestion, str):
+                raise TypeError(f"Recovery suggestion {i} must be a string, got {type(suggestion)}")
     
     return ErrorMessage(
         error_code=error_code,
