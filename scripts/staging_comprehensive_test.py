@@ -22,8 +22,8 @@ import requests
 
 # Staging environment URLs
 STAGING_URLS = {
-    'frontend': 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app',
-    'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
+    'frontend': 'https://app.staging.netrasystems.ai',
+    'backend': 'https://api.staging.netrasystems.ai',
     'auth': 'https://auth.staging.netrasystems.ai'
 }
 
