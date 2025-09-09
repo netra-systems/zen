@@ -237,9 +237,7 @@ class GCPWebSocketInitializationValidator:
                 if is_connected and self.is_gcp_environment:
                     # CRITICAL FIX: Use synchronous sleep for measurable grace period
                     # This prevents async/await issues and makes the grace period testable
-                    self.logger.debug(f"Applying 500ms grace period for Redis stabilization (is_connected={is_connected}, is_gcp={self.is_gcp_environment})")
                     time.sleep(0.5)  # 500ms grace period for background task stability
-                    self.logger.debug("Grace period completed")
                 
                 return is_connected
             

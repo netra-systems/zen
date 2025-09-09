@@ -54,6 +54,7 @@ See [Netra Optimization Breakdown](./NETRA_OPTIMIZATION_BREAKDOWN.md) for detail
 
 ### 📚 Key Architecture Documents
 
+- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **MISSION CRITICAL**: Complete user journey analysis from connection to response delivery, including race condition fixes and WebSocket event requirements ($500K+ ARR dependency)
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - **CRITICAL**: Complete guide to the new Factory-based user isolation architecture with execution engines and WebSocket event emitters
 - [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - Details of WebSocket isolation implementation
 - [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped tool dispatchers
@@ -115,7 +116,8 @@ docker-compose up
 ## 📖 Documentation
 
 ### Architecture & Design
-- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation (START HERE)
+- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **START HERE**: Complete user journey analysis with critical issue identification and business impact ($500K+ ARR)
+- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation architecture
 - **[UVS Triage Architecture Transition](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** - NEW: Unified Validation System with data sufficiency states
 - **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
 - [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
