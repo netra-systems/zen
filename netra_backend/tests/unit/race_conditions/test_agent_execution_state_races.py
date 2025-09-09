@@ -181,32 +181,46 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         
         # Create 50 concurrent execution contexts
         contexts = []
-        states = []
+        user_execution_contexts = []
         for i in range(50):
             user_id = f"user_{i:03d}"
             run_id = f"run_{i:03d}_{uuid.uuid4().hex[:8]}"
+            thread_id = f"thread_{i:03d}"
             
             context = AgentExecutionContext(
                 agent_name="test_agent",
                 run_id=run_id,
                 user_id=user_id,
-                thread_id=f"thread_{i:03d}",
+                thread_id=thread_id,
                 retry_count=0,
                 max_retries=2
             )
             contexts.append(context)
             
-            state = DeepAgentState()
-            state.user_id = user_id
-            state.thread_id = context.thread_id
-            states.append(state)
+            # CRITICAL SECURITY FIX: Use UserExecutionContext for proper user isolation
+            user_execution_context = UserExecutionContext.from_agent_execution_context(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                agent_context={
+                    'agent_name': 'test_agent',
+                    'test_scenario': 'race_condition_test',
+                    'iteration': i
+                },
+                audit_metadata={
+                    'test_name': 'test_50_concurrent_agent_executions',
+                    'execution_number': i,
+                    'created_for': 'race_condition_testing'
+                }
+            )
+            user_execution_contexts.append(user_execution_context)
         
         # Execute all agents concurrently
         start_time = time.time()
         
-        async def execute_agent(ctx, st):
+        async def execute_agent(ctx, user_ctx):
             try:
-                return await execution_core.execute_agent(ctx, st)
+                return await execution_core.execute_agent(ctx, user_ctx)
             except Exception as e:
                 logger.error(f"Agent execution failed: {e}")
                 return AgentExecutionResult(
@@ -218,7 +232,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         
         # Use asyncio.gather to run all executions concurrently
         results = await asyncio.gather(
-            *[execute_agent(ctx, st) for ctx, st in zip(contexts, states)],
+            *[execute_agent(ctx, user_ctx) for ctx, user_ctx in zip(contexts, user_execution_contexts)],
             return_exceptions=True
         )
         
@@ -298,14 +312,26 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
             )
             contexts.append(context)
         
-        # Execute concurrently
-        states = [DeepAgentState() for _ in contexts]
-        for ctx, st in zip(contexts, states):
-            st.user_id = ctx.user_id
-            st.thread_id = ctx.thread_id
+        # Execute concurrently with proper UserExecutionContext
+        user_execution_contexts = []
+        for ctx in contexts:
+            user_execution_context = UserExecutionContext.from_agent_execution_context(
+                user_id=ctx.user_id,
+                thread_id=ctx.thread_id,
+                run_id=ctx.run_id,
+                agent_context={
+                    'agent_name': 'test_agent',
+                    'test_scenario': 'state_isolation_test'
+                },
+                audit_metadata={
+                    'test_name': 'test_execution_state_isolation',
+                    'created_for': 'race_condition_testing'
+                }
+            )
+            user_execution_contexts.append(user_execution_context)
         
         results = await asyncio.gather(
-            *[execution_core.execute_agent(ctx, st) for ctx, st in zip(contexts, states)],
+            *[execution_core.execute_agent(ctx, user_ctx) for ctx, user_ctx in zip(contexts, user_execution_contexts)],
             return_exceptions=True
         )
         
