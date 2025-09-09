@@ -652,6 +652,8 @@ class AgentResultValidator:
         return second_avg - first_avg
 
 
+@pytest.mark.unit
+@pytest.mark.golden_path
 class TestAgentResultValidationBusinessLogic:
     """Test agent result validation business logic for quality assurance."""
     
