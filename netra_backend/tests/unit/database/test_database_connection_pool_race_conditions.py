@@ -1212,8 +1212,8 @@ class TestDatabaseConnectionPoolRaceConditions(BaseIntegrationTest):
         
         # Test without lock (should have race conditions)
         counter_without_lock = SharedCounter()
-        thread_count = 10
-        increments_per_thread = 10
+        thread_count = 20  # More threads to increase contention
+        increments_per_thread = 5  # Fewer increments per thread but more threads
         
         with ThreadPoolExecutor(max_workers=thread_count) as executor:
             futures = [
