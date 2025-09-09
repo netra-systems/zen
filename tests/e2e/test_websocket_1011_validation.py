@@ -457,7 +457,7 @@ class TestWebSocket1011BusinessValueValidation:
         
         registry = get_connection_state_registry()
         events_connection = f"events_test_{int(time.time())}"
-        events_user = "events_test_user"
+        events_user = f"user_{int(time.time())}_events"
         
         try:
             # Real-time events require operational connection management
@@ -506,7 +506,7 @@ class TestWebSocket1011BusinessValueValidation:
             # Check 2: State machine operation
             registry = get_connection_state_registry()
             staging_connection = f"staging_test_{int(time.time())}"
-            staging_user = "staging_test_user"
+            staging_user = f"user_{int(time.time())}_staging"
             
             state_machine = registry.register_connection(staging_connection, staging_user)
             success = state_machine.transition_to(
