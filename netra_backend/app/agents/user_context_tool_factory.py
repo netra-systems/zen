@@ -97,15 +97,13 @@ class UserContextToolFactory:
             except Exception as e:
                 logger.error(f"❌ Failed to create WebSocket bridge for {correlation_id}: {e}")
         
-        # Create isolated tool dispatcher for this user using factory
+        # Create isolated tool dispatcher for this user using factory with pre-created registry
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=context,
             tools=user_tools,
-            websocket_manager=None  # We use bridge instead
+            websocket_manager=None,  # We use bridge instead
+            registry=registry  # CRITICAL FIX: Pass pre-created registry to prevent proliferation
         )
-        
-        # Override dispatcher registry with our pre-created registry to prevent duplication
-        dispatcher.registry = registry
         
         # Register tools in the isolated registry
         for tool in user_tools:

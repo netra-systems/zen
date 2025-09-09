@@ -47,8 +47,9 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.execution_engine import ExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.database.models.agent_execution import AgentExecution, AgentExecutionStatus
-from netra_backend.app.database.models.user_context import UserContext
+from netra_backend.app.models.agent_execution import AgentExecution
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from shared.types.execution_types import AgentExecutionState
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env

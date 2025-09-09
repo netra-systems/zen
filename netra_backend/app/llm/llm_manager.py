@@ -25,6 +25,12 @@ from netra_backend.app.schemas.llm_types import (
     TokenUsage,
 )
 
+# CRITICAL REMEDIATION: Import timeout management for LLM circuit breaker protection
+from netra_backend.app.agents.execution_timeout_manager import (
+    get_timeout_manager,
+    CircuitBreakerOpenError
+)
+
 T = TypeVar('T', bound=BaseModel)
 
 
@@ -62,9 +68,12 @@ class LLMManager:
         self._ever_initialized = False  # Track if manager has ever been successfully initialized
         self._user_context = user_context
         
+        # CRITICAL REMEDIATION: Initialize timeout manager for LLM circuit breaker protection
+        self._timeout_manager = get_timeout_manager()
+        
         # Log the initialization with security context
         if user_context:
-            self._logger.info(f"LLM Manager initialized for user {user_context.user_id[:8]}...")
+            self._logger.info(f"LLM Manager initialized for user {user_context.user_id[:8]}... with timeout protection")
         else:
             self._logger.warning(
                 "LLM Manager initialized without user context. "
@@ -135,9 +144,16 @@ class LLMManager:
             return self._cache[cache_key]
         
         try:
-            # For now, return a placeholder response
-            # In a real implementation, this would call the actual LLM
-            response = await self._make_llm_request(prompt, llm_config_name)
+            # CRITICAL REMEDIATION: Make LLM request with circuit breaker protection
+            async def llm_request_wrapper():
+                # For now, return a placeholder response
+                # In a real implementation, this would call the actual LLM
+                return await self._make_llm_request(prompt, llm_config_name)
+            
+            response = await self._timeout_manager.execute_llm_with_circuit_breaker(
+                llm_request_wrapper,
+                f"llm_request_{llm_config_name}"
+            )
             
             # Cache the response (user-scoped)
             if use_cache:
@@ -145,8 +161,21 @@ class LLMManager:
                 self._cache[cache_key] = response
             
             return response
+            
+        except CircuitBreakerOpenError as e:
+            self._logger.error(f"🚫 LLM circuit breaker open: {e}")
+            return (
+                "I apologize, but our AI service is temporarily unavailable due to high demand. "
+                "Please try again in a moment. If the issue persists, please contact support."
+            )
+        except TimeoutError as e:
+            self._logger.error(f"⏰ LLM request timed out: {e}")
+            return (
+                "I apologize, but your request is taking longer than expected to process. "
+                "Please try again with a simpler request or contact support if the issue persists."
+            )
         except Exception as e:
-            self._logger.error(f"LLM request failed: {e}")
+            self._logger.error(f"❌ LLM request failed: {e}")
             return f"I apologize, but I'm unable to process your request at the moment. Error: {str(e)}"
     
     async def ask_llm_full(

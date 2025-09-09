@@ -190,11 +190,11 @@ class TestDataValidationBusinessRules:
         assert str(typed_run_id) == run_id, "Run ID should be preserved"
         assert str(typed_request_id) == request_id, "Request ID should be preserved"
         
-        # Business Rule: Type safety should be enforced
-        assert isinstance(typed_user_id, UserID), "Should be UserID type"
-        assert isinstance(typed_thread_id, ThreadID), "Should be ThreadID type"
-        assert isinstance(typed_run_id, RunID), "Should be RunID type"
-        assert isinstance(typed_request_id, RequestID), "Should be RequestID type"
+        # Business Rule: Type safety should be enforced (NewType creates callable, not type)
+        assert isinstance(typed_user_id, str), "Should be UserID type (which is a string NewType)"
+        assert isinstance(typed_thread_id, str), "Should be ThreadID type (which is a string NewType)"
+        assert isinstance(typed_run_id, str), "Should be RunID type (which is a string NewType)"
+        assert isinstance(typed_request_id, str), "Should be RequestID type (which is a string NewType)"
 
 
 @pytest.mark.unit
@@ -563,6 +563,10 @@ class TestDataSanitizationBusinessSecurity:
                 
     def _validate_api_response_structure(self, response: Dict) -> bool:
         """Helper to validate API response structure for business requirements."""
+        # Business Rule: API responses must have explicit status for business integration
+        if not isinstance(response, dict) or len(response) == 0:
+            return False
+            
         # Success responses must have status and data
         if response.get("status") == "success":
             return "data" in response
@@ -571,8 +575,9 @@ class TestDataSanitizationBusinessSecurity:
         if response.get("status") == "error":
             return "error" in response and isinstance(response["error"], dict)
             
-        # Other responses are valid if they have some recognizable structure
-        return len(response) > 0 and isinstance(response, dict)
+        # Business Rule: Responses without explicit status are invalid for business systems
+        # This enforces consistent API structure for business integration
+        return False
 
     def test_business_rule_enforcement_data_validation(self):
         """Test business rule enforcement in data validation."""

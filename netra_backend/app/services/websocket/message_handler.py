@@ -1,9 +1,12 @@
 """Refactored WebSocket Message Handler
 
 Uses message queue system for better scalability and error handling.
+PHASE 4 FIX: Enhanced with concurrency protection for connection storms.
 """
 
+import asyncio
 import json
+import time
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
@@ -25,6 +28,82 @@ from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
+
+# PHASE 4 FIX: Thread-safe handler registry for concurrent connections
+_handler_registry_lock = asyncio.Lock()
+_handler_instances = {}
+_initialization_in_progress = set()
+
+async def create_handler_safely(handler_type: str, supervisor, db_session_factory) -> Optional[Any]:
+    """
+    PHASE 4 FIX: Thread-safe handler creation for concurrent connections.
+    
+    This function prevents race conditions during handler initialization when
+    multiple WebSocket connections are established simultaneously.
+    
+    Args:
+        handler_type: Type of handler to create ('start_agent', 'user_message')
+        supervisor: Supervisor instance
+        db_session_factory: Database session factory
+        
+    Returns:
+        Handler instance or None if creation fails
+    """
+    handler_key = f"{handler_type}_{id(supervisor)}"
+    
+    async with _handler_registry_lock:
+        # Check if handler already exists
+        if handler_key in _handler_instances:
+            logger.debug(f"PHASE 4: Reusing existing {handler_type} handler")
+            return _handler_instances[handler_key]
+        
+        # Check if initialization is in progress for this handler
+        if handler_key in _initialization_in_progress:
+            logger.debug(f"PHASE 4: Handler {handler_type} initialization in progress, waiting...")
+            # Wait for initialization to complete
+            while handler_key in _initialization_in_progress:
+                await asyncio.sleep(0.01)  # 10ms wait
+            
+            # Check if handler was created during wait
+            if handler_key in _handler_instances:
+                return _handler_instances[handler_key]
+            else:
+                logger.warning(f"PHASE 4: Handler {handler_type} initialization failed during wait")
+                return None
+        
+        # Mark initialization as in progress
+        _initialization_in_progress.add(handler_key)
+    
+    try:
+        # Create handler outside the lock to avoid blocking other operations
+        handler = None
+        start_time = time.time()
+        
+        if handler_type == "start_agent":
+            handler = StartAgentHandler(supervisor, db_session_factory)
+        elif handler_type == "user_message":
+            handler = UserMessageHandler(supervisor, db_session_factory)
+        else:
+            logger.error(f"PHASE 4: Unknown handler type: {handler_type}")
+            return None
+        
+        creation_time = time.time() - start_time
+        logger.debug(f"PHASE 4: Created {handler_type} handler in {creation_time:.3f}s")
+        
+        # Store handler in registry
+        async with _handler_registry_lock:
+            _handler_instances[handler_key] = handler
+            _initialization_in_progress.discard(handler_key)
+        
+        return handler
+        
+    except Exception as e:
+        logger.error(f"PHASE 4: Failed to create {handler_type} handler: {e}")
+        # Ensure initialization flag is cleared on error
+        async with _handler_registry_lock:
+            _initialization_in_progress.discard(handler_key)
+        return None
+
 
 class BaseMessageHandler(ABC):
     """Abstract base class for message handlers"""
@@ -72,15 +151,32 @@ class StartAgentHandler(BaseMessageHandler):
     
     async def _setup_thread_and_run(self, user_id: str, user_request: str) -> tuple[str, str]:
         """Setup thread and run for agent processing"""
-        async with get_unit_of_work() as uow:
-            thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
-            if not thread:
-                # Use session-based context for error handling
-                context = get_user_execution_context(user_id=user_id)
-                manager = await create_websocket_manager(context)
-                await manager.send_error(user_id, "Failed to create or retrieve thread")
-                return None, None
-            return await self._create_message_and_run(uow, thread, user_request, user_id)
+        # CRITICAL FIX: Ensure database is initialized before using UnitOfWork
+        try:
+            from netra_backend.app.db.postgres import initialize_postgres, async_session_factory
+            
+            # Check if database is initialized, if not initialize it
+            if async_session_factory is None:
+                logger.info("Database not initialized, initializing PostgreSQL...")
+                initialize_postgres()
+                
+            async with get_unit_of_work() as uow:
+                thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
+                if not thread:
+                    # Use session-based context for error handling
+                    context = get_user_execution_context(user_id=user_id)
+                    manager = await create_websocket_manager(context)
+                    await manager.send_error(user_id, "Failed to create or retrieve thread")
+                    return None, None
+                return await self._create_message_and_run(uow, thread, user_request, user_id)
+                
+        except Exception as db_error:
+            logger.error(f"Database setup failed in WebSocket handler: {db_error}")
+            # Use session-based context for error handling
+            context = get_user_execution_context(user_id=user_id)
+            manager = await create_websocket_manager(context)
+            await manager.send_error(user_id, f"Database initialization failed: {str(db_error)}")
+            return None, None
     
     async def _create_message_and_run(self, uow, thread, user_request: str, user_id: str) -> tuple[str, str]:
         """Create user message and run in database"""
@@ -102,22 +198,47 @@ class StartAgentHandler(BaseMessageHandler):
         """Execute agent workflow without holding database session"""
         self._configure_supervisor(thread_id, user_id)
         
-        # CRITICAL FIX: Ensure supervisor has WebSocket bridge for event emission
+        # PHASE 4 FIX: Enhanced WebSocket bridge creation with retry logic for connection storms
         if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
-            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            from netra_backend.app.dependencies import get_user_execution_context
-            
-            context = get_user_execution_context(
-                user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id
-            )
-            
-            websocket_bridge = create_agent_websocket_bridge(context)
-            self.supervisor.websocket_bridge = websocket_bridge
-            logger.info(f"✅ Added WebSocket bridge to supervisor for user {user_id}")
+            await self._create_websocket_bridge_with_retry(user_id, thread_id, run_id)
         
         return await self.supervisor.run(user_request, thread_id, user_id, run_id)
+    
+    async def _create_websocket_bridge_with_retry(self, user_id: str, thread_id: str, run_id: str) -> None:
+        """
+        PHASE 4 FIX: Create WebSocket bridge with retry logic for connection storms.
+        
+        This method handles bridge creation failures that can occur during
+        concurrent connection establishment, ensuring robust chat functionality.
+        """
+        max_retries = 3
+        retry_delay = 0.1  # 100ms
+        
+        for attempt in range(max_retries + 1):
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                from netra_backend.app.dependencies import get_user_execution_context
+                
+                context = get_user_execution_context(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                
+                websocket_bridge = create_agent_websocket_bridge(context)
+                self.supervisor.websocket_bridge = websocket_bridge
+                logger.info(f"✅ PHASE 4: Added WebSocket bridge to supervisor for user {user_id} (attempt {attempt + 1})")
+                return
+                
+            except Exception as e:
+                logger.warning(f"PHASE 4: WebSocket bridge creation attempt {attempt + 1} failed for user {user_id}: {e}")
+                
+                if attempt < max_retries:
+                    await asyncio.sleep(retry_delay * (2 ** attempt))  # Exponential backoff
+                else:
+                    logger.error(f"PHASE 4: Failed to create WebSocket bridge after {max_retries + 1} attempts for user {user_id}")
+                    # Continue without bridge - supervisor will work but without real-time events
+                    self.supervisor.websocket_bridge = None
     
     def _configure_supervisor(self, thread_id: str, user_id: str) -> None:
         """Configure supervisor properties"""

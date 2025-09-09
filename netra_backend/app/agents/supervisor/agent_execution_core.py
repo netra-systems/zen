@@ -2,6 +2,9 @@
 
 CRITICAL: This module adds execution tracking, heartbeat monitoring, and error boundaries
 to prevent silent agent deaths.
+
+CRITICAL REMEDIATION: Enhanced with comprehensive timeout management and circuit breakers
+to prevent agent execution pipeline blocking that prevents users from receiving AI responses.
 """
 
 import asyncio
@@ -34,14 +37,31 @@ from netra_backend.app.core.logging_context import (
 )
 from netra_backend.app.logging_config import central_logger
 
+# CRITICAL REMEDIATION: Import timeout management for preventing execution blocking
+from netra_backend.app.agents.execution_timeout_manager import (
+    get_timeout_manager,
+    TimeoutConfig,
+    CircuitBreakerOpenError
+)
+
+# CRITICAL REMEDIATION: Import state tracking for explicit execution phase monitoring
+from netra_backend.app.agents.agent_state_tracker import (
+    get_agent_state_tracker,
+    AgentExecutionPhase
+)
+
 logger = central_logger.get_logger(__name__)
 
 
 class AgentExecutionCore:
-    """Enhanced agent execution with death detection and recovery."""
+    """Enhanced agent execution with death detection and recovery.
     
-    # Timeout configuration
-    DEFAULT_TIMEOUT = 30.0  # 30 seconds default
+    CRITICAL REMEDIATION: Enhanced with comprehensive timeout management and circuit breakers
+    to prevent agent execution pipeline blocking that prevents users from receiving AI responses.
+    """
+    
+    # CRITICAL REMEDIATION: Reduced timeout configuration for faster feedback
+    DEFAULT_TIMEOUT = 25.0  # Reduced from 30s for faster feedback
     HEARTBEAT_INTERVAL = 5.0  # Send heartbeat every 5 seconds
     
     def __init__(self, registry: 'AgentRegistry', websocket_bridge: Optional['AgentWebSocketBridge'] = None):
@@ -50,6 +70,17 @@ class AgentExecutionCore:
         self.execution_tracker = get_execution_tracker()
         # trace_persistence removed - no longer needed
         self.persistence = None
+        
+        # CRITICAL REMEDIATION: Initialize timeout manager for preventing execution blocking
+        self.timeout_manager = get_timeout_manager()
+        
+        # CRITICAL REMEDIATION: Initialize state tracker for explicit execution phase monitoring
+        self.state_tracker = get_agent_state_tracker()
+        
+        logger.info(
+            f"AgentExecutionCore initialized with timeout manager (default_timeout: {self.DEFAULT_TIMEOUT}s) "
+            f"and state tracker for comprehensive monitoring"
+        )
         
     async def execute_agent(
         self, 
@@ -91,6 +122,18 @@ class AgentExecutionCore:
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
+        # CRITICAL REMEDIATION: Start state tracking for comprehensive monitoring
+        state_exec_id = self.state_tracker.start_execution(
+            agent_name=context.agent_name,
+            run_id=str(context.run_id),
+            user_id=getattr(state, 'user_id', None) or 'unknown',
+            metadata={
+                'correlation_id': trace_context.correlation_id,
+                'thread_id': getattr(state, 'thread_id', None),
+                'timeout': timeout or self.DEFAULT_TIMEOUT
+            }
+        )
+        
         # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         # The heartbeat system was found to:
         # 1. Continue running even when agents are dead (zombie heartbeats)
@@ -111,25 +154,30 @@ class AgentExecutionCore:
                 # Start execution tracking
                 await self.execution_tracker.start_execution(exec_id)
                 
+                # CRITICAL REMEDIATION: Transition to websocket setup phase
+                await self.state_tracker.transition_phase(
+                    state_exec_id, 
+                    AgentExecutionPhase.WEBSOCKET_SETUP,
+                    websocket_manager=self.websocket_bridge
+                )
+                
                 # Add trace event
                 trace_context.add_event("agent.started")
                 
-                # CRITICAL: Send agent_started event for business value and user transparency
-                # Business Value: Users must know agent has started working on their problem
-                # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
+                # CRITICAL REMEDIATION: Transition to starting phase with WebSocket events
+                await self.state_tracker.transition_phase(
+                    state_exec_id, 
+                    AgentExecutionPhase.STARTING,
+                    metadata={"trace_context": trace_context.correlation_id},
+                    websocket_manager=self.websocket_bridge
+                )
+                
+                # CRITICAL FIX: Send agent_started event for user visibility
                 if self.websocket_bridge:
                     await self.websocket_bridge.notify_agent_started(
                         run_id=context.run_id,
                         agent_name=context.agent_name,
-                        trace_context=trace_context.to_websocket_context()
-                    )
-                    # CRITICAL: Send agent thinking event for real-time user feedback
-                    # Business Value: Users see AI is working on their problem (Trust Building)
-                    await self.websocket_bridge.notify_agent_thinking(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        reasoning=f"Analyzing your request and determining the best approach...",
-                        step_number=1
+                        context={"status": "starting", "phase": "initialization"}
                     )
                 
                 # Get agent from registry
@@ -140,6 +188,16 @@ class AgentExecutionCore:
                         exec_id, 
                         error=f"Agent {context.agent_name} not found"
                     )
+                    
+                    # CRITICAL REMEDIATION: Transition to failed phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.FAILED,
+                        metadata={"error": "Agent not found"},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    self.state_tracker.complete_execution(state_exec_id, success=False)
+                    
                     if self.websocket_bridge:
                         await self.websocket_bridge.notify_agent_error(
                             run_id=context.run_id,
@@ -148,33 +206,123 @@ class AgentExecutionCore:
                         )
                     return agent
                 
-                # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
-                # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
-                if heartbeat:  # This will be False since heartbeat is disabled
-                    async with heartbeat:
-                        result = await self._execute_with_protection(
-                            agent, context, state, exec_id, heartbeat, timeout, trace_context
-                        )
-                else:
-                    # Direct execution without heartbeat wrapper
-                    result = await self._execute_with_protection(
-                        agent, context, state, exec_id, None, timeout, trace_context
+                # CRITICAL REMEDIATION: Execute with comprehensive timeout management
+                # This prevents agent execution from hanging indefinitely and blocking user responses
+                try:
+                    async def agent_execution_wrapper():
+                        # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
+                        # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+                        if heartbeat:  # This will be False since heartbeat is disabled
+                            async with heartbeat:
+                                return await self._execute_with_protection(
+                                    agent, context, state, exec_id, heartbeat, timeout, trace_context
+                                )
+                        else:
+                            # Direct execution without heartbeat wrapper
+                            return await self._execute_with_protection(
+                                agent, context, state, exec_id, None, timeout, trace_context
+                            )
+                    
+                    # CRITICAL: Execute agent with timeout manager to prevent blocking
+                    result = await self.timeout_manager.execute_agent_with_timeout(
+                        agent_execution_wrapper,
+                        context.agent_name,
+                        str(context.run_id),
+                        self.websocket_bridge
+                    )
+                    
+                except CircuitBreakerOpenError as e:
+                    # Circuit breaker is open - create fallback response
+                    logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
+                    
+                    # Transition to circuit breaker open phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.CIRCUIT_BREAKER_OPEN,
+                        metadata={'error': str(e), 'error_type': 'circuit_breaker'},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    
+                    fallback_response = await self.timeout_manager.create_fallback_response(
+                        context.agent_name,
+                        e,
+                        str(context.run_id),
+                        self.websocket_bridge
+                    )
+                    result = AgentExecutionResult(
+                        success=False,
+                        agent_name=context.agent_name,
+                        error=str(e),
+                        duration=0.0,
+                        data=fallback_response
+                    )
+                    
+                except TimeoutError as e:
+                    # Agent execution timed out
+                    logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
+                    
+                    # Transition to timeout phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.TIMEOUT,
+                        metadata={'error': str(e), 'error_type': 'timeout'},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    
+                    result = AgentExecutionResult(
+                        success=False,
+                        agent_name=context.agent_name,
+                        error=str(e),
+                        duration=0.0
                     )
             
                 # Collect and persist metrics
                 metrics = await self._collect_metrics(exec_id, result, state, heartbeat)
                 await self._persist_metrics(exec_id, metrics, context.agent_name, state)
                 
-                # Mark execution complete
+                # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
                     trace_context.add_event("agent.completed")
                     await self.execution_tracker.complete_execution(exec_id, result=result)
+                    
+                    # Transition to completion phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.COMPLETING,
+                        metadata={"success": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.COMPLETED,
+                        metadata={"result": "success"},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    
+                    # CRITICAL FIX: Send agent_completed event for user closure
+                    if self.websocket_bridge:
+                        await self.websocket_bridge.notify_agent_completed(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            result={"status": "completed", "success": True, "data": result.data if hasattr(result, 'data') else None}
+                        )
+                    
+                    self.state_tracker.complete_execution(state_exec_id, success=True)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
                     await self.execution_tracker.complete_execution(
                         exec_id, 
                         error=result.error or "Unknown error"
                     )
+                    
+                    # Transition to failed phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.FAILED,
+                        metadata={'error': result.error or 'Unknown error'},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    self.state_tracker.complete_execution(state_exec_id, success=False)
                     
                     # CRITICAL: Send error notification for agent failures including death detection
                     # Business Value: Users must be notified when agent fails or dies silently
@@ -184,6 +332,13 @@ class AgentExecutionCore:
                             run_id=context.run_id,
                             agent_name=context.agent_name,
                             error=result.error or "Agent execution failed"
+                        )
+                        
+                        # CRITICAL FIX: Also send agent_completed event for error cases
+                        await self.websocket_bridge.notify_agent_completed(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"}
                         )
                 
                 # Finish the span

@@ -634,11 +634,17 @@ class TestAgentExecutionSequenceBusinessLogic(BaseTestCase):
         
         # Verify data insights are incorporated
         data_spend = data_result.outputs["analyzed_data"]["monthly_ai_spend"]
-        assert any(str(data_spend) in finding for finding in key_findings), "Data insights must be in report"
+        # Business Rule: Data insights must be present in report (handle formatting variations)
+        data_spend_str = str(data_spend)
+        data_spend_formatted = f"{data_spend:,}"  # Handle comma formatting (e.g. "15,000")
+        assert any(data_spend_str in finding or data_spend_formatted in finding for finding in key_findings), "Data insights must be in report"
         
         # Verify optimization insights are incorporated
         cost_savings = optimization_result.business_value[BusinessValueMetric.COST_SAVINGS_IDENTIFIED]
-        assert any(str(int(cost_savings)) in finding for finding in key_findings), "Optimization insights must be in report"
+        # Business Rule: Optimization insights must be present in report (handle formatting variations)
+        cost_savings_str = str(int(cost_savings))
+        cost_savings_formatted = f"{int(cost_savings):,}"  # Handle comma formatting (e.g. "3,750")
+        assert any(cost_savings_str in finding or cost_savings_formatted in finding for finding in key_findings), "Optimization insights must be in report"
 
     def test_execution_phase_transitions_business_logic(self):
         """Test execution phases transition correctly according to business rules."""

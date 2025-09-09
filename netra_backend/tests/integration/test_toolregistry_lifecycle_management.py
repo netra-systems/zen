@@ -133,9 +133,9 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         self.original_registry_init = ToolRegistry.__init__
         self.original_register = ToolRegistry.register
         
-        def tracked_init(registry_self, allow_override=False):
+        def tracked_init(registry_self, scope_id=None):
             """Track registry creation."""
-            result = self.original_registry_init(registry_self, allow_override=allow_override)
+            result = self.original_registry_init(registry_self, scope_id=scope_id)
             registry_id = id(registry_self)
             creator = self._get_creation_stack()
             self.lifecycle_tracker.track_registry_creation(registry_id, creator)

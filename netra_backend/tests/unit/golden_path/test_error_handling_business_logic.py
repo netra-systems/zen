@@ -96,16 +96,28 @@ class TestErrorHandlingBusinessContinuity:
         """Test WebSocket connection errors maintain business service availability."""
         # Business Rule: WebSocket errors should not prevent business operations
         
-        mock_websocket = AsyncMock()
-        # Simulate connection error
-        mock_websocket.send.side_effect = ConnectionError("WebSocket connection lost")
+        # Create mock WebSocketManager that simulates connection failure
+        mock_websocket_manager = AsyncMock()
+        mock_websocket_manager.send_to_thread.side_effect = ConnectionError("WebSocket connection lost")
         
-        notifier = WebSocketNotifier(websocket=mock_websocket, user_id="error-test-user")
+        # Create WebSocketNotifier with correct SSOT constructor
+        with patch('warnings.warn'):  # Suppress deprecation warning for test
+            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+        
+        # Create a test execution context for the notification
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        context = AgentExecutionContext(
+            agent_name="TestAgent",
+            run_id="test-run-id",
+            thread_id="error-test-thread",
+            user_id="error-test-user"
+        )
         
         # Business Rule: Connection errors should be handled gracefully
         connection_error_handled = False
         try:
-            await notifier.send_event("test_event", {"business_data": "important"})
+            # Use actual WebSocketNotifier method instead of non-existent send_event
+            await notifier.send_agent_thinking(context, "Processing your business data request")
             connection_error_handled = True
         except ConnectionError:
             # Business Rule: Some errors may propagate but should be typed appropriately
@@ -564,12 +576,13 @@ class TestErrorMonitoringBusinessOperations:
         if revenue_impact > 1000 or "payment" in error_description.lower() or "security" in error_description.lower():
             return "P1_critical"
             
-        # High priority: Core functionality affected, many users
-        if affected_users > 50 or "service" in error_description.lower() and "degraded" in error_description.lower():
+        # High priority: Core functionality affected, many users (but not minor UI issues)
+        if ("service" in error_description.lower() and "degraded" in error_description.lower()) or \
+           (affected_users > 50 and not any(ui_term in error_description.lower() for ui_term in ["ui", "tooltip", "text", "interface"])):
             return "P2_high"
             
-        # Medium priority: User experience issues
-        if affected_users > 10 or "ui" in error_description.lower() or "interface" in error_description.lower():
+        # Medium priority: User experience issues (including UI issues regardless of user count)
+        if affected_users > 10 or "ui" in error_description.lower() or "interface" in error_description.lower() or "tooltip" in error_description.lower():
             return "P3_medium"
             
         # Low priority: Minor issues with minimal business impact

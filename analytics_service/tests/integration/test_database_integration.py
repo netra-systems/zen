@@ -295,7 +295,7 @@ class TestRedisDatabaseIntegration:
         test_key = f"test_key_{int(time.time())}"
         test_value = {"data": "test_value", "timestamp": time.time()}
         
-        await redis_manager.set(test_key, test_value, expire_seconds=300)
+        await redis_manager.set(test_key, test_value, ex=300)
         retrieved_value = await redis_manager.get(test_key)
         
         assert retrieved_value == test_value
@@ -321,7 +321,7 @@ class TestRedisDatabaseIntegration:
         test_key = f"expire_test_{int(time.time())}"
         test_value = "expires_soon"
         
-        await redis_manager.set(test_key, test_value, expire_seconds=1)
+        await redis_manager.set(test_key, test_value, ex=1)
         
         # Verify key exists initially
         value = await redis_manager.get(test_key)
@@ -434,7 +434,7 @@ class TestRedisDatabaseIntegration:
             key = f"concurrent_key_{op_id}"
             value = f"concurrent_value_{op_id}"
             
-            await redis_manager.set(key, value, expire_seconds=60)
+            await redis_manager.set(key, value, ex=60)
             retrieved = await redis_manager.get(key)
             await redis_manager.delete(key)
             
@@ -585,7 +585,7 @@ class TestDatabaseIntegrationCombined:
             "last_updated": datetime.now(timezone.utc).isoformat(),
         }
         
-        await redis_manager.set(cache_key, cache_data, expire_seconds=3600)
+        await redis_manager.set(cache_key, cache_data, ex=3600)
         
         # Retrieve from cache
         cached_data = await redis_manager.get(cache_key)
@@ -663,7 +663,7 @@ class TestDatabaseIntegrationCombined:
                 "start_time": datetime.now(timezone.utc).isoformat(),
                 "event_count": 1,
             }
-            await redis_manager.set(session_key, session_data, expire_seconds=3600)
+            await redis_manager.set(session_key, session_data, ex=3600)
             
             # Verify both operations succeeded
             # Check ClickHouse

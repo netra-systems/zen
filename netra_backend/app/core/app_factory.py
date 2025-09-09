@@ -223,8 +223,8 @@ def _install_gcp_error_handlers(app: FastAPI) -> None:
         # Install all handlers (logging handler, exception handlers, middleware)
         install_exception_handlers(app)
         
-        # Install authentication context middleware for enterprise error tracking
-        _install_auth_context_middleware(app)
+        # Note: Authentication context middleware is now handled by SSOT setup_middleware()
+        # in middleware_setup.py to ensure proper dependency order with SessionMiddleware
         
         logger.info("Complete GCP error reporting integration installed")
         
@@ -241,27 +241,3 @@ def _install_gcp_error_handlers(app: FastAPI) -> None:
         logger.warning(f"Could not install GCP error handlers: {e}")
 
 
-def _install_auth_context_middleware(app: FastAPI) -> None:
-    """Install authentication context middleware for GCP error reporting.
-    
-    This middleware captures authentication context for enterprise error tracking
-    and multi-user isolation in GCP Error Reporting.
-    """
-    try:
-        from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
-        from netra_backend.app.core.unified_logging import get_logger
-        
-        logger = get_logger(__name__)
-        
-        # Install auth context middleware
-        app.add_middleware(GCPAuthContextMiddleware, enable_user_isolation=True)
-        logger.info("GCP Authentication Context Middleware installed")
-        
-    except ImportError as e:
-        from netra_backend.app.core.unified_logging import get_logger
-        logger = get_logger(__name__)
-        logger.debug(f"Authentication context middleware not available: {e}")
-    except Exception as e:
-        from netra_backend.app.core.unified_logging import get_logger
-        logger = get_logger(__name__)
-        logger.warning(f"Failed to install auth context middleware: {e}")

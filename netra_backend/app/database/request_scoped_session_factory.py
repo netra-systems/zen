@@ -239,88 +239,91 @@ class RequestScopedSessionFactory:
         
         session = None
         try:
-            # Create session using the single source of truth
-            # get_db() is decorated with @asynccontextmanager, so we use async with
-            async with get_db() as db_session:
-                session = db_session
-                
-                # Tag session for validation and monitoring
-                self._tag_session(session, user_id, request_id, thread_id, session_id)
-                
-                # Register session for monitoring
-                await self._register_session(session_id, session_metrics, session)
-                
-                session_metrics.state = SessionState.ACTIVE
-                session_metrics.mark_activity()
-                
-                # ENHANCED DEBUG: Session creation success with full context
-                creation_context = {
-                    "session_id": session_id,
-                    "user_id": user_id,
-                    "request_id": request_id,
-                    "thread_id": thread_id,
-                    "session_state": session_metrics.state.value,
-                    "active_sessions_count": len(self._active_sessions),
-                    "user_type": "system_user" if user_id == "system" or (user_id and user_id.startswith("system")) else "regular_user",
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
-                
-                logger.info(
-                    f"✅ SUCCESS: Created request-scoped session {session_id} for user {user_id}. "
-                    f"Context: {creation_context}"
-                )
-                
-                # Special logging for system user sessions
-                if user_id == "system" or (user_id and user_id.startswith("system")):
-                    logger.info(
-                        f"🔧 SYSTEM SESSION: Successfully created session for system user '{user_id}'. "
-                        f"This indicates successful service-to-service authentication. "
-                        f"Session: {session_id}, Request: {request_id}"
-                    )
-                
-                # CRITICAL FIX: Ensure thread record exists before session operations
-                await self._ensure_thread_record_exists(session, thread_id, user_id)
-                
-                try:
-                    yield session
+            # CRITICAL FIX: Use get_system_db() for system users to bypass authentication
+            # System users don't have JWT tokens but represent legitimate internal operations
+            if user_id == "system" or (user_id and user_id.startswith("system")):
+                logger.info(f"Using system database session for user {user_id} - bypassing authentication")
+                from netra_backend.app.database import get_system_db
+                # Use system database session that bypasses authentication
+                async with get_system_db() as db_session:
+                    session = db_session
                     
-                    # Mark session as successfully used
-                    session_metrics.state = SessionState.COMMITTED
+                    # Tag session for validation and monitoring
+                    self._tag_session(session, user_id, request_id, thread_id, session_id)
+                    
+                    # Register session for monitoring
+                    await self._register_session(session_id, session_metrics, session)
+                    
+                    session_metrics.state = SessionState.ACTIVE
                     session_metrics.mark_activity()
                     
-                except Exception as e:
-                    # Record error and rollback if needed
-                    session_metrics.record_error(str(e))
-                    
-                    # ENHANCED ERROR CONTEXT in session execution
-                    execution_error_context = {
-                        "session_id": session_id,
-                        "user_id": user_id,
-                        "request_id": request_id,
-                        "thread_id": thread_id,
-                        "error_type": type(e).__name__,
-                        "error_message": str(e),
-                        "session_state_before_error": session_metrics.state.value if session_metrics else "unknown",
-                        "session_operations_count": session_metrics.operations_count if session_metrics else 0,
-                        "authentication_hints": {
-                            "is_auth_error": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
-                            "user_type": "system_user" if user_id == "system" or (user_id and user_id.startswith("system")) else "regular_user"
-                        }
-                    }
-                    
-                    logger.error(
-                        f"❌ ERROR: Request-scoped session {session_id} execution failed. "
-                        f"User: {user_id}, Error: {e}. Full context: {execution_error_context}"
+                    logger.info(
+                        f"✅ SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed)"
                     )
                     
-                    try:
-                        if session.in_transaction():
-                            await session.rollback()
-                            session_metrics.state = SessionState.ROLLED_BACK
-                    except Exception as rollback_error:
-                        logger.error(f"Failed to rollback session {session_id}: {rollback_error}")
+                    # Yield the system session
+                    yield session
+            else:
+                # Create session using the single source of truth for regular users
+                # get_db() is decorated with @asynccontextmanager, so we use async with
+                async with get_db() as db_session:
+                    session = db_session
                     
-                    raise
+                    # Tag session for validation and monitoring
+                    self._tag_session(session, user_id, request_id, thread_id, session_id)
+                    
+                    # Register session for monitoring
+                    await self._register_session(session_id, session_metrics, session)
+                    
+                    session_metrics.state = SessionState.ACTIVE
+                    session_metrics.mark_activity()
+                    
+                    logger.info(f"✅ SUCCESS: Created regular database session {session_id} for user {user_id}")
+                    
+                    # CRITICAL FIX: Ensure thread record exists before session operations
+                    await self._ensure_thread_record_exists(session, thread_id, user_id)
+                    
+                    try:
+                        # Yield the regular session
+                        yield session
+                        
+                        # Mark session as successfully used
+                        session_metrics.state = SessionState.COMMITTED
+                        session_metrics.mark_activity()
+                        
+                    except Exception as e:
+                        # Record error and rollback if needed
+                        session_metrics.record_error(str(e))
+                        
+                        # ENHANCED ERROR CONTEXT in session execution
+                        execution_error_context = {
+                            "session_id": session_id,
+                            "user_id": user_id,
+                            "request_id": request_id,
+                            "thread_id": thread_id,
+                            "error_type": type(e).__name__,
+                            "error_message": str(e),
+                            "session_state_before_error": session_metrics.state.value if session_metrics else "unknown",
+                            "session_operations_count": session_metrics.operations_count if session_metrics else 0,
+                            "authentication_hints": {
+                                "is_auth_error": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
+                                "user_type": "system_user" if user_id == "system" or (user_id and user_id.startswith("system")) else "regular_user"
+                            }
+                        }
+                        
+                        logger.error(
+                            f"❌ ERROR: Request-scoped session {session_id} execution failed. "
+                            f"User: {user_id}, Error: {e}. Full context: {execution_error_context}"
+                        )
+                        
+                        try:
+                            if session.in_transaction():
+                                await session.rollback()
+                                session_metrics.state = SessionState.ROLLED_BACK
+                        except Exception as rollback_error:
+                            logger.error(f"Failed to rollback session {session_id}: {rollback_error}")
+                        
+                        raise
         
         except Exception as e:
             session_metrics.record_error(str(e))

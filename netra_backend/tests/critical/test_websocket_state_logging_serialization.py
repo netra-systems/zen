@@ -26,10 +26,7 @@ class TestWebSocketStateSafeLogging:
     """Test safe WebSocket state serialization for logging contexts."""
 
     @pytest.mark.parametrize("safe_logging_func", [
-        utils_safe_logging,
-        auth_safe_logging, 
-        pool_safe_logging,
-        routes_safe_logging
+        _safe_websocket_state_for_logging
     ])
     def test_starlette_websocket_state_serialization(self, safe_logging_func):
         """Test that Starlette WebSocketState enums are safely serialized."""
@@ -51,10 +48,7 @@ class TestWebSocketStateSafeLogging:
             json.dumps(result)  # This should not raise an exception
 
     @pytest.mark.parametrize("safe_logging_func", [
-        utils_safe_logging,
-        auth_safe_logging,
-        pool_safe_logging,
-        routes_safe_logging
+        _safe_websocket_state_for_logging
     ])
     def test_fastapi_websocket_state_serialization(self, safe_logging_func):
         """Test that FastAPI WebSocketState enums are safely serialized."""
@@ -76,10 +70,7 @@ class TestWebSocketStateSafeLogging:
             json.dumps(result)  # This should not raise an exception
 
     @pytest.mark.parametrize("safe_logging_func", [
-        utils_safe_logging,
-        auth_safe_logging,
-        pool_safe_logging,
-        routes_safe_logging
+        _safe_websocket_state_for_logging
     ])
     def test_non_enum_objects_serialization(self, safe_logging_func):
         """Test that non-enum objects are handled gracefully."""
@@ -101,10 +92,7 @@ class TestWebSocketStateSafeLogging:
             json.dumps(result)  # This should not raise an exception
 
     @pytest.mark.parametrize("safe_logging_func", [
-        utils_safe_logging,
-        auth_safe_logging,
-        pool_safe_logging,
-        routes_safe_logging
+        _safe_websocket_state_for_logging
     ])
     def test_error_handling_fallback(self, safe_logging_func):
         """Test that problematic objects fall back to error handling."""

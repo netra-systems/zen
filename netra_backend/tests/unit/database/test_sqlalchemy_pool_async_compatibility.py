@@ -449,7 +449,7 @@ class TestSQLAlchemyPoolAsyncCompatibility:
             assert isinstance(session, AsyncSession)
             
             # Test a simple query
-            result = await session.execute("SELECT 1 as test_value")
+            result = await session.execute(text("SELECT 1 as test_value"))
             row = result.fetchone()
             assert row is not None
             assert row[0] == 1

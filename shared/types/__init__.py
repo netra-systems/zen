@@ -23,7 +23,7 @@ from .core_types import (
     # Authentication types
     AuthValidationResult, SessionValidationResult, TokenResponse,
     # WebSocket types
-    ConnectionState, WebSocketConnectionInfo, WebSocketEventType, WebSocketMessage,
+    ConnectionState, WebSocketConnectionInfo, WebSocketEventType, WebSocketMessage, WebSocketAuthContext,
     # Database types
     DatabaseConnectionInfo,
     # Compatibility utilities
@@ -46,6 +46,14 @@ from .execution_types import (
     upgrade_legacy_context, downgrade_to_legacy_context
 )
 
+# Agent request/response/validation types - SSOT for agent execution flows
+from .agent_types import (
+    # Core agent execution types
+    AgentExecutionRequest, AgentExecutionResult, AgentValidationResult,
+    # Enhanced typed result for better validation
+    TypedAgentResult
+)
+
 __all__ = [
     # Legacy types
     "PerformanceMetrics", 
@@ -62,7 +70,7 @@ __all__ = [
     "AuthValidationResult", "SessionValidationResult", "TokenResponse",
     
     # WebSocket types
-    "ConnectionState", "WebSocketConnectionInfo", "WebSocketEventType", "WebSocketMessage",
+    "ConnectionState", "WebSocketConnectionInfo", "WebSocketEventType", "WebSocketMessage", "WebSocketAuthContext",
     "WebSocketEventPriority", "StronglyTypedWebSocketEvent",
     
     # Database types
@@ -73,6 +81,9 @@ __all__ = [
     
     # Agent execution types
     "AgentExecutionState", "AgentExecutionMetrics",
+    
+    # Agent request/response/validation types - CRITICAL for agent execution flows
+    "AgentExecutionRequest", "AgentExecutionResult", "AgentValidationResult", "TypedAgentResult",
     
     # Tool execution types  
     "ToolExecutionState", "ToolExecutionRequest", "ToolExecutionResult",

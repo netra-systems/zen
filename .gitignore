@@ -19,6 +19,9 @@ htmlcov/
 .ruff_cache/
 .coverage*
 
+# Test output files
+junit.xml
+
 # Dev launcher cache
 .dev_cache/
 .dev_launcher_cache/
@@ -68,6 +71,12 @@ gcp-*.json
 coverage/
 test-results/
 *.log
+
+# Coverage HTML reports (generated artifacts)
+reports/coverage/html/
+htmlcov/
+coverage.json
+coverage.xml
 
 # Database
 *.db

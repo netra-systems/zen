@@ -67,7 +67,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 # Real WebSocket Integration
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.event_types import WebSocketEventType
+from netra_backend.app.websocket_core.event_validation_framework import EventType as WebSocketEventType
 
 # State and Schema Models for REAL data
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult

@@ -175,7 +175,7 @@ class E2EAuthHelper:
             Valid JWT token string
         """
         email = email or self.config.test_user_email
-        permissions = permissions or ["read", "write"]
+        permissions = permissions if permissions is not None else ["read", "write"]
         
         # Create token payload
         payload = {
@@ -316,10 +316,11 @@ class E2EAuthHelper:
         last_error = None
         for attempt in range(max_retries + 1):
             try:
-                # Create WebSocket connection with full authentication
+                # PHASE 2 FIX: Use additional_headers instead of extra_headers for compatibility
+                # This fixes 100% connection failure rate under concurrent load
                 websocket = await websockets.connect(
                     websocket_url,
-                    extra_headers=headers,
+                    additional_headers=headers,  # FIXED: Changed from extra_headers to additional_headers
                     subprotocols=subprotocols,
                     ping_interval=20,  # Keep connection alive
                     ping_timeout=10,
@@ -1065,7 +1066,7 @@ def get_jwt_token_for_user(
     return auth_helper.create_test_jwt_token(
         user_id=user_id,
         email=email,
-        permissions=permissions or ["read", "write"],
+        permissions=permissions if permissions is not None else ["read", "write"],
         exp_minutes=exp_minutes
     )
 
@@ -1115,7 +1116,7 @@ async def create_authenticated_user(
     # Generate user ID if not provided
     user_id = user_id or f"test-user-{uuid.uuid4().hex[:8]}"
     email = email or auth_helper.config.test_user_email
-    permissions = permissions or ["read", "write"]
+    permissions = permissions if permissions is not None else ["read", "write"]
     
     # Create JWT token with user data
     token = auth_helper.create_test_jwt_token(
@@ -1174,7 +1175,7 @@ async def create_authenticated_user_context(
     jwt_token = auth_helper.create_test_jwt_token(
         user_id=user_id,
         email=user_email,
-        permissions=permissions or ["read", "write"]
+        permissions=permissions if permissions is not None else ["read", "write"]
     )
     
     # Generate unified IDs using SSOT ID generator
@@ -1198,7 +1199,7 @@ async def create_authenticated_user_context(
             'jwt_token': jwt_token,
             'user_email': user_email,
             'environment': environment,
-            'permissions': permissions or ["read", "write"],
+            'permissions': permissions if permissions is not None else ["read", "write"],
             'test_mode': True,
             'e2e_test': True
         },

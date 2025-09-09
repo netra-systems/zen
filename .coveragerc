@@ -33,9 +33,6 @@ precision = 2
 show_missing = True
 skip_covered = False
 
-[html]
-directory = reports/coverage/html
-
 [json]
 output = reports/coverage/coverage.json
 

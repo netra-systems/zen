@@ -70,6 +70,10 @@ from netra_backend.app.websocket_core.utils import (
     validate_websocket_handshake_completion,
     _safe_websocket_state_for_logging
 )
+from netra_backend.app.websocket_core.connection_state_machine import (
+    get_connection_state_machine,
+    ApplicationConnectionState
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -250,7 +254,7 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # PHASE 1 FIX 1: Integrate ApplicationConnectionStateMachine after successful accept()
         # This addresses the race condition where message handling begins before accept() completion
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
         
         # Generate preliminary connection_id for state machine registration
         # This will be updated with proper user context after authentication
@@ -1075,7 +1079,6 @@ async def websocket_endpoint(websocket: WebSocket):
             # Legacy handshake validation for backward compatibility
             if environment in ["staging", "production"]:
                 # Additional validation using existing utils for double-check
-                from netra_backend.app.websocket_core.utils import validate_websocket_handshake_completion
                 
                 handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=2.0)
                 if not handshake_valid:
@@ -1150,7 +1153,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     )
                 
                 # Double-check with legacy validation
-                from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
                 if not is_websocket_connected_and_ready(websocket):
                     logger.warning("WebSocket not ready after final confirmation - potential race condition detected")
                     race_detector.add_detected_pattern(
@@ -1229,7 +1231,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 raise WebSocketDisconnect(code=1006, reason="Race condition prevented message handling")
             
             # Legacy validation as backup
-            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready, validate_websocket_handshake_completion
             if not is_websocket_connected_and_ready(websocket):
                 logger.error(f"WebSocket connection not ready for message handling for user {user_id}")
                 race_detector.add_detected_pattern(
@@ -1420,11 +1421,9 @@ async def _handle_websocket_messages(
     try:
         first_check = True
         # CRITICAL FIX: Use enhanced connection validation to prevent race conditions
-        from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
         
         # PHASE 1 FIX 2: Add accept completion validation before message routing
         # This ensures WebSocket accept() is fully completed before processing messages
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
         
         # Validate connection state machine readiness before message processing
         state_machine = get_connection_state_machine(connection_id)

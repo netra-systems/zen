@@ -14,8 +14,21 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 from google.auth import default
 from google.auth.exceptions import GoogleAuthError
-from google.cloud import logging as gcp_logging
-from google.cloud import secretmanager
+
+# Optional GCP imports with graceful fallback
+try:
+    from google.cloud import logging as gcp_logging
+    GCP_LOGGING_AVAILABLE = True
+except ImportError:
+    gcp_logging = None
+    GCP_LOGGING_AVAILABLE = False
+
+try:
+    from google.cloud import secretmanager
+    GCP_SECRET_MANAGER_AVAILABLE = True
+except ImportError:
+    secretmanager = None
+    GCP_SECRET_MANAGER_AVAILABLE = False
 
 from test_framework.unified.base_interfaces import (
     BaseTestComponent,

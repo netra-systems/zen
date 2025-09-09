@@ -180,7 +180,8 @@ class UserExecutionEngine:
     """
     
     # Constants (immutable, safe to share)
-    AGENT_EXECUTION_TIMEOUT = 30.0
+    # CRITICAL REMEDIATION: Reduced timeout for faster feedback and reduced blocking
+    AGENT_EXECUTION_TIMEOUT = 25.0  # Reduced from 30s for faster feedback
     MAX_HISTORY_SIZE = 100
     
     def __init__(self, 

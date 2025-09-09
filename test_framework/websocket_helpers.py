@@ -188,6 +188,124 @@ class WebSocketTestClient:
 # WEBSOCKET CONNECTION UTILITIES
 # =============================================================================
 
+class WebSocketClientAbstraction:
+    """
+    PHASE 2 FIX: WebSocket client abstraction to handle parameter compatibility.
+    
+    This class provides a unified interface for WebSocket connections that
+    automatically handles the extra_headers vs additional_headers compatibility
+    issue across different websockets library versions.
+    """
+    
+    @staticmethod
+    async def connect_with_compatibility(
+        url: str,
+        headers: Optional[Dict[str, str]] = None,
+        subprotocols: Optional[List[str]] = None,
+        timeout: float = 10.0,
+        **kwargs
+    ):
+        """
+        Connect to WebSocket with automatic parameter compatibility handling.
+        
+        Args:
+            url: WebSocket URL to connect to
+            headers: Headers to send (automatically uses correct parameter name)
+            subprotocols: WebSocket subprotocols
+            timeout: Connection timeout
+            **kwargs: Additional websockets.connect parameters
+            
+        Returns:
+            WebSocket connection object
+            
+        Raises:
+            ConnectionError: If connection fails with both parameter variations
+        """
+        if not WEBSOCKETS_AVAILABLE:
+            raise RuntimeError("websockets library is not available")
+            
+        # Prepare base connection parameters
+        connect_params = {
+            "ping_interval": kwargs.get("ping_interval", 20),
+            "ping_timeout": kwargs.get("ping_timeout", 10),
+            "close_timeout": kwargs.get("close_timeout", 5),
+            "max_size": kwargs.get("max_size", 2**20),
+            "timeout": timeout
+        }
+        
+        # Add subprotocols if provided
+        if subprotocols:
+            connect_params["subprotocols"] = subprotocols
+        
+        # Try additional_headers first (newer API)
+        if headers:
+            try:
+                logger.debug("WEBSOCKET CLIENT: Attempting connection with additional_headers (newer API)")
+                return await websockets.connect(
+                    url,
+                    additional_headers=headers,
+                    **connect_params
+                )
+            except (TypeError, AttributeError) as e:
+                logger.debug(f"WEBSOCKET CLIENT: additional_headers failed: {e}, trying extra_headers (older API)")
+                
+                # Fallback to extra_headers (older API)
+                try:
+                    return await websockets.connect(
+                        url,
+                        extra_headers=headers,
+                        **connect_params
+                    )
+                except Exception as fallback_error:
+                    raise ConnectionError(
+                        f"Failed to connect with both additional_headers and extra_headers. "
+                        f"Original error: {e}, Fallback error: {fallback_error}"
+                    )
+            except Exception as e:
+                # Re-raise non-compatibility errors
+                raise ConnectionError(f"WebSocket connection failed: {e}")
+        else:
+            # No headers, simple connection
+            try:
+                return await websockets.connect(url, **connect_params)
+            except Exception as e:
+                raise ConnectionError(f"WebSocket connection failed: {e}")
+    
+    @staticmethod
+    def get_compatible_connection_params(headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        """
+        Get connection parameters with automatic compatibility detection.
+        
+        Args:
+            headers: Headers to include
+            
+        Returns:
+            Dictionary with appropriate header parameter name
+        """
+        if not headers:
+            return {}
+            
+        # Test which parameter the current websockets library accepts
+        import inspect
+        
+        try:
+            # Check websockets.connect signature
+            connect_signature = inspect.signature(websockets.connect)
+            if "additional_headers" in connect_signature.parameters:
+                return {"additional_headers": headers}
+            elif "extra_headers" in connect_signature.parameters:
+                return {"extra_headers": headers}
+            else:
+                logger.warning("WEBSOCKET CLIENT: Neither additional_headers nor extra_headers found in websockets.connect signature")
+                return {"additional_headers": headers}  # Default to newer parameter
+        except Exception as e:
+            logger.warning(f"WEBSOCKET CLIENT: Failed to inspect websockets.connect signature: {e}")
+            return {"additional_headers": headers}  # Default to newer parameter
+
+# =============================================================================
+# WEBSOCKET CONNECTION UTILITIES
+# =============================================================================
+
 class MockWebSocketConnection:
     """Mock WebSocket connection for testing without Docker services."""
     
@@ -437,9 +555,10 @@ class WebSocketTestHelpers:
         last_error = None
         for attempt in range(max_retries):
             try:
-                # Try connection with retries - handle different websockets API versions
+                # PHASE 2 FIX: Handle different websockets API versions with better compatibility
+                # Use additional_headers as primary, extra_headers as fallback
                 try:
-                    # Try newer websockets API (>= 10.0)
+                    # Try newer websockets API (>= 10.0) with additional_headers
                     if subprotocols:
                         connection = await asyncio.wait_for(
                             websockets.connect(
@@ -457,8 +576,9 @@ class WebSocketTestHelpers:
                             ),
                             timeout=timeout
                         )
-                except TypeError:
-                    # Fallback to older API (< 10.0)
+                except (TypeError, AttributeError):
+                    # Fallback to older API (< 10.0) with extra_headers
+                    logger.debug("WEBSOCKET COMPATIBILITY: Falling back to extra_headers for older websockets library")
                     if subprotocols:
                         connection = await asyncio.wait_for(
                             websockets.connect(
@@ -872,15 +992,16 @@ class HighVolumeThroughputClient:
         headers = {"Authorization": f"Bearer {self.token}"}
         
         try:
-            # Try newer websockets API first
+            # PHASE 2 FIX: Try newer websockets API first with additional_headers
             try:
                 self.websocket = await websockets.connect(
                     self.uri, 
                     additional_headers=headers,
                     subprotocols=["jwt-auth"]
                 )
-            except TypeError:
-                # Fallback to older API
+            except (TypeError, AttributeError):
+                # Fallback to older API with extra_headers
+                logger.debug("HIGH VOLUME CLIENT: Falling back to extra_headers compatibility mode")
                 self.websocket = await websockets.connect(
                     self.uri, 
                     extra_headers=headers,
@@ -893,7 +1014,8 @@ class HighVolumeThroughputClient:
                     self.uri, 
                     additional_headers=headers
                 )
-            except TypeError:
+            except (TypeError, AttributeError):
+                logger.debug("HIGH VOLUME CLIENT: Basic connection using extra_headers compatibility")
                 self.websocket = await websockets.connect(
                     self.uri, 
                     extra_headers=headers

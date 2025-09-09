@@ -314,6 +314,57 @@ def _add_session_middleware(app: FastAPI, session_config: dict) -> None:
     )
 
 
+def setup_gcp_auth_context_middleware(app: FastAPI) -> None:
+    """Setup GCP Authentication Context middleware for error reporting and user isolation.
+    
+    CRITICAL FIX: This function integrates GCPAuthContextMiddleware into the SSOT middleware setup.
+    The middleware MUST be installed AFTER SessionMiddleware to ensure request.session access.
+    
+    Business Value Justification:
+    - Enterprise customers require GDPR/SOX compliance with user-specific error tracking
+    - Multi-user error isolation enables proper enterprise audit requirements
+    - Proper middleware order prevents Golden Path authentication failures
+    """
+    try:
+        from shared.middleware.gcp_auth_context import GCPAuthContextMiddleware
+        from shared.isolated_environment import get_env
+        
+        env_manager = get_env()
+        environment = env_manager.get('ENVIRONMENT', '').lower()
+        project_id = env_manager.get('GCP_PROJECT_ID') or env_manager.get('GOOGLE_CLOUD_PROJECT')
+        
+        # Only install in environments with GCP error reporting
+        if project_id and environment in ['staging', 'production']:
+            app.add_middleware(GCPAuthContextMiddleware, enable_user_isolation=True)
+            logger.info(f"GCP Authentication Context Middleware installed for {environment} environment")
+        else:
+            logger.debug(f"GCP Auth Context middleware skipped for environment: {environment}, project_id: {bool(project_id)}")
+            
+    except ImportError as e:
+        # Try fallback import from netra_backend
+        try:
+            from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
+            from shared.isolated_environment import get_env
+            
+            env_manager = get_env()
+            environment = env_manager.get('ENVIRONMENT', '').lower()
+            project_id = env_manager.get('GCP_PROJECT_ID') or env_manager.get('GOOGLE_CLOUD_PROJECT')
+            
+            # Only install in environments with GCP error reporting
+            if project_id and environment in ['staging', 'production']:
+                app.add_middleware(GCPAuthContextMiddleware, enable_user_isolation=True)
+                logger.info(f"GCP Authentication Context Middleware installed (fallback import) for {environment}")
+            else:
+                logger.debug(f"GCP Auth Context middleware skipped (fallback), environment: {environment}")
+                
+        except ImportError:
+            logger.warning(f"GCP Authentication Context Middleware not available: {e}")
+    except Exception as e:
+        logger.error(f"Error setting up GCP Authentication Context middleware: {e}")
+        # Don't fail app startup if middleware setup fails
+        pass
+
+
 def setup_middleware(app: FastAPI) -> None:
     """
     Main middleware setup function - SSOT for all middleware configuration.
@@ -327,16 +378,19 @@ def setup_middleware(app: FastAPI) -> None:
         # 1. Session middleware (must be first for request.session access)
         setup_session_middleware(app)
         
-        # 2. CORS middleware (handles cross-origin requests)
+        # 2. GCP Authentication Context middleware (after session, needs request.session access)
+        setup_gcp_auth_context_middleware(app)
+        
+        # 3. CORS middleware (handles cross-origin requests)
         setup_cors_middleware(app)
         
-        # 3. Authentication middleware (after CORS, before application logic)
+        # 4. Authentication middleware (after CORS, before application logic)
         setup_auth_middleware(app)
         
-        # 4. GCP WebSocket readiness middleware (environment specific)
+        # 5. GCP WebSocket readiness middleware (environment specific)
         setup_gcp_websocket_readiness_middleware(app)
         
-        # 5. CORS redirect middleware (handles redirects with CORS headers)
+        # 6. CORS redirect middleware (handles redirects with CORS headers)
         cors_redirect = create_cors_redirect_middleware()
         app.middleware("http")(cors_redirect)
         

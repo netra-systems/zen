@@ -22,11 +22,11 @@ from netra_backend.tests.database.test_message_repository import TestMessageRepo
 from netra_backend.tests.database.test_repository_auth import (
 TestOptimizationRepositoryStorage,
 )
-from netra_backend.tests.database.test_thread_repository import TestThreadRepositoryOperations
+# from netra_backend.tests.database.test_thread_repository import TestThreadRepositoryOperations  # File missing
 
 # Re-export for backward compatibility
 __all__ = [
-'TestThreadRepositoryOperations',
+# 'TestThreadRepositoryOperations',  # File missing
 'TestMessageRepositoryQueries',
 'TestClickHouseConnectionPool',
 'TestMigrationRunnerSafety',

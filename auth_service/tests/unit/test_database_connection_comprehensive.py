@@ -98,6 +98,7 @@ class TestAuthDatabaseConnectionInitialization:
         with patch.object(get_env(), 'get') as mock_get:
             mock_get.side_effect = lambda key, default=None: {
                 "AUTH_FAST_TEST_MODE": "true",
+                "AUTH_USE_MEMORY_DB": "true",
                 "ENVIRONMENT": "test"
             }.get(key, default)
             

@@ -90,15 +90,8 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
         k_service = env.get("K_SERVICE", "")  # GCP Cloud Run service name
         
-        # Auto-detect staging environments that should enable E2E bypass
-        is_staging_environment = (
-            current_env == "staging" or
-            "staging" in google_project.lower() or
-            k_service.endswith("-staging") or  # Cloud Run staging service detection
-            "staging" in k_service.lower()
-        )
-        
-        # Standard E2E environment variable detection
+        # SECURITY FIX: E2E environment variable detection only
+        # Removed automatic staging environment detection to prevent auth bypass
         is_e2e_via_env_vars = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
@@ -107,24 +100,59 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             env.get("E2E_TEST_ENV") == "staging"
         )
         
-        # ENHANCED FIX: Combine environment variable detection with staging auto-detection
-        is_e2e_via_env = is_e2e_via_env_vars or is_staging_environment
+        # CRITICAL SECURITY FIX: Only use explicit environment variables for E2E bypass
+        # Do NOT automatically bypass auth for staging deployments
+        is_e2e_via_env = is_e2e_via_env_vars
         
-        # Log enhanced detection for debugging
-        if is_staging_environment and not is_e2e_via_env_vars:
-            logger.info(f"ENHANCED E2E DETECTION: Auto-enabled for staging environment "
+        # PHASE 1 FIX: Enhanced concurrent E2E detection for race condition resilience
+        # Check for concurrent test execution markers
+        concurrent_test_markers = [
+            env.get("PYTEST_XDIST_WORKER"),  # pytest-xdist worker ID
+            env.get("PYTEST_CURRENT_TEST"),  # Current test name
+            env.get("RACE_CONDITION_TEST_MODE"),  # Explicit race condition testing
+            env.get("CONCURRENT_E2E_SESSION_ID")  # Session-based concurrent testing
+        ]
+        
+        # Enhanced E2E detection includes concurrent test scenarios
+        is_concurrent_e2e = any(marker is not None for marker in concurrent_test_markers)
+        
+        # Update E2E detection to include concurrent scenarios
+        is_e2e_via_env = is_e2e_via_env_vars or is_concurrent_e2e
+        
+        # Log E2E detection for debugging
+        if is_e2e_via_env_vars:
+            logger.info(f"E2E DETECTION: Enabled via environment variables "
                        f"(env={current_env}, project={google_project[:20]}..., service={k_service})")
         
-        # Create E2E context if detected
-        if is_e2e_via_headers or is_e2e_via_env:
+        # CRITICAL SECURITY FIX: Prevent header-based bypass in production
+        # Headers can be spoofed by attackers, so only allow them in safe environments
+        is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
+        
+        # CRITICAL SECURITY: Production environments NEVER allow E2E bypass
+        if is_production:
+            allow_e2e_bypass = False  # NEVER allow bypass in production
+            security_mode = "production_strict"
+            logger.warning(f"SECURITY DEBUG: Production detected - blocking E2E bypass "
+                         f"(env={current_env}, project={google_project}, is_prod={is_production})")
+            if is_e2e_via_headers or is_e2e_via_env:
+                logger.warning(f"SECURITY: E2E bypass attempt blocked in production environment "
+                             f"(project: {google_project}, service: {k_service})")
+        else:
+            # In non-production, allow both headers and env vars for E2E testing
+            allow_e2e_bypass = is_e2e_via_headers or is_e2e_via_env
+            security_mode = "development_permissive"
+        
+        # Create E2E context if bypass is allowed based on security mode
+        logger.warning(f"SECURITY DEBUG: allow_e2e_bypass={allow_e2e_bypass}, is_production={is_production}")
+        if allow_e2e_bypass:
             e2e_context = {
                 "is_e2e_testing": True,
                 "detection_method": {
-                    "via_headers": is_e2e_via_headers,
+                    "via_headers": is_e2e_via_headers and not is_production,  # Headers blocked in production
                     "via_environment": is_e2e_via_env,
-                    "via_env_vars": is_e2e_via_env_vars,
-                    "via_staging_auto_detection": is_staging_environment
+                    "via_env_vars": is_e2e_via_env_vars
                 },
+                "security_mode": security_mode,
                 "e2e_headers": e2e_headers,
                 "environment": current_env,
                 "google_cloud_project": google_project[:30] + "..." if len(google_project) > 30 else google_project,
@@ -199,6 +227,7 @@ class UnifiedWebSocketAuthenticator:
     - Standardized error handling and responses
     - UserExecutionContext creation for factory pattern
     - Comprehensive logging and monitoring
+    - PHASE 1: Authentication circuit breaker for concurrent connections
     """
     
     def __init__(self):
@@ -212,7 +241,18 @@ class UnifiedWebSocketAuthenticator:
         self._websocket_auth_failures = 0
         self._connection_states_seen = {}
         
-        logger.info("UnifiedWebSocketAuthenticator initialized with SSOT compliance")
+        # PHASE 1 FIX: Authentication circuit breaker for race condition protection
+        self._circuit_breaker = {
+            "failure_count": 0,
+            "failure_threshold": 5,  # Trip after 5 consecutive failures
+            "reset_timeout": 30.0,  # Reset after 30 seconds
+            "last_failure_time": None,
+            "state": "CLOSED",  # CLOSED (normal), OPEN (failing), HALF_OPEN (testing)
+            "concurrent_token_cache": {},  # Cache tokens during concurrent access
+            "token_cache_lock": asyncio.Lock()
+        }
+        
+        logger.info("UnifiedWebSocketAuthenticator initialized with SSOT compliance and circuit breaker protection")
     
     async def authenticate_websocket_connection(
         self, 
@@ -267,10 +307,24 @@ class UnifiedWebSocketAuthenticator:
         logger.debug(f"🔐 WEBSOCKET AUTH ATTEMPT DEBUG: {json.dumps(auth_attempt_debug, indent=2)}")
         
         try:
+            # PHASE 1 FIX: Check authentication circuit breaker before proceeding
+            circuit_state = await self._check_circuit_breaker()
+            if circuit_state == "OPEN":
+                error_msg = "Authentication circuit breaker is OPEN - too many recent failures"
+                logger.warning(f"SSOT WEBSOCKET AUTH: {error_msg}")
+                self._websocket_auth_failures += 1
+                
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message=error_msg,
+                    error_code="AUTH_CIRCUIT_BREAKER_OPEN"
+                )
+            
             # Validate WebSocket connection state first
             if not self._is_websocket_valid_for_auth(websocket):
                 error_msg = f"WebSocket in invalid state for authentication: {_safe_websocket_state_for_logging(connection_state)}"
                 logger.error(f"SSOT WEBSOCKET AUTH: {error_msg}")
+                await self._record_circuit_breaker_failure()
                 self._websocket_auth_failures += 1
                 
                 return WebSocketAuthResult(
@@ -283,6 +337,14 @@ class UnifiedWebSocketAuthenticator:
             if e2e_context is None:
                 e2e_context = extract_e2e_context_from_websocket(websocket)
             
+            # PHASE 1 FIX: Check concurrent token cache for this E2E context
+            cached_result = await self._check_concurrent_token_cache(e2e_context)
+            if cached_result:
+                logger.info("SSOT WEBSOCKET AUTH: Using cached authentication result for concurrent connection")
+                await self._record_circuit_breaker_success()
+                self._websocket_auth_successes += 1
+                return cached_result
+            
             # Use SSOT authentication service for WebSocket authentication with E2E context
             auth_result, user_context = await self._auth_service.authenticate_websocket(
                 websocket, 
@@ -290,6 +352,9 @@ class UnifiedWebSocketAuthenticator:
             )
             
             if not auth_result.success:
+                # PHASE 1 FIX: Record circuit breaker failure
+                await self._record_circuit_breaker_failure()
+                
                 # Enhanced failure debugging
                 failure_debug = {
                     "error_code": auth_result.error_code,
@@ -297,6 +362,7 @@ class UnifiedWebSocketAuthenticator:
                     "connection_state": str(connection_state),
                     "failure_count": self._websocket_auth_failures + 1,
                     "success_rate": (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100,
+                    "circuit_breaker_state": self._circuit_breaker["state"],
                     "websocket_info": {
                         "client_host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
                         "headers_count": len(websocket.headers) if websocket.headers else 0,
@@ -317,6 +383,19 @@ class UnifiedWebSocketAuthenticator:
                     error_code=auth_result.error_code
                 )
             
+            # PHASE 1 FIX: Record circuit breaker success and cache result for concurrent access
+            await self._record_circuit_breaker_success()
+            
+            # Create successful auth result
+            websocket_auth_result = WebSocketAuthResult(
+                success=True,
+                user_context=user_context,
+                auth_result=auth_result
+            )
+            
+            # PHASE 1 FIX: Cache result for concurrent E2E contexts
+            await self._cache_concurrent_token_result(e2e_context, websocket_auth_result)
+            
             # Authentication successful - Enhanced success logging  
             success_debug = {
                 "user_id_prefix": auth_result.user_id[:8] if auth_result.user_id else '[NO_USER_ID]',
@@ -324,6 +403,7 @@ class UnifiedWebSocketAuthenticator:
                 "success_count": self._websocket_auth_successes + 1,
                 "success_rate": ((self._websocket_auth_successes + 1) / max(1, self._websocket_auth_attempts)) * 100,
                 "connection_state": str(connection_state),
+                "circuit_breaker_state": self._circuit_breaker["state"],
                 "permissions_count": len(auth_result.permissions) if auth_result.permissions else 0,
                 "websocket_info": {
                     "client_host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
@@ -336,19 +416,19 @@ class UnifiedWebSocketAuthenticator:
             logger.debug(f"✅ WEBSOCKET AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._websocket_auth_successes += 1
             
-            return WebSocketAuthResult(
-                success=True,
-                user_context=user_context,
-                auth_result=auth_result
-            )
+            return websocket_auth_result
             
         except Exception as e:
+            # PHASE 1 FIX: Record circuit breaker failure for exceptions too
+            await self._record_circuit_breaker_failure()
+            
             # Enhanced exception debugging
             exception_debug = {
                 "exception_type": type(e).__name__,
                 "exception_message": str(e),
                 "connection_state": str(connection_state),
                 "websocket_available": websocket is not None,
+                "circuit_breaker_state": self._circuit_breaker["state"],
                 "client_info": {
                     "host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket and websocket.client else 'no_client',
                     "port": safe_get_attr(websocket.client, 'port', 'no_client') if websocket and websocket.client else 'no_client'
@@ -367,6 +447,131 @@ class UnifiedWebSocketAuthenticator:
                 error_message=f"WebSocket authentication error: {str(e)}",
                 error_code="WEBSOCKET_AUTH_EXCEPTION"
             )
+    
+    async def _check_circuit_breaker(self) -> str:
+        """
+        PHASE 1 FIX: Check authentication circuit breaker state.
+        
+        Returns:
+            Circuit breaker state: 'CLOSED', 'OPEN', or 'HALF_OPEN'
+        """
+        current_time = time.time()
+        
+        # Check if circuit breaker should reset from OPEN to HALF_OPEN
+        if (self._circuit_breaker["state"] == "OPEN" and 
+            self._circuit_breaker["last_failure_time"] and
+            current_time - self._circuit_breaker["last_failure_time"] > self._circuit_breaker["reset_timeout"]):
+            
+            self._circuit_breaker["state"] = "HALF_OPEN"
+            self._circuit_breaker["failure_count"] = 0
+            logger.info("CIRCUIT BREAKER: Transitioning from OPEN to HALF_OPEN for testing")
+            
+        return self._circuit_breaker["state"]
+    
+    async def _record_circuit_breaker_failure(self):
+        """PHASE 1 FIX: Record authentication failure for circuit breaker."""
+        self._circuit_breaker["failure_count"] += 1
+        self._circuit_breaker["last_failure_time"] = time.time()
+        
+        # Trip circuit breaker if failure threshold reached
+        if self._circuit_breaker["failure_count"] >= self._circuit_breaker["failure_threshold"]:
+            if self._circuit_breaker["state"] != "OPEN":
+                self._circuit_breaker["state"] = "OPEN"
+                logger.warning(f"CIRCUIT BREAKER: OPENED after {self._circuit_breaker['failure_count']} consecutive failures")
+    
+    async def _record_circuit_breaker_success(self):
+        """PHASE 1 FIX: Record authentication success for circuit breaker."""
+        # Reset failure count on success
+        self._circuit_breaker["failure_count"] = 0
+        
+        # Close circuit breaker if it was HALF_OPEN
+        if self._circuit_breaker["state"] == "HALF_OPEN":
+            self._circuit_breaker["state"] = "CLOSED"
+            logger.info("CIRCUIT BREAKER: CLOSED after successful authentication")
+    
+    async def _check_concurrent_token_cache(self, e2e_context: Optional[Dict[str, Any]]) -> Optional[WebSocketAuthResult]:
+        """
+        PHASE 1 FIX: Check cached authentication result for concurrent E2E contexts.
+        
+        Args:
+            e2e_context: E2E test context for cache key generation
+            
+        Returns:
+            Cached WebSocketAuthResult or None if not found
+        """
+        if not e2e_context or not e2e_context.get("is_e2e_testing"):
+            return None
+            
+        async with self._circuit_breaker["token_cache_lock"]:
+            # Generate cache key from E2E context
+            cache_key = self._generate_cache_key(e2e_context)
+            if cache_key in self._circuit_breaker["concurrent_token_cache"]:
+                cached_entry = self._circuit_breaker["concurrent_token_cache"][cache_key]
+                
+                # Check if cache entry is still valid (5 minutes)
+                if time.time() - cached_entry["timestamp"] < 300:
+                    logger.debug(f"CONCURRENT CACHE: Hit for E2E context {cache_key[:16]}...")
+                    return cached_entry["result"]
+                else:
+                    # Remove expired entry
+                    del self._circuit_breaker["concurrent_token_cache"][cache_key]
+                    logger.debug(f"CONCURRENT CACHE: Expired entry removed {cache_key[:16]}...")
+                    
+        return None
+    
+    async def _cache_concurrent_token_result(self, e2e_context: Optional[Dict[str, Any]], result: WebSocketAuthResult):
+        """
+        PHASE 1 FIX: Cache authentication result for concurrent E2E contexts.
+        
+        Args:
+            e2e_context: E2E test context for cache key generation
+            result: WebSocketAuthResult to cache
+        """
+        if not e2e_context or not e2e_context.get("is_e2e_testing") or not result.success:
+            return
+            
+        async with self._circuit_breaker["token_cache_lock"]:
+            cache_key = self._generate_cache_key(e2e_context)
+            
+            # Limit cache size to prevent memory issues (max 50 entries)
+            if len(self._circuit_breaker["concurrent_token_cache"]) >= 50:
+                # Remove oldest entry
+                oldest_key = min(
+                    self._circuit_breaker["concurrent_token_cache"].keys(),
+                    key=lambda k: self._circuit_breaker["concurrent_token_cache"][k]["timestamp"]
+                )
+                del self._circuit_breaker["concurrent_token_cache"][oldest_key]
+                logger.debug("CONCURRENT CACHE: Removed oldest entry to maintain size limit")
+            
+            self._circuit_breaker["concurrent_token_cache"][cache_key] = {
+                "result": result,
+                "timestamp": time.time()
+            }
+            
+            logger.debug(f"CONCURRENT CACHE: Stored result for E2E context {cache_key[:16]}...")
+    
+    def _generate_cache_key(self, e2e_context: Dict[str, Any]) -> str:
+        """
+        PHASE 1 FIX: Generate cache key from E2E context.
+        
+        Args:
+            e2e_context: E2E test context
+            
+        Returns:
+            Cache key string
+        """
+        import hashlib
+        
+        # Create deterministic cache key from E2E context
+        key_parts = [
+            e2e_context.get("test_environment", "unknown"),
+            e2e_context.get("e2e_oauth_key", ""),
+            str(e2e_context.get("bypass_enabled", False)),
+            e2e_context.get("fix_version", "")
+        ]
+        
+        key_string = "|".join(str(part) for part in key_parts)
+        return hashlib.md5(key_string.encode()).hexdigest()
     
     def _is_websocket_valid_for_auth(self, websocket: WebSocket) -> bool:
         """

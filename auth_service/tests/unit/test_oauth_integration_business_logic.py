@@ -20,11 +20,11 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone, timedelta
 
-from auth_service.auth_core.oauth.oauth_handler import OAuthHandler
-from auth_service.auth_core.oauth.oauth_validator import OAuthValidator
+from auth_service.auth_core.oauth.oauth_business_logic import OAuthBusinessLogic
+from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.business_logic.user_business_logic import UserBusinessLogic
 from auth_service.auth_core.database.oauth_repository import OAuthRepository
-from test_framework.mock_factory import MockFactory
+# MockFactory not available - using standard unittest.mock instead
 
 
 class TestOAuthIntegrationBusinessLogic:

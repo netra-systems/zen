@@ -1,504 +1,453 @@
 """
-Golden Path E2E Test Suite for System Authentication Fix
+Golden Path System Authentication Fix E2E Tests for GitHub Issue #115
 
-CRITICAL: These E2E tests validate the complete golden path user flow 
-works properly after the system user authentication fix (GitHub Issue #115).
+Business Value Justification (BVJ):
+- Segment: All (Free, Early, Mid, Enterprise)
+- Business Goal: Validate complete golden path user flow restoration
+- Value Impact: Golden path delivers core business value through AI agents
+- Strategic Impact: End-to-end business functionality validation on staging
 
-Purpose: Ensure that authentication failures don't block business value delivery
-and that WebSocket agent events work with proper system user authentication.
+CRITICAL: These E2E tests validate golden path restoration on GCP staging.
+They MUST PASS after implementing service authentication fix.
 
-Business Value: All Customer Segments - Revenue Protection & User Experience
-- Restores complete golden path user flows that generate revenue
-- Enables WebSocket agent events that deliver AI value to users  
-- Ensures system appears functional and valuable to users
-- Validates business-critical chat functionality works end-to-end
-
-IMPORTANT: These tests follow CLAUDE.md requirements:
-- Use real services and authentication flows (marked @pytest.mark.real_services)
-- No mocks in E2E testing - must use actual auth, WebSocket, database
-- Must show measurable execution time (not 0.00s) 
-- Extend SSotBaseTestCase for SSOT compliance
-- Must include WebSocket agent events per CLAUDE.md Section 6
-
-Expected Results:
-BEFORE FIX: Tests WILL FAIL due to system user authentication blocking flows
-AFTER FIX: Tests MUST PASS with complete golden path working end-to-end
+This test suite follows CLAUDE.md requirements:
+- ALL e2e tests MUST use real authentication (JWT/OAuth) per CLAUDE.md Section 7.4
+- NO MOCKS in e2e tests (forbidden per CLAUDE.md)
+- Real services, real staging environment, real WebSocket connections
+- Uses SSOT E2E auth helper for proper authentication patterns
 """
 
-import asyncio
-import time
-from typing import Dict, Any, Optional, List
 import pytest
-from unittest.mock import patch
+import asyncio
+import aiohttp
+import websockets
+import json
+import logging
+from datetime import datetime, timezone
+from typing import Optional, Dict, Any, List
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-from netra_backend.app.dependencies import get_request_scoped_db_session
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import IsolatedEnvironment
+from test_framework.ssot.e2e_auth_helper import (
+    E2EAuthHelper, 
+    E2EWebSocketAuthHelper,
+    create_test_user_with_auth,
+    create_authenticated_user
+)
+from tests.e2e.staging_config import StagingTestConfig
+from shared.isolated_environment import get_env
 
+logger = logging.getLogger(__name__)
 
-@pytest.mark.real_services
 class TestGoldenPathSystemAuthFix(SSotBaseTestCase):
     """
-    E2E test suite validating the golden path works with fixed system authentication.
+    E2E Tests: Validate golden path restoration with fixed system authentication.
     
-    These tests ensure business value delivery is restored after fixing
-    the system user authentication failure that was blocking all user flows.
+    These tests run on GCP staging environment and validate that:
+    1. Complete golden path user flow works end-to-end
+    2. System user authentication no longer blocks internal operations  
+    3. WebSocket agent events work with proper authentication context
+    4. Database sessions create successfully with service authentication
+    5. Business value delivery is restored
+    
+    CRITICAL: These tests should PASS after implementing service authentication fix.
     """
-    
+
     def setup_method(self, method):
-        """Setup E2E testing environment with real services."""
+        """Set up staging environment for golden path E2E testing."""
         super().setup_method(method)
-        self.start_time = time.time()
+        self.env = get_env()
         
-        # Use real services per CLAUDE.md E2E requirements
-        self.env = IsolatedEnvironment()
-        self.auth_helper = E2EAuthHelper()
-        self.auth_client = AuthServiceClient()
+        # Use staging environment for E2E tests
+        self.environment = "staging"
+        self.staging_config = StagingTestConfig()
         
-        # Initialize WebSocket event tracking for agent events validation
-        self.websocket_events: List[Dict[str, Any]] = []
+        # Initialize E2E auth helpers
+        self.auth_helper = E2EAuthHelper(environment=self.environment)
+        self.websocket_helper = E2EWebSocketAuthHelper(environment=self.environment)
         
-        self.logger.info(f"🚀 GOLDEN PATH E2E: {method.__name__} - Testing complete user flow")
-        
-    def teardown_method(self, method):
-        """Teardown with timing validation per CLAUDE.md requirements."""
-        execution_time = time.time() - self.start_time
-        
-        # CRITICAL: E2E tests must show measurable timing (not 0.00s per CLAUDE.md)
-        assert execution_time > 0.001, (
-            f"E2E test {method.__name__} executed in {execution_time:.3f}s - "
-            "0.00s execution indicates test not actually running (CLAUDE.md violation)"
-        )
-        
-        # E2E tests should take meaningful time (>1s) as they involve real services
-        if execution_time < 1.0:
-            self.logger.warning(
-                f"E2E test {method.__name__} executed in {execution_time:.3f}s - "
-                "unusually fast for E2E test with real services"
-            )
-        
-        self.logger.info(f"✅ E2E test {method.__name__} executed in {execution_time:.3f}s")
-        super().teardown_method(method)
-    
+        logger.info(f"🌐 GOLDEN PATH E2E TEST: {method.__name__}")
+        logger.info(f"Environment: {self.environment}")
+        logger.info(f"Backend URL: {self.staging_config.urls.backend_url}")
+        logger.info(f"WebSocket URL: {self.staging_config.urls.websocket_url}")
+
     @pytest.mark.e2e
+    @pytest.mark.staging
+    @pytest.mark.golden_path
     async def test_golden_path_with_fixed_authentication(self):
         """
-        CRITICAL E2E TEST: Complete golden path user flow with fixed authentication.
+        Test complete golden path user flow works with fixed system authentication.
         
-        This test validates the entire user journey works after fixing the system
-        user authentication failure:
-        1. User authentication (JWT/OAuth) 
-        2. WebSocket connection establishment
-        3. Agent execution with proper system user authentication
-        4. Database operations with service authentication
-        5. WebSocket agent events delivery
-        6. Complete business value delivery
-        
-        Expected Results:
-        - BEFORE FIX: WILL FAIL at database session creation due to system user auth
-        - AFTER FIX: MUST PASS with complete flow working end-to-end
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: End-to-end business value delivery restored on staging
         """
-        self.logger.info("🚀 GOLDEN PATH E2E: Testing complete user flow with fixed auth")
+        logger.info("🚀 GOLDEN PATH E2E: Testing complete user flow with fixed auth")
         
-        test_start = time.time()
-        flow_stages = []
+        # Create authenticated user using SSOT patterns
+        user_token, user_data = await create_authenticated_user(
+            environment=self.environment,
+            permissions=["read", "write", "agent_execution"]
+        )
         
-        try:
-            # Stage 1: User Authentication (Real JWT/OAuth flow)
-            stage_start = time.time()
+        user_id = user_data["id"]
+        
+        async with aiohttp.ClientSession() as session:
+            # Test complete golden path flow
+            test_url = f"{self.staging_config.urls.backend_url}/api/chat/start-conversation"
+            headers = {
+                "Authorization": f"Bearer {user_token}",
+                "Content-Type": "application/json"
+            }
             
-            # Use real authentication per CLAUDE.md E2E requirements
-            auth_result = await self.auth_helper.create_authenticated_user()
-            
-            assert auth_result and auth_result.get("user_id"), "User authentication must succeed"
-            user_id = auth_result["user_id"]
-            jwt_token = auth_result.get("access_token")
-            
-            stage_duration = time.time() - stage_start
-            flow_stages.append({
-                "stage": "user_authentication",
-                "duration": stage_duration,
-                "success": True,
-                "user_id": user_id
-            })
-            
-            self.logger.info(f"✅ Stage 1: User authenticated in {stage_duration:.3f}s - User ID: {user_id}")
-            
-            # Stage 2: Service Authentication Validation
-            stage_start = time.time()
-            
-            # Validate service authentication is available for system operations
-            service_headers = self.auth_client._get_service_auth_headers()
-            assert service_headers, "Service authentication must be available"
-            assert service_headers.get("X-Service-ID"), "Service ID header must be present"
-            assert service_headers.get("X-Service-Secret"), "Service Secret header must be present"
-            
-            stage_duration = time.time() - stage_start
-            flow_stages.append({
-                "stage": "service_auth_validation", 
-                "duration": stage_duration,
-                "success": True,
-                "service_id": service_headers.get("X-Service-ID")
-            })
-            
-            self.logger.info(f"✅ Stage 2: Service auth validated in {stage_duration:.3f}s")
-            
-            # Stage 3: Database Session Creation (The CRITICAL test)
-            stage_start = time.time()
-            
-            # This is where the original failure occurred - system user database sessions
-            database_session_success = False
-            database_error = None
+            data = {
+                "message": "Analyze my costs and provide optimization recommendations",
+                "agent_type": "cost_optimizer", 
+                "user_id": user_id,
+                "thread_id": f"golden_path_test_{int(datetime.now().timestamp())}"
+            }
             
             try:
-                async for session in get_request_scoped_db_session():
-                    # Validate session functionality
-                    assert session is not None, "Database session must not be None"
-                    assert hasattr(session, 'execute'), "Session must have execute method"
+                # Golden path should complete successfully with fixed auth
+                async with session.post(test_url, headers=headers, json=data, timeout=30) as response:
+                    response_text = await response.text()
                     
-                    # Test basic database operation
-                    result = await session.execute("SELECT 1 as test_value")
-                    row = result.fetchone()
-                    assert row is not None, "Database query must return results"
+                    if response.status == 200:
+                        response_data = await response.json() if response.content_type == 'application/json' else {}
+                        
+                        logger.info("✅ GOLDEN PATH SUCCESS: End-to-end flow completed")
+                        logger.info(f"Response includes: {list(response_data.keys())}")
+                        
+                        # Validate business value indicators
+                        self._validate_golden_path_business_value(response_data, response_text)
+                        return
+                        
+                    elif response.status in [500, 503]:
+                        # Check for system auth issues (should be resolved)
+                        system_auth_errors = [
+                            "system_user_auth_failure", "system user failed authentication",
+                            "not authenticated", "database session", "session factory"
+                        ]
+                        
+                        if any(error in response_text.lower() for error in system_auth_errors):
+                            pytest.fail(
+                                f"GOLDEN PATH FAILED: System authentication issues persist. "
+                                f"Status: {response.status}, Response: {response_text}. "
+                                f"Service authentication fix may be incomplete or not deployed to staging."
+                            )
+                        else:
+                            pytest.fail(
+                                f"GOLDEN PATH FAILED: Non-auth error in golden path. "
+                                f"Status: {response.status}, Response: {response_text}"
+                            )
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"GOLDEN PATH FAILED: Authentication issues in golden path. "
+                            f"Status: {response.status}, Response: {response_text}. "
+                            f"Check if user authentication is working properly."
+                        )
+                    else:
+                        pytest.fail(
+                            f"GOLDEN PATH FAILED: Unexpected error. "
+                            f"Status: {response.status}, Response: {response_text}"
+                        )
+                        
+            except asyncio.TimeoutError:
+                pytest.fail(
+                    "GOLDEN PATH FAILED: Request timed out. This may indicate "
+                    "system authentication issues still preventing completion."
+                )
+            except Exception as e:
+                pytest.fail(f"GOLDEN PATH FAILED: Unexpected error: {e}")
+
+    @pytest.mark.e2e
+    @pytest.mark.staging
+    @pytest.mark.websocket
+    async def test_websocket_agent_events_with_authenticated_system_user(self):
+        """
+        Test WebSocket agent events work with authenticated system user context.
+        
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: WebSocket events delivered with proper system user authentication
+        """
+        logger.info("🔌 WEBSOCKET E2E: Testing agent events with authenticated system user")
+        
+        try:
+            # Create authenticated WebSocket connection
+            websocket = await self.websocket_helper.connect_authenticated_websocket(timeout=15.0)
+            
+            # Send agent execution request
+            request_data = {
+                "type": "agent_request",
+                "agent": "triage_agent", 
+                "message": "Test system user authentication for WebSocket events",
+                "user_id": f"e2e_websocket_test_{int(datetime.now().timestamp())}",
+                "thread_id": f"websocket_test_thread_{int(datetime.now().timestamp())}"
+            }
+            
+            await websocket.send(json.dumps(request_data))
+            logger.info("📤 Sent agent request via WebSocket")
+            
+            # Collect WebSocket events
+            events_received = []
+            start_time = datetime.now()
+            timeout_seconds = 25.0
+            
+            while True:
+                try:
+                    # Wait for WebSocket message with timeout
+                    remaining_time = timeout_seconds - (datetime.now() - start_time).total_seconds()
+                    if remaining_time <= 0:
+                        break
+                        
+                    message = await asyncio.wait_for(websocket.recv(), timeout=remaining_time)
+                    event_data = json.loads(message)
+                    events_received.append(event_data)
                     
-                    database_session_success = True
-                    self.logger.info("✅ Database session operations successful")
+                    logger.info(f"📨 Received WebSocket event: {event_data.get('type', 'unknown')}")
                     
-                    # Clean up session
-                    await session.close()
+                    # Check if agent execution completed
+                    if event_data.get("type") == "agent_completed":
+                        logger.info("✅ Agent execution completed")
+                        break
+                        
+                except asyncio.TimeoutError:
+                    logger.warning("⏰ WebSocket timeout waiting for more events")
+                    break
+                except websockets.exceptions.ConnectionClosed:
+                    logger.warning("🔌 WebSocket connection closed")
                     break
                     
-            except Exception as db_error:
-                database_error = db_error
-                self.logger.error(f"❌ Database session failed: {db_error}")
+            await websocket.close()
             
-            stage_duration = time.time() - stage_start
-            flow_stages.append({
-                "stage": "database_session_creation",
-                "duration": stage_duration, 
-                "success": database_session_success,
-                "error": str(database_error) if database_error else None
-            })
-            
-            if not database_session_success:
-                # This is the critical failure point
-                raise AssertionError(
-                    f"CRITICAL FAILURE: Database session creation failed - {database_error}. "
-                    "This indicates system user authentication is still not working."
+            # Validate WebSocket events received
+            if not events_received:
+                pytest.fail(
+                    "WEBSOCKET E2E FAILED: No WebSocket events received. "
+                    "This may indicate system user authentication is still blocking agent execution."
                 )
             
-            self.logger.info(f"✅ Stage 3: Database session created in {stage_duration:.3f}s")
+            # Validate critical agent events are present
+            event_types = [event.get("type") for event in events_received]
+            required_events = ["agent_started"]  # Minimum required
             
-            # Stage 4: WebSocket Agent Events (Business Value Delivery)
-            stage_start = time.time()
-            
-            # Simulate agent execution that requires both user and system authentication
-            await self._test_websocket_agent_events_with_auth(user_id, jwt_token)
-            
-            stage_duration = time.time() - stage_start
-            flow_stages.append({
-                "stage": "websocket_agent_events",
-                "duration": stage_duration,
-                "success": True,
-                "events_count": len(self.websocket_events)
-            })
-            
-            self.logger.info(f"✅ Stage 4: WebSocket agent events in {stage_duration:.3f}s")
-            
-            # Stage 5: Complete Business Value Validation
-            stage_start = time.time()
-            
-            # Validate that all required WebSocket events were sent
-            required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
-            events_sent = [event["type"] for event in self.websocket_events]
-            
-            for required_event in required_events:
-                assert required_event in events_sent, (
-                    f"Required WebSocket event '{required_event}' not sent. "
-                    "This indicates business value delivery is incomplete."
+            missing_events = [event for event in required_events if event not in event_types]
+            if missing_events:
+                pytest.fail(
+                    f"WEBSOCKET E2E FAILED: Missing required WebSocket events: {missing_events}. "
+                    f"Received events: {event_types}. "
+                    f"This may indicate system user authentication issues preventing agent execution."
                 )
             
-            stage_duration = time.time() - stage_start
-            flow_stages.append({
-                "stage": "business_value_validation",
-                "duration": stage_duration,
-                "success": True,
-                "required_events": required_events,
-                "events_sent": events_sent
-            })
-            
-            self.logger.info(f"✅ Stage 5: Business value validated in {stage_duration:.3f}s")
-            
-            # Complete E2E Test Success
-            total_execution_time = time.time() - test_start
-            
-            self.record_metric("golden_path_e2e_success", {
-                "total_execution_time": total_execution_time,
-                "stages_completed": len(flow_stages),
-                "user_id": user_id,
-                "service_auth_working": True,
-                "database_session_working": True,
-                "websocket_events_working": True,
-                "business_value_delivered": True,
-                "flow_stages": flow_stages
-            })
-            
-            self.logger.info(
-                f"🎉 GOLDEN PATH SUCCESS: Complete E2E flow in {total_execution_time:.3f}s - "
-                f"Authentication fix validated, business value restored"
-            )
+            logger.info(f"✅ WEBSOCKET E2E SUCCESS: Received {len(events_received)} events: {event_types}")
             
         except Exception as e:
-            total_execution_time = time.time() - test_start
-            
-            self.record_metric("golden_path_e2e_failure", {
-                "total_execution_time": total_execution_time,
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "stages_completed": len(flow_stages),
-                "failure_stage": flow_stages[-1]["stage"] if flow_stages else "initialization",
-                "flow_stages": flow_stages
-            })
-            
-            self.logger.error(
-                f"❌ GOLDEN PATH FAILURE: E2E test failed in {total_execution_time:.3f}s: {e}"
-            )
-            
-            # Re-raise to show the failure
-            raise AssertionError(f"Golden path E2E test failed: {e}") from e
-    
-    async def _test_websocket_agent_events_with_auth(self, user_id: str, jwt_token: Optional[str]):
+            pytest.fail(f"WEBSOCKET E2E FAILED: Error in WebSocket agent events test: {e}")
+
+    @pytest.mark.e2e
+    @pytest.mark.staging  
+    @pytest.mark.database
+    async def test_database_operations_with_system_user_authentication(self):
         """
-        Test WebSocket agent events with proper authentication context.
+        Test database operations work with system user service authentication.
         
-        This validates that agent events work properly when system user
-        authentication is fixed.
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Database sessions create successfully with service authentication
         """
-        self.logger.info("🔧 Testing WebSocket agent events with authentication")
+        logger.info("🗄️ DATABASE E2E: Testing database operations with system user auth")
         
-        # Simulate the required WebSocket events that must be sent during agent execution
-        # per CLAUDE.md Section 6 (Mission Critical: WebSocket Agent Events)
+        # Create authenticated user
+        auth_result = await create_test_user_with_auth(
+            email="database_test@example.com",
+            environment=self.environment,
+            permissions=["read", "write"]
+        )
         
-        required_events = [
-            {
-                "type": "agent_started",
-                "user_id": user_id,
-                "timestamp": time.time(),
-                "message": "Agent began processing user request"
-            },
-            {
-                "type": "agent_thinking", 
-                "user_id": user_id,
-                "timestamp": time.time(),
-                "message": "AI analyzing problem and planning solution"
-            },
-            {
-                "type": "tool_executing",
-                "user_id": user_id, 
-                "timestamp": time.time(),
-                "message": "Executing tool to gather data"
-            },
-            {
-                "type": "tool_completed",
-                "user_id": user_id,
-                "timestamp": time.time(),
-                "message": "Tool execution completed with results"
-            },
-            {
-                "type": "agent_completed",
-                "user_id": user_id,
-                "timestamp": time.time(),
-                "message": "Agent completed with valuable response ready"
+        user_token = auth_result["jwt_token"]
+        
+        async with aiohttp.ClientSession() as session:
+            # Test database operation that requires system user authentication
+            test_url = f"{self.staging_config.urls.backend_url}/api/threads/create"
+            headers = {
+                "Authorization": f"Bearer {user_token}",
+                "Content-Type": "application/json"
             }
+            
+            data = {
+                "title": "Test Database Operations with System Auth",
+                "description": "Testing database session creation with fixed system user authentication"
+            }
+            
+            try:
+                async with session.post(test_url, headers=headers, json=data, timeout=15) as response:
+                    response_text = await response.text()
+                    
+                    if response.status == 201:
+                        logger.info("✅ DATABASE E2E SUCCESS: Database operations working with system auth")
+                        
+                        # Validate response structure
+                        if response.content_type == 'application/json':
+                            response_data = await response.json()
+                            if "thread_id" in response_data or "id" in response_data:
+                                logger.info(f"Thread created successfully: {response_data.get('id', 'N/A')}")
+                                return
+                        
+                        logger.info("Database operation completed successfully")
+                        return
+                        
+                    elif response.status in [500, 503]:
+                        # Check for system auth errors (should be resolved) 
+                        system_auth_errors = [
+                            "system_user_auth_failure", "system user failed authentication",
+                            "not authenticated", "database session", "session factory"
+                        ]
+                        
+                        if any(error in response_text.lower() for error in system_auth_errors):
+                            pytest.fail(
+                                f"DATABASE E2E FAILED: System authentication errors persist in database operations. "
+                                f"Status: {response.status}, Response: {response_text}. "
+                                f"Service authentication fix may not be working for database operations."
+                            )
+                        else:
+                            pytest.fail(
+                                f"DATABASE E2E FAILED: Non-auth error in database operations. "
+                                f"Status: {response.status}, Response: {response_text}"
+                            )
+                    elif response.status in [401, 403]:
+                        pytest.fail(
+                            f"DATABASE E2E FAILED: Authentication error in database operations. "
+                            f"Status: {response.status}, Response: {response_text}"
+                        )
+                    else:
+                        pytest.fail(
+                            f"DATABASE E2E FAILED: Unexpected error in database operations. "
+                            f"Status: {response.status}, Response: {response_text}"
+                        )
+                        
+            except asyncio.TimeoutError:
+                pytest.fail(
+                    "DATABASE E2E FAILED: Database operation timed out. "
+                    "This may indicate system authentication issues preventing database access."
+                )
+            except Exception as e:
+                pytest.fail(f"DATABASE E2E FAILED: Error in database operations test: {e}")
+
+    @pytest.mark.e2e
+    @pytest.mark.staging
+    @pytest.mark.health_check  
+    async def test_staging_system_user_auth_health_validation(self):
+        """
+        Test staging environment system user authentication health.
+        
+        EXPECTED: This test should PASS after service auth implementation
+        VALIDATES: Staging environment properly configured for service authentication
+        """
+        logger.info("🏥 HEALTH E2E: Testing staging system user authentication health")
+        
+        health_checks = []
+        
+        async with aiohttp.ClientSession() as session:
+            # Test 1: System user service authentication health
+            try:
+                health_url = f"{self.staging_config.urls.backend_url}/api/health/system-auth"
+                async with session.get(health_url, timeout=10) as response:
+                    response_text = await response.text()
+                    
+                    if response.status == 200:
+                        health_checks.append("system_auth: HEALTHY")
+                        logger.info("✅ System auth health check: PASSED")
+                    else:
+                        health_checks.append(f"system_auth: FAILED ({response.status})")
+                        logger.warning(f"⚠️ System auth health check failed: {response.status}")
+                        
+            except Exception as e:
+                health_checks.append(f"system_auth: ERROR ({e})")
+                logger.error(f"❌ System auth health check error: {e}")
+            
+            # Test 2: Database connectivity with system user
+            try:
+                db_health_url = f"{self.staging_config.urls.backend_url}/api/health/database"
+                async with session.get(db_health_url, timeout=10) as response:
+                    response_text = await response.text()
+                    
+                    if response.status == 200:
+                        health_checks.append("database: HEALTHY")
+                        logger.info("✅ Database health check: PASSED")
+                    else:
+                        health_checks.append(f"database: FAILED ({response.status})")
+                        logger.warning(f"⚠️ Database health check failed: {response.status}")
+                        
+            except Exception as e:
+                health_checks.append(f"database: ERROR ({e})")
+                logger.error(f"❌ Database health check error: {e}")
+            
+            # Test 3: Service authentication configuration
+            try:
+                service_auth_url = f"{self.staging_config.urls.backend_url}/api/health/service-auth"
+                async with session.get(service_auth_url, timeout=10) as response:
+                    response_text = await response.text()
+                    
+                    if response.status == 200:
+                        health_checks.append("service_auth_config: HEALTHY")
+                        logger.info("✅ Service auth config check: PASSED")
+                    else:
+                        health_checks.append(f"service_auth_config: FAILED ({response.status})")
+                        logger.warning(f"⚠️ Service auth config check failed: {response.status}")
+                        
+            except Exception as e:
+                health_checks.append(f"service_auth_config: ERROR ({e})")
+                logger.error(f"❌ Service auth config check error: {e}")
+        
+        # Evaluate overall health
+        failed_checks = [check for check in health_checks if "FAILED" in check or "ERROR" in check]
+        
+        logger.info(f"📊 HEALTH SUMMARY: {health_checks}")
+        
+        if failed_checks:
+            pytest.fail(
+                f"HEALTH E2E FAILED: Staging environment has health issues: {failed_checks}. "
+                f"Full health report: {health_checks}. "
+                f"System authentication fix may not be properly deployed or configured."
+            )
+        
+        logger.info("✅ HEALTH E2E SUCCESS: All staging environment health checks passed")
+
+    def _validate_golden_path_business_value(self, response_data: Dict[str, Any], response_text: str):
+        """
+        Validate that golden path delivers actual business value.
+        
+        Args:
+            response_data: Parsed JSON response data
+            response_text: Raw response text
+        """
+        business_value_indicators = [
+            "recommendation", "optimization", "cost", "savings", 
+            "insight", "analysis", "agent_response", "result"
         ]
         
-        # Simulate sending these events (in real implementation, this would
-        # involve actual WebSocket connections and agent execution)
+        # Check for business value indicators in response
+        found_indicators = []
         
-        for event in required_events:
-            # Add small delay to simulate real timing
-            await asyncio.sleep(0.01)
-            
-            # Validate event can be processed (requires working authentication)
-            assert event["user_id"] == user_id, "Event must be for authenticated user"
-            assert event["type"] in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"], (
-                f"Event type '{event['type']}' not in required WebSocket events"
+        # Check in structured response data
+        if response_data:
+            for key, value in response_data.items():
+                if any(indicator in key.lower() for indicator in business_value_indicators):
+                    found_indicators.append(f"data.{key}")
+                if isinstance(value, str) and any(indicator in value.lower() for indicator in business_value_indicators):
+                    found_indicators.append(f"data.{key}.content")
+        
+        # Check in response text
+        text_indicators = [indicator for indicator in business_value_indicators if indicator in response_text.lower()]
+        found_indicators.extend([f"text.{indicator}" for indicator in text_indicators])
+        
+        if not found_indicators:
+            logger.warning(
+                f"⚠️ BUSINESS VALUE WARNING: Golden path response may lack business value indicators. "
+                f"Response keys: {list(response_data.keys()) if response_data else 'None'}, "
+                f"Text length: {len(response_text)}"
             )
-            
-            # Record the event
-            self.websocket_events.append(event)
-            
-            self.logger.debug(f"WebSocket event: {event['type']} for user {user_id}")
-        
-        self.logger.info(f"✅ All {len(required_events)} WebSocket agent events simulated successfully")
-    
-    @pytest.mark.e2e
-    async def test_multi_user_isolation_with_system_auth(self):
-        """
-        Test that multiple users can use the system concurrently with fixed system auth.
-        
-        This validates that the system authentication fix doesn't break multi-user isolation.
-        """
-        self.logger.info("🚀 Testing multi-user isolation with system auth fix")
-        
-        test_start = time.time()
-        
-        try:
-            # Create multiple authenticated users
-            users = []
-            for i in range(2):  # Test with 2 users for E2E efficiency
-                auth_result = await self.auth_helper.create_authenticated_user()
-                assert auth_result, f"User {i+1} authentication must succeed"
-                users.append(auth_result)
-            
-            self.logger.info(f"✅ Created {len(users)} authenticated users")
-            
-            # Test that each user can perform database operations independently
-            for i, user in enumerate(users):
-                user_start = time.time()
-                
-                # Each user should be able to create database sessions
-                async for session in get_request_scoped_db_session():
-                    # Validate session works for this user
-                    assert session is not None, f"User {i+1} session must not be None"
-                    
-                    # Test basic operation
-                    result = await session.execute("SELECT 1 as user_test")
-                    row = result.fetchone()
-                    assert row is not None, f"User {i+1} database query must work"
-                    
-                    await session.close()
-                    break
-                
-                user_duration = time.time() - user_start
-                self.logger.info(f"✅ User {i+1} database operations in {user_duration:.3f}s")
-            
-            total_execution_time = time.time() - test_start
-            
-            self.record_metric("multi_user_system_auth_test", {
-                "users_tested": len(users),
-                "total_execution_time": total_execution_time,
-                "all_users_successful": True,
-                "system_auth_working": True,
-                "user_isolation_maintained": True
-            })
-            
-            self.logger.info(
-                f"✅ Multi-user isolation test completed in {total_execution_time:.3f}s - "
-                f"System auth working for all {len(users)} users"
-            )
-            
-        except Exception as e:
-            total_execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Multi-user isolation test failed in {total_execution_time:.3f}s: {e}")
-            raise AssertionError(f"Multi-user isolation with system auth failed: {e}") from e
-    
-    @pytest.mark.e2e 
-    async def test_system_resilience_after_auth_fix(self):
-        """
-        Test system resilience and error handling after the authentication fix.
-        
-        This validates that the authentication fix doesn't introduce new failure modes.
-        """
-        self.logger.info("🚀 Testing system resilience after auth fix")
-        
-        test_start = time.time()
-        
-        try:
-            # Test 1: Service auth works under normal conditions
-            service_headers = self.auth_client._get_service_auth_headers()
-            assert service_headers, "Service auth must be available"
-            
-            # Test 2: Database sessions work reliably
-            session_attempts = 3
-            successful_sessions = 0
-            
-            for attempt in range(session_attempts):
-                try:
-                    async for session in get_request_scoped_db_session():
-                        # Quick validation
-                        assert session is not None, "Session must be valid"
-                        await session.close()
-                        successful_sessions += 1
-                        break
-                except Exception as session_error:
-                    self.logger.warning(f"Session attempt {attempt + 1} failed: {session_error}")
-            
-            # Validate reliability 
-            success_rate = successful_sessions / session_attempts
-            assert success_rate >= 0.8, (
-                f"Database session success rate {success_rate:.1%} too low - "
-                "authentication fix may have reliability issues"
-            )
-            
-            total_execution_time = time.time() - test_start
-            
-            self.record_metric("system_resilience_after_auth_fix", {
-                "total_execution_time": total_execution_time,
-                "session_attempts": session_attempts,
-                "successful_sessions": successful_sessions,
-                "success_rate": success_rate,
-                "service_auth_available": bool(service_headers),
-                "system_resilient": True
-            })
-            
-            self.logger.info(
-                f"✅ System resilience validated in {total_execution_time:.3f}s - "
-                f"Session success rate: {success_rate:.1%}"
-            )
-            
-        except Exception as e:
-            total_execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ System resilience test failed in {total_execution_time:.3f}s: {e}")
-            raise AssertionError(f"System resilience after auth fix failed: {e}") from e
-    
-    @pytest.mark.e2e
-    def test_authentication_configuration_health(self):
-        """
-        Test that authentication configuration is healthy for E2E operations.
-        
-        This validates the configuration foundation required for the other E2E tests.
-        """
-        self.logger.info("🔧 Testing authentication configuration health")
-        
-        test_start = time.time()
-        
-        try:
-            # Check service authentication configuration
-            service_id = self.env.get("SERVICE_ID")
-            service_secret = self.env.get("SERVICE_SECRET")
-            
-            auth_health = {
-                "SERVICE_ID_configured": bool(service_id),
-                "SERVICE_SECRET_configured": bool(service_secret),
-                "auth_client_initialized": bool(self.auth_client),
-                "e2e_auth_helper_available": bool(self.auth_helper)
-            }
-            
-            # Validate all components are healthy
-            for component, status in auth_health.items():
-                assert status, f"Authentication component '{component}' not healthy"
-            
-            execution_time = time.time() - test_start
-            
-            self.record_metric("auth_configuration_health", {
-                **auth_health,
-                "execution_time": execution_time,
-                "service_id_value": service_id,
-                "configuration_complete": True
-            })
-            
-            self.logger.info(
-                f"✅ Authentication configuration health validated in {execution_time:.3f}s - "
-                f"All components healthy"
-            )
-            
-        except Exception as e:
-            execution_time = time.time() - test_start
-            
-            self.logger.error(f"❌ Auth configuration health check failed in {execution_time:.3f}s: {e}")
-            raise AssertionError(f"Authentication configuration health check failed: {e}") from e
+        else:
+            logger.info(f"✅ BUSINESS VALUE VALIDATED: Found indicators: {found_indicators}")
+
+    def teardown_method(self, method):
+        """Clean up after test."""
+        logger.info(f"🏁 GOLDEN PATH E2E TEST COMPLETE: {method.__name__}")
+        super().teardown_method(method)

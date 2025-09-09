@@ -224,10 +224,32 @@ class AuthenticationTokenManager:
             expected_permissions = self.business_permission_rules[user_tier]["permissions"]
             token_permissions = decoded_payload["permissions"]
             
-            # Check for permission escalation
+            # Check for permission escalation - unexpected permissions
             for permission in token_permissions:
                 if permission not in expected_permissions:
                     validation_result["security_warnings"].append(f"Unexpected permission: {permission}")
+            
+            # Business Security Rule: Detect potential tier escalation attempts
+            # A legitimate token for a tier should have ALL expected permissions for that tier
+            # Tokens with only some permissions suggest possible escalation from a lower tier
+            if user_tier in [UserTier.ENTERPRISE, UserTier.MID]:
+                missing_permissions = set(expected_permissions) - set(token_permissions)
+                if missing_permissions:
+                    # If high-value permissions are missing, this suggests tier escalation
+                    high_value_permissions = {"admin_panel", "user_management", "advanced_analytics", "api_access", "custom_integrations"}
+                    has_high_value_perms = any(perm in token_permissions for perm in high_value_permissions)
+                    missing_high_value_perms = missing_permissions & high_value_permissions
+                    
+                    if has_high_value_perms and missing_high_value_perms:
+                        validation_result["security_warnings"].append(
+                            f"Potential tier escalation detected: {user_tier.value} tier token missing expected permissions: {sorted(missing_permissions)}"
+                        )
+                        
+                        # Also specifically flag the suspicious escalated permissions
+                        escalated_high_value_perms = set(token_permissions) & high_value_permissions
+                        if escalated_high_value_perms:
+                            for perm in escalated_high_value_perms:
+                                validation_result["security_warnings"].append(f"Suspicious {perm} permission in incomplete {user_tier.value} token")
             
             # Business Rule 5: Validate business context integrity
             business_context = decoded_payload["business_context"]
@@ -559,19 +581,19 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         # Create users for all tiers
         users = {
             UserTier.FREE: UserProfile(
-                user_id=ensure_user_id("free-user"), email="free@test.com", tier=UserTier.FREE,
+                user_id=ensure_user_id("free-user-001"), email="free@test.com", tier=UserTier.FREE,
                 permissions=set(["basic_chat", "view_usage"])
             ),
             UserTier.EARLY: UserProfile(
-                user_id=ensure_user_id("early-user"), email="early@test.com", tier=UserTier.EARLY,
+                user_id=ensure_user_id("early-user-002"), email="early@test.com", tier=UserTier.EARLY,
                 permissions=set(["basic_chat", "view_usage", "export_data"])
             ),
             UserTier.MID: UserProfile(
-                user_id=ensure_user_id("mid-user"), email="mid@test.com", tier=UserTier.MID,
+                user_id=ensure_user_id("mid-user-003"), email="mid@test.com", tier=UserTier.MID,
                 permissions=set(["basic_chat", "view_usage", "export_data", "advanced_analytics"])
             ),
             UserTier.ENTERPRISE: UserProfile(
-                user_id=ensure_user_id("ent-user"), email="enterprise@test.com", tier=UserTier.ENTERPRISE,
+                user_id=ensure_user_id("enterprise-user-004"), email="enterprise@test.com", tier=UserTier.ENTERPRISE,
                 permissions=set(["basic_chat", "view_usage", "admin_panel"])
             )
         }
@@ -648,7 +670,7 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Create user with inactive subscription
         inactive_user = UserProfile(
-            user_id=ensure_user_id("inactive-user"),
+            user_id=ensure_user_id("inactive-user-005"),
             email="inactive@test.com",
             tier=UserTier.MID,
             permissions=set(["basic_chat", "advanced_analytics"]),
@@ -667,7 +689,7 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Business Rule 3: Active subscriptions must validate successfully
         active_user = UserProfile(
-            user_id=ensure_user_id("active-user"),
+            user_id=ensure_user_id("active-user-006"),
             email="active@test.com",
             tier=UserTier.MID,
             permissions=set(["basic_chat", "advanced_analytics"]),
