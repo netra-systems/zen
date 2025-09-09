@@ -406,10 +406,12 @@ class TestAgentCircuitBreakerE2E:
                 
                 # Test REAL agent execution via WebSocket
                 request = {
-                    "type": "agent_execute",
-                    "agent": "triage",
-                    "message": "WebSocket circuit breaker test",
-                    "request_id": "ws_cb_test_001"
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": "WebSocket circuit breaker test",
+                        "agent": "triage",
+                        "request_id": "ws_cb_test_001"
+                    }
                 }
                 
                 await websocket.send(json.dumps(request))

@@ -1,5 +1,5 @@
 ---
-description: "Real e2e test fix deploy loop"
+description: "Real e2e test fix deploy loop (backend focused by default)"
 argument-hint: "[focus area]"
 ---
 
@@ -7,7 +7,7 @@ You MUST repeat the entire PROCESS until ALL 1000 e2e real staging tests pass. W
 
 PROCESS INSTRUCTIONS START:
 
-0) Deploy the service if it hasn't been deployed last few minutes. 
+0) Deploy the backend service if it hasn't been deployed last few minutes. 
 WAIT for service revision success
 
 1) Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md

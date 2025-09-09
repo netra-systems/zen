@@ -56,7 +56,7 @@ from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNoti
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+# from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -160,9 +160,9 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
     Integration Level: Tests real agent execution components with mocked transport layer only.
     """
     
-    async def async_setup_method(self):
+    def setup_method(self, method=None):
         """Setup real agent components with mock WebSocket transport for integration testing."""
-        await super().async_setup_method()
+        super().setup_method(method)
         
         # Set up test environment
         self.set_env_var("TESTING", "1")
@@ -188,20 +188,24 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             agent_name="TestAgent",
-            agent_type="test_agent",
-            user_request="Test agent execution for WebSocket events"
+            metadata={
+                "agent_type": "test_agent",
+                "user_request": "Test agent execution for WebSocket events"
+            }
         )
         
-        # Initialize real WebSocket notifier with mock transport
-        self.websocket_notifier = WebSocketNotifier(self.mock_websocket_manager)
-        
-        # Initialize real agent WebSocket bridge
-        self.agent_websocket_bridge = AgentWebSocketBridge(self.mock_websocket_manager)
+        # Initialize real WebSocket notifier with mock transport (with test_mode enabled)
+        self.websocket_notifier = WebSocketNotifier(self.mock_websocket_manager, test_mode=True)
         
         # Event tracking for validation
         self.expected_critical_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
         self.event_sequence_tracker = []
         self.event_timing_tracker = {}
+    
+    async def async_setup_method(self):
+        """Async setup method - calls setup_method since everything is already sync-compatible."""
+        # The setup is already done in setup_method, this is just for compatibility
+        pass
         
     async def async_teardown_method(self):
         """Clean up test resources."""
@@ -909,8 +913,10 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
                 thread_id=thread_id,
                 run_id=run_id,
                 agent_name=f"Agent_{i}",
-                agent_type="concurrent_test",
-                user_request=f"User {i} specific request: Analyze sensitive data for business segment {i}"
+                metadata={
+                    "agent_type": "concurrent_test",
+                    "user_request": f"User {i} specific request: Analyze sensitive data for business segment {i}"
+                }
             )
             
             user_contexts.append({
@@ -1283,8 +1289,10 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             agent_name="BusinessAnalyzer",
-            agent_type="business_intelligence", 
-            user_request="Analyze Q3 financial performance and identify cost optimization opportunities"
+            metadata={
+                "agent_type": "business_intelligence", 
+                "user_request": "Analyze Q3 financial performance and identify cost optimization opportunities"
+            }
         )
         
         # Send events with rich business context
@@ -1700,8 +1708,10 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
             thread_id=f"e2e_thread_{uuid.uuid4().hex[:6]}",
             run_id=f"e2e_run_{uuid.uuid4().hex[:6]}",
             agent_name="ComprehensiveBusinessAgent",
-            agent_type="business_intelligence_comprehensive",
-            user_request="Perform comprehensive business analysis: assess Q3 performance, identify optimization opportunities, and provide strategic recommendations for Q4 growth"
+            metadata={
+                "agent_type": "business_intelligence_comprehensive",
+                "user_request": "Perform comprehensive business analysis: assess Q3 performance, identify optimization opportunities, and provide strategic recommendations for Q4 growth"
+            }
         )
         
         # Register connection for comprehensive test

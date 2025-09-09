@@ -103,10 +103,10 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 
                 # Send a message that should trigger session activity
                 test_message = {
-                    "type": "agent_execute",
-                    "data": {
-                        "agent_type": "supply_researcher", 
-                        "query": "Test session metrics collection",
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": "Test session metrics collection",
+                        "agent_type": "supply_researcher",
                         "thread_id": f"test-thread-{int(time.time())}"
                     }
                 }
@@ -268,10 +268,10 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 
                 # Send concurrent agent execution
                 message = {
-                    "type": "agent_execute",
-                    "data": {
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": f"Concurrent session test for {user_label}",
                         "agent_type": "supply_researcher",
-                        "query": f"Concurrent session test for {user_label}",
                         "thread_id": thread_id
                     }
                 }
