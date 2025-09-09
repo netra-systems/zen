@@ -162,6 +162,7 @@ HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 @router.websocket("/ws")
 @gcp_reportable(reraise=True)
+@windows_asyncio_safe
 async def websocket_endpoint(websocket: WebSocket):
     """
     Main WebSocket endpoint - handles all WebSocket connections.
