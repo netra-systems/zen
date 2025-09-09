@@ -575,33 +575,64 @@ class ServiceReadinessValidator:
             return False
     
     def _validate_redis_service(self) -> bool:
-        """Validate Redis service readiness with race condition fix."""
+        """Validate Redis service readiness with enhanced diagnostics."""
         try:
             if not self.app_state:
+                self.logger.warning("Redis validation failed: app_state is None")
                 return False
             
             if not hasattr(self.app_state, 'redis_manager'):
+                self.logger.warning("Redis validation failed: app_state has no redis_manager attribute")
                 return False
             
             redis_manager = self.app_state.redis_manager
             if redis_manager is None:
+                self.logger.warning("Redis validation failed: redis_manager is None")
                 return False
             
-            # Check connection status
-            if hasattr(redis_manager, 'is_connected'):
-                is_connected = redis_manager.is_connected()
-                
-                # CRITICAL FIX: Apply grace period for GCP environments to prevent race conditions
-                if is_connected and self.environment in ['staging', 'production']:
-                    # 500ms grace period for background task stabilization
-                    time.sleep(0.5)
-                
-                return is_connected
+            # Enhanced Redis status logging for Five Whys analysis
+            self.logger.info(f"Redis validation check - Environment: {self.environment}")
             
-            return True
+            # Check connection status with detailed logging
+            if hasattr(redis_manager, 'is_connected'):
+                is_connected = redis_manager.is_connected
+                self.logger.info(f"Redis is_connected property result: {is_connected}")
+                
+                # Get detailed Redis status for diagnostics
+                if hasattr(redis_manager, 'get_status'):
+                    status = redis_manager.get_status()
+                    self.logger.info(f"Redis detailed status: {status}")
+                
+                # Check if Redis is actually reachable with ping test
+                if hasattr(redis_manager, '_client') and redis_manager._client:
+                    try:
+                        # Attempt a quick ping to validate actual connectivity
+                        import asyncio
+                        ping_result = asyncio.run(asyncio.wait_for(redis_manager._client.ping(), timeout=2.0))
+                        self.logger.info(f"Redis ping test result: {ping_result}")
+                    except Exception as ping_error:
+                        self.logger.warning(f"Redis ping test failed: {ping_error}")
+                
+                # CRITICAL FIX: Apply grace period to prevent race conditions
+                if is_connected:
+                    if self.environment in ['staging', 'production']:
+                        # 500ms grace period for background task stabilization
+                        self.logger.info("Applying 500ms grace period for Redis background task stabilization (staging/production)")
+                        time.sleep(0.5)
+                    elif self.environment in ['development', 'dev']:
+                        # 200ms grace period for development environment coordination
+                        self.logger.info("Applying 200ms grace period for Redis background task stabilization (development)")
+                        time.sleep(0.2)
+                
+                # Final validation result
+                self.logger.info(f"Redis validation result: {is_connected}")
+                return is_connected
+            else:
+                self.logger.warning("Redis validation failed: redis_manager has no is_connected method")
+                return True  # Assume valid if no is_connected method
             
         except Exception as e:
-            self.logger.debug(f"Redis validation error: {e}")
+            self.logger.error(f"Redis validation error: {e}", exc_info=True)
             return False
     
     def _validate_auth_system(self) -> bool:
