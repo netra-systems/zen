@@ -27,13 +27,143 @@ class AuthConfig:
     logic is centralized in AuthEnvironment (the true SSOT).
     """
     
-    # Get the SSOT instance
-    _auth_env = get_auth_env()
+    def __init__(self, auth_env=None):
+        """Initialize AuthConfig with fresh AuthEnvironment instance."""
+        # Get the SSOT instance - use instance-level for proper test isolation
+        # Allow injecting auth_env for testing
+        self._auth_env = auth_env if auth_env is not None else get_auth_env()
+        # Test override values for validation testing
+        self._test_override_values = {}
     
     # Class-level attributes for legacy compatibility
     @property
     def ENVIRONMENT(self) -> str:
         return self._auth_env.get_environment()
+    
+    # Instance property accessors for test compatibility
+    @property
+    def jwt_secret_key(self) -> str:
+        """JWT secret key property accessor."""
+        return self._auth_env.get_jwt_secret_key()
+    
+    @jwt_secret_key.setter
+    def jwt_secret_key(self, value: str):
+        """JWT secret key property setter for test compatibility."""
+        # Store in test override values for validation testing
+        self._test_override_values['jwt_secret_key'] = value
+        # Also try to set on AuthEnvironment for completeness
+        if value is not None:
+            self._auth_env.set("JWT_SECRET_KEY", value, source="test_override")
+    
+    @property
+    def postgres_host(self) -> str:
+        """PostgreSQL host property accessor."""
+        return self._auth_env.get_postgres_host()
+    
+    @postgres_host.setter
+    def postgres_host(self, value: str):
+        """PostgreSQL host property setter for test compatibility."""
+        self._test_override_values['postgres_host'] = value
+        if value is not None:
+            self._auth_env.set("POSTGRES_HOST", value, source="test_override")
+    
+    @property
+    def postgres_user(self) -> str:
+        """PostgreSQL user property accessor."""
+        return self._auth_env.get_postgres_user()
+    
+    @postgres_user.setter
+    def postgres_user(self, value: str):
+        """PostgreSQL user property setter for test compatibility."""
+        self._test_override_values['postgres_user'] = value
+        if value is not None:
+            self._auth_env.set("POSTGRES_USER", value, source="test_override")
+    
+    @property
+    def postgres_password(self) -> str:
+        """PostgreSQL password property accessor."""
+        return self._auth_env.get_postgres_password()
+    
+    @postgres_password.setter
+    def postgres_password(self, value: str):
+        """PostgreSQL password property setter for test compatibility."""
+        self._test_override_values['postgres_password'] = value
+        if value is not None:
+            self._auth_env.set("POSTGRES_PASSWORD", value, source="test_override")
+    
+    @property
+    def postgres_db(self) -> str:
+        """PostgreSQL database property accessor."""
+        return self._auth_env.get_postgres_db()
+    
+    @postgres_db.setter
+    def postgres_db(self, value: str):
+        """PostgreSQL database property setter for test compatibility."""
+        self._test_override_values['postgres_db'] = value
+        if value is not None:
+            self._auth_env.set("POSTGRES_DB", value, source="test_override")
+    
+    @property
+    def redis_url(self) -> str:
+        """Redis URL property accessor."""
+        return self._auth_env.get_redis_url()
+    
+    @redis_url.setter
+    def redis_url(self, value: str):
+        """Redis URL property setter for test compatibility."""
+        self._test_override_values['redis_url'] = value
+        if value is not None:
+            self._auth_env.set("REDIS_URL", value, source="test_override")
+    
+    @property
+    def google_client_id(self) -> str:
+        """Google Client ID property accessor."""
+        return self._auth_env.get_oauth_google_client_id()
+    
+    @google_client_id.setter
+    def google_client_id(self, value: str):
+        """Google Client ID property setter for test compatibility."""
+        self._test_override_values['google_client_id'] = value
+        if value is not None:
+            self._auth_env.set("GOOGLE_CLIENT_ID", value, source="test_override")
+    
+    @property
+    def google_client_secret(self) -> str:
+        """Google Client Secret property accessor."""
+        return self._auth_env.get_oauth_google_client_secret()
+    
+    @google_client_secret.setter
+    def google_client_secret(self, value: str):
+        """Google Client Secret property setter for test compatibility."""
+        self._test_override_values['google_client_secret'] = value
+        if value is not None:
+            self._auth_env.set("GOOGLE_CLIENT_SECRET", value, source="test_override")
+    
+    # Additional properties for configuration validation
+    @property
+    def debug_mode(self) -> bool:
+        """Debug mode property accessor."""
+        return self._auth_env.get_environment() in ["development", "test"]
+    
+    @property
+    def cors_allow_all(self) -> bool:
+        """CORS allow all property accessor."""
+        return self._auth_env.get_environment() in ["development", "test"]
+    
+    @property
+    def jwt_token_expiry(self) -> int:
+        """JWT token expiry property accessor."""
+        return self._auth_env.get_jwt_expiration_minutes() * 60  # Convert to seconds
+    
+    @property
+    def require_https(self) -> bool:
+        """Require HTTPS property accessor."""
+        return self._auth_env.get_environment() in ["production", "staging"]
+    
+    @property
+    def jwt_algorithm(self) -> str:
+        """JWT algorithm property accessor."""
+        return self._auth_env.get_jwt_algorithm()
     
     # Core Environment Methods - delegate to SSOT
     @staticmethod
