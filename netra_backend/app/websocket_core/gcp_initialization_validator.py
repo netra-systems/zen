@@ -113,7 +113,7 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['redis'] = ServiceReadinessCheck(
             name='redis',
             validator=self._validate_redis_readiness,
-            timeout_seconds=30.0 if self.is_gcp_environment else 10.0,
+            timeout_seconds=60.0 if self.is_gcp_environment else 10.0,  # BUGFIX: Increased from 30.0 to 60.0 for staging race condition fix
             retry_count=5,
             retry_delay=1.5 if self.is_gcp_environment else 1.0,
             is_critical=True,
@@ -187,7 +187,7 @@ class GCPWebSocketInitializationValidator:
             return False
     
     def _validate_redis_readiness(self) -> bool:
-        """Validate Redis readiness using SSOT patterns."""
+        """Validate Redis readiness using SSOT patterns with race condition fix."""
         try:
             if not self.app_state:
                 return False
@@ -201,7 +201,16 @@ class GCPWebSocketInitializationValidator:
             
             # Additional check: try to verify redis manager is initialized
             if hasattr(redis_manager, 'is_connected'):
-                return redis_manager.is_connected()
+                is_connected = redis_manager.is_connected()
+                
+                # BUGFIX: Grace period for background task stabilization
+                # If connected but in GCP environment, add small delay to allow
+                # background monitoring tasks to fully stabilize (race condition fix)
+                if is_connected and self.is_gcp_environment:
+                    import time
+                    time.sleep(0.5)  # 500ms grace period for background task stability
+                
+                return is_connected
             
             return True
             
