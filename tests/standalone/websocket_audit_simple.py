@@ -23,7 +23,7 @@ if project_root not in sys.path:
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from shared.types.core_types import AgentExecutionContext
+from shared.types.core_types import AgentExecutionContext, create_execution_context_from_supervisor_style
 from fastapi.websockets import WebSocketState
 
 
@@ -88,7 +88,7 @@ async def test_error_handling():
     # Send messages that will sometimes fail
     success_count = 0
     for i in range(20):
-        context = AgentExecutionContext(
+        context = create_execution_context_from_supervisor_style(
             run_id=f"error_test_{i}",
             thread_id=thread_id,
             user_id=user_id,
@@ -242,7 +242,7 @@ async def test_concurrent_users():
     # Send messages concurrently
     async def send_user_messages(user_id: str):
         for i in range(5):
-            context = AgentExecutionContext(
+            context = create_execution_context_from_supervisor_style(
                 run_id=f"concurrent_{user_id}_{i}",
                 thread_id=f"thread_{user_id.split('_')[1]}",
                 user_id=user_id,
