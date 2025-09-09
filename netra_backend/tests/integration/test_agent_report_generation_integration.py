@@ -22,9 +22,9 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message, MessageType
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.services.thread_run_registry import ThreadRunRegistry
-from shared.types.strongly_typed_ids import UserID, ThreadID, RunID, MessageID
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -102,9 +102,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         redis = real_services_fixture["redis"]
         
         # Create test user with real database
-        user_id = UserID.generate()
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
         user = User(
-            id=str(user_id),
+            id=user_id,
             email="test@example.com",
             name="Test User",
             subscription_tier="enterprise"
@@ -113,17 +113,17 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         await db.commit()
         
         # Create thread for agent execution
-        thread_id = ThreadID.generate()
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
         thread = Thread(
-            id=str(thread_id),
-            user_id=str(user_id),
+            id=thread_id,
+            user_id=user_id,
             title="Cost Optimization Analysis"
         )
         db.add(thread)
         await db.commit()
         
         # Simulate agent execution that should produce report
-        run_id = RunID.generate()
+        run_id = UnifiedIdGenerator.generate_base_id("run_test")
         
         # Create user execution context (SSOT pattern)
         user_context = UserExecutionContext(
