@@ -1,9 +1,12 @@
 """Refactored WebSocket Message Handler
 
 Uses message queue system for better scalability and error handling.
+PHASE 4 FIX: Enhanced with concurrency protection for connection storms.
 """
 
+import asyncio
 import json
+import time
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
@@ -25,6 +28,82 @@ from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
+
+# PHASE 4 FIX: Thread-safe handler registry for concurrent connections
+_handler_registry_lock = asyncio.Lock()
+_handler_instances = {}
+_initialization_in_progress = set()
+
+async def create_handler_safely(handler_type: str, supervisor, db_session_factory) -> Optional[Any]:
+    """
+    PHASE 4 FIX: Thread-safe handler creation for concurrent connections.
+    
+    This function prevents race conditions during handler initialization when
+    multiple WebSocket connections are established simultaneously.
+    
+    Args:
+        handler_type: Type of handler to create ('start_agent', 'user_message')
+        supervisor: Supervisor instance
+        db_session_factory: Database session factory
+        
+    Returns:
+        Handler instance or None if creation fails
+    """
+    handler_key = f"{handler_type}_{id(supervisor)}"
+    
+    async with _handler_registry_lock:
+        # Check if handler already exists
+        if handler_key in _handler_instances:
+            logger.debug(f"PHASE 4: Reusing existing {handler_type} handler")
+            return _handler_instances[handler_key]
+        
+        # Check if initialization is in progress for this handler
+        if handler_key in _initialization_in_progress:
+            logger.debug(f"PHASE 4: Handler {handler_type} initialization in progress, waiting...")
+            # Wait for initialization to complete
+            while handler_key in _initialization_in_progress:
+                await asyncio.sleep(0.01)  # 10ms wait
+            
+            # Check if handler was created during wait
+            if handler_key in _handler_instances:
+                return _handler_instances[handler_key]
+            else:
+                logger.warning(f"PHASE 4: Handler {handler_type} initialization failed during wait")
+                return None
+        
+        # Mark initialization as in progress
+        _initialization_in_progress.add(handler_key)
+    
+    try:
+        # Create handler outside the lock to avoid blocking other operations
+        handler = None
+        start_time = time.time()
+        
+        if handler_type == "start_agent":
+            handler = StartAgentHandler(supervisor, db_session_factory)
+        elif handler_type == "user_message":
+            handler = UserMessageHandler(supervisor, db_session_factory)
+        else:
+            logger.error(f"PHASE 4: Unknown handler type: {handler_type}")
+            return None
+        
+        creation_time = time.time() - start_time
+        logger.debug(f"PHASE 4: Created {handler_type} handler in {creation_time:.3f}s")
+        
+        # Store handler in registry
+        async with _handler_registry_lock:
+            _handler_instances[handler_key] = handler
+            _initialization_in_progress.discard(handler_key)
+        
+        return handler
+        
+    except Exception as e:
+        logger.error(f"PHASE 4: Failed to create {handler_type} handler: {e}")
+        # Ensure initialization flag is cleared on error
+        async with _handler_registry_lock:
+            _initialization_in_progress.discard(handler_key)
+        return None
+
 
 class BaseMessageHandler(ABC):
     """Abstract base class for message handlers"""

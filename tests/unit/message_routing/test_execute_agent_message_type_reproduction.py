@@ -29,8 +29,6 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler, BaseMessageHandler
-from netra_backend.app.routes.agents_execute import execute_agent_endpoint
-from netra_backend.app.services.agent_service_core import AgentServiceCore
 from netra_backend.app.agents.supervisor_ssot import SupervisorSSO
 from netra_backend.app.services.user_execution_context import UserExecutionContext, get_user_execution_context
 from shared.isolated_environment import get_env
