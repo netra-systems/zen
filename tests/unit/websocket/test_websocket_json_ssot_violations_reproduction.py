@@ -258,8 +258,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
             try:
                 # Try to route invalid message - create a WebSocket message first
                 test_message = create_standard_message(
-                    message_type=case["type"],
-                    data=case["data"]
+                    msg_type=case["type"],
+                    payload=case["data"]
                 )
                 
                 # Try to find a handler for this message type
