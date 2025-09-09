@@ -263,7 +263,7 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
                 )
                 
                 # Try to find a handler for this message type
-                handler = router.get_handler(test_message.type)
+                handler = router._find_handler(test_message.type)
                 
                 # If routing succeeds, we have an SSOT violation
                 if handler is not None:
@@ -284,7 +284,7 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
             )
             
             # This should NOT fail if SSOT is working
-            handler = router.get_handler(valid_message.type)
+            handler = router._find_handler(valid_message.type)
             if handler is None:
                 routing_violations.append(f"CRITICAL: Valid message failed to find handler: {valid_message.type}")
             
