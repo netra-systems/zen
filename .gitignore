@@ -72,6 +72,10 @@ coverage/
 test-results/
 *.log
 
+# Coverage HTML reports (generated artifacts)
+reports/coverage/html/
+htmlcov/
+
 # Database
 *.db
 *.sqlite
