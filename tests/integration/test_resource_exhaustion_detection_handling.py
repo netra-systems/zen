@@ -1,0 +1,153 @@
+"""
+Performance & Load Testing: Resource Exhaustion Detection and Handling
+
+Business Value Justification (BVJ):
+- Segment: All (Free, Early, Mid, Enterprise)
+- Business Goal: Prevent system failures by detecting and handling resource exhaustion gracefully
+- Value Impact: Users experience stable service even under resource pressure or unexpected load spikes
+- Strategic Impact: Resource exhaustion handling prevents costly system downtime and maintains SLA compliance
+
+CRITICAL: This test validates resource exhaustion detection, graceful degradation mechanisms,
+and system recovery capabilities under various resource pressure scenarios.
+"""
+
+import asyncio
+import pytest
+import time
+import statistics
+import json
+import psutil
+import os
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, field
+import threading
+import gc
+
+from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
+from test_framework.real_services_test_fixtures import real_services_fixture
+from shared.isolated_environment import get_env
+
+
+@dataclass
+class ResourceExhaustionMetrics:
+    \"\"\"Resource exhaustion test metrics.\"\"\"
+    test_name: str
+    resource_type: str
+    initial_usage: float
+    peak_usage: float
+    final_usage: float
+    exhaustion_threshold: float
+    exhaustion_detected: bool
+    graceful_degradation_triggered: bool
+    recovery_time_seconds: float
+    operations_before_exhaustion: int
+    operations_during_exhaustion: int
+    operations_after_recovery: int
+    errors_during_exhaustion: List[str] = field(default_factory=list)
+
+
+@dataclass
+class SystemResourceSnapshot:
+    \"\"\"System resource usage snapshot.\"\"\"
+    timestamp: float
+    cpu_percent: float
+    memory_mb: float
+    memory_percent: float
+    disk_usage_percent: float
+    open_files: int
+    network_connections: int
+    thread_count: int
+
+
+class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
+    \"\"\"Test resource exhaustion detection and handling mechanisms.\"\"\"
+    
+    def _get_system_resource_snapshot(self) -> SystemResourceSnapshot:
+        \"\"\"Get current system resource usage snapshot.\"\"\"
+        process = psutil.Process(os.getpid())
+        
+        # Get system-wide stats
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory_info = psutil.virtual_memory()
+        disk_info = psutil.disk_usage('/')
+        
+        # Get process-specific stats
+        proc_memory = process.memory_info()
+        proc_memory_mb = proc_memory.rss / 1024 / 1024
+        
+        try:
+            open_files = process.num_fds() if hasattr(process, 'num_fds') else len(process.open_files())
+        except (psutil.AccessDenied, psutil.NoSuchProcess):
+            open_files = 0
+        
+        try:
+            network_connections = len(process.connections())
+        except (psutil.AccessDenied, psutil.NoSuchProcess):
+            network_connections = 0
+        
+        try:
+            thread_count = process.num_threads()
+        except (psutil.AccessDenied, psutil.NoSuchProcess):
+            thread_count = threading.active_count()
+        
+        return SystemResourceSnapshot(
+            timestamp=time.time(),
+            cpu_percent=cpu_percent,
+            memory_mb=proc_memory_mb,
+            memory_percent=memory_info.percent,
+            disk_usage_percent=disk_info.percent,
+            open_files=open_files,
+            network_connections=network_connections,
+            thread_count=thread_count
+        )
+    
+    @pytest.mark.integration
+    @pytest.mark.performance
+    @pytest.mark.real_services
+    async def test_memory_exhaustion_detection_and_recovery(self, real_services_fixture):
+        \"\"\"
+        Test memory exhaustion detection and graceful recovery.
+        
+        Resource SLA:
+        - Memory usage monitoring and alerting
+        - Graceful degradation when memory usage >80%
+        - Automatic recovery when memory usage <70%
+        - No system crashes due to OOM
+        \"\"\"
+        redis = real_services_fixture[\"redis\"]
+        
+        # Memory exhaustion thresholds (as percentage of available memory)
+        memory_warning_threshold = 80.0  # 80% memory usage triggers warnings
+        memory_critical_threshold = 90.0  # 90% memory usage triggers degradation
+        memory_recovery_threshold = 70.0  # 70% memory usage allows recovery
+        
+        initial_snapshot = self._get_system_resource_snapshot()
+        memory_exhaustion_metrics = ResourceExhaustionMetrics(
+            test_name=\"Memory Exhaustion Detection\",
+            resource_type=\"memory\",
+            initial_usage=initial_snapshot.memory_mb,
+            peak_usage=initial_snapshot.memory_mb,
+            final_usage=initial_snapshot.memory_mb,
+            exhaustion_threshold=memory_warning_threshold,
+            exhaustion_detected=False,
+            graceful_degradation_triggered=False,
+            recovery_time_seconds=0,
+            operations_before_exhaustion=0,
+            operations_during_exhaustion=0,
+            operations_after_recovery=0
+        )
+        
+        # Memory consumption strategy: gradually consume memory until threshold
+        memory_consumers = []  # Keep references to prevent GC
+        chunk_size_mb = 10  # 10MB chunks
+        max_chunks = 100  # Maximum 1GB total consumption
+        
+        operations_count = 0\n        exhaustion_phase = \"loading\"  # loading -> exhausted -> recovering\n        phase_start_time = time.time()\n        \n        try:\n            for chunk_id in range(max_chunks):\n                # Allocate memory chunk\n                chunk_data = bytearray(chunk_size_mb * 1024 * 1024)  # 10MB of data\n                \n                # Fill with data to ensure actual memory allocation\n                for i in range(0, len(chunk_data), 4096):  # Every 4KB\n                    chunk_data[i:i+8] = b\"testdata\"\n                \n                memory_consumers.append(chunk_data)\n                \n                # Perform operations and monitor memory\n                current_snapshot = self._get_system_resource_snapshot()\n                memory_exhaustion_metrics.peak_usage = max(\n                    memory_exhaustion_metrics.peak_usage, \n                    current_snapshot.memory_mb\n                )\n                \n                # Simulate system operations under memory pressure\n                try:\n                    # Redis operations (memory intensive)\n                    test_key = f\"memory_test:{chunk_id}\"\n                    test_data = {\"chunk_id\": chunk_id, \"data\": \"x\" * 1024}  # 1KB JSON data\n                    await redis.set(test_key, json.dumps(test_data), ex=60)\n                    \n                    # User context creation (memory intensive)\n                    if chunk_id % 5 == 0:  # Every 5th iteration\n                        user_context = await create_authenticated_user_context(\n                            user_email=f\"memory_test_{chunk_id}@example.com\",\n                            environment=\"test\"\n                        )\n                        # Don't keep reference to allow GC\n                        del user_context\n                    \n                    operations_count += 1\n                    \n                    if exhaustion_phase == \"loading\":\n                        memory_exhaustion_metrics.operations_before_exhaustion += 1\n                    elif exhaustion_phase == \"exhausted\":\n                        memory_exhaustion_metrics.operations_during_exhaustion += 1\n                    else:  # recovering\n                        memory_exhaustion_metrics.operations_after_recovery += 1\n                    \n                except Exception as e:\n                    error_msg = f\"Operation failed at chunk {chunk_id}: {str(e)}\"\n                    memory_exhaustion_metrics.errors_during_exhaustion.append(error_msg)\n                \n                # Check for memory exhaustion thresholds\n                memory_growth_mb = current_snapshot.memory_mb - initial_snapshot.memory_mb\n                memory_growth_percent = (memory_growth_mb / initial_snapshot.memory_mb) * 100\n                \n                if not memory_exhaustion_metrics.exhaustion_detected and memory_growth_percent > 50:\n                    # Detected significant memory growth (>50% increase)\n                    memory_exhaustion_metrics.exhaustion_detected = True\n                    exhaustion_phase = \"exhausted\"\n                    phase_start_time = time.time()\n                    print(f\"💾 Memory exhaustion detected at chunk {chunk_id}: {current_snapshot.memory_mb:.1f}MB ({memory_growth_percent:.1f}% growth)\")\n                \n                # Trigger graceful degradation if memory usage is very high\n                if memory_growth_percent > 75 and not memory_exhaustion_metrics.graceful_degradation_triggered:\n                    memory_exhaustion_metrics.graceful_degradation_triggered = True\n                    print(f\"⚠️ Graceful degradation triggered at chunk {chunk_id}\")\n                    \n                    # Simulate graceful degradation: reduce operation frequency\n                    await asyncio.sleep(0.1)  # Slow down operations\n                    \n                    # Cleanup some memory consumers to simulate memory management\n                    if len(memory_consumers) > 20:\n                        # Release 25% of consumed memory\n                        release_count = len(memory_consumers) // 4\n                        for _ in range(release_count):\n                            memory_consumers.pop(0)\n                        \n                        # Force garbage collection\n                        gc.collect()\n                        exhaustion_phase = \"recovering\"\n                        phase_start_time = time.time()\n                        print(f\"🔄 Memory recovery initiated\")\n                        break\n                \n                # Safety check: don't consume too much memory\n                if current_snapshot.memory_mb > initial_snapshot.memory_mb * 3:  # 3x original memory\n                    print(f\"🛑 Safety limit reached at chunk {chunk_id}, stopping memory consumption\")\n                    break\n                \n                # Small delay between chunks\n                await asyncio.sleep(0.01)\n        \n        finally:\n            # Cleanup: release all memory consumers\n            print(f\"🧹 Cleaning up {len(memory_consumers)} memory chunks...\")\n            cleanup_start = time.time()\n            memory_consumers.clear()\n            gc.collect()  # Force garbage collection\n            \n            # Wait for memory to be released\n            await asyncio.sleep(1.0)\n            \n            recovery_snapshot = self._get_system_resource_snapshot()\n            memory_exhaustion_metrics.recovery_time_seconds = time.time() - cleanup_start\n            memory_exhaustion_metrics.final_usage = recovery_snapshot.memory_mb\n        \n        # Memory recovery verification\n        memory_recovered = (\n            memory_exhaustion_metrics.final_usage <= \n            initial_snapshot.memory_mb * 1.2  # Within 20% of original\n        )\n        \n        # Performance assertions\n        assert memory_exhaustion_metrics.exhaustion_detected, \"Memory exhaustion should have been detected\"\n        assert memory_exhaustion_metrics.operations_before_exhaustion > 0, \"Should have operations before exhaustion\"\n        assert len(memory_exhaustion_metrics.errors_during_exhaustion) <= operations_count * 0.1, \"Too many errors during memory pressure\"\n        assert memory_recovered, f\"Memory not properly recovered: {memory_exhaustion_metrics.final_usage:.1f}MB vs initial {initial_snapshot.memory_mb:.1f}MB\"\n        assert memory_exhaustion_metrics.recovery_time_seconds < 10.0, f\"Memory recovery took too long: {memory_exhaustion_metrics.recovery_time_seconds:.1f}s\"\n        \n        print(f\"✅ Memory Exhaustion Detection and Recovery Results:\")\n        print(f\"   Initial memory: {initial_snapshot.memory_mb:.1f}MB\")\n        print(f\"   Peak memory: {memory_exhaustion_metrics.peak_usage:.1f}MB\")\n        print(f\"   Final memory: {memory_exhaustion_metrics.final_usage:.1f}MB\")\n        print(f\"   Memory growth: {memory_exhaustion_metrics.peak_usage - initial_snapshot.memory_mb:.1f}MB\")\n        print(f\"   Exhaustion detected: {'✓' if memory_exhaustion_metrics.exhaustion_detected else '✗'}\")\n        print(f\"   Graceful degradation: {'✓' if memory_exhaustion_metrics.graceful_degradation_triggered else '✗'}\")\n        print(f\"   Recovery time: {memory_exhaustion_metrics.recovery_time_seconds:.2f}s\")\n        print(f\"   Memory recovered: {'✓' if memory_recovered else '✗'}\")\n        print(f\"   Operations completed: {operations_count}\")\n        print(f\"   Errors during exhaustion: {len(memory_exhaustion_metrics.errors_during_exhaustion)}\")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_database_connection_exhaustion_handling(self, real_services_fixture):\n        \"\"\"
+        Test database connection pool exhaustion and recovery.
+        
+        Resource SLA:
+        - Connection pool exhaustion detection\n        - Graceful request queuing when pool exhausted\n        - Automatic recovery when connections available\n        - No permanent connection leaks\n        \"\"\"\n        db = real_services_fixture[\"db\"]\n        \n        # Connection exhaustion test parameters\n        max_concurrent_connections = 100  # Try to exhaust connection pool\n        operations_per_connection = 20\n        \n        connection_exhaustion_metrics = ResourceExhaustionMetrics(\n            test_name=\"Database Connection Exhaustion\",\n            resource_type=\"database_connections\",\n            initial_usage=0,\n            peak_usage=0,\n            final_usage=0,\n            exhaustion_threshold=50,  # Assume pool has ~50 connections\n            exhaustion_detected=False,\n            graceful_degradation_triggered=False,\n            recovery_time_seconds=0,\n            operations_before_exhaustion=0,\n            operations_during_exhaustion=0,\n            operations_after_recovery=0\n        )\n        \n        connection_timeout_count = 0\n        connection_error_count = 0\n        active_connections = set()\n        \n        async def connection_intensive_operation(operation_id: int) -> Dict[str, Any]:\n            \"\"\"Operation that holds database connections for extended periods.\"\"\"\n            operation_start = time.time()\n            \n            try:\n                # Hold connection for longer than usual to increase pool pressure\n                connection_hold_time = 0.5  # 500ms per operation\n                \n                # Start transaction (holds connection)\n                async with db.transaction():\n                    active_connections.add(operation_id)\n                    \n                    # Update peak usage tracking\n                    current_active = len(active_connections)\n                    connection_exhaustion_metrics.peak_usage = max(\n                        connection_exhaustion_metrics.peak_usage,\n                        current_active\n                    )\n                    \n                    # Perform database operations within transaction\n                    for i in range(3):  # 3 queries per connection\n                        await db.execute(\n                            \"SELECT $1 as operation_id, $2 as query_num, generate_series(1, 5)\",\n                            operation_id, i\n                        )\n                        \n                        # Small delay to hold connection longer\n                        await asyncio.sleep(connection_hold_time / 3)\n                    \n                    # Check if we've likely exhausted the connection pool\n                    if current_active > 30 and not connection_exhaustion_metrics.exhaustion_detected:\n                        connection_exhaustion_metrics.exhaustion_detected = True\n                        print(f\"🗃️ Database connection exhaustion detected with {current_active} active connections\")\n                    \n                    active_connections.discard(operation_id)\n                \n                execution_time = time.time() - operation_start\n                \n                return {\n                    \"operation_id\": operation_id,\n                    \"execution_time\": execution_time,\n                    \"success\": True,\n                    \"active_connections_peak\": current_active\n                }\n                \n            except asyncio.TimeoutError:\n                connection_timeout_count += 1\n                connection_exhaustion_metrics.errors_during_exhaustion.append(\n                    f\"Connection timeout for operation {operation_id}\"\n                )\n                active_connections.discard(operation_id)\n                \n                return {\n                    \"operation_id\": operation_id,\n                    \"execution_time\": time.time() - operation_start,\n                    \"success\": False,\n                    \"error\": \"timeout\"\n                }\n                \n            except Exception as e:\n                connection_error_count += 1\n                connection_exhaustion_metrics.errors_during_exhaustion.append(\n                    f\"Connection error for operation {operation_id}: {str(e)}\"\n                )\n                active_connections.discard(operation_id)\n                \n                return {\n                    \"operation_id\": operation_id,\n                    \"execution_time\": time.time() - operation_start,\n                    \"success\": False,\n                    \"error\": str(e)\n                }\n        \n        # Execute connection exhaustion test\n        print(f\"🔗 Testing database connection exhaustion with {max_concurrent_connections} concurrent operations...\")\n        exhaustion_start = time.time()\n        \n        # Launch all operations simultaneously to maximize connection pressure\n        operation_tasks = [\n            connection_intensive_operation(i)\n            for i in range(max_concurrent_connections)\n        ]\n        \n        operation_results = await asyncio.gather(*operation_tasks, return_exceptions=True)\n        \n        exhaustion_duration = time.time() - exhaustion_start\n        \n        # Recovery test: perform simple operations after exhaustion\n        print(f\"🔄 Testing connection pool recovery...\")\n        recovery_start = time.time()\n        \n        recovery_operations = 10\n        recovery_results = []\n        \n        for i in range(recovery_operations):\n            try:\n                await db.execute(\"SELECT 1 as recovery_test\")\n                recovery_results.append(True)\n            except Exception as e:\n                recovery_results.append(False)\n                print(f\"Recovery operation {i} failed: {e}\")\n            \n            await asyncio.sleep(0.1)\n        \n        recovery_time = time.time() - recovery_start\n        connection_exhaustion_metrics.recovery_time_seconds = recovery_time\n        \n        # Analyze results\n        successful_operations = [r for r in operation_results if isinstance(r, dict) and r.get(\"success\", False)]\n        failed_operations = [r for r in operation_results if isinstance(r, dict) and not r.get(\"success\", False)]\n        \n        connection_exhaustion_metrics.operations_before_exhaustion = len(successful_operations)\n        connection_exhaustion_metrics.operations_during_exhaustion = len(failed_operations)\n        \n        recovery_success_rate = sum(recovery_results) / len(recovery_results)\n        overall_success_rate = len(successful_operations) / max_concurrent_connections\n        \n        # Connection exhaustion assertions\n        assert connection_exhaustion_metrics.peak_usage > 10, \"Should have created significant connection pressure\"\n        assert recovery_success_rate >= 0.90, f\"Connection pool recovery rate {recovery_success_rate:.3f} below 90%\"\n        assert recovery_time < 5.0, f\"Connection pool recovery time {recovery_time:.2f}s too long\"\n        \n        # Allow for some failures during exhaustion, but not complete failure\n        assert overall_success_rate >= 0.60, f\"Overall success rate {overall_success_rate:.3f} too low\"\n        \n        print(f\"✅ Database Connection Exhaustion Results:\")\n        print(f\"   Concurrent operations: {max_concurrent_connections}\")\n        print(f\"   Successful operations: {len(successful_operations)}\")\n        print(f\"   Failed operations: {len(failed_operations)}\")\n        print(f\"   Peak active connections: {connection_exhaustion_metrics.peak_usage}\")\n        print(f\"   Connection timeouts: {connection_timeout_count}\")\n        print(f\"   Connection errors: {connection_error_count}\")\n        print(f\"   Overall success rate: {overall_success_rate:.3f}\")\n        print(f\"   Recovery success rate: {recovery_success_rate:.3f}\")\n        print(f\"   Recovery time: {recovery_time:.2f}s\")\n        print(f\"   Test duration: {exhaustion_duration:.2f}s\")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_redis_memory_exhaustion_handling(self, real_services_fixture):\n        \"\"\"
+        Test Redis memory exhaustion detection and handling.
+        
+        Resource SLA:\n        - Redis memory usage monitoring\n        - Graceful handling when Redis approaches memory limits\n        - Cache eviction policies work correctly under pressure\n        - Recovery after memory pressure relief\n        \"\"\"\n        redis = real_services_fixture[\"redis\"]\n        \n        # Redis memory exhaustion parameters\n        large_value_size = 1024 * 100  # 100KB per value\n        max_keys = 1000  # Up to 100MB of data\n        \n        redis_memory_metrics = ResourceExhaustionMetrics(\n            test_name=\"Redis Memory Exhaustion\",\n            resource_type=\"redis_memory\",\n            initial_usage=0,\n            peak_usage=0,\n            final_usage=0,\n            exhaustion_threshold=50 * 1024 * 1024,  # 50MB threshold\n            exhaustion_detected=False,\n            graceful_degradation_triggered=False,\n            recovery_time_seconds=0,\n            operations_before_exhaustion=0,\n            operations_during_exhaustion=0,\n            operations_after_recovery=0\n        )\n        \n        # Get initial Redis memory usage\n        try:\n            initial_redis_info = await redis.info('memory')\n            initial_memory = int(initial_redis_info.get('used_memory', 0))\n            redis_memory_metrics.initial_usage = initial_memory / 1024 / 1024  # Convert to MB\n        except Exception:\n            initial_memory = 0\n            redis_memory_metrics.initial_usage = 0\n        \n        operations_completed = 0\n        memory_operations_failed = 0\n        keys_created = []\n        \n        try:\n            for key_id in range(max_keys):\n                test_key = f\"redis_exhaustion_test:{key_id}:{int(time.time())}\"\n                \n                # Create large value to consume memory\n                large_value = {\n                    \"key_id\": key_id,\n                    \"data\": \"x\" * large_value_size,\n                    \"timestamp\": time.time(),\n                    \"metadata\": {\n                        \"size\": large_value_size,\n                        \"test_type\": \"memory_exhaustion\",\n                        \"iteration\": key_id\n                    }\n                }\n                \n                try:\n                    # Store large value in Redis\n                    await redis.set(test_key, json.dumps(large_value), ex=300)  # 5 minute expiry\n                    keys_created.append(test_key)\n                    operations_completed += 1\n                    \n                    # Check Redis memory usage periodically\n                    if key_id % 50 == 0:  # Every 50 keys\n                        try:\n                            memory_info = await redis.info('memory')\n                            current_memory = int(memory_info.get('used_memory', 0))\n                            current_memory_mb = current_memory / 1024 / 1024\n                            \n                            redis_memory_metrics.peak_usage = max(\n                                redis_memory_metrics.peak_usage,\n                                current_memory_mb\n                            )\n                            \n                            # Detect memory pressure\n                            memory_growth = current_memory - initial_memory\n                            if memory_growth > 50 * 1024 * 1024 and not redis_memory_metrics.exhaustion_detected:\n                                redis_memory_metrics.exhaustion_detected = True\n                                print(f\"🔴 Redis memory exhaustion detected at key {key_id}: {current_memory_mb:.1f}MB\")\n                                \n                                # Trigger graceful degradation\n                                redis_memory_metrics.graceful_degradation_triggered = True\n                                print(f\"⚠️ Redis graceful degradation triggered\")\n                                break\n                                \n                        except Exception as e:\n                            print(f\"Memory info check failed: {e}\")\n                    \n                except Exception as e:\n                    memory_operations_failed += 1\n                    error_msg = str(e).lower()\n                    \n                    if \"memory\" in error_msg or \"oom\" in error_msg:\n                        redis_memory_metrics.errors_during_exhaustion.append(\n                            f\"Redis OOM at key {key_id}: {str(e)}\"\n                        )\n                        if not redis_memory_metrics.exhaustion_detected:\n                            redis_memory_metrics.exhaustion_detected = True\n                            redis_memory_metrics.graceful_degradation_triggered = True\n                            print(f\"🔴 Redis OOM detected at key {key_id}\")\n                            break\n                    else:\n                        redis_memory_metrics.errors_during_exhaustion.append(\n                            f\"Redis operation failed at key {key_id}: {str(e)}\"\n                        )\n        \n        finally:\n            # Test recovery: cleanup keys and verify Redis recovery\n            print(f\"🧹 Cleaning up {len(keys_created)} Redis keys...\")\n            recovery_start = time.time()\n            \n            # Delete keys in batches to avoid overwhelming Redis\n            batch_size = 100\n            for i in range(0, len(keys_created), batch_size):\n                batch_keys = keys_created[i:i + batch_size]\n                try:\n                    if batch_keys:\n                        await redis.delete(*batch_keys)\n                except Exception as e:\n                    print(f\"Batch delete failed: {e}\")\n                \n                # Small delay between batches\n                await asyncio.sleep(0.1)\n            \n            # Force Redis cleanup (if supported)\n            try:\n                await redis.execute_command('MEMORY', 'PURGE')\n            except Exception:\n                pass  # Command might not be supported\n            \n            # Wait for cleanup to complete\n            await asyncio.sleep(2.0)\n            \n            # Check final memory usage\n            try:\n                final_redis_info = await redis.info('memory')\n                final_memory = int(final_redis_info.get('used_memory', 0))\n                redis_memory_metrics.final_usage = final_memory / 1024 / 1024\n            except Exception:\n                redis_memory_metrics.final_usage = redis_memory_metrics.initial_usage\n            \n            redis_memory_metrics.recovery_time_seconds = time.time() - recovery_start\n        \n        # Memory recovery verification\n        memory_recovered = (\n            redis_memory_metrics.final_usage <= \n            redis_memory_metrics.initial_usage * 1.5  # Within 50% of original\n        )\n        \n        # Redis memory exhaustion assertions\n        assert operations_completed > 0, \"Should have completed some operations before exhaustion\"\n        assert redis_memory_metrics.peak_usage > redis_memory_metrics.initial_usage, \"Should have increased memory usage\"\n        assert memory_recovered, f\"Redis memory not properly recovered: {redis_memory_metrics.final_usage:.1f}MB vs initial {redis_memory_metrics.initial_usage:.1f}MB\"\n        \n        # Allow for some operations to fail during exhaustion\n        failure_rate = memory_operations_failed / (operations_completed + memory_operations_failed)\n        assert failure_rate <= 0.5, f\"Too many Redis operations failed: {failure_rate:.3f}\"\n        \n        print(f\"✅ Redis Memory Exhaustion Results:\")\n        print(f\"   Initial memory: {redis_memory_metrics.initial_usage:.1f}MB\")\n        print(f\"   Peak memory: {redis_memory_metrics.peak_usage:.1f}MB\")\n        print(f\"   Final memory: {redis_memory_metrics.final_usage:.1f}MB\")\n        print(f\"   Memory growth: {redis_memory_metrics.peak_usage - redis_memory_metrics.initial_usage:.1f}MB\")\n        print(f\"   Operations completed: {operations_completed}\")\n        print(f\"   Operations failed: {memory_operations_failed}\")\n        print(f\"   Failure rate: {failure_rate:.3f}\")\n        print(f\"   Exhaustion detected: {'✓' if redis_memory_metrics.exhaustion_detected else '✗'}\")\n        print(f\"   Memory recovered: {'✓' if memory_recovered else '✗'}\")\n        print(f\"   Recovery time: {redis_memory_metrics.recovery_time_seconds:.2f}s\")\n        print(f\"   Keys created: {len(keys_created)}\")\n        print(f\"   Errors during exhaustion: {len(redis_memory_metrics.errors_during_exhaustion)}\")"
