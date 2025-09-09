@@ -297,7 +297,7 @@ class WebSocketConfig(BaseModel):
     max_message_rate_per_minute: int = 30
     max_message_size_bytes: int = 8192
     connection_timeout_seconds: int = 300
-    heartbeat_interval_seconds: int = 45
+    heartbeat_interval_seconds: int = 25  # GCP Cloud Run requires <30s for stability
     cleanup_interval_seconds: int = 60
     enable_compression: bool = False
     allowed_origins: List[str] = Field(default_factory=list)

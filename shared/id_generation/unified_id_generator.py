@@ -109,15 +109,14 @@ class UnifiedIdGenerator:
         base_timestamp = int(time.time() * 1000)
         counter_base = _get_next_counter()
         
-        # CRITICAL FIX: Use consistent ID pattern for both thread_id and run_id
+        # CRITICAL FIX: Use proper SSOT format for both thread_id and run_id 
         # This prevents the pattern mismatch that causes WebSocket manager cleanup failures
-        base_id = f"{operation}_{base_timestamp}"
         random_part = secrets.token_hex(4)
         
-        # Generate related but CONSISTENT IDs - thread_id contains same base as run_id
-        thread_id = f"thread_{base_id}_{counter_base}_{random_part}"
-        run_id = f"{base_id}"  # run_id is the base that thread_id contains
-        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
+        # Generate SSOT-compliant IDs using proper format: [prefix_]type_counter_uuid8
+        thread_id = f"thread_{operation}_{counter_base}_{random_part}"
+        run_id = f"run_{operation}_{counter_base + 1}_{secrets.token_hex(4)}"
+        request_id = f"req_{operation}_{counter_base + 2}_{secrets.token_hex(4)}"
         
         return thread_id, run_id, request_id
     

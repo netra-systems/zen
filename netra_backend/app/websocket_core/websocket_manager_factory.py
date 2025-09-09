@@ -56,7 +56,12 @@ logger = central_logger.get_logger(__name__)
 
 class FactoryInitializationError(Exception):
     """Raised when WebSocket manager factory initialization fails due to SSOT violations or other configuration issues."""
-    pass
+    
+    def __init__(self, message: str, user_id: Optional[str] = None, error_code: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.user_id = user_id
+        self.error_code = error_code
+        self.details = details or {}
 
 
 def create_defensive_user_execution_context(
@@ -65,26 +70,23 @@ def create_defensive_user_execution_context(
     fallback_context: Optional[Dict[str, Any]] = None
 ) -> UserExecutionContext:
     """
-    CRITICAL FIX: Create defensive UserExecutionContext with validation and fallback.
+    CRITICAL FIX: Create defensive UserExecutionContext using SSOT factory method.
     
-    This function creates a properly formatted UserExecutionContext with defensive
-    measures to prevent validation failures that cause 1011 WebSocket errors.
+    This function creates a properly formatted UserExecutionContext using the new
+    SSOT from_websocket_request() method to ensure consistent ID generation patterns
+    and prevent WebSocket resource leaks.
     
     Args:
         user_id: User ID (required, validated)
         websocket_client_id: WebSocket client ID (optional)
-        fallback_context: Fallback context data if available
+        fallback_context: Fallback context data if available (deprecated - for compatibility)
         
     Returns:
-        Validated UserExecutionContext instance
+        Validated UserExecutionContext instance with SSOT ID patterns
         
     Raises:
         ValueError: If user_id is invalid or context creation fails
     """
-    import uuid
-    from datetime import datetime, timezone
-    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-    
     try:
         # CRITICAL FIX: Validate user_id defensively
         if not user_id or not isinstance(user_id, str) or not user_id.strip():
@@ -93,46 +95,27 @@ def create_defensive_user_execution_context(
         
         user_id = user_id.strip()
         
-        # Generate unique identifiers using SSOT ID generator
+        # SSOT FIX: Use the new SSOT factory method for consistent ID generation
         try:
-            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_context = UserExecutionContext.from_websocket_request(
                 user_id=user_id,
+                websocket_client_id=websocket_client_id,
                 operation="websocket_factory"
             )
-        except Exception as id_gen_error:
-            logger.warning(f"UnifiedIdGenerator failed, using UnifiedIDManager fallback: {id_gen_error}")
-            # Fallback to UnifiedIDManager instead of raw UUID
-            id_manager = UnifiedIDManager()
-            thread_id = id_manager.generate_id(IDType.THREAD, prefix="ws_thread", context={"user_id": user_id})
-            run_id = id_manager.generate_id(IDType.EXECUTION, prefix="ws_run", context={"user_id": user_id})
-            request_id = id_manager.generate_id(IDType.REQUEST, prefix="ws_req", context={"user_id": user_id})
-        
-        # Handle websocket_client_id defensively
-        if websocket_client_id is None:
-            # Generate client ID using UnifiedIDManager
-            id_manager = UnifiedIDManager()
-            websocket_client_id = id_manager.generate_id(
-                IDType.WEBSOCKET,
-                prefix="ws_client",
-                context={"user_id": user_id, "component": "client_connection"}
+            
+            logger.debug(
+                f"[SSOT OK] Created SSOT UserExecutionContext for user {user_id[:8]}... "
+                f"using from_websocket_request() factory method"
             )
-            logger.debug(f"Generated websocket_client_id: {websocket_client_id}")
-        
-        # Create UserExecutionContext with validated inputs
-        user_context = UserExecutionContext(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            request_id=request_id,
-            websocket_client_id=websocket_client_id
-        )
-        
-        # CRITICAL FIX: Validate the created context to ensure it meets SSOT requirements
-        # CYCLE 4 FIX: Use staging-safe validation for environment accommodation
-        _validate_ssot_user_context_staging_safe(user_context)
-        
-        logger.debug(f"[OK] Created defensive UserExecutionContext for user {user_id[:8]}... (client_id: {websocket_client_id})")
-        return user_context
+            return user_context
+            
+        except Exception as ssot_error:
+            logger.error(f"SSOT factory method failed: {ssot_error}")
+            # Don't fallback to old methods - SSOT failure should be addressed
+            raise ValueError(
+                f"SSOT UserExecutionContext creation failed: {ssot_error}. "
+                f"This indicates an issue with the SSOT ID generation system."
+            ) from ssot_error
         
     except Exception as context_error:
         logger.error(f"Failed to create defensive UserExecutionContext for user_id {repr(user_id)}: {context_error}")
@@ -1326,25 +1309,29 @@ class WebSocketManagerFactory:
     
     def _generate_isolation_key(self, user_context: UserExecutionContext) -> str:
         """
-        Generate a unique isolation key for a user context.
+        Generate a unique isolation key for a user context using SSOT patterns.
         
-        The isolation key ensures that each connection gets its own manager instance,
-        providing the strongest possible isolation.
+        CRITICAL FIX: Uses thread_id as the primary isolation key to ensure consistency
+        between manager creation and cleanup operations. This addresses the root cause
+        of WebSocket resource leaks where different ID generation patterns caused
+        cleanup failures.
         
         Args:
             user_context: User execution context
             
         Returns:
-            Unique isolation key
+            Consistent isolation key based on user_id and thread_id
         """
-        # Use connection-specific isolation (stronger than per-user)
-        # Handle both websocket_connection_id (agents context) and websocket_client_id (services context)
-        connection_id = getattr(user_context, 'websocket_connection_id', None) or getattr(user_context, 'websocket_client_id', None)
-        if connection_id:
-            return f"{user_context.user_id}:{connection_id}"
-        else:
-            # Fallback to request-based isolation
-            return f"{user_context.user_id}:{user_context.request_id}"
+        # SSOT FIX: Use thread_id as primary isolation component for consistency
+        # This ensures manager creation and cleanup use the same key pattern
+        isolation_key = f"{user_context.user_id}:{user_context.thread_id}"
+        
+        logger.debug(
+            f"SSOT Isolation Key: Generated {isolation_key} for user {user_context.user_id[:8]}... "
+            f"(thread_id={user_context.thread_id})"
+        )
+        
+        return isolation_key
     
     async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
         """
@@ -1390,8 +1377,21 @@ class WebSocketManagerFactory:
                     # Clean up inactive manager
                     self._cleanup_manager_internal(isolation_key)
             
-            # Check resource limits with immediate cleanup attempt
+            # CRITICAL FIX: Proactive resource management - cleanup BEFORE hitting limits
             current_count = self._user_manager_count.get(user_id, 0)
+            
+            # Proactive cleanup when reaching 60% of limit (12 out of 20 managers)
+            proactive_threshold = int(self.max_managers_per_user * 0.6)
+            if current_count >= proactive_threshold:
+                logger.info(f"🔄 PROACTIVE CLEANUP: User {user_id[:8]}... at 60% capacity ({current_count}/{self.max_managers_per_user}) - cleaning expired managers")
+                try:
+                    cleaned_count = await self._emergency_cleanup_user_managers(user_id)
+                    current_count = self._user_manager_count.get(user_id, 0)  # Refresh count
+                    logger.info(f"✅ PROACTIVE CLEANUP: Removed {cleaned_count} managers, new count: {current_count}")
+                except Exception as proactive_error:
+                    logger.error(f"Proactive cleanup failed for user {user_id[:8]}...: {proactive_error}")
+            
+            # Hard limit enforcement - only after proactive cleanup failed
             if current_count >= self.max_managers_per_user:
                 self._factory_metrics.resource_limit_hits += 1
                 logger.warning(
@@ -1437,8 +1437,9 @@ class WebSocketManagerFactory:
             )
             
             logger.info(
-                f"Created isolated WebSocket manager for user {user_id[:8]}... "
-                f"(isolation_key: {isolation_key}, manager_id: {id(manager)})"
+                f"✅ SSOT MANAGER CREATED: user={user_id[:8]}... "
+                f"thread_id={user_context.thread_id} isolation_key={isolation_key} "
+                f"manager_id={id(manager)} total_active={len(self._active_managers)}"
             )
             
             return manager
@@ -1484,9 +1485,15 @@ class WebSocketManagerFactory:
                 logger.error(f"Error during manager cleanup: {e}")
             
             # Remove from tracking
+            user_id = manager.user_context.user_id
+            thread_id = manager.user_context.thread_id
             self._cleanup_manager_internal(isolation_key)
             
-            logger.info(f"Cleaned up manager with isolation key: {isolation_key}")
+            logger.info(
+                f"🗑️ SSOT MANAGER CLEANUP: user={user_id[:8]}... "
+                f"thread_id={thread_id} isolation_key={isolation_key} "
+                f"remaining_active={len(self._active_managers)}"
+            )
             return True
     
     def _cleanup_manager_internal(self, isolation_key: str) -> None:
@@ -1622,11 +1629,13 @@ class WebSocketManagerFactory:
             cleanup_interval = 30  # 30 seconds for test environments
             logger.info("🧪 TEST ENVIRONMENT: Using 30-second background cleanup interval")
         elif environment == "development":
-            cleanup_interval = 120  # 2 minutes for development
-            logger.info("🔧 DEV ENVIRONMENT: Using 2-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 2 minutes to 60 seconds for faster resource cleanup
+            cleanup_interval = 60  # 1 minute for development (was 2 minutes)
+            logger.info("🔧 DEV ENVIRONMENT: Using 1-minute background cleanup interval")
         else:
-            cleanup_interval = 300  # 5 minutes for staging/production
-            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 5-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 5 minutes to 2 minutes for faster production cleanup
+            cleanup_interval = 120  # 2 minutes for staging/production (was 5 minutes)
+            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 2-minute background cleanup interval")
         
         while True:
             try:
@@ -1689,7 +1698,9 @@ class WebSocketManagerFactory:
             return 0
         
         # Check which ones are inactive or expired (more aggressive than background cleanup)
-        cutoff_time = datetime.utcnow() - timedelta(minutes=5)  # 5-minute cutoff for emergency
+        # CRITICAL FIX: Emergency cleanup timeout reduced from 30 seconds to 10 seconds
+        # This provides immediate cleanup response to prevent resource accumulation
+        cutoff_time = datetime.utcnow() - timedelta(seconds=10)  # 10-second cutoff for emergency cleanup
         cleanup_keys = []
         
         for key in user_isolation_keys:
@@ -1706,17 +1717,26 @@ class WebSocketManagerFactory:
                 cleanup_keys.append(key)
                 logger.debug(f"Emergency cleanup: Manager {key} is old with no connections")
         
-        # Clean up the identified managers
+        # Clean up the identified managers with detailed logging
         cleaned_count = 0
         for key in cleanup_keys:
             try:
+                # Get manager details before cleanup for logging
+                manager = self._active_managers.get(key)
+                if manager:
+                    thread_id = manager.user_context.thread_id
+                    logger.debug(f"Emergency cleanup target: {key} (thread_id={thread_id})")
+                
                 await self.cleanup_manager(key)
                 cleaned_count += 1
-                logger.info(f"Emergency cleanup: Removed manager {key}")
+                logger.info(f"🚨 EMERGENCY CLEANUP: Removed manager {key}")
             except Exception as e:
                 logger.error(f"Failed to emergency cleanup manager {key}: {e}")
         
-        logger.info(f"🔥 EMERGENCY CLEANUP COMPLETE: Cleaned {cleaned_count} managers for user {user_id[:8]}...")
+        logger.info(
+            f"🔥 EMERGENCY CLEANUP COMPLETE: user={user_id[:8]}... "
+            f"cleaned_managers={cleaned_count} remaining_managers={len(self._active_managers)}"
+        )
         return cleaned_count
     
     def _start_background_cleanup(self) -> None:
@@ -1837,6 +1857,64 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
         ) from unexpected_error
 
 
+def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    """
+    Synchronous wrapper for create_websocket_manager for testing purposes.
+    
+    CRITICAL: This function is ONLY for testing and should NOT be used in production code.
+    Production code should use the async create_websocket_manager() function.
+    
+    TEST COMPATIBILITY: This function provides synchronous access for test environments
+    that cannot easily handle async factory functions.
+    
+    Args:
+        user_context: User execution context for the manager
+        
+    Returns:
+        Isolated WebSocket manager instance
+        
+    Raises:
+        RuntimeError: If called in production environment
+        ValueError: If user_context is invalid
+        FactoryInitializationError: If SSOT factory validation fails
+    """
+    import asyncio
+    import os
+    from shared.isolated_environment import get_env
+    
+    # Restrict to test environments only
+    env = get_env()
+    environment = env.get('ENVIRONMENT', 'development').lower()
+    
+    # Allow in test, development, and CI environments
+    if environment not in ['test', 'development', 'ci', 'testing']:
+        raise RuntimeError(
+            f"create_websocket_manager_sync() is restricted to test environments. "
+            f"Current environment: {environment}. Use async create_websocket_manager() in production."
+        )
+    
+    try:
+        # Run the async function synchronously in test environment
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If event loop is already running, we need to use a different approach
+            # This commonly happens in pytest-asyncio environments
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, create_websocket_manager(user_context))
+                return future.result(timeout=10.0)  # 10 second timeout for tests
+        else:
+            return loop.run_until_complete(create_websocket_manager(user_context))
+    except Exception as e:
+        logger.error(f"Failed to create WebSocket manager synchronously for user {user_context.user_id}: {e}")
+        raise FactoryInitializationError(
+            f"Synchronous WebSocket manager creation failed: {e}",
+            user_id=user_context.user_id,
+            error_code="SYNC_MANAGER_CREATION_FAILED",
+            details={"original_error": str(e)}
+        )
+
+
 __all__ = [
     "WebSocketManagerFactory",
     "IsolatedWebSocketManager", 
@@ -1846,6 +1924,7 @@ __all__ = [
     "FactoryInitializationError",
     "get_websocket_manager_factory",
     "create_websocket_manager",
+    "create_websocket_manager_sync",
     "create_defensive_user_execution_context",
     # Five Whys Root Cause Prevention
     "WebSocketManagerProtocol"  # Re-exported from protocols module

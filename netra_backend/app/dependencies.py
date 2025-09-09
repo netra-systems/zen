@@ -1206,8 +1206,9 @@ async def get_request_scoped_message_handler(
             websocket_manager = None
         
         # Create MessageHandlerService with request-scoped components
+        # WEBSOCKET FACTORY FIX: MessageHandlerService creates websocket_manager internally as needed
         from netra_backend.app.services.message_handlers import MessageHandlerService
-        message_service = MessageHandlerService(supervisor, thread_service, websocket_manager)
+        message_service = MessageHandlerService(supervisor, thread_service)
         
         logger.info(f"✅ Created request-scoped MessageHandlerService for user {context.user_id}")
         return message_service

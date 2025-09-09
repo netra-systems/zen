@@ -101,6 +101,22 @@ class StartAgentHandler(BaseMessageHandler):
     async def _execute_agent_workflow(self, user_request: str, thread_id: str, user_id: str, run_id: str):
         """Execute agent workflow without holding database session"""
         self._configure_supervisor(thread_id, user_id)
+        
+        # CRITICAL FIX: Ensure supervisor has WebSocket bridge for event emission
+        if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            from netra_backend.app.dependencies import get_user_execution_context
+            
+            context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id
+            )
+            
+            websocket_bridge = create_agent_websocket_bridge(context)
+            self.supervisor.websocket_bridge = websocket_bridge
+            logger.info(f"✅ Added WebSocket bridge to supervisor for user {user_id}")
+        
         return await self.supervisor.run(user_request, thread_id, user_id, run_id)
     
     def _configure_supervisor(self, thread_id: str, user_id: str) -> None:

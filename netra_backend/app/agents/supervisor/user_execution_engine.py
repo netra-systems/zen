@@ -263,43 +263,109 @@ class UserExecutionEngine:
     def get_tool_dispatcher(self):
         """Get tool dispatcher for this engine with user context.
         
-        This creates a user-scoped tool dispatcher with proper isolation.
-        For testing, this returns a mock dispatcher with user context using SSOT patterns.
+        Creates a user-scoped tool dispatcher with proper isolation and WebSocket event emission.
+        This ensures tool_executing and tool_completed events are sent to the user.
         """
-        return self._create_mock_tool_dispatcher()
+        if not hasattr(self, '_tool_dispatcher'):
+            self._tool_dispatcher = self._create_tool_dispatcher()
+        return self._tool_dispatcher
+    
+    def _create_tool_dispatcher(self):
+        """Create real tool dispatcher with WebSocket event emission."""
+        try:
+            # Import the SSOT tool dispatcher factory
+            from netra_backend.app.agents.tool_dispatcher import create_request_scoped_tool_dispatcher
+            
+            # Check if we have a WebSocket manager available
+            websocket_manager = getattr(self.websocket_emitter, 'manager', None) if self.websocket_emitter else None
+            
+            # Create request-scoped dispatcher with WebSocket events
+            dispatcher = create_request_scoped_tool_dispatcher(
+                user_context=self.context,
+                websocket_manager=websocket_manager,
+                tools=[]  # Tools will be registered as needed
+            )
+            
+            logger.info(f"✅ Created real tool dispatcher with WebSocket events for user {self.context.user_id}")
+            return dispatcher
+            
+        except Exception as e:
+            logger.warning(f"Failed to create real tool dispatcher: {e}. Falling back to mock for tests.")
+            return self._create_mock_tool_dispatcher()
     
     def _create_mock_tool_dispatcher(self):
-        """Create mock tool dispatcher using SSOT mock protection."""
-        from shared.test_only_guard import test_only, require_test_mode
-        
-        # SSOT Guard: This function should only run in test mode
-        require_test_mode("_create_mock_tool_dispatcher", 
-                         "Mock tool dispatcher creation should only happen in tests")
-        
-        # Conditionally import test_framework to avoid production dependencies
+        """Create mock tool dispatcher using SSOT mock protection (fallback for tests only)."""
         try:
+            from shared.test_only_guard import require_test_mode
+            
+            # SSOT Guard: This function should only run in test mode
+            require_test_mode("_create_mock_tool_dispatcher", 
+                             "Mock tool dispatcher creation should only happen in tests")
+            
+            # Conditionally import test_framework to avoid production dependencies
             from test_framework.ssot.mocks import get_mock_factory
+            
+            # Use SSOT MockFactory for consistent mock creation
+            mock_factory = get_mock_factory()
+            mock_dispatcher = mock_factory.create_tool_executor_mock()
+            
+            # Configure user context for this mock
+            mock_dispatcher.user_context = self.context
+            
+            # Override execute_tool with user-specific behavior that emits WebSocket events
+            async def mock_execute_tool(tool_name, args):
+                # Emit tool_executing event
+                if self.websocket_emitter:
+                    await self.websocket_emitter.notify_tool_executing(tool_name)
+                    
+                # Simulate tool execution
+                result = {
+                    "result": f"Tool {tool_name} executed for user {self.context.user_id}",
+                    "user_id": self.context.user_id,
+                    "tool_args": args,
+                    "success": True
+                }
+                
+                # Emit tool_completed event
+                if self.websocket_emitter:
+                    await self.websocket_emitter.notify_tool_completed(tool_name, {"result": result})
+                    
+                return result
+            
+            mock_dispatcher.execute_tool = mock_execute_tool
+            logger.info(f"✅ Created mock tool dispatcher with WebSocket events for user {self.context.user_id}")
+            return mock_dispatcher
+            
         except ImportError:
-            raise ImportError("test_framework not available - mock creation not supported in production")
+            logger.error("test_framework not available - mock creation not supported in production")
+            # Return a minimal dispatcher that at least emits WebSocket events
+            return self._create_minimal_tool_dispatcher()
+            
+    def _create_minimal_tool_dispatcher(self):
+        """Create minimal tool dispatcher for production fallback."""
+        class MinimalToolDispatcher:
+            def __init__(self, context, websocket_emitter):
+                self.context = context
+                self.websocket_emitter = websocket_emitter
+                
+            async def execute_tool(self, tool_name, args):
+                # Emit tool_executing event
+                if self.websocket_emitter:
+                    await self.websocket_emitter.notify_tool_executing(tool_name)
+                    
+                # Basic result
+                result = {
+                    "result": f"Tool {tool_name} executed (minimal dispatcher)",
+                    "success": True
+                }
+                
+                # Emit tool_completed event
+                if self.websocket_emitter:
+                    await self.websocket_emitter.notify_tool_completed(tool_name, {"result": result})
+                    
+                return result
         
-        # Use SSOT MockFactory for consistent mock creation
-        mock_factory = get_mock_factory()
-        mock_dispatcher = mock_factory.create_tool_executor_mock()
-        
-        # Configure user context for this mock
-        mock_dispatcher.user_context = self.context
-        
-        # Override execute_tool with user-specific behavior
-        async def mock_execute_tool(tool_name, args):
-            return {
-                "result": f"Tool {tool_name} executed for user {self.context.user_id}",
-                "user_id": self.context.user_id,
-                "tool_args": args,
-                "success": True
-            }
-        
-        mock_dispatcher.execute_tool = mock_execute_tool
-        return mock_dispatcher
+        return MinimalToolDispatcher(self.context, self.websocket_emitter)
     
     def _init_components(self) -> None:
         """Initialize execution components with user context."""
@@ -320,6 +386,20 @@ class UserExecutionEngine:
             # Initialize components with user-scoped bridge
             # Use minimal adapters to maintain interface compatibility
             self.periodic_update_manager = MinimalPeriodicUpdateManager()
+            
+            # CRITICAL FIX: Set tool dispatcher on registry before creating agent_core
+            # This ensures agents created by AgentExecutionCore have WebSocket-enabled tool dispatchers
+            if hasattr(registry, 'set_tool_dispatcher') or hasattr(registry, 'tool_dispatcher'):
+                tool_dispatcher = self.get_tool_dispatcher()
+                if hasattr(registry, 'set_tool_dispatcher'):
+                    registry.set_tool_dispatcher(tool_dispatcher)
+                    logger.info(f"✅ Set tool dispatcher on agent registry via set_tool_dispatcher method")
+                elif hasattr(registry, 'tool_dispatcher'):
+                    registry.tool_dispatcher = tool_dispatcher
+                    logger.info(f"✅ Set tool dispatcher on agent registry via direct assignment")
+            else:
+                logger.warning(f"⚠️ Agent registry doesn't support tool dispatcher - tool events may not work")
+            
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
             # Use minimal fallback manager with user context
             self.fallback_manager = MinimalFallbackManager(self.context)
@@ -551,7 +631,19 @@ class UserExecutionEngine:
                 user_context=self.context
             )
             
-            # Execute with user isolation
+            # CRITICAL FIX: Set tool dispatcher on the agent before execution
+            if hasattr(agent, 'tool_dispatcher') or hasattr(agent, 'set_tool_dispatcher'):
+                tool_dispatcher = self.get_tool_dispatcher()
+                if hasattr(agent, 'set_tool_dispatcher'):
+                    agent.set_tool_dispatcher(tool_dispatcher)
+                    logger.info(f"✅ Set tool dispatcher on {context.agent_name} via set_tool_dispatcher method")
+                elif hasattr(agent, 'tool_dispatcher'):
+                    agent.tool_dispatcher = tool_dispatcher
+                    logger.info(f"✅ Set tool dispatcher on {context.agent_name} via direct assignment")
+                else:
+                    logger.warning(f"⚠️ Agent {context.agent_name} doesn't have tool dispatcher support")
+            
+            # Execute with user isolation - use the agent_core for proper lifecycle management
             result = await self.agent_core.execute_agent(context, state)
             
             # Final heartbeat

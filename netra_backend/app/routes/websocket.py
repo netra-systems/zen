@@ -112,7 +112,7 @@ def _get_staging_optimized_timeouts():
         # and GCP load balancer keepalive requirements
         return {
             "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "600")),
-            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "30")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "25")),  # Staging: GCP compatible
             "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "90")),
             "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "120"))
         }
@@ -128,7 +128,7 @@ def _get_staging_optimized_timeouts():
         # Development/testing - more permissive with environment variables
         return {
             "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "300")),
-            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "45")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "20")),  # Development: Faster heartbeat for testing
             "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "60")),
             "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "60"))
         }
@@ -1283,6 +1283,12 @@ async def _handle_websocket_messages(
                 # Track loop iteration with detailed state
                 loop_duration = time.time() - loop_start_time
                 logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {_safe_websocket_state_for_logging(websocket.application_state)}, duration: {loop_duration:.1f}s")
+                
+                # RACE CONDITION FIX: Additional validation before receive_text
+                # This prevents "Need to call 'accept' first" errors in GCP Cloud Run
+                if not is_websocket_connected_and_ready(websocket):
+                    logger.debug(f"WebSocket connection {connection_id} became unavailable before receive, exiting loop")
+                    break
                 
                 # Receive message with timeout
                 raw_message = await asyncio.wait_for(
