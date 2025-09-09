@@ -173,18 +173,16 @@ class TestAgentExecutionCore(BaseIntegrationTest):
     """
     
     @pytest.fixture(autouse=True)
-    async def setup_test_environment(self, real_postgres_connection, real_redis_fixture):
+    async def setup_test_environment(self, real_services_fixture):
         """Set up isolated test environment with real services."""
         await self.async_setup()
         
         self.env = get_env()
-        self.postgres_connection = real_postgres_connection
-        self.redis_connection = real_redis_fixture
+        self.services = real_services_fixture
         self.auth_helper = E2EAuthHelper(environment="test")
         
         # CRITICAL: Verify real services are available (CLAUDE.md requirement)
-        assert real_postgres_connection, "Real PostgreSQL required - no mocks allowed per CLAUDE.md"
-        assert real_redis_fixture, "Real Redis required - no mocks allowed per CLAUDE.md"
+        assert real_services_fixture, "Real services fixture required - no mocks allowed per CLAUDE.md"
         
         # Generate test user context with proper isolation
         self.test_user_context = await create_authenticated_user_context(
@@ -239,7 +237,7 @@ class TestAgentExecutionCore(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_lifecycle_management_complete_flow(self):
+    async def test_agent_lifecycle_management_complete_flow(self, real_services_fixture):
         """
         Test complete agent lifecycle from creation to completion.
         
