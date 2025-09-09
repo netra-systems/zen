@@ -428,6 +428,131 @@ class UnifiedWebSocketAuthenticator:
                 error_code="WEBSOCKET_AUTH_EXCEPTION"
             )
     
+    async def _check_circuit_breaker(self) -> str:
+        """
+        PHASE 1 FIX: Check authentication circuit breaker state.
+        
+        Returns:
+            Circuit breaker state: 'CLOSED', 'OPEN', or 'HALF_OPEN'
+        """
+        current_time = time.time()
+        
+        # Check if circuit breaker should reset from OPEN to HALF_OPEN
+        if (self._circuit_breaker["state"] == "OPEN" and 
+            self._circuit_breaker["last_failure_time"] and
+            current_time - self._circuit_breaker["last_failure_time"] > self._circuit_breaker["reset_timeout"]):
+            
+            self._circuit_breaker["state"] = "HALF_OPEN"
+            self._circuit_breaker["failure_count"] = 0
+            logger.info("CIRCUIT BREAKER: Transitioning from OPEN to HALF_OPEN for testing")
+            
+        return self._circuit_breaker["state"]
+    
+    async def _record_circuit_breaker_failure(self):
+        """PHASE 1 FIX: Record authentication failure for circuit breaker."""
+        self._circuit_breaker["failure_count"] += 1
+        self._circuit_breaker["last_failure_time"] = time.time()
+        
+        # Trip circuit breaker if failure threshold reached
+        if self._circuit_breaker["failure_count"] >= self._circuit_breaker["failure_threshold"]:
+            if self._circuit_breaker["state"] != "OPEN":
+                self._circuit_breaker["state"] = "OPEN"
+                logger.warning(f"CIRCUIT BREAKER: OPENED after {self._circuit_breaker['failure_count']} consecutive failures")
+    
+    async def _record_circuit_breaker_success(self):
+        """PHASE 1 FIX: Record authentication success for circuit breaker."""
+        # Reset failure count on success
+        self._circuit_breaker["failure_count"] = 0
+        
+        # Close circuit breaker if it was HALF_OPEN
+        if self._circuit_breaker["state"] == "HALF_OPEN":
+            self._circuit_breaker["state"] = "CLOSED"
+            logger.info("CIRCUIT BREAKER: CLOSED after successful authentication")
+    
+    async def _check_concurrent_token_cache(self, e2e_context: Optional[Dict[str, Any]]) -> Optional[WebSocketAuthResult]:
+        """
+        PHASE 1 FIX: Check cached authentication result for concurrent E2E contexts.
+        
+        Args:
+            e2e_context: E2E test context for cache key generation
+            
+        Returns:
+            Cached WebSocketAuthResult or None if not found
+        """
+        if not e2e_context or not e2e_context.get("is_e2e_testing"):
+            return None
+            
+        async with self._circuit_breaker["token_cache_lock"]:
+            # Generate cache key from E2E context
+            cache_key = self._generate_cache_key(e2e_context)
+            if cache_key in self._circuit_breaker["concurrent_token_cache"]:
+                cached_entry = self._circuit_breaker["concurrent_token_cache"][cache_key]
+                
+                # Check if cache entry is still valid (5 minutes)
+                if time.time() - cached_entry["timestamp"] < 300:
+                    logger.debug(f"CONCURRENT CACHE: Hit for E2E context {cache_key[:16]}...")
+                    return cached_entry["result"]
+                else:
+                    # Remove expired entry
+                    del self._circuit_breaker["concurrent_token_cache"][cache_key]
+                    logger.debug(f"CONCURRENT CACHE: Expired entry removed {cache_key[:16]}...")
+                    
+        return None
+    
+    async def _cache_concurrent_token_result(self, e2e_context: Optional[Dict[str, Any]], result: WebSocketAuthResult):
+        """
+        PHASE 1 FIX: Cache authentication result for concurrent E2E contexts.
+        
+        Args:
+            e2e_context: E2E test context for cache key generation
+            result: WebSocketAuthResult to cache
+        """
+        if not e2e_context or not e2e_context.get("is_e2e_testing") or not result.success:
+            return
+            
+        async with self._circuit_breaker["token_cache_lock"]:
+            cache_key = self._generate_cache_key(e2e_context)
+            
+            # Limit cache size to prevent memory issues (max 50 entries)
+            if len(self._circuit_breaker["concurrent_token_cache"]) >= 50:
+                # Remove oldest entry
+                oldest_key = min(
+                    self._circuit_breaker["concurrent_token_cache"].keys(),
+                    key=lambda k: self._circuit_breaker["concurrent_token_cache"][k]["timestamp"]
+                )
+                del self._circuit_breaker["concurrent_token_cache"][oldest_key]
+                logger.debug("CONCURRENT CACHE: Removed oldest entry to maintain size limit")
+            
+            self._circuit_breaker["concurrent_token_cache"][cache_key] = {
+                "result": result,
+                "timestamp": time.time()
+            }
+            
+            logger.debug(f"CONCURRENT CACHE: Stored result for E2E context {cache_key[:16]}...")
+    
+    def _generate_cache_key(self, e2e_context: Dict[str, Any]) -> str:
+        """
+        PHASE 1 FIX: Generate cache key from E2E context.
+        
+        Args:
+            e2e_context: E2E test context
+            
+        Returns:
+            Cache key string
+        """
+        import hashlib
+        
+        # Create deterministic cache key from E2E context
+        key_parts = [
+            e2e_context.get("test_environment", "unknown"),
+            e2e_context.get("e2e_oauth_key", ""),
+            str(e2e_context.get("bypass_enabled", False)),
+            e2e_context.get("fix_version", "")
+        ]
+        
+        key_string = "|".join(str(part) for part in key_parts)
+        return hashlib.md5(key_string.encode()).hexdigest()
+    
     def _is_websocket_valid_for_auth(self, websocket: WebSocket) -> bool:
         """
         Check if WebSocket is in a valid state for authentication.
