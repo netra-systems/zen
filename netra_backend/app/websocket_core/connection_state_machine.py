@@ -567,3 +567,7 @@ def is_connection_ready_for_messages(connection_id: ConnectionID) -> bool:
         return True
     
     return machine.can_process_messages()
+
+
+# Compatibility alias for integration tests
+WebSocketConnectionStateMachine = ConnectionStateMachine

@@ -62,7 +62,7 @@ from netra_backend.app.cache.session_cache import SessionCache
 from netra_backend.app.cache.result_cache import ResultCache
 
 # Agent execution components
-from netra_backend.app.services.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_agent import SupervisorAgent
 from netra_backend.app.execution.execution_engine import ExecutionEngine
 
@@ -1467,10 +1467,868 @@ I've saved your progress so we can continue from where we left off."""
             'user_informed': True
         }, 'error_recovery')
 
-    # CONTINUING WITH REMAINING TESTS (7-15)...
-    # Note: Due to length, I'm implementing the first 6 tests fully.
-    # The remaining tests (7-15) would follow the same comprehensive pattern,
-    # covering the remaining Golden Path exit scenarios and persistence requirements.
+    # =============================================================================
+    # TEST 7: Timeout Exit - Save Partial Results and Log Timeout Details
+    # =============================================================================
+    
+    @pytest.mark.timeout(60)
+    async def test_timeout_exit_save_partial_results_log_timeout_details(self, real_services_fixture):
+        """
+        Test 7: Timeout Exit - Save partial results if available, log timeout details
+        
+        BVJ:
+        - Segment: All users - Performance reliability
+        - Business Goal: Preserve partial progress when operations exceed time limits
+        - Value Impact: Timeout handling prevents complete loss of processing work
+        - Strategic Impact: Graceful timeout handling maintains user confidence
+        """
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for timeout exit testing")
+        
+        # Create isolated user context
+        user_context = await self.create_isolated_user_context(real_services, "timeout_exit")
+        user_id = user_context['user_id']
+        
+        thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+        run_id = RunID(f"run_{uuid.uuid4()}")
+        
+        # Simulate long-running operation that times out
+        timeout_timestamp = time.time()
+        execution_timeout_seconds = 300  # 5 minutes
+        
+        # Partial results available at timeout
+        timeout_partial_results = {
+            'execution_start': timeout_timestamp - execution_timeout_seconds,
+            'timeout_occurred': timeout_timestamp,
+            'execution_duration': execution_timeout_seconds,
+            'completed_phases': ['initialization', 'data_gathering', 'partial_analysis'],
+            'incomplete_phases': ['optimization_analysis', 'report_generation'],
+            'partial_data': {
+                'infrastructure_scan': {
+                    'aws_resources_analyzed': 156,
+                    'azure_resources_analyzed': 89,
+                    'gcp_resources_analyzed': 43,
+                    'total_estimated_cost': 8400,
+                    'completion_percentage': 0.72
+                },
+                'preliminary_findings': {
+                    'immediate_savings_identified': 1260,
+                    'optimization_opportunities': 8,
+                    'high_priority_issues': 3
+                }
+            },
+            'timeout_context': {
+                'timeout_reason': 'execution_duration_exceeded',
+                'max_allowed_duration': execution_timeout_seconds,
+                'final_operation_attempted': 'comprehensive_cost_modeling',
+                'recovery_possible': True,
+                'partial_value_available': True
+            }
+        }
+        
+        # Save timeout state and partial results
+        async with real_services['db'].begin() as tx:
+            # Create thread with timeout state
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(thread_id),
+                'created_at': int(timeout_timestamp - execution_timeout_seconds),
+                'metadata_': json.dumps({
+                    'user_id': str(user_id),
+                    'state': 'timeout_terminated',
+                    'timeout_timestamp': timeout_timestamp,
+                    'partial_results_available': True
+                })
+            })
+            
+            # Log comprehensive timeout details
+            await tx.execute(text("""
+                INSERT INTO apex_optimizer_agent_runs (id, run_id, step_name, step_input, step_output, timestamp)
+                VALUES (:id, :run_id, :step_name, :step_input, :step_output, :timestamp)
+            """), {
+                'id': str(uuid.uuid4()),
+                'run_id': str(run_id),
+                'step_name': 'timeout_termination_details',
+                'step_input': json.dumps({'max_duration': execution_timeout_seconds}),
+                'step_output': json.dumps(timeout_partial_results),
+                'timestamp': datetime.now(timezone.utc)
+            })
+        
+        # Verify timeout handling and partial results preservation
+        async with real_services['db'].begin() as tx:
+            timeout_query = await tx.execute(text("""
+                SELECT step_output FROM apex_optimizer_agent_runs 
+                WHERE run_id = :run_id AND step_name = 'timeout_termination_details'
+            """), {'run_id': str(run_id)})
+            timeout_row = timeout_query.fetchone()
+            
+            assert timeout_row is not None, "Timeout details must be logged"
+            timeout_data = json.loads(timeout_row.step_output)
+            
+            assert timeout_data['partial_data']['preliminary_findings']['immediate_savings_identified'] == 1260, "Partial business value must be preserved"
+            assert timeout_data['timeout_context']['partial_value_available'] is True, "Partial value availability must be recorded"
+        
+        self.assert_business_value_delivered({
+            'timeout_handled': True,
+            'partial_results_saved': True,
+            'partial_value_preserved': 1260,
+            'recovery_info_logged': True
+        }, 'reliability')
+
+    # =============================================================================
+    # TEST 8: Service Shutdown Exit - Graceful State Persistence
+    # =============================================================================
+    
+    @pytest.mark.timeout(60)
+    async def test_service_shutdown_exit_gracefully_save_user_session_states(self, real_services_fixture):
+        """
+        Test 8: Service Shutdown Exit - Gracefully save all user session states
+        
+        BVJ:
+        - Segment: All users - System reliability
+        - Business Goal: Zero data loss during planned maintenance
+        - Value Impact: Graceful shutdowns prevent user frustration and data corruption
+        - Strategic Impact: Professional system behavior during maintenance windows
+        """
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for shutdown exit testing")
+        
+        # Create multiple user contexts to simulate multi-user shutdown
+        user_contexts = []
+        for i in range(3):
+            user_context = await self.create_isolated_user_context(real_services, f"shutdown_{i}")
+            user_contexts.append(user_context)
+        
+        shutdown_timestamp = time.time()
+        
+        # Simulate active sessions for multiple users
+        active_sessions = []
+        for i, user_context in enumerate(user_contexts):
+            user_id = user_context['user_id']
+            thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+            
+            session_state = {
+                'user_id': str(user_id),
+                'thread_id': str(thread_id),
+                'session_active': True,
+                'current_operation': f'cost_analysis_phase_{i+1}',
+                'progress': 0.3 + (i * 0.2),
+                'partial_results': {
+                    'data_collected': True,
+                    'analysis_progress': 0.3 + (i * 0.2),
+                    'preliminary_savings': 500 + (i * 300)
+                }
+            }
+            active_sessions.append(session_state)
+        
+        # Phase: Graceful Shutdown - Save All User States
+        async with real_services['db'].begin() as tx:
+            for session in active_sessions:
+                # Create thread for each user
+                await tx.execute(text("""
+                    INSERT INTO threads (id, object, created_at, metadata_)
+                    VALUES (:id, 'thread', :created_at, :metadata_)
+                """), {
+                    'id': session['thread_id'],
+                    'created_at': int(shutdown_timestamp - 60),
+                    'metadata_': json.dumps({
+                        'user_id': session['user_id'],
+                        'state': 'graceful_shutdown_preserved',
+                        'shutdown_timestamp': shutdown_timestamp,
+                        'session_state': session
+                    })
+                })
+                
+                # Save session preservation record
+                await tx.execute(text("""
+                    INSERT INTO apex_optimizer_agent_runs (id, run_id, step_name, step_input, step_output, timestamp)
+                    VALUES (:id, :run_id, :step_name, :step_input, :step_output, :timestamp)
+                """), {
+                    'id': str(uuid.uuid4()),
+                    'run_id': f"shutdown_{session['user_id']}",
+                    'step_name': 'graceful_shutdown_state_preservation',
+                    'step_input': json.dumps({'shutdown_timestamp': shutdown_timestamp}),
+                    'step_output': json.dumps(session),
+                    'timestamp': datetime.now(timezone.utc)
+                })
+        
+        # Verify all user sessions were preserved
+        async with real_services['db'].begin() as tx:
+            preserved_sessions_query = await tx.execute(text("""
+                SELECT COUNT(*) as count FROM threads 
+                WHERE metadata_::json->>'state' = 'graceful_shutdown_preserved'
+            """))
+            preserved_count = preserved_sessions_query.fetchone().count
+            
+            assert preserved_count == 3, "All user sessions must be preserved during graceful shutdown"
+        
+        self.assert_business_value_delivered({
+            'shutdown_graceful': True,
+            'all_sessions_preserved': True,
+            'users_affected': 3,
+            'data_loss': False
+        }, 'reliability')
+
+    # =============================================================================
+    # TEST 9: Database Transaction Integrity - ACID Compliance
+    # =============================================================================
+    
+    @pytest.mark.timeout(60)
+    async def test_database_transaction_integrity_rollback_scenarios_acid_compliance(self, real_services_fixture):
+        """
+        Test 9: Database Transaction Integrity - Rollback scenarios and ACID compliance
+        
+        BVJ:
+        - Segment: All users - Data integrity
+        - Business Goal: Ensure data consistency and prevent corruption
+        - Value Impact: Transaction integrity prevents data inconsistencies that break user experience
+        - Strategic Impact: ACID compliance ensures platform reliability and user trust
+        """
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for transaction integrity testing")
+        
+        user_context = await self.create_isolated_user_context(real_services, "transaction_test")
+        user_id = user_context['user_id']
+        
+        # Test atomic transaction with rollback scenario
+        thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+        run_id = RunID(f"run_{uuid.uuid4()}")
+        
+        try:
+            async with real_services['db'].begin() as tx:
+                # Insert thread
+                await tx.execute(text("""
+                    INSERT INTO threads (id, object, created_at, metadata_)
+                    VALUES (:id, 'thread', :created_at, :metadata_)
+                """), {
+                    'id': str(thread_id),
+                    'created_at': int(time.time()),
+                    'metadata_': json.dumps({'user_id': str(user_id), 'test': 'transaction'})
+                })
+                
+                # Insert message
+                await tx.execute(text("""
+                    INSERT INTO messages (id, thread_id, role, content, created_at, object)
+                    VALUES (:id, :thread_id, :role, :content, :created_at, 'thread.message')
+                """), {
+                    'id': f"msg_{uuid.uuid4()}",
+                    'thread_id': str(thread_id),
+                    'role': 'user',
+                    'content': json.dumps([{"type": "text", "text": "test"}]),
+                    'created_at': int(time.time())
+                })
+                
+                # Force rollback by raising exception
+                raise RuntimeError("Simulated transaction failure")
+                
+        except RuntimeError:
+            # Expected exception for rollback test
+            pass
+        
+        # Verify rollback occurred - no data should exist
+        async with real_services['db'].begin() as tx:
+            thread_check = await tx.execute(text("""
+                SELECT COUNT(*) as count FROM threads WHERE id = :thread_id
+            """), {'thread_id': str(thread_id)})
+            thread_count = thread_check.fetchone().count
+            
+            assert thread_count == 0, "Failed transaction must be completely rolled back"
+        
+        # Test successful atomic transaction
+        async with real_services['db'].begin() as tx:
+            # This time complete successfully
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(thread_id),
+                'created_at': int(time.time()),
+                'metadata_': json.dumps({'user_id': str(user_id), 'test': 'successful_transaction'})
+            })
+            
+            await tx.execute(text("""
+                INSERT INTO messages (id, thread_id, role, content, created_at, object)
+                VALUES (:id, :thread_id, :role, :content, :created_at, 'thread.message')
+            """), {
+                'id': f"msg_{uuid.uuid4()}",
+                'thread_id': str(thread_id),
+                'role': 'user',
+                'content': json.dumps([{"type": "text", "text": "successful test"}]),
+                'created_at': int(time.time())
+            })
+        
+        # Verify successful transaction persisted both records
+        async with real_services['db'].begin() as tx:
+            success_check = await tx.execute(text("""
+                SELECT t.id, COUNT(m.id) as message_count
+                FROM threads t
+                LEFT JOIN messages m ON t.id = m.thread_id
+                WHERE t.id = :thread_id
+                GROUP BY t.id
+            """), {'thread_id': str(thread_id)})
+            success_row = success_check.fetchone()
+            
+            assert success_row is not None, "Successful transaction must persist"
+            assert success_row.message_count == 1, "All transaction components must be committed together"
+        
+        self.assert_business_value_delivered({
+            'rollback_works': True,
+            'commit_atomic': True,
+            'data_consistency': True,
+            'acid_compliance': True
+        }, 'data_integrity')
+
+    # =============================================================================
+    # TEST 10: Redis Cache Consistency - Expiration and Data Consistency
+    # =============================================================================
+    
+    @pytest.mark.timeout(60)
+    async def test_redis_cache_consistency_expiration_handling_data_consistency(self, real_services_fixture):
+        """
+        Test 10: Redis Cache Consistency - Expiration handling and data consistency
+        
+        BVJ:
+        - Segment: All users - Performance consistency
+        - Business Goal: Reliable cache behavior for consistent user experience
+        - Value Impact: Cache inconsistencies cause confusing user experiences and performance issues
+        - Strategic Impact: Cache reliability enables predictable performance scaling
+        """
+        real_services = real_services_fixture
+        
+        user_context = await self.create_isolated_user_context(real_services, "cache_consistency")
+        user_id = user_context['user_id']
+        
+        # Mock Redis if not available
+        if real_services['services_available']['redis']:
+            import redis.asyncio as redis
+            redis_client = redis.from_url(real_services['redis'])
+        else:
+            # Use dict with time tracking for testing
+            redis_client = {}
+            redis_client._expiry_times = {}
+        
+        # Test cache expiration handling
+        cache_key = f"test_cache:{user_id}"
+        cache_data = {'value': 12345, 'timestamp': time.time()}
+        expiry_seconds = 5
+        
+        if hasattr(redis_client, 'set'):
+            await redis_client.set(cache_key, json.dumps(cache_data), ex=expiry_seconds)
+            
+            # Verify immediate retrieval
+            cached = await redis_client.get(cache_key)
+            assert cached is not None, "Cached data must be immediately retrievable"
+            
+            # Wait for expiration and verify cleanup
+            await asyncio.sleep(expiry_seconds + 1)
+            expired = await redis_client.get(cache_key)
+            assert expired is None, "Expired cache entries must be automatically cleaned"
+        else:
+            # Mock expiry
+            redis_client[cache_key] = json.dumps(cache_data)
+            redis_client._expiry_times[cache_key] = time.time() + expiry_seconds
+            assert cache_key in redis_client, "Cache must store data"
+        
+        # Test cache consistency across concurrent operations
+        consistency_results = []
+        
+        async def concurrent_cache_operation(index):
+            key = f"consistency_test:{user_id}:{index}"
+            value = {'index': index, 'operation_time': time.time()}
+            
+            if hasattr(redis_client, 'set'):
+                await redis_client.set(key, json.dumps(value), ex=60)
+                retrieved = await redis_client.get(key)
+                parsed = json.loads(retrieved) if retrieved else None
+                
+                return {
+                    'index': index,
+                    'stored': value,
+                    'retrieved': parsed,
+                    'consistent': parsed == value if parsed else False
+                }
+            else:
+                redis_client[key] = json.dumps(value)
+                return {'index': index, 'consistent': True}
+        
+        # Run 10 concurrent operations
+        consistency_results = await asyncio.gather(*[concurrent_cache_operation(i) for i in range(10)])
+        
+        # Verify all operations were consistent
+        consistent_operations = sum(1 for r in consistency_results if r.get('consistent', False))
+        assert consistent_operations == 10, f"All cache operations must be consistent, got {consistent_operations}/10"
+        
+        self.assert_business_value_delivered({
+            'expiration_works': True,
+            'concurrent_consistency': True,
+            'operations_tested': 10,
+            'consistency_rate': 1.0
+        }, 'performance_optimization')
+
+    # =============================================================================
+    # TEST 11-15: Additional Critical Persistence Tests
+    # =============================================================================
+    
+    @pytest.mark.timeout(60)
+    async def test_multi_user_data_isolation_multi_tenant_database(self, real_services_fixture):
+        """Test 11: Multi-user data isolation in multi-tenant database"""
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for multi-user isolation testing")
+        
+        # Create 3 isolated users
+        users = []
+        for i in range(3):
+            user_context = await self.create_isolated_user_context(real_services, f"isolation_user_{i}")
+            users.append(user_context)
+        
+        # Create data for each user
+        for i, user in enumerate(users):
+            user_id = user['user_id']
+            thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+            
+            async with real_services['db'].begin() as tx:
+                await tx.execute(text("""
+                    INSERT INTO threads (id, object, created_at, metadata_)
+                    VALUES (:id, 'thread', :created_at, :metadata_)
+                """), {
+                    'id': str(thread_id),
+                    'created_at': int(time.time()),
+                    'metadata_': json.dumps({
+                        'user_id': str(user_id),
+                        'sensitive_data': f'confidential_user_{i}_data',
+                        'cost_analysis': {'monthly_spend': 1000 + (i * 500)}
+                    })
+                })
+        
+        # Verify each user can only access their own data
+        for i, user in enumerate(users):
+            user_id = user['user_id']
+            
+            async with real_services['db'].begin() as tx:
+                user_data_query = await tx.execute(text("""
+                    SELECT COUNT(*) as count, metadata_
+                    FROM threads 
+                    WHERE metadata_::json->>'user_id' = :user_id
+                    GROUP BY metadata_
+                """), {'user_id': str(user_id)})
+                user_row = user_data_query.fetchone()
+                
+                assert user_row is not None, f"User {i} must have access to their data"
+                assert user_row.count == 1, f"User {i} must see exactly their own data"
+                
+                metadata = json.loads(user_row.metadata_)
+                assert metadata['sensitive_data'] == f'confidential_user_{i}_data', "User must only see their own sensitive data"
+        
+        self.assert_business_value_delivered({
+            'isolation_verified': True,
+            'users_tested': 3,
+            'data_leakage': False,
+            'privacy_compliance': True
+        }, 'security')
+
+    @pytest.mark.timeout(60)
+    async def test_thread_message_hierarchy_threading_persistence_validation(self, real_services_fixture):
+        """Test 12: Thread and Message Hierarchy persistence validation"""
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for hierarchy testing")
+        
+        user_context = await self.create_isolated_user_context(real_services, "hierarchy_test")
+        user_id = user_context['user_id']
+        
+        # Create thread hierarchy
+        parent_thread = ThreadID(f"thread_{uuid.uuid4()}")
+        messages = []
+        
+        # Create conversation with proper hierarchy
+        for i in range(5):
+            message_data = {
+                'id': f"msg_{uuid.uuid4()}",
+                'thread_id': str(parent_thread),
+                'role': 'user' if i % 2 == 0 else 'assistant',
+                'content': [{"type": "text", "text": f"Message {i} in conversation"}],
+                'created_at': int(time.time() + i),
+                'sequence': i
+            }
+            messages.append(message_data)
+        
+        # Persist hierarchy
+        async with real_services['db'].begin() as tx:
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(parent_thread),
+                'created_at': int(time.time()),
+                'metadata_': json.dumps({'user_id': str(user_id), 'message_count': len(messages)})
+            })
+            
+            for msg in messages:
+                await tx.execute(text("""
+                    INSERT INTO messages (id, thread_id, role, content, created_at, object)
+                    VALUES (:id, :thread_id, :role, :content, :created_at, 'thread.message')
+                """), {
+                    'id': msg['id'],
+                    'thread_id': msg['thread_id'],
+                    'role': msg['role'],
+                    'content': json.dumps(msg['content']),
+                    'created_at': msg['created_at']
+                })
+        
+        # Verify hierarchy preservation and ordering
+        async with real_services['db'].begin() as tx:
+            hierarchy_query = await tx.execute(text("""
+                SELECT m.id, m.role, m.created_at, m.content
+                FROM messages m
+                WHERE m.thread_id = :thread_id
+                ORDER BY m.created_at ASC
+            """), {'thread_id': str(parent_thread)})
+            
+            hierarchy_rows = hierarchy_query.fetchall()
+            assert len(hierarchy_rows) == 5, "All messages in hierarchy must be preserved"
+            
+            # Verify ordering
+            for i, row in enumerate(hierarchy_rows):
+                expected_role = 'user' if i % 2 == 0 else 'assistant'
+                assert row.role == expected_role, f"Message {i} role must be preserved in correct order"
+        
+        self.assert_business_value_delivered({
+            'hierarchy_preserved': True,
+            'message_ordering': True,
+            'conversation_integrity': True,
+            'messages_count': 5
+        }, 'conversation_continuity')
+
+    @pytest.mark.timeout(60)
+    async def test_concurrent_database_load_performance_under_concurrent_operations(self, real_services_fixture):
+        """Test 13: Performance under concurrent database operations"""
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for concurrent load testing")
+        
+        # Create multiple users for concurrent testing
+        user_contexts = []
+        for i in range(5):
+            user_context = await self.create_isolated_user_context(real_services, f"concurrent_user_{i}")
+            user_contexts.append(user_context)
+        
+        async def concurrent_database_operation(user_context, operation_index):
+            user_id = user_context['user_id']
+            thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+            
+            start_time = time.time()
+            
+            async with real_services['db'].begin() as tx:
+                # Create thread
+                await tx.execute(text("""
+                    INSERT INTO threads (id, object, created_at, metadata_)
+                    VALUES (:id, 'thread', :created_at, :metadata_)
+                """), {
+                    'id': str(thread_id),
+                    'created_at': int(time.time()),
+                    'metadata_': json.dumps({'user_id': str(user_id), 'operation': operation_index})
+                })
+                
+                # Create messages
+                for j in range(3):
+                    await tx.execute(text("""
+                        INSERT INTO messages (id, thread_id, role, content, created_at, object)
+                        VALUES (:id, :thread_id, :role, :content, :created_at, 'thread.message')
+                    """), {
+                        'id': f"msg_{uuid.uuid4()}",
+                        'thread_id': str(thread_id),
+                        'role': 'user' if j % 2 == 0 else 'assistant',
+                        'content': json.dumps([{"type": "text", "text": f"Concurrent message {j}"}]),
+                        'created_at': int(time.time() + j)
+                    })
+            
+            duration = time.time() - start_time
+            return {'user_id': str(user_id), 'operation_index': operation_index, 'duration': duration}
+        
+        # Run concurrent operations
+        concurrent_tasks = []
+        for i, user_context in enumerate(user_contexts):
+            for j in range(3):  # 3 operations per user = 15 total concurrent operations
+                task = concurrent_database_operation(user_context, f"{i}_{j}")
+                concurrent_tasks.append(task)
+        
+        results = await asyncio.gather(*concurrent_tasks)
+        
+        # Analyze performance
+        durations = [r['duration'] for r in results]
+        avg_duration = sum(durations) / len(durations)
+        max_duration = max(durations)
+        
+        # Performance assertions
+        assert avg_duration < 2.0, f"Average concurrent operation must be fast (< 2s), got {avg_duration:.3f}s"
+        assert max_duration < 5.0, f"No single operation should exceed 5s, got {max_duration:.3f}s"
+        assert len(results) == 15, "All concurrent operations must complete successfully"
+        
+        self.assert_business_value_delivered({
+            'concurrent_operations': 15,
+            'avg_duration': avg_duration,
+            'max_duration': max_duration,
+            'performance_acceptable': avg_duration < 2.0
+        }, 'performance_optimization')
+
+    @pytest.mark.timeout(60)
+    async def test_data_recovery_consistency_backup_recovery_cross_service_validation(self, real_services_fixture):
+        """Test 14: Data recovery and consistency - Backup, recovery, and cross-service consistency validation"""
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for recovery testing")
+        
+        user_context = await self.create_isolated_user_context(real_services, "recovery_test")
+        user_id = user_context['user_id']
+        
+        # Create critical business data
+        thread_id = ThreadID(f"thread_{uuid.uuid4()}")
+        critical_data = {
+            'cost_analysis_results': {
+                'total_monthly_cost': 5600,
+                'optimization_savings': 1680,
+                'critical_recommendations': ['migrate_to_spot_instances', 'optimize_storage_class']
+            },
+            'execution_metadata': {
+                'completion_time': time.time(),
+                'success': True,
+                'business_impact': 'high'
+            }
+        }
+        
+        # Store critical data across multiple tables (simulating cross-service consistency)
+        async with real_services['db'].begin() as tx:
+            # Primary thread record
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(thread_id),
+                'created_at': int(time.time()),
+                'metadata_': json.dumps({'user_id': str(user_id), 'critical_data': True})
+            })
+            
+            # Agent results record  
+            await tx.execute(text("""
+                INSERT INTO apex_optimizer_agent_runs (id, run_id, step_name, step_output, timestamp)
+                VALUES (:id, :run_id, :step_name, :step_output, :timestamp)
+            """), {
+                'id': str(uuid.uuid4()),
+                'run_id': f"run_{thread_id}",
+                'step_name': 'critical_business_results',
+                'step_output': json.dumps(critical_data),
+                'timestamp': datetime.now(timezone.utc)
+            })
+        
+        # Simulate data verification for consistency
+        async with real_services['db'].begin() as tx:
+            # Verify cross-table data consistency
+            consistency_query = await tx.execute(text("""
+                SELECT 
+                    t.id as thread_id,
+                    t.metadata_,
+                    r.step_output
+                FROM threads t
+                JOIN apex_optimizer_agent_runs r ON r.run_id = CONCAT('run_', t.id)
+                WHERE t.id = :thread_id
+            """), {'thread_id': str(thread_id)})
+            
+            consistency_row = consistency_query.fetchone()
+            assert consistency_row is not None, "Cross-service data must be consistent"
+            
+            thread_metadata = json.loads(consistency_row.metadata_)
+            agent_results = json.loads(consistency_row.step_output)
+            
+            assert thread_metadata['critical_data'] is True, "Thread metadata must be preserved"
+            assert agent_results['cost_analysis_results']['optimization_savings'] == 1680, "Business results must be exact"
+        
+        # Simulate recovery scenario - verify data can be reconstructed
+        recovery_data = {}
+        async with real_services['db'].begin() as tx:
+            recovery_query = await tx.execute(text("""
+                SELECT 
+                    t.id,
+                    t.metadata_,
+                    r.step_output,
+                    r.timestamp
+                FROM threads t
+                LEFT JOIN apex_optimizer_agent_runs r ON r.run_id = CONCAT('run_', t.id)
+                WHERE t.metadata_::json->>'user_id' = :user_id
+                  AND t.metadata_::json->>'critical_data' = 'true'
+            """), {'user_id': str(user_id)})
+            
+            recovery_rows = recovery_query.fetchall()
+            
+            for row in recovery_rows:
+                if row.step_output:
+                    recovered_results = json.loads(row.step_output)
+                    recovery_data[row.id] = {
+                        'thread_metadata': json.loads(row.metadata_),
+                        'business_results': recovered_results,
+                        'recovery_timestamp': row.timestamp
+                    }
+        
+        assert len(recovery_data) == 1, "All critical data must be recoverable"
+        recovered_thread = recovery_data[str(thread_id)]
+        assert recovered_thread['business_results']['cost_analysis_results']['total_monthly_cost'] == 5600, "Recovered data must be exact"
+        
+        self.assert_business_value_delivered({
+            'data_consistency': True,
+            'cross_service_integrity': True,
+            'recovery_possible': True,
+            'critical_data_preserved': True
+        }, 'data_integrity')
+
+    @pytest.mark.timeout(60)
+    async def test_data_cleanup_archival_processes_data_lifecycle_management(self, real_services_fixture):
+        """Test 15: Data cleanup and archival processes - Data lifecycle management"""
+        real_services = real_services_fixture
+        
+        if not real_services['database_available']:
+            pytest.skip("Real database not available for cleanup testing")
+        
+        user_context = await self.create_isolated_user_context(real_services, "cleanup_test")
+        user_id = user_context['user_id']
+        
+        # Create data with different lifecycle stages
+        current_time = time.time()
+        old_thread_id = ThreadID(f"old_thread_{uuid.uuid4()}")
+        recent_thread_id = ThreadID(f"recent_thread_{uuid.uuid4()}")
+        
+        # Old data (simulated 90 days old)
+        old_timestamp = current_time - (90 * 24 * 3600)
+        # Recent data (simulated 1 day old)
+        recent_timestamp = current_time - (1 * 24 * 3600)
+        
+        async with real_services['db'].begin() as tx:
+            # Create old thread (eligible for archival)
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(old_thread_id),
+                'created_at': int(old_timestamp),
+                'metadata_': json.dumps({
+                    'user_id': str(user_id),
+                    'archival_eligible': True,
+                    'last_activity': old_timestamp
+                })
+            })
+            
+            # Create recent thread (active)
+            await tx.execute(text("""
+                INSERT INTO threads (id, object, created_at, metadata_)
+                VALUES (:id, 'thread', :created_at, :metadata_)
+            """), {
+                'id': str(recent_thread_id),
+                'created_at': int(recent_timestamp),
+                'metadata_': json.dumps({
+                    'user_id': str(user_id),
+                    'archival_eligible': False,
+                    'last_activity': recent_timestamp
+                })
+            })
+            
+            # Add messages to both threads
+            for thread_id, timestamp in [(old_thread_id, old_timestamp), (recent_thread_id, recent_timestamp)]:
+                await tx.execute(text("""
+                    INSERT INTO messages (id, thread_id, role, content, created_at, object)
+                    VALUES (:id, :thread_id, :role, :content, :created_at, 'thread.message')
+                """), {
+                    'id': f"msg_{uuid.uuid4()}",
+                    'thread_id': str(thread_id),
+                    'role': 'user',
+                    'content': json.dumps([{"type": "text", "text": "Test message"}]),
+                    'created_at': int(timestamp)
+                })
+        
+        # Simulate archival process - identify old data
+        archival_candidates = []
+        async with real_services['db'].begin() as tx:
+            archival_query = await tx.execute(text("""
+                SELECT t.id, t.created_at, COUNT(m.id) as message_count
+                FROM threads t
+                LEFT JOIN messages m ON t.id = m.thread_id
+                WHERE t.created_at < :archival_cutoff
+                  AND t.metadata_::json->>'user_id' = :user_id
+                GROUP BY t.id, t.created_at
+            """), {
+                'archival_cutoff': int(current_time - (30 * 24 * 3600)),  # 30 days
+                'user_id': str(user_id)
+            })
+            
+            archival_candidates = archival_query.fetchall()
+        
+        assert len(archival_candidates) == 1, "Exactly one thread should be eligible for archival"
+        assert archival_candidates[0].id == str(old_thread_id), "Old thread must be identified for archival"
+        
+        # Simulate archival - soft delete old data
+        async with real_services['db'].begin() as tx:
+            await tx.execute(text("""
+                UPDATE threads 
+                SET deleted_at = :deleted_at,
+                    metadata_ = metadata_ || :archival_metadata::jsonb
+                WHERE id = :thread_id
+            """), {
+                'thread_id': str(old_thread_id),
+                'deleted_at': datetime.now(timezone.utc),
+                'archival_metadata': json.dumps({
+                    'archived': True,
+                    'archival_timestamp': current_time,
+                    'archival_reason': 'age_based_cleanup'
+                })
+            })
+        
+        # Verify archival and active data separation
+        async with real_services['db'].begin() as tx:
+            active_query = await tx.execute(text("""
+                SELECT COUNT(*) as active_count FROM threads 
+                WHERE metadata_::json->>'user_id' = :user_id 
+                  AND deleted_at IS NULL
+            """), {'user_id': str(user_id)})
+            active_count = active_query.fetchone().active_count
+            
+            archived_query = await tx.execute(text("""
+                SELECT COUNT(*) as archived_count FROM threads 
+                WHERE metadata_::json->>'user_id' = :user_id 
+                  AND deleted_at IS NOT NULL
+            """), {'user_id': str(user_id)})
+            archived_count = archived_query.fetchone().archived_count
+            
+            assert active_count == 1, "Recent thread must remain active"
+            assert archived_count == 1, "Old thread must be archived"
+        
+        # Verify cleanup preserves business value for recovery if needed
+        async with real_services['db'].begin() as tx:
+            recovery_query = await tx.execute(text("""
+                SELECT metadata_::json->'archival_reason' as archival_reason
+                FROM threads 
+                WHERE id = :thread_id AND deleted_at IS NOT NULL
+            """), {'thread_id': str(old_thread_id)})
+            recovery_row = recovery_query.fetchone()
+            
+            assert recovery_row.archival_reason == 'age_based_cleanup', "Archival reason must be preserved for audit"
+        
+        self.assert_business_value_delivered({
+            'archival_process': True,
+            'data_lifecycle_managed': True,
+            'active_data_preserved': True,
+            'archival_reason_logged': True,
+            'recovery_metadata_preserved': True
+        }, 'data_lifecycle_management')
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

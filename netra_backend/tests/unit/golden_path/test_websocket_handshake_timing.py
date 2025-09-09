@@ -61,9 +61,9 @@ class MockWebSocketHandshakeValidator:
         """Business logic: Start a new handshake with race condition prevention."""
         current_time = time.time()
         
-        # Check for race conditions with recent handshakes
-        recent_handshakes = self._get_recent_handshakes_for_user(user_id, current_time)
-        if len(recent_handshakes) >= self.max_concurrent_per_user:
+        # Check for concurrent handshake limit
+        active_handshakes = self._get_active_handshakes_for_user(user_id)
+        if len(active_handshakes) >= self.max_concurrent_per_user:
             return {
                 "allowed": False,
                 "reason": "too_many_concurrent_handshakes",
@@ -101,6 +101,15 @@ class MockWebSocketHandshakeValidator:
         return [
             attempt for attempt in self.active_handshakes.values()
             if attempt.user_id == user_id and attempt.attempt_time > threshold_time
+        ]
+    
+    def _get_active_handshakes_for_user(self, user_id: UserID) -> List[HandshakeAttempt]:
+        """Get all active handshake attempts for a user (for concurrent limit checking)."""
+        return [
+            attempt for attempt in self.active_handshakes.values()
+            if attempt.user_id == user_id and attempt.phase in [
+                HandshakePhase.CONNECTING, HandshakePhase.AUTHENTICATING, HandshakePhase.READY
+            ]
         ]
     
     def _has_recent_handshake_attempt(self, user_id: UserID, current_time: float) -> bool:
@@ -168,7 +177,8 @@ class MockWebSocketHandshakeValidator:
         
         # Progressive backoff: 0.1s, 0.2s, 0.5s, 1.0s, 2.0s
         delays = [0.1, 0.2, 0.5, 1.0, 2.0]
-        delay_index = min(failed_attempts, len(delays) - 1)
+        # Fix off-by-one error: first failure (failed_attempts=1) should use delays[0]=0.1s
+        delay_index = min(failed_attempts - 1, len(delays) - 1) if failed_attempts > 0 else 0
         return delays[delay_index]
 
 
@@ -385,30 +395,37 @@ class TestWebSocketHandshakeTimingLogic(SSotBaseTestCase):
     @pytest.mark.unit
     def test_race_condition_prevention_timing_accuracy(self):
         """Test timing accuracy of race condition prevention logic."""
-        # Start first handshake
-        start_time = time.time()
-        result1 = self.validator.start_handshake(self.test_websocket_id, self.test_user_id)
-        assert result1["allowed"] is True
-        
-        # Test timing accuracy at various intervals
+        # Test timing accuracy at various intervals by creating controlled handshake attempts
+        base_time = time.time()
         test_intervals = [0.05, 0.09, 0.11, 0.15]  # Around the 0.1s threshold
         
-        for interval in test_intervals:
-            # Simulate time passing
-            test_time = start_time + interval
+        for i, interval in enumerate(test_intervals):
+            # Create fresh validator for each test to avoid interference
+            validator = MockWebSocketHandshakeValidator()
+            user_id = UserID(f"timing_test_user_{i}")
             
-            # Mock the time to test timing logic
+            # Create first handshake at base_time
+            first_attempt = HandshakeAttempt(
+                websocket_id=WebSocketID(f"ws_first_{i}"),
+                user_id=user_id,
+                attempt_time=base_time,
+                phase=HandshakePhase.CONNECTING
+            )
+            validator.active_handshakes[first_attempt.websocket_id] = first_attempt
+            
+            # Test second handshake at base_time + interval with mocked time
+            test_time = base_time + interval
             with patch('time.time', return_value=test_time):
-                websocket_id = WebSocketID(f"ws_test_{interval}")
-                result = self.validator.start_handshake(websocket_id, self.test_user_id)
+                websocket_id = WebSocketID(f"ws_test_{interval}_{i}")
+                result = validator.start_handshake(websocket_id, user_id)
                 
                 if interval < 0.1:
                     # Should be blocked by race condition detection
-                    assert result["allowed"] is False
+                    assert result["allowed"] is False, f"Interval {interval}s should be blocked"
                     assert result["reason"] == "race_condition_detected"
                 else:
                     # Should be allowed after threshold
-                    assert result["allowed"] is True
+                    assert result["allowed"] is True, f"Interval {interval}s should be allowed"
         
         # Record business metric
         self.record_metric("race_condition_timing_accuracy", True)
