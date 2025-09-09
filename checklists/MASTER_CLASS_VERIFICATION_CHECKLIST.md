@@ -27,7 +27,7 @@
   - [ ] Factory pattern used for instances
   
 - [ ] **ExecutionEngine** (`netra_backend/app/agents/supervisor/execution_engine_factory.py`)
-  - [ ] WebSocketNotifier initialized
+  - [ ] AgentWebSocketBridge initialized
   - [ ] User context properly isolated
   - [ ] No cross-user contamination
   

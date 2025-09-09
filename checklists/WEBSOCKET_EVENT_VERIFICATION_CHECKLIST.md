@@ -65,10 +65,10 @@ These 5 events are MANDATORY for chat business value:
   ```
 
 ### ExecutionEngine
-- [ ] WebSocketNotifier present
+- [ ] AgentWebSocketBridge present
   ```python
   # In execution engine
-  assert self.websocket_notifier is not None
+  assert self.websocket_bridge is not None
   ```
 - [ ] User context available
   ```python
