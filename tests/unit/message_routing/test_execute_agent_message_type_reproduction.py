@@ -29,9 +29,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler, BaseMessageHandler
-from netra_backend.app.routes.agents_execute import execute_agent_endpoint
-from netra_backend.app.services.agent_service_core import AgentServiceCore
-from netra_backend.app.agents.supervisor_ssot import SupervisorSSO
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext, get_user_execution_context
 from shared.isolated_environment import get_env
 
@@ -84,7 +82,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
                         msg_type=variation,
                         payload=message_data
                     )
-                    handler = router.get_handler(test_message.type)
+                    handler = router._find_handler(test_message.type)
                     
                     # Check if routing was successful
                     if handler is None:
@@ -130,7 +128,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         for message_type in execute_agent_variations:
             try:
                 # Check if handler exists for message type  
-                handler = router.get_handler(MessageType(message_type))
+                handler = router._find_handler(MessageType(message_type))
                 
                 if handler is None:
                     registration_failures.append(f"HANDLER REGISTRATION FAILURE: No handler registered for {message_type}")
@@ -317,7 +315,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
             )
             
             # Simple synchronous handler lookup - timing it to check for performance issues
-            handler = router.get_handler(test_message.type)
+            handler = router._find_handler(test_message.type)
             
             routing_time = time.time() - start_time
             if routing_time > 0.4:  # More than 400ms is slow
