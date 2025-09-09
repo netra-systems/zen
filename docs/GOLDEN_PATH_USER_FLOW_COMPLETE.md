@@ -127,7 +127,7 @@ sequenceDiagram
         Engine->>User: WebSocket Event: agent_started
         Engine->>Supervisor: Orchestrate sub-agent workflow
         
-        Note over Supervisor,ReportAgent: Agent Execution Order: Data → Optimization → Report
+        Note over Supervisor,ReportAgent: Agent Triage, Data Helper, UVS (Reporting)
         
         Supervisor->>DataAgent: Execute data analysis (Step 1)
         DataAgent->>User: WebSocket Event: agent_thinking
