@@ -570,9 +570,12 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
                 f"Found {len(slow_executions)} unreasonably slow executions (> 2s). "
                 f"This may indicate deadlocks or resource contention."
             )
-        
-        logger.info(
-            f"✅ Timing anomaly detection passed: "
-            f"{len(times)}/20 successful executions, "
-            f"avg time: {avg_time:.3f}s, variation: {time_variation:.3f}s"
-        )
+            
+            logger.info(
+                f"✅ Timing anomaly detection passed: "
+                f"{len(times)}/20 successful executions, "
+                f"avg time: {avg_time:.3f}s, variation: {time_variation:.3f}s"
+            )
+        else:
+            logger.warning("No successful executions to analyze for timing anomalies")
+            assert False, "No successful executions completed - this indicates a critical race condition"
