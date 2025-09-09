@@ -32,14 +32,14 @@ from concurrent.futures import ThreadPoolExecutor
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory  
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage
-from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
+from netra_backend.app.websocket_core.context import WebSocketContext, WebSocketRequestContext
+from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, generate_default_message
+from shared.session_management.user_session_manager import UserSessionManager
 
 # Import the SSOT UnifiedIdGenerator for proper user isolation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.core_types import UserID, ConnectionID, ThreadID
-from shared.session_management.user_session_manager import UnifiedUserSessionManager
+from shared.session_management.user_session_manager import UserSessionManager as UnifiedUserSessionManager
 
 
 class TestWebSocketUserIsolationUuidFailures:
@@ -222,8 +222,6 @@ class TestWebSocketUserIsolationUuidFailures:
         for user_id in users:
             user_messages = []
             for msg_type in ["agent_started", "agent_thinking", "agent_completed"]:
-                from netra_backend.app.websocket_core.types import generate_default_message
-                
                 message = generate_default_message(
                     message_type=msg_type,
                     user_id=user_id,
@@ -508,7 +506,6 @@ class TestWebSocketUserIsolationUuidFailures:
         user1, user2 = users
         
         # Create messages for user1
-        from netra_backend.app.websocket_core.types import generate_default_message
         user1_message = generate_default_message(
             message_type="agent_completed",
             user_id=user1,
