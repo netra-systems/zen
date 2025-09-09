@@ -299,8 +299,9 @@ class AgentRegistry(UniversalAgentRegistry):
         # FIXED: Track background tasks to prevent timeout issues
         self._background_tasks: List[asyncio.Task] = []
         
-        # REMOVED: Legacy dispatcher - all code now uses factory pattern for user isolation
-        # Use create_tool_dispatcher_for_user() for proper SSOT compliance
+        # BACKWARD COMPATIBILITY: Initialize legacy dispatcher to None
+        # New code should use create_tool_dispatcher_for_user() for proper SSOT compliance  
+        self._legacy_dispatcher = None
         
         logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
         logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
@@ -932,10 +933,11 @@ class AgentRegistry(UniversalAgentRegistry):
     def tool_dispatcher(self, value):
         """DEPRECATED: Legacy setter for backward compatibility."""
         logger.warning(
-            "⚠️ DEPRECATED: Setting tool_dispatcher is deprecated and ignored.\n"
+            "⚠️ DEPRECATED: Setting tool_dispatcher is deprecated.\n"
             "Use tool_dispatcher_factory parameter in constructor for custom factories."
         )
-        # SSOT: No legacy assignment - use factory patterns
+        # BACKWARD COMPATIBILITY: Store value for legacy tests, but getter still returns None
+        self._legacy_dispatcher = value
     
     async def _default_dispatcher_factory(self, user_context: 'UserExecutionContext', 
                                          websocket_bridge: Optional['AgentWebSocketBridge'] = None) -> 'CanonicalToolDispatcher':
