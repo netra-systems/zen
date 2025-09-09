@@ -367,8 +367,7 @@ class MockAgentExecutionEngine:
         return executed_tools
 
 
-@pytest.fixture(scope="function")
-async def no_docker_golden_path_services() -> AsyncGenerator[Dict[str, Any], None]:
+async def _create_no_docker_golden_path_services() -> Dict[str, Any]:
     """
     Provide mock services for Golden Path tests without Docker dependencies.
     
@@ -400,13 +399,21 @@ async def no_docker_golden_path_services() -> AsyncGenerator[Dict[str, Any], Non
     
     logger.info("[NO-DOCKER FIXTURE] Mock services initialized successfully")
     
+    return services
+
+
+@pytest.fixture(scope="function")
+async def no_docker_golden_path_services() -> AsyncGenerator[Dict[str, Any], None]:
+    """Pytest fixture wrapper for no-Docker golden path services."""
+    services = await _create_no_docker_golden_path_services()
+    
     try:
         yield services
     finally:
         # Cleanup mock services
-        await websocket_manager.disconnect()
-        await database_manager.close()
-        mock_state.reset()
+        await services["websocket_manager"].disconnect()
+        await services["database_manager"].close()
+        services["mock_state"].reset()
         logger.info("[NO-DOCKER FIXTURE] Mock services cleaned up")
 
 
@@ -461,9 +468,16 @@ async def golden_path_services(request) -> AsyncGenerator[Dict[str, Any], None]:
     if use_real_services and docker_available:
         logger.info("[GOLDEN PATH SERVICES] Docker available but real services disabled for no-Docker mode")
         # For this implementation, always use mock services to ensure no-Docker compatibility
-        async for services in no_docker_golden_path_services():
-            yield services
+        services = await _create_no_docker_golden_path_services()
     else:
         logger.info("[GOLDEN PATH SERVICES] Using mock services (no Docker)")
-        async for services in no_docker_golden_path_services():
-            yield services
+        services = await _create_no_docker_golden_path_services()
+    
+    try:
+        yield services
+    finally:
+        # Cleanup mock services
+        await services["websocket_manager"].disconnect()
+        await services["database_manager"].close()
+        services["mock_state"].reset()
+        logger.info("[GOLDEN PATH SERVICES] Mock services cleaned up")
