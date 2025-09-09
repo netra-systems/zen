@@ -546,11 +546,22 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
                 max_retries=2
             )
             
-            state = DeepAgentState()
-            state.user_id = context.user_id
-            state.thread_id = context.thread_id
+            user_execution_context = UserExecutionContext.from_agent_execution_context(
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id,
+                agent_context={
+                    'agent_name': 'test_agent',
+                    'test_scenario': 'timing_anomaly_test',
+                    'execution_index': index
+                },
+                audit_metadata={
+                    'test_name': 'test_timing_anomaly_detection',
+                    'created_for': 'race_condition_testing'
+                }
+            )
             
-            result = await execution_core.execute_agent(context, state)
+            result = await execution_core.execute_agent(context, user_execution_context)
             end_time = time.time()
             
             execution_time = end_time - start_time

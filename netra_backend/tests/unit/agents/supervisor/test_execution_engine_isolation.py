@@ -423,9 +423,12 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
             mock_tracker.heartbeat.return_value = True
             mock_tracker_factory.return_value = mock_tracker
             
-            # Execute agent (should fail)
-            with pytest.raises(RuntimeError, match="Simulated agent execution failure"):
-                await engine.execute_agent(agent_context, user_context)
+            # Execute agent (should return failed result)
+            result = await engine.execute_agent(agent_context, user_context)
+        
+        # Validate execution failed
+        assert not result.success, "Execution should have failed"
+        assert "Simulated agent execution failure" in result.error
         
         # Validate user error notifications
         error_notifications = self.mock_websocket_bridge.notify_agent_error.call_args_list
@@ -957,8 +960,11 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
             mock_tracker_factory.return_value = mock_tracker
             
             # Execution should handle error gracefully
-            with pytest.raises(ValueError):
-                await engine.execute_agent(agent_context, user_context)
+            result = await engine.execute_agent(agent_context, user_context)
+        
+        # Validate execution failed with business error
+        assert not result.success, "Business logic error should cause execution to fail"
+        assert "Invalid cost optimization parameters" in result.error
         
         # Validate business-focused error notifications
         error_calls = self.mock_websocket_bridge.notify_agent_error.call_args_list

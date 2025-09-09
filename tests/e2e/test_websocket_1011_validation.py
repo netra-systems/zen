@@ -96,7 +96,7 @@ class TestWebSocket1011Prevention:
         
         # Test full connection lifecycle
         test_connection_id = f"e2e_test_{int(time.time())}"
-        test_user_id = "e2e_test_user"
+        test_user_id = f"user_{int(time.time())}"  # Use proper user ID format
         
         try:
             # Register connection
@@ -144,7 +144,7 @@ class TestWebSocket1011Prevention:
         
         registry = get_connection_state_registry()
         test_connection = f"e2e_pipeline_{int(time.time())}"
-        test_user = "e2e_pipeline_user"
+        test_user = f"user_{int(time.time())}_pipeline"
         
         try:
             # Simulate the complete pipeline that was failing
@@ -264,7 +264,7 @@ class TestWebSocket1011Prevention:
             assert auth_helper is not None, "E2E auth helper unavailable"
             
             # Test token creation (basic functionality test)
-            test_user_id = "e2e_auth_test_user"
+            test_user_id = f"user_{int(time.time())}_auth"
             
             # This should not raise errors (though we don't test full auth flow here)
             # We're validating that the SSOT patterns are available
@@ -304,7 +304,7 @@ class TestWebSocket1011Prevention:
             logger.info("Phase 2: Validating state machine operation...")
             registry = get_connection_state_registry()
             integration_connection = f"integration_1011_test_{int(time.time())}"
-            integration_user = "integration_1011_user"
+            integration_user = f"user_{int(time.time())}_integration"
             
             state_machine = registry.register_connection(integration_connection, integration_user)
             assert state_machine is not None
@@ -364,7 +364,7 @@ class TestWebSocket1011Prevention:
             # Step 1: WebSocket connection capability
             registry = get_connection_state_registry()
             golden_path_connection = f"golden_path_test_{int(time.time())}"
-            golden_path_user = "golden_path_user"
+            golden_path_user = f"user_{int(time.time())}_golden"
             
             state_machine = registry.register_connection(golden_path_connection, golden_path_user)
             assert state_machine is not None, "Golden Path WebSocket connection setup failed"
@@ -415,7 +415,7 @@ class TestWebSocket1011BusinessValueValidation:
         
         registry = get_connection_state_registry()
         chat_connection = f"chat_test_{int(time.time())}"
-        chat_user = "chat_test_user"
+        chat_user = f"user_{int(time.time())}_chat"
         
         try:
             # Chat requires: Connection -> Authentication -> Processing Ready
