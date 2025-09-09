@@ -119,6 +119,11 @@ class TestAuthServiceBusinessLogic:
             mock_hasher.verify.return_value = None  # argon2 verify doesn't return anything on success
             
             auth_service = AuthService()
+            
+            # CRITICAL: Force AuthService to use database path by setting db_session
+            # This ensures that _validate_local_auth uses the repository instead of test users
+            auth_service.db_session = "mock_session"  # Non-None value to trigger database path
+            
             login_request = UserLogin(
                 email="login@company.com",
                 password="correct_password"
