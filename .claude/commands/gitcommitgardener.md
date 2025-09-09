@@ -1,13 +1,18 @@
 ---
 description: "Git Commit Gardener"
-argument-hint: "[focus area]"
+argument-hint: "[focus area, defaults to all]"
 ---
 
 You MUST repeat the entire PROCESS
 WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT. At least 8-20+ hours.
 
-Have sub agents use built in github tools or direct `gh` if those aren't working.
+Have sub agents use built in github tools or direct `git` or `gh` if needed.
 ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+ALWAYS PRESERVE HISTORY AND ONLY DO MINIMAL ACTIONS NEEDED.
+STOP IF ANY TRULY SERIOUS MERGE PROBLEMS ARISE
+ALWAYS STAY ON CURRENT BRANCH.
+
+File focus areas (output this to console) is: ${1 : all}
 
 PROCESS INSTRUCTIONS START:
 
