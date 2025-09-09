@@ -17,6 +17,13 @@ from abc import ABC, abstractmethod
 from shared.isolated_environment import get_env
 from test_framework.real_services import RealServicesManager, get_real_services
 
+# Import service abstraction for --no-docker scenarios
+try:
+    from test_framework.service_abstraction import IntegrationServiceManager
+except ImportError:
+    logger.warning("Service abstraction not available - some integration tests may fail without Docker")
+    IntegrationServiceManager = None
+
 
 class BaseIntegrationTest(ABC):
     """
@@ -46,8 +53,21 @@ class BaseIntegrationTest(ABC):
         """Set up isolated test environment."""
         self.env = get_env()
         self.env.set("TESTING", "1", source="integration_test")
-        self.env.set("USE_REAL_SERVICES", "true", source="integration_test")
-        self.env.set("SKIP_MOCKS", "true", source="integration_test")
+        
+        # Check if --no-docker flag was used (USE_REAL_SERVICES would be false)
+        use_real_services = self.env.get("USE_REAL_SERVICES", "false").lower() == "true"
+        if use_real_services:
+            self.env.set("USE_REAL_SERVICES", "true", source="integration_test")
+            self.env.set("SKIP_MOCKS", "true", source="integration_test") 
+            logger.info("Integration test using real services (Docker)")
+        else:
+            # Use service abstractions for --no-docker scenarios
+            self.env.set("USE_SERVICE_ABSTRACTION", "true", source="integration_test")
+            logger.info("Integration test using service abstractions (--no-docker)")
+        
+        # Store which mode we're in for test methods to check
+        self.using_real_services = use_real_services
+        self.using_service_abstraction = not use_real_services
     
     def cleanup_resources(self):
         """Clean up resources after test."""
