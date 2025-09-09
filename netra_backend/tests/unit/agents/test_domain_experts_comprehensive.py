@@ -820,7 +820,7 @@ class TestDomainExpertsComprehensive(SSotBaseTestCase):
         mock_state.user_request = "Comprehensive analysis for cloud optimization project"
         mock_state.accumulated_data = {
             "costs": 50000, "roi": 0.25, "payback": "12 months",  # Finance data
-            "latency": "50ms", "throughput": 1000, "scale": "horizontal",  # Engineering data
+            "latency": "50ms", "throughput": 1000, "scale": "horizontal", "cpu": "4 cores",  # Engineering data
             "market": "enterprise", "competitor": "AWS", "revenue": 500000  # Business data
         }
         
