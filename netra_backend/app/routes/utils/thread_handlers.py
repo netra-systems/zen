@@ -1,6 +1,7 @@
 """Thread route handlers."""
 import time
 
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.routes.utils.thread_builders import (
@@ -141,3 +142,57 @@ async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: 
     await update_thread_with_title(db, thread, title)
     await send_thread_rename_notification(user_id, thread_id, title)
     return await create_final_thread_response(db, thread, title)
+
+
+async def handle_send_message_request(db: AsyncSession, thread_id: str, request, user_id: str):
+    """Handle send message to thread request logic."""
+    import time
+    from uuid import uuid4
+    from netra_backend.app.logging_config import central_logger
+    from netra_backend.app.services.database.message_repository import MessageRepository
+    
+    logger = central_logger.get_logger(__name__)
+    logger.info(f"Sending message to thread {thread_id} for user {user_id}")
+    
+    # Validate thread exists and user has access
+    thread = await get_thread_with_validation(db, thread_id, user_id)
+    logger.debug(f"Thread validation passed for {thread_id}")
+    
+    # Create message record
+    message_id = str(uuid4())
+    created_at = int(time.time())
+    
+    # Prepare message data
+    message_data = {
+        'id': message_id,
+        'thread_id': thread_id,
+        'role': 'user',  # Messages sent via this endpoint are user messages
+        'content': request.message,
+        'created_at': created_at,
+        'metadata_': request.metadata or {}
+    }
+    
+    try:
+        # Save message to database
+        message_repo = MessageRepository()
+        await message_repo.create(db, **message_data)
+        await db.commit()
+        
+        logger.info(f"Successfully created message {message_id} in thread {thread_id}")
+        
+        # Return response matching the expected schema
+        return {
+            'id': message_id,
+            'thread_id': thread_id,
+            'content': request.message,
+            'role': 'user',
+            'created_at': created_at
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to save message to thread {thread_id}: {e}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to send message: {str(e)}"
+        )
