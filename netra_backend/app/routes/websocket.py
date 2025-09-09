@@ -1954,7 +1954,7 @@ async def websocket_health_check():
     # Try to get authentication stats (optional)
     try:
         authenticator = get_websocket_authenticator()
-        auth_stats = authenticator.get_auth_stats()
+        auth_stats = authenticator.get_websocket_auth_stats()
         metrics["authentication"] = {
             "success_rate": auth_stats.get("success_rate", 0),
             "rate_limited_requests": auth_stats.get("rate_limited", 0)
